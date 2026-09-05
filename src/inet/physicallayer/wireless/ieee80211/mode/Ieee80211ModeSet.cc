@@ -1040,13 +1040,14 @@ const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode 
     return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval, bool requireUnique) const
 {
-    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
+    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval, requireUnique);
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval, bool requireUnique) const
 {
+    const IIeee80211Mode *result = nullptr;
     for (size_t index = 0; index < entries.size(); index++) {
         auto mode = entries[index].mode;
         auto dataMode = mode->getDataMode();
@@ -1058,15 +1059,20 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate,
             (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams) &&
             guardIntervalMatches)
         {
-            return entries[index].mode;
+            if (!requireUnique)
+                return mode;
+            if (result != nullptr && result != mode)
+                throw cRuntimeError("Ambiguous mode for bitrate range (%g - %g) bps in operation mode '%s'; specify bandwidth, number of spatial streams, and guard interval",
+                        minBitrate.get(), maxBitrate.get(), getName());
+            result = mode;
         }
     }
-    return nullptr;
+    return result;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval, bool requireUnique) const
 {
-    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
+    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval, requireUnique);
     if (mode == nullptr)
         throw cRuntimeError("Unknown mode for bitrate %g bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
                 bitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());
@@ -1074,9 +1080,9 @@ const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int n
         return mode;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval, bool requireUnique) const
 {
-    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams, guardInterval);
+    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams, guardInterval, requireUnique);
     if (mode == nullptr)
         throw cRuntimeError("Unknown mode for bitrate range (%g - %g) bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
                 minBitrate.get(), maxBitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());

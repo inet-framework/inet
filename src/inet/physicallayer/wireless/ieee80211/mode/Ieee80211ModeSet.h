@@ -111,10 +111,11 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     // Pointer lookup is intentionally strict. Use getControlResponseMode() for an explicitly requested response that needs HT-mixed translation.
     const IIeee80211Mode *findMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getMode(const IIeee80211Mode *mode) const;
-    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
-    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
-    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
-    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    // requireUnique rejects multiple matching entries instead of selecting the first.
+    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1, bool requireUnique = false) const;
+    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1, bool requireUnique = false) const;
+    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1, bool requireUnique = false) const;
+    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1, bool requireUnique = false) const;
     const IIeee80211Mode *getSlowestMode() const;
     const IIeee80211Mode *getFastestMode() const;
     const IIeee80211Mode *getSlowerMode(const IIeee80211Mode *mode) const;

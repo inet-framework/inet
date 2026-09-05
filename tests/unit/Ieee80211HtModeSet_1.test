@@ -43,6 +43,17 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
 const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
 const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
 
+// 13 Mbps identifies both one-stream MCS 1 and two-stream MCS 8.
+bool ambiguousRejected = false;
+try { htModeSet->getMode(Mbps(13), MHz(20), -1, SimTime(800, SIMTIME_NS), true); }
+catch (const cRuntimeError& error) {
+    ambiguousRejected = error.getFormattedMessage().find("Ambiguous mode") != std::string::npos;
+}
+ASSERT(ambiguousRejected);
+ASSERT(htModeSet->getMode(Mbps(13), MHz(20), 1, SimTime(800, SIMTIME_NS), true)->getHtMcsIndex() == 1);
+ASSERT(htModeSet->getMode(Mbps(13), MHz(20), 2, SimTime(800, SIMTIME_NS), true)->getHtMcsIndex() == 8);
+ASSERT(htModeSet->findMode(Mbps(9999), MHz(20), 1, -1, true) == nullptr);
+
 ASSERT(htModeSet->isHtOperationSupported());
 ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
 

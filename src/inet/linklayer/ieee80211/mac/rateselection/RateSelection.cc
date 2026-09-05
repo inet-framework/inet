@@ -24,12 +24,12 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
-static const IIeee80211Mode *resolveConfiguredResponseCtsFrameMode(const Ieee80211ModeSet *modeSet, double bitrate, const char *modulePath)
+static const IIeee80211Mode *resolveConfiguredResponseCtsFrameMode(const Ieee80211ModeSet *modeSet, double bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval, const char *modulePath)
 {
     if (bitrate == -1)
         return nullptr;
     try {
-        auto result = modeSet->getMode(bps(bitrate));
+        auto result = modeSet->getMode(bps(bitrate), bandwidth, numSpatialStreams, guardInterval, true);
         if (modeSet->isHtOperationSupported() && result->getHtMcsIndex() < 0)
             throw cRuntimeError("legacy mode '%s' is not selectable for HT CTS responses", result->getName());
         return result;
@@ -106,9 +106,9 @@ void RateSelection::updateModes()
     double controlFrameBitrate = par("controlFrameBitrate");
     auto newControlFrameMode = controlFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
     double responseAckFrameBitrate = par("responseAckFrameBitrate");
-    auto newResponseAckFrameMode = responseAckFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
+    auto newResponseAckFrameMode = responseAckFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate), Hz(par("responseAckFrameBandwidth")), par("responseAckFrameNumSpatialStreams"), par("responseAckFrameGuardInterval"), true);
     double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-    auto newResponseCtsFrameMode = resolveConfiguredResponseCtsFrameMode(modeSet, responseCtsFrameBitrate, getFullPath().c_str());
+    auto newResponseCtsFrameMode = resolveConfiguredResponseCtsFrameMode(modeSet, responseCtsFrameBitrate, Hz(par("responseCtsFrameBandwidth")), par("responseCtsFrameNumSpatialStreams"), par("responseCtsFrameGuardInterval"), getFullPath().c_str());
     auto newFastestMandatoryMode = modeSet->getFastestMandatoryMode();
 
     // Commit only after every configured mode has been resolved, so a failed
