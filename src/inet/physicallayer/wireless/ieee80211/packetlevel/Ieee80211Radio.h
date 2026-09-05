@@ -50,8 +50,9 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     Ieee80211Radio();
 
     // These setters snapshot transactional mode-set consumers before applying
-    // the catalog, and restore them if an update or synchronous notification
-    // throws. Stateful modesetChanged subscribers implement IIeee80211ModeSetListener.
+    // the catalog, and restore them if an update throws. Notifications publish
+    // committed state; listener exceptions propagate without rolling it back.
+    // Behavioral consumers implement IIeee80211ModeSetListener.
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
