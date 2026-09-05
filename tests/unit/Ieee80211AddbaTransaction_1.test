@@ -910,7 +910,7 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
         running = true;
         numStartedSequences++;
     }
-    virtual void processResponse(Packet *) override {}
+    virtual bool processResponse(Packet *) override { return true; }
     virtual void transmissionComplete() override {}
     virtual bool isSequenceRunning() override { return running; }
     virtual void handleStartRxTimeout() override {}
@@ -6084,6 +6084,71 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     auto frames = inProgressFrames.releaseFrames();
     for (auto frame : frames)
         delete frame;
+}
+
+// A transmitted BAR selects one originator agreement by receiver and TID.
+// IEEE Std 802.11-2024, 10.25.6.1: identical TIDs and overlapping sequence
+// ranges at different peers remain independent Block Ack state machines.
+for (bool compressed : { false, true }) {
+    TestQosAckHandler ackHandler;
+    auto peer1DataHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(700));
+    auto peer2DataHeader = makeQosHeader(peer2, 6, SequenceNumberCyclic(700));
+    peer1DataHeader->setAckPolicy(BLOCK_ACK);
+    peer2DataHeader->setAckPolicy(BLOCK_ACK);
+    auto peer1Frame = new Packet("peer1OverlappingData", peer1DataHeader);
+    auto peer2Frame = new Packet("peer2OverlappingData", peer2DataHeader);
+    auto peer1Header = peer1Frame->peekAtFront<Ieee80211DataHeader>();
+    auto peer2Header = peer2Frame->peekAtFront<Ieee80211DataHeader>();
+    ackHandler.frameGotInProgress(peer1Header);
+    ackHandler.processTransmittedDataOrMgmtFrame(peer1Header);
+    ackHandler.frameGotInProgress(peer2Header);
+    ackHandler.processTransmittedDataOrMgmtFrame(peer2Header);
+
+    Ptr<Ieee80211BasicBlockAckReq> peer1BasicBar;
+    Ptr<Ieee80211BasicBlockAckReq> peer2BasicBar;
+    Ptr<Ieee80211CompressedBlockAckReq> peer1CompressedBar;
+    Ptr<Ieee80211CompressedBlockAckReq> peer2CompressedBar;
+    if (compressed) {
+        peer1CompressedBar = makeShared<Ieee80211CompressedBlockAckReq>();
+        peer2CompressedBar = makeShared<Ieee80211CompressedBlockAckReq>();
+        peer1CompressedBar->setReceiverAddress(peer1);
+        peer1CompressedBar->setTidInfo(6);
+        peer1CompressedBar->setStartingSequenceNumber(SequenceNumberCyclic(700));
+        peer2CompressedBar->setReceiverAddress(peer2);
+        peer2CompressedBar->setTidInfo(6);
+        peer2CompressedBar->setStartingSequenceNumber(SequenceNumberCyclic(700));
+    }
+    else {
+        peer1BasicBar = makeShared<Ieee80211BasicBlockAckReq>();
+        peer2BasicBar = makeShared<Ieee80211BasicBlockAckReq>();
+        peer1BasicBar->setReceiverAddress(peer1);
+        peer1BasicBar->setTidInfo(6);
+        peer1BasicBar->setStartingSequenceNumber(SequenceNumberCyclic(700));
+        peer2BasicBar->setReceiverAddress(peer2);
+        peer2BasicBar->setTidInfo(6);
+        peer2BasicBar->setStartingSequenceNumber(SequenceNumberCyclic(700));
+    }
+    Ptr<const Ieee80211BlockAckReq> peer1Bar;
+    Ptr<const Ieee80211BlockAckReq> peer2Bar;
+    if (compressed) {
+        peer1Bar = peer1CompressedBar;
+        peer2Bar = peer2CompressedBar;
+    }
+    else {
+        peer1Bar = peer1BasicBar;
+        peer2Bar = peer2BasicBar;
+    }
+
+    ackHandler.processTransmittedBlockAckReq(peer1Bar);
+    ASSERT(ackHandler.getQoSDataAckStatus(peer1Header) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(ackHandler.getQoSDataAckStatus(peer2Header) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+
+    // The second peer remains eligible until its own BAR is transmitted.
+    ackHandler.processTransmittedBlockAckReq(peer2Bar);
+    ASSERT(ackHandler.getQoSDataAckStatus(peer1Header) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(ackHandler.getQoSDataAckStatus(peer2Header) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    delete peer1Frame;
+    delete peer2Frame;
 }
 
 // Any terminal originator agreement removal releases outstanding BA-policy

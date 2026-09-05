@@ -40,6 +40,22 @@ inline std::optional<OneTidBlockAckReqDetails> getOneTidBlockAckReqDetails(const
         return std::nullopt;
 }
 
+// IEEE Std 802.11-2024, 9.3.1.7, 9.3.1.8, and 10.25.5: correlate the BAR RA
+// with the BA TA, TID, and selected BlockAck variant before accepting a response.
+inline bool isMatchingOneTidBlockAckResponse(const OneTidBlockAckReqDetails& blockAckReqDetails, const Ptr<const Ieee80211BlockAck>& blockAck)
+{
+    if (blockAckReqDetails.blockAckReq->getReceiverAddress() != blockAck->getTransmitterAddress())
+        return false;
+    if (blockAckReqDetails.variant == OneTidBlockAckReqVariant::BASIC) {
+        auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck);
+        return basicBlockAck != nullptr && basicBlockAck->getTidInfo() == blockAckReqDetails.tid;
+    }
+    else {
+        auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck);
+        return compressedBlockAck != nullptr && compressedBlockAck->getTidInfo() == blockAckReqDetails.tid;
+    }
+}
+
 } // namespace ieee80211
 } // namespace inet
 

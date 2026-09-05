@@ -42,7 +42,9 @@ class INET_API IFrameSequenceHandler
     virtual const FrameSequenceContext *getContext() const = 0;
     virtual const IFrameSequence *getFrameSequence() const = 0;
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
-    virtual void processResponse(Packet *frame) = 0;
+    // Returns true when the handler consumes the frame; false leaves ownership
+    // with the caller because the active receive step remains unchanged.
+    virtual bool processResponse(Packet *frame) = 0;
     virtual void transmissionComplete() = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;

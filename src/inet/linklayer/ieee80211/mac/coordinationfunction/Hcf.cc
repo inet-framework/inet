@@ -615,12 +615,19 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO always call processResponse?
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
-            frameSequenceHandler->processResponse(packet);
             // Only cancel RxTimer when the current running sequence has been handled by frameSequenceHandler->processResponse().
             // If the received frame is not for us, we are still waiting to receive our ACK. In that case, don't cancel the timer.
             // Otherwise, current frame sequence stucks in RX step and runs longer than intendeed, preventing sequence from
             // another access category (AC) to start running (RuntimeError("Channel access granted while a frame sequence is running")).
-            cancelEvent(startRxTimer);
+            if (frameSequenceHandler->processResponse(packet))
+                cancelEvent(startRxTimer);
+            else {
+                EV_INFO << "Ignoring a response that does not match the active frame sequence step." << endl;
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -1243,6 +1250,11 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
     }
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header)) {
         EV_INFO << blockAck->getClassName() << " has arrived" << std::endl;
+        auto blockAckReqDetails = getOneTidBlockAckReqDetails(lastTransmittedHeader);
+        if (!blockAckReqDetails || !isMatchingOneTidBlockAckResponse(*blockAckReqDetails, blockAck)) {
+            EV_INFO << "Ignoring BlockAck that does not match the transmitted BlockAckReq.\n";
+            return;
+        }
         Tid tid = -1;
         MacAddress transmitterAddress = blockAck->getTransmitterAddress();
         if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck))

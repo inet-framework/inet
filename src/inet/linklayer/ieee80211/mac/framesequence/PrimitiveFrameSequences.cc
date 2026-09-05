@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -431,7 +433,13 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
             const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
-            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK;
+            auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStep(firstStep));
+            if (transmitStep == nullptr || transmitStep->getFrameToTransmit() == nullptr)
+                return false;
+            auto blockAckReqHeader = transmitStep->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>();
+            auto blockAckReqDetails = getOneTidBlockAckReqDetails(blockAckReqHeader);
+            auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(receivedHeader);
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK && blockAckReqDetails && blockAck != nullptr && isMatchingOneTidBlockAckResponse(*blockAckReqDetails, blockAck);
         }
         default:
             throw cRuntimeError("Unknown step");
