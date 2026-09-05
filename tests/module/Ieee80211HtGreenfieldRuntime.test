@@ -42,9 +42,10 @@ class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
         if (transmission->getPreambleDuration() < SIMTIME_ZERO || transmission->getHeaderDuration() < SIMTIME_ZERO || transmission->getDataDuration() < SIMTIME_ZERO ||
             transmission->getPreambleDuration() + transmission->getHeaderDuration() + transmission->getDataDuration() != transmission->getDuration())
             throw cRuntimeError("Invalid preamble/header/data duration decomposition");
-        if (mode != nullptr && (transmission->getHeaderDuration() != SIMTIME_ZERO ||
-            transmission->getDataDuration() != mode->getDataMode()->getDuration(B(phyHeader->getLengthField()))))
-            throw cRuntimeError("HT transmission did not keep SIG in the preamble and data in the data interval");
+        if (mode != nullptr && (transmission->getPreambleDuration() != mode->getPreambleDuration() ||
+            transmission->getHeaderDuration() != mode->getHeaderDuration() || transmission->getHeaderDuration() <= SIMTIME_ZERO ||
+            transmission->getDataDuration() != mode->getDataDuration(B(phyHeader->getLengthField()))))
+            throw cRuntimeError("HT transmission did not preserve the mode's timed header phase");
         auto macHeader = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phyHeader->getChunkLength());
         auto isHtGreenfield = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD;
         auto isHtMixed = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED;

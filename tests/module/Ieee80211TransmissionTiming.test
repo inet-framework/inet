@@ -1,0 +1,106 @@
+%description:
+Verify packet transmitter chronological preamble/header/data durations and analog
+model boundaries for HT-mixed, HT-Greenfield, VHT, and legacy modes.
+
+%file: Test.cc
+#include <iostream>
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+using namespace inet;
+using namespace inet::physicallayer;
+namespace Ieee80211TransmissionTiming {
+class TimingRadio : public Ieee80211Radio
+{
+  public:
+    void encapsulateForTest(Packet *packet) const { encapsulate(packet); }
+};
+Define_Module(TimingRadio);
+class TimingProbe : public cSimpleModule
+{
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_LAST)
+            return;
+        auto radio = check_and_cast<TimingRadio *>(getSimulation()->getModuleByPath("Test.host.wlan[0].radio"));
+        auto transmitter = check_and_cast<Ieee80211Transmitter *>(radio->getSubmodule("transmitter"));
+        int count = 0;
+        for (const char *profile : {"n(mixed-2.4Ghz)", "n(greenfield-2.4Ghz)", "ac", "a", "b", "g(mixed)"}) {
+            auto modes = Ieee80211ModeSet::getModeSet(profile);
+            for (int i = 0; i < modes->getNumModes(); i++) {
+                auto mode = modes->getMode(i);
+                // One antenna suffices; use every one-stream catalog variant.
+                if (mode->getDataMode()->getNumberOfSpatialStreams() > 1)
+                    continue;
+                transmitter->setModeSetAndMode(modes, mode);
+                for (int length : {1, 100, 1500}) {
+                    Packet packet("timing");
+                    packet.insertAtBack(makeShared<ByteCountChunk>(B(length)));
+                    packet.addTag<Ieee80211ModeReq>()->setMode(mode);
+                    radio->encapsulateForTest(&packet);
+                    auto transmission = transmitter->createTransmission(radio, &packet, SimTime(1));
+                    ASSERT(transmission->getPreambleDuration() == mode->getPreambleDuration());
+                    ASSERT(transmission->getHeaderDuration() == mode->getHeaderDuration());
+                    ASSERT(transmission->getHeaderDuration() > SIMTIME_ZERO);
+                    ASSERT(transmission->getDataDuration() == mode->getDataDuration(B(length)));
+                    ASSERT(transmission->getDuration() == mode->getDuration(B(length)));
+                    ASSERT(transmission->getPreambleDuration() + transmission->getHeaderDuration() + transmission->getDataDuration() == transmission->getDuration());
+                    auto analog = transmission->getAnalogModel();
+                    ASSERT(analog->getPreambleDuration() == transmission->getPreambleDuration());
+                    ASSERT(analog->getHeaderDuration() == transmission->getHeaderDuration());
+                    ASSERT(analog->getDataDuration() == transmission->getDataDuration());
+                    delete transmission;
+                    count++;
+                }
+            }
+        }
+        ASSERT(count > 100);
+        std::cout << "HT, VHT, and legacy packet transmission phases verified.\n";
+    }
+};
+Define_Module(TimingProbe);
+}
+%file: test.ned
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
+module TimingRadio extends Ieee80211Radio
+{
+    parameters:
+        @class(TimingRadio);
+}
+simple TimingProbe
+{
+    parameters:
+        @class(TimingProbe);
+}
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: AdhocHost;
+        probe: TimingProbe;
+}
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+seed-set = 0
+sim-time-limit = 0s
+**.host.wlan[0].opMode = "a"
+**.host.wlan[0].radio.typename = "TimingRadio"
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 100m
+**.constraintAreaMaxY = 100m
+**.constraintAreaMaxZ = 0m
+%contains: stdout
+HT, VHT, and legacy packet transmission phases verified.
