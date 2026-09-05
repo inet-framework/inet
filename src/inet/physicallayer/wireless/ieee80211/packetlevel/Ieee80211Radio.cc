@@ -140,10 +140,6 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
         receiver->setModeSet(modeSet);
         for (auto participant : participants)
             participant->applyModeSet(modeSet);
-        // Every built-in dependent, including the MIB, is now current before
-        // any observer runs. Built-in signal adapters skip this applied set.
-        if (modeSet != nullptr)
-            emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
     }
     catch (...) {
         transmitter->setModeSetAndMode(oldTransmitterModeSet, oldMode);
@@ -154,10 +150,21 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
         changingModeSet = false;
         throw;
     }
+    receptionTimer = nullptr;
+    // The transaction is committed. Observer failures must not undo a state
+    // already published to earlier listeners. Keep the reentrancy guard during
+    // publication so every listener observes the same committed mode set.
+    try {
+        if (modeSet != nullptr)
+            emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+        emit(listeningChangedSignal, 0);
+    }
+    catch (...) {
+        changingModeSet = false;
+        throw;
+    }
     changingModeSet = false;
     EV << "Changing radio mode set to " << modeSet << " and mode to " << transmitter->getMode() << endl;
-    receptionTimer = nullptr;
-    emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
