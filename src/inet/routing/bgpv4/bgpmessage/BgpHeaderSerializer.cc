@@ -240,7 +240,7 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> BgpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     bool incorrect = false;
     uint8_t marker[16];

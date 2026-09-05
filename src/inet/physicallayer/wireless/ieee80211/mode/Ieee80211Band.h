@@ -25,6 +25,9 @@ class INET_API IIeee80211Band : public cObject, public IPrintableObject
     virtual int getNumChannels() const = 0;
     virtual Hz getCenterFrequency(int channelNumber) const = 0;
     virtual Hz getSpacing() const = 0;
+    virtual int getStandardChannelNumber(int channelIndex) const;
+    virtual int getChannelIndex(int standardChannelNumber) const;
+    virtual bool isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const;
 };
 
 class INET_API Ieee80211BandBase : public IIeee80211Band
@@ -42,13 +45,16 @@ class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
 {
   protected:
     std::vector<Hz> centers;
+    std::vector<int> standardChannelNumbers;
 
   public:
-    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers);
+    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers = {});
 
     virtual int getNumChannels() const override { return centers.size(); }
     virtual Hz getCenterFrequency(int channelNumber) const override;
     virtual Hz getSpacing() const override { return Hz(NaN); }
+    virtual int getStandardChannelNumber(int channelIndex) const override;
+    virtual int getChannelIndex(int standardChannelNumber) const override;
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase

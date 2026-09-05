@@ -148,7 +148,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
     }
 }
 
-const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv4HeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();

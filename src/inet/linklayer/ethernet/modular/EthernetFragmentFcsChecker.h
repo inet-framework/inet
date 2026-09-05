@@ -19,6 +19,7 @@ class INET_API EthernetFragmentFcsChecker : public ChecksumCheckerBase
   protected:
     uint32_t lastFragmentCompleteFcs = 0;
     mutable uint32_t currentFragmentCompleteFcs = 0;
+    mutable bool currentFragmentMFcs = false;
 
   protected:
     virtual bool checkComputedChecksum(const Packet *packet, ChecksumType checksumType, uint64_t fcs) const override;

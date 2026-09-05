@@ -26,7 +26,8 @@ class INET_API IOriginatorBlockAckAgreementPolicy
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
 
     virtual bool isMsduSupported() const = 0;
-    virtual simtime_t computeAddbaFailureTimeout() const = 0;
+    virtual simtime_t getAddbaResponseTimeout() const = 0;
+    virtual simtime_t computeAddbaRetryBackoff() const = 0;
     virtual simtime_t getBlockAckTimeoutValue() const = 0;
     virtual bool isDelayedAckPolicySupported() const = 0;
     virtual int getMaximumAllowedBufferSize() const = 0;
@@ -36,4 +37,3 @@ class INET_API IOriginatorBlockAckAgreementPolicy
 } // namespace inet
 
 #endif
-

@@ -8,6 +8,9 @@
 #ifndef __INET_IEEE80211MODESET_H
 #define __INET_IEEE80211MODESET_H
 
+#include <array>
+#include <set>
+
 #include "inet/common/DelayedInitializer.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 
@@ -16,11 +19,21 @@ namespace physicallayer {
 
 class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 {
+  public:
+    enum class PhyType {
+        OFDM,
+        HR_DSSS,
+        ERP,
+        HT,
+        VHT,
+    };
+
   protected:
     class INET_API Entry {
       public:
         bool isMandatory;
         const IIeee80211Mode *mode;
+        bool isLegacyOperational = false;
     };
 
     struct EntryNetBitrateComparator {
@@ -30,6 +43,16 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   protected:
     std::string name;
     const std::vector<Entry> entries;
+    const PhyType phyType;
+    // PHY timing and contention parameters remain anchored to the explicitly
+    // configured reference mode, even though entries are sorted by bitrate for lookup.
+    const IIeee80211Mode *referenceMode;
+    std::vector<const IIeee80211Mode *> legacyOperationalModes;
+    std::array<bool, 77> htMcsSupported = {};
+    std::array<bool, 77> htMcsMandatory = {};
+    std::set<Hz> htSupportedChannelWidths;
+    std::set<Hz> htShortGuardIntervalChannelWidths;
+    bool htOperationSupported = false;
 
   public:
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
@@ -39,15 +62,29 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int getModeIndex(const IIeee80211Mode *mode) const;
 
   public:
-    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
+            PhyType phyType, bool htOperationSupported = false);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
     const char *getName() const override { return name.c_str(); }
 
     int getNumModes() const { return entries.size(); }
-    const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
-    bool isMandatory(int index) { return entries[index].isMandatory; }
+    const IIeee80211Mode *getMode(int index) const { return entries[index].mode; }
+    bool isMandatory(int index) const { return entries[index].isMandatory; }
+    bool isHtOperationSupported() const { return htOperationSupported; }
+    Hz getMaximumChannelWidth() const;
+    int getMaximumNumberOfSpatialStreams() const;
+    // The management policy advertises all explicitly eligible representable
+    // legacy modes in deterministic mandatory-first order. Overflow is split
+    // into the Extended Supported Rates element by management.
+    const std::vector<const IIeee80211Mode *>& getLegacyOperationalModes() const { return legacyOperationalModes; }
+    const IIeee80211Mode *getFastestLegacyOperationalMode() const;
+    const std::array<bool, 77>& getHtMcsSupported() const { return htMcsSupported; }
+    const std::array<bool, 77>& getHtMcsMandatory() const { return htMcsMandatory; }
+    const std::set<Hz>& getHtSupportedChannelWidths() const { return htSupportedChannelWidths; }
+    const std::set<Hz>& getHtShortGuardIntervalChannelWidths() const { return htShortGuardIntervalChannelWidths; }
+    bool isHtShortGuardIntervalSupported(Hz bandwidth) const { return htShortGuardIntervalChannelWidths.count(bandwidth) != 0; }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
@@ -68,11 +105,15 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);
 
-    simtime_t getSifsTime() const { return entries[0].mode->getSifsTime(); }
-    simtime_t getSlotTime() const { return entries[0].mode->getSlotTime(); }
-    simtime_t getPhyRxStartDelay() const { return entries[0].mode->getPhyRxStartDelay(); }
-    int getCwMin() const { return entries[0].mode->getLegacyCwMin(); }
-    int getCwMax() const { return entries[0].mode->getLegacyCwMax(); }
+    // PHY timing and contention policy remain anchored to the explicitly
+    // configured reference mode, independent of bitrate sorting.
+    PhyType getPhyType() const { return phyType; }
+    const IIeee80211Mode *getReferenceMode() const { return referenceMode; }
+    simtime_t getSifsTime() const { return referenceMode->getSifsTime(); }
+    simtime_t getSlotTime() const { return referenceMode->getSlotTime(); }
+    simtime_t getPhyRxStartDelay() const { return referenceMode->getPhyRxStartDelay(); }
+    int getCwMin() const { return referenceMode->getLegacyCwMin(); }
+    int getCwMax() const { return referenceMode->getLegacyCwMax(); }
 
     IIeee80211Mode *_getSlowestMode() const { return const_cast<IIeee80211Mode *>(getSlowestMode()); }
     IIeee80211Mode *_getFastestMode() const { return const_cast<IIeee80211Mode *>(getFastestMode()); }

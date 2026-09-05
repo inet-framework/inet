@@ -218,7 +218,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     ASSERT(stream.getLength() - startPos == b(totalLen));
 }
 
-const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MobilityHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     b startPos = stream.getPosition();
 

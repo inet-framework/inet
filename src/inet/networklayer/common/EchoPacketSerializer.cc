@@ -22,7 +22,7 @@ void EchoPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeUint16Be(echoPacket->getSeqNumber());
 }
 
-const Ptr<Chunk> EchoPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EchoPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto echoPacket = makeShared<EchoPacket>();
     echoPacket->setType(static_cast<inet::EchoProtocolType>(stream.readUint16Be()));

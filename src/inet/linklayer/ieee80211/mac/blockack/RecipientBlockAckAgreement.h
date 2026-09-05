@@ -21,11 +21,14 @@ class INET_API RecipientBlockAckAgreement : public cObject
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
-    bool isAddbaResponseSent = false;
     simtime_t expirationTime = -1;
+    // The agreement stays installed until the timeout DELBA is transmitted;
+    // prevent that pending teardown from being re-armed by late activity.
+    bool inactivityExpired = false;
+    uint64_t generationId = 0;
 
   public:
-    RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
+    RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue, uint64_t generationId = 0);
     virtual ~RecipientBlockAckAgreement() { delete blockAckRecord; }
 
     virtual void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
@@ -34,10 +37,15 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
+    virtual uint64_t getGenerationId() const { return generationId; }
 
-    virtual void addbaResposneSent() { isAddbaResponseSent = true; }
-    virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
+    virtual void calculateExpirationTime() {
+        if (!inactivityExpired)
+            expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue;
+    }
     virtual simtime_t getExpirationTime() { return expirationTime; }
+    virtual bool isInactivityExpired() const { return inactivityExpired; }
+    virtual void markInactivityExpired() { inactivityExpired = true; expirationTime = SIMTIME_MAX; }
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);
 };
 
@@ -45,4 +53,3 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

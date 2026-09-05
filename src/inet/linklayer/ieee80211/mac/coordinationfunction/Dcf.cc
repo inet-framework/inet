@@ -8,10 +8,13 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -47,6 +50,11 @@ void Dcf::initialize(int stage)
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
         WATCH_EXPR("frameSequenceInfo", frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "");
     }
+    else if (stage == INITSTAGE_LAST) {
+        // Dcaf resolves its pending queue at the link-layer stage. Install
+        // this callback after all child initialization has completed.
+        channelAccess->getPendingQueue()->addPacketCallback(this);
+    }
 }
 
 void Dcf::forEachChild(cVisitor *v)
@@ -72,6 +80,12 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     Enter_Method("channelGranted");
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
+        if (this->channelAccess->getInProgressFrames()->getFrameToTransmit() == nullptr) {
+            EV_DETAIL << "Releasing channel because no frame is available.\n";
+            channelAccess->releaseChannel(this);
+            mac->sendDownPendingRadioConfigMsg();
+            return;
+        }
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
         emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     }
@@ -113,6 +127,22 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
     throw cRuntimeError("Unknown management frame");
 }
 
+void Dcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
+{
+    Enter_Method("handlePacketRemoved");
+    auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    if ((reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED || reason == queueing::IPacketQueue::PacketRemovalReason::REMOVED) && transactionTag != nullptr) {
+        if (cancelManagementTransaction(transactionTag->getTransactionId(), packet))
+            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+    }
+}
+
+void Dcf::cancelManagementTransaction(uint64_t transactionId)
+{
+    Enter_Method("cancelManagementTransaction");
+    cancelManagementTransaction(transactionId, nullptr);
+}
+
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     emit(packetSentToPeerSignal, packet);
@@ -122,6 +152,135 @@ void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
         recipientAckProcedure->processTransmittedAck(ackFrame);
     else
         throw cRuntimeError("Unknown control response frame");
+}
+
+bool Dcf::isPacketReferencedByCurrentFrameSequence(const Packet *packet) const
+{
+    if (frameSequenceHandler == nullptr || !frameSequenceHandler->isSequenceRunning())
+        return false;
+    auto context = frameSequenceHandler->getContext();
+    if (context == nullptr)
+        return false;
+    for (int i = 0; i < context->getNumSteps(); i++) {
+        auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStep(i));
+        if (transmitStep != nullptr && transmitStep->getFrameToTransmit() == packet)
+            return true;
+        auto rtsTransmitStep = dynamic_cast<RtsTransmitStep *>(transmitStep);
+        if (rtsTransmitStep != nullptr && rtsTransmitStep->getProtectedFrame() == packet)
+            return true;
+    }
+    return false;
+}
+
+bool Dcf::isManagementTransactionCancelled(const Packet *packet) const
+{
+    if (packet == nullptr)
+        return false;
+    auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    return transactionTag != nullptr && cancelledManagementTransactions.find(transactionTag->getTransactionId()) != cancelledManagementTransactions.end();
+}
+
+bool Dcf::isCurrentFrameSequenceCancelled(const Packet *packet) const
+{
+    if (packet == nullptr || frameSequenceHandler == nullptr || !frameSequenceHandler->isSequenceRunning())
+        return false;
+    auto context = frameSequenceHandler->getContext();
+    if (context == nullptr)
+        return false;
+    auto transmitStep = dynamic_cast<ITransmitStep *>(context->getLastStep());
+    if (transmitStep == nullptr)
+        transmitStep = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
+    if (transmitStep == nullptr)
+        return false;
+    if (transmitStep->getFrameToTransmit() == packet)
+        return isManagementTransactionCancelled(packet) || (dynamic_cast<RtsTransmitStep *>(transmitStep) != nullptr &&
+                isManagementTransactionCancelled(dynamic_cast<RtsTransmitStep *>(transmitStep)->getProtectedFrame()));
+    auto rtsTransmitStep = dynamic_cast<RtsTransmitStep *>(transmitStep);
+    return rtsTransmitStep != nullptr && rtsTransmitStep->getProtectedFrame() == packet && isManagementTransactionCancelled(packet);
+}
+
+bool Dcf::cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket)
+{
+    Enter_Method("cancelManagementTransaction");
+    auto eventNumber = cSimulation::getActiveSimulation()->getEventNumber();
+    if (completedManagementTransactionsEventNumber != eventNumber) {
+        completedManagementTransactions.clear();
+        completedManagementTransactionsEventNumber = eventNumber;
+    }
+    if (completedManagementTransactions.find(transactionId) != completedManagementTransactions.end())
+        return false;
+    if (!managementTransactionsBeingCancelled.insert(transactionId).second)
+        return false;
+
+    // IEEE Std 802.11-2024, 10.3.4.4 and 10.4: terminal retry/lifetime
+    // failure discards the MMPDU and all remaining fragments. The callback's
+    // packet is still borrowed by the active frame sequence, so it is left
+    // for the caller to retire after this helper returns.
+
+    auto belongsToTransaction = [transactionId, excludedPacket](Packet *packet) {
+        auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+        return packet != excludedPacket && transactionTag != nullptr && transactionTag->getTransactionId() == transactionId;
+    };
+
+    auto pendingQueue = channelAccess->getPendingQueue();
+    for (int i = pendingQueue->getNumPackets() - 1; i >= 0; i--) {
+        auto packet = pendingQueue->getPacket(i);
+        if (belongsToTransaction(packet)) {
+            pendingQueue->removePacket(packet);
+            take(packet);
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
+
+    auto inProgressFrames = channelAccess->getInProgressFrames();
+    bool frameSequenceCancellationRequested = false;
+    bool pendingTransmissionCancelled = false;
+    for (int i = inProgressFrames->getLength() - 1; i >= 0; i--) {
+        auto packet = inProgressFrames->getFrames(i);
+        if (belongsToTransaction(packet)) {
+            if (isPacketReferencedByCurrentFrameSequence(packet)) {
+                // Keep the packet alive for raw pointers held by the active
+                // sequence, but remove it from eligibility immediately. The
+                // sequence retires it at its next safe boundary.
+                inProgressFrames->dropFrame(packet);
+                cancelledManagementTransactions.insert(transactionId);
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, packet, &details);
+                bool currentFrameSequenceCancelled = isCurrentFrameSequenceCancelled(packet);
+                frameSequenceCancellationRequested |= currentFrameSequenceCancelled;
+                // A sequence can retain completed steps in its context. Only
+                // cancel Tx when the current transmit/protected step belongs
+                // to this transaction; the callback owner alone is not enough
+                // to identify a historical frame.
+                if (currentFrameSequenceCancelled && tx != nullptr)
+                    pendingTransmissionCancelled |= tx->cancelPendingTransmission(this);
+                continue;
+            }
+            auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            auto extractedPacket = inProgressFrames->extractFrame(packet);
+            ASSERT(extractedPacket == packet);
+            take(packet);
+            if (recoveryProcedure != nullptr)
+                recoveryProcedure->discardFrame(packet, header);
+            ackHandler->dropFrame(header);
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
+    if (frameSequenceCancellationRequested && frameSequenceHandler != nullptr) {
+        frameSequenceHandler->cancelFrameSequence();
+        if (pendingTransmissionCancelled)
+            frameSequenceHandler->abortFrameSequence();
+    }
+    managementTransactionsBeingCancelled.erase(transactionId);
+    completedManagementTransactions.insert(transactionId);
+    return true;
 }
 
 void Dcf::scheduleStartRxTimer(simtime_t timeout)
@@ -191,6 +350,7 @@ void Dcf::frameSequenceFinished()
     if (hasFrameToTransmit())
         channelAccess->requestChannel(this);
     mac->sendDownPendingRadioConfigMsg(); // TODO review
+    cancelledManagementTransactions.clear();
 }
 
 bool Dcf::isReceptionInProgress()
@@ -253,12 +413,24 @@ bool Dcf::hasFrameToTransmit()
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 {
     Enter_Method("originatorProcessRtsProtectionFailed");
+    if (isManagementTransactionCancelled(packet)) {
+        auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        if (recoveryProcedure != nullptr)
+            recoveryProcedure->discardRtsFrame(protectedHeader);
+        channelAccess->getInProgressFrames()->dropFrame(packet);
+        if (ackHandler != nullptr)
+            ackHandler->dropFrame(protectedHeader);
+        return;
+    }
     EV_INFO << "RTS frame transmission failed\n";
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
     EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
+        auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+        bool notifyManagement = dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader) != nullptr &&
+                (transactionTag == nullptr || cancelManagementTransaction(transactionTag->getTransactionId(), packet));
         channelAccess->getInProgressFrames()->dropFrame(packet);
         ackHandler->dropFrame(protectedHeader);
         EV_INFO << "Dropping RTS/CTS protected frame " << packet->getName() << ", because retry limit is reached.\n";
@@ -267,14 +439,20 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         details.setLimit(recoveryProcedure->getShortRetryLimit());
         emit(packetDroppedSignal, packet, &details);
         emit(linkBrokenSignal, packet);
+        if (notifyManagement)
+            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     }
 }
 
 void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
     Enter_Method("originatorProcessTransmittedFrame");
+    if (isCurrentFrameSequenceCancelled(packet))
+        return;
     EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     emit(packetSentToPeerSignal, packet);
+    if (isCurrentFrameSequenceCancelled(packet))
+        return;
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
         EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, dataOrMgmtHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, dataOrMgmtHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
@@ -311,6 +489,8 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
         channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         ackHandler->dropFrame(lastTransmittedDataOrMgmtHeader);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedDataOrMgmtHeader))
+            mac->notifyFrameTransmission(lastTransmittedPacket, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
@@ -323,6 +503,15 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
 void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
     Enter_Method("originatorProcessFailedFrame");
+    if (isManagementTransactionCancelled(failedPacket)) {
+        auto failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        if (recoveryProcedure != nullptr)
+            recoveryProcedure->discardFrame(failedPacket, failedHeader);
+        channelAccess->getInProgressFrames()->dropFrame(failedPacket);
+        if (ackHandler != nullptr)
+            ackHandler->dropFrame(failedHeader);
+        return;
+    }
     EV_INFO << "Data/Mgmt frame transmission failed\n";
     const auto& failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
     ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
@@ -336,6 +525,9 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
     ackHandler->processFailedFrame(failedHeader);
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(failedPacket, failedHeader);
+        auto transactionTag = failedPacket->findTag<Ieee80211MgmtTransactionTag>();
+        bool notifyManagement = dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader) != nullptr &&
+                (transactionTag == nullptr || cancelManagementTransaction(transactionTag->getTransactionId(), failedPacket));
         channelAccess->getInProgressFrames()->dropFrame(failedPacket);
         ackHandler->dropFrame(failedHeader);
         EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
@@ -344,6 +536,8 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         details.setLimit(-1); // TODO
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
+        if (notifyManagement)
+            mac->notifyFrameTransmission(failedPacket, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     }
     else {
         EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
@@ -391,4 +585,3 @@ Dcf::~Dcf()
 
 } // namespace ieee80211
 } // namespace inet
-

@@ -8,6 +8,11 @@
 #ifndef __INET_HCF_H
 #define __INET_HCF_H
 
+#include <array>
+#include <map>
+#include <set>
+#include <tuple>
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -29,13 +34,13 @@
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -45,12 +50,13 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public queueing::IPacketQueue::ICallback
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
+    static simsignal_t blockAckAgreementChangedSignal;
 
   protected:
     Ieee80211Mac *mac = nullptr;
@@ -58,6 +64,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
+    cMessage *addbaResponseTimer = nullptr;
+    // The two agreement handlers share one timer but publish independent
+    // absolute deadlines. Keep both until the handlers explicitly retire
+    // their role so one role cannot cancel the other's timeout.
+    simtime_t originatorInactivityDeadline = SIMTIME_MAX;
+    simtime_t recipientInactivityDeadline = SIMTIME_MAX;
+    bool blockAckInactivityExpiryInProgress = false;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -96,8 +109,27 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
 
+    struct PendingFrameEligibility {
+        AccessCategory accessCategory;
+        bool eligible;
+    };
+    std::map<const Packet *, PendingFrameEligibility> pendingFrameEligibility;
+    std::array<int, AC_NUMCATEGORIES> numEligiblePendingFrames = {};
+
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
+
+    // A management transaction may have several fragmented MPDUs in the
+    // pending/in-progress queues. Keep the transaction identity only while
+    // removing its siblings so queue callbacks cannot report the same logical
+    // transaction recursively. A transaction has one pending original before
+    // fragmentation; the completed set additionally spans the synchronous
+    // callbacks of a bulk queue removal and is cleared at the next event.
+    std::set<uint64_t> managementTransactionsBeingCancelled;
+    std::set<uint64_t> completedManagementTransactions;
+    eventnumber_t completedManagementTransactionsEventNumber = -1;
+    std::set<uint64_t> cancelledManagementTransactions;
+    std::set<std::tuple<bool, MacAddress, Tid, uint64_t>> blockAckTeardownsBeingCancelled;
 
     // Protection mechanisms
     SingleProtectionMechanism *singleProtectionMechanism = nullptr;
@@ -110,22 +142,34 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
-    void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
+    int handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
     void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
+    virtual void requestEligibleChannelAccess();
+    virtual void resumeEligibleChannelAccess();
+    virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
+    virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
+    virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual bool isManagementTransactionCancelled(const Packet *packet) const;
+    virtual bool isCurrentFrameSequenceCancelled(const Packet *packet) const;
+    virtual bool cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket);
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
+    virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
+    virtual void untrackPendingFrame(const Packet *packet);
+    virtual void rebuildPendingFrameEligibility();
     virtual bool isReceptionInProgress();
 
     // Recipient
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
-    virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
+    virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     // Originator
-    virtual void originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
+    virtual void originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacHeader>& controlHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac);
     virtual void originatorProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
@@ -157,12 +201,18 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
     // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) override;
+    virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
+    virtual bool releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid) override;
+    virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override;
 
     std::string getFrameSequenceInfo() const;
 
   public:
     virtual ~Hcf();
+
+    virtual void cancelManagementTransaction(uint64_t transactionId);
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
@@ -174,4 +224,3 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 } /* namespace inet */
 
 #endif
-

@@ -57,6 +57,10 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
     virtual std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
     virtual void processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
+    // Makes all outstanding BA-policy frames for this peer/TID retryable
+    // through the normal acknowledgment path when the agreement is no longer
+    // available to the data plane.
+    virtual bool releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid);
 
     virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
@@ -78,4 +82,3 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 } /* namespace inet */
 
 #endif
-

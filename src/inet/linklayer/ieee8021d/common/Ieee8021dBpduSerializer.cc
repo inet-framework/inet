@@ -53,7 +53,7 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     }
 }
 
-const Ptr<Chunk> Ieee8021dBpduSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021dBpduSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto protocolIdentifier = static_cast<BpduProtocolIdentifier>(stream.readUint16Be());
     auto protocolVersionIdentifier = static_cast<BpduProtocolVersionIdentifier>(stream.readUint8());

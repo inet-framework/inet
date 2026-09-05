@@ -25,7 +25,8 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
     bool aMsduSupported = false;
     int maximumAllowedBufferSize = -1;
     simtime_t blockAckTimeoutValue = -1;
-    simtime_t addbaFailureTimeout = -1;
+    simtime_t addbaResponseTimeout = -1;
+    simtime_t addbaRetryBackoff = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -36,7 +37,8 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement) override;
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
 
-    virtual simtime_t computeAddbaFailureTimeout() const override;
+    virtual simtime_t getAddbaResponseTimeout() const override { return addbaResponseTimeout; }
+    virtual simtime_t computeAddbaRetryBackoff() const override { return addbaRetryBackoff; }
 
     virtual bool isMsduSupported() const override { return aMsduSupported; }
     virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
@@ -48,4 +50,3 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
 } /* namespace inet */
 
 #endif
-

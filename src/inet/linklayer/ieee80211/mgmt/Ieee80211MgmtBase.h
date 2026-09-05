@@ -17,6 +17,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
@@ -36,6 +37,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     NetworkInterface *myIface = nullptr;
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 
     // statistics
     long numMgmtFramesReceived;
@@ -60,6 +62,29 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
+
+    /** Populates the primary and (when needed) Extended Supported Rates elements. */
+    template<typename Frame>
+    void setSupportedRateElements(const Ptr<Frame>& frame) const
+    {
+        frame->setSupportedRates(supportedRates);
+        frame->setExtendedSupportedRatesPresent(extendedSupportedRates.numRates > 0);
+        frame->setExtendedSupportedRates(extendedSupportedRates);
+    }
+
+    /** Returns the encoded length of the primary and optional Extended Supported Rates elements. */
+    template<typename Frame>
+    B getSupportedRateElementsLength(const Ptr<Frame>& frame) const
+    {
+        B length = B(2 + frame->getSupportedRates().numRates);
+        if (frame->getExtendedSupportedRatesPresent())
+            length += B(2 + frame->getExtendedSupportedRates().numRates);
+        return length;
+    }
+
+    /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const;
 
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

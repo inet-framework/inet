@@ -28,7 +28,7 @@ void EtherAppReqSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> EtherAppReqSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EtherAppReqSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto etherAppReq = makeShared<EtherAppReq>();
@@ -55,7 +55,7 @@ void EtherAppRespSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> EtherAppRespSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EtherAppRespSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto etherAppResp = makeShared<EtherAppResp>();

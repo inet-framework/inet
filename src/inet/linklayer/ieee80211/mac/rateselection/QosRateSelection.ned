@@ -23,6 +23,7 @@ simple QosRateSelection extends SimpleModule
     parameters:
         @class(QosRateSelection);
         string rateControlModule;
+        string mibModule = default("^.^.^.mib");
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);
 

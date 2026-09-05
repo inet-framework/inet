@@ -25,12 +25,15 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
 
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
+    std::vector<IPacketQueue::ICallback *> packetCallbacks;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
+    virtual void recordPacketDequeued(Packet *packet);
+    virtual void notifyPacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason);
 
     virtual std::string resolveDirective(char directive) const override;
 
@@ -41,6 +44,10 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
     virtual void enqueuePacket(Packet *packet) override;
     virtual Packet *dequeuePacket() override;
 
+    virtual void addPacketCallback(IPacketQueue::ICallback *callback) override;
+    virtual void removePacketCallback(IPacketQueue::ICallback *callback) override;
+
+  public:
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
@@ -54,4 +61,3 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
 } // namespace inet
 
 #endif
-

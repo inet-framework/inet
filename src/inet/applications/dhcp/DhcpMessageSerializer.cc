@@ -216,7 +216,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     ASSERT(dhcpMessage->getChunkLength() == B(length));
 }
 
-const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> DhcpMessageSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto dhcpMessage = makeShared<DhcpMessage>();
 

@@ -1117,7 +1117,7 @@ void SctpHeaderSerializer::hmacSha1(const uint8_t *buf, uint32_t buflen, const u
     }
 }
 
-const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> SctpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     uint16_t paramType;
     int32_t parptr, chunklen, cLen, woPadding;

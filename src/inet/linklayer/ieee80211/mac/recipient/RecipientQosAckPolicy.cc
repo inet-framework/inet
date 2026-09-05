@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -62,7 +63,7 @@ bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        return agreement != nullptr;
+        return agreement != nullptr && !agreement->isInactivityExpired();
         // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }
@@ -96,4 +97,3 @@ simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packe
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

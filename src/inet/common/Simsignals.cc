@@ -22,6 +22,7 @@ simsignal_t l2ApDisassociatedSignal = cComponent::registerSignal("l2ApDisassocia
 simsignal_t linkBrokenSignal = cComponent::registerSignal("linkBroken");
 
 simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
+simsignal_t frameTransmissionFinishedSignal = cComponent::registerSignal("frameTransmissionFinished");
 
 simsignal_t interpacketGapStartedSignal = cComponent::registerSignal("interpacketGapStarted");
 simsignal_t interpacketGapEndedSignal = cComponent::registerSignal("interpacketGapEnded");

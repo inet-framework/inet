@@ -4,6 +4,29 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Migrating ``FieldsChunkSerializer`` Subclasses
+-----------------------------------------------
+
+The protected deserialization hook of :cpp:`FieldsChunkSerializer` now receives
+the concrete chunk type requested from the serializer registry. Custom
+serializers must replace this override:
+
+.. code-block:: c++
+
+   const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+with:
+
+.. code-block:: c++
+
+   const Ptr<Chunk> deserializeFields(MemoryInputStream& stream,
+           const std::type_info& typeInfo) const override;
+
+Serializers that always produce one concrete chunk type may leave the second
+parameter unnamed. Serializers registered for several chunk types can inspect
+``typeInfo`` to construct the exact requested type. Calls between field
+deserializers must likewise use ``deserializeFields(stream, typeid(ChunkType))``.
+
 .. _mg:sec:migrationguide:architecture:
 
 Network Node Architecture

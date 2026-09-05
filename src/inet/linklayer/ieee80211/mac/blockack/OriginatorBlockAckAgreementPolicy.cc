@@ -24,15 +24,14 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
-        // TODO addbaFailureTimeout = par("addbaFailureTimeout");
+        addbaResponseTimeout = par("addbaResponseTimeout");
+        addbaRetryBackoff = par("addbaRetryBackoff");
+        if (addbaResponseTimeout <= 0)
+            throw cRuntimeError("addbaResponseTimeout must be greater than zero");
+        if (addbaRetryBackoff < 0)
+            throw cRuntimeError("addbaRetryBackoff must not be negative");
         WATCH(blockAckReqThreshold);
     }
-}
-
-simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
-{
-    // TODO ADDBAFailureTimeout -- 6.3.29.2.2 Semantics of the service primitive
-    throw cRuntimeError("Unimplemented");
 }
 
 bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
@@ -42,8 +41,7 @@ bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const P
 
 bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement)
 {
-    ASSERT(agreement);
-    return true;
+    return agreement != nullptr && addbaResp->getStatusCode() == 0;
 }
 
 bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
@@ -53,4 +51,3 @@ bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
