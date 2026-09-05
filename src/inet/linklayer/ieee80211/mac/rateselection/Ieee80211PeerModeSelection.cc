@@ -18,15 +18,22 @@ const IIeee80211Mode *selectGroupAddressedMode(const Ieee80211ModeSet *modeSet, 
 {
     // IEEE Std 802.11-2024, 10.6.5.1 and 10.6.5.4. The model advertises
     // mandatory legacy operational modes as its BSS basic legacy rate set.
+    bool hasMandatoryLegacyMode = false;
     const IIeee80211Mode *legacyMode = nullptr;
     for (const auto *candidate : modeSet->getLegacyOperationalModes()) {
         if (!modeSet->getIsMandatory(candidate))
+            continue;
+        hasMandatoryLegacyMode = true;
+        if (candidate->getDataMode()->getNetBitrate() > requestedMode->getDataMode()->getNetBitrate())
             continue;
         if (candidate == requestedMode)
             return candidate;
         if (legacyMode == nullptr || candidate->getDataMode()->getNetBitrate() > legacyMode->getDataMode()->getNetBitrate())
             legacyMode = candidate;
     }
+    if (legacyMode == nullptr && hasMandatoryLegacyMode)
+        throw cRuntimeError("No mandatory legacy mode at or below requested group-addressed mode '%s' in mode set '%s'",
+                requestedMode->getName(), modeSet->getName());
     return legacyMode != nullptr ? legacyMode : requestedMode;
 }
 

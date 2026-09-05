@@ -78,6 +78,32 @@ const auto *modeOutsideSet = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80
         Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
 ASSERT(!modeSet->containsMode(modeOutsideSet));
 
+// Group-addressed configured optional rates are upper bounds over the basic
+// legacy set (modeled by mandatory legacy operational modes).
+for (const char *profile : {"a", "g(mixed)"}) {
+    const auto *groupSet = Ieee80211ModeSet::getModeSet(profile);
+    for (int rate : {6, 9, 12, 18, 24}) {
+        const auto *requested = groupSet->getMode(Mbps(rate));
+        auto expected = Mbps(rate == 9 ? 6 : rate == 18 ? 12 : rate);
+        const auto *selected = selectGroupAddressedMode(groupSet, requested);
+        ASSERT(selected->getDataMode()->getNetBitrate() == expected);
+        if (rate != 9 && rate != 18)
+            ASSERT(selected == requested);
+    }
+}
+const auto *legacySet = Ieee80211ModeSet::getModeSet("a");
+const auto *six = legacySet->getMode(Mbps(6));
+const auto *nine = legacySet->getMode(Mbps(9));
+Ieee80211ModeSet aboveBound("aboveBound", {{true, nine, true}}, nine, Ieee80211ModeSet::PhyType::OFDM);
+bool groupBoundRejected = false;
+try { selectGroupAddressedMode(&aboveBound, six); }
+catch (const cRuntimeError& error) {
+    groupBoundRejected = error.getFormattedMessage().find("No mandatory legacy mode at or below") != std::string::npos;
+}
+ASSERT(groupBoundRejected);
+Ieee80211ModeSet noMandatory("noMandatory", {{false, nine, true}}, nine, Ieee80211ModeSet::PhyType::OFDM);
+ASSERT(selectGroupAddressedMode(&noMandatory, nine) == nine);
+
 const MacAddress peer("02:00:00:00:00:01");
 
 auto shortGiPeer = makePeerState({8}, {MHz(20)}, MHz(20), true);
