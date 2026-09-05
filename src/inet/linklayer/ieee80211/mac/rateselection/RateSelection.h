@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,8 +32,13 @@ namespace ieee80211 {
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames
  */
-class INET_API RateSelection : public IRateSelection, public SimpleModule, public cListener // FIXME
+class INET_API RateSelection : public IRateSelection, public SimpleModule, public cListener, public physicallayer::IIeee80211ModeSetListener // FIXME
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual std::function<void()> saveModeSetState() override;
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
