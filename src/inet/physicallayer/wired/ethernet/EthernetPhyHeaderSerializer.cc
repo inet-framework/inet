@@ -24,16 +24,16 @@ void EthernetPhyHeaderBaseSerializer::serialize(MemoryOutputStream& stream, cons
     throw cRuntimeError("Invalid operation");
 }
 
-const Ptr<Chunk> EthernetPhyHeaderBaseSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPhyHeaderBaseSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     uint8_t byte = stream.getData().at(PREAMBLE_BYTES.get<B>());
     if (byte == 0xD5) {
         EthernetPhyHeaderSerializer serializer;
-        return serializer.deserialize(stream);
+        return serializer.deserializeFields(stream, typeid(EthernetPhyHeader));
     }
     else {
         EthernetFragmentPhyHeaderSerializer serializer;
-        return serializer.deserialize(stream);
+        return serializer.deserializeFields(stream, typeid(EthernetFragmentPhyHeader));
     }
 }
 
@@ -43,7 +43,7 @@ void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByte(0xD5); // SFD
 }
 
-const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetPhyHeader>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>()); // preamble
@@ -84,7 +84,7 @@ void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, 
     }
 }
 
-const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetFragmentPhyHeader>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>() - 1);

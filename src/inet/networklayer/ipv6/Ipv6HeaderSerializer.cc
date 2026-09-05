@@ -37,7 +37,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeIpv6Address(ipv6Header->getDestAddress());
 }
 
-const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6HeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ipv6Header = makeShared<Ipv6Header>();
     ipv6Header->setVersion(stream.readUint4());

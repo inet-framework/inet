@@ -23,7 +23,7 @@ void MplsPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeUint8(mplsHeader->getTtl());
 }
 
-const Ptr<Chunk> MplsPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MplsPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto mplsHeader = makeShared<MplsHeader>();
     mplsHeader->setLabel(stream.readNBitsToUint64Be(20));

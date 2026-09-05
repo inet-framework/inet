@@ -43,7 +43,7 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
         throw cRuntimeError("CsmaCaMacSerializer: cannot serialize chunk");
 }
 
-const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPos = stream.getPosition();
     CsmaCaMacHeaderType type = static_cast<CsmaCaMacHeaderType>(stream.readUint8());
@@ -86,7 +86,7 @@ void CsmaCaMacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeUint32Be(macTrailer->getFcs());
 }
 
-const Ptr<Chunk> CsmaCaMacTrailerSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> CsmaCaMacTrailerSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     auto fcs = stream.readUint32Be();

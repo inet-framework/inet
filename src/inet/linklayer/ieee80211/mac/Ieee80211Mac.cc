@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
+#include <algorithm>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -21,10 +23,10 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211HtChannelWidthProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -66,6 +68,20 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
+        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
+                modeSet->getMaximumNumberOfSpatialStreams());
+        std::set<Hz> operationalChannelWidths;
+        if (modeSet->isHtOperationSupported()) {
+            const auto *transmitterWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getTransmitter());
+            const auto *receiverWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getReceiver());
+            if (transmitterWidthProvider == nullptr || receiverWidthProvider == nullptr)
+                throw cRuntimeError("HT operation requires transmitter and receiver PHY channel-width providers");
+            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+                if (transmitterWidthProvider->isHtChannelWidthSupported(channelWidth) &&
+                        receiverWidthProvider->isHtChannelWidthSupported(channelWidth))
+                    operationalChannelWidths.insert(channelWidth);
+        }
+        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();
@@ -374,6 +390,14 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
+void Ieee80211Mac::notifyFrameTransmission(const Packet *frame, FrameTransmissionStatus status)
+{
+    Enter_Method("notifyFrameTransmission");
+    FrameTransmissionDetails details;
+    details.setStatus(status);
+    emit(frameTransmissionFinishedSignal, const_cast<Packet *>(frame), &details);
+}
+
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(\"%s\")", packet->getName());
@@ -418,4 +442,3 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
-

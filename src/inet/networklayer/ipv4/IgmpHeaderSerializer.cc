@@ -99,7 +99,7 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IgmpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     B start = stream.getRemainingLength();
     unsigned char type = stream.readByte();

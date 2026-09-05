@@ -1,0 +1,174 @@
+%description:
+Verify that frameTransmissionFinishedSignal emissions with FrameTransmissionDetails
+are properly filtered by frameTransmissionStatusIs* result filters and recorded
+by the @statistic declarations on Ieee80211Mac (frameAcked, frameRetryLimitReached,
+and frameDroppedBeforeTx).
+
+%file: TestIeee80211FrameTransmissionStats.cc
+
+#include <omnetpp/cresultfilter.h>
+#include <omnetpp/resultrecorders.h>
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211FrameTransmissionStatsTest : public cSimpleModule
+{
+  public:
+    Ieee80211FrameTransmissionStatsTest() : cSimpleModule(65536) {}
+
+  protected:
+    TotalCountRecorder *findCountRecorder(cResultListener *resultListener, const char *statisticName)
+    {
+        if (auto recorder = dynamic_cast<TotalCountRecorder *>(resultListener)) {
+            if (!strcmp(statisticName, recorder->getStatisticName()))
+                return recorder;
+            return nullptr;
+        }
+        else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
+            for (auto delegate : resultFilter->getDelegates()) {
+                auto found = findCountRecorder(delegate, statisticName);
+                if (found != nullptr)
+                    return found;
+            }
+        }
+        return nullptr;
+    }
+
+    virtual void activity() override
+    {
+        // 1. Verify result filter factory registrations
+        ASSERT(cResultFilterType::find("frameTransmissionStatusIsAcknowledged") != nullptr);
+        ASSERT(cResultFilterType::find("frameTransmissionStatusIsRetryLimitReached") != nullptr);
+        ASSERT(cResultFilterType::find("frameTransmissionStatusIsDroppedBeforeTransmission") != nullptr);
+
+        // 2. Locate MAC and its signal listeners on frameTransmissionFinishedSignal
+        auto mac = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.ap.wlan[0].mac"));
+        auto listeners = mac->getLocalSignalListeners(frameTransmissionFinishedSignal);
+        ASSERT(!listeners.empty());
+
+        TotalCountRecorder *ackRecorder = nullptr;
+        TotalCountRecorder *retryRecorder = nullptr;
+        TotalCountRecorder *dropRecorder = nullptr;
+
+        for (auto listener : listeners) {
+            if (auto resultListener = dynamic_cast<cResultListener *>(listener)) {
+                if (!ackRecorder)
+                    ackRecorder = findCountRecorder(resultListener, "frameAcked");
+                if (!retryRecorder)
+                    retryRecorder = findCountRecorder(resultListener, "frameRetryLimitReached");
+                if (!dropRecorder)
+                    dropRecorder = findCountRecorder(resultListener, "frameDroppedBeforeTx");
+            }
+        }
+
+        ASSERT(ackRecorder != nullptr);
+        ASSERT(retryRecorder != nullptr);
+        ASSERT(dropRecorder != nullptr);
+
+        ASSERT(ackRecorder->getCount() == 0);
+        ASSERT(retryRecorder->getCount() == 0);
+        ASSERT(dropRecorder->getCount() == 0);
+
+        // 3. Emit status=ACKNOWLEDGED
+        auto packet1 = new Packet("frame1");
+        packet1->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        mac->notifyFrameTransmission(packet1, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete packet1;
+
+        ASSERT(ackRecorder->getCount() == 1);
+        ASSERT(retryRecorder->getCount() == 0);
+        ASSERT(dropRecorder->getCount() == 0);
+
+        // 4. Emit status=RETRY_LIMIT_REACHED
+        auto packet2 = new Packet("frame2");
+        packet2->insertAtBack(makeShared<ByteCountChunk>(B(200)));
+        mac->notifyFrameTransmission(packet2, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+        delete packet2;
+
+        ASSERT(ackRecorder->getCount() == 1);
+        ASSERT(retryRecorder->getCount() == 1);
+        ASSERT(dropRecorder->getCount() == 0);
+
+        // 5. Emit status=DROPPED_BEFORE_TRANSMISSION
+        auto packet3 = new Packet("frame3");
+        packet3->insertAtBack(makeShared<ByteCountChunk>(B(300)));
+        mac->notifyFrameTransmission(packet3, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+        delete packet3;
+
+        ASSERT(ackRecorder->getCount() == 1);
+        ASSERT(retryRecorder->getCount() == 1);
+        ASSERT(dropRecorder->getCount() == 1);
+
+        // 6. Emit another ACKNOWLEDGED and another DROPPED_BEFORE_TRANSMISSION
+        auto packet4 = new Packet("frame4");
+        packet4->insertAtBack(makeShared<ByteCountChunk>(B(150)));
+        mac->notifyFrameTransmission(packet4, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete packet4;
+
+        auto packet5 = new Packet("frame5");
+        packet5->insertAtBack(makeShared<ByteCountChunk>(B(250)));
+        mac->notifyFrameTransmission(packet5, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+        delete packet5;
+
+        ASSERT(ackRecorder->getCount() == 2);
+        ASSERT(retryRecorder->getCount() == 1);
+        ASSERT(dropRecorder->getCount() == 2);
+
+        std::cout << "Frame transmission statistics and result filters verified.\n";
+    }
+};
+
+Define_Module(Ieee80211FrameTransmissionStatsTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211FrameTransmissionStatsTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211FrameTransmissionStatsTest);
+}
+
+network Ieee80211FrameTransmissionStatsTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        test: Ieee80211FrameTransmissionStatsTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211FrameTransmissionStatsTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+cmdenv-express-mode = true
+record-scalar-results = true
+record-vector-results = true
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+
+%contains: stdout
+Frame transmission statistics and result filters verified.

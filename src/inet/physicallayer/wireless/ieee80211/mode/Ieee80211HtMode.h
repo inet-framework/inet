@@ -244,17 +244,19 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     virtual ~Ieee80211HtMode() { delete preambleMode; delete dataMode; }
 
     virtual const Ieee80211HtDataMode *getDataMode() const override { return dataMode; }
+    virtual int getHtMcsIndex() const override { return dataMode->getMcsIndex(); }
+    virtual bool isHtShortGuardInterval() const override { return dataMode->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT; }
     virtual const Ieee80211HtPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211HtSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
     virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
 
-    // Table 20-25—MIMO PHY characteristics
+    // IEEE Std 802.11-2024, Table 19-25—HT PHY characteristics.
     virtual const simtime_t getSlotTime() const override;
     virtual const simtime_t getShortSlotTime() const;
     virtual const simtime_t getSifsTime() const override;
     virtual const simtime_t getRifsTime() const override { return 2E-6; }
     virtual const simtime_t getCcaTime() const override { return 4E-6; } // < 4
-    virtual const simtime_t getPhyRxStartDelay() const override { return 33E-6; }
+    virtual const simtime_t getPhyRxStartDelay() const override { return 24E-6; }
     virtual const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
     virtual const simtime_t getPreambleLength() const override { return 16E-6; }
     virtual const simtime_t getPlcpHeaderLength() const override { return 4E-6; }

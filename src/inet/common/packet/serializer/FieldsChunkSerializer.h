@@ -23,14 +23,15 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
 
     /**
      * Deserializes a chunk from a stream by reading the bytes at the current
-     * position of the stream. The current stream position is updated according
-     * to the length of the returned chunk.
+     * position of the stream. The typeInfo parameter specifies the concrete
+     * chunk type requested from ChunkSerializerRegistry. The current stream
+     * position is updated according to the length of the returned chunk.
      */
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const final override;
 };
 
 } // namespace

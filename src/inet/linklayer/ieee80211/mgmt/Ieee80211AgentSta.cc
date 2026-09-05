@@ -30,6 +30,8 @@ void Ieee80211AgentSta::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        mib.reference(this, "mibModule", true);
+
         // read parameters
         activeScan = par("activeScan");
         probeDelay = par("probeDelay");
@@ -98,10 +100,10 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
         processScanConfirm(ptr);
     else if (auto ptr = dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
         processAuthenticateConfirm(ptr);
-    else if (auto ptr = dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
-        processAssociateConfirm(ptr);
     else if (auto ptr = dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
         processReassociateConfirm(ptr);
+    else if (auto ptr = dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
+        processAssociateConfirm(ptr);
     else if (ctrl)
         throw cRuntimeError("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
@@ -288,13 +290,14 @@ void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     }
     else {
         EV << "Association successful\n";
+        bool newAp = prevAP.isUnspecified() || prevAP != resp->getAddress();
+        if (newAp)
+            prevAP = resp->getAddress();
         emit(acceptConfirmSignal, PR_ASSOCIATE_CONFIRM);
         // we are happy!
         getContainingNode(this)->bubble("Associated with AP");
-        if (prevAP.isUnspecified() || prevAP != resp->getAddress()) {
+        if (newAp)
             emit(l2AssociatedNewApSignal, myIface); // TODO detail: NetworkInterface?
-            prevAP = resp->getAddress();
-        }
         else
             emit(l2AssociatedOldApSignal, myIface);
     }
@@ -302,17 +305,25 @@ void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
 
 void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp)
 {
-    // treat the same way as AssociateConfirm
     if (resp->getResultCode() != PRC_SUCCESS) {
         EV << "Reassociation error\n";
+        bool isAssociated = mib->bssStationData.isAssociated;
         emit(dropConfirmSignal, PR_REASSOCIATE_CONFIRM);
-        EV << "Going back to scanning\n";
-        sendScanRequest();
+        if (!isAssociated) {
+            EV << "Going back to scanning\n";
+            sendScanRequest();
+        }
     }
     else {
         EV << "Reassociation successful\n";
-        emit(l2AssociatedOldApSignal, myIface); // TODO detail: NetworkInterface?
+        bool newAp = prevAP.isUnspecified() || prevAP != resp->getAddress();
+        if (newAp)
+            prevAP = resp->getAddress();
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
+        if (newAp)
+            emit(l2AssociatedNewApSignal, myIface); // TODO detail: NetworkInterface?
+        else
+            emit(l2AssociatedOldApSignal, myIface);
         // we are happy!
     }
 }
