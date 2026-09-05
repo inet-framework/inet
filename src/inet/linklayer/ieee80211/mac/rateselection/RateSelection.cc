@@ -150,28 +150,28 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
 //
 const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+        const auto *requestedMode = multicastFrameMode;
+        if (requestedMode == nullptr)
+            requestedMode = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) ? dataFrameMode : mgmtFrameMode;
+        return selectGroupAddressedMode(modeSet, requestedMode != nullptr ? requestedMode : fastestMandatoryMode);
+    }
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
-    // frames are left to the existing rules below.
+    // frames were handled above.
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && !dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
         ensurePerReceiverModesResolved();
         auto it = perReceiverDataFrameMode.find(dataOrMgmtHeader->getReceiverAddress());
         if (it != perReceiverDataFrameMode.end())
             return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), it->second);
     }
-    if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), multicastFrameMode);
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
-    // Rate control adapts to the feedback of one peer, and a group-addressed frame has no peer:
-    // it is never acknowledged, so nothing would ever correct a rate chosen for it. Group-addressed
-    // frames therefore take a mandatory rate, as the clause above requires.
-    if (dataOrMgmtRateControl && !dataOrMgmtHeader->getReceiverAddress().isMulticast())
+    if (dataOrMgmtRateControl)
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
-    else
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
+    return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
 
 // 802.11-1999 Std.

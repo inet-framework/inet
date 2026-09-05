@@ -157,9 +157,15 @@ const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet 
 
 const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+        const auto *requestedMode = multicastFrameMode;
+        if (requestedMode == nullptr)
+            requestedMode = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) ? dataFrameMode : mgmtFrameMode;
+        return selectGroupAddressedMode(modeSet, requestedMode != nullptr ? requestedMode : fastestMandatoryMode);
+    }
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
-    // frames are left to the existing rules below.
+    // frames were handled above.
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && !dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
         ensurePerReceiverModesResolved();
         auto it = perReceiverDataFrameMode.find(dataOrMgmtHeader->getReceiverAddress());
@@ -170,46 +176,9 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
-    // This subclause describes the rate selection rules for group addressed data and management frames, excluding
-    // the following:
-    //   — Non-STBC Beacon and non-STBC PSMP frames
-    //   — STBC group addressed data and management frames
-    //   — Data frames located in an FMS stream (see 10.23.7)
-    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
-        // If the BSSBasicRateSet parameter is not empty, a data or management frame (excluding the frames listed
-        // above) with a group address in the Address 1 field shall be transmitted in a non-HT PPDU using one of the
-        // rates included in the BSSBasicRateSet parameter or the rate chosen by the AP, described in 10.23.7, if the data
-        // frames are part of an FMS stream.
-        // TODO BSSBasicRateSet
-        // If the BSSBasicRateSet parameter is empty and the BSSBasicMCSSet parameter is not empty, the frame shall
-        // be transmitted in an HT PPDU using one of the MCSs included in the BSSBasicMCSSet parameter.
-
-        // If both the BSSBasicRateSet parameter and the BSSBasicMCSSet parameter are empty (e.g., a scanning STA
-        // that is not yet associated with a BSS), the frame shall be transmitted in a non-HT PPDU using one of the
-        // mandatory PHY rates.
-        // The rate control is not consulted for these frames. It adapts to the feedback of one
-        // peer, and a group-addressed frame has no peer: it is never acknowledged, so nothing
-        // would ever correct a rate chosen for it.
-        return fastestMandatoryMode;
-    }
-    // A data or management frame not identified in 9.7.5.1 through 9.7.5.5 shall be sent using any data rate or MCS
-    // subject to the following constraints:
-    //    — A STA shall not transmit a frame using a rate or MCS that is not supported by the receiver STA or
-    //      STAs, as reported in any Supported Rates element, Extended Supported Rates element, or
-    //      Supported MCS field in management frames transmitted by the receiver STA.
-    //    — A STA shall not transmit a frame using a value for the CH_BANDWIDTH parameter of the
-    //      TXVECTOR that is not supported by the receiver STA.
-    //    — A STA shall not initiate transmission of a frame at a data rate higher than the greatest rate in the
-    //      OperationalRateSet or the HTOperationalMCSset, which are parameters of the MLME-
-    //      JOIN.request primitive.
-    else {
-        // TODO Supported Rates element, Extended Supported Rates element
-        // TODO OperationalRateSet or the HTOperationalMCSset
-        if (dataOrMgmtRateControl)
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
-        else
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
-    }
+    if (dataOrMgmtRateControl)
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
+    return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
 
 const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
