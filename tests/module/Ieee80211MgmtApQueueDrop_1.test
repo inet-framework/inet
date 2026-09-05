@@ -110,7 +110,7 @@ class Ieee80211MgmtApQueueDropTest : public cSimpleModule
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::AUTHENTICATED);
 
-        // The existing packetDroppedSignal is delivered before deletion, so the reservation
+        // The queue removal notification is delivered before deletion, so the reservation
         // is released synchronously and can be reused by another STA.
         ASSERT(mgmt->reserveAssociationId(reusable) == 1);
         mgmt->cancelAssociationIdReservation(reusable);
@@ -152,7 +152,7 @@ class Ieee80211MgmtApQueueDropTest : public cSimpleModule
         for (int i = 0; i < 100 && mgmt->statuses.size() < 3; i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 3);
-        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses.back() == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
         ASSERT(!mgmt->hasPendingAssociation(explicitlyRemovedStation));
         ASSERT(mgmt->getCommittedAssociationId(explicitlyRemovedStation) == 0);
         auto explicitlyRemovedAid = mgmt->reserveAssociationId(explicitlyRemovedStation);
@@ -175,8 +175,8 @@ class Ieee80211MgmtApQueueDropTest : public cSimpleModule
         for (int i = 0; i < 100 && mgmt->statuses.size() < 5; i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 5);
-        ASSERT(mgmt->statuses[3] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
-        ASSERT(mgmt->statuses[4] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses[3] == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses[4] == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
         ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation1));
         ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation2));
         ASSERT(mgmt->getCommittedAssociationId(bulkRemovedStation1) == 0);

@@ -755,10 +755,10 @@ class TestMac : public Ieee80211Mac
 {
   public:
     int numPendingRadioConfigSends = 0;
-    std::vector<IFrameTransmissionCallback::Status> transmissionStatuses;
+    std::vector<FrameTransmissionStatus> transmissionStatuses;
     std::vector<const Packet *> transmissionFrames;
     virtual void sendDownPendingRadioConfigMsg() override { numPendingRadioConfigSends++; }
-    virtual void notifyFrameTransmission(const Packet *frame, IFrameTransmissionCallback::Status status) override {
+    virtual void notifyFrameTransmission(const Packet *frame, FrameTransmissionStatus status) override {
         transmissionFrames.push_back(frame);
         transmissionStatuses.push_back(status);
     }
@@ -5190,7 +5190,7 @@ for (auto responseType : { ST_ASSOCIATIONRESPONSE, ST_REASSOCIATIONRESPONSE }) {
     dcfRemovalQueue.dropPacketFromQueue(droppedPacket);
     delete droppedPacket;
     ASSERT(dcfRemovalMac.transmissionStatuses.size() == 1);
-    ASSERT(dcfRemovalMac.transmissionStatuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+    ASSERT(dcfRemovalMac.transmissionStatuses.back() == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
     auto removedPacket = makeTaggedManagementPacket("dcfRemovedManagement", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(411), 0, false, 811);
     dcfRemovalQueue.packets = { removedPacket };
     dcfRemovalQueue.removePacket(removedPacket);
@@ -5300,7 +5300,7 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     dcf.processFailedFrame(current);
 
     ASSERT(mac.transmissionStatuses.size() == 1);
-    ASSERT(mac.transmissionStatuses.front() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+    ASSERT(mac.transmissionStatuses.front() == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     ASSERT(mac.transmissionFrames.front() == current);
     ASSERT(inProgressFrames.getLength() == 0);
     ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
@@ -5379,7 +5379,7 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     hcf.processFailedFrame(current);
 
     ASSERT(mac.transmissionStatuses.size() == 1);
-    ASSERT(mac.transmissionStatuses.front() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+    ASSERT(mac.transmissionStatuses.front() == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     ASSERT(mac.transmissionFrames.front() == current);
     ASSERT(inProgressFrames[AC_BE].getLength() == 0);
     ASSERT(inProgressFrames[AC_BE].getNumDroppedFrames() == 1);
