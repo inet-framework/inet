@@ -8,11 +8,29 @@
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 
 namespace inet {
 namespace ieee80211 {
+
+static bool isUnexpectedBlockAckResponse(const FrameSequenceContext *context, Packet *frame)
+{
+    if (context == nullptr || frame == nullptr)
+        return false;
+    auto receiveStep = dynamic_cast<IReceiveStep *>(context->getLastStep());
+    auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
+    if (receiveStep == nullptr || transmitStep == nullptr || transmitStep->getFrameToTransmit() == nullptr)
+        return false;
+    auto receivedHeader = frame->peekAtFront<Ieee80211MacHeader>();
+    auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(receivedHeader);
+    if (blockAck == nullptr)
+        return false;
+    auto blockAckReqHeader = transmitStep->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>();
+    auto blockAckReqDetails = getOneTidBlockAckReqDetails(blockAckReqHeader);
+    return blockAckReqDetails && !isMatchingOneTidBlockAckResponse(*blockAckReqDetails, blockAck);
+}
 
 void FrameSequenceHandler::handleStartRxTimeout()
 {
@@ -28,24 +46,26 @@ void FrameSequenceHandler::handleStartRxTimeout()
     }
 }
 
-void FrameSequenceHandler::processResponse(Packet *frame)
+bool FrameSequenceHandler::processResponse(Packet *frame)
 {
     ASSERT(callback != nullptr);
     if (frameSequenceCancellationRequested) {
         delete frame;
         abortFrameSequence();
-        return;
+        return true;
     }
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE: {
+            if (isUnexpectedBlockAckResponse(context, frame))
+                return false;
             // TODO check if not for us and abort
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getLastStep());
             receiveStep->setFrameToReceive(frame);
             finishFrameSequenceStep();
             if (isSequenceRunning())
                 startFrameSequenceStep();
-            break;
+            return true;
         }
         case IFrameSequenceStep::Type::TRANSMIT:
             throw cRuntimeError("Received frame while current step is transmit");

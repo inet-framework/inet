@@ -175,6 +175,11 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
 }
 
 %activity:
+ASSERT(SequenceNumberCyclic(0) - 1 == SequenceNumberCyclic(4095));
+ASSERT(SequenceNumberCyclic(1) - 2 + 1 == SequenceNumberCyclic(0));
+ASSERT(SequenceNumberCyclic(4095) + 1 == SequenceNumberCyclic(0));
+EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediate values.\n";
+
 {
     auto request = makeCompressedBlockAckReq();
     Packet packet("compressedBar", request);
@@ -440,6 +445,15 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
     ASSERT(receiveBuffer->getBuffer().at(2)[0] == incomplete2Fragment0.first);
     ASSERT(receiveBuffer->getBuffer().at(2)[1] == incomplete2Fragment1.first);
 
+    // An in-window MPDU is also rejected when incomplete fragments already
+    // occupy every receive-buffer slot; it must remain absent from the BA
+    // scoreboard and leave WinStartB unchanged.
+    auto received1 = makeReceivedQosFrame(1);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, received1.first, received1.second).empty());
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(1));
+    ASSERT(!agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(1), 0));
+    ASSERT(!agreement.getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(1)));
+
     auto received3 = makeReceivedQosFrame(3);
     ASSERT(reordering.processReceivedQoSFrame(&agreement, received3.first, received3.second).empty());
     ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(1));
@@ -448,9 +462,10 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
     ASSERT(receiveBuffer->getBuffer().at(2)[0] == incomplete2Fragment0.first);
     ASSERT(receiveBuffer->getBuffer().at(2)[1] == incomplete2Fragment1.first);
     ASSERT(receiveBuffer->getBuffer().find(3) == receiveBuffer->getBuffer().end());
-    ASSERT(agreement.getStartingSequenceNumber() == SequenceNumberCyclic(2));
-    ASSERT(agreement.getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(3)));
-    EV << "Rejected future MPDU preserves a fragment-full reorder window but updates the scoreboard.\n";
+    ASSERT(agreement.getStartingSequenceNumber() == SequenceNumberCyclic(1));
+    ASSERT(!agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(3), 0));
+    ASSERT(!agreement.getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(3)));
+    EV << "Rejected future MPDU preserves a fragment-full reorder window and leaves the scoreboard unchanged.\n";
 }
 
 {
@@ -472,6 +487,9 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
     ASSERT(receiveBuffer->getBuffer().at(0).size() == 1 && receiveBuffer->getBuffer().at(0)[0] == incomplete0.first);
     ASSERT(receiveBuffer->getBuffer().at(1).size() == 1 && receiveBuffer->getBuffer().at(1)[0] == received1.first);
     ASSERT(agreement.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == agreement.getStartingSequenceNumber());
+    ASSERT(agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(1), 0));
+    ASSERT(agreement.getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(1)));
     EV << "Future MPDU reclaims a displaced slot across sequence wrap before advancing WinStartB.\n";
 }
 
@@ -810,6 +828,7 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
 EV << ".\n";
 
 %contains: stdout
+Cyclic sequence arithmetic wraps through zero without invalid intermediate values.
 Compressed BAR encoding and round-trip passed.
 Compressed BA encoding and round-trip passed.
 HCF accepts one-TID BAR variants and rejects Multi-TID as unknown.
@@ -822,7 +841,7 @@ Established agreement produces the expected 64-bit bitmap.
 Compressed bitmap preserves leading receive-window holes.
 SN64 advances a size-64 scoreboard and remains buffered across a gap.
 Future MPDU returns displaced and consecutive complete MSDUs without losing gaps.
-Rejected future MPDU preserves a fragment-full reorder window but updates the scoreboard.
+Rejected future MPDU preserves a fragment-full reorder window and leaves the scoreboard unchanged.
 Future MPDU reclaims a displaced slot across sequence wrap before advancing WinStartB.
 Normal-Ack data advances and updates the Block Ack scoreboard.
 Upward delivery advances only the reorder cursor, not WinStartR.

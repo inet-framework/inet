@@ -37,9 +37,6 @@ BlockAckReordering::QosFrameProcessingResult BlockAckReordering::processReceived
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto startingSequenceNumber = receiveBuffer->getNextExpectedSequenceNumber();
     bool advancesWindow = startingSequenceNumber + receiveBuffer->getBufferSize() <= sequenceNumber && sequenceNumber < startingSequenceNumber + 2048;
-    // IEEE Std 802.11-2024, 10.25.6.3 and 10.25.6.4: update the
-    // scoreboard for every related Data frame, independently of reorder storage.
-    agreement->dataFrameReceived(dataHeader);
     SequenceNumberCyclic newStartingSequenceNumber;
     if (advancesWindow) {
         // IEEE Std 802.11-2024, 10.25.6.6.2.1(b): store the future MPDU
@@ -55,12 +52,20 @@ BlockAckReordering::QosFrameProcessingResult BlockAckReordering::processReceived
         receiveBuffer->insertFrameWithResult(dataPacket, dataHeader, newStartingSequenceNumber) :
         receiveBuffer->insertFrameWithResult(dataPacket, dataHeader);
     if (insertionResult != ReceiveBuffer::FrameInsertionResult::INSERTED) {
-        if (insertionResult == ReceiveBuffer::FrameInsertionResult::REJECTED_EXPIRED)
+        if (insertionResult == ReceiveBuffer::FrameInsertionResult::REJECTED_EXPIRED) {
+            // Preserve the receive-lifetime tombstone policy for late Block Ack fragments.
+            if (dataHeader->getAckPolicy() == BLOCK_ACK)
+                agreement->dataFrameReceived(dataHeader);
             result.tombstonedFragments.push_back(dataPacket);
+        }
         else
             delete dataPacket;
         return result;
     }
+    // IEEE Std 802.11-2024, 10.25.6.3 and 10.25.6.6.2.1: acknowledge an
+    // MPDU after it has been admitted to the receive buffer, so a capacity-
+    // rejected MPDU cannot be reported as received.
+    agreement->dataFrameReceived(dataHeader);
     if (advancesWindow) {
         framesToPassUp = collectCompletePrecedingMpdus(receiveBuffer, newStartingSequenceNumber);
         for (const auto& entry : framesToPassUp)
