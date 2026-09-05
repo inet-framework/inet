@@ -59,11 +59,8 @@ void Ieee80211MgmtAp::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
-        if (myIface != nullptr) {
-            auto macModule = myIface->getSubmodule("mac");
-            if (macModule != nullptr)
-                macModule->subscribe(frameTransmissionFinishedSignal, this);
-        }
+        auto macModule = getModuleFromPar<cModule>(par("macModule"), this);
+        macModule->subscribe(frameTransmissionFinishedSignal, this);
     }
 }
 
