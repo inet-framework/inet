@@ -14,6 +14,11 @@
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * Selects the fastest mandatory legacy mode at or below the requested bitrate,
+ * preserving an exact mandatory request. Throws if mandatory legacy modes exist
+ * but none meets the bound; preserves the request if that mandatory set is empty.
+ */
 INET_API const physicallayer::IIeee80211Mode *selectGroupAddressedMode(
         const physicallayer::Ieee80211ModeSet *modeSet, const physicallayer::IIeee80211Mode *requestedMode);
 
