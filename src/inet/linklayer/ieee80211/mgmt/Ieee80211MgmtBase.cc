@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
+#include <tuple>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -14,6 +16,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -42,15 +45,59 @@ void Ieee80211MgmtBase::initialize(int stage)
 void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == modesetChangedSignal && obj != modeSet)
+        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+}
 
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
-        supportedRates.numRates = std::min(8, modeSet->getNumModes());
-        int rateIndex = 0;
-        for (int i = 0; i < supportedRates.numRates; i++)
-            if (modeSet->isMandatory(i))
-                supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+void Ieee80211MgmtBase::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    supportedRates = Ieee80211SupportedRatesElement();
+    extendedSupportedRates = Ieee80211ExtendedSupportedRatesElement();
+    int rateIndex = 0;
+    int extendedRateIndex = 0;
+    // Supported Rates carries the legacy OperationalRateSet only. HT/VHT
+    // MCS support is advertised through the corresponding capabilities
+    // elements (IEEE Std 802.11-2024, 9.4.2.3, 9.4.2.54.4, 11.1.4.6).
+    for (const auto *mode : modeSet->getLegacyOperationalModes()) {
+        bool isBasicRate = modeSet->getIsMandatory(mode);
+        double rate = mode->getDataMode()->getNetBitrate().get<Mbps>();
+        if (rateIndex < 8) {
+            supportedRates.rate[rateIndex] = rate;
+            supportedRates.basicRate[rateIndex] = isBasicRate;
+            rateIndex++;
+        }
+        else if (extendedRateIndex < 255) {
+            extendedSupportedRates.rate[extendedRateIndex] = rate;
+            extendedSupportedRates.basicRate[extendedRateIndex] = isBasicRate;
+            extendedRateIndex++;
+        }
+        else
+            throw cRuntimeError("Mode set '%s' contains more than 263 legacy operational rates", modeSet->getName());
     }
+    supportedRates.numRates = rateIndex;
+    extendedSupportedRates.numRates = extendedRateIndex;
+}
+
+std::function<void()> Ieee80211MgmtBase::saveModeSetState()
+{
+    Enter_Method_Silent();
+    return [this, state = std::make_tuple(modeSet, supportedRates, extendedSupportedRates)]() mutable {
+        std::tie(modeSet, supportedRates, extendedSupportedRates) = std::move(state);
+    };
+}
+
+void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isHtOperationSupported())
+        setHtCapabilities(frame, mib->localHtCapabilities);
+}
+
+void Ieee80211MgmtBase::addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const
+{
+    if (mib->isHtOperationSupported())
+        setHtOperation(frame, band, mib->getHtOperation());
 }
 
 void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
@@ -158,6 +205,7 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
+    mib->clearPeerHtCapabilities();
 }
 
 } // namespace ieee80211

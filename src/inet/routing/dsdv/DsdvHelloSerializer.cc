@@ -23,7 +23,7 @@ void DsdvHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint32Be(dsdvHello->getHopdistance());
 }
 
-const Ptr<Chunk> DsdvHelloSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> DsdvHelloSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto dsdvHello = makeShared<DsdvHello>();
     dsdvHello->setSrcAddress(stream.readIpv4Address());

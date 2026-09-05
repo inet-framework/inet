@@ -14,6 +14,16 @@ using namespace inet::physicallayer;
 
 Define_Module(OnoeRateControl);
 
+std::function<void()> OnoeRateControl::saveModeSetState()
+{
+    Enter_Method_Silent();
+    auto restoreBase = ModeSetListener::saveModeSetState();
+    return [this, savedStations = stations, restoreBase]() mutable {
+        stations.swap(savedStations);
+        restoreBase();
+    };
+}
+
 void OnoeRateControl::initialize(int stage)
 {
     RateControlBase::initialize(stage);

@@ -49,7 +49,7 @@ const IIeee80211Mode *Ieee80211Transmitter::computeTransmissionMode(const Packet
     const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
     const auto& bitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
-        if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
+        if (modeSet != nullptr && !modeSet->supportsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
         transmissionMode = modeReq->getMode();
     }
@@ -75,16 +75,31 @@ const Ieee80211Channel *Ieee80211Transmitter::computeTransmissionChannel(const P
 void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     if (this->modeSet != modeSet) {
+        auto newMode = mode;
+        if (mode != nullptr && modeSet != nullptr && !modeSet->containsMode(mode)) {
+            newMode = modeSet->findCompatibleMode(mode);
+            if (newMode == nullptr)
+                throw cRuntimeError("Cannot map current mode to operation mode '%s' without changing bitrate, bandwidth, spatial streams, or guard interval", modeSet->getName());
+        }
+        else if (modeSet == nullptr)
+            newMode = nullptr;
         this->modeSet = modeSet;
-        if (mode != nullptr)
-            mode = modeSet != nullptr ? modeSet->getMode(mode->getDataMode()->getNetBitrate()) : nullptr;
+        mode = newMode;
     }
+}
+
+void Ieee80211Transmitter::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    this->modeSet = modeSet;
+    this->mode = mode;
 }
 
 void Ieee80211Transmitter::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {
-        if (modeSet->findMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth()) == nullptr)
+        if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
             throw cRuntimeError("Invalid mode");
         this->mode = mode;
     }
@@ -104,6 +119,7 @@ void Ieee80211Transmitter::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
+        this->band = channel->getBand();
         setCenterFrequency(channel->getCenterFrequency());
     }
 }
@@ -112,6 +128,14 @@ void Ieee80211Transmitter::setChannelNumber(int channelNumber)
 {
     if (channel == nullptr || channelNumber != channel->getChannelNumber())
         setChannel(new Ieee80211Channel(band, channelNumber));
+}
+
+bool Ieee80211Transmitter::isHtChannelWidthSupported(Hz channelWidth) const
+{
+    // The packet-level PHY currently represents only the primary channel.
+    // Until a primary/secondary compound channel determines the analog-model
+    // center frequency, advertising a 40 MHz HT width would be false.
+    return channelWidth == MHz(20) && modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
 }
 
 std::ostream& Ieee80211Transmitter::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -143,8 +167,16 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
-    const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = duration - headerDuration - preambleDuration;
+    const simtime_t dataDuration = transmissionMode->getDataDuration(B(phyHeader->getLengthField()));
+    // HT/VHT include their SIG fields in the PHY preamble duration, so their
+    // mode duration is exactly preamble + data duration. Other PHYs expose a
+    // separate header; their residual data interval may also include a trailing
+    // signal extension (ERP). Keep that extension in chronological data time.
+    const bool headerIncludedInPreamble = duration == preambleDuration + dataDuration;
+    const simtime_t headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : transmissionMode->getHeaderMode()->getDuration();
+    if (preambleDuration < SIMTIME_ZERO || headerDuration < SIMTIME_ZERO || dataDuration < SIMTIME_ZERO ||
+        preambleDuration + headerDuration + dataDuration != duration)
+        throw cRuntimeError("Invalid transmission duration decomposition for mode %s", transmissionMode->getName());
     auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }
@@ -152,4 +184,3 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
 } // namespace physicallayer
 
 } // namespace inet
-

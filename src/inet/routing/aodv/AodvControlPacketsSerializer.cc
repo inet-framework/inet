@@ -138,7 +138,7 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
     }
 }
 
-const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto aodvControlPacket = makeShared<AodvControlPacket>();
     AodvControlPacketType packetType = static_cast<AodvControlPacketType>(stream.readByte());

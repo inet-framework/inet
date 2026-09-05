@@ -25,7 +25,7 @@ void Ieee8021aeTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, co
 //    stream.writeUint64Be(header->getSci());
 }
 
-const Ptr<Chunk> Ieee8021aeTagTpidHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021aeTagTpidHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     const auto& header = makeShared<Ieee8021aeTagTpidHeader>();
     auto tpid = stream.readUint16Be();
@@ -48,7 +48,7 @@ void Ieee8021aeTagEpdHeaderSerializer::serialize(MemoryOutputStream& stream, con
     stream.writeUint16Be(header->getTypeOrLength());
 }
 
-const Ptr<Chunk> Ieee8021aeTagEpdHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021aeTagEpdHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     const auto& header = makeShared<Ieee8021aeTagEpdHeader>();
     header->setTciAn(stream.readByte());

@@ -32,7 +32,7 @@ void EthernetMacAddressFieldsSerializer::serialize(MemoryOutputStream& stream, c
     stream.writeMacAddress(header->getSrc());
 }
 
-const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetMacAddressFields>();
     header->setDest(stream.readMacAddress());
@@ -46,7 +46,7 @@ void EthernetTypeOrLengthFieldSerializer::serialize(MemoryOutputStream& stream, 
     stream.writeUint16Be(header->getTypeOrLength());
 }
 
-const Ptr<Chunk> EthernetTypeOrLengthFieldSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetTypeOrLengthFieldSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetTypeOrLengthField>();
     header->setTypeOrLength(stream.readUint16Be());
@@ -61,7 +61,7 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
-const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
     ethernetMacHeader->setDest(stream.readMacAddress());
@@ -75,7 +75,7 @@ void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     stream.writeByteRepeatedly(0, chunk->getChunkLength().get<B>());
 }
 
-const Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPaddingSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     throw cRuntimeError("Invalid operation");
 }
@@ -88,13 +88,18 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(ethernetFcs->getFcs());
 }
 
-const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetFcsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto ethernetFcs = makeShared<EthernetFcs>();
+    Ptr<EthernetFcs> ethernetFcs;
+    if (typeInfo == typeid(EthernetFragmentFcs))
+        ethernetFcs = makeShared<EthernetFragmentFcs>();
+    else if (typeInfo == typeid(EthernetFcs))
+        ethernetFcs = makeShared<EthernetFcs>();
+    else
+        throw cRuntimeError("Cannot deserialize Ethernet FCS of type %s", opp_typename(typeInfo));
     ethernetFcs->setFcs(stream.readUint32Be());
     ethernetFcs->setFcsMode(FCS_COMPUTED);
     return ethernetFcs;
 }
 
 } // namespace inet
-

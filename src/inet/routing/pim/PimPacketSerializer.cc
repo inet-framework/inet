@@ -248,7 +248,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> PimPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto pimPacket = makeShared<PimPacket>();
     // PIM header common to all PIM messages:

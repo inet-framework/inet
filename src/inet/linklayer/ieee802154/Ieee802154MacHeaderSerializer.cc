@@ -48,7 +48,7 @@ void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const 
     stream.writeUint16Le(0);  // Padding to 8 bytes
 }
 
-const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<Ieee802154MacHeader>();
 

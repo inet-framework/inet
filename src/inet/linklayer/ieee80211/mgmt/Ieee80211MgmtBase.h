@@ -17,7 +17,9 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 
@@ -27,8 +29,13 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual std::function<void()> saveModeSetState() override;
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     // configuration
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -36,6 +43,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     NetworkInterface *myIface = nullptr;
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 
     // statistics
     long numMgmtFramesReceived;
@@ -60,6 +68,29 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
+
+    /** Populates the primary and (when needed) Extended Supported Rates elements. */
+    template<typename Frame>
+    void setSupportedRateElements(const Ptr<Frame>& frame) const
+    {
+        frame->setSupportedRates(supportedRates);
+        frame->setExtendedSupportedRatesPresent(extendedSupportedRates.numRates > 0);
+        frame->setExtendedSupportedRates(extendedSupportedRates);
+    }
+
+    /** Returns the encoded length of the primary and optional Extended Supported Rates elements. */
+    template<typename Frame>
+    B getSupportedRateElementsLength(const Ptr<Frame>& frame) const
+    {
+        B length = B(2 + frame->getSupportedRates().numRates);
+        if (frame->getExtendedSupportedRatesPresent())
+            length += B(2 + frame->getExtendedSupportedRates().numRates);
+        return length;
+    }
+
+    /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const;
 
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

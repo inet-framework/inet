@@ -16,10 +16,39 @@ Ieee80211BandBase::Ieee80211BandBase(const char *name) :
 {
 }
 
-Ieee80211EnumeratedBand::Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers) :
-    Ieee80211BandBase(name),
-    centers(centers)
+int IIeee80211Band::getStandardChannelNumber(int channelIndex) const
 {
+    throw cRuntimeError("Band '%s' has no standards channel-number mapping for internal channel index %d", getName(), channelIndex);
+}
+
+int IIeee80211Band::getChannelIndex(int standardChannelNumber) const
+{
+    throw cRuntimeError("Band '%s' has no internal channel-index mapping for standards channel number %d", getName(), standardChannelNumber);
+}
+
+bool IIeee80211Band::isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const
+{
+    if (secondaryChannelOffset != 1 && secondaryChannelOffset != 3)
+        return false;
+    try {
+        int primaryStandardChannel = getStandardChannelNumber(primaryChannelIndex);
+        int secondaryStandardChannel = primaryStandardChannel + (secondaryChannelOffset == 1 ? 4 : -4);
+        int secondaryChannelIndex = getChannelIndex(secondaryStandardChannel);
+        Hz expectedOffset = secondaryChannelOffset == 1 ? MHz(20) : MHz(-20);
+        return getCenterFrequency(secondaryChannelIndex) - getCenterFrequency(primaryChannelIndex) == expectedOffset;
+    }
+    catch (const cRuntimeError&) {
+        return false;
+    }
+}
+
+Ieee80211EnumeratedBand::Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers) :
+    Ieee80211BandBase(name),
+    centers(centers),
+    standardChannelNumbers(standardChannelNumbers)
+{
+    if (!this->standardChannelNumbers.empty() && this->standardChannelNumbers.size() != this->centers.size())
+        throw cRuntimeError("Band '%s' has %zu centers but %zu standards channel numbers", name, this->centers.size(), this->standardChannelNumbers.size());
 }
 
 Hz Ieee80211EnumeratedBand::getCenterFrequency(int channelNumber) const
@@ -27,6 +56,25 @@ Hz Ieee80211EnumeratedBand::getCenterFrequency(int channelNumber) const
     if (channelNumber < 0 || channelNumber >= (int)centers.size())
         throw cRuntimeError("Invalid channel number: %d", channelNumber);
     return centers[channelNumber];
+}
+
+int Ieee80211EnumeratedBand::getStandardChannelNumber(int channelIndex) const
+{
+    if (channelIndex < 0 || channelIndex >= (int)centers.size())
+        throw cRuntimeError("Invalid channel index: %d", channelIndex);
+    if (standardChannelNumbers.empty())
+        return IIeee80211Band::getStandardChannelNumber(channelIndex);
+    return standardChannelNumbers[channelIndex];
+}
+
+int Ieee80211EnumeratedBand::getChannelIndex(int standardChannelNumber) const
+{
+    if (standardChannelNumbers.empty())
+        return IIeee80211Band::getChannelIndex(standardChannelNumber);
+    for (int channelIndex = 0; channelIndex < (int)standardChannelNumbers.size(); channelIndex++)
+        if (standardChannelNumbers[channelIndex] == standardChannelNumber)
+            return channelIndex;
+    throw cRuntimeError("Band '%s' has no internal channel index for standards channel number %d", getName(), standardChannelNumber);
 }
 
 Ieee80211ArithmeticalBand::Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels) :
@@ -60,6 +108,9 @@ const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
     GHz(2.467),    // 12
     GHz(2.472),    // 13
     GHz(2.484),    // 14, this channel is intentionally further away from the previous than the others, see 802.11 specification
+},
+{
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 });
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), 200);

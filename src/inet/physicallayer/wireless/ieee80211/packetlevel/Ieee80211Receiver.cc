@@ -50,13 +50,13 @@ std::ostream& Ieee80211Receiver::printToStream(std::ostream& stream, int level, 
 bool Ieee80211Receiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(transmission);
-    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+    return ieee80211Transmission && modeSet->supportsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
 bool Ieee80211Receiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(reception->getTransmission());
-    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
+    return ieee80211Transmission && modeSet->supportsMode(ieee80211Transmission->getMode()) && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
 }
 
 const IReceptionResult *Ieee80211Receiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
@@ -88,6 +88,7 @@ void Ieee80211Receiver::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
+        this->band = channel->getBand();
         setCenterFrequency(channel->getCenterFrequency());
     }
 }
@@ -96,6 +97,14 @@ void Ieee80211Receiver::setChannelNumber(int channelNumber)
 {
     if (channel == nullptr || channelNumber != channel->getChannelNumber())
         setChannel(new Ieee80211Channel(band, channelNumber));
+}
+
+bool Ieee80211Receiver::isHtChannelWidthSupported(Hz channelWidth) const
+{
+    // The receiver listens around the primary-channel center and cannot yet
+    // represent simultaneous primary-only and primary/secondary reception.
+    return channelWidth == MHz(20) && channelWidth <= getBandwidth() && modeSet != nullptr &&
+            modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
 }
 
 } // namespace physicallayer
