@@ -38,6 +38,7 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase, public IIeee80211HtC
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
+    const Ieee80211ModeSet *getModeSet() const { return modeSet; }
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);

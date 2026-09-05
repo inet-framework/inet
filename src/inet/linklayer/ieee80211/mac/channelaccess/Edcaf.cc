@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 
+#include <tuple>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -189,12 +191,25 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 void Edcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        calculateTimingParameters();
-    }
+    if (signalID == modesetChangedSignal && obj != modeSet)
+        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
 }
+
+void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
+}
+
+std::function<void()> Edcaf::saveModeSetState()
+{
+    Enter_Method_Silent();
+    return [this, state = std::make_tuple(modeSet, slotTime, sifs, ifs, eifs, cw, cwMin, cwMax)]() mutable {
+        std::tie(modeSet, slotTime, sifs, ifs, eifs, cw, cwMin, cwMax) = std::move(state);
+    };
+}
+
 
 } // namespace ieee80211
 } // namespace inet

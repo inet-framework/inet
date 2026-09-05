@@ -42,6 +42,8 @@ class INET_API Ieee80211Transmitter : public FlatTransmitterBase, public IIeee80
 
     // Re-selects the current mode only when bitrate, bandwidth, NSS, and GI
     // remain compatible. Use setModeSetAndMode for an explicit transition.
+    const Ieee80211ModeSet *getModeSet() const { return modeSet; }
+    const IIeee80211Mode *getMode() const { return mode; }
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     // Applies a mode set and an explicitly selected mode as one validated update.
     virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);

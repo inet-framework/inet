@@ -1,0 +1,287 @@
+%description:
+Exercise both radio mode-set setters with DCF and HCF selectors. Successful
+HT/legacy transitions refresh PHY-limited capabilities and actual Beacon bodies.
+Fixed-rate and observer failures restore all subscribed catalogs, caches, peer
+negotiations, and channel-access windows. No signal replay is used for rollback.
+
+%file: Ieee80211ModeSetTransition.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Dcaf.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class TransitionMgmtAp : public Ieee80211MgmtAp
+{
+    bool probing = false;
+  public:
+    void checkAdvertisement()
+    {
+        Enter_Method_Silent();
+        probing = true;
+        sendBeacon();
+        probing = false;
+    }
+  protected:
+    virtual void sendDown(Packet *packet) override
+    {
+        if (!probing) {
+            Ieee80211MgmtAp::sendDown(packet);
+            return;
+        }
+        const auto& body = packet->peekAtFront<Ieee80211BeaconFrame>();
+        ASSERT(body->getHtCapabilitiesPresent() == modeSet->isHtOperationSupported());
+        ASSERT(body->getHtOperationPresent() == modeSet->isHtOperationSupported());
+        const auto& rates = body->getSupportedRates();
+        const auto& extended = body->getExtendedSupportedRates();
+        const auto& modes = modeSet->getLegacyOperationalModes();
+        ASSERT(rates.numRates + extended.numRates == (int)modes.size());
+        for (int i = 0; i < (int)modes.size(); i++) {
+            double rate = i < rates.numRates ? rates.rate[i] : extended.rate[i - rates.numRates];
+            bool basic = i < rates.numRates ? rates.basicRate[i] : extended.basicRate[i - rates.numRates];
+            ASSERT(rate == modes[i]->getDataMode()->getNetBitrate().get<Mbps>());
+            ASSERT(basic == modeSet->getIsMandatory(modes[i]));
+        }
+        if (modeSet->isHtOperationSupported()) {
+            for (int i = 0; i < 77; i++)
+                ASSERT(body->getHtCapabilities().rxMcsSupported[i] == (i < 8));
+            ASSERT(!body->getHtCapabilities().supportedChannelWidth40Mhz);
+            ASSERT(!body->getHtCapabilities().shortGi40);
+        }
+        delete packet;
+    }
+};
+Define_Module(TransitionMgmtAp);
+
+class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
+{
+    bool rejectNotification = false;
+    int notifications = 0;
+    MacAddress peer = MacAddress("02:00:00:00:01:ff");
+
+    std::vector<IIeee80211ModeSetListener *> participants(cModule *radio)
+    {
+        std::vector<IIeee80211ModeSetListener *> result;
+        for (cComponent *component = radio; component; component = component->getParentModule())
+            for (auto listener : component->getLocalSignalListeners(modesetChangedSignal))
+                if (auto participant = dynamic_cast<IIeee80211ModeSetListener *>(listener))
+                    result.push_back(participant);
+        return result;
+    }
+
+    void check(cModule *nic, const Ieee80211ModeSet *expected, bool peerExpected)
+    {
+        auto radio = check_and_cast<Ieee80211Radio *>(nic->getSubmodule("radio"));
+        ASSERT(check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter())->getModeSet() == expected);
+        ASSERT(check_and_cast<const Ieee80211Receiver *>(radio->getReceiver())->getModeSet() == expected);
+        for (auto participant : participants(radio))
+            ASSERT(participant->getModeSet() == expected);
+        auto mib = check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"));
+        ASSERT(mib->isHtOperationSupported() == expected->isHtOperationSupported());
+        ASSERT(mib->requirePrimaryChannel() == 6);
+        ASSERT((mib->findPeerHtState(peer) != nullptr) == peerExpected);
+        for (int i = 0; i < 77; i++) {
+            ASSERT(mib->localHtCapabilities.rxMcsSupported[i] == (expected->isHtOperationSupported() && i < 8));
+            ASSERT(mib->getHtOperation().basicMcsSupported[i] == (expected->isHtOperationSupported() && i < 8));
+        }
+        if (peerExpected) {
+            auto state = mib->findPeerHtState(peer);
+            ASSERT(state->negotiatedCapabilities.localTxPeerRx.valid);
+            for (int i = 8; i < 77; i++)
+                ASSERT(!state->negotiatedCapabilities.localTxPeerRx.supportedMcs[i]);
+        }
+        check_and_cast<TransitionMgmtAp *>(nic->getSubmodule("mgmt"))->checkAdvertisement();
+        auto data = makeShared<Ieee80211DataHeader>();
+        auto beacon = makeShared<Ieee80211MgmtHeader>();
+        beacon->setType(ST_BEACON);
+        for (auto address : {MacAddress::BROADCAST_ADDRESS, MacAddress("01:00:5e:00:00:01"), peer}) {
+            data->setReceiverAddress(address);
+            beacon->setReceiverAddress(address);
+            Packet packet("selection probe");
+            auto mac = nic->getSubmodule("mac");
+            auto dcf = check_and_cast<RateSelection *>(mac->getSubmodule("dcf")->getSubmodule("rateSelection"));
+            auto qos = check_and_cast<QosRateSelection *>(mac->getSubmodule("hcf")->getSubmodule("rateSelection"));
+            for (const auto& header : {Ptr<const Ieee80211MacHeader>(data), Ptr<const Ieee80211MacHeader>(beacon)}) {
+                auto nonQosMode = dcf->computeMode(&packet, header);
+                auto qosMode = qos->computeMode(&packet, header, nullptr);
+                ASSERT(expected->containsMode(nonQosMode));
+                ASSERT(expected->containsMode(qosMode));
+                if (address.isMulticast()) {
+                    ASSERT(nonQosMode->getHtMcsIndex() < 0);
+                    ASSERT(qosMode->getHtMcsIndex() < 0);
+                    ASSERT(expected->getIsMandatory(nonQosMode));
+                    ASSERT(expected->getIsMandatory(qosMode));
+                }
+            }
+        }
+    }
+
+  protected:
+    virtual void initialize() override { scheduleAt(SimTime(1, SIMTIME_US), new cMessage("switch")); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        notifications++;
+        auto radio = check_and_cast<Ieee80211Radio *>(source);
+        auto target = check_and_cast<Ieee80211ModeSet *>(value);
+        // Publication must follow *all* internal updates, irrespective of where
+        // this observer appears in the subscriber list.
+        auto nic = radio->getParentModule();
+        for (auto participant : participants(radio))
+            ASSERT(participant->getModeSet() == target);
+        ASSERT(check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"))->isHtOperationSupported() == target->isHtOperationSupported());
+        check_and_cast<TransitionMgmtAp *>(nic->getSubmodule("mgmt"))->checkAdvertisement();
+        if (rejectNotification)
+            throw cRuntimeError("test observer rejects mode set");
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        for (int index : {1, 2, 0}) {
+            auto nic = getParentModule()->getSubmodule("ap", index)->getSubmodule("wlan", 0);
+            auto radio = check_and_cast<Ieee80211Radio *>(nic->getSubmodule("radio"));
+            auto mib = check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"));
+            auto ht = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+            auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
+            radio->setMode(ht->getMode(Mbps(24)));
+            radio->subscribe(modesetChangedSignal, this);
+            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+            check(nic, ht, true);
+            auto oldGeneration = mib->findPeerHtState(peer)->generation;
+            auto tx = check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+            auto oldMode = tx->getMode();
+            auto dcf = nic->getSubmodule("mac")->getSubmodule("dcf");
+            auto hcf = nic->getSubmodule("mac")->getSubmodule("hcf");
+            auto channelAccess = check_and_cast<Dcaf *>(dcf->getSubmodule("channelAccess"));
+            auto edcaf = check_and_cast<Edcaf *>(hcf->getSubmodule("edca")->getSubmodule("edcaf", 0));
+            channelAccess->incrementCw();
+            edcaf->incrementCw();
+            int oldCw = channelAccess->getCw();
+            int oldQosCw = edcaf->getCw();
+            // Populate both adaptive histories before any failed transition.
+            auto arf = check_and_cast<IRateControl *>(dcf->getSubmodule("rateControl"));
+            auto onoe = check_and_cast<IRateControl *>(hcf->getSubmodule("rateControl"));
+            auto oldArf = arf->getRate(peer);
+            auto oldOnoe = onoe->getRate(peer);
+            if (index != 0) {
+                for (bool explicitMode : {false, true}) {
+                    bool rejected = false;
+                    try {
+                        if (explicitMode)
+                            radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+                        else
+                            radio->setModeSet(legacy);
+                    }
+                    catch (const cRuntimeError&) { rejected = true; }
+                    ASSERT(rejected);
+                    ASSERT(notifications == 0);
+                    check(nic, ht, true);
+                    ASSERT(tx->getMode() == oldMode);
+                    ASSERT(mib->findPeerHtState(peer)->generation == oldGeneration);
+                    ASSERT(channelAccess->getCw() == oldCw);
+                    ASSERT(edcaf->getCw() == oldQosCw);
+                    ASSERT(arf->getRate(peer) == oldArf);
+                    ASSERT(onoe->getRate(peer) == oldOnoe);
+                }
+                radio->unsubscribe(modesetChangedSignal, this);
+                continue;
+            }
+            // Reject after all internal updates have succeeded, to cover arbitrary
+            // notification-prefix failure in addition to fixed-rate lookup failure.
+            rejectNotification = true;
+            bool rejected = false;
+            try { radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24))); }
+            catch (const cRuntimeError&) { rejected = true; }
+            ASSERT(rejected);
+            ASSERT(notifications == 1);
+            check(nic, ht, true);
+            ASSERT(mib->findPeerHtState(peer)->generation == oldGeneration);
+            ASSERT(channelAccess->getCw() == oldCw);
+            ASSERT(edcaf->getCw() == oldQosCw);
+            rejectNotification = false;
+            radio->setModeSet(legacy);
+            check(nic, legacy, false);
+            radio->setModeSetAndMode(ht, ht->getMode(Mbps(65), MHz(20), 1, 800e-9));
+            check(nic, ht, false);
+            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+            check(nic, ht, true);
+            ASSERT(notifications == 3);
+            radio->unsubscribe(modesetChangedSignal, this);
+        }
+        std::cout << "Mode-set switching, advertisements, peer state, both selectors, and rollback verified.\n";
+        endSimulation();
+    }
+};
+Define_Module(Ieee80211ModeSetTransitionTest);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.wireless.AccessPoint;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TransitionMgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::TransitionMgmtAp);
+}
+
+simple Ieee80211ModeSetTransitionTest extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211ModeSetTransitionTest);
+}
+
+network TransitionNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap[3]: AccessPoint;
+        test: Ieee80211ModeSetTransitionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TransitionNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 6
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].mac.qosStation = true
+*.ap[*].wlan[0].mgmt.typename = "TransitionMgmtAp"
+*.ap[*].wlan[0].mgmt.ssid = "transition"
+*.ap[*].wlan[0].mgmt.beaconInterval = 1s
+*.ap[*].wlan[0].mac.dcf.rateControl.typename = "AarfRateControl"
+*.ap[*].wlan[0].mac.hcf.rateControl.typename = "OnoeRateControl"
+
+*.ap[1].wlan[0].mac.dcf.rateSelection.dataFrameBitrate = 65Mbps
+*.ap[1].wlan[0].mac.dcf.rateSelection.dataFrameBandwidth = 20MHz
+*.ap[1].wlan[0].mac.dcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.ap[1].wlan[0].mac.dcf.rateSelection.dataFrameGuardInterval = 800ns
+*.ap[2].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+*.ap[2].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+*.ap[2].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.ap[2].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = 800ns
+
+%contains: stdout
+Mode-set switching, advertisements, peer state, both selectors, and rollback verified.

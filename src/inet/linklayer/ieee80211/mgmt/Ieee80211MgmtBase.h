@@ -19,6 +19,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 
@@ -28,8 +29,13 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual std::function<void()> saveModeSetState() override;
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     // configuration
     ModuleRefByPar<Ieee80211Mib> mib;

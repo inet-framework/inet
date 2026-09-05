@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
+#include <tuple>
+
 #include <algorithm>
 
 #include "inet/common/INETUtils.h"
@@ -69,20 +71,7 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
-                modeSet->getMaximumNumberOfSpatialStreams());
-        std::set<Hz> operationalChannelWidths;
-        if (modeSet->isHtOperationSupported()) {
-            const auto *transmitterWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getTransmitter());
-            const auto *receiverWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getReceiver());
-            if (transmitterWidthProvider == nullptr || receiverWidthProvider == nullptr)
-                throw cRuntimeError("HT operation requires transmitter and receiver PHY channel-width providers");
-            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
-                if (transmitterWidthProvider->isHtChannelWidthSupported(channelWidth) &&
-                        receiverWidthProvider->isHtChannelWidthSupported(channelWidth))
-                    operationalChannelWidths.insert(channelWidth);
-        }
-        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
+        updateLocalHtCapabilities();
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();
@@ -93,6 +82,24 @@ void Ieee80211Mac::initialize(int stage)
         if (mib->qos && !hcf)
             throw cRuntimeError("Missing hcf module, required for QoS");
     }
+}
+
+void Ieee80211Mac::updateLocalHtCapabilities()
+{
+    int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
+            modeSet->getMaximumNumberOfSpatialStreams());
+    std::set<Hz> operationalChannelWidths;
+    if (modeSet->isHtOperationSupported()) {
+        const auto *transmitterWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getTransmitter());
+        const auto *receiverWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getReceiver());
+        if (transmitterWidthProvider == nullptr || receiverWidthProvider == nullptr)
+            throw cRuntimeError("HT operation requires transmitter and receiver PHY channel-width providers");
+        for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+            if (transmitterWidthProvider->isHtChannelWidthSupported(channelWidth) &&
+                    receiverWidthProvider->isHtChannelWidthSupported(channelWidth))
+                operationalChannelWidths.insert(channelWidth);
+    }
+    mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
 }
 
 void Ieee80211Mac::initializeRadioMode()
@@ -347,9 +354,25 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == modesetChangedSignal && obj != modeSet)
+        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+}
 
-    if (signalID == modesetChangedSignal)
-        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
+void Ieee80211Mac::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    updateLocalHtCapabilities();
+}
+
+std::function<void()> Ieee80211Mac::saveModeSetState()
+{
+    Enter_Method_Silent();
+    auto restoreMib = mib->saveHtState();
+    return [this, state = std::make_tuple(modeSet), restoreMib]() mutable {
+        std::tie(modeSet) = std::move(state);
+        restoreMib();
+    };
 }
 
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
