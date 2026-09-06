@@ -314,7 +314,15 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
-            frameSequenceHandler->processResponse(packet);
+            if (frameSequenceHandler->processResponse(packet))
+                cancelEvent(startRxTimer);
+            else {
+                EV_INFO << "Ignoring a response that does not match the active frame sequence step." << std::endl;
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -323,7 +331,6 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
-        cancelEvent(startRxTimer);
     }
     else if (isForUs(header))
         recipientProcessReceivedFrame(packet, header);
