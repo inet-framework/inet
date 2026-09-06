@@ -93,6 +93,7 @@ class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
     virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
     virtual bool aMsduSupported() const override { return aMsduSupportedValue; }
     virtual bool delayedBlockAckPolicySupported() const override { return delayedBlockAckPolicySupportedValue; }
+    virtual bool isPeerCompressedBlockAckSupported(const MacAddress&) const override { return false; }
     virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 

@@ -249,19 +249,19 @@ IRecipientQosMacDataService::ManagementFrameReceptionResult RecipientQosMacDataS
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     Enter_Method("controlFrameReceived");
+    auto blockAckReqDetails = getOneTidBlockAckReqDetails(controlHeader);
+    RecipientBlockAckAgreement *agreement = nullptr;
+    if (blockAckReqDetails) {
+        auto originatorAddr = blockAckReqDetails->blockAckReq->getTransmitterAddress();
+        agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(blockAckReqDetails->tid, originatorAddr);
+        if (!isAcceptedOneTidBlockAckReq(blockAckReqDetails->blockAckReq, agreement))
+            return {};
+    }
     expireReceiveLifetime();
-    if (auto blockAckReqDetails = getOneTidBlockAckReqDetails(controlHeader)) {
+    if (blockAckReqDetails) {
         BlockAckReordering::ReorderBuffer frames;
-        if (blockAckReordering) {
-            MacAddress originatorAddr = blockAckReqDetails->blockAckReq->getTransmitterAddress();
-            RecipientBlockAckAgreement *agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(blockAckReqDetails->tid, originatorAddr);
-            if (agreement)
-                frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReqDetails->blockAckReq);
-            else {
-                scheduleReceiveLifetimeTimer();
-                return std::vector<Packet *>();
-            }
-        }
+        if (blockAckReordering)
+            frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReqDetails->blockAckReq);
         std::vector<Packet *> defragmentedFrames;
         if (basicReassembly) { // FIXME defragmentation
             for (auto it : frames) {

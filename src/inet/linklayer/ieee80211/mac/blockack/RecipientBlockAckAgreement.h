@@ -21,6 +21,7 @@ class INET_API RecipientBlockAckAgreement : public cObject
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
     bool isAddbaResponseSent = false;
+    bool isCompressedBlockAckSupported = false;
     bool isDelayedBlockAckPolicySupported = false;
     simtime_t expirationTime = -1;
     // The agreement stays installed until the timeout DELBA is transmitted;
@@ -44,6 +45,8 @@ class INET_API RecipientBlockAckAgreement : public cObject
         if (!inactivityExpired)
             expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue;
     }
+    virtual bool getIsCompressedBlockAckSupported() const { return isCompressedBlockAckSupported; }
+    virtual void setIsCompressedBlockAckSupported(bool supported) { isCompressedBlockAckSupported = supported; }
     virtual bool getIsAddbaResponseSent() const { return isAddbaResponseSent; }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
 

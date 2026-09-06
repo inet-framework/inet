@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -227,7 +229,8 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (receiverAddress == blockAckReq->getReceiverAddress() && compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO ASSERT(seqCtrlField.second == 0)?
+                // IEEE Std 802.11-2024, 10.25.6.1: the non-HE bitmap covers 64 sequence numbers.
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && BlockAckWindow::isWithin(startingSeqNum, 64, SequenceNumberCyclic(seqCtrlField.getSequenceNumber())) && seqCtrlField.getFragmentNumber() == 0)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }

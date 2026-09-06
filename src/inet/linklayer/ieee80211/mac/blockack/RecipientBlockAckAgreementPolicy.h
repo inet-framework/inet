@@ -8,17 +8,19 @@
 #ifndef __INET_RECIPIENTBLOCKACKAGREEMENTPOLICY_H
 #define __INET_RECIPIENTBLOCKACKAGREEMENTPOLICY_H
 
-#include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RecipientBlockAckAgreementPolicy : public SimpleModule, public IRecipientBlockAckAgreementPolicy
+class INET_API RecipientBlockAckAgreementPolicy : public ModeSetListener, public IRecipientBlockAckAgreementPolicy
 {
   protected:
     int maximumAllowedBufferSize = -1;
+    bool localCompressedBlockAckSupported = false;
+    std::set<MacAddress> compressedBlockAckPeerAddresses;
     bool isAMsduSupported = false;
     bool isDelayedBlockAckPolicySupported = false;
     simtime_t blockAckTimeoutValue = -1;
@@ -34,6 +36,7 @@ class INET_API RecipientBlockAckAgreementPolicy : public SimpleModule, public IR
     virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
     virtual bool aMsduSupported() const override { return isAMsduSupported; }
     virtual bool delayedBlockAckPolicySupported() const override { return isDelayedBlockAckPolicySupported; }
+    virtual bool isPeerCompressedBlockAckSupported(const MacAddress& peerAddress) const override;
     virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 

@@ -10,6 +10,7 @@
 #include <optional>
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -38,6 +39,21 @@ inline std::optional<OneTidBlockAckReqDetails> getOneTidBlockAckReqDetails(const
             static_cast<Tid>(compressedBlockAckReq->getTidInfo()), compressedBlockAckReq->getStartingSequenceNumber() };
     else
         return std::nullopt;
+}
+
+// Validate before either receive-window mutation or response generation.
+// IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6: compressed BARs have
+// fragment number zero and require an established HT-immediate agreement.
+inline bool isAcceptedOneTidBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& request, const RecipientBlockAckAgreement *agreement)
+{
+    if (agreement == nullptr)
+        return false;
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(request))
+        return !agreement->isInactivityExpired();
+    if (auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(request))
+        return compressed->getFragmentNumber() == 0 && agreement->getIsCompressedBlockAckSupported() &&
+               agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported();
+    return false;
 }
 
 // IEEE Std 802.11-2024, 9.3.1.7, 9.3.1.8, and 10.25.5: correlate the BAR RA

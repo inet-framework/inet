@@ -206,6 +206,7 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
         }
         else
             blockAckAgreements[id] = agreement;
+        agreement->setIsCompressedBlockAckSupported(blockAckAgreementPolicy->isPeerCompressedBlockAckSupported(addbaRequest->getTransmitterAddress()));
         agreement->addbaResposneSent();
         agreement->setIsDelayedBlockAckPolicySupported(addbaResponse->getBlockAckPolicy() == 0);
         scheduleInactivityTimer(agreementHandlerCallback);

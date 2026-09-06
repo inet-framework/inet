@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
@@ -63,7 +64,7 @@ bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        return agreement != nullptr && !agreement->isInactivityExpired();
+        return isAcceptedOneTidBlockAckReq(blockAckReq, agreement);
         // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }
@@ -77,9 +78,7 @@ bool RecipientQosAckPolicy::isCompressedBlockAckNeeded(const Ptr<const Ieee80211
 {
     // IEEE Std 802.11-2024, 10.25.6.4 and 10.25.6.5: a null response
     // requires an established HT-immediate agreement whose partial state is absent.
-    if (blockAckReq->getFragmentNumber() != 0)
-        return false;
-    return agreement != nullptr && agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported();
+    return isAcceptedOneTidBlockAckReq(blockAckReq, agreement);
 }
 
 //
