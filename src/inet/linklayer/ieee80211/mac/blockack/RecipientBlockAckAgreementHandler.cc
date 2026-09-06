@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
@@ -61,7 +62,7 @@ void RecipientBlockAckAgreementHandler::blockAckReqReceived(const Ptr<const Ieee
     else
         throw cRuntimeError("Unsupported BlockAckReq");
     auto agreement = getActiveAgreement(tid, blockAckReq->getTransmitterAddress());
-    if (agreement != nullptr) {
+    if (isAcceptedOneTidBlockAckReq(blockAckReq, agreement)) {
         agreement->calculateExpirationTime();
         scheduleInactivityTimer(callback);
     }
