@@ -45,7 +45,7 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
     virtual bool isMsduSupported() const override { return aMsduSupported; }
     virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
     virtual bool isDelayedAckPolicySupported() const override { return delayedAckPolicySupported; }
-    virtual bool isPeerCompressedBlockAckSupported(const MacAddress& peerAddress) const override { return localCompressedBlockAckSupported && compressedBlockAckPeerAddresses.find(peerAddress) != compressedBlockAckPeerAddresses.end(); }
+    virtual bool isPeerCompressedBlockAckSupported(const MacAddress& peerAddress) const override { return modeSet != nullptr && modeSet->isHtOperationSupported() && localCompressedBlockAckSupported && compressedBlockAckPeerAddresses.find(peerAddress) != compressedBlockAckPeerAddresses.end(); }
     virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 

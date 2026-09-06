@@ -73,6 +73,7 @@ class TestOriginatorBlockAckAgreementPolicy : public OriginatorBlockAckAgreement
   public:
     void configureCompressedBlockAckCapability(bool localSupport, std::initializer_list<MacAddress> peerAddresses)
     {
+        applyModeSet(physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"));
         localCompressedBlockAckSupported = localSupport;
         compressedBlockAckPeerAddresses = std::set<MacAddress>(peerAddresses);
     }
@@ -720,6 +721,17 @@ EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediat
     ASSERT(!handler.getAgreement(listedPeer, 5)->getIsCompressedBlockAckSupported());
     ASSERT(!handler.getAgreement(unlistedPeer, 5)->getIsCompressedBlockAckSupported());
     ASSERT(handler.getAgreement(positivePeer, 5)->getIsCompressedBlockAckSupported());
+
+    // Configuration alone must not activate compressed BA in a legacy mode
+    // or before the active mode set has been supplied.
+    for (const char *mode : std::initializer_list<const char *> {nullptr, "a", "b", "g(mixed)", "n(mixed-2.4Ghz)"}) {
+        localEnabledPolicy.applyModeSet(mode == nullptr ? nullptr : physicallayer::Ieee80211ModeSet::getModeSet(mode));
+        bool expected = mode != nullptr && localEnabledPolicy.getModeSet()->isHtOperationSupported();
+        ASSERT(localEnabledPolicy.isPeerCompressedBlockAckSupported(listedPeer) == expected);
+        TestOriginatorBlockAckAgreementHandler modeHandler;
+        modeHandler.createAgreement(makeAddbaRequest(listedPeer), 1, &localEnabledPolicy);
+        ASSERT(modeHandler.getAgreement(listedPeer, 5)->getIsCompressedBlockAckSupported() == expected);
+    }
 
     auto response = makeShared<Ieee80211AddbaResponse>();
     response->setTransmitterAddress(listedPeer);
