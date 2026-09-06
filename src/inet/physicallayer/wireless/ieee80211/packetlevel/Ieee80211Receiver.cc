@@ -156,7 +156,7 @@ bool Ieee80211Receiver::computeHtCcaBusy(const IListening *listening, const IInt
         const auto *transmission = dynamic_cast<const Ieee80211Transmission *>(reception->getTransmission());
         const auto *signal = dynamic_cast<const INarrowbandSignalAnalogModel *>(reception->getAnalogModel());
         if (transmission == nullptr || transmission->getMode() == nullptr || signal == nullptr ||
-                !modeSet->containsMode(transmission->getMode()) || !isBandOverlapping(bandListening, signal))
+                !modeSet->supportsMode(transmission->getMode()) || !isBandOverlapping(bandListening, signal))
             continue;
 
         const W signalPower = signal->computeMinPower(reception->getStartTime(), reception->getEndTime());

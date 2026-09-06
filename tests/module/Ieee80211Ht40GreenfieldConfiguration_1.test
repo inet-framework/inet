@@ -1,8 +1,14 @@
 %description:
-Verify HT40 configuration and bandwidth-only HT20 transition through the radio command path and AP beacon generation.
+Verify a Greenfield HT40 receiver senses supported mixed-format transmissions below energy detection on both subchannels, including the sensitivity boundary, and preserves HT20 reconfiguration and beacon behavior.
 
 %file: Test.cc
 #include <vector>
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
@@ -56,6 +62,7 @@ class CcaCheckingReceiver : public physicallayer::Ieee80211Receiver
 {
   public:
     using Ieee80211Receiver::isHtCcaOperation;
+    using Ieee80211Receiver::computeListeningDecision;
 };
 Define_Module(CcaCheckingReceiver);
 
@@ -64,6 +71,31 @@ class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
   public:
     bool checking = false;
     int notifications = 0;
+    void checkMixedCca()
+    {
+        Enter_Method("checkMixedCca");
+        using namespace physicallayer;
+        auto rx = check_and_cast<const CcaCheckingReceiver *>(getReceiver());
+        auto mixedMode = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getMode(bps(Mbps(135)), Hz(MHz(40)));
+        ASSERT(!rx->getModeSet()->containsMode(mixedMode));
+        ASSERT(rx->getModeSet()->supportsMode(mixedMode));
+        Ieee80211Transmission transmission(this, nullptr, 0, 1, 0, 0, 1,
+                Coord::ZERO, Coord::ZERO, Quaternion::IDENTITY, Quaternion::IDENTITY,
+                nullptr, nullptr, nullptr, nullptr, nullptr, mixedMode, getChannel());
+        for (double dbm : {-80.0, -79.0, -75.0}) {
+            auto analog = new ScalarReceptionAnalogModel(0, 0, 1, getChannel()->getBondedCenterFrequency(),
+                    MHz(40), mW(math::dBmW2mW(dbm)));
+            Reception reception(this, &transmission, 0, 1, Coord::ZERO, Coord::ZERO,
+                    Quaternion::IDENTITY, Quaternion::IDENTITY, analog);
+            Interference interference(nullptr, new std::vector<const IReception *>{&reception});
+            for (auto frequency : {getChannel()->getCenterFrequency(), getChannel()->getSecondaryCenterFrequency()}) {
+                BandListening listening(this, 0, 1, Coord::ZERO, Coord::ZERO, frequency, MHz(20));
+                auto decision = rx->computeListeningDecision(&listening, &interference);
+                ASSERT(decision->isListeningPossible() == (dbm >= -79.0));
+                delete decision;
+            }
+        }
+    }
     void narrow()
     {
         Enter_Method("narrow");
@@ -110,6 +142,7 @@ class ChannelWidthTest : public cSimpleModule
         ASSERT(rx->getBandwidth() == MHz(40));
         ASSERT(rx->getCenterFrequency() == radio->getChannel()->getBondedCenterFrequency());
         radio->checkCca();
+        radio->checkMixedCca();
         mgmt->emitBeaconNow();
         ASSERT(mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
         radio->narrow();
