@@ -132,20 +132,21 @@ void Ieee80211Radio::initialize(int stage)
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
+        ConfigureRadioCommand *configureCommand = dynamic_cast<ConfigureRadioCommand *>(message->getControlInfo());
+        auto ieee80211Command = dynamic_cast<Ieee80211ConfigureRadioCommand *>(configureCommand);
         if (configureCommand != nullptr) {
             Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
             const Ieee80211Channel *currentChannel = ieee80211Receiver->getChannel();
-            const char *requestedOpMode = configureCommand->getOpMode();
+            const char *requestedOpMode = ieee80211Command != nullptr ? ieee80211Command->getOpMode() : "";
             std::string targetOpMode = *requestedOpMode ? requestedOpMode : this->opMode;
-            const Ieee80211Channel *channel = configureCommand->getChannel();
-            const IIeee80211Band *bandParam = configureCommand->getBand();
+            const Ieee80211Channel *channel = ieee80211Command != nullptr ? ieee80211Command->getChannel() : nullptr;
+            const IIeee80211Band *bandParam = ieee80211Command != nullptr ? ieee80211Command->getBand() : nullptr;
             const IIeee80211Band *targetBand = bandParam != nullptr ? bandParam :
                     (channel != nullptr && channel->getBand() != nullptr) ? channel->getBand() : this->band;
-            const Ieee80211ModeSet *modeSetParam = configureCommand->getModeSet();
+            const Ieee80211ModeSet *modeSetParam = ieee80211Command != nullptr ? ieee80211Command->getModeSet() : nullptr;
             const Ieee80211ModeSet *targetModeSet = modeSetParam != nullptr ? modeSetParam :
                     *requestedOpMode ? Ieee80211ModeSet::getModeSet(requestedOpMode) : this->modeSet;
-            int newChannelNumber = configureCommand->getChannelNumber();
+            int newChannelNumber = ieee80211Command != nullptr ? ieee80211Command->getChannelNumber() : -1;
             int targetChannelNumber = channel != nullptr ? channel->getChannelNumber() :
                     newChannelNumber != -1 ? newChannelNumber :
                     currentChannel != nullptr ? currentChannel->getChannelNumber() : -1;
@@ -153,13 +154,19 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
                     htSecondaryChannelOffset;
             if (targetChannelNumber != -1 && (targetBand == nullptr || targetChannelNumber < 0 || targetChannelNumber >= targetBand->getNumChannels()))
                 throw cRuntimeError("Invalid target 802.11 channel number %d", targetChannelNumber);
-            if (targetChannelNumber != -1)
-                (void)Ieee80211Channel(targetBand, targetChannelNumber, targetSecondaryChannelOffset).getCenterFrequency();
 
             Hz newBandwidth = configureCommand->getBandwidth();
             Hz targetBandwidth = std::isnan(newBandwidth.get()) ? ieee80211Receiver->getBandwidth() : newBandwidth;
+            if (targetBandwidth == MHz(20))
+                targetSecondaryChannelOffset = IEEE80211_SECONDARY_CHANNEL_NONE;
+            if (targetChannelNumber != -1) {
+                Ieee80211Channel targetChannel(targetBand, targetChannelNumber, targetSecondaryChannelOffset);
+                (void)targetChannel.getCenterFrequency();
+                if (targetSecondaryChannelOffset != IEEE80211_SECONDARY_CHANNEL_NONE)
+                    (void)targetChannel.getBondedCenterFrequency();
+            }
             bps newBitrate = configureCommand->getBitrate();
-            const IIeee80211Mode *mode = configureCommand->getMode();
+            const IIeee80211Mode *mode = ieee80211Command != nullptr ? ieee80211Command->getMode() : nullptr;
             const IIeee80211Mode *resolvedMode = mode;
             if (resolvedMode == nullptr && targetModeSet != nullptr && !std::isnan(newBitrate.get())) {
                 if (!std::isnan(newBandwidth.get()))
@@ -177,8 +184,11 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             bool publishModeSet = targetModeSet != this->modeSet || targetBand != this->band ||
                     *requestedOpMode;
 
+            // Commit width before setChannel publishes geometry to synchronous observers.
+            if (!std::isnan(newBandwidth.get()))
+                setBandwidth(targetBandwidth);
             if (targetChannelNumber != -1 &&
-                    (currentChannel == nullptr || targetBand != this->band || targetChannelNumber != currentChannel->getChannelNumber() ||
+                    (!std::isnan(newBandwidth.get()) || currentChannel == nullptr || targetBand != this->band || targetChannelNumber != currentChannel->getChannelNumber() ||
                      targetSecondaryChannelOffset != currentChannel->getSecondaryChannelOffset()))
                 setChannel(new Ieee80211Channel(targetBand, targetChannelNumber, targetSecondaryChannelOffset));
             else if (targetBand != this->band)

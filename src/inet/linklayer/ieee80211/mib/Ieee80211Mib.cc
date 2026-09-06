@@ -57,7 +57,7 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel)
     setPrimaryChannel(primaryChannel, nullptr);
 }
 
-void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band)
+void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band, bool ht40Supported)
 {
     if (primaryChannel < 0 || primaryChannel > 255)
         throw cRuntimeError("IEEE 802.11 primary channel must be in the range 0..255, not %d", primaryChannel);
@@ -71,7 +71,7 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::II
         }
 
         if (localHtCapabilitiesValid) {
-            if (configuredSecondaryChannelOffset != 0) {
+            if (configuredSecondaryChannelOffset != 0 && ht40Supported) {
                 if (band->isHt40OperationSupported(primaryChannel, configuredSecondaryChannelOffset)) {
                     htOperation.secondaryChannelOffset = configuredSecondaryChannelOffset;
                     htOperation.operatingChannelWidth = MHz(40);

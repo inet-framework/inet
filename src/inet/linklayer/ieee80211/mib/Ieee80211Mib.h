@@ -110,7 +110,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     int requirePrimaryChannel() const;
     int getConfiguredSecondaryChannelOffset() const { return configuredSecondaryChannelOffset; }
     void setPrimaryChannel(int primaryChannel);
-    void setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band);
+    void setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band, bool ht40Supported = true);
     const Ieee80211HtOperation& getHtOperation() const;
     const PeerHtState *findPeerHtState(const MacAddress& address) const;
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);
