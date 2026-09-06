@@ -203,6 +203,20 @@ void Ieee80211Receiver::setModeSet(const Ieee80211ModeSet *modeSet)
     this->modeSet = modeSet;
 }
 
+std::function<void()> Ieee80211Receiver::saveChannelState()
+{
+    auto savedChannel = std::make_shared<std::unique_ptr<const Ieee80211Channel>>();
+    if (channel != nullptr)
+        savedChannel->reset(new Ieee80211Channel(*channel));
+    return [this, savedChannel, oldBand = band, oldBandwidth = bandwidth, oldCenterFrequency = centerFrequency]() {
+        delete channel;
+        channel = savedChannel->release();
+        band = oldBand;
+        bandwidth = oldBandwidth;
+        centerFrequency = oldCenterFrequency;
+    };
+}
+
 void Ieee80211Receiver::setBand(const IIeee80211Band *band)
 {
     if (this->band != band) {
