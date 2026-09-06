@@ -76,6 +76,8 @@ class Callback : public IProcedureCallback
 class CompressedBlockAckValidation : public SimpleModule
 {
   protected:
+    RecipientBlockAckAgreementHandler lifetimeHandler;
+    RecipientBlockAckAgreement *lifetimeAgreement = nullptr;
     Ptr<Ieee80211DataHeader> dataHeader(int sequence, int fragment = 0, bool more = false) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
@@ -211,7 +213,61 @@ class CompressedBlockAckValidation : public SimpleModule
             delete frame;
     }
 
+    virtual void handleMessage(cMessage *message) override {
+        auto savedDeadline = lifetimeAgreement->getExpirationTime();
+        ASSERT(savedDeadline > simTime());
+        if (message->getKind() == 0) {
+            auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+            request->setTransmitterAddress(PEER);
+            request->setReceiverAddress(LOCAL);
+            request->setTidInfo(5);
+            request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            request->setFragmentNumber(1);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == savedDeadline);
+
+            request->setFragmentNumber(0);
+            lifetimeAgreement->setIsCompressedBlockAckSupported(false);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == savedDeadline);
+
+            lifetimeAgreement->setIsCompressedBlockAckSupported(true);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == simTime() + SimTime(1));
+            ASSERT(lifetimeAgreement->getExpirationTime() > savedDeadline);
+            message->setKind(1);
+            scheduleAt(simTime() + SimTime(1, SIMTIME_MS), message);
+        }
+        else {
+            auto request = makeShared<Ieee80211BasicBlockAckReq>();
+            request->setTransmitterAddress(PEER);
+            request->setReceiverAddress(LOCAL);
+            request->setTidInfo(5);
+            request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == simTime() + SimTime(1));
+            ASSERT(lifetimeAgreement->getExpirationTime() > savedDeadline);
+            delete message;
+            std::cout << "Rejected BARs preserve inactivity deadlines; valid BARs renew them.\n";
+        }
+    }
+
     virtual void initialize() override {
+        RecipientPolicy policy;
+        policy.configure(true, true, true);
+        Callback callback;
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(PEER);
+        request->setReceiverAddress(LOCAL);
+        request->setTid(5);
+        request->setDialogToken(1);
+        request->setBufferSize(64);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setBlockAckPolicy(true);
+        request->setBlockAckTimeoutValue(SimTime(1));
+        lifetimeAgreement = lifetimeHandler.processReceivedAddbaRequest(request, &policy, &callback, nullptr);
+        ASSERT(lifetimeAgreement->getExpirationTime() == SimTime(1));
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("checkBarLifetime"));
         checkRecipient(true, true, true, 1);
         checkRecipient(true, false, true, 0);
         checkRecipient(true, true, false, 0);
@@ -254,3 +310,6 @@ record-scalar-results = false
 
 %contains: stdout
 Compressed BAR validation preserves receive state and limits transmit state to 64 positions.
+
+%contains: stdout
+Rejected BARs preserve inactivity deadlines; valid BARs renew them.
