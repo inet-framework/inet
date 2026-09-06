@@ -157,6 +157,7 @@ static Packet *makeOutstandingQosFrame(MacAddress receiverAddress, Tid tid, Frag
     header->setType(ST_DATA_WITH_QOS);
     header->setReceiverAddress(receiverAddress);
     header->setTid(tid);
+    header->setSequenceNumber(SequenceNumberCyclic(100));
     header->setFragmentNumber(fragmentNumber);
     header->setMoreFragments(moreFragments);
     return new Packet("outstanding", header);
@@ -267,6 +268,7 @@ EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediat
     TestRecipientBlockAckProcedure procedure;
     RecipientBlockAckAgreement emptyAgreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
     emptyAgreement.addbaResposneSent();
+    emptyAgreement.setIsCompressedBlockAckSupported(true);
     auto request = makeCompressedBlockAckReq();
     request->setStartingSequenceNumber(SequenceNumberCyclic(100));
     ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &emptyAgreement));
@@ -682,6 +684,7 @@ EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediat
     RecipientBlockAckAgreement delayedAgreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
     ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement));
     delayedAgreement.addbaResposneSent();
+    delayedAgreement.setIsCompressedBlockAckSupported(true);
     delayedAgreement.setIsDelayedBlockAckPolicySupported(true);
     ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement));
     delayedAgreement.setIsDelayedBlockAckPolicySupported(false);

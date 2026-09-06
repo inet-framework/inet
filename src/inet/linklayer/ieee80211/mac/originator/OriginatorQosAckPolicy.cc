@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
+
 #include <tuple>
 
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
@@ -74,13 +76,23 @@ bool OriginatorQosAckPolicy::isCompressedBlockAckReqNeeded(const std::vector<Pac
     if (agreement == nullptr || !agreement->getIsCompressedBlockAckSupported() || !agreement->getIsAddbaResponseReceived() || agreement->getIsDelayedBlockAckPolicySupported())
         return false;
     bool hasMatchingOutstandingFrame = false;
+    SequenceNumberCyclic startingSequenceNumber;
     for (auto frame : outstandingFrames) {
         auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
         if (header == nullptr || header->getReceiverAddress() != agreement->getReceiverAddr() || header->getTid() != agreement->getTid())
             continue;
+        if (!hasMatchingOutstandingFrame || header->getSequenceNumber() < startingSequenceNumber)
+            startingSequenceNumber = header->getSequenceNumber();
         hasMatchingOutstandingFrame = true;
         if (header->getFragmentNumber() != 0 || header->getMoreFragments())
             return false;
+    }
+    for (auto frame : outstandingFrames) {
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
+        if (header != nullptr && header->getReceiverAddress() == agreement->getReceiverAddr() && header->getTid() == agreement->getTid()) {
+            if (!BlockAckWindow::isWithin(startingSequenceNumber, 64, header->getSequenceNumber()))
+                return false;
+        }
     }
     return hasMatchingOutstandingFrame;
 }
