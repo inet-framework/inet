@@ -131,6 +131,8 @@ void Ieee80211Radio::initialize(int stage)
 
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant radio configuration change");
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = dynamic_cast<ConfigureRadioCommand *>(message->getControlInfo());
         auto ieee80211Command = dynamic_cast<Ieee80211ConfigureRadioCommand *>(configureCommand);
@@ -184,24 +186,32 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             bool publishModeSet = targetModeSet != this->modeSet || targetBand != this->band ||
                     *requestedOpMode;
 
-            // Commit width before setChannel publishes geometry to synchronous observers.
-            if (!std::isnan(newBandwidth.get()))
-                setBandwidth(targetBandwidth);
-            if (targetChannelNumber != -1 &&
-                    (!std::isnan(newBandwidth.get()) || currentChannel == nullptr || targetBand != this->band || targetChannelNumber != currentChannel->getChannelNumber() ||
-                     targetSecondaryChannelOffset != currentChannel->getSecondaryChannelOffset()))
-                setChannel(new Ieee80211Channel(targetBand, targetChannelNumber, targetSecondaryChannelOffset));
-            else if (targetBand != this->band)
-                setBand(targetBand);
-            this->opMode = targetOpMode;
-            if (publishModeSet && targetModeSet != nullptr) {
-                if (resolvedMode != nullptr)
-                    setModeSetAndMode(targetModeSet, resolvedMode);
-                else
-                    setModeSet(targetModeSet);
-            }
-            else if (resolvedMode != nullptr)
-                setMode(resolvedMode);
+            bool changeChannel = targetChannelNumber != -1 &&
+                    (!std::isnan(newBandwidth.get()) || currentChannel == nullptr || targetBand != this->band ||
+                     targetChannelNumber != currentChannel->getChannelNumber() ||
+                     targetSecondaryChannelOffset != currentChannel->getSecondaryChannelOffset());
+            auto applyConfiguration = [&]() {
+                auto tx = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+                if (!std::isnan(newBandwidth.get()))
+                    setBandwidth(targetBandwidth);
+                if (changeChannel) {
+                    tx->setChannel(new Ieee80211Channel(targetBand, targetChannelNumber, targetSecondaryChannelOffset));
+                    ieee80211Receiver->setChannel(new Ieee80211Channel(targetBand, targetChannelNumber, targetSecondaryChannelOffset));
+                    htSecondaryChannelOffset = targetSecondaryChannelOffset;
+                }
+                else if (targetBand != this->band) {
+                    tx->setBand(targetBand);
+                    ieee80211Receiver->setBand(targetBand);
+                }
+                this->band = targetBand;
+                this->opMode = targetOpMode;
+                if (!std::isnan(configureCommand->getCenterFrequency().get()))
+                    setCenterFrequency(configureCommand->getCenterFrequency());
+            };
+            if (publishModeSet || resolvedMode != nullptr || changeChannel || !std::isnan(newBandwidth.get()) ||
+                    !std::isnan(configureCommand->getCenterFrequency().get()))
+                changeModeSet(targetModeSet, resolvedMode, resolvedMode != nullptr, applyConfiguration,
+                        publishModeSet, changeChannel ? targetChannelNumber : -1);
         }
     }
     FlatRadioBase::handleUpperCommand(message);
@@ -219,7 +229,8 @@ void Ieee80211Radio::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const II
     changeModeSet(modeSet, mode, true);
 }
 
-void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode)
+void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode,
+        const std::function<void()>& applyConfiguration, bool publishModeSet, int channelNumber)
 {
     if (changingModeSet)
         throw cRuntimeError("Reentrant radio mode-set change");
@@ -231,13 +242,18 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     const auto *oldReceiverModeSet = receiver->getModeSet();
     const auto *oldMode = transmitter->getMode();
     auto oldReceptionTimer = receptionTimer;
+    auto oldBand = band;
+    auto oldOpMode = opMode;
+    auto oldSecondaryChannelOffset = htSecondaryChannelOffset;
+    auto restoreTransmitterChannel = applyConfiguration ? transmitter->saveChannelState() : std::function<void()>();
+    auto restoreReceiverChannel = applyConfiguration ? receiver->saveChannelState() : std::function<void()>();
 
     // Discover the same subscribers that receive the hierarchical notification,
     // deduplicating participants subscribed at more than one level. Capture all
     // state first: a failing participant may have partially changed itself.
     std::vector<IIeee80211ModeSetListener *> participants;
     std::vector<std::function<void()>> restore;
-    for (cComponent *component = this; component != nullptr; component = component->getParentModule()) {
+    for (cComponent *component = publishModeSet ? this : nullptr; component != nullptr; component = component->getParentModule()) {
         for (auto listener : component->getLocalSignalListeners(modesetChangedSignal)) {
             auto participant = dynamic_cast<IIeee80211ModeSetListener *>(listener);
             if (participant != nullptr && std::find(participants.begin(), participants.end(), participant) == participants.end())
@@ -256,12 +272,21 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
         else
             transmitter->setModeSet(modeSet);
         receiver->setModeSet(modeSet);
+        if (applyConfiguration)
+            applyConfiguration();
         for (auto participant : participants)
             participant->applyModeSet(modeSet);
     }
     catch (...) {
         transmitter->setModeSetAndMode(oldTransmitterModeSet, oldMode);
         receiver->setModeSet(oldReceiverModeSet);
+        if (applyConfiguration) {
+            restoreTransmitterChannel();
+            restoreReceiverChannel();
+            band = oldBand;
+            opMode.swap(oldOpMode);
+            htSecondaryChannelOffset = oldSecondaryChannelOffset;
+        }
         for (auto it = restore.rbegin(); it != restore.rend(); ++it)
             (*it)();
         receptionTimer = oldReceptionTimer;
@@ -276,11 +301,19 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     std::exception_ptr observerFailure;
     if (getComponentType() != nullptr) {
         try {
-            if (modeSet != nullptr)
-                emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+            if (channelNumber != -1)
+                emit(radioChannelChangedSignal, channelNumber);
         }
         catch (...) {
             observerFailure = std::current_exception();
+        }
+        try {
+            if (publishModeSet && modeSet != nullptr)
+                emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+        }
+        catch (...) {
+            if (!observerFailure)
+                observerFailure = std::current_exception();
         }
         // Listening changes are independent committed facts: the medium must get
         // its publication attempt even when a mode-set observer throws.
@@ -300,6 +333,8 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
 
 void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 {
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant radio configuration change");
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
@@ -310,6 +345,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
 {
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant radio configuration change");
     this->band = band;
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
@@ -325,6 +362,8 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
 
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 {
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant radio configuration change");
     ASSERT(channel != nullptr);
     ASSERT(channel->getBand() != nullptr);
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));

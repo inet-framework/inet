@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211RECEIVER_H
 #define __INET_IEEE80211RECEIVER_H
 
+#include <functional>
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -49,6 +51,9 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
 
     const Ieee80211ModeSet *getModeSet() const { return modeSet; }
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    // Captures geometry for a synchronous radio configuration transaction.
+    // The returned one-shot restore callback neither throws nor emits signals.
+    std::function<void()> saveChannelState();
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int channelNumber);

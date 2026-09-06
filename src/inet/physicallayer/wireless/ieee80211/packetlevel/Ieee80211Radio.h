@@ -42,7 +42,8 @@ class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211CcaProvid
   protected:
     virtual void initialize(int stage) override;
 
-    void changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode);
+    void changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode,
+            const std::function<void()>& applyConfiguration = {}, bool publishModeSet = true, int channelNumber = -1);
 
     virtual void handleUpperCommand(cMessage *message) override;
 
