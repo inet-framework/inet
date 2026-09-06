@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
@@ -36,12 +37,12 @@ BlockAckReordering::QosFrameProcessingResult BlockAckReordering::processReceived
     ReorderBuffer framesToPassUp;
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto startingSequenceNumber = receiveBuffer->getNextExpectedSequenceNumber();
-    bool advancesWindow = startingSequenceNumber + receiveBuffer->getBufferSize() <= sequenceNumber && sequenceNumber < startingSequenceNumber + 2048;
+    bool advancesWindow = BlockAckWindow::isBeyond(startingSequenceNumber, receiveBuffer->getBufferSize(), sequenceNumber);
     SequenceNumberCyclic newStartingSequenceNumber;
     if (advancesWindow) {
         // IEEE Std 802.11-2024, 10.25.6.6.2.1(b): store the future MPDU
         // before moving WinStartB and releasing complete displaced MSDUs.
-        newStartingSequenceNumber = sequenceNumber - receiveBuffer->getBufferSize() + 1;
+        newStartingSequenceNumber = BlockAckWindow::getStartingSequenceNumber(sequenceNumber, receiveBuffer->getBufferSize());
     }
     // The reception of QoS data frames using Normal Ack policy shall not be used by the
     // recipient to reset the timer to detect Block Ack timeout (see 10.5.4).
@@ -148,7 +149,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         // advance NextExpectedSequenceNumber to at least the BAR SSN without
         // regressing it past consecutively released MSDUs.
         receiveBuffer->dropFramesUntil(startingSequenceNumber);
-        if (receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber)
+        if (BlockAckWindow::isBefore(receiveBuffer->getNextExpectedSequenceNumber(), startingSequenceNumber))
             receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
         return completePrecedingMpdus;
     }
@@ -167,7 +168,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
     auto currentStartingSequenceNumber = receiveBuffer->getNextExpectedSequenceNumber();
     for (int i = 0; i < receiveBuffer->getBufferSize(); i++) {
         auto sequenceNumber = currentStartingSequenceNumber + i;
-        if (!(sequenceNumber < startingSequenceNumber))
+        if (!BlockAckWindow::isBefore(sequenceNumber, startingSequenceNumber))
             break;
         auto it = buffer.find(sequenceNumber.get());
         if (it != buffer.end() && ReceiveBuffer::isComplete(it->second))
@@ -295,7 +296,7 @@ std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists
     if (earliestFragments.size() > 0) {
         for (auto it : buffer) {
             SequenceNumberCyclic currentSeqNum = it.second.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
-            if (currentSeqNum < earliestSeqNum) {
+            if (BlockAckWindow::isBefore(currentSeqNum, earliestSeqNum)) {
                 if (ReceiveBuffer::isComplete(it.second)) {
                     earliestFragments = it.second;
                     earliestSeqNum = currentSeqNum;

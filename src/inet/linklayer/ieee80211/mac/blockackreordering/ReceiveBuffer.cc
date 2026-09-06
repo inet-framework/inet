@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -46,7 +48,7 @@ bool ReceiveBuffer::isComplete(const Fragments& fragments)
 void ReceiveBuffer::pruneExpiredFragmentSequences()
 {
     for (auto it = expiredFragmentSequences.begin(); it != expiredFragmentSequences.end();) {
-        if (SequenceNumberCyclic(*it) < nextExpectedSequenceNumber)
+        if (BlockAckWindow::isBefore(SequenceNumberCyclic(*it), nextExpectedSequenceNumber))
             it = expiredFragmentSequences.erase(it);
         else
             ++it;
@@ -63,11 +65,11 @@ bool ReceiveBuffer::canInsertFrame(const Ptr<const Ieee80211DataHeader>& dataHea
 {
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto fragmentNumber = dataHeader->getFragmentNumber();
-    if (!(nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize))
+    if (!BlockAckWindow::isWithin(nextExpectedSequenceNumber, bufferSize, sequenceNumber))
         return false;
     int retainedLength = length;
     for (const auto& entry : buffer) {
-        if (SequenceNumberCyclic(entry.first) < nextExpectedSequenceNumber)
+        if (BlockAckWindow::isBefore(SequenceNumberCyclic(entry.first), nextExpectedSequenceNumber))
             retainedLength -= entry.second.size();
     }
     // IEEE Std 802.11-2024, 9.4.1.13, footnote 26: each fragment
@@ -136,7 +138,7 @@ void ReceiveBuffer::dropFramesUntil(SequenceNumberCyclic sequenceNumber)
 {
     auto it = buffer.begin();
     while (it != buffer.end()) {
-        if (SequenceNumberCyclic(it->first) < sequenceNumber) {
+        if (BlockAckWindow::isBefore(SequenceNumberCyclic(it->first), sequenceNumber)) {
             length -= it->second.size();
             for (auto fragment : it->second)
                 delete fragment;
