@@ -67,7 +67,7 @@ void Ieee80211Radio::updateCcaState()
     auto channel = ieee80211Receiver == nullptr ? nullptr : ieee80211Receiver->getChannel();
     bool ht40Configured = channel != nullptr &&
             channel->getSecondaryChannelOffset() != IEEE80211_SECONDARY_CHANNEL_NONE &&
-            modeSet != nullptr && !strcmp(modeSet->getName(), "n(mixed-2.4Ghz)") &&
+            modeSet != nullptr && modeSet->isHtOperationSupported() &&
             ieee80211Receiver->getBandwidth() == MHz(40);
     bool ht40 = ht40Configured && isReceiverMode(radioMode);
     bool primaryBusy = false;
@@ -112,14 +112,14 @@ void Ieee80211Radio::initialize(int stage)
             ieee80211Receiver->setBandwidth(radioBw);
             ieee80211Transmitter->setBandwidth(radioBw);
         }
-        if (modeSet != nullptr && !strcmp(modeSet->getName(), "n(mixed-2.4Ghz)") &&
+        if (modeSet != nullptr && modeSet->isHtOperationSupported() &&
                 radioBw == MHz(40) &&
                 htSecondaryChannelOffset == IEEE80211_SECONDARY_CHANNEL_NONE)
             throw cRuntimeError("HT 40 MHz operation requires a secondary channel offset of above or below");
         if (htSecondaryChannelOffset != IEEE80211_SECONDARY_CHANNEL_NONE) {
             // IEEE Std 802.11-2024, 19.2.3 and 19.3.15.4: the secondary
             // channel is an HT40-only operating-channel property.
-            if (modeSet == nullptr || strcmp(modeSet->getName(), "n(mixed-2.4Ghz)") ||
+            if (modeSet == nullptr || !modeSet->isHtOperationSupported() ||
                     radioBw != MHz(40))
                 throw cRuntimeError("htSecondaryChannelOffset above/below requires HT 40 MHz operation");
         }
@@ -174,7 +174,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
                 else
                     resolvedMode = targetModeSet->getMode(newBitrate);
             }
-            if (targetModeSet != nullptr && !strcmp(targetModeSet->getName(), "n(mixed-2.4Ghz)") &&
+            if (targetModeSet != nullptr && targetModeSet->isHtOperationSupported() &&
                     ((targetBandwidth == MHz(40)) ||
                      (resolvedMode != nullptr && dynamic_cast<const Ieee80211HtMode *>(resolvedMode) != nullptr &&
                       resolvedMode->getDataMode()->getBandwidth() == MHz(40))) &&
