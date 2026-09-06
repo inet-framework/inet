@@ -1,8 +1,10 @@
 %description:
 Exercise the live HCF lower-frame entry while a Block Ack response step is
-waiting. A Block Ack for another active peer, for the wrong TID, or with the
-wrong Basic/Compressed variant must leave the current response wait and its
-timeout armed. The matching response then completes that same frame sequence.
+waiting. An ACK, CTS, data frame, or other control frame addressed to this
+station, as well as a Block Ack for another active peer, the wrong TID, or the
+wrong Basic/Compressed variant, must leave the current response wait and its
+timeout armed. The matching response then completes that same frame sequence,
+while an unmatched wait ends only when its response timer expires.
 
 %file: TestIeee80211BlockAckResponseCorrelation.cc
 
@@ -127,6 +129,8 @@ class TestHcfBlockAckResponseCorrelation : public Hcf
         return header->getReceiverAddress() == localAddress;
     }
 
+    virtual bool isReceptionInProgress() override { return false; }
+
     virtual void transmitFrame(Packet *, simtime_t) override
     {
         transmittedFrames++;
@@ -137,8 +141,12 @@ class TestHcfBlockAckResponseCorrelation : public Hcf
 
     virtual void originatorProcessTransmittedFrame(Packet *) override {}
     virtual void originatorProcessReceivedFrame(Packet *, Packet *) override { acceptedResponses++; }
-    virtual void originatorProcessFailedFrame(Packet *) override {}
-    virtual void frameSequenceFinished() override { finishedSequences++; }
+    virtual void originatorProcessFailedFrame(Packet *) override { failedFrames++; }
+    virtual void frameSequenceFinished() override
+    {
+        finishedSequences++;
+        lastFinishedAt = simTime();
+    }
 
     virtual void scheduleStartRxTimer(simtime_t timeout) override
     {
@@ -148,7 +156,9 @@ class TestHcfBlockAckResponseCorrelation : public Hcf
   public:
     int transmittedFrames = 0;
     int acceptedResponses = 0;
+    int failedFrames = 0;
     int finishedSequences = 0;
+    simtime_t lastFinishedAt = SIMTIME_ZERO;
 
     TestHcfBlockAckResponseCorrelation() : testEdca(&channelOwner) {}
 
@@ -183,8 +193,57 @@ class TestHcfBlockAckResponseCorrelation : public Hcf
         Hcf::processLowerFrame(packet, blockAck);
     }
 
+    void injectAck()
+    {
+        Enter_Method("injectAck");
+        auto ack = makeShared<Ieee80211AckFrame>();
+        ack->setReceiverAddress(localAddress);
+        auto packet = new Packet("injectedAck", ack);
+        Hcf::processLowerFrame(packet, ack);
+    }
+
+    void injectCts()
+    {
+        Enter_Method("injectCts");
+        auto cts = makeShared<Ieee80211CtsFrame>();
+        cts->setReceiverAddress(localAddress);
+        auto packet = new Packet("injectedCts", cts);
+        Hcf::processLowerFrame(packet, cts);
+    }
+
+    void injectData()
+    {
+        Enter_Method("injectData");
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setReceiverAddress(localAddress);
+        data->setTransmitterAddress(PEER_ONE);
+        data->setAddress3(LOCAL_ADDRESS);
+        data->setSequenceNumber(SequenceNumberCyclic(CURRENT_SSN));
+        auto packet = new Packet("injectedData", data);
+        Hcf::processLowerFrame(packet, data);
+    }
+
+    void injectRts()
+    {
+        Enter_Method("injectRts");
+        auto rts = makeShared<Ieee80211RtsFrame>();
+        rts->setReceiverAddress(localAddress);
+        rts->setTransmitterAddress(PEER_ONE);
+        auto packet = new Packet("injectedRts", rts);
+        Hcf::processLowerFrame(packet, rts);
+    }
+
     bool isResponseWaitActive() const { return frameSequenceHandler->isSequenceRunning(); }
     bool isResponseTimerScheduled() const { return startRxTimer->isScheduled(); }
+    simtime_t getResponseTimerArrival() const { return startRxTimer->getArrivalTime(); }
+    bool hasReceivedResponse() const
+    {
+        auto context = frameSequenceHandler->getContext();
+        if (context == nullptr)
+            return false;
+        auto receiveStep = dynamic_cast<IReceiveStep *>(context->getLastStep());
+        return receiveStep != nullptr && receiveStep->getReceivedFrame() != nullptr;
+    }
 };
 
 Define_Module(TestHcfBlockAckResponseCorrelation);
@@ -212,29 +271,73 @@ class Ieee80211BlockAckResponseCorrelationTest : public cSimpleModule
 
             auto expectedTransmittedFrames = hcf->transmittedFrames + 1;
             auto expectedAcceptedResponses = hcf->acceptedResponses + 1;
+            auto expectedFailedFrames = hcf->failedFrames;
             auto expectedFinishedSequences = hcf->finishedSequences + 1;
             hcf->startBlockAckResponseWait(&ackPolicy, &blockAckProcedure, &agreementHandler, &inProgressFrames, &txopProcedure);
             ASSERT(hcf->transmittedFrames == expectedTransmittedFrames);
             ASSERT(hcf->isResponseWaitActive());
             ASSERT(hcf->isResponseTimerScheduled());
+            const auto responseDeadline = simTime() + SimTime(1, SIMTIME_MS);
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
 
-            // All three frames are addressed to this STA, so HCF must inspect
-            // the active BAR request before letting any one end the wait.
+            // Every frame below is addressed to this STA. HCF must leave each
+            // one outside the active BAR response step and retain its exact
+            // response deadline.
+            hcf->injectAck();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectCts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectData();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectRts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            // Block Ack frames for the wrong peer, TID, or variant must obey
+            // the same ownership and timer boundary.
             hcf->injectBlockAck(PEER_TWO, CURRENT_TID, compressed);
             ASSERT(hcf->isResponseWaitActive());
             ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
             ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
             ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
 
             hcf->injectBlockAck(PEER_ONE, CURRENT_TID + 1, compressed);
             ASSERT(hcf->isResponseWaitActive());
             ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
             ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
             ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
 
             hcf->injectBlockAck(PEER_ONE, CURRENT_TID, !compressed);
             ASSERT(hcf->isResponseWaitActive());
             ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
             ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
             ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
 
@@ -242,9 +345,53 @@ class Ieee80211BlockAckResponseCorrelationTest : public cSimpleModule
             ASSERT(!hcf->isResponseWaitActive());
             ASSERT(!hcf->isResponseTimerScheduled());
             ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->failedFrames == expectedFailedFrames);
             ASSERT(hcf->finishedSequences == expectedFinishedSequences);
+
+            // A fresh BAR wait with no matching response must stay alive
+            // through the same unrelated traffic and finish only at timeout.
+            expectedTransmittedFrames = hcf->transmittedFrames + 1;
+            expectedAcceptedResponses = hcf->acceptedResponses;
+            expectedFailedFrames = hcf->failedFrames + 1;
+            expectedFinishedSequences = hcf->finishedSequences + 1;
+            hcf->startBlockAckResponseWait(&ackPolicy, &blockAckProcedure, &agreementHandler, &inProgressFrames, &txopProcedure);
+            ASSERT(hcf->transmittedFrames == expectedTransmittedFrames);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            const auto timeoutDeadline = simTime() + SimTime(1, SIMTIME_MS);
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+
+            hcf->injectAck();
+            hcf->injectCts();
+            hcf->injectData();
+            hcf->injectRts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+            ASSERT(hcf->failedFrames == expectedFailedFrames - 1);
+
+            wait(SimTime(500, SIMTIME_US));
+            hcf->injectAck();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+            ASSERT(hcf->failedFrames == expectedFailedFrames - 1);
+
+            wait(SimTime(500, SIMTIME_US) + SimTime(1, SIMTIME_US));
+            ASSERT(!hcf->isResponseWaitActive());
+            ASSERT(!hcf->isResponseTimerScheduled());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences);
+            ASSERT(hcf->failedFrames == expectedFailedFrames);
+            ASSERT(hcf->lastFinishedAt == timeoutDeadline);
         }
-        std::cout << "HCF keeps the active Block Ack response wait scoped by peer, TID, and variant.\n";
+        std::cout << "HCF keeps BAR response waits scoped by expected type, peer, TID, and variant until match or timeout.\n";
         endSimulation();
     }
 };
@@ -291,7 +438,7 @@ network Ieee80211BlockAckResponseCorrelationTestNetwork
 [General]
 network = Ieee80211BlockAckResponseCorrelationTestNetwork
 ned-path = .;../../../../src;../../lib
-sim-time-limit = 1ms
+sim-time-limit = 3ms
 seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
@@ -305,4 +452,4 @@ record-scalar-results = false
 **.mobility.constraintAreaMaxZ = 0m
 
 %contains: stdout
-HCF keeps the active Block Ack response wait scoped by peer, TID, and variant.
+HCF keeps BAR response waits scoped by expected type, peer, TID, and variant until match or timeout.

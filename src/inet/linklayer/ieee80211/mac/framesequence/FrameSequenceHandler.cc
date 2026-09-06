@@ -49,17 +49,19 @@ void FrameSequenceHandler::handleStartRxTimeout()
 bool FrameSequenceHandler::processResponse(Packet *frame)
 {
     ASSERT(callback != nullptr);
+    auto lastStep = context->getLastStep();
+    if (lastStep->getType() == IFrameSequenceStep::Type::RECEIVE) {
+        auto receiveStep = check_and_cast<IReceiveStep *>(lastStep);
+        if (!receiveStep->isExpectedResponse(frame, context) || isUnexpectedBlockAckResponse(context, frame))
+            return false;
+    }
     if (frameSequenceCancellationRequested) {
         delete frame;
         abortFrameSequence();
         return true;
     }
-    auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE: {
-            if (isUnexpectedBlockAckResponse(context, frame))
-                return false;
-            // TODO check if not for us and abort
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getLastStep());
             receiveStep->setFrameToReceive(frame);
             finishFrameSequenceStep();
