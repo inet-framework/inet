@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/BlockAckRecord.h"
 
 #include "inet/common/stlutils.h"
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -26,12 +27,12 @@ void BlockAckRecord::dataFrameReceived(const Ptr<const Ieee80211DataHeader>& hea
     // IEEE Std 802.11-2024, 10.25.6.3(b), case 3: an old related MPDU
     // does not change the Block Ack record. The cyclic comparison below already
     // restricts the accepted range to [WinStartR, WinStartR + 2047].
-    if (!(startingSequenceNumber <= sequenceNumber))
+    if (!BlockAckWindow::isAtOrAfter(sequenceNumber, startingSequenceNumber))
         return;
     // Cases 1 and 2: record an in-window MPDU, or advance WinStartR
     // before recording an MPDU beyond WinEndR (also see 10.25.6.4(c)).
-    if (startingSequenceNumber + windowSize <= sequenceNumber && sequenceNumber < startingSequenceNumber + 2048)
-        advanceStartingSequenceNumber(sequenceNumber - windowSize + 1);
+    if (BlockAckWindow::isBeyond(startingSequenceNumber, windowSize, sequenceNumber))
+        advanceStartingSequenceNumber(BlockAckWindow::getStartingSequenceNumber(sequenceNumber, windowSize));
     acknowledgmentState[SequenceControlField(sequenceNumber.get(), fragmentNumber)] = true;
 }
 
@@ -40,25 +41,25 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
     // The status of MPDUs that are considered “old” and prior to the sequence number
     // range for which the receiver maintains status shall be reported as successfully
     // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber)) || sequenceNumber < startingSequenceNumber;
+    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber)) || BlockAckWindow::isBefore(sequenceNumber, startingSequenceNumber);
 }
 
 bool BlockAckRecord::getCompressedAckState(SequenceNumberCyclic sequenceNumber)
 {
     // IEEE Std 802.11-2024, 10.25.6.1: bits preceding the maintained
     // receive-window range are one; missing MPDUs within the range are zero.
-    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), 0)) || sequenceNumber < startingSequenceNumber;
+    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), 0)) || BlockAckWindow::isBefore(sequenceNumber, startingSequenceNumber);
 }
 
 void BlockAckRecord::advanceStartingSequenceNumber(SequenceNumberCyclic newStartingSequenceNumber)
 {
     // IEEE Std 802.11-2024, 10.25.6.3 and 10.25.6.4: advance WinStartR
     // for a newer related MPDU or BAR SSN, using the 12-bit sequence space.
-    if (!(startingSequenceNumber < newStartingSequenceNumber))
+    if (!BlockAckWindow::isAfter(newStartingSequenceNumber, startingSequenceNumber))
         return;
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
-        if (SequenceNumberCyclic(it->first.getSequenceNumber()) < newStartingSequenceNumber)
+        if (BlockAckWindow::isBefore(SequenceNumberCyclic(it->first.getSequenceNumber()), newStartingSequenceNumber))
             it = acknowledgmentState.erase(it);
         else
             it++;
