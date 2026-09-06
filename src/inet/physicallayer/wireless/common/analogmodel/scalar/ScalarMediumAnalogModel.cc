@@ -121,6 +121,7 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> powerChanges;
+    std::vector<ScalarNoise::PowerComponent> powerComponents;
     powerChanges[math::getLowerBound<simtime_t>()] = W(0);
     powerChanges[math::getUpperBound<simtime_t>()] = W(0);
     auto listeningMin = commonCenterFrequency - commonBandwidth / 2;
@@ -133,8 +134,11 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();
         auto signalMin = signalCenterFrequency - signalBandwidth / 2;
         auto signalMax = signalCenterFrequency + signalBandwidth / 2;
-        if (signalMin >= listeningMin && signalMax <= listeningMax)
+        if (signalMin >= listeningMin && signalMax <= listeningMax) {
             addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
+            auto powerFunction = makeShared<math::Boxcar1DFunction<W, simtime_t>>(reception->getStartTime(), reception->getEndTime(), receptionAnalogModel->getPower());
+            powerComponents.push_back({signalCenterFrequency, signalBandwidth, powerFunction});
+        }
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, signalCenterFrequency, signalBandwidth))
             throw cRuntimeError("Partially interfering signals are not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
@@ -142,8 +146,11 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
     if (scalarBackgroundNoise) {
         auto bgMin = scalarBackgroundNoise->getCenterFrequency() - scalarBackgroundNoise->getBandwidth() / 2;
         auto bgMax = scalarBackgroundNoise->getCenterFrequency() + scalarBackgroundNoise->getBandwidth() / 2;
-        if (bgMin >= listeningMin && bgMax <= listeningMax)
+        if (bgMin >= listeningMin && bgMax <= listeningMax) {
             addNoise(scalarBackgroundNoise, noiseStartTime, noiseEndTime, powerChanges);
+            const auto& backgroundComponents = scalarBackgroundNoise->getPowerComponents();
+            powerComponents.insert(powerComponents.end(), backgroundComponents.begin(), backgroundComponents.end());
+        }
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, scalarBackgroundNoise->getCenterFrequency(), scalarBackgroundNoise->getBandwidth()))
             throw cRuntimeError("Partially interfering background noise is not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
@@ -156,12 +163,16 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
     }
     EV_TRACE << "Noise power end" << endl;
     const auto& powerFunction = makeShared<math::Interpolated1DFunction<W, simtime_t>>(powerChanges, &math::LeftInterpolator<simtime_t, W>::singleton);
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerFunction);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerFunction, powerComponents);
 }
 
 const INoise *ScalarMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
     auto scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    auto powerComponents = scalarNoise->getPowerComponents();
+    auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel());
+    auto receptionPowerFunction = makeShared<math::Boxcar1DFunction<W, simtime_t>>(reception->getStartTime(), reception->getEndTime(), receptionAnalogModel->getPower());
+    powerComponents.push_back({receptionAnalogModel->getCenterFrequency(), receptionAnalogModel->getBandwidth(), receptionPowerFunction});
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> powerChanges;
@@ -175,7 +186,7 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IReception *reception,
         it.second = power;
     }
     const auto& powerFunction = makeShared<math::Interpolated1DFunction<W, simtime_t>>(powerChanges, &math::LeftInterpolator<simtime_t, W>::singleton);
-    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerFunction);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerFunction, powerComponents);
 }
 
 const ISnir *ScalarMediumAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
