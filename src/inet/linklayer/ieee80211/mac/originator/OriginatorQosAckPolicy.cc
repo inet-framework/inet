@@ -65,7 +65,9 @@ SequenceNumberCyclic OriginatorQosAckPolicy::computeStartingSequenceNumber(const
 
 bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement) const
 {
-    return isCompressedBlockAckReqNeeded(outstandingFrames, agreement);
+    // Agreements retain their negotiated capability across mode-set changes.
+    // Recheck the active mode whenever selecting a new BAR variant.
+    return modeSet != nullptr && modeSet->isHtOperationSupported() && isCompressedBlockAckReqNeeded(outstandingFrames, agreement);
 }
 
 bool OriginatorQosAckPolicy::isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement)

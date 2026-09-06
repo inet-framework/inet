@@ -10,10 +10,13 @@ IEEE Std 802.11-2024, 9.3.1.7.2, 9.3.1.8.2, 10.25.6.1, and 10.25.6.5.
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
@@ -110,6 +113,14 @@ class TestOriginatorQosAckPolicy : public OriginatorQosAckPolicy
     {
         return isCompressedBlockAckReqNeeded(outstandingFrames, agreement);
     }
+};
+
+class OutstandingFramesFixture : public InProgressFrames
+{
+  public:
+    std::vector<Packet *> frames;
+    virtual std::vector<Packet *> getOutstandingFrames() override { return frames; }
+    virtual ~OutstandingFramesFixture() { for (auto frame : frames) delete frame; }
 };
 
 class TestRecipientQosAckPolicy : public RecipientQosAckPolicy
@@ -741,6 +752,39 @@ EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediat
     handler.updateAgreement(handler.getAgreement(listedPeer, 5), response, &localEnabledPolicy);
     ASSERT(handler.getAgreement(listedPeer, 5)->getIsCompressedBlockAckSupported());
     EV << "Local and per-peer capability gates are snapshotted by agreements.\n";
+
+    // Exercise the production BAR selector with the same established agreement
+    // throughout runtime mode transitions, without refreshing its capability flag.
+    auto agreement = handler.getActiveAgreement(listedPeer, 5);
+    ASSERT(agreement != nullptr && agreement->getIsCompressedBlockAckSupported());
+    OriginatorQosAckPolicy ackPolicy;
+    OriginatorBlockAckProcedure procedure;
+    OutstandingFramesFixture frames;
+    frames.frames.push_back(makeOutstandingQosFrame(listedPeer, 5));
+    for (const char *mode : {"n(mixed-2.4Ghz)", "a", "n(mixed-2.4Ghz)", "b", "n(mixed-2.4Ghz)", "g(mixed)", "n(mixed-2.4Ghz)"}) {
+        auto modeSet = physicallayer::Ieee80211ModeSet::getModeSet(mode);
+        localEnabledPolicy.applyModeSet(modeSet);
+        ackPolicy.applyModeSet(modeSet);
+        ASSERT(handler.getActiveAgreement(listedPeer, 5) == agreement);
+        ASSERT(agreement->getIsCompressedBlockAckSupported());
+        FrameSequenceContext context(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &frames, nullptr, nullptr, nullptr,
+                new QoSContext(&ackPolicy, &procedure, &handler, nullptr));
+        BlockAckReqBlockAckFs sequence;
+        sequence.startSequence(&context, 0);
+        auto step = sequence.prepareStep(&context);
+        context.addStep(step);
+        auto packet = check_and_cast<ITransmitStep *>(step)->getFrameToTransmit();
+        auto details = getOneTidBlockAckReqDetails(packet->peekAtFront<Ieee80211BlockAckReq>());
+        ASSERT(details.has_value());
+        ASSERT(details->tid == 5);
+        if (modeSet->isHtOperationSupported())
+            ASSERT(dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(packet->peekAtFront<Ieee80211BlockAckReq>()) != nullptr);
+        else
+            ASSERT(dynamicPtrCast<const Ieee80211BasicBlockAckReq>(packet->peekAtFront<Ieee80211BlockAckReq>()) != nullptr);
+    }
+    ackPolicy.applyModeSet(nullptr);
+    ASSERT(!ackPolicy.isCompressedBlockAckReq(frames.frames, agreement));
+    EV << "Existing HT agreements use Basic BAR immediately after legacy mode transitions.\n";
 }
 
 {
@@ -869,6 +913,7 @@ Compressed bitmap wraps from sequence 4095 to 0.
 Compressed bitmap preserves leading holes across sequence wrap.
 Recipient fragment and agreement-policy gates passed.
 Local and per-peer capability gates are snapshotted by agreements.
+Existing HT agreements use Basic BAR immediately after legacy mode transitions.
 Originator capability, agreement, and fragmentation gates passed.
 Legacy Basic BAR and BA remain byte-exact.
 Accepted delayed agreement is retained for Basic BAR fallback.
