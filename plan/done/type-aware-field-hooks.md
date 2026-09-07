@@ -1,6 +1,6 @@
 # Type-aware field hooks for FieldsChunkSerializer
 
-Status: in progress
+Status: done
 
 ## Problem
 
@@ -77,19 +77,49 @@ chunk)` in each subclass hides the public `serialize(stream, chunk, offset, leng
 
 ## Steps
 
-- [ ] 1. Base class: add `serializeFields` and `deserializeFields`; route the public wrappers
+- [x] 1. Base class: add `serializeFields` and `deserializeFields`; route the public wrappers
       through them; the default body of each new hook calls the old hook. The old hooks stay
       pure, so nothing changes for a subclass.
-- [ ] 2. Base class: make the old hooks non-pure, so that a subclass can override the new
+- [x] 2. Base class: make the old hooks non-pure, so that a subclass can override the new
       hooks alone. Both hooks stay overridable. This step removes the obligation to override
       the old hooks. It does not remove the permission.
-- [ ] 3. Base class: mark the old hooks deprecated, and write the WHATSNEW entry and the
+- [x] 3. Base class: mark the old hooks deprecated, and write the WHATSNEW entry and the
       migration guide section.
-- [ ] 4. Migrate the in-tree serializers to the new hooks, and migrate the direct hook calls
+- [x] 4. Migrate the in-tree serializers to the new hooks, and migrate the direct hook calls
       between serializers.
 
 Step 1 to step 3 touch only `src/inet/common/packet/serializer/FieldsChunkSerializer.*` and the
 documents. Step 4 touches the rest of the tree. Each step compiles and runs.
+
+- [x] 5. Add `tests/unit/FieldsChunkSerializer_1.test`, which exercises all three cases: a
+      serializer with the old hooks only, a serializer with the new hooks only that is
+      registered for two chunk types, and a serializer with no hook at all.
+
+## Findings during implementation
+
+- The tree has 92 `FieldsChunkSerializer` subclasses in 112 files, and 7 direct hook calls
+  between serializers (`OspfPacketSerializer`, `EthernetPhyHeaderSerializer` and the packet
+  unit test). The direct calls must move to the new name, because after the migration the
+  callee no longer overrides the old hook.
+- The in-tree serializer hierarchy is flat. Every `FieldsChunkSerializer` subclass is a leaf.
+  So step 4 cannot break an in-tree class that another in-tree class derives from. It can
+  still break third-party code that derives from an in-tree serializer and overrides the old
+  hook, because the migrated parent's `deserializeFields` override would win.
+
+  Decided: this case does not occur. Third-party code adds new serializers for its own chunk
+  types; it does not override the in-tree ones. So step 4 migrates every in-tree subclass, and
+  the only compatibility surface that matters is `FieldsChunkSerializer` itself.
+- Step 2 makes `FieldsChunkSerializer` concrete. Before the change it had two pure virtual
+  members, so it could not be instantiated. This is a small loss; the throwing default bodies
+  keep the mistake visible.
+- Only 61 translation units include `FieldsChunkSerializer.h`, so a change to the base class
+  costs a 61-file rebuild, not a full one.
+- Build evidence: `make MODE=release` gives exit 0 after step 1, step 2 and step 4. Step 1 is
+  the compatibility proof, because all 92 subclasses were still unmigrated at that point.
+  `make MODE=debug` plus `tests/packet` also gives exit 0.
+- Test evidence: `inet_run_unit_tests -p inet -m debug` gives 91 PASS and 0 FAIL, which is the
+  90 tests of master plus the new one. `inet_run_packet_tests -p inet -m debug` gives PASS,
+  which covers the migrated `tests/packet/UnitTest.cc` and its three direct hook calls.
 
 ## Out of scope
 
