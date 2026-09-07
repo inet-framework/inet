@@ -290,7 +290,11 @@ it is:
   distinction is invisible — no other host lives on the home link — but a
   host on the home link could not reach an away mobile node.
 
-  .. todo::
+  .. admonition:: TODO
+
+     Merge this bullet with the next one: the one-second delay described there
+     is a consequence of this same missing capability, not a separate
+     shortcoming.
 
      This is gap 1 of MIPV6_IMPLEMENTATION_GAPS.md, and unlike the other gaps
      the page refers to it is **not filed** — no issue, no branch, no fix in
@@ -318,6 +322,19 @@ it is:
   perform on the home address before answering. The delay itself is not the
   deviation: a compliant home agent waits about as long for real duplicate
   address detection.
+
+  .. admonition:: TODO
+
+     This bullet exists only because the previous one's capability is missing.
+     Implementing proxy Neighbor Discovery gives the home agent a real
+     duplicate address detection probe, and this bullet is then deleted: the
+     wait stops being a stand-in and becomes the timing of a check that
+     actually runs. The wait itself does not go away -- INET's duplicate
+     address detection costs ``retransTimer`` (1 s) plus a random 0--1 s, so
+     it stays in the same range and starts varying per seed -- but it then
+     belongs beside the handover budget in the Results section, which is where
+     the reader meets it as a number, rather than in a list of things the
+     simulation does not do.
 - Until that acknowledgement lands the mobile node's reverse tunnel is not up,
   and the replies it sends from its home address are dropped instead of being
   queued or tunneled. The node refuses to emit a packet whose home-address
