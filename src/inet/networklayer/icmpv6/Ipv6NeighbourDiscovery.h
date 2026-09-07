@@ -127,6 +127,7 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
         simtime_t nextScheduledRATime; // stores time when next RA will be sent.
         simtime_t lastMulticastRATime = -1; // time the last multicast RA was sent (-1 = none yet); used to rate-limit RAs to MIN_DELAY_BETWEEN_RAS (RFC 4861 Section 6.2.6)
         cMessage *raTimeoutMsg; // the message to cancel when resetting RA timer
+        cMessage *pendingSolicitedRaMsg = nullptr; // solicited RA scheduled on this interface but not yet sent (nullptr = none); cancelled when a solicitation schedules an earlier one
     };
     typedef std::vector<AdvIfEntry *> AdvIfList;
 

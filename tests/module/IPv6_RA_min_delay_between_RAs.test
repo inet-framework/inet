@@ -1,0 +1,85 @@
+%description:
+Tests that consecutive multicast Router Advertisements (RA) sent by an IPv6 router to
+the all-nodes address are never closer than MIN_DELAY_BETWEEN_RAS (3 s), even when
+several Router Solicitations (RS) arrive while a solicited advertisement is already
+pending (RFC 4861 Section 6.2.6).
+
+Six hosts boot at the same time on one link, so their solicitations reach router R
+within a fraction of a second of each other, while the advertisement scheduled for the
+first of them has not been sent yet. Each solicitation computes its own send time from
+a random delay in [0, MAX_RA_DELAY_TIME], so a later solicitation can land earlier than
+the pending advertisement. When it does, the router must let that one advertisement
+serve them all, not send both.
+
+The scenario depends on the random delays the run draws, so the test also asserts that
+the superseding case really occurred. Without that, a change elsewhere that shifts the
+random number stream could leave the run with no overlapping solicitations at all, and
+the rate-limit assertion would then pass without exercising anything.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network RaRateLimit
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        switch: EthernetSwitch;
+        R: Router6;
+        host[6]: StandardHost6;
+    connections:
+        R.ethg++ <--> ethline <--> switch.ethg++;
+        for i=0..5 {
+            host[i].ethg++ <--> ethline <--> switch.ethg++;
+        }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = RaRateLimit
+sim-time-limit = 30s
+cmdenv-express-mode = false
+**.cmdenv-log-level = detail
+cmdenv-log-prefix = "%t %C: "
+
+# RFC 4861 defaults, and also INET's own NED defaults: no periodic advertisement is due
+# within the run, so every advertisement seen here is a solicited one
+**.R.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 200s
+**.R.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 600s
+
+# all hosts boot together, as after a power failure
+**.host[*].ipv6.neighbourDiscovery.hostBootupTime = 0.4s
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: awk '/R\.ipv6\.neighbourDiscovery: Create and send RA invoked/ { if (prev != "" && $1 - prev < 3) printf "VIOLATION: two multicast RAs %.6f s apart, at %s and %s\n", $1 - prev, prev, $1; prev = $1 }' test.out > ra_gaps.out
+%not-contains: ra_gaps.out
+VIOLATION
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RaRateLimit.host[5].ipv6.neighbourDiscovery: Assigning new address to: eth0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+R.ipv6.neighbourDiscovery: Cancelling the solicited RA scheduled at
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
