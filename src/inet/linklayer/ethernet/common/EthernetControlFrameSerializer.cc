@@ -17,7 +17,7 @@ namespace inet {
 Register_Serializer(EthernetControlFrameBase, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPauseFrame, EthernetControlFrameSerializer);
 
-void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetControlFrameSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& frame = staticPtrCast<const EthernetControlFrameBase>(chunk);
     stream.writeUint16Be(frame->getOpCode());
@@ -30,7 +30,7 @@ void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const
         throw cRuntimeError("Cannot serialize '%s' (EthernetControlFrame with opCode = %d)", frame->getClassName(), frame->getOpCode());
 }
 
-const Ptr<Chunk> EthernetControlFrameSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetControlFrameSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<EthernetControlFrameBase> controlFrame = nullptr;
     uint16_t opCode = stream.readUint16Be();

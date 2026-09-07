@@ -20,7 +20,7 @@ Register_Serializer(Rrep, AodvControlPacketsSerializer);
 Register_Serializer(Rerr, AodvControlPacketsSerializer);
 Register_Serializer(RrepAck, AodvControlPacketsSerializer);
 
-void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void AodvControlPacketsSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& aodvControlPacket = staticPtrCast<const AodvControlPacket>(chunk);
     switch (aodvControlPacket->getPacketType()) {
@@ -138,7 +138,7 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
     }
 }
 
-const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto aodvControlPacket = makeShared<AodvControlPacket>();
     AodvControlPacketType packetType = static_cast<AodvControlPacketType>(stream.readByte());

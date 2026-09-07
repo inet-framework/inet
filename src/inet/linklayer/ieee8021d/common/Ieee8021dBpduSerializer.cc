@@ -16,7 +16,7 @@ Register_Serializer(BpduBase, Ieee8021dBpduSerializer);
 Register_Serializer(BpduCfg, Ieee8021dBpduSerializer);
 Register_Serializer(BpduTcn, Ieee8021dBpduSerializer);
 
-void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee8021dBpduSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& bpduBase = staticPtrCast<const BpduBase>(chunk);
     stream.writeUint16Be(bpduBase->getProtocolIdentifier());
@@ -53,7 +53,7 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     }
 }
 
-const Ptr<Chunk> Ieee8021dBpduSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021dBpduSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto protocolIdentifier = static_cast<BpduProtocolIdentifier>(stream.readUint16Be());
     auto protocolVersionIdentifier = static_cast<BpduProtocolVersionIdentifier>(stream.readUint8());

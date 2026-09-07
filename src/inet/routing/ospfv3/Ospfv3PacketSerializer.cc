@@ -402,7 +402,7 @@ void Ospfv3PacketSerializer::serializeLsa(MemoryOutputStream& stream, const Ospf
 
 // ---- packets ----
 
-void Ospfv3PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ospfv3PacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ospfPacket = staticPtrCast<const Ospfv3Packet>(chunk);
     serializeOspfHeader(stream, ospfPacket);
@@ -472,7 +472,7 @@ void Ospfv3PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-const Ptr<Chunk> Ospfv3PacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ospfv3PacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ospfPacket = makeShared<Ospfv3Packet>();
     uint16_t packetLength = deserializeOspfHeader(stream, ospfPacket);

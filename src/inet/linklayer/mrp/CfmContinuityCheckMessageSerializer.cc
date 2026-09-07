@@ -13,7 +13,7 @@ namespace inet {
 
 Register_Serializer(CfmContinuityCheckMessage, CfmContinuityCheckMessageSerializer);
 
-void CfmContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void CfmContinuityCheckMessageSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     // ITU Y.1731 Section 9.2.2
     const auto& ccm = staticPtrCast<const CfmContinuityCheckMessage>(chunk);
@@ -40,7 +40,7 @@ void CfmContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, 
     stream.writeUint8(0);  // End TLV
 }
 
-const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ccm = makeShared<CfmContinuityCheckMessage>();
     ccm->setMdLevel(stream.readUint8());

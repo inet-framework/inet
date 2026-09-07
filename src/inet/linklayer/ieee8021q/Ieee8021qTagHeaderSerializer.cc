@@ -15,7 +15,7 @@ namespace inet {
 Register_Serializer(Ieee8021qTagTpidHeader, Ieee8021qTagTpidHeaderSerializer);
 Register_Serializer(Ieee8021qTagEpdHeader, Ieee8021qTagEpdHeaderSerializer);
 
-void Ieee8021qTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee8021qTagTpidHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const Ieee8021qTagTpidHeader>(chunk);
     stream.writeUint16Be(header->getTpid());
@@ -24,7 +24,7 @@ void Ieee8021qTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, con
                          (header->getDei() ? 0x1000 : 0));
 }
 
-const Ptr<Chunk> Ieee8021qTagTpidHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021qTagTpidHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     const auto& header = makeShared<Ieee8021qTagTpidHeader>();
     header->setTpid(stream.readUint16Be());
@@ -35,7 +35,7 @@ const Ptr<Chunk> Ieee8021qTagTpidHeaderSerializer::deserialize(MemoryInputStream
     return header;
 }
 
-void Ieee8021qTagEpdHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee8021qTagEpdHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const Ieee8021qTagEpdHeader>(chunk);
     stream.writeUint16Be((header->getVid() & 0xFFF) |
@@ -44,7 +44,7 @@ void Ieee8021qTagEpdHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     stream.writeUint16Be(header->getTypeOrLength());
 }
 
-const Ptr<Chunk> Ieee8021qTagEpdHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021qTagEpdHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     const auto& header = makeShared<Ieee8021qTagEpdHeader>();
     uint16_t value = stream.readUint16Be();

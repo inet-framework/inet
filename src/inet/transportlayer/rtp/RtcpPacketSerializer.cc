@@ -90,7 +90,7 @@ void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpP
 
 } // namespace
 
-void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void RtcpPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& rtcpPacket = staticPtrCast<const RtcpPacket>(chunk);
     B start_position = B(stream.getLength());
@@ -146,7 +146,7 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RtcpPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto rtcpPacket = makeShared<RtcpPacket>();
     rtcpPacket->setVersion(stream.readUint2());

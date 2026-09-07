@@ -16,7 +16,7 @@ Register_Serializer(XMacHeaderBase, XMacHeaderSerializer);
 Register_Serializer(XMacControlFrame, XMacHeaderSerializer);
 Register_Serializer(XMacDataFrameHeader, XMacHeaderSerializer);
 
-void XMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void XMacHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     b startPos = stream.getLength();
     const auto& header = staticPtrCast<const XMacHeaderBase>(chunk);
@@ -47,7 +47,7 @@ void XMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         stream.writeBitRepeatedly(0, remainderBits & 7);
 }
 
-const Ptr<Chunk> XMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> XMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     b startPos = stream.getPosition();
     XMacTypes type = static_cast<XMacTypes>(stream.readByte());

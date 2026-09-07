@@ -14,14 +14,14 @@ namespace inet {
 
 Register_Serializer(FragmentNumberHeader, FragmentNumberHeaderSerializer);
 
-void FragmentNumberHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void FragmentNumberHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& fragmentNumberHeader = staticPtrCast<const FragmentNumberHeader>(chunk);
     uint8_t byte = (fragmentNumberHeader->getFragmentNumber() & 0x7F) + (fragmentNumberHeader->getLastFragment() ? 0x80 : 0x00);
     stream.writeUint8(byte);
 }
 
-const Ptr<Chunk> FragmentNumberHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> FragmentNumberHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto fragmentNumberHeader = makeShared<FragmentNumberHeader>();
     uint8_t byte = stream.readUint8();

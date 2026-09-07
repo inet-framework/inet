@@ -17,8 +17,8 @@ namespace inet {
 class INET_API MrpTlvSerializer: public FieldsChunkSerializer
 {
 protected:
-    virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
 public:
     MrpTlvSerializer() :
@@ -29,8 +29,8 @@ public:
 class INET_API MrpVersionFieldSerializer: public FieldsChunkSerializer
 {
 protected:
-    virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
 public:
     MrpVersionFieldSerializer() :
@@ -40,8 +40,8 @@ public:
 class INET_API MrpSubTlvSerializer: public FieldsChunkSerializer
 {
 protected:
-    virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
 public:
     MrpSubTlvSerializer() :

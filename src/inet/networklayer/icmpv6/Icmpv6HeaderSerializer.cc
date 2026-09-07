@@ -190,7 +190,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
     }
 }
 
-void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Icmpv6HeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pkt = staticPtrCast<const Icmpv6Header>(chunk);
 
@@ -302,7 +302,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Icmpv6HeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto icmpv6Header = makeShared<Icmpv6Header>();
     Icmpv6Type type = static_cast<Icmpv6Type>(stream.readByte()); // type

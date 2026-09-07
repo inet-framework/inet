@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(MplsHeader, MplsPacketSerializer);
 
-void MplsPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void MplsPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& mplsHeader = staticPtrCast<const MplsHeader>(chunk);
     stream.writeNBitsOfUint64Be(mplsHeader->getLabel(), 20);
@@ -23,7 +23,7 @@ void MplsPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeUint8(mplsHeader->getTtl());
 }
 
-const Ptr<Chunk> MplsPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MplsPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto mplsHeader = makeShared<MplsHeader>();
     mplsHeader->setLabel(stream.readNBitsToUint64Be(20));

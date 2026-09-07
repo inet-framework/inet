@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(ApplicationPacket, ApplicationPacketSerializer);
 
-void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void ApplicationPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     const auto& applicationPacket = staticPtrCast<const ApplicationPacket>(chunk);
@@ -26,7 +26,7 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ApplicationPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto applicationPacket = makeShared<ApplicationPacket>();

@@ -19,7 +19,7 @@ namespace inet {
 
 Register_Serializer(RipPacket, RipPacketSerializer);
 
-void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void RipPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ripPacket = staticPtrCast<const RipPacket>(chunk);
 
@@ -41,7 +41,7 @@ void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RipPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ripPacket = makeShared<RipPacket>();
 

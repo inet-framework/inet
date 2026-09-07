@@ -25,7 +25,7 @@ Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211MgmtFrameSerializer);
 
-void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     if (auto authenticationFrame = dynamicPtrCast<const Ieee80211AuthenticationFrame>(chunk)) {
 //        type = ST_AUTHENTICATION;
@@ -255,7 +255,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Cannot serialize frame");
 }
 
-const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     switch (0) { // TODO receive and dispatch on type_info parameter
         case 0xB0: // ST_AUTHENTICATION

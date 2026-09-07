@@ -132,7 +132,7 @@ B deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket
 
 } // namespace
 
-void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void PimPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pimPacket = staticPtrCast<const PimPacket>(chunk);
     // PIM header common to all PIM messages:
@@ -248,7 +248,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> PimPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto pimPacket = makeShared<PimPacket>();
     // PIM header common to all PIM messages:

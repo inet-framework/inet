@@ -14,13 +14,13 @@ namespace inet {
 
 Register_Serializer(SequenceNumberHeader, SequenceNumberHeaderSerializer);
 
-void SequenceNumberHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void SequenceNumberHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& sequenceNumberHeader = staticPtrCast<const SequenceNumberHeader>(chunk);
     stream.writeUint16Be(sequenceNumberHeader->getSequenceNumber());
 }
 
-const Ptr<Chunk> SequenceNumberHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> SequenceNumberHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto sequenceNumberHeader = makeShared<SequenceNumberHeader>();
     sequenceNumberHeader->setSequenceNumber(stream.readUint16Be());

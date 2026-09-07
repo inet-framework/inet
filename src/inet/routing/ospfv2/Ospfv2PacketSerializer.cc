@@ -23,7 +23,7 @@ Register_Serializer(Ospfv2LinkStateRequestPacket, Ospfv2PacketSerializer);
 Register_Serializer(Ospfv2LinkStateUpdatePacket, Ospfv2PacketSerializer);
 Register_Serializer(Ospfv2LinkStateAcknowledgementPacket, Ospfv2PacketSerializer);
 
-void Ospfv2PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ospfv2PacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ospfPacket = staticPtrCast<const Ospfv2Packet>(chunk);
     serializeOspfHeader(stream, ospfPacket);
@@ -87,7 +87,7 @@ void Ospfv2PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ospfv2PacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ospfPacket = makeShared<Ospfv2Packet>();
     uint16_t packetLength = deserializeOspfHeader(stream, ospfPacket);

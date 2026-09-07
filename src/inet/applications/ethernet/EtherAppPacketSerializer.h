@@ -18,8 +18,8 @@ namespace inet {
 class INET_API EtherAppReqSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     EtherAppReqSerializer() : FieldsChunkSerializer() {}
@@ -31,8 +31,8 @@ class INET_API EtherAppReqSerializer : public FieldsChunkSerializer
 class INET_API EtherAppRespSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     EtherAppRespSerializer() : FieldsChunkSerializer() {}

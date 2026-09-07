@@ -15,7 +15,7 @@ namespace inet {
 Register_Serializer(PppHeader, PppHeaderSerializer);
 Register_Serializer(PppTrailer, PppTrailerSerializer);
 
-void PppHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void PppHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pppHeader = staticPtrCast<const PppHeader>(chunk);
     stream.writeUint8(pppHeader->getFlag());
@@ -24,7 +24,7 @@ void PppHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(pppHeader->getProtocol());
 }
 
-const Ptr<Chunk> PppHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> PppHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setFlag(stream.readUint8());
@@ -34,14 +34,14 @@ const Ptr<Chunk> PppHeaderSerializer::deserialize(MemoryInputStream& stream) con
     return pppHeader;
 }
 
-void PppTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void PppTrailerSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pppTrailer = staticPtrCast<const PppTrailer>(chunk);
     stream.writeUint16Be(pppTrailer->getFcs());
 //    stream.writeUint8(pppTrailer->getFlag()); //KLUDGE length is currently 2 bytes instead of 3 bytes
 }
 
-const Ptr<Chunk> PppTrailerSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> PppTrailerSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto pppTrailer = makeShared<PppTrailer>();
     pppTrailer->setFcs(stream.readUint16Be());

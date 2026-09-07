@@ -27,13 +27,13 @@ Register_Serializer(MrpManufacturerFkt, MrpSubTlvSerializer);
 Register_Serializer(MrpSubTlvTest, MrpSubTlvSerializer);
 Register_Serializer(MrpVersion, MrpVersionFieldSerializer);
 
-void MrpVersionFieldSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const
+void MrpVersionFieldSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto &version = staticPtrCast<const MrpVersion>(chunk);
     stream.writeUint16Be(version->getVersion());
 }
 
-void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const
+void MrpTlvSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto &tlv = staticPtrCast<const MrpTlvHeader>(chunk);
     size_t startPos = stream.getLength().get<B>();
@@ -129,7 +129,7 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     }
 }
 
-void MrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const
+void MrpSubTlvSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto &subTlv = staticPtrCast<const MrpSubTlvHeader>(chunk);
     stream.writeUint8(subTlv->getSubType());
@@ -154,14 +154,14 @@ void MrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> MrpVersionFieldSerializer::deserialize(MemoryInputStream &stream) const
+const Ptr<Chunk> MrpVersionFieldSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto mrpVersion = makeShared<MrpVersion>();
     mrpVersion->setVersion(stream.readUint16Be());
     return mrpVersion;
 }
 
-const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
+const Ptr<Chunk> MrpTlvSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     size_t startPos = stream.getPosition().get<B>();
     auto headerType = static_cast<TlvHeaderType>(stream.readUint8());
@@ -286,7 +286,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
     return tlvReturnValue;
 }
 
-const Ptr<Chunk> MrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const
+const Ptr<Chunk> MrpSubTlvSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto subType = static_cast<SubTlvHeaderType>(stream.readUint8());
     switch (subType) {

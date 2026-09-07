@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(DsdvHello, DsdvHelloSerializer);
 
-void DsdvHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void DsdvHelloSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& dsdvHello = staticPtrCast<const DsdvHello>(chunk);
     stream.writeIpv4Address(dsdvHello->getSrcAddress());
@@ -23,7 +23,7 @@ void DsdvHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint32Be(dsdvHello->getHopdistance());
 }
 
-const Ptr<Chunk> DsdvHelloSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> DsdvHelloSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto dsdvHello = makeShared<DsdvHello>();
     dsdvHello->setSrcAddress(stream.readIpv4Address());

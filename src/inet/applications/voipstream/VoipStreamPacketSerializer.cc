@@ -13,7 +13,7 @@ namespace inet {
 
 Register_Serializer(VoipStreamPacket, VoipStreamPacketSerializer);
 
-void VoipStreamPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void VoipStreamPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     const auto& voipStreamPacket = staticPtrCast<const VoipStreamPacket>(chunk);
@@ -37,7 +37,7 @@ void VoipStreamPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> VoipStreamPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> VoipStreamPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto voipStreamPacket = makeShared<VoipStreamPacket>();

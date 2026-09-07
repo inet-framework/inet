@@ -21,8 +21,8 @@ namespace ieee80211 {
 class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211MacHeaderSerializer() : FieldsChunkSerializer() {}
@@ -31,8 +31,8 @@ class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 class INET_API Ieee80211MacTrailerSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211MacTrailerSerializer() : FieldsChunkSerializer() {}
@@ -44,8 +44,8 @@ class INET_API Ieee80211MacTrailerSerializer : public FieldsChunkSerializer
 class INET_API Ieee80211MsduSubframeHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211MsduSubframeHeaderSerializer() : FieldsChunkSerializer() {}
@@ -57,8 +57,8 @@ class INET_API Ieee80211MsduSubframeHeaderSerializer : public FieldsChunkSeriali
 class INET_API Ieee80211MpduSubframeHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211MpduSubframeHeaderSerializer() : FieldsChunkSerializer() {}

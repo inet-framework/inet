@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(ChecksumHeader, ChecksumHeaderSerializer);
 
-void ChecksumHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void ChecksumHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& checksumHeader = staticPtrCast<const ChecksumHeader>(chunk);
     auto checksumMode = checksumHeader->getChecksumMode();
@@ -32,7 +32,7 @@ void ChecksumHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     }
 }
 
-const Ptr<Chunk> ChecksumHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ChecksumHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto checksumHeader = makeShared<ChecksumHeader>();
     B length = stream.getRemainingLength();

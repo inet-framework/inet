@@ -63,7 +63,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     }
 }
 
-void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ipv4HeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ipv4Header = staticPtrCast<const Ipv4Header>(chunk);
     serialize(stream, *ipv4Header.get());
@@ -148,7 +148,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
     }
 }
 
-const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv4HeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();

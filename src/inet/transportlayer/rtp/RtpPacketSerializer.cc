@@ -14,7 +14,7 @@ namespace rtp {
 
 Register_Serializer(RtpHeader, RtpPacketSerializer);
 
-void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void RtpPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& rtpHeader = staticPtrCast<const RtpHeader>(chunk);
     stream.writeUint2(rtpHeader->getVersion());
@@ -32,7 +32,7 @@ void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> RtpPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RtpPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto rtpHeader = makeShared<RtpHeader>();
     rtpHeader->setVersion(stream.readUint2());

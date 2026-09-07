@@ -23,7 +23,7 @@ Register_Serializer(MldDone, MldHeaderSerializer);
 Register_Serializer(Mldv2Query, MldHeaderSerializer);
 Register_Serializer(Mldv2Report, MldHeaderSerializer);
 
-void MldHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void MldHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     // MLDv2 Report (RFC 3810, ICMPv6 type 143) has its own layout (a list of records)
     if (auto report = dynamicPtrCast<const Mldv2Report>(chunk)) {
@@ -69,7 +69,7 @@ void MldHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> MldHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MldHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     B start = stream.getRemainingLength();
     uint8_t type = stream.readByte();

@@ -94,7 +94,7 @@ Register_Serializer(BindingRefreshRequest, MobilityHeaderSerializer);
 // The common MH header is 6 bytes. The Header Len field is in units of
 // 8 octets, not including the first 8 octets.
 
-void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void MobilityHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     b startPos = stream.getLength();
     const auto& mh = staticPtrCast<const MobilityHeader>(chunk);
@@ -218,7 +218,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     ASSERT(stream.getLength() - startPos == b(totalLen));
 }
 
-const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MobilityHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     b startPos = stream.getPosition();
 

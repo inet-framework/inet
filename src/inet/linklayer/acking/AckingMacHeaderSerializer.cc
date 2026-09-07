@@ -19,7 +19,7 @@ namespace inet {
 
 Register_Serializer(AckingMacHeader, AckingMacHeaderSerializer);
 
-void AckingMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void AckingMacHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     auto macHeader = staticPtrCast<const AckingMacHeader>(chunk);
@@ -34,7 +34,7 @@ void AckingMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> AckingMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> AckingMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto macHeader = makeShared<AckingMacHeader>();

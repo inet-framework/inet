@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(EchoPacket, EchoPacketSerializer);
 
-void EchoPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EchoPacketSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& echoPacket = staticPtrCast<const EchoPacket>(chunk);
     stream.writeUint16Be(echoPacket->getType());
@@ -22,7 +22,7 @@ void EchoPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeUint16Be(echoPacket->getSeqNumber());
 }
 
-const Ptr<Chunk> EchoPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EchoPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto echoPacket = makeShared<EchoPacket>();
     echoPacket->setType(static_cast<inet::EchoProtocolType>(stream.readUint16Be()));

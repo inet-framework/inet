@@ -15,7 +15,7 @@ namespace inet {
 Register_Serializer(EtherAppReq, EtherAppReqSerializer);
 Register_Serializer(EtherAppResp, EtherAppRespSerializer);
 
-void EtherAppReqSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EtherAppReqSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     const auto& etherAppReq = staticPtrCast<const EtherAppReq>(chunk);
@@ -28,7 +28,7 @@ void EtherAppReqSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> EtherAppReqSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EtherAppReqSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto etherAppReq = makeShared<EtherAppReq>();
@@ -42,7 +42,7 @@ const Ptr<Chunk> EtherAppReqSerializer::deserialize(MemoryInputStream& stream) c
     return etherAppReq;
 }
 
-void EtherAppRespSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EtherAppRespSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     const auto& etherAppResp = staticPtrCast<const EtherAppResp>(chunk);
@@ -55,7 +55,7 @@ void EtherAppRespSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeByteRepeatedly('?', remainders);
 }
 
-const Ptr<Chunk> EtherAppRespSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EtherAppRespSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto etherAppResp = makeShared<EtherAppResp>();

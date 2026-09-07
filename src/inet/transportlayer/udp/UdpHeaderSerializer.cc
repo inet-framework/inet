@@ -14,7 +14,7 @@ namespace inet {
 
 Register_Serializer(UdpHeader, UdpHeaderSerializer);
 
-void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void UdpHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& udpHeader = staticPtrCast<const UdpHeader>(chunk);
     stream.writeUint16Be(udpHeader->getSourcePort());
@@ -26,7 +26,7 @@ void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(udpHeader->getChecksum());
 }
 
-const Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> UdpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(stream.readUint16Be());

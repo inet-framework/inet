@@ -15,7 +15,7 @@ Register_Serializer(Ieee802154MacHeader, Ieee802154MacHeaderSerializer);
 // FIXME TODO KLUDGE: The IEEE 802.15.4 header does not contain information about the payload protocol type.
 // Currently, INET does not use the Source PAN ID field, so we store the payload protocol ID in this field.
 
-void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee802154MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const Ieee802154MacHeader>(chunk);
 
@@ -48,7 +48,7 @@ void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const 
     stream.writeUint16Le(0);  // Padding to 8 bytes
 }
 
-const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<Ieee802154MacHeader>();
 

@@ -52,7 +52,7 @@ Register_Serializer(Ieee80211VhtPhyHeader, Ieee80211VhtPhyHeaderSerializer);
 /**
  * FHSS
  */
-void Ieee80211FhssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211FhssPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto fhssPhyHeader = dynamicPtrCast<const Ieee80211FhssPhyHeader>(chunk);
     stream.writeNBitsOfUint64Be(fhssPhyHeader->getPlw(), 12);
@@ -60,7 +60,7 @@ void Ieee80211FhssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, con
     stream.writeUint16Be(fhssPhyHeader->getFcs());
 }
 
-const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto fhssPhyHeader = makeShared<Ieee80211FhssPhyHeader>();
     fhssPhyHeader->setPlw(stream.readNBitsToUint64Be(12));
@@ -73,13 +73,13 @@ const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserialize(MemoryInputStream
 /**
  * IR
  */
-void Ieee80211IrPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211IrPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto irPhyHeader = dynamicPtrCast<const Ieee80211IrPhyHeader>(chunk);
     stream.writeUint16Be(irPhyHeader->getFcs());
 }
 
-const Ptr<Chunk> Ieee80211IrPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211IrPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto irPhyHeader = makeShared<Ieee80211IrPhyHeader>();
     irPhyHeader->setFcs(stream.readUint16Be());
@@ -90,7 +90,7 @@ const Ptr<Chunk> Ieee80211IrPhyHeaderSerializer::deserialize(MemoryInputStream& 
 /**
  * DSSS
  */
-void Ieee80211DsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211DsssPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto dsssPhyHeader = dynamicPtrCast<const Ieee80211DsssPhyHeader>(chunk);
     stream.writeByte(dsssPhyHeader->getSignal());
@@ -99,7 +99,7 @@ void Ieee80211DsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, con
     stream.writeUint16Le(dsssPhyHeader->getFcs());
 }
 
-const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto dsssPhyHeader = makeShared<Ieee80211DsssPhyHeader>();
     dsssPhyHeader->setSignal(stream.readByte());
@@ -113,7 +113,7 @@ const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream
 /**
  * HR/DSSS
  */
-void Ieee80211HrDsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211HrDsssPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto hrDsssPhyHeader = dynamicPtrCast<const Ieee80211HrDsssPhyHeader>(chunk);
     stream.writeByte(hrDsssPhyHeader->getSignal());
@@ -122,7 +122,7 @@ void Ieee80211HrDsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, c
     stream.writeUint16Le(hrDsssPhyHeader->getFcs());
 }
 
-const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hrDsssPhyHeader = makeShared<Ieee80211HrDsssPhyHeader>();
     hrDsssPhyHeader->setSignal(stream.readByte());
@@ -136,14 +136,14 @@ const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStre
 /**
  * OFDM
  */
-void Ieee80211OfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211OfdmPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto ofdmPhyHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(chunk);
     writeOfdmSignal(stream, ofdmPhyHeader->getRate(), ofdmPhyHeader->getReserved(), ofdmPhyHeader->getLengthField().get<B>(), ofdmPhyHeader->getParity(), ofdmPhyHeader->getTail());
     stream.writeUint16Le(ofdmPhyHeader->getService());
 }
 
-const Ptr<Chunk> Ieee80211OfdmPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211OfdmPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ofdmPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
     uint8_t rate;
@@ -164,14 +164,14 @@ const Ptr<Chunk> Ieee80211OfdmPhyHeaderSerializer::deserialize(MemoryInputStream
 /**
  * ERP OFDM
  */
-void Ieee80211ErpOfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211ErpOfdmPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto erpOfdmPhyHeader = dynamicPtrCast<const Ieee80211ErpOfdmPhyHeader>(chunk);
     writeOfdmSignal(stream, erpOfdmPhyHeader->getRate(), erpOfdmPhyHeader->getReserved(), erpOfdmPhyHeader->getLengthField().get<B>(), erpOfdmPhyHeader->getParity(), erpOfdmPhyHeader->getTail());
     stream.writeUint16Le(erpOfdmPhyHeader->getService());
 }
 
-const Ptr<Chunk> Ieee80211ErpOfdmPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211ErpOfdmPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto erpOfdmPhyHeader = makeShared<Ieee80211ErpOfdmPhyHeader>();
     uint8_t rate;
@@ -192,12 +192,12 @@ const Ptr<Chunk> Ieee80211ErpOfdmPhyHeaderSerializer::deserialize(MemoryInputStr
 /**
  * HT
  */
-void Ieee80211HtPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211HtPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto htPhyHeader = dynamicPtrCast<const Ieee80211HtPhyHeader>(chunk);
 }
 
-const Ptr<Chunk> Ieee80211HtPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211HtPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto htPhyHeader = makeShared<Ieee80211HtPhyHeader>();
     return htPhyHeader;
@@ -206,12 +206,12 @@ const Ptr<Chunk> Ieee80211HtPhyHeaderSerializer::deserialize(MemoryInputStream& 
 /**
  * VHT
  */
-void Ieee80211VhtPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211VhtPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto vhtPhyHeader = dynamicPtrCast<const Ieee80211VhtPhyHeader>(chunk);
 }
 
-const Ptr<Chunk> Ieee80211VhtPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211VhtPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto vhtPhyHeader = makeShared<Ieee80211VhtPhyHeader>();
     return vhtPhyHeader;

@@ -25,7 +25,7 @@ Register_Serializer(Igmpv2Leave, IgmpHeaderSerializer);
 Register_Serializer(Igmpv3Query, IgmpHeaderSerializer);
 Register_Serializer(Igmpv3Report, IgmpHeaderSerializer);
 
-void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void IgmpHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& igmpMessage = staticPtrCast<const IgmpMessage>(chunk);
     IgmpType type = igmpMessage->getType();
@@ -99,7 +99,7 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IgmpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     B start = stream.getRemainingLength();
     unsigned char type = stream.readByte();

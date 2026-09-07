@@ -63,8 +63,8 @@ class INET_API Ospfv3PacketSerializer : public FieldsChunkSerializer
     static void deserializeIntraAreaPrefixLsa(MemoryInputStream& stream, Ospfv3IntraAreaPrefixLsa& lsa);
 
   protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ospfv3PacketSerializer() : FieldsChunkSerializer() {}

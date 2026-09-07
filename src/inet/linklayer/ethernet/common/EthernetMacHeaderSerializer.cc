@@ -25,14 +25,14 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EthernetFragmentFcs, EthernetFcsSerializer);
 
-void EthernetMacAddressFieldsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetMacAddressFieldsSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const EthernetMacAddressFields>(chunk);
     stream.writeMacAddress(header->getDest());
     stream.writeMacAddress(header->getSrc());
 }
 
-const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetMacAddressFields>();
     header->setDest(stream.readMacAddress());
@@ -40,20 +40,20 @@ const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserialize(MemoryInputStre
     return header;
 }
 
-void EthernetTypeOrLengthFieldSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetTypeOrLengthFieldSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const EthernetTypeOrLengthField>(chunk);
     stream.writeUint16Be(header->getTypeOrLength());
 }
 
-const Ptr<Chunk> EthernetTypeOrLengthFieldSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetTypeOrLengthFieldSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto header = makeShared<EthernetTypeOrLengthField>();
     header->setTypeOrLength(stream.readUint16Be());
     return header;
 }
 
-void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetMacHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
     stream.writeMacAddress(ethernetMacHeader->getDest());
@@ -61,7 +61,7 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
-const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
     ethernetMacHeader->setDest(stream.readMacAddress());
@@ -70,17 +70,17 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     return ethernetMacHeader;
 }
 
-void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetPaddingSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream.writeByteRepeatedly(0, chunk->getChunkLength().get<B>());
 }
 
-const Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPaddingSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     throw cRuntimeError("Invalid operation");
 }
 
-void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void EthernetFcsSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetFcs = staticPtrCast<const EthernetFcs>(chunk);
     if (ethernetFcs->getFcsMode() != FCS_COMPUTED)
@@ -88,7 +88,7 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(ethernetFcs->getFcs());
 }
 
-const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetFcsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ethernetFcs = makeShared<EthernetFcs>();
     ethernetFcs->setFcs(stream.readUint32Be());

@@ -16,7 +16,7 @@ namespace inet {
 Register_Serializer(Ieee8022LlcHeader, Ieee8022LlcHeaderSerializer);
 Register_Serializer(Ieee8022LlcSnapHeader, Ieee8022LlcHeaderSerializer);
 
-void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee8022LlcHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& llcHeader = CHK(dynamicPtrCast<const Ieee8022LlcHeader>(chunk));
     stream.writeByte(llcHeader->getSsap());
@@ -33,7 +33,7 @@ void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     }
 }
 
-const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();

@@ -106,7 +106,7 @@ Register_Serializer(Ieee80211MacTrailer, Ieee80211MacTrailerSerializer);
 Register_Serializer(Ieee80211MsduSubframeHeader, Ieee80211MsduSubframeHeaderSerializer);
 Register_Serializer(Ieee80211MpduSubframeHeader, Ieee80211MpduSubframeHeaderSerializer);
 
-void Ieee80211MsduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211MsduSubframeHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto msduSubframe = dynamicPtrCast<const Ieee80211MsduSubframeHeader>(chunk);
     stream.writeMacAddress(msduSubframe->getDa());
@@ -114,7 +114,7 @@ void Ieee80211MsduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream
     stream.writeUint16Be(msduSubframe->getLength());
 }
 
-const Ptr<Chunk> Ieee80211MsduSubframeHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MsduSubframeHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto msduSubframe = makeShared<Ieee80211MsduSubframeHeader>();
     msduSubframe->setDa(stream.readMacAddress());
@@ -123,7 +123,7 @@ const Ptr<Chunk> Ieee80211MsduSubframeHeaderSerializer::deserialize(MemoryInputS
     return msduSubframe;
 }
 
-void Ieee80211MpduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211MpduSubframeHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto mpduSubframe = dynamicPtrCast<const Ieee80211MpduSubframeHeader>(chunk);
     stream.writeUint4(0);
@@ -133,7 +133,7 @@ void Ieee80211MpduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream
     stream.writeByte(0x4E);
 }
 
-const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
     stream.readUint4();
@@ -144,7 +144,7 @@ const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserialize(MemoryInputS
     return mpduSubframe;
 }
 
-void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     B startPos = stream.getLength();
     auto macHeader = dynamicPtrCast<const Ieee80211MacHeader>(chunk);
@@ -364,7 +364,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     }
 }
 
-const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto macHeader = makeShared<Ieee80211MacHeader>();
     uint8_t subType = stream.readUint4();
@@ -621,7 +621,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
     }
 }
 
-void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee80211MacTrailerSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& macTrailer = dynamicPtrCast<const Ieee80211MacTrailer>(chunk);
     auto fcsMode = macTrailer->getFcsMode();
@@ -630,7 +630,7 @@ void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const 
     stream.writeUint32Be(macTrailer->getFcs());
 }
 
-const Ptr<Chunk> Ieee80211MacTrailerSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MacTrailerSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto macTrailer = makeShared<Ieee80211MacTrailer>();
     auto fcs = stream.readUint32Be();

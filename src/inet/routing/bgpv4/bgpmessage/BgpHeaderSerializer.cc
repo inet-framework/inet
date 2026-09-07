@@ -45,7 +45,7 @@ static Ipv6Address readIpv6Bytes(MemoryInputStream& stream, int numBytes)
     return Ipv6Address(w[0], w[1], w[2], w[3]);
 }
 
-void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void BgpHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& bgpHeader = staticPtrCast<const BgpHeader>(chunk);
     for (size_t i = 0; i < 16; ++i) {
@@ -240,7 +240,7 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> BgpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     bool incorrect = false;
     uint8_t marker[16];
