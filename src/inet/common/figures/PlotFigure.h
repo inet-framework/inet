@@ -67,7 +67,9 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     virtual void refreshDisplay() override;
 
     virtual void setNumSeries(int numSeries);
+    [[deprecated("renamed to getNumItems()")]]
     virtual int getNumSeries() const override { return numSeries; }
+    virtual int getNumItems() const override { return numSeries; }
 
     virtual void setValue(int series, simtime_t timestamp, double value) override { setValue(series, timestamp.dbl(), value); }
     virtual void setValue(int series, double x, double y);
