@@ -12,6 +12,16 @@
 
 namespace inet {
 
+void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    throw cRuntimeError("%s overrides neither serialize(stream, chunk) nor serializeFields(stream, chunk)", getClassName());
+}
+
+const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream) const
+{
+    throw cRuntimeError("%s overrides neither deserialize(stream) nor deserializeFields(stream, typeInfo)", getClassName());
+}
+
 void FieldsChunkSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     serialize(stream, chunk);

@@ -17,16 +17,18 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
   protected:
     /**
      * Serializes a chunk into a stream by writing all bytes representing the
-     * chunk at the end of the stream.
+     * chunk at the end of the stream. A subclass overrides either this hook or
+     * serializeFields(). The default implementation throws an error.
      */
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const;
 
     /**
      * Deserializes a chunk from a stream by reading the bytes at the current
      * position of the stream. The current stream position is updated according
-     * to the length of the returned chunk.
+     * to the length of the returned chunk. A subclass overrides either this hook
+     * or deserializeFields(). The default implementation throws an error.
      */
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const;
 
     /**
      * Serializes a chunk into a stream by writing all bytes representing the
