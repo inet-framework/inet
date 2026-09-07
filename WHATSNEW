@@ -56,6 +56,17 @@ Notable backward compatible changes are the following:
    owns a MAC address, by the host's path relative to the network, and falls back
    to the MAC address string when no host owns the address.
 
+4. Type-aware field chunk serializers
+
+   FieldsChunkSerializer gained two protected hooks, serializeFields() and
+   deserializeFields(). The deserializeFields() hook receives the concrete chunk
+   type that was requested from ChunkSerializerRegistry, so a serializer that is
+   registered for several chunk types can build the exact requested type. The old
+   hooks, serialize(stream, chunk) and deserialize(stream), are deprecated but
+   still work: they are no longer pure virtual, and the new hooks call them by
+   default. Serializers written against an earlier INET version need no source
+   change. See the migration guide for the new signatures.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
