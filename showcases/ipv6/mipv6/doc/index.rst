@@ -177,17 +177,37 @@ Mobile IPv6 in INET
 -------------------
 
 INET implements the mobile node, home agent, and correspondent node roles of
-RFC 3775 in the ``Mipv6`` module, an optional submodule of the IPv6 network
-layer (enabled by the ``hasMipv6`` parameter of ``Ipv6NetworkLayer``). The
-following node types package the three roles:
+RFC 6275 in the ``Mipv6`` module, an optional submodule of the IPv6 network
+layer. The ``hasMipv6`` parameter of ``Ipv6NetworkLayer`` creates that module,
+together with the two data modules it works with.
 
-- ``WirelessHost6`` — a wireless host with Mobile IPv6 in the mobile-node
-  role; this is the node that moves.
-- ``HomeAgent6`` — an IPv6 router (``Router6``) with the home-agent role
-  enabled.
-- ``CorrespondentNode6`` — a standard IPv6 host that can take part in route
-  optimization.
-- ``MobileHost6`` — a wired variant of the mobile node (not used here).
+Which role a node plays is decided by two boolean parameters on ``Mipv6``:
+``isMobileNode`` and ``isHomeAgent``. They are not three switches for three
+roles. They select between two kinds of memory. A mobile node keeps a
+*Binding Update List*, the record of the bindings it has registered
+elsewhere. Every other Mobile IPv6 node keeps a *Binding Cache*, the record of
+bindings it holds for others. A node that sets neither flag is a
+correspondent node: it does not select that role, it falls through to it.
+
+What each role does follows from that. The mobile node registers. It forms a
+care-of address, sends the Binding Update, and runs the return-routability
+exchange. The home agent answers. It acknowledges every Binding Update, holds
+the binding, and builds the tunnel to the care-of address. A correspondent
+node only accepts a binding and answers the return-routability test. No node
+type sets both flags.
+
+A model rarely sets the flags itself. The four node types below are ordinary
+IPv6 nodes that switch Mobile IPv6 on and then fix them, so choosing a node
+type chooses a role:
+
+- ``WirelessHost6`` — a ``StandardHost6`` with one wireless interface, in the
+  mobile-node role. This is the node that moves.
+- ``MobileHost6`` — the same role on a wired host (not used here).
+- ``HomeAgent6`` — a ``Router6`` in the home-agent role.
+- ``CorrespondentNode6`` — a ``StandardHost6`` that is neither a mobile node
+  nor a home agent. It differs from a plain ``StandardHost6`` in nothing but
+  the presence of the Mobile IPv6 modules, and that presence is what lets it
+  accept a binding and take part in route optimization.
 
 The screenshot below shows the mobile node's IPv6 network layer. Mobile IPv6
 is not a separate protocol layer: the ``mipv6`` module sits beside ``ipv6``,
@@ -215,11 +235,33 @@ image:
              (the module's own layout).
    stamp:    captured 2026-08, INET 4.7
 
+Every tunable parameter lives in the ``mipv6`` module:
+
+- ``isMobileNode`` and ``isHomeAgent`` — the two role flags, fixed by the node
+  type as described above.
+- ``useRouteOptimization`` (default ``true``) — route-optimize with
+  correspondent nodes, or always tunnel through the home agent.
+- ``maxHaBindingLifeTime`` (default 3600 s) — the ceiling on a home
+  registration.
+- ``maxRrBindingLifeTime`` (default 420 s) — the ceiling on a binding held at
+  a correspondent node.
+
+One level up, ``hasMipv6`` on ``Ipv6NetworkLayer`` decides whether these
+modules exist at all.
+
+Neither lifetime expires inside this showcase's 80 second run, but a study of
+re-registration reaches the 420 second one first. ``Mipv6`` also emits two
+signals a study can record: ``mipv6RoCompleted`` when route optimization
+finishes, and ``packetDropped``.
+
 Configuration notes:
 
-- ``useRouteOptimization`` (on the mobile node's ``mipv6`` submodule, default
-  ``true``) selects between bidirectional tunneling and route optimization —
-  in this showcase the same scenario runs both ways with this one flag.
+- ``hasMipv6`` (on the node's ``ipv6`` submodule) creates or omits the whole
+  Mobile IPv6 footprint. The ``WithoutMipv6`` configuration sets it to
+  ``false`` on the mobile node, which leaves an ordinary wireless IPv6 host
+  and is how this showcase measures what mobility support is worth.
+- ``useRouteOptimization`` on the mobile node is what separates two of the
+  three configurations: the same scenario runs both ways with this one flag.
 - Movement detection does not depend on frequent Router Advertisements: on
   every layer-2 association the IPv6 neighbour discovery module immediately
   sends a Router Solicitation (its ``detectL2Movement`` parameter, default
