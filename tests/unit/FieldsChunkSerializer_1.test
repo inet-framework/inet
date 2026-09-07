@@ -1,0 +1,150 @@
+%description:
+FieldsChunkSerializer offers two protected hook pairs. The old pair, serialize(stream, chunk)
+and deserialize(stream), does not see the requested chunk type. The new pair, serializeFields()
+and deserializeFields(), does. This test checks all three cases through ChunkSerializerRegistry:
+a serializer that overrides only the old pair, a serializer that overrides only the new pair,
+and a serializer that overrides neither.
+
+The old-pair case is the backward compatibility check. Its source text is what a serializer
+written against an earlier INET version looks like, and it must keep working unchanged.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+
+using namespace inet;
+
+%global:
+
+class LegacyChunk : public FieldsChunk
+{
+  public:
+    LegacyChunk() { setChunkLength(B(1)); }
+    LegacyChunk(const LegacyChunk& other) = default;
+    virtual LegacyChunk *dup() const override { return new LegacyChunk(*this); }
+};
+
+class TypeAwareChunkA : public FieldsChunk
+{
+  public:
+    TypeAwareChunkA() { setChunkLength(B(1)); }
+    TypeAwareChunkA(const TypeAwareChunkA& other) = default;
+    virtual TypeAwareChunkA *dup() const override { return new TypeAwareChunkA(*this); }
+};
+
+class TypeAwareChunkB : public FieldsChunk
+{
+  public:
+    TypeAwareChunkB() { setChunkLength(B(1)); }
+    TypeAwareChunkB(const TypeAwareChunkB& other) = default;
+    virtual TypeAwareChunkB *dup() const override { return new TypeAwareChunkB(*this); }
+};
+
+class NoHookChunk : public FieldsChunk
+{
+  public:
+    NoHookChunk() { setChunkLength(B(1)); }
+    NoHookChunk(const NoHookChunk& other) = default;
+    virtual NoHookChunk *dup() const override { return new NoHookChunk(*this); }
+};
+
+// A serializer written against an earlier INET version. It overrides the old hook pair only,
+// and its source text is unchanged. The new hooks fall back to these.
+class LegacyChunkSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override
+    {
+        stream.writeByte(0xA5);
+    }
+
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override
+    {
+        stream.readByte();
+        return makeShared<LegacyChunk>();
+    }
+};
+
+// A serializer that overrides the new hook pair only. It is registered for two chunk types and
+// builds the exact type that the registry asked for.
+class TypeAwareChunkSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override
+    {
+        stream.writeByte(0x5A);
+    }
+
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override
+    {
+        stream.readByte();
+        if (typeInfo == typeid(TypeAwareChunkA))
+            return makeShared<TypeAwareChunkA>();
+        else if (typeInfo == typeid(TypeAwareChunkB))
+            return makeShared<TypeAwareChunkB>();
+        else
+            throw cRuntimeError("Unexpected chunk type: %s", opp_typename(typeInfo));
+    }
+};
+
+// A serializer that overrides no hook at all. Both default bodies throw.
+class NoHookChunkSerializer : public FieldsChunkSerializer
+{
+};
+
+Register_Serializer(LegacyChunk, LegacyChunkSerializer);
+Register_Serializer(TypeAwareChunkA, TypeAwareChunkSerializer);
+Register_Serializer(TypeAwareChunkB, TypeAwareChunkSerializer);
+Register_Serializer(NoHookChunk, NoHookChunkSerializer);
+
+template<typename T>
+static void checkRoundTrip(uint8_t expectedByte)
+{
+    Packet output("output", makeShared<T>());
+    auto bytes = output.peekAllAsBytes()->getBytes();
+    ASSERT(bytes == std::vector<uint8_t>({ expectedByte }));
+
+    Packet input("input", makeShared<BytesChunk>(bytes));
+    auto chunk = input.popAtFront<T>(B(1));
+    ASSERT(typeid(*chunk) == typeid(T));
+    ASSERT(chunk->getChunkLength() == B(1));
+    ASSERT(input.getDataLength() == B(0));
+}
+
+%activity:
+
+// 1. The old hook pair alone still works. This is the backward compatibility check.
+checkRoundTrip<LegacyChunk>(0xA5);
+
+// 2. The new hook pair receives the requested type and builds it. One serializer, two types.
+checkRoundTrip<TypeAwareChunkA>(0x5A);
+checkRoundTrip<TypeAwareChunkB>(0x5A);
+
+// 3. A serializer that overrides neither hook fails with a clear error, not silently.
+bool serializeRejected = false;
+try {
+    Packet output("output", makeShared<NoHookChunk>());
+    output.peekAllAsBytes();
+}
+catch (const cRuntimeError&) {
+    serializeRejected = true;
+}
+ASSERT(serializeRejected);
+
+bool deserializeRejected = false;
+try {
+    Packet input("input", makeShared<BytesChunk>(std::vector<uint8_t>({ 0x00 })));
+    input.popAtFront<NoHookChunk>(B(1));
+}
+catch (const cRuntimeError&) {
+    deserializeRejected = true;
+}
+ASSERT(deserializeRejected);
+
+EV << "Both the old and the new field hooks work, and a missing hook is reported.\n";
+
+%contains: stdout
+Both the old and the new field hooks work, and a missing hook is reported.
