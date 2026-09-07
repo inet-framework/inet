@@ -17,7 +17,7 @@ B=/home/levy/workspace/inet-infrastructure
 
 run_in() { # run_in <worktree> <command...>
     local W=$1; shift
-    bash -c "cd /home/levy/workspace/omnetpp && source setenv -q && cd $W && source setenv -q && $*"
+    bash -c "cd /home/levy/workspace/omnetpp-inet-infrastructure-clean && source setenv -q && cd $W && source setenv -q && $*"
 }
 
 echo "== baseline update: tplx"

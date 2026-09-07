@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run one INET simulation with verified environment.
 # Usage: runsim.sh <workdir-relative-to-INET_ROOT> [extra opp_run args...]
-cd /home/levy/workspace/omnetpp || exit 1
+cd /home/levy/workspace/omnetpp-inet-infrastructure-clean || exit 1
 source setenv -q
 cd /home/levy/workspace/inet-infrastructure || exit 1
 source setenv -q

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test-runner preamble with verified environment. Usage: runtests.sh '<filter-regex>'
-cd /home/levy/workspace/omnetpp || exit 1
+cd /home/levy/workspace/omnetpp-inet-infrastructure-clean || exit 1
 source setenv -q
 cd /home/levy/workspace/inet-infrastructure || exit 1
 source setenv -q

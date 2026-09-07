@@ -9,7 +9,7 @@ set -e
 WORKTREE=$1
 RESULT=$2
 shift 2
-cd /home/levy/workspace/omnetpp && source setenv -q
+cd /home/levy/workspace/omnetpp-inet-infrastructure-clean && source setenv -q
 cd "$WORKTREE" && source setenv -q
 exec opp_run_fingerprint_tests --load @opp -p inet --no-build -m release \
     --result-file "$RESULT" "$@"
