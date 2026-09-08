@@ -376,8 +376,10 @@ them.
   `*Classifier`, `*Configurator`, `*Inserter`, `*Checker`, `*Visualizer`, `*Receiver`, …) plus
   a few C++-only roles:
 
-  | Suffix | Role | Example |
+  | Affix | Role | Example |
   |---|---|---|
+  | `I<Stem>` | **an interface**: pure virtuals only, no method body, no data. The `I` is a promise that the class carries no implementation, and [AR-ORG-CONTRACT-PURITY](architecture.md#ar-org-contract-purity) is what the promise means. A class with a body is not an interface and must not take the prefix. | `IRadio`, `IPacketQueue` |
+  | `<Stem>Base` | the shared implementation that implementors of `I<Stem>` extend; **this is where a default body lives**. There is no `*Default` suffix in INET, and none should be introduced. | `RadioBase`, `MobilityBase` |
   | `*Chunk` | a packet-content representation | `SliceChunk`, `FieldsChunk` |
   | `*Serializer` | serializes/deserializes a chunk to bytes | `Ipv4HeaderSerializer` |
   | `*ProtocolDissector` | dissects a protocol's packets | `Ipv4ProtocolDissector` |
@@ -406,7 +408,7 @@ them.
   the rare occasion a dedicated exception type is warranted, name it `<Condition>Exception`
   (`ConnectionClosedException`); reserve `cTerminationException` for ending a run cleanly.
 
-*Enforced at T3 — [`.clang-tidy`](../../../.clang-tidy).*
+*Enforced at T3 — [`.clang-tidy`](../../../.clang-tidy) for casing; [check-interfaces.sh](../enforcement/check-interfaces.sh) for the `I<Stem>` promise.*
 
 ### NR-CPP-NAME
 

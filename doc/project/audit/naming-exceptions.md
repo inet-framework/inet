@@ -94,6 +94,7 @@ here — see *Auditing* at the bottom.
 | Id | Deviation | Should be | Where | Status |
 |---|---|---|---|---|
 | NV-17 | Hyphenated icon file names `europe-er.png`, `world-er.png` | run-together lowercase | `images/maps/` | Open (trivial) |
+| NV-19 | `I<Stem>` classes that are **not interfaces** — no pure virtual at all: `IPrintableObject` (a mixin: 8 virtuals with bodies), `IScrambling` (a value type: 2 accessors), `IRadioSignal` (an enum holder over `IPrintableObject`) | `I<Stem>` is a promise of no implementation (NR-CPP-TYPE); a class that carries one takes a `*Base` or `*Mixin` name | `common/IPrintableObject.h`, `physicallayer/wireless/common/contract/bitlevel/IScrambler.h`, `physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h` | Open. `IPrintableObject` is the one that matters: it is extended by dozens of classes and its name says the opposite of what it is. `PrintableObjectMixin` reads true. |
 | NV-18 | `camelCase` and underscored icon names: `voipPhone.png`, `signal_arrival.png`, `signal_departure.png`, `signal_power_0..3.png` | run-together lowercase; the `_vs`/`_s`/`_l`/`_vl` size suffix is sanctioned | `images/misc/` | Open (trivial) |
 
 ---
@@ -116,4 +117,5 @@ find here rather than fixing it silently in place:
 | Area | Date | Findings |
 |---|---|---|
 | Repo-wide convention scan (packages, modules, gates, params, signals, `.msg` types/fields, C++ types/methods/members/enums/macros/constants, `.ini`, `.oppfeatures`, directories, tests, icons) | 2026-07-20 | Seeded this ledger: NS-01…05, NV-01…17. Not an exhaustive per-file audit — a sampling scan; individual files may hold further violations not yet listed. |
+| `check-interfaces.sh` over every `I<Stem>` class (NR-CPP-TYPE: the prefix is a promise) | 2026-09-07 | [sweep/interfaces.md](report/sweep/interfaces.md). 3 classes carry the prefix and are not interfaces — NV-19; two the gate flags, one (`IRadioSignal`) it notes and a reviewer decided. |
 | `check-naming.sh` over `src/inet`, `images/`, `.github/workflows/` — the mechanical rules NR-PKG, NR-DIR, NR-GEN, NR-ASSET, NR-CI | 2026-08-31 | [sweep/naming.md](report/sweep/naming.md). 23 hits: 11 known, 12 new. NV-02 and NV-17 extended, NV-18 opened. NR-GEN and NR-CI clean. |

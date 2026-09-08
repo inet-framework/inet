@@ -197,6 +197,25 @@ convenient namespace. It also drags the contract's dependencies along with it: t
 touches a concrete frame or a concrete mode, every implementor of the interface, present and future,
 must compile against them.
 
+**In C++ the test is mechanical: a class named `I<Stem>` holds no method body.** Only pure virtual
+declarations (`= 0;`), a virtual destructor, and the declarations below. Not a no-op default
+(`virtual void f() {}`), not a one-line forwarder, not a `const_cast` convenience. The destructor is
+the one body a C++ interface cannot avoid, and it is the only one.
+
+**A default body is not a small exception; it is the failure mode.** `IIndicatorFigure::getNumSeries()`
+had a default body returning 1. When it was renamed to `getNumItems()`, every implementation outside
+INET kept compiling, its override was silently never called again, and each figure reported one item
+([pr-1125.md](../audit/report/pull-request/pr-1125.md) F-2). A pure virtual would have made every one
+of those a compile error. The default body is what turned a loud break into a quiet one — and it was
+put there, as such comments always say, "for backward compatibility".
+
+**Where a default goes: `<Stem>Base`.** INET already pairs 58 interfaces with a `<Stem>Base` class,
+and 206 `*Base` classes exist. That is the designed place for shared machinery and for a default an
+implementor may not care about. An implementor that wants the defaults extends the Base; one that
+implements the interface directly accepts that every new method is a compile error — which is the
+correct trade, because the *interface* stays honest and the *Base* absorbs evolution. There is no
+`*Default` suffix in INET and none should be introduced; the Base is the default.
+
 The line to draw is **behavior**, not file size. A contract may declare the identities its role's
 observations use — `static simsignal_t datarateSelectedSignal` is part of the vocabulary the contract
 defines, which is why seven contract headers under `linklayer/ieee80211/mac/contract/` each have a
@@ -217,8 +236,9 @@ If it encodes a **policy** — when to attach details to a signal, which frames 
 value — then it is a modeling decision, and it belongs to the module that owns that decision, not to
 the interface that names the role.
 
-*Enforced at T4 — agent review: does a contract header declare anything that is not a pure virtual, a
-type, or a signal identity?*
+*Enforced at T3 — [check-interfaces.sh](../enforcement/check-interfaces.sh) fails on any body, data
+member or non-virtual function in a class named `I<Stem>`, and on an `I<Stem>` class with no pure
+virtual at all; T4 for a NED `moduleinterface`, and for a helper hiding under another name.*
 
 ### AR-ORG-VIS-SPLIT
 
