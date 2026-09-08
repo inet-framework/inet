@@ -41,6 +41,7 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int channelNumber);
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const;
 };
 
 } // namespace physicallayer
