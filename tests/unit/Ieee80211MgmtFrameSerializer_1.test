@@ -2,7 +2,8 @@
 Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
 subtype, consume and preserve trailing information elements, safely reject malformed SSID and
 supported-rate elements, use little-endian numeric fields, serialize Timestamp fields in
-microseconds independently of the simulation-time resolution, and round-trip through serialization.
+microseconds independently of the simulation-time resolution, validate Association-ID wire
+markers, and round-trip through serialization.
 
 %inifile: omnetpp.ini
 [General]
@@ -230,16 +231,16 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 
 {
     const std::vector<uint8_t> body = {
-        0x00, 0x00, 0x00, 0x00, 0x34, 0x12,
+        0x00, 0x00, 0x00, 0x00, 0x23, 0xC1,
         0x01, 0x01, 0x0C
     };
     auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(appendTrailingInformationElement(body));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
-    ASSERT(frame->getAid() == 0x1234);
+    ASSERT(frame->getAid() == 0x0123);
 
     auto serializedFrame = makeShared<Ieee80211AssociationResponseFrame>();
     serializedFrame->setStatusCode(SC_SUCCESSFUL);
-    serializedFrame->setAid(0x1234);
+    serializedFrame->setAid(0x0123);
     Ieee80211SupportedRatesElement supportedRates;
     supportedRates.numRates = 1;
     supportedRates.rate[0] = 6;
@@ -248,13 +249,67 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 }
 
 {
+    const std::vector<uint8_t> body = {
+        0x00, 0x00, 0x34, 0x12, 0x00, 0x00,
+        0x01, 0x01, 0x0C
+    };
+    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(body);
+    ASSERT(frame->getStatusCode() == static_cast<Ieee80211StatusCode>(0x1234));
+    ASSERT(frame->getAid() == 0);
+}
+
+{
     auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>(appendTrailingInformationElement({
-        0x00, 0x00, 0x00, 0x00, 0x45, 0x23,
+        0x00, 0x00, 0x00, 0x00, 0x45, 0xC2,
         0x01, 0x01, 0x0C
     }));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
-    ASSERT(frame->getAid() == 0x2345);
+    ASSERT(frame->getAid() == 0x0245);
 }
+
+bool missingAssociationIdMarkerRejected = false;
+try {
+    deserializeBody<Ieee80211AssociationResponseFrame>({
+        0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
+        0x01, 0x01, 0x0C
+    });
+}
+catch (const cRuntimeError&) {
+    missingAssociationIdMarkerRejected = true;
+}
+ASSERT(missingAssociationIdMarkerRejected);
+
+bool successfulZeroAssociationIdRejected = false;
+try {
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(SC_SUCCESSFUL);
+    frame->setAid(0);
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    frame->setSupportedRates(supportedRates);
+    assertSerializedBody(frame, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x0C});
+}
+catch (const cRuntimeError&) {
+    successfulZeroAssociationIdRejected = true;
+}
+ASSERT(successfulZeroAssociationIdRejected);
+
+bool unsuccessfulNonzeroAssociationIdRejected = false;
+try {
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(static_cast<Ieee80211StatusCode>(0x1234));
+    frame->setAid(1);
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    frame->setSupportedRates(supportedRates);
+    assertSerializedBody(frame, {0x00, 0x00, 0x34, 0x12, 0x00, 0x00, 0x01, 0x01, 0x0C});
+}
+catch (const cRuntimeError&) {
+    unsuccessfulNonzeroAssociationIdRejected = true;
+}
+ASSERT(unsuccessfulNonzeroAssociationIdRejected);
 
 {
     auto frame = deserializeBody<Ieee80211BeaconFrame>(appendTrailingInformationElement({
@@ -337,8 +392,8 @@ checkMalformedSupportedRates<Ieee80211ReassociationRequestFrame>({
     0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
     0x00, 0x01, 'R'
 });
-checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x34, 0x12});
-checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x45, 0x23});
+checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x23, 0xC1});
+checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x45, 0xC2});
 checkMalformedSupportedRates<Ieee80211BeaconFrame>({
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x64, 0x00, 0x00, 0x00,
