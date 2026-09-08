@@ -191,6 +191,7 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
+    mib->clearPeerHtCapabilities();
 }
 
 } // namespace ieee80211
