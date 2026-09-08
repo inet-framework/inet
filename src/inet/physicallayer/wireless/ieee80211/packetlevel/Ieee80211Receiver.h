@@ -48,4 +48,3 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
 } // namespace inet
 
 #endif
-
