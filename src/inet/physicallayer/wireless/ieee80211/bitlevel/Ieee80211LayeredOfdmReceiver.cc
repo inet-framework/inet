@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel.h"
@@ -411,6 +412,14 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     }
     // add indications
     auto packet = const_cast<Packet *>(packetModel->getPacket());
+    // Packet-domain error models duplicate the transmitted packet, including
+    // sender-local tags.  Reception results must expose only metadata that is
+    // authoritative at this boundary, just like ReceiverBase does for flat
+    // packet-level radios.
+    auto transmittedPacket = transmission->getPacket();
+    auto transmittedProtocolTag = transmittedPacket->getTag<PacketProtocolTag>();
+    packet->clearTags();
+    packet->addTag<PacketProtocolTag>()->setProtocol(transmittedProtocolTag->getProtocol());
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
