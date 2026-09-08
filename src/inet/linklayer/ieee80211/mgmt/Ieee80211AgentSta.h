@@ -8,10 +8,12 @@
 #ifndef __INET_IEEE80211AGENTSTA_H
 #define __INET_IEEE80211AGENTSTA_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
 #include <vector>
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {
@@ -30,6 +32,7 @@ class INET_API Ieee80211AgentSta : public SimpleModule, public cListener // TODO
 {
   protected:
     NetworkInterface *myIface = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
     MacAddress prevAP;
     bool activeScan = false;
     std::vector<int> channelsToScan;
