@@ -293,6 +293,18 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. A solicited Neighbor Advertisement sets the Override flag
+
+    Internet Protocol version 6 (IPv6) Neighbour Discovery decided the
+    Override flag of a Neighbor Advertisement sent in reply to a Neighbor
+    Solicitation from the wrong option, so the replies to Neighbour Unreachability Detection probes and to
+    Duplicate Address Detection probes went out with the flag clear. With the
+    flag clear, a receiver keeps its cached link-layer address when the
+    advertisement carries a different one (Request for Comments (RFC) 4861
+    Section 7.2.5). The flag is now set, as RFC 4861 Section 7.2.4 specifies. Fingerprints that hash
+    message contents or packet bytes of IPv6 networks in which such probes are
+    answered change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
