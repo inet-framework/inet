@@ -1,0 +1,145 @@
+%description:
+
+RFC 791 — a gateway forwards a datagram unchanged, and the destination passes its data up to
+the addressed program.
+
+Checks RFC791-FWD-1, RFC791-DLV-1, RFC791-PROTO-1, RFC791-HDR-1, RFC791-HDR-2, and RFC791-HDR-3
+(all description) from doc/project/evidence/standard/rfc791/catalog.md. The English procedure and the mockup are in
+doc/project/evidence/protocol/ipv4/checks.md#datagram-delivery; the program steps below map one to one onto its
+expected observations. Mapping of the mockup: host A = hostA, gateway R = router, host B =
+hostB; link 1 = hostA-router, link 2 = router-hostB.
+
+Implementation note on observation 2 ("the same source and destination addresses"): a
+".packet()" expression cannot compare two Ipv4Address values by content. PacketFilter's
+cValue engine represents a non-scalar field such as an address as an opaque pointer, and its
+equality operator compares pointer identity, not the addressed bytes (see
+src/inet/common/packet/PacketFilter.cc and the POINTER case of CompareNode::compare() in
+omnetpp's src/common/exprnodes.cc) -- a captured address could never equal a later one, even
+when the two are the same dotted-decimal address. That step therefore uses a typed C++
+predicate (.match(lambda), AUTHORING.md section 4) that reads both addresses with
+evalPacketField() and compares their str() forms as ordinary strings.
+
+Deviation on observation 4 ("the program on host B receives the 100 octets"): the tester can
+only turn a packet-carrying signal into a matchable event when the signal is one of a fixed
+set (packetSentToLower/ReceivedFromLower/SentToUpper/ReceivedFromUpper/SentToPeer/
+ReceivedFromPeer/Dropped/Pushed*/Pulled*, see ProtocolTester::initialize()'s signalKinds map).
+UdpSink emits only "packetReceived" (src/inet/applications/udpapp/UdpSink.cc), which is outside
+that set; naming it in .signal(...) does register a subscription, but only on the scalar
+(intval_t) delivery path (ProtocolTester::receiveSignal's second overload), which a
+Packet-carrying emission never reaches, so the step could never see an event no matter how it
+was phrased -- confirmed empirically (deadline miss with zero candidate events) and by reading
+both call sites. No application-layer module in this mockup emits a signal the tester
+recognizes. The nearest faithful, actually-observable proxy is UDP's own upward handoff:
+Udp::sendUp() (src/inet/transportlayer/udp/Udp.cc) emits packetSentToUpperSignal -- a
+recognized kind -- on the fully-stripped, 100-octet application payload immediately before
+send()ing it to the socket that resolves to hostB.app[0]. This is the same reasoning
+checks.md's own Notes section already applies one layer down ("host B's UDP receiving the
+datagram is the observable form of 'passes the data to the application program'"): here it is
+UDP's act of *handing the data upward* that stands for the program receiving it, one step
+closer to the program than observation 3.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_datagram_delivery")
+        // Expected observation 1: link 1 shows version 4, a header length of 20 octets, a
+        // total length of 128 octets, and the UDP protocol number (17) -- confirms the
+        // stimulus and covers RFC791-HDR-1, HDR-2, HDR-3 and the wire half of PROTO-1.
+        // Record the source and destination addresses for the observation-2 comparison.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.version == 4 && ipv4.headerLength == 20B && ipv4.totalLengthField == 128B && ipv4.protocolId == 17")
+                  .capture("srcAddr", [](const PacketEvent& e) {
+                      return evalPacketField(e.packet, "ipv4.srcAddress").pointerValue().get<Ipv4Address>()->str();
+                  })
+                  .capture("dstAddr", [](const PacketEvent& e) {
+                      return evalPacketField(e.packet, "ipv4.destAddress").pointerValue().get<Ipv4Address>()->str();
+                  })
+                  .describe("the datagram on link 1 with version 4, header length 20, total length 128, and protocol UDP")
+                  .within(0.5))
+        // Expected observation 2: link 2 shows the same source and destination addresses --
+        // the gateway forwarded it and did not rewrite them (RFC791-FWD-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) {
+                      return evalPacketField(c.event.packet, "ipv4.srcAddress").pointerValue().get<Ipv4Address>()->str() == c.get("srcAddr").stdstringValue()
+                          && evalPacketField(c.event.packet, "ipv4.destAddress").pointerValue().get<Ipv4Address>()->str() == c.get("dstAddr").stdstringValue();
+                  })
+                  .describe("the same datagram on link 2 with the same source and destination addresses")
+                  .within(0.1))
+        // Expected observation 3: host B's UDP receives the datagram with the 100 octets of
+        // data -- the internet module handed the data to the protocol the header named
+        // (RFC791-PROTO-1).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B") // 8-octet UDP header + 100 octets of data
+                  .describe("the datagram at host B's UDP with 100 octets of data")
+                  .within(0.1))
+        // Expected observation 4: the program on host B receives the 100 octets
+        // (RFC791-DLV-1). UdpSink's own "packetReceived" signal is not one the tester can
+        // observe (see the %description deviation note), so this uses UDP's handoff to the
+        // socket instead -- the last recognizable signal before the data reaches the program.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 100;
+                  })
+                  .describe("the 100 octets of data handed up from host B's UDP toward the program")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_datagram_delivery compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/ipv4/checks.md#datagram-delivery: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# One UDP datagram, 100 octets of application data, sender TTL the sender's default.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc791_datagram_delivery: PASS

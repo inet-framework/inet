@@ -1,0 +1,111 @@
+%description:
+
+RFC 791 — a gateway decreases the TTL of a forwarded datagram, and its header checksum changes
+because of it.
+
+Checks RFC791-TTL-1 (must), RFC791-CKSUM-1 (description), and RFC791-TTL-3 (description) from
+doc/project/evidence/standard/rfc791/catalog.md. The English procedure and the mockup are in
+doc/project/evidence/protocol/ipv4/checks.md#ttl-decrement; the program steps below map one to one onto its expected
+observations, except that observation 4 (the checksum) shares its wire event with observation 2
+(both properties belong to the one datagram sent on link 2), so one program step asserts both.
+Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB; link 1 =
+hostA-router, link 2 = router-hostB.
+
+The ini sets **.checksumMode = "computed" (the same wildcard INET's own examples use for this
+purpose, e.g. examples/inet/udpclientserver/omnetpp.ini). A narrower *.ipv4.ip.checksumMode
+(matching the module path seen in the trace, hostA.ipv4.ip) compiled and ran but never actually
+took hold -- the header kept reporting checksumMode = 1 (FCS_DECLARED_CORRECT) and the fixed
+0xC00D checksum on both links; only the doubled-wildcard form changed it to computed values.
+Under the default ("declared") mode, Ipv4Header::updateChecksum() writes that fixed sentinel on
+every datagram regardless of its content (src/inet/networklayer/ipv4/Ipv4Header.cc), so link 1
+and link 2 would show the identical checksum for a reason unrelated to the TTL decrement.
+checks.md's common mockup permits configuring this mode off, because this check specifically
+reads the checksum value.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_ttl_decrement")
+        // Expected observation 1: link 1 shows the sender value (RFC791-TTL-3). Record the
+        // TTL and the header checksum for the observation-4 comparison below.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 32")
+                  .capture("ttl", "ipv4.timeToLive")
+                  .capture("cksum1", "ipv4.checksum")
+                  .describe("the datagram on link 1 with the sender TTL")
+                  .within(0.5))
+        // Expected observations 2 and 4: link 2 shows the recorded TTL value minus 1
+        // (RFC791-TTL-1), and a header checksum that differs from the one recorded on
+        // link 1, because the TTL change forced a recomputation (RFC791-CKSUM-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1 && ipv4.checksum != {cksum1}")
+                  .describe("the same datagram on link 2 with the TTL decreased by one and a different header checksum")
+                  .within(0.1))
+        // Expected observation 3: host B receives it with the decreased TTL.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
+                  .describe("the datagram at host B with the TTL decreased by one")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_ttl_decrement compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/ipv4/checks.md#ttl-decrement: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Compute real header checksums instead of the default "declared correct" placeholder, so
+# observation 4 (the checksum changes with the TTL) has an actual value to compare.
+**.checksumMode = "computed"
+
+# One UDP datagram, 100 octets of application data, sender TTL 32.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 32
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc791_ttl_decrement: PASS

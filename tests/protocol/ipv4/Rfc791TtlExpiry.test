@@ -1,0 +1,106 @@
+%description:
+
+RFC 791 / RFC 792 — a gateway destroys a datagram whose time to live reaches zero, and it
+reports the drop to the source.
+
+Checks RFC791-TTL-2 (must) and RFC792-TE-1 (must + may) from doc/project/evidence/standard/rfc791/catalog.md. The English
+procedure and the mockup are in doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry; the program steps below map one
+to one onto its expected observations. Host A sends with TTL 1, so the datagram survives
+exactly one hop; the gateway decrements it to zero and must destroy it. Mapping of the mockup:
+host A = hostA, gateway R = router, host B = hostB; link 1 = hostA-router, link 2 =
+router-hostB.
+
+The ICMP step (observation 3) asserts a "may" clause of RFC 792. A silent discard also
+conforms to the RFCs. If this step fails on some implementation, record an implementation gap
+against the "may" clause, not a specification violation (see
+doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry, Notes).
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_ttl_expiry")
+        // Expected observation 1: link 1 shows the datagram with TTL = 1 -- confirms the
+        // stimulus. Record the identification to scope the observation-3 absence check.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 1")
+                  .capture("id", "ipv4.identification")
+                  .describe("the datagram on link 1 with TTL 1")
+                  .within(0.5))
+        // Expected observation 2: the gateway discards the datagram (RFC791-TTL-2). The
+        // discard is recorded at the moment of the decision, before the report crosses
+        // link 1, so this step is in time where a watch on link 2 would open too late.
+        .once(on("router.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id}")
+                  .describe("the gateway's discard of the datagram")
+                  .within(0.1))
+        // Expected observation 3: host A receives an ICMP time exceeded message, type 11,
+        // code 0 (RFC792-TE-1).
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 11 && icmpv4.code == 0") // the dissector protocol name is icmpv4
+                  .describe("the ICMP time exceeded message received at host A")
+                  .within(0.1))
+        // Expected observation 4: from then on the datagram never appears on link 2, so host
+        // B never receives it (RFC791-TTL-2, the wire form of observation 2).
+        .never(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.identification == {id}")
+                  .describe("any part of the datagram on link 2")
+                  .within(0.3));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_ttl_expiry compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# One UDP datagram, 100 octets of application data, sender TTL 1: it survives exactly one hop.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 1
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc791_ttl_expiry: PASS

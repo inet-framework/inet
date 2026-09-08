@@ -1,0 +1,132 @@
+%description:
+
+RFC 791 — every internet module can forward a 68-octet datagram whole, and a host accepts a
+576-octet datagram that arrives as fragments.
+
+Checks RFC791-FRAG-6 (must) and RFC791-REASM-2 (must) from doc/project/evidence/standard/rfc791/catalog.md. The English
+procedure and the size arithmetic are in doc/project/evidence/protocol/ipv4/checks.md#minimum-sizes; the program steps
+below map one to one onto its expected observations. Mapping of the mockup: host A = hostA,
+gateway R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB with its MTU
+set to 68 octets, the smallest the RFC lets a module demand.
+
+Two applications on host A send the two datagrams (40 and 548 octets of application data),
+since one UdpBasicApp instance sends messages of a single configured length.
+
+Implementation note on observation 4: its packet expression does not test "udp.destPort", even
+though the first fragment of datagram 2 does carry a complete, byte-identical UDP header.
+Ipv4ProtocolDissector::dissect() (src/inet/networklayer/ipv4/Ipv4ProtocolDissector.cc) only
+descends into the next-protocol dissector when fragmentOffset == 0 && !moreFragments; any
+fragment -- first or not -- is otherwise dissected as opaque, protocol-less data, so
+"udp.destPort" can never match on a fragment and silently stalls the step (confirmed by
+comparing against the raw Cmdenv packet dump, which does print the UdpHeader fields because it
+walks the chunk tree directly instead of going through the protocol-aware dissector).
+ipv4.moreFragments alone already disambiguates datagram 2's fragments from datagram 1, which
+never carries that flag.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_minimum_sizes")
+        // Expected observation 1: link 1 shows datagram 1 with total length 68 -- confirms
+        // the stimulus.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 68B")
+                  .describe("datagram 1 on link 1 with total length 68")
+                  .within(0.5))
+        // Expected observation 2: link 2 shows datagram 1 whole -- total length 68,
+        // more-fragments 0, fragment offset 0 (RFC791-FRAG-6).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 68B && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
+                  .describe("datagram 1 on link 2, whole and unfragmented")
+                  .within(0.1))
+        // Expected observation 3: link 1 shows datagram 2 with total length 576.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 576B")
+                  .describe("datagram 2 on link 1 with total length 576")
+                  .within(0.3))
+        // Expected observation 4: link 2 shows a fragment of datagram 2 with the
+        // more-fragments flag set -- the gateway fragmented it (datagram 1 never carries
+        // this flag, so it alone identifies a datagram-2 fragment).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.moreFragments == true")
+                  .describe("a fragment of datagram 2 on link 2 with the more-fragments flag set")
+                  .within(0.1))
+        // Expected observation 5: host B's UDP receives datagram 2 whole, 556 octets of UDP
+        // datagram, that is 548 octets of data (RFC791-REASM-2).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 556B") // 8-octet UDP header + 548 octets of data
+                  .describe("the reassembled 556-octet UDP datagram at host B")
+                  .within(0.3));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_minimum_sizes compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/ipv4/checks.md#minimum-sizes: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1], MTU 68
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Link 2's MTU is the smallest an internet module must accept (68 octets); link 1 keeps the
+# default MTU. The MTU parameter lives on the MAC module of the interface.
+*.router.eth[1].mac.mtu = 68B
+
+# Datagram 1: 40 octets of application data, so 20 + 8 + 40 = 68 octets -- crosses link 2 whole.
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 40B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+
+# Datagram 2: 548 octets of application data, so 20 + 8 + 548 = 576 octets -- the gateway must
+# fragment it for link 2, and host B must reassemble it. Sent after datagram 1.
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].destAddresses = "hostB"
+*.hostA.app[1].destPort = 5000
+*.hostA.app[1].localPort = 4001
+*.hostA.app[1].messageLength = 548B
+*.hostA.app[1].startTime = 0.2s
+*.hostA.app[1].sendInterval = 1s
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc791_minimum_sizes: PASS
