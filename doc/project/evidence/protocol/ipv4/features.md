@@ -340,8 +340,12 @@ or that this map marks the area as out of scope.
 | RFC 1122, Error reporting | IPV4-F-ERROR-REPORT |
 | RFC 6864, Identification | IPV4-F-IDENTIFICATION, IPV4-F-DONT-FRAGMENT |
 
-All 23 entries of RFC 791 and RFC 792, all 37 entries of RFC 1122, and all 7 entries of
-RFC 6864 appear in the map, and no entry appears in none.
+All 21 entries of RFC 791, the two RFC 792 entries that report an IPv4 failure, all 37
+entries of RFC 1122, and all 7 entries of RFC 6864 appear in the map, and no entry appears
+in none. The third entry of the shared RFC 792 catalog,
+[RFC792-DU-3](../../standard/rfc792/catalog.md#rfc792-du-3), the port unreachable report,
+serves UDP and is mapped in [`udp/features.md`](../udp/features.md); the RFC 792 catalog is
+one copy for every protocol that uses it.
 
 Out of scope in the map, because the catalogs put them out of scope: options, type of
 service and precedence, the security annex, the ICMP messages other than the error

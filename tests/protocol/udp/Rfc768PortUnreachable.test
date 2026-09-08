@@ -1,0 +1,139 @@
+%description:
+
+RFC 792: if the destination host cannot deliver the datagram because the indicated port is not
+active, the destination host may send a destination unreachable message, code 3, to the
+source. RFC 768: the destination port selects the receiver; a port that no program opened
+selects none.
+
+Checks RFC792-DU-3 (may). Also covers RFC768-HDR-2 (the closed-port half) from
+doc/project/evidence/standard/rfc768/catalog.md (the RFC792 catalog holds RFC792-DU-3 itself).
+The English procedure and the mockup are in
+doc/project/evidence/protocol/udp/checks.md#port-unreachable; the program steps below map one
+to one onto its expected observations. Mapping of the mockup: host A = hostA, host B = hostB;
+link 1 = hostA-hostB. Host B opens no application port at all (numApps = 0), so port 6000 is
+certainly closed.
+
+The ICMP step (observation 3) asserts a "may" clause of RFC 792, the same status the
+Rfc791TtlExpiry.test ICMP step already carries: a silent discard also conforms to the RFCs. If
+this step fails on some implementation, record an implementation gap against the "may" clause,
+not a specification violation (see doc/project/evidence/protocol/udp/checks.md#port-unreachable,
+Notes). Verified in Udp.cc: Udp::processUndeliverablePacket() is reached when
+findSocketForUnicastPacket() finds no match; it emits packetDroppedSignal (reason
+NO_PORT_FOUND) on the packet before it builds the Icmpv4SendErrorReq (type 3 /
+ICMP_DESTINATION_UNREACHABLE, code 3 / ICMP_DU_PORT_UNREACHABLE) and dispatches it to ICMP.
+StandardHost's IPv4 stack instantiates an `icmp: Icmp` submodule unconditionally
+(Ipv4NetworkLayer.ned), so host A's own stack is not what is under test here -- host B is.
+
+Deviation on observation 2's filter: a plain .packet("udp.destPort == 6000") does not match
+here, even though the UDP header is genuinely still present on the packet at that point (the
+front offset is restored before the emit, in processUDPPacket(), so peekAtFront<UdpHeader>()
+in processUndeliverablePacket() succeeds). The reason is upstream of the header itself:
+processUDPPacket() unconditionally calls udpPacket->removeTag<PacketProtocolTag>() as its very
+first action, for every packet it receives, before it even pops the header. The tester's
+.packet(expr) dissects via PacketDissector::dissectPacket(Packet*) (PacketField.cc), which
+looks up that same PacketProtocolTag to pick which protocol's dissector to start with
+(PacketDissector.cc); with the tag gone, it falls back to DefaultProtocolDissector (registered
+for protocol == nullptr), which does not attribute the UDP header chunk to protocol "udp" --
+confirmed with a temporary diagnostic .match(lambda) that both a protocol-name lookup
+(evalPacketField(..., "udp.destPort")) and a chunk-class lookup
+(evalPacketField(..., "UdpHeader.destPort")) throw "protocol '...' not present in packet" for
+this exact event, even though the event itself does arrive (byteLength 108, confirmed by the
+same diagnostic) -- so neither PacketFilter path can attribute this chunk once the tag is gone.
+Ipv4's own drop paths (e.g. the TTL-expiry one in Ipv4.cc) never strip this tag, so
+Rfc791TtlExpiry.test's equivalent ipv4.identification filter on a packetDropped signal never
+hits this. The fix confirms the same content honestly through a property that does not depend
+on dissection at all -- the packet's byte length, 108 (8-octet header + 100 octets of data),
+the same tag-independent technique this suite already uses for hostB.udp's packetSentToUpper
+handoffs (see Rfc768DatagramDelivery.test and Rfc768Checksum.test) -- rather than through a
+re-dissected port field.
+
+Observation 4 needs no packet filter: the only datagram host B's UDP ever sees in this
+scenario is the one to the closed port 6000, so asserting that packetSentToUpper never fires at
+all is equivalent to asserting that no program is ever handed anything.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_port_unreachable")
+        // Expected observation 1: link 1 shows the datagram to port 6000 from port 4000 --
+        // confirms the stimulus.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.srcPort == 4000 && udp.destPort == 6000")
+                  .describe("the datagram on link 1 to port 6000 from port 4000")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP discards the datagram -- a discard for a port
+        // without a program is recorded at host B (RFC768-HDR-2, the closed-port half). This
+        // is in time, before the ICMP report is built, so it does not anchor too late. Filtered
+        // by size, not by a re-dissected udp.destPort -- see the %description deviation note.
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 108; // 8-octet UDP header + 100 octets of data
+                  })
+                  .describe("host B's UDP discard of the 108-octet datagram to the closed port 6000")
+                  .within(0.1))
+        // Expected observation 3: host A receives an ICMP destination unreachable message,
+        // type 3, code 3 (RFC792-DU-3).
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 3 && icmpv4.code == 3") // the dissector protocol name is icmpv4
+                  .describe("the ICMP destination unreachable (port) message received at host A")
+                  .within(0.1))
+        // Expected observation 4: from then on, host B's UDP hands nothing upward -- no
+        // program ever receives the datagram.
+        .never(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("any datagram handed up to a program at host B")
+                  .within(0.3));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_port_unreachable compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/udp/checks.md#port-unreachable: hostA -- hostB.
+network Rfc768PortUnreachableNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768PortUnreachableNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host A: 100 octets from port 4000 to host B's port 6000.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 6000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+
+# Host B: no application at all -- port 6000 (and every other port) is closed.
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc768_port_unreachable: PASS

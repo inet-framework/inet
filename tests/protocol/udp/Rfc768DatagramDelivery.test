@@ -1,0 +1,157 @@
+%description:
+
+RFC 768 — the destination port selects the receiving program within the destination address,
+the length field counts the header and the data with a minimum of eight, and the datagram is
+carried as IP protocol 17.
+
+Checks RFC768-HDR-2, RFC768-HDR-3 and RFC768-PROTO-1 (all description) and RFC768-UI-1
+(should) from doc/project/evidence/standard/rfc768/catalog.md. Also covers RFC768-HDR-1
+(description). The English procedure and the mockup are in
+doc/project/evidence/protocol/udp/checks.md#datagram-delivery; the program steps below map one
+to one onto its expected observations. Mapping of the mockup: host A = hostA, host B = hostB;
+link 1 = hostA-hostB.
+
+Deviation on observations 2 and 4 ("hands ... upward to the program"): as already
+established in tests/protocol/ipv4/Rfc791DatagramDelivery.test, UdpSink's own "packetReceived"
+signal is not one the tester can turn into a matchable event (it is outside the fixed
+signalKinds set the tester recognises, and the scalar-delivery overload a Packet-carrying
+emission never reaches -- see that file's %description for the full argument). The nearest
+faithful, actually-observable proxy is again Udp::sendUp()'s packetSentToUpperSignal
+(src/inet/transportlayer/udp/Udp.cc), one step closer to the program than the wire. Because
+that signal fires after the UDP header has already been popped off the packet
+(Udp::processUDPPacket() calls popAtFront<UdpHeader> before dispatching), no udp.* field
+survives to be filtered on it; the two sends are told apart the same way checks.md's own
+Notes do it -- by size (100 / 200 octets) -- via a typed .match(lambda) on
+packet->getByteLength().
+
+Deviation on observation 4's "and not to the program on port 5000": checks.md's Notes section
+says this half is established together with the port-unreachable check (a datagram to an open
+port reaches its program, a datagram to a closed one reaches none), and that the size alone
+already tells the two sends to hostB apart (the 200-octet handoff cannot be P1's 100-octet one).
+No separate negative step is added here for it.
+
+Observations 5 and 6 (the empty, 0-octet datagram from P3) are not runnable and are left out of
+the program below. UdpBasicApp::sendPacket() itself places no lower bound on messageLength
+(payload->setChunkLength(B(par("messageLength")))), but the packet library it hands the result
+to does: Packet::insertAt() -- the function insertAtBack() calls -- asserts
+CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty")
+(src/inet/common/packet/Packet.cc), and the same guard is repeated in SequenceChunk.cc,
+ChunkQueue.cc and ChunkBuffer.cc. Confirmed empirically: giving UdpBasicApp messageLength = 0B
+aborts the run with "<!> Error: chunk is empty -- in module (inet::UdpBasicApp)
+...hostA.app[2] ... at t=0.3s" the instant it tries to send. This is a universal invariant of
+the chunk/packet abstraction itself, not a peculiarity of UdpBasicApp -- no application built on
+Packet::insertAtBack() in this codebase could construct a wire-empty datagram, so a scenario
+tooling limit, not a model verdict, is what observations 5 and 6 run into. P3 is therefore not
+part of the scenario below; host A runs only P1 and P2.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_datagram_delivery")
+        // Expected observation 1: link 1 shows P1's datagram, port 4000 to port 5000, UDP
+        // length 108 octets (8-octet header + 100 octets of data), IP protocol 17 -- confirms
+        // the stimulus and covers RFC768-HDR-1 (a meaningful source port), RFC768-HDR-3 and
+        // RFC768-PROTO-1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.srcPort == 4000 && udp.destPort == 5000 && udp.totalLengthField == 108B && ipv4.protocolId == 17")
+                  .describe("P1's datagram on link 1, port 4000 to port 5000, UDP length 108")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP hands P1's 100 octets of data upward, to the
+        // program on port 5000 (RFC768-HDR-2, RFC768-UI-1).
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 100;
+                  })
+                  .describe("the 100 octets of P1's data handed up from host B's UDP toward the program on port 5000")
+                  .within(0.1))
+        // Expected observation 3: link 1 shows P2's datagram, port 4001 to port 5001, UDP
+        // length 208 octets (8-octet header + 200 octets of data).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.srcPort == 4001 && udp.destPort == 5001 && udp.totalLengthField == 208B")
+                  .describe("P2's datagram on link 1, port 4001 to port 5001, UDP length 208")
+                  .within(0.2))
+        // Expected observation 4: host B's UDP hands P2's 200 octets of data upward, to the
+        // program on port 5001 and not to the program on port 5000 -- the port selected the
+        // receiver (RFC768-HDR-2). The 200-octet size cannot be P1's 100-octet datagram, so
+        // the size alone is the "not to port 5000" evidence (see checks.md Notes).
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 200;
+                  })
+                  .describe("the 200 octets of P2's data handed up from host B's UDP toward the program on port 5001")
+                  .within(0.1));
+        // Expected observations 5 and 6 (P3's empty, 0-octet datagram and its upward handoff)
+        // are not runnable with this model: see the %description note -- Packet::insertAt(),
+        // which insertAtBack() calls, refuses any chunk of length 0 ("chunk is empty"), a
+        // universal invariant of the packet library, confirmed by an actual crash when P3 was
+        // included. P3 is not part of this scenario.
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_datagram_delivery compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/udp/checks.md#datagram-delivery: hostA -- hostB.
+network Rfc768DatagramDeliveryNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768DatagramDeliveryNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# P1: 100 octets, port 4000 -> 5000.
+# (P3, the empty 0-octet datagram of checks.md's scenario constants, is not runnable with this
+# model -- see %description -- so host A here runs only P1 and P2.)
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+
+# P2: 200 octets, port 4001 -> 5001, starts 0.1s after P1.
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].destAddresses = "hostB"
+*.hostA.app[1].destPort = 5001
+*.hostA.app[1].localPort = 4001
+*.hostA.app[1].messageLength = 200B
+*.hostA.app[1].startTime = 0.2s
+*.hostA.app[1].sendInterval = 1s
+
+# Host B: one receiving program per open port, 5000 and 5001.
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST rfc768_datagram_delivery: PASS

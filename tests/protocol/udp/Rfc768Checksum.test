@@ -1,0 +1,145 @@
+%description:
+
+RFC 768 — a sender that generates a checksum transmits a nonzero value, and a sender that
+generates none transmits zero; the receiver accepts a datagram of either kind.
+
+Checks RFC768-CKSUM-2 (description). Also covers RFC768-CKSUM-1 (description, presence only)
+from doc/project/evidence/standard/rfc768/catalog.md. The English procedure and the mockup are
+in doc/project/evidence/protocol/udp/checks.md#checksum-presence-and-absence; the program steps
+below map one to one onto its expected observations. Mapping of the mockup: host A = hostA,
+host B = hostB, host C = hostC; link 1 = hostA-hostB, link 2 = hostB-hostC.
+
+Udp's checksum mode is the `checksumMode` parameter of the ~Udp module
+(src/inet/transportlayer/udp/Udp.ned), `@enum("disabled", "declared", "computed")`, default
+"declared". Only two of the three values are usable here: "computed" makes the sender compute
+and transmit the real RFC 768 checksum (a nonzero value, or all-ones if the sum came out zero);
+"disabled" makes it transmit an all-zero checksum, i.e. RFC768-CKSUM-2's "generated none". The
+third value, "declared", is a non-serializable simulation shortcut (a placeholder value of
+0xC00D, asserted correct without being computed) and is not one of the two RFC 768 behaviours,
+so it is not used by either host here. Host A therefore sets `*.hostA.udp.checksumMode =
+"computed"`, host C sets `*.hostC.udp.checksumMode = "disabled"`.
+
+Implementation note verified in Udp.cc: when checksumMode is "computed", Udp::initialize()
+(INITSTAGE_TRANSPORT_LAYER) dynamically creates a UdpChecksumInsertionHook submodule and
+registers it as an IPv4 datagramPostRoutingHook; the header's checksum field is left as 0x0000
+at packet-creation time and is only filled in by that hook during IP post-routing -- still
+strictly before the packet reaches the link layer, so it is already final wherever this program
+observes it (link 1). The "disabled" (and "declared"/"declared-incorrect") modes instead set
+the checksum field synchronously in Udp::insertChecksum() at packet-creation time; no hook is
+involved.
+
+Deviation on observations 2 and 4 ("hands ... upward"): as established in
+tests/protocol/ipv4/Rfc791DatagramDelivery.test and reused in Rfc768DatagramDelivery.test,
+UdpSink's own "packetReceived" signal cannot be observed by the tester; the proxy is
+Udp::sendUp()'s packetSentToUpperSignal, and because the UDP header is already stripped by
+then, host A's and host C's datagrams are told apart at host B by size (100 vs 200 octets),
+exactly as checks.md's own Notes prescribe.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_checksum")
+        // Expected observation 1: link 1 shows host A's datagram to port 5000 with a nonzero
+        // checksum -- confirms the stimulus of the first half (a checksum was generated).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B && udp.checksum != 0")
+                  .describe("host A's 100-octet datagram on link 1 with a nonzero checksum")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP hands the 100 octets upward -- the datagram
+        // with a checksum was accepted.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 100;
+                  })
+                  .describe("host A's 100 octets handed up from host B's UDP, accepted with a checksum")
+                  .within(0.1))
+        // Expected observation 3: link 2 shows host C's datagram to port 5000 with an
+        // all-zero checksum -- confirms the stimulus of the second half (no checksum was
+        // generated).
+        .once(on("hostC.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 208B && udp.checksum == 0")
+                  .describe("host C's 200-octet datagram on link 2 with an all-zero checksum")
+                  .within(0.2))
+        // Expected observation 4: host B's UDP hands the 200 octets upward -- the datagram
+        // without a checksum was accepted, not discarded as a failed one.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getByteLength() == 200;
+                  })
+                  .describe("host C's 200 octets handed up from host B's UDP, accepted without a checksum")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_checksum compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/udp/checks.md#checksum-presence-and-absence:
+// hostA -- hostB -- hostC, host B between the other two, no forwarding needed (both sends
+// terminate at host B itself).
+network Rfc768ChecksumNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        hostB: StandardHost { @display("p=400,100"); }
+        hostC: StandardHost { @display("p=600,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1 (hostB.eth[0])
+        hostB.ethg++ <--> Eth100M <--> hostC.ethg++; // link 2 (hostB.eth[1])
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768ChecksumNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host A generates a real checksum; host C generates none (transmits an all-zero checksum).
+*.hostA.udp.checksumMode = "computed"
+*.hostC.udp.checksumMode = "disabled"
+
+# Host A: 100 octets to port 5000.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+
+# Host C: 200 octets to port 5000, starts 0.1s after host A.
+*.hostC.numApps = 1
+*.hostC.app[0].typename = "UdpBasicApp"
+*.hostC.app[0].destAddresses = "hostB"
+*.hostC.app[0].destPort = 5000
+*.hostC.app[0].localPort = 4001
+*.hostC.app[0].messageLength = 200B
+*.hostC.app[0].startTime = 0.2s
+*.hostC.app[0].sendInterval = 1s
+
+# Host B: one receiving program, on port 5000.
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc768_checksum: PASS
