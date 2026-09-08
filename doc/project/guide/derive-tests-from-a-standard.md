@@ -72,8 +72,8 @@ defines the level.
 | Level | Name | What it adds | Toolset a check may use | Exit criterion |
 | --- | --- | --- | --- | --- |
 | 1 | **Survey** | The standards family and the model's claim. No test at all. | none | The standards map pins an in-scope set, every model claim is mapped onto it, and every obsolete claim is named. |
-| 2 | **Core** | The normal path of every mandatory mechanism. | observe a normal exchange on the wire | Every normal-path mandatory mechanism of the base document appears as a feature, and every mandatory feature has a core check that ran and has a verdict. |
-| 3 | **Edge** | Everything away from the happy path: boundary values, negative requirements, error reports, injected faults. | and injection, interception, absence steps | The catalogs hold every mandatory statement of the in-scope documents, including each `MUST NOT`, and each one has a check. |
+| 2 | **Core** | The normal path of every mandatory mechanism, with its boundary values. | observe a normal exchange on the wire, including the absence of a packet | Every normal-path mandatory mechanism of the base document appears as a feature, and every mandatory feature has a core check that ran and has a verdict. |
+| 3 | **Edge** | Everything that needs a fault to show: negative requirements, error reports, corrupted or crafted input. | and injection, interception | The catalogs hold every mandatory statement of the in-scope documents, including each `MUST NOT`, and each one has a check. |
 | 4 | **Dynamics** | Timers, distributions, control loops. | and statistical tests, state signals | The catalogs hold every timer and every control loop of the in-scope set, and each one has a check with a stated tolerance. |
 | 5 | **Complete** | The optional features, the options, the whole state machine. | and module tests, fingerprints | No area of an in-scope catalog stays out of scope, and the conformance matrix holds no `unverified`. |
 
@@ -88,8 +88,10 @@ Each step up is a different kind of work, not more of the same:
   having on its own. The TCP survey found that the model claims RFC 793 and never names
   RFC 9293, and that finding cost no simulation.
 - **2 to 3** adds control over the network. You must drop, corrupt, delay, or craft a
-  packet, and you must assert an absence. Debugging is harder, because a missing packet and
-  a wrong filter look the same.
+  packet. An absence step alone stays at level 2: a don't-fragment discard or a TTL expiry
+  needs only observation, and the rule of step 5 — one observation confirms the stimulus —
+  guards against a vacuous pass. Debugging at level 3 is harder, because a missing packet
+  and a wrong filter look the same.
 - **3 to 4** adds statistics. A timer or a congestion window is a distribution, not a value,
   so every check needs a tolerance and a defence against a false failure.
 - **4 to 5** adds no new tool. It differs by exhaustiveness alone, so it is the one level
