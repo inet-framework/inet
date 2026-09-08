@@ -72,14 +72,14 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int getNumModes() const { return entries.size(); }
     const IIeee80211Mode *getMode(int index) const { return entries[index].mode; }
     bool isMandatory(int index) const { return entries[index].isMandatory; }
-
+    bool isHtOperationSupported() const { return htOperationSupported; }
+    Hz getMaximumChannelWidth() const;
+    int getMaximumNumberOfSpatialStreams() const;
     // The management policy advertises all explicitly eligible representable
     // legacy modes in deterministic mandatory-first order. Overflow is split
     // into the Extended Supported Rates element by management.
     const std::vector<const IIeee80211Mode *>& getLegacyOperationalModes() const { return legacyOperationalModes; }
-    bool isHtOperationSupported() const { return htOperationSupported; }
-    Hz getMaximumChannelWidth() const;
-    int getMaximumNumberOfSpatialStreams() const;
+    const IIeee80211Mode *getFastestLegacyOperationalMode() const;
     const std::array<bool, 77>& getHtMcsSupported() const { return htMcsSupported; }
     const std::array<bool, 77>& getHtMcsMandatory() const { return htMcsMandatory; }
     const std::set<Hz>& getHtSupportedChannelWidths() const { return htSupportedChannelWidths; }
