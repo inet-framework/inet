@@ -1,0 +1,423 @@
+%description:
+Verify that the station agent uses the management MIB association state when
+deciding whether a failed reassociation should restart scanning. A retained
+same-AP preflight refusal must not scan or disassociate, while loss of the
+current AP during a pending different-target reassociation must scan through
+the production agent-to-management path. Also verify reassociation handover
+signals, callback-visible prevAP state, and completion signal ordering.
+
+%file: TestIeee80211AgentStaReassociation.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211AgentSta : public Ieee80211AgentSta
+{
+  public:
+    int associateConfirms = 0;
+    int reassociateConfirms = 0;
+
+    void setPreviousAp(const MacAddress& address) { prevAP = address; }
+    const MacAddress& getPreviousAp() const { return prevAP; }
+
+    void deliverConfirm(Ieee80211PrimConfirm *confirm)
+    {
+        Enter_Method("deliverConfirm");
+        auto message = new cMessage("confirm");
+        message->setControlInfo(confirm);
+        handleResponse(message);
+    }
+
+  protected:
+    virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp) override
+    {
+        associateConfirms++;
+        Ieee80211AgentSta::processAssociateConfirm(resp);
+    }
+
+    virtual void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp) override
+    {
+        reassociateConfirms++;
+        Ieee80211AgentSta::processReassociateConfirm(resp);
+    }
+};
+
+Define_Module(TestIeee80211AgentSta);
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  protected:
+    ApInfo *ensureAccessPoint(const MacAddress& address)
+    {
+        auto ap = lookupAP(address);
+        if (ap == nullptr) {
+            apList.push_back(ApInfo());
+            ap = &apList.back();
+            ap->address = address;
+            ap->channel = 1;
+            ap->ssid = "SSID";
+            ap->beaconInterval = SimTime(100, SIMTIME_MS);
+            ap->isAuthenticated = true;
+        }
+        return ap;
+    }
+
+  public:
+    int scanCommands = 0;
+    bool forcePreflightRefusal = false;
+
+    void setAssociated(const MacAddress& address)
+    {
+        Enter_Method("setAssociated");
+        if (mib->bssStationData.isAssociated)
+            clearCurrentAssociation();
+        ensureAccessPoint(address);
+        mib->bssData.bssid = address;
+        mib->bssStationData.isAssociated = true;
+        assocAP = AssociatedApInfo();
+        assocAP.address = address;
+        assocAP.channel = 1;
+        assocAP.ssid = "SSID";
+        assocAP.beaconInterval = SimTime(100, SIMTIME_MS);
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", 1);
+        scheduleAfter(SimTime(1, SIMTIME_S), assocAP.beaconTimeoutMsg);
+    }
+
+    void requestReassociation(const MacAddress& address)
+    {
+        Enter_Method("requestReassociation");
+        Ieee80211Prim_ReassociateRequest request;
+        request.setAddress(address);
+        request.setTimeout(SimTime(1, SIMTIME_S));
+        processReassociateCommand(&request);
+    }
+
+    void beginPendingReassociation(const MacAddress& targetAddress)
+    {
+        Enter_Method("beginPendingReassociation");
+        ASSERT(mib->bssStationData.isAssociated);
+        ASSERT(assocTimeoutMsg == nullptr);
+        auto target = ensureAccessPoint(targetAddress);
+        assocTimeoutMsg = new cMessage("assocTimeout", 2);
+        assocTimeoutMsg->setContextPointer(target);
+        reassociationInProgress = true;
+        scheduleAfter(SimTime(1, SIMTIME_S), assocTimeoutMsg);
+    }
+
+    void terminateCurrentAp(const MacAddress& address)
+    {
+        Enter_Method("terminateCurrentAp");
+        ASSERT(terminateCurrentAssociationFromPeer(address));
+    }
+
+    void deliverFailedReassociationResponse(const MacAddress& transmitter)
+    {
+        Enter_Method("deliverFailedReassociationResponse");
+        auto packet = new Packet("ReassociationResponse");
+        auto body = makeShared<Ieee80211AssociationResponseFrame>();
+        body->setStatusCode(SC_UNSPECIFIED);
+        body->setChunkLength(B(6));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(transmitter);
+        processAssociationResponse(packet, header, true);
+    }
+
+    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    MacAddress getAssociatedAddress() const { return assocAP.address; }
+    bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    bool hasPendingReassociation() const { return assocTimeoutMsg != nullptr && reassociationInProgress; }
+
+  protected:
+    virtual void processScanCommand(Ieee80211Prim_ScanRequest *ctrl) override
+    {
+        scanCommands++;
+        Ieee80211MgmtSta::processScanCommand(ctrl);
+    }
+
+    virtual bool isHtBssSupported(const ApInfo *ap, std::string& reason) const override
+    {
+        if (forcePreflightRefusal) {
+            reason = "test preflight refusal";
+            return false;
+        }
+        return Ieee80211MgmtSta::isHtBssSupported(ap, reason);
+    }
+};
+
+Define_Module(TestIeee80211MgmtSta);
+
+class CompletionListener : public cListener
+{
+  public:
+    TestIeee80211AgentSta *agent = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    MacAddress expectedAddress;
+    bool acceptSeen = false;
+    bool callbackStateValid = true;
+    int acceptCount = 0;
+    int newApCount = 0;
+    int oldApCount = 0;
+    std::vector<std::string> events;
+
+    void reset(TestIeee80211AgentSta *newAgent, Ieee80211Mib *newMib, const MacAddress& address)
+    {
+        agent = newAgent;
+        mib = newMib;
+        expectedAddress = address;
+        acceptSeen = false;
+        callbackStateValid = true;
+        acceptCount = 0;
+        newApCount = 0;
+        oldApCount = 0;
+        events.clear();
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override
+    {
+        acceptSeen = true;
+        acceptCount++;
+        events.push_back("accept");
+        callbackStateValid = callbackStateValid && agent->getPreviousAp() == expectedAddress && mib->bssStationData.isAssociated;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (signalID == l2AssociatedNewApSignal) {
+            newApCount++;
+            events.push_back("new");
+        }
+        else if (signalID == l2AssociatedOldApSignal) {
+            oldApCount++;
+            events.push_back("old");
+        }
+        else
+            return;
+        callbackStateValid = callbackStateValid && acceptSeen && agent->getPreviousAp() == expectedAddress && mib->bssStationData.isAssociated;
+    }
+};
+
+class DropListener : public cListener
+{
+  public:
+    int count = 0;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override
+    {
+        count++;
+    }
+};
+
+class Ieee80211AgentStaReassociationTest : public cSimpleModule
+{
+  protected:
+    TestIeee80211AgentSta *agent = nullptr;
+    TestIeee80211MgmtSta *mgmt = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    CompletionListener completionListener;
+    DropListener dropListener;
+
+  public:
+    Ieee80211AgentStaReassociationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        agent = check_and_cast<TestIeee80211AgentSta *>(getModuleByPath("^.sta.wlan[0].agent"));
+        mgmt = check_and_cast<TestIeee80211MgmtSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        agent->subscribe("acceptConfirm", &completionListener);
+        agent->subscribe(l2AssociatedNewApSignal, &completionListener);
+        agent->subscribe(l2AssociatedOldApSignal, &completionListener);
+        agent->subscribe("dropConfirm", &dropListener);
+    }
+
+    virtual void activity() override
+    {
+        const MacAddress currentAp("02:00:00:00:00:01");
+        const MacAddress targetAp("02:00:00:00:00:02");
+
+        // A same-AP preflight refusal does not change the management-owned
+        // association state, so the agent must not restart scanning.
+        mgmt->setAssociated(currentAp);
+        mgmt->forcePreflightRefusal = true;
+        int scanCommandsBefore = mgmt->scanCommands;
+        mgmt->requestReassociation(currentAp);
+        wait(0);
+        ASSERT(agent->reassociateConfirms == 1);
+        ASSERT(dropListener.count == 1);
+        ASSERT(mgmt->scanCommands == scanCommandsBefore);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+
+        // Association success uses the same completion ordering and state
+        // visibility as reassociation success.
+        mgmt->forcePreflightRefusal = false;
+        agent->setPreviousAp(currentAp);
+        completionListener.reset(agent, mib, targetAp);
+        auto associateConfirm = new Ieee80211Prim_AssociateConfirm();
+        associateConfirm->setResultCode(PRC_SUCCESS);
+        associateConfirm->setAddress(targetAp);
+        agent->deliverConfirm(associateConfirm);
+        ASSERT(agent->associateConfirms == 1);
+        ASSERT(completionListener.acceptCount == 1);
+        ASSERT(completionListener.newApCount == 1);
+        ASSERT(completionListener.oldApCount == 0);
+        ASSERT(completionListener.events.size() == 2);
+        ASSERT(completionListener.events[0] == "accept");
+        ASSERT(completionListener.events[1] == "new");
+        ASSERT(completionListener.callbackStateValid);
+        ASSERT(agent->getPreviousAp() == targetAp);
+
+        // A successful same-AP reassociation emits the old-AP signal and
+        // leaves prevAP unchanged.
+        agent->setPreviousAp(currentAp);
+        completionListener.reset(agent, mib, currentAp);
+        auto sameReassociateConfirm = new Ieee80211Prim_ReassociateConfirm();
+        sameReassociateConfirm->setResultCode(PRC_SUCCESS);
+        sameReassociateConfirm->setAddress(currentAp);
+        agent->deliverConfirm(sameReassociateConfirm);
+        ASSERT(agent->reassociateConfirms == 2);
+        ASSERT(completionListener.acceptCount == 1);
+        ASSERT(completionListener.newApCount == 0);
+        ASSERT(completionListener.oldApCount == 1);
+        ASSERT(completionListener.events.size() == 2);
+        ASSERT(completionListener.events[0] == "accept");
+        ASSERT(completionListener.events[1] == "old");
+        ASSERT(completionListener.callbackStateValid);
+        ASSERT(agent->getPreviousAp() == currentAp);
+
+        // A different-target success emits the new-AP signal and commits the
+        // target before either completion callback can observe the state.
+        completionListener.reset(agent, mib, targetAp);
+        auto differentReassociateConfirm = new Ieee80211Prim_ReassociateConfirm();
+        differentReassociateConfirm->setResultCode(PRC_SUCCESS);
+        differentReassociateConfirm->setAddress(targetAp);
+        agent->deliverConfirm(differentReassociateConfirm);
+        ASSERT(agent->reassociateConfirms == 3);
+        ASSERT(completionListener.acceptCount == 1);
+        ASSERT(completionListener.newApCount == 1);
+        ASSERT(completionListener.oldApCount == 0);
+        ASSERT(completionListener.events.size() == 2);
+        ASSERT(completionListener.events[0] == "accept");
+        ASSERT(completionListener.events[1] == "new");
+        ASSERT(completionListener.callbackStateValid);
+        ASSERT(agent->getPreviousAp() == targetAp);
+
+        // If the current AP is lost while a different-target reassociation is
+        // pending, management clears the MIB state before the target fails.
+        // The resulting refusal must restart scanning through the real gates,
+        // and processScanCommand must not disassociate anything further.
+        agent->setPreviousAp(currentAp);
+        mgmt->setAssociated(currentAp);
+        mgmt->beginPendingReassociation(targetAp);
+        mgmt->terminateCurrentAp(currentAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->hasPendingReassociation());
+        mgmt->deliverFailedReassociationResponse(targetAp);
+        wait(0);
+        wait(0);
+        ASSERT(agent->reassociateConfirms == 4);
+        ASSERT(dropListener.count == 2);
+        ASSERT(mgmt->scanCommands == scanCommandsBefore + 1);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+
+        // An unspecified previous AP is also classified as a new AP.
+        mgmt->setAssociated(currentAp);
+        agent->setPreviousAp(MacAddress());
+        completionListener.reset(agent, mib, currentAp);
+        auto unspecifiedPreviousApConfirm = new Ieee80211Prim_ReassociateConfirm();
+        unspecifiedPreviousApConfirm->setResultCode(PRC_SUCCESS);
+        unspecifiedPreviousApConfirm->setAddress(currentAp);
+        agent->deliverConfirm(unspecifiedPreviousApConfirm);
+        ASSERT(agent->reassociateConfirms == 5);
+        ASSERT(completionListener.acceptCount == 1);
+        ASSERT(completionListener.newApCount == 1);
+        ASSERT(completionListener.oldApCount == 0);
+        ASSERT(completionListener.callbackStateValid);
+        ASSERT(agent->getPreviousAp() == currentAp);
+
+        std::cout << "STA reassociation MIB retry policy and completion ordering verified.\n";
+    }
+};
+
+Define_Module(Ieee80211AgentStaReassociationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211AgentSta extends Ieee80211AgentSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211AgentSta);
+}
+
+simple TestIeee80211MgmtSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtSta);
+}
+
+simple Ieee80211AgentStaReassociationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211AgentStaReassociationTest);
+}
+
+network Ieee80211AgentStaReassociationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].agent.typename = "TestIeee80211AgentSta";
+                wlan[*].mgmt.typename = "TestIeee80211MgmtSta";
+        }
+        test: Ieee80211AgentStaReassociationTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211AgentStaReassociationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].agent.startingTime = 1s
+*.sta.wlan[0].agent.activeScan = false
+*.sta.wlan[0].agent.channelsToScan = "1"
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+STA reassociation MIB retry policy and completion ordering verified.
