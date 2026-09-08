@@ -20,11 +20,14 @@ using namespace inet::units::values;
 class INET_API IIeee80211Band : public cObject, public IPrintableObject
 {
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211Band, name = " << getName(); }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override = 0;
     virtual const char *getName() const override = 0;
     virtual int getNumChannels() const = 0;
     virtual Hz getCenterFrequency(int channelNumber) const = 0;
     virtual Hz getSpacing() const = 0;
+    virtual int getStandardChannelNumber(int channelIndex) const = 0;
+    virtual int getChannelIndex(int standardChannelNumber) const = 0;
+    virtual bool isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const = 0;
 };
 
 class INET_API Ieee80211BandBase : public IIeee80211Band
@@ -35,20 +38,27 @@ class INET_API Ieee80211BandBase : public IIeee80211Band
   public:
     Ieee80211BandBase(const char *name);
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211Band, name = " << getName(); }
     virtual const char *getName() const override { return name; }
+    virtual int getStandardChannelNumber(int channelIndex) const override;
+    virtual int getChannelIndex(int standardChannelNumber) const override;
+    virtual bool isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const override;
 };
 
 class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
 {
   protected:
     std::vector<Hz> centers;
+    std::vector<int> standardChannelNumbers;
 
   public:
-    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers);
+    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers = {});
 
     virtual int getNumChannels() const override { return centers.size(); }
     virtual Hz getCenterFrequency(int channelNumber) const override;
     virtual Hz getSpacing() const override { return Hz(NaN); }
+    virtual int getStandardChannelNumber(int channelIndex) const override;
+    virtual int getChannelIndex(int standardChannelNumber) const override;
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase

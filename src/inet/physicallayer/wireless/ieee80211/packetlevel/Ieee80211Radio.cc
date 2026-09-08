@@ -113,6 +113,8 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
 
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 {
+    ASSERT(channel != nullptr);
+    ASSERT(channel->getBand() != nullptr);
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannel(channel);
