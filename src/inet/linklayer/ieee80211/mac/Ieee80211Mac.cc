@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
+#include <algorithm>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -25,7 +27,9 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -66,6 +70,18 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
+        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
+                modeSet->getMaximumNumberOfSpatialStreams());
+        std::set<Hz> operationalChannelWidths;
+        if (modeSet->isHtOperationSupported()) {
+            const auto *transmitter = check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+            const auto *receiver = check_and_cast<const Ieee80211Receiver *>(radio->getReceiver());
+            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+                if (transmitter->isHtChannelWidthSupported(channelWidth) &&
+                        receiver->isHtChannelWidthSupported(channelWidth))
+                    operationalChannelWidths.insert(channelWidth);
+        }
+        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();

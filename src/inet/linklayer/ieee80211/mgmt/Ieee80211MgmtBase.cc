@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -71,6 +72,12 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
         supportedRates.numRates = rateIndex;
         extendedSupportedRates.numRates = extendedRateIndex;
     }
+}
+
+void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isHtOperationSupported())
+        setHtCapabilities(frame, mib->localHtCapabilities);
 }
 
 void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
