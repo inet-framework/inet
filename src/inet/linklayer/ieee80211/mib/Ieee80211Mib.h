@@ -16,6 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 class Ieee80211ModeSet;
+class IIeee80211Band;
 }
 
 namespace ieee80211 {
@@ -81,6 +82,7 @@ class INET_API Ieee80211Mib : public SimpleModule
 
   private:
     Ieee80211HtOperation htOperation;
+    int configuredSecondaryChannelOffset = 0;
     bool primaryChannelAvailable = false;
     std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
@@ -104,6 +106,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     bool hasPrimaryChannel() const { return primaryChannelAvailable; }
     int requirePrimaryChannel() const;
     void setPrimaryChannel(int primaryChannel);
+    void setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band);
     const Ieee80211HtOperation& getHtOperation() const;
     const PeerHtState *findPeerHtState(const MacAddress& address) const;
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);
