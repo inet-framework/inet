@@ -1,15 +1,14 @@
 %description:
-Verify that frameTransmissionFinishedSignal emissions with FrameTransmissionDetails
+Verify that Ieee80211Mac::frameTransmissionOutcomeSignal emissions with FrameTransmissionDetails
 are properly filtered by frameTransmissionStatusIs* result filters and recorded
-by the @statistic declarations on Ieee80211Mac (frameAcked, frameRetryLimitReached,
-and frameDroppedBeforeTx).
+by the @statistic declarations on Ieee80211Mac (frameTransmissionOutcome,
+frameAcked, frameRetryLimitReached, and frameDroppedBeforeTx).
 
 %file: TestIeee80211FrameTransmissionStats.cc
 
 #include <omnetpp/cresultfilter.h>
 #include <omnetpp/resultrecorders.h>
 
-#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
@@ -48,17 +47,20 @@ class Ieee80211FrameTransmissionStatsTest : public cSimpleModule
         ASSERT(cResultFilterType::find("frameTransmissionStatusIsRetryLimitReached") != nullptr);
         ASSERT(cResultFilterType::find("frameTransmissionStatusIsDroppedBeforeTransmission") != nullptr);
 
-        // 2. Locate MAC and its signal listeners on frameTransmissionFinishedSignal
+        // 2. Locate MAC and its signal listeners on Ieee80211Mac::frameTransmissionOutcomeSignal
         auto mac = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.ap.wlan[0].mac"));
-        auto listeners = mac->getLocalSignalListeners(frameTransmissionFinishedSignal);
+        auto listeners = mac->getLocalSignalListeners(Ieee80211Mac::frameTransmissionOutcomeSignal);
         ASSERT(!listeners.empty());
 
+        TotalCountRecorder *outcomeRecorder = nullptr;
         TotalCountRecorder *ackRecorder = nullptr;
         TotalCountRecorder *retryRecorder = nullptr;
         TotalCountRecorder *dropRecorder = nullptr;
 
         for (auto listener : listeners) {
             if (auto resultListener = dynamic_cast<cResultListener *>(listener)) {
+                if (!outcomeRecorder)
+                    outcomeRecorder = findCountRecorder(resultListener, "frameTransmissionOutcome");
                 if (!ackRecorder)
                     ackRecorder = findCountRecorder(resultListener, "frameAcked");
                 if (!retryRecorder)
@@ -68,6 +70,8 @@ class Ieee80211FrameTransmissionStatsTest : public cSimpleModule
             }
         }
 
+        ASSERT(outcomeRecorder != nullptr);
+        ASSERT(outcomeRecorder->getCount() == 0);
         ASSERT(ackRecorder != nullptr);
         ASSERT(retryRecorder != nullptr);
         ASSERT(dropRecorder != nullptr);
@@ -120,6 +124,8 @@ class Ieee80211FrameTransmissionStatsTest : public cSimpleModule
         ASSERT(ackRecorder->getCount() == 2);
         ASSERT(retryRecorder->getCount() == 1);
         ASSERT(dropRecorder->getCount() == 2);
+
+        ASSERT(outcomeRecorder->getCount() == 5);
 
         std::cout << "Frame transmission statistics and result filters verified.\n";
     }

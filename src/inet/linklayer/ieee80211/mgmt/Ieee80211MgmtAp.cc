@@ -13,6 +13,7 @@
 #endif // ifdef INET_WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
@@ -60,7 +61,7 @@ void Ieee80211MgmtAp::initialize(int stage)
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
         auto macModule = getModuleFromPar<cModule>(par("macModule"), this);
-        macModule->subscribe(frameTransmissionFinishedSignal, this);
+        macModule->subscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
     }
 }
 
@@ -82,7 +83,7 @@ void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
 
 void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    if (signalID == frameTransmissionFinishedSignal) {
+    if (signalID == Ieee80211Mac::frameTransmissionOutcomeSignal) {
         Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast_nullable<const Packet *>(obj);
         auto transDetails = check_and_cast<const FrameTransmissionDetails *>(details);

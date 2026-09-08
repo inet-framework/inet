@@ -32,8 +32,6 @@ extern INET_API simsignal_t // admin
 
     modesetChangedSignal,
 
-    frameTransmissionFinishedSignal,
-
     interpacketGapStartedSignal,
     interpacketGapEndedSignal,
 

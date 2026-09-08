@@ -16,7 +16,7 @@ enum FrameTransmissionStatus
 }
 
 //
-// Details payload emitted with frameTransmissionFinishedSignal.
+// Details payload emitted with frameTransmissionOutcomeSignal.
 // The payload is created synchronously by the MAC and is valid only for
 // the duration of the notification.
 //

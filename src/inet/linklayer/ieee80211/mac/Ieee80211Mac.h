@@ -38,6 +38,9 @@ class Ieee80211MacHeader;
  */
 class INET_API Ieee80211Mac : public MacProtocolBase
 {
+  public:
+    static simsignal_t frameTransmissionOutcomeSignal;
+
   protected:
     FcsMode fcsMode;
 
@@ -106,7 +109,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void sendDownPendingRadioConfigMsg();
 
     /**
-     * Emits a terminal frame transmission outcome via frameTransmissionFinishedSignal
+     * Emits a terminal frame transmission outcome via frameTransmissionOutcomeSignal
      * while the frame is still borrowed from the coordination function.
      */
     virtual void notifyFrameTransmission(const Packet *frame, FrameTransmissionStatus status);

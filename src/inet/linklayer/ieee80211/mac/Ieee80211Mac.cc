@@ -37,6 +37,8 @@ using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
 
+simsignal_t Ieee80211Mac::frameTransmissionOutcomeSignal = cComponent::registerSignal("frameTransmissionOutcome");
+
 Ieee80211Mac::Ieee80211Mac()
 {
 }
@@ -395,7 +397,7 @@ void Ieee80211Mac::notifyFrameTransmission(const Packet *frame, FrameTransmissio
     Enter_Method("notifyFrameTransmission");
     FrameTransmissionDetails details;
     details.setStatus(status);
-    emit(frameTransmissionFinishedSignal, const_cast<Packet *>(frame), &details);
+    emit(frameTransmissionOutcomeSignal, const_cast<Packet *>(frame), &details);
 }
 
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
