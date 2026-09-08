@@ -11,6 +11,7 @@
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -39,7 +40,7 @@ class INET_API TxopProcedure : public ModeSetListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual s getTxopLimit(const physicallayer::IIeee80211Mode *mode, AccessCategory ac);
+    virtual s getTxopLimit(physicallayer::Ieee80211ModeSet::PhyType phyType, AccessCategory ac);
     virtual ProtectionMechanism selectProtectionMechanism(AccessCategory ac) const;
 
   public:
