@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -18,6 +19,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,6 +33,9 @@ using namespace physicallayer;
 // TODO mac should be able to signal when msg got transmitted
 
 Define_Module(Ieee80211MgmtSta);
+Register_Class(Ieee80211MgmtSta::HtNegotiationFailure);
+
+simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSignal("htNegotiationFailed");
 
 // message kind values for timers
 #define MK_AUTH_TIMEOUT           1
@@ -41,6 +46,53 @@ Define_Module(Ieee80211MgmtSta);
 #define MK_BEACON_TIMEOUT         6
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
+
+static bool decodeHtOperation(const IIeee80211Band *band,
+        const Ieee80211HtOperationElement& element, Ieee80211HtOperation& operation, std::string& reason)
+{
+    try {
+        operation = makeHtOperation(band, element);
+        return true;
+    }
+    catch (const cRuntimeError& error) {
+        reason = error.what();
+        return false;
+    }
+}
+
+static bool validateHtOperation(const IIeee80211Band *band, const Ieee80211HtOperation& operation,
+        std::string& reason)
+{
+    if (band == nullptr) {
+        reason = "HT Operation has no IEEE 802.11 band";
+        return false;
+    }
+
+    // IEEE Std 802.11-2024, Table 9-230 and 11.15.2: the channel width and
+    // secondary-channel offset form one tuple, and a 40 MHz tuple must name
+    // an actually supported pair in the selected band.
+    if (operation.operatingChannelWidth == MHz(20)) {
+        if (operation.secondaryChannelOffset != 0) {
+            reason = "20 MHz HT Operation has a secondary channel offset";
+            return false;
+        }
+    }
+    else if (operation.operatingChannelWidth == MHz(40)) {
+        if (operation.secondaryChannelOffset != 1 && operation.secondaryChannelOffset != 3) {
+            reason = "40 MHz HT Operation has no valid secondary channel offset";
+            return false;
+        }
+        if (!band->isHt40OperationSupported(operation.primaryChannel, operation.secondaryChannelOffset)) {
+            reason = "40 MHz HT Operation names an unsupported primary/secondary channel pair";
+            return false;
+        }
+    }
+    else {
+        reason = "HT Operation has an unsupported channel width";
+        return false;
+    }
+    return true;
+}
 
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSta::ScanningInfo& scanning)
 {
@@ -289,7 +341,8 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
-    body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body));
+    addHtCapabilities(body);
+    body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
     reassociationInProgress = false;
 
@@ -311,7 +364,8 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
     body->setCurrentAP(assocAP.address);
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
-    body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body));
+    addHtCapabilities(body);
+    body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, ap->address);
     reassociationInProgress = true;
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
@@ -407,7 +461,8 @@ void Ieee80211MgmtSta::sendProbeRequest()
     const auto& body = makeShared<Ieee80211ProbeRequestFrame>();
     body->setSSID(scanning.ssid.c_str());
     setSupportedRateElements(body);
-    body->setChunkLength(B(2 + scanning.ssid.length()) + getSupportedRateElementsLength(body));
+    addHtCapabilities(body);
+    body->setChunkLength(B(2 + scanning.ssid.length()) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("ProbeReq", body, ST_PROBEREQUEST, scanning.bssid);
 }
 
@@ -478,6 +533,12 @@ void Ieee80211MgmtSta::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
     ApInfo *ap = lookupAP(address);
     if (!ap)
         throw cRuntimeError("processAssociateCommand: AP not known: address = %s", address.str().c_str());
+    std::string reason;
+    if (!isHtBssSupported(ap, reason)) {
+        EV_INFO << "Association refused before request transmission: " << reason << endl;
+        sendAssociationConfirm(ap, PRC_REFUSED);
+        return;
+    }
     startAssociation(ap, ctrl->getTimeout());
 }
 
@@ -493,6 +554,12 @@ void Ieee80211MgmtSta::processReassociateCommand(Ieee80211Prim_ReassociateReques
     ApInfo *ap = lookupAP(address);
     if (!ap)
         throw cRuntimeError("processReassociateCommand: AP not known: address = %s", address.str().c_str());
+    std::string reason;
+    if (!isHtBssSupported(ap, reason)) {
+        EV_INFO << "Reassociation refused before request transmission: " << reason << endl;
+        sendReassociationConfirm(ap, PRC_REFUSED);
+        return;
+    }
     startReassociation(ap, ctrl->getTimeout());
 }
 
@@ -696,6 +763,24 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
     const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     int statusCode = responseBody->getStatusCode();
 
+    HtAssociationResponseStatus responseHtStatus = HtAssociationResponseStatus::LEGACY;
+    Ieee80211HtCapabilities responseHtCapabilities;
+    Ieee80211HtOperation responseHtOperation;
+    std::string responseHtReason;
+    const auto& channelInd = packet->findTag<Ieee80211ChannelInd>();
+    const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
+    const auto *band = receivedChannel != nullptr ? receivedChannel->getBand() : nullptr;
+    if (statusCode == SC_SUCCESSFUL)
+        responseHtStatus = classifyAssociationResponse(responseBody, band,
+                ap->htOperationPresent ? &ap->htOperation : nullptr,
+                responseHtCapabilities, responseHtOperation, responseHtReason);
+    if (responseHtStatus == HtAssociationResponseStatus::VALID_HT &&
+            (receivedChannel == nullptr || responseHtOperation.primaryChannel != receivedChannel->getChannelNumber())) {
+        responseHtStatus = HtAssociationResponseStatus::INVALID_HT;
+        responseHtReason = receivedChannel == nullptr ?
+                "successful HT association response has no received channel indication" :
+                "HT Operation primary channel does not match the received channel";
+    }
     delete packet;
 
     cancelPendingAssociation();
@@ -704,6 +789,8 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         EV << "Association failed with AP address=" << ap->address << "\n";
         if (reassociation)
             handleReassociationFailure(ap);
+        else if (!mib->bssStationData.isAssociated || assocAP.address != ap->address)
+            mib->removePeerHtCapabilities(ap->address);
     }
     else {
         EV << "Association successful, AP address=" << ap->address << "\n";
@@ -711,6 +798,7 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         if (mib->bssStationData.isAssociated) {
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
             mib->bssStationData.isAssociated = false;
+            mib->removePeerHtCapabilities(assocAP.address);
             cancelAndDelete(assocAP.beaconTimeoutMsg);
             assocAP.beaconTimeoutMsg = nullptr;
             assocAP = AssociatedApInfo();
@@ -721,6 +809,21 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
+        if (responseHtStatus == HtAssociationResponseStatus::VALID_HT)
+            mib->setPeerHtCapabilities(ap->address, responseHtCapabilities, responseHtOperation);
+        else {
+            mib->removePeerHtCapabilities(ap->address);
+            if (responseHtStatus == HtAssociationResponseStatus::INVALID_HT) {
+                EV_WARN << "Association succeeded without usable HT negotiation with AP address=" << ap->address
+                        << ": " << responseHtReason << "\n";
+                HtNegotiationFailure notification;
+                notification.setPeerAddress(ap->address);
+                notification.setReassociation(reassociation);
+                notification.setStatus(responseHtStatus);
+                notification.setReason(responseHtReason);
+                emit(htNegotiationFailedSignal, &notification);
+            }
+        }
 
         emit(l2AssociatedSignal, myIface, ap);
 
@@ -735,14 +838,104 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
+Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociationResponse(
+        const Ptr<const Ieee80211AssociationResponseFrame>& responseBody,
+        const physicallayer::IIeee80211Band *band,
+        const Ieee80211HtOperation *selectedBssHtOperation,
+        Ieee80211HtCapabilities& responseHtCapabilities, Ieee80211HtOperation& responseHtOperation,
+        std::string& reason) const
+{
+    bool responseHtCapabilitiesPresent = responseBody->getHtCapabilitiesPresent();
+    bool responseHtOperationPresent = responseBody->getHtOperationPresent();
+    // A non-HT station deliberately ignores HT elements. This preserves the
+    // genuine legacy association path even when an HT-capable AP includes its
+    // normal response elements.
+    if (!mib->isHtOperationSupported())
+        return HtAssociationResponseStatus::LEGACY;
+    if (!responseHtCapabilitiesPresent && !responseHtOperationPresent)
+        return HtAssociationResponseStatus::LEGACY;
+    if (responseHtCapabilitiesPresent != responseHtOperationPresent) {
+        reason = "association response contains only one of the HT Capabilities and HT Operation elements";
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (band == nullptr) {
+        reason = "successful HT association response has no received channel indication or band";
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (selectedBssHtOperation == nullptr) {
+        reason = "successful HT association response has no cached HT Operation from BSS discovery";
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    // The response is peer input. Keep the conversion helpers strict for
+    // local/configuration use, but turn their failures into an unusable HT
+    // negotiation at this receive boundary.
+    if (!decodeHtCapabilities(responseBody->getHtCapabilities(), responseHtCapabilities, reason)) {
+        reason = "invalid HT Capabilities in association response: " + reason;
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (!decodeHtOperation(band, responseBody->getHtOperation(), responseHtOperation, reason)) {
+        reason = "invalid HT Operation in association response: " + reason;
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (!validateHtOperation(band, responseHtOperation, reason))
+        return HtAssociationResponseStatus::INVALID_HT;
+    // Table 9-230 reserves the Basic HT-MCS Set in Association and
+    // Reassociation Responses. Use the selected BSS's Beacon/Probe Response
+    // advertisement instead of interpreting those reserved response bits.
+    responseHtOperation.basicMcsSupported = selectedBssHtOperation->basicMcsSupported;
+    auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, responseHtCapabilities, responseHtOperation);
+    if (!supportsBasicHtMcsSet(mib->localHtCapabilities, responseHtOperation) ||
+            !negotiated.localTxPeerRx.valid || !negotiated.localRxPeerTx.valid) {
+        reason = "HT capabilities and operation have no bidirectionally usable common mode";
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    return HtAssociationResponseStatus::VALID_HT;
+}
+
+bool Ieee80211MgmtSta::isHtBssSupported(const ApInfo *ap, std::string& reason) const
+{
+    if (!mib->isHtOperationSupported())
+        return true;
+    if (!ap->htCapabilitiesPresent && !ap->htOperationPresent)
+        return true;
+    if (ap->htCapabilitiesPresent != ap->htOperationPresent) {
+        reason = "selected BSS contains only one of the HT Capabilities and HT Operation elements";
+        return false;
+    }
+    auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, ap->htCapabilities, ap->htOperation);
+    if (!supportsBasicHtMcsSet(mib->localHtCapabilities, ap->htOperation) ||
+            !negotiated.localTxPeerRx.valid || !negotiated.localRxPeerTx.valid) {
+        reason = "selected BSS HT advertisement has no bidirectionally usable common mode";
+        return false;
+    }
+    return true;
+}
+
+const char *Ieee80211MgmtSta::getHtAssociationResponseStatusName(HtAssociationResponseStatus status)
+{
+    switch (status) {
+        case HtAssociationResponseStatus::LEGACY: return "LEGACY";
+        case HtAssociationResponseStatus::VALID_HT: return "VALID_HT";
+        case HtAssociationResponseStatus::INVALID_HT: return "INVALID_HT";
+        default: return "UNKNOWN";
+    }
+}
+
 void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
 {
     // IEEE Std 802.11-2024, 11.3.5.4(f): failed or timed-out reassociation
     // disassociates the STA only when the target is its current AP.
-    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address))
+    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address)) {
+        // This peer state belongs to the completed failed reassociation, not
+        // to the generic lifecycle reset performed by disassociate().
+        mib->removePeerHtCapabilities(ap->address);
         disassociate();
-    else if (mib->bssStationData.isAssociated)
-        changeChannel(assocAP.channel);
+    }
+    else {
+        mib->removePeerHtCapabilities(ap->address);
+        if (mib->bssStationData.isAssociated)
+            changeChannel(assocAP.channel);
+    }
 }
 
 bool Ieee80211MgmtSta::shouldDisassociateOnReassociationFailure(bool isAssociated,
@@ -783,10 +976,10 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
-    storeAPInfo(packet, header, beaconBody);
+    bool accepted = storeAPInfo(packet, header, beaconBody);
 
     // if it is out associate AP, restart beacon timeout
-    if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
+    if (accepted && mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(assocAP.beaconTimeoutMsg != nullptr);
         rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
@@ -811,32 +1004,112 @@ void Ieee80211MgmtSta::handleProbeResponseFrame(Packet *packet, const Ptr<const 
     delete packet;
 }
 
-void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
+bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
 {
     auto address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
-    if (ap) {
-        EV << "AP address=" << address << ", SSID=" << body->getSSID() << " already in our AP list, refreshing the info\n";
-    }
-    else {
-        EV << "Inserting AP address=" << address << ", SSID=" << body->getSSID() << " into our AP list\n";
-        apList.push_back(ApInfo());
-        ap = &apList.back();
+    ApInfo candidate;
+    if (ap != nullptr) {
+        // Authentication state belongs to the cached AP record, not to one
+        // advertisement. Keep its timer and state untouched until validation
+        // has completed successfully.
+        candidate.isAuthenticated = ap->isAuthenticated;
+        candidate.authSeqExpected = ap->authSeqExpected;
+        candidate.authTimeoutMsg = ap->authTimeoutMsg;
+        candidate.rxPower = ap->rxPower;
     }
 
-    ap->channel = body->getChannelNumber();
-    ap->address = address;
-    ap->ssid = body->getSSID();
-    ap->supportedRates = body->getSupportedRates();
-    ap->extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
-    ap->extendedSupportedRates = body->getExtendedSupportedRates();
-    ap->beaconInterval = body->getBeaconInterval();
-    auto signalPowerInd = packet->getTag<SignalPowerInd>();
-    if (signalPowerInd != nullptr) {
-        ap->rxPower = signalPowerInd->getPower().get<W>();
-        if (ap->address == assocAP.address)
-            assocAP.rxPower = ap->rxPower;
+    candidate.address = address;
+    candidate.ssid = body->getSSID();
+    candidate.supportedRates = body->getSupportedRates();
+    candidate.extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
+    candidate.extendedSupportedRates = body->getExtendedSupportedRates();
+    bool htCapabilitiesPresent = body->getHtCapabilitiesPresent();
+    bool htOperationPresent = body->getHtOperationPresent();
+    bool ignoreHt = mib != nullptr && !mib->isHtOperationSupported();
+    std::string reason;
+    if (ignoreHt) {
+        // A legacy STA ignores optional HT information, including malformed
+        // typed values, and retains the legacy channel advertisement.
+        candidate.channel = body->getChannelNumber();
+        candidate.htCapabilitiesPresent = false;
+        candidate.htOperationPresent = false;
     }
+    else {
+        if (htCapabilitiesPresent != htOperationPresent) {
+            reason = "Beacon or Probe Response contains only one of the HT Capabilities and HT Operation elements";
+            EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+            return false;
+        }
+        candidate.htCapabilitiesPresent = htCapabilitiesPresent;
+        candidate.htOperationPresent = htOperationPresent;
+        if (htCapabilitiesPresent && !decodeHtCapabilities(body->getHtCapabilities(), candidate.htCapabilities, reason)) {
+            EV_WARN << "Ignoring HT discovery from AP address=" << address
+                    << ": invalid HT Capabilities: " << reason << "\n";
+            return false;
+        }
+        if (htOperationPresent) {
+            const auto& channelInd = packet->findTag<Ieee80211ChannelInd>();
+            const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
+            if (receivedChannel == nullptr) {
+                reason = "HT Operation discovery has no received channel indication";
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            if (!decodeHtOperation(receivedChannel->getBand(), body->getHtOperation(), candidate.htOperation, reason)) {
+                EV_WARN << "Ignoring HT discovery from AP address=" << address
+                        << ": invalid HT Operation: " << reason << "\n";
+                return false;
+            }
+            if (candidate.htOperation.primaryChannel != receivedChannel->getChannelNumber()) {
+                reason = "HT Operation primary channel does not match the received channel index";
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            if (!validateHtOperation(receivedChannel->getBand(), candidate.htOperation, reason)) {
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            // IEEE Std 802.11-2024, Table 9-230 and 11.14: the HT Operation
+            // primary channel is authoritative once converted to the
+            // received radio's internal channel index.
+            candidate.channel = candidate.htOperation.primaryChannel;
+        }
+        else
+            candidate.channel = body->getChannelNumber();
+    }
+    candidate.beaconInterval = body->getBeaconInterval();
+    auto signalPowerInd = packet->getTag<SignalPowerInd>();
+    bool currentAp = address == assocAP.address;
+    if (signalPowerInd != nullptr)
+        candidate.rxPower = signalPowerInd->getPower().get<W>();
+
+    if (ap == nullptr) {
+        apList.push_back(ApInfo());
+        ap = &apList.back();
+        EV << "Inserting AP address=" << address << ", SSID=" << body->getSSID() << " into our AP list\n";
+    }
+    else
+        EV << "AP address=" << address << ", SSID=" << body->getSSID()
+                << " already in our AP list, refreshing the info\n";
+    ap->channel = candidate.channel;
+    ap->address = candidate.address;
+    ap->ssid = candidate.ssid;
+    ap->supportedRates = candidate.supportedRates;
+    ap->extendedSupportedRatesPresent = candidate.extendedSupportedRatesPresent;
+    ap->extendedSupportedRates = candidate.extendedSupportedRates;
+    ap->htCapabilitiesPresent = candidate.htCapabilitiesPresent;
+    ap->htCapabilities = candidate.htCapabilities;
+    ap->htOperationPresent = candidate.htOperationPresent;
+    ap->htOperation = candidate.htOperation;
+    ap->beaconInterval = candidate.beaconInterval;
+    ap->rxPower = candidate.rxPower;
+    ap->isAuthenticated = candidate.isAuthenticated;
+    ap->authSeqExpected = candidate.authSeqExpected;
+    ap->authTimeoutMsg = candidate.authTimeoutMsg;
+    if (signalPowerInd != nullptr && currentAp)
+        assocAP.rxPower = candidate.rxPower;
+    return true;
 }
 
 } // namespace ieee80211
