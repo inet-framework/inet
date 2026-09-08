@@ -166,7 +166,6 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
-
     // reset authentication status, when starting a new auth sequence
     // The statements below are added because the L2 handover time was greater than before when
     // a STA wants to re-connect to an AP with which it was associated before. When the STA wants to

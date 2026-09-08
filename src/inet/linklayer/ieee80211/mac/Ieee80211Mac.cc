@@ -418,4 +418,3 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
-

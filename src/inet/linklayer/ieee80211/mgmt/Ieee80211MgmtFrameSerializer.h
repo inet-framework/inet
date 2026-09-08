@@ -33,4 +33,3 @@ class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 #endif
-

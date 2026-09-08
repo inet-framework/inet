@@ -35,4 +35,3 @@ void Ieee80211MgmtApBase::initialize(int stage)
 } // namespace ieee80211
 
 } // namespace inet
-
