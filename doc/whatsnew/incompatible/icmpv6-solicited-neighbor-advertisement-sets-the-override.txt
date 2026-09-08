@@ -1,0 +1,11 @@
+A solicited Neighbor Advertisement sets the Override flag
+
+Internet Protocol version 6 (IPv6) Neighbour Discovery decided the
+Override flag of a Neighbor Advertisement sent in reply to a Neighbor
+Solicitation from the wrong option, so the replies to Neighbour Unreachability Detection probes and to
+Duplicate Address Detection probes went out with the flag clear. With the
+flag clear, a receiver keeps its cached link-layer address when the
+advertisement carries a different one (Request for Comments (RFC) 4861
+Section 7.2.5). The flag is now set, as RFC 4861 Section 7.2.4 specifies. Fingerprints that hash
+message contents or packet bytes of IPv6 networks in which such probes are
+answered change.
