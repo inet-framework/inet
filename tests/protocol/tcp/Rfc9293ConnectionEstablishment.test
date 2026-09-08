@@ -1,0 +1,130 @@
+%description:
+
+RFC 9293 — a connection opens with the three-way handshake.
+
+Checks RFC9293-EST-1, RFC9293-EST-2, RFC9293-SEQ-1, RFC9293-HDR-1 (description) and
+RFC9293-CKSUM-1 (must), and covers RFC9293-ISS-1 (description) and RFC9293-OPT-1 (should)
+from doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup
+are in doc/project/evidence/protocol/tcp/checks.md#connection-establishment; the program
+steps below map one to one onto its expected observations. Mapping of the mockup: host A =
+host1, host B = host2, link L = host1-host2.
+
+The governing document is RFC 9293 (August 2022), which obsoletes RFC 793. See
+doc/project/evidence/protocol/tcp/standards.md.
+
+No step asserts an absolute sequence number. Each side picks its own initial sequence
+number (RFC9293-ISS-1), so every expectation is a captured value plus an offset.
+
+Deviation on observation 1: the header-length and checksum conditions (RFC9293-HDR-1,
+RFC9293-CKSUM-1) cannot be observed at host1.tcp's own outbound signal, so this observation
+moves to host1.eth[0].mac. TCP's checksum, when checksumMode = "computed", is inserted by
+TcpChecksumInsertionHook::datagramPostRoutingHook() (src/inet/transportlayer/tcp_common/
+TcpChecksumInsertionHook.cc), a hook that runs during the IPv4 module's own postRouting
+stage -- strictly after host1.tcp has already emitted packetSentToLowerSignal and hosted the
+segment to IP. Observed at host1.tcp the checksum field would therefore still read its
+unset default of 0. The header length is unaffected by this (it is fixed when the header is
+built), but both conditions belong to the one expected observation, so both move together.
+Observation 3 needs only the header length, which has no such timing dependency, so it stays
+at host1.tcp. The captured header length is reported in the run: 24 octets means host A's
+SYN carries the MSS option (RFC9293-OPT-1, a "should"); this test does not assert either
+value, since the option's absence would be a note, not a failure.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_connection_establishment")
+        // Observation 1: host A sends the SYN. Record ISS_A and the header length. This
+        // also confirms the stimulus -- without the SYN the rest of the check would pass
+        // vacuously. A header of at least 20 octets and a nonzero checksum cover HDR-1 and
+        // CKSUM-1; observed at the MAC because the checksum isn't inserted until the IPv4
+        // module's postRouting stage (see the %description deviation note).
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false && tcp.headerLength >= 20B && tcp.checksum != 0")
+                  .capture("issA", "tcp.sequenceNo")
+                  // Captured via a lambda, stripping the "B" unit into a plain number: the
+                  // declarative string-form capture("name", "tcp.headerLength") stores the
+                  // field's unit-bearing cValue as-is, and EventPattern.cc's
+                  // formatCaptureValue() -- used to substitute {captures} into a *later*
+                  // step's dynamic expression -- calls cValue::intValue(), which throws
+                  // ("Attempt to use the value '24B' as a dimensionless number", confirmed
+                  // empirically) for any capture that still carries a unit, even one the
+                  // later step's own expression never references. No prior test in this
+                  // suite captured a unit-bearing field, so this is new territory.
+                  .capture("synHeaderLength", [](const PacketEvent& e) {
+                      return cValue(evalPacketField(e.packet, "tcp.headerLength").doubleValueInUnit("B"));
+                  })
+                  .describe("host A's SYN, carrying ISS_A, a header of at least 20 octets, and a nonzero checksum").within(0.5))
+        // Observation 2: the SYN+ACK acknowledges ISS_A + 1. The plus one is
+        // RFC9293-SEQ-1: the SYN occupied exactly one sequence number.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1")
+                  .capture("issB", "tcp.sequenceNo")
+                  .describe("host B's SYN+ACK acknowledging ISS_A + 1").within(0.5))
+        // Observation 3: host A's final ACK acknowledges ISS_B + 1, with a 20-octet header:
+        // no option, five words.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {issB} + 1 && tcp.headerLength == 20B")
+                  .describe("host A's final ACK acknowledging ISS_B + 1, with a 20-octet header").within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_connection_establishment compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise (also needed since observation 1
+# now reads the checksum at the MAC layer).
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup: the checksum is never
+# optional, MUST-2). The default "declared" mode never inserts a hook at all (see
+# src/inet/transportlayer/tcp/Tcp.cc), so the checksum field would stay at its unset 0.
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockup.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9293_connection_establishment: PASS

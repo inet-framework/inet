@@ -1,0 +1,178 @@
+%description:
+
+RFC 9293 — every segment carries the receive window, and the peer sends new data only up to
+that edge; when the window is smaller than a full segment, the window and not the segment
+size bounds what the sender transmits.
+
+Checks RFC9293-WND-1 and RFC9293-WND-2 (description, with the SHLD-15 rule), and covers
+RFC9293-ACKD-1 (must, as a scenario condition) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup are
+in doc/project/evidence/protocol/tcp/checks.md#flow-control; the program steps below map one
+to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
+host2, link L = host1-host2.
+
+checks.md's scenario constants for this check: host B's receive window is 300 octets
+(smaller than a 536-octet segment and smaller than any initial congestion window), its
+acknowledgment is delayed, and host A's data block is 3000 octets (ten times the window).
+Write ISS_A for host A's initial sequence number and W (= 300) for host B's advertised
+window: before any data is acknowledged, host A may send octets ISS_A + 1 to ISS_A + W and
+no further; after host B acknowledges ISS_A + W + 1 with the window reopened, host A may
+continue from ISS_A + W + 1.
+
+Parameters (src/inet/transportlayer/tcp/Tcp.ned), set on host B only: advertisedWindow = 300
+(default 14 * mss, i.e. 7504 -- a plain byte count, no unit annotation) and
+delayedAcksEnabled = true (default false). The delay itself is not separately configurable:
+it is the fixed DELAYED_ACK_TIMEOUT constant in
+src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc, 0.2 s -- exactly checks.md's constant
+(permitted, since RFC9293-ACKD-1 only requires less than 0.5 s), so nothing further is set
+for the delay itself.
+
+Deviation on tClose: the common mockup's close time (0.4 s) is dropped. Draining the
+3000-octet block through a 300-octet window with a 0.2 s delayed ack takes about ten rounds
+(~2 s), so 0.4 s would land the close command while the exchange this check examines is
+still in progress; the check's own procedure has no close step at all, so tClose = -1s
+(never close).
+
+Deviation on observations 3, 4 and 6: as in Rfc9293DataTransfer.test, the data-length
+comparison needs ipv4.totalLengthField and ipv4.headerLength, not dissectable at host1.tcp's
+own outbound signal, so these observe at host1.eth[0].mac instead. Observations 1, 2 and 5
+need no ipv4 field and stay at host1.tcp.
+
+Deviation on host2's app: TcpSinkApp, not TcpEchoApp (the other tests in this suite's own
+receiver). TcpEchoApp writes back whatever it receives as soon as it receives it, so its
+reply segment always has fresh data to piggyback an immediate acknowledgment on -- it never
+lets the delayed-ACK timer fire at all, defeating this check's whole premise (confirmed
+empirically: with TcpEchoApp, host A's second 300-octet segment left within
+0.00003s of the first, well inside observation 4's 0.15s "never" window, because host B's
+echoed reply carried ack = ISS_A + 301 immediately). TcpSinkApp only ever receives, so host
+B has nothing of its own to send and must fall back to the delayed, standalone ACK checks.md
+requires.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The data length of a TCP segment (see Rfc9293DataTransfer.test for the same helper and
+// the reasoning behind it).
+static double tcpSegmentDataLength(const Packet *packet)
+{
+    return evalPacketField(packet, "ipv4.totalLengthField").doubleValueInUnit("B")
+         - evalPacketField(packet, "ipv4.headerLength").doubleValueInUnit("B")
+         - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_flow_control")
+        // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
+        // stimulus.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: host A receives host B's SYN-ACK with a window field of 300
+        // (RFC9293-WND-1). Record it as W.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1 && tcp.window == 300")
+                  .capture("w", "tcp.window")
+                  .describe("host B's SYN-ACK advertising a 300-octet window").within(0.5))
+        // Observation 3: after the send time, host A sends a segment with sequence number
+        // ISS_A + 1 that carries exactly W (300) octets of data: the window, not the
+        // segment size, bounded it (RFC9293-WND-2). No notBefore is needed: the
+        // handshake's own final ACK shares the same starting sequence number but carries
+        // no data, so the length check alone already disambiguates the two (see
+        // Rfc9293DataTransfer.test's observation 2 for why a notBefore(0.19) here -- this
+        // step's anchor is observation 2's SYN-ACK receipt, itself only ~0.1s in -- would
+        // wrongly exclude the real 0.2s send time; confirmed empirically).
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {issA} + 1")
+                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 300; })
+                  .describe("host A's first data segment, bounded to the 300-octet window, not the 536-octet segment size")
+                  .within(1.0))
+        // Observation 4: for 0.15 s after that segment, host A sends no segment that
+        // carries new data beyond ISS_A + W (RFC9293-WND-2). The acknowledgment that would
+        // open the window is still 0.05 s away (the 0.2 s delayed-ack timer started when
+        // observation 3's segment arrived at host B).
+        .never(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo > {issA} + 300")
+                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .describe("any new data beyond the window edge, ISS_A + 300")
+                  .within(0.15))
+        // Observation 5: host A receives an acknowledgment of ISS_A + W + 1 with a window
+        // field of at least W: the receiver accepted the octets and reopened the window.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackNo == {issA} + 301 && tcp.window >= 300")
+                  .describe("host B's delayed acknowledgment of ISS_A + 301, reopening the window").within(0.5))
+        // Observation 6: host A sends a segment with sequence number ISS_A + W + 1 that
+        // carries data: the sender resumed exactly at the edge.
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {issA} + 301")
+                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .describe("host A resuming exactly at the window edge, ISS_A + 301")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_flow_control compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise (also needed since several
+# observations read ipv4 fields at the MAC layer).
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2).
+**.checksumMode = "computed"
+
+# checks.md#flow-control's scenario constants: host B's receive window is smaller than a
+# full segment, and its acknowledgment is delayed.
+*.host2.tcp.advertisedWindow = 300
+*.host2.tcp.delayedAcksEnabled = true
+
+# The scenario constants of checks.md#common-mockup, except tClose (see the %description
+# deviation note: this check's own procedure has no close step, and the windowed transfer
+# is still in progress well past the common mockup's 0.4 s close time).
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 3000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9293_flow_control: PASS

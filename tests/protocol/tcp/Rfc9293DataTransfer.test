@@ -1,0 +1,147 @@
+%description:
+
+RFC 9293 — the sender cuts the byte stream into segments no larger than the effective send
+MSS, and the receiver's cumulative acknowledgment names the next octet it expects.
+
+Checks RFC9293-DATA-1 and RFC9293-SEG-1 (must) and RFC9293-ACK-1 (description), and covers
+RFC9293-ACK-2 (description) from doc/project/evidence/standard/rfc9293/catalog.md. The
+English procedure and the mockup are in
+doc/project/evidence/protocol/tcp/checks.md#data-transfer; the program steps below map one
+to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
+host2, link L = host1-host2.
+
+Replaces Rfc9293CumulativeAck.test: that file's own anchor (#cumulative-acknowledgment) no
+longer exists in checks.md, which now organizes this material under "Data transfer" with a
+fourth, SYN-anchored observation.
+
+The data block is 5000 octets and the effective send MSS is 536, so the stream occupies
+sequence numbers ISS_A + 1 to ISS_A + 5000, in nine segments of 536 octets and one of 176.
+The acknowledgment of the whole stream is ISS_A + 5001.
+
+Deviation on observation 2: the data length (RFC9293-SEG-1's octet count) is computed as
+ipv4.totalLengthField - ipv4.headerLength - tcp.headerLength (all three are byte-unit ("B")
+fields; PacketField.h's evalPacketField() returns each as a unit-bearing cValue, read here
+with doubleValueInUnit("B") so the subtraction is ordinary double arithmetic -- the same
+technique tests/protocol/ipv4/Rfc791DatagramDelivery.test uses for its address comparison,
+here for a numeric computation instead). ipv4 fields aren't dissectable at host1.tcp's own
+outbound signal (the IPv4 header is added downstream, in the IP layer; INET's own IPv4
+protocol-test templates make the same choice, asserting ipv4.* only at the MAC/router layer
+and never at a transport module's own boundary), so this observation moves to
+host1.eth[0].mac. Observations 1, 3 and 4 need no ipv4 field and stay at host1.tcp,
+unchanged from the established idiom.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The data length of a TCP segment: ipv4.totalLengthField, ipv4.headerLength and
+// tcp.headerLength are all byte-unit ("B") fields (see PacketField.h / TcpHeader.msg /
+// Ipv4Header.msg); doubleValueInUnit("B") reads each as a plain byte count so the
+// subtraction is ordinary double arithmetic.
+static double tcpSegmentDataLength(const Packet *packet)
+{
+    return evalPacketField(packet, "ipv4.totalLengthField").doubleValueInUnit("B")
+         - evalPacketField(packet, "ipv4.headerLength").doubleValueInUnit("B")
+         - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_data_transfer")
+        // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
+        // stimulus.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: after the send time, host A sends a segment with sequence number
+        // ISS_A + 1 that carries exactly 536 octets of data and has ACK set (RFC9293-SEG-1:
+        // a full segment is the effective send MSS and not more; RFC9293-ACK-2). No
+        // notBefore is needed: the handshake's own final ACK shares the same starting
+        // sequence number ISS_A + 1 but carries no data, so the length check alone already
+        // disambiguates the two (this step's anchor -- observation 1's SYN, at ~0.1s --
+        // is itself already close to that final ACK, so a notBefore(0.19) here would
+        // wrongly push the earliest acceptable match to ~0.29s, past the real 0.2s send
+        // time; confirmed empirically).
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {issA} + 1 && tcp.ackBit == true")
+                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 536; })
+                  .describe("host A's first data segment, 536 octets at ISS_A + 1, with ACK set")
+                  .within(1.0))
+        // Observation 3: host A sends a segment with sequence number ISS_A + 537 that
+        // carries data: the stream continues where the first segment ended, with no gap.
+        // The data-length condition is necessary: a pure acknowledgment that host A sends
+        // while its next sequence number is ISS_A + 537 carries that same number and no
+        // data, and with an echoing peer host A does send such acknowledgments.
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {issA} + 537")
+                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .describe("host A's next data segment, continuing at ISS_A + 537 with no gap")
+                  .within(1.0))
+        // Observation 4: host A receives an acknowledgment of the whole stream, ISS_A +
+        // 5001 (RFC9293-ACK-1, RFC9293-DATA-1: the receiver accepted the whole stream in
+        // order). Decisive: a cumulative acknowledgment of the last octet cannot occur
+        // unless every earlier octet was received in order.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo == {issA} + 5001")
+                  .describe("the cumulative acknowledgment of the whole 5000-octet stream, ISS_A + 5001")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_data_transfer compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise (also needed since observation 2
+# reads ipv4 fields at the MAC layer).
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2).
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockup.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9293_data_transfer: PASS

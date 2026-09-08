@@ -1,0 +1,90 @@
+%description:
+
+RFC 9293 — a normal close carries a FIN in each direction, and each FIN is acknowledged.
+
+Checks RFC9293-FIN-1 and RFC9293-FIN-2 (both description) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup are
+in doc/project/evidence/protocol/tcp/checks.md#connection-termination; the program steps
+below map one to one onto its expected observations. Mapping of the mockup: host A = host1,
+host B = host2, link L = host1-host2.
+
+The plus one in step 2 and step 4 is RFC9293-FIN-1: the FIN occupies one sequence number,
+after the last data octet. Figure 12 of RFC 9293 is the close sequence this check follows.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_connection_termination")
+        // Observation 1: host A sends its FIN. Record F_A. This confirms the stimulus:
+        // the close really started.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.finBit == true")
+                  .capture("finA", "tcp.sequenceNo")
+                  .describe("host A's FIN, at sequence number F_A").within(1.0))
+        // Observation 2: host B acknowledges F_A + 1 -- the FIN occupied one sequence
+        // number (RFC9293-FIN-1).
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo == {finA} + 1")
+                  .describe("host B's acknowledgment of host A's FIN, F_A + 1").within(1.0))
+        // Observation 3: host B closes its own direction with its own FIN.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.finBit == true")
+                  .capture("finB", "tcp.sequenceNo")
+                  .describe("host B's FIN, at sequence number F_B").within(1.0))
+        // Observation 4: host A acknowledges F_B + 1.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo == {finB} + 1")
+                  .describe("host A's acknowledgment of host B's FIN, F_B + 1").within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_connection_termination compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# The scenario constants of checks.md#common-mockup.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9293_connection_termination: PASS

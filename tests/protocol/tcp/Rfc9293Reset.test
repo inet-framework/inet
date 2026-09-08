@@ -1,0 +1,100 @@
+%description:
+
+RFC 9293 — a segment for a connection that does not exist is answered with a reset, and the
+connection attempt ends.
+
+Checks RFC9293-RST-1 (description, a rule of the state machine) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup are
+in doc/project/evidence/protocol/tcp/checks.md#connection-reset; the program steps below map
+one to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
+host2, link L = host1-host2.
+
+Scenario (checks.md's own scenario constants for this check, replacing the common mockup's
+data/close phases, which do not apply here): host B has no application at all (numApps = 0),
+so nothing listens on port 7000; host A's TcpSessionApp connects there. host B's TCP answers
+the SYN with <SEQ=0><ACK=SEG.SEQ+SEG.LEN><CTL=RST,ACK> (RFC9293-RST-1); the SYN occupies one
+octet of sequence space, so SEG.SEQ + SEG.LEN is ISS_A + 1.
+
+TcpSessionApp schedules its data-send and close timers reactively, from socketEstablished()
+(src/inet/applications/tcpapp/TcpSessionApp.cc) -- a callback a refused connection never
+reaches (socketFailure() instead cancels the app's timer outright) -- so host A's app makes
+no further attempt of its own accord after the initial SYN; tSend, sendBytes and tClose are
+therefore left unset (their defaults are never reached).
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_reset")
+        // Observation 1: host A sends a SYN to port 7000. Record ISS_A. Confirms the
+        // stimulus.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.destPort == 7000")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN to port 7000, carrying ISS_A").within(0.5))
+        // Observation 2: host A receives a segment from port 7000 with RST set and ACK
+        // set, sequence number 0, and acknowledgment field ISS_A + 1 (RFC9293-RST-1: the
+        // SYN occupies one octet of sequence space, so SEG.SEQ + SEG.LEN is ISS_A + 1).
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.rstBit == true && tcp.ackBit == true && tcp.sequenceNo == 0 && tcp.ackNo == {issA} + 1")
+                  .describe("host B's RST, ACK answering the SYN, sequence number 0, acknowledging ISS_A + 1").within(0.5))
+        // Observation 3: for 0.3 s after the reset, host A sends nothing more to port
+        // 7000 -- the attempt is abandoned, and no acknowledgment or data follows.
+        .never(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.destPort == 7000")
+                  .describe("anything more from host A to port 7000")
+                  .within(0.3));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_reset compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2).
+**.checksumMode = "computed"
+
+# checks.md#connection-reset's scenario: no listener on port 7000 of host B.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 7000
+*.host1.app[0].tOpen = 0.1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_reset: PASS

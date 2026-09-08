@@ -1,0 +1,116 @@
+%description:
+
+RFC 9293 -- a sender without a PUSH flag on its send operation sets PSH on the last
+buffered segment of a send.
+
+Checks RFC9293-PSH-1 (must, under the condition that the SEND call offers no PUSH flag)
+from doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup
+are in doc/project/evidence/protocol/tcp/checks.md#push-on-the-last-segment; the program
+steps below map one to one onto its expected observations. Mapping of the mockup: host A =
+host1, host B = host2, link L = host1-host2.
+
+Expected result: FAIL. The model's send interface offers no PUSH flag, so MUST-61 applies,
+and the model never sets the PSH bit on a data segment: the sender carries the comment
+"TODO when to set PSH bit?" where the bit would be set (src/inet/transportlayer/tcp/
+TcpConnectionUtil.cc, sendSegment), and the SEND processing carries "FIXME how to support
+PUSH?" (TcpConnectionEventProc.cc, process_SEND). The step stays as the standard demands;
+the gap is recorded in doc/project/evidence/model/tcp/results.md. When the gap closes, this
+test reports PASS (unexpected), and the declaration below is removed.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The data length of a TCP segment: ipv4.totalLengthField, ipv4.headerLength and
+// tcp.headerLength are all byte-unit ("B") fields (see PacketField.h / TcpHeader.msg /
+// Ipv4Header.msg); doubleValueInUnit("B") reads each as a plain byte count so the
+// subtraction is ordinary double arithmetic.
+static double tcpSegmentDataLength(const Packet *packet)
+{
+    return evalPacketField(packet, "ipv4.totalLengthField").doubleValueInUnit("B")
+         - evalPacketField(packet, "ipv4.headerLength").doubleValueInUnit("B")
+         - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_push")
+        // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
+        // stimulus.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: host A sends the last segment of the stream -- the one whose last
+        // data octet is ISS_A + 5000 -- with PSH set (RFC9293-PSH-1: no more queued data).
+        // The segment is identified by its end, not by a fixed sequence number.
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.pshBit == true")
+                  .match([](const MatchContext& c) {
+                      double seq = evalPacketField(c.event.packet, "tcp.sequenceNo").doubleValue();
+                      double len = tcpSegmentDataLength(c.event.packet);
+                      return len > 0 && seq + len == c.get("issA").doubleValue() + 5001;
+                  })
+                  .describe("the last data segment of the stream, ending at ISS_A + 5000, with PSH set")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_push compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// host A -- link L -- host B.
+network Rfc9293TcpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TcpNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise (also needed since observation 2
+# reads ipv4 fields at the MAC layer).
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2).
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockup.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9293_push: PASS
