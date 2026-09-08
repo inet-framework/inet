@@ -29,6 +29,7 @@ class ExplicitModeSet : public Ieee80211ModeSet
 const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
 const auto *vhtModeSet = Ieee80211ModeSet::getModeSet("ac");
 const auto *htReference = htModeSet->getMode(Mbps(6.5));
+const auto *legacyMode = htModeSet->getMode(Mbps(1));
 
 ASSERT(htModeSet->getPhyType() == Ieee80211ModeSet::PhyType::HT);
 ASSERT(htModeSet->getReferenceMode() == htReference);
@@ -48,13 +49,26 @@ ASSERT(vhtModeSet->getPhyType() == Ieee80211ModeSet::PhyType::VHT);
 std::vector<ExplicitModeSet::Entry> reorderedEntries = {
     {false, htModeSet->getMode(Mbps(65))},
     {true, htReference},
+    {true, legacyMode, true},
 };
 ExplicitModeSet reordered(reorderedEntries, htReference, Ieee80211ModeSet::PhyType::HT);
 ASSERT(reordered.getReferenceMode() == htReference);
-ASSERT(reordered.getMode(0) == htReference);
+ASSERT(reordered.getMode(0) == legacyMode);
+ASSERT(reordered.getMode(1) == htReference);
+ASSERT(reordered.getLegacyOperationalModes().size() == 1);
+ASSERT(reordered.getLegacyOperationalModes()[0] == legacyMode);
 ASSERT(reordered.getSifsTime() == htReference->getSifsTime());
 ASSERT(reordered.getSlotTime() == htReference->getSlotTime());
 ASSERT(reordered.getPhyRxStartDelay() == htReference->getPhyRxStartDelay());
+
+bool emptyLegacyRejected = false;
+try {
+    ExplicitModeSet invalid({{false, htReference}}, htReference, Ieee80211ModeSet::PhyType::HT);
+}
+catch (const cRuntimeError&) {
+    emptyLegacyRejected = true;
+}
+ASSERT(emptyLegacyRejected);
 
 bool nullReferenceRejected = false;
 try {
