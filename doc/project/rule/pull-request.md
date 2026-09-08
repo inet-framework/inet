@@ -255,9 +255,15 @@ branch afterwards is the maintainer's decision; the branch you submit stays line
 
 **`area: what the commit does`**
 
-One line: the component or tree area, a colon, then what the commit does, in the present tense.
-Keep it below about 72 characters and end it without a full stop. Then one empty line, then the
-body.
+One line: the component or tree area, a colon, then what the commit does, in the present tense. End
+it without a full stop. Then one empty line, then the body.
+
+**Aim for 72 characters. A gate fails above 80.** The 72 is where `git log --oneline` still fits an
+80-column terminal, once the abbreviated hash and its space are counted. The 80 is where the subject
+stops fitting on its own. Between the two is a matter of taste and nothing is gained by arguing it:
+the length limit is a proxy for [PR-SPLIT-ONE-CHANGE](#pr-split-one-change) — a subject that will not
+fit usually describes two changes — and at 73 characters that proxy tells you nothing. A gate that
+reports a one-character overrun beside a real defect teaches the reader to skim both.
 
 The area is the NED or C++ component (`ExternalProcess:`, `Ipv4:`, `visualizer:`) or the part of
 the tree (`tests:`, `doc:`, `build:`, `examples/mpls/net37:`). An optional kind word may follow
@@ -367,7 +373,7 @@ argue about.
 | PR-SERIES-BUILDS | T2 | CI builds and tests every commit of the branch, not only the head |
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
-| PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, length, no file paths, no links |
+| PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
 | PR-MSG-FACTS | T3 | commit-message lint: no attribution trailers |
 | PR-SPLIT-ONE-CHANGE | T4 | agent review: does the commit contain two independent decisions? |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |

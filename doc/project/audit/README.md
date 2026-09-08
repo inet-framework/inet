@@ -45,6 +45,29 @@ unaudited ──audit──► audited ──repair or sanction──► complia
 
 Only the user moves a path into `sealed`. Everything before that an agent can do and report.
 
+## How severe is a finding
+
+A report that numbers every fault `F-1`, `F-2`, `F-3` tells the reader that a missing release note
+and a one-character subject overrun are the same kind of thing. They are not, and a reader who learns
+that the numbers mean nothing skims all of them.
+
+Every finding carries one of three severities, stated in bold at its head.
+
+| Severity | Means | The author's move |
+| --- | --- | --- |
+| **Blocking** | merging it causes a problem for someone outside the change: a break nobody announced, a sealed path edited without permission, an expectation that no longer holds | fix before merge |
+| **Finding** | it degrades the record or the review, but nothing outside the change suffers: a commit that holds two decisions, a message that will not age, a test in the wrong category | fix, or say why not |
+| **Note** | mechanical or advisory; worth seeing, not worth a round trip: a subject a few characters long, a stray blank line, a convention drifting | fix if you are touching the commit anyway |
+
+**Only Blocking and Finding are numbered.** A note goes in a *Notes* section at the end, unnumbered,
+so the numbered list stays the list of things that need a decision.
+
+**The verdict counts findings, not notes.** *"PASS with 2 findings"* over a report with six notes is
+an honest summary; *"PASS with 8 findings"* is not.
+
+The gates follow the same split: `check-commits.sh` prints `VIOLATION` for what fails it and `note:`
+for what is advisory, and only a `VIOLATION` sets its exit status.
+
 ## What a report holds
 
 A report is a **snapshot**: it describes one audit, at one commit, on one date. Every report holds:

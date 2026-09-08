@@ -10,7 +10,8 @@
 #   PR-SPLIT-BASELINE    — a baseline-only commit that repeats the commit before it, or gives no reason
 #   PR-SERIES-ORDER      — a fixup, squash or "address review" subject
 #   PR-SERIES-LINEAR     — a merge commit inside the series
-#   PR-MSG-SUBJECT       — "area: what it does", under 72 characters, no file path, no link
+#   PR-MSG-SUBJECT       — "area: what it does", no file path, no link; length fails above 80,
+#                          and is reported as a note between 73 and 80
 #   PR-MSG-FACTS         — no attribution trailer
 #
 # Usage (from the INET repository root):
@@ -26,6 +27,8 @@ if ! git rev-parse "$RANGE" >/dev/null 2>&1; then
 fi
 status=0
 flag() { echo "  VIOLATION: $1"; status=1; }
+# A note is advisory: it is worth seeing and it does not fail the gate.
+note() { echo "  note: $1"; }
 
 echo "== the series: $RANGE =="
 COMMITS=$(git log --format=%H --reverse "$RANGE")
@@ -47,7 +50,14 @@ ok=1
 while read -r sha; do
   subj=$(git log -1 --format=%s "$sha")
   short=${sha:0:9}
-  [ ${#subj} -gt 72 ] && { flag "$short subject is ${#subj} characters: $subj"; ok=0; }
+  # The rule aims for 72 and fails above 80.  Between the two is a note that does not fail the
+  # gate: at 73 characters the length says nothing about whether the commit holds one change,
+  # and a one-character overrun reported beside a real defect teaches the reader to skim both.
+  if [ ${#subj} -gt 80 ]; then
+    flag "$short subject is ${#subj} characters: $subj"; ok=0
+  elif [ ${#subj} -gt 72 ]; then
+    note "$short subject is ${#subj} characters, over the 72 aimed for: $subj"
+  fi
   echo "$subj" | grep -qE "^[a-z0-9_./-]+(\([a-z0-9_/-]+\))?: " || { flag "$short subject is not 'area: what it does': $subj"; ok=0; }
   echo "$subj" | grep -qE "\.(cc|h|ned|msg|ini|py|sh|md)\b|https?://" && { flag "$short subject names a file or a link: $subj"; ok=0; }
   git log -1 --format=%B "$sha" | grep -qiE "^(Co-Authored-By|Generated-By|Signed-off-by: .*\[bot\]):" && { flag "$short carries an attribution trailer"; ok=0; }
