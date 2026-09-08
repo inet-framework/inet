@@ -13,6 +13,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
 
@@ -26,7 +27,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener, public NetfilterBase::HookBase
 {
   public:
     /**
@@ -103,10 +104,29 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
+    /**
+     * Sets the checksum mode on the header and, for the declared modes, the recognizable
+     * placeholder value. In CHECKSUM_COMPUTED mode it only zeroes the field; the value is
+     * filled in by datagramPostRoutingHook(), after routing.
+     */
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
     void insertChecksum(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertChecksum(checksumMode, icmpHeader, packet); }
 
+    // Fills in the checksum of an outgoing ICMPv6 message, at the point where the source
+    // and destination addresses the datagram is sent with are settled.
+    virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *packet) override;
+    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
+
   protected:
+    /**
+     * Computes the checksum of an ICMPv6 message: the one's complement sum over the
+     * message, whose checksum field must be zero.
+     */
+    static uint16_t computeChecksum(const Ptr<const Icmpv6Header>& icmpHeader, const Ptr<const Chunk>& icmpData);
+
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
