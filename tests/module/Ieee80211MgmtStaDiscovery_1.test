@@ -287,6 +287,14 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         processAssociationResponse(packet, header, reassociation);
     }
 
+    void resetAssociationState()
+    {
+        Enter_Method("resetAssociationState");
+        cancelPendingAssociation();
+        if (mib->bssStationData.isAssociated)
+            clearCurrentAssociation();
+    }
+
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
 
     bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
@@ -400,6 +408,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4: a successful
         // association remains successful when the HT exchange is absent or
         // unusable; only the negotiated HT state is suppressed.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
         ASSERT(mgmt->associationConfirms == 2);
@@ -407,6 +416,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 0);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
         ASSERT(mgmt->associationConfirms == 3);
@@ -466,6 +476,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->reassociationConfirms == 2);
         ASSERT(mgmt->lastReassociationResult == PRC_TIMEOUT);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::PARTIAL);
         ASSERT(mgmt->associationConfirms == 4);
@@ -475,6 +486,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!lastFailureReason.empty());
         ASSERT(!lastFailureWasReassociation);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::UNUSABLE);
         ASSERT(mgmt->associationConfirms == 5);
@@ -482,6 +494,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 2);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_DATARATE_UNSUP, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
         ASSERT(mgmt->associationConfirms == 6);
@@ -491,6 +504,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         // The same policy applies to reassociation responses, and its
         // diagnostic retains the procedure context for observers.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
         ASSERT(mgmt->hasPeerHtState(address));
@@ -504,6 +518,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         // Missing packet-domain channel metadata is an invalid HT response,
         // not an exception. The association result itself remains successful.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, false);
         ASSERT(mgmt->associationConfirms == 8);
@@ -516,6 +531,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // Typed conversion failures in both successful response subtypes
         // preserve the successful association result while producing exactly
         // one HT negotiation diagnostic.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::MALFORMED_CAPABILITIES);
         ASSERT(mgmt->associationConfirms == 9);
@@ -523,6 +539,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 5);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
         ASSERT(mgmt->associationConfirms == 10);
@@ -543,6 +560,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         int expectedReassociationConfirms = mgmt->reassociationConfirms;
         int expectedFailures = htNegotiationFailures;
         auto expectInvalidAssociationTuple = [&](int primaryChannel, int secondaryChannelOffset, int width) {
+            mgmt->resetAssociationState();
             mgmt->prepareResponse(address, false);
             mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
                     TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
@@ -560,6 +578,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         expectInvalidAssociationTuple(13, 1, 40);
 
         auto expectValidAssociationTuple = [&](int primaryChannel, int secondaryChannelOffset) {
+            mgmt->resetAssociationState();
             mgmt->prepareResponse(address, false);
             mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
                     TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
@@ -607,6 +626,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // An unmappable standards-facing primary is peer input: a successful
         // association remains successful, but no negotiated HT state is kept
         // and exactly one diagnostic is emitted.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
                 TestIeee80211MgmtStaDiscovery::ResponseHtForm::UNMAPPABLE_PRIMARY);
@@ -619,6 +639,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         // A production legacy STA ignores malformed optional HT elements in
         // discovery and successful association/reassociation responses.
+        mgmt->resetAssociationState();
         mgmt->setLegacyForTest();
         const MacAddress legacyAddress("02:00:00:00:00:04");
         mgmt->deliverDiscovery(legacyAddress, false, true, false, 11);
