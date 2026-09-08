@@ -1,0 +1,59 @@
+%description:
+Verify that the local IEEE 802.11 management transaction identity is retained
+when a management frame is replaced by fragmentation packets, and that a
+generic body region tag is clipped and rebased for each fragment.
+
+%includes:
+#include <vector>
+
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+
+auto frame = new Packet("AssocResp-OK");
+frame->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(9, 0)));
+frame->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(42);
+frame->addRegionTag<CreationTimeTag>(B(2), B(5));
+
+auto header = makeShared<Ieee80211MgmtHeader>();
+header->setType(ST_ASSOCIATIONRESPONSE);
+header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+frame->insertAtFront(header);
+frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+auto headerLength = header->getChunkLength();
+
+Fragmentation fragmentation;
+auto fragments = fragmentation.fragmentFrame(frame, {4, 5});
+ASSERT(fragments->size() == 2);
+for (auto fragment : *fragments) {
+    auto tag = fragment->findTag<Ieee80211MgmtTransactionTag>();
+    ASSERT(tag != nullptr);
+    ASSERT(tag->getTransactionId() == 42);
+}
+ASSERT(fragments->front()->peekAtFront<Ieee80211MgmtHeader>()->getMoreFragments());
+ASSERT(!fragments->back()->peekAtFront<Ieee80211MgmtHeader>()->getMoreFragments());
+
+auto firstRegionTags = fragments->front()->getAllRegionTags<CreationTimeTag>();
+ASSERT(firstRegionTags.size() == 1);
+ASSERT(firstRegionTags.front().getStartOffset() == headerLength + B(2));
+ASSERT(firstRegionTags.front().getLength() == B(2));
+auto secondRegionTags = fragments->back()->getAllRegionTags<CreationTimeTag>();
+ASSERT(secondRegionTags.size() == 1);
+ASSERT(secondRegionTags.front().getStartOffset() == headerLength);
+ASSERT(secondRegionTags.front().getLength() == B(3));
+
+for (auto fragment : *fragments)
+    delete fragment;
+delete fragments;
+
+EV << "Management transaction packet tag survived frame replacement.\n";
+
+%contains: stdout
+Management transaction packet tag survived frame replacement.
