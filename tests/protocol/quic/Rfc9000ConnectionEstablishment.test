@@ -1,0 +1,139 @@
+%description:
+
+RFC 9000 -- connection establishment.
+
+Checks RFC9000-PKT-1, RFC9000-PKT-2 (description), RFC9000-SIZE-1 (must), from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
+doc/project/evidence/protocol/quic/checks.md#connection-establishment; the program steps below map
+one to one onto its expected observations (steps 1+2 share one datagram, since observations 1 and 2
+both describe that same first datagram). Mockup mapping: host A = client, host B = server.
+
+Scenario: client opens a QUIC connection to server and sends 4000 octets on one stream (the
+checks.md common-mockup constant), via TrafficgenCompound+QuicTrafficgen+TrafficgenSimple (a
+single 4000B burst; QuicClient, the app used in examples/quic/basic3, cannot be reused here
+because it hardcodes two fixed writes of 1000B and 500B in C++ (QuicClient.cc,
+socketEstablished()), not a configurable size). packetInterval is set far beyond
+sim-time-limit and packetCount left at -1 (infinite) so the generator's own "all done, tell
+the handler to close" path (QuicTrafficgen::handleGeneratorInfo, TRAFFICGEN_INFO_FINISH) never
+fires -- otherwise the client would call quic socket close() immediately after handing the
+4000B to the socket, which (per RFC9000-CLOSE-1 / Rfc9000ConnectionClose.test) sends
+CONNECTION_CLOSE right away and would race the handshake/short-header observations below.
+
+Implementation note (Task 0 probe finding): QUIC has no protocol dissector registered
+(src/inet/transportlayer/quic has no Register_Protocol_Dissector for Protocol::quic), so
+PacketDissector falls back to DefaultProtocolDissector, which visits the whole undissected
+remainder as one opaque chunk -- confirmed empirically: evalPacketField(pkt,
+"InitialPacketHeader.version") and friends all threw "protocol '...' not present in packet",
+at every observation point tried (client.udp, both directions, all four recognized
+signals). This test therefore never uses .packet("quic....") or evalPacketField() for QUIC
+fields; it walks the packet's own chunk tree directly via QuicChunks.h's
+findQuicChunk<T>(), which *does* work reliably (also confirmed empirically) because
+inet::quic::QuicPacket::createOmnetPacket() builds each QUIC packet by insertAtBack()-ing
+distinct FieldsChunk-derived chunks, which INET represents as a flat SequenceChunk --
+including the UDP header, still flattened in rather than nested, at an observation point
+before UDP pops it. .packet("udp....") for plain UDP fields is unaffected (UDP has its own
+registered dissector) and works normally, though this test does not need it.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_connection_establishment")
+        // Expected observations 1 and 2: the first UDP datagram from host A to host B
+        // carries a QUIC packet with a long header naming QUIC version 1 (RFC9000-PKT-1;
+        // confirms the stimulus -- a connection attempt started), and that same datagram
+        // is at least 1200 octets (RFC9000-SIZE-1) -- the honest reading of "the UDP
+        // datagram that carries the Initial packet" is the whole datagram UDP hands to
+        // IP, byteLength here, which already includes the 8-octet UDP header.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto initial = findQuicChunk<InitialPacketHeader>(c.event.packet);
+                      return initial != nullptr
+                          && initial->getVersion() == 1
+                          && c.event.packet->getByteLength() >= 1200;
+                  })
+                  .describe("host A's first datagram: a long-header Initial packet, version 1, >= 1200 octets")
+                  .within(0.5))
+        // Expected observation 3: host B answers with a datagram carrying a long header
+        // packet -- the handshake proceeds in both directions.
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<LongPacketHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("host B's answering datagram, also a long-header packet")
+                  .within(0.5))
+        // Expected observation 4: later, host A sends a datagram carrying a QUIC packet
+        // with a short header (RFC9000-PKT-2) -- the connection reached the state in
+        // which application data travels.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<ShortPacketHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("host A's later datagram: a short-header (1-RTT) packet")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_connection_establishment compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_connection_establishment: PASS

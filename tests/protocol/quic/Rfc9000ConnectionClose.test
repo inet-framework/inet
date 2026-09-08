@@ -1,0 +1,111 @@
+%description:
+
+RFC 9000 -- connection close.
+
+Checks RFC9000-CLOSE-1 (description of the mechanism), from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
+doc/project/evidence/protocol/quic/checks.md#connection-close; the program steps below map one to
+one onto its expected observations. Mockup mapping: host A = client, host B = server.
+
+Scenario: examples/quic/basic3's own network and QuicClient/QuicDiscardServer apps, unmodified.
+QuicClient *does* close on its own: socketEstablished() (QuicClient.cc) sends its two writes and
+then unconditionally calls `socket->close()` in the same handler, with no ini parameter gating it
+-- so this check is runnable, and the model's own "immediate" semantics for CONNECTION_CLOSE
+(Connection::close() calls sendConnectionClose() synchronously, before anything else) mean the
+close is sent essentially back-to-back with the data, not after a delay: consistent with checks.md's
+own description of the mechanism ("an endpoint terminates the connection immediately").
+
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+cannot see inside a QUIC packet; this test finds the CONNECTION_CLOSE and STREAM frames directly
+on the packet's own chunk tree via QuicChunks.h's findQuicChunk<T>(). ConnectionCloseFrameHeader
+is the one C++ class for both CONNECTION_CLOSE variants (QUIC-layer error, frameType 0x1c, and
+application-layer error, frameType 0x1d -- FrameHeader.msg); QuicClient's app-initiated close
+produces the app variant (confirmed empirically: `CONNECTION_CLOSE[APP, errorCode=0]`), so this
+test does not restrict frameType and accepts either, matching checks.md's mechanism-level wording.
+
+Deviation on the scope of observation 2: checks.md asks for "no datagram carrying a STREAM frame
+... in either direction" after the close. This test checks only host A's (the client's) outgoing
+side, because the reverse direction is trivially true throughout the *entire* run, not just after
+the close: QuicDiscardServer (src/inet/applications/quicapp/QuicDiscardServer.cc) only ever reads
+and discards -- it has no code path that originates a STREAM frame -- so asserting "no STREAM frame
+from host B" would verify nothing check-specific. Host A's side is the substantive half: it is the
+side that was sending data and had to actually stop.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_connection_close")
+        // Expected observation 1: host A sends a datagram whose QUIC packet carries a
+        // CONNECTION_CLOSE frame. Confirms the stimulus: the close really started
+        // (RFC9000-CLOSE-1).
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<ConnectionCloseFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("host A's datagram carrying a CONNECTION_CLOSE frame")
+                  .within(0.5))
+        // Expected observation 2: from then on, no datagram carrying a STREAM frame
+        // travels from host A -- the stream is closed. See the %description for why the
+        // server->client half is not separately asserted.
+        .never(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("a further STREAM frame from host A")
+                  .within(4.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_connection_close compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+# examples/quic/basic3's own client/server apps, unmodified: the client opens a connection,
+# writes 1000B then 500B, and closes.
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[*].typename = "QuicClient"
+**.client.app[*].localPort = 1001
+**.client.app[*].connectPort = 1000
+**.client.app[*].connectAddress = "server"
+
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_connection_close: PASS

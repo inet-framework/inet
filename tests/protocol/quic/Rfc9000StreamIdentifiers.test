@@ -1,0 +1,124 @@
+%description:
+
+RFC 9000 -- stream identifiers.
+
+Checks RFC9000-STR-1 (description of the encoding, normative), from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
+doc/project/evidence/protocol/quic/checks.md#stream-identifiers; the program step below maps onto
+all three of its expected observations at once, because all three describe the very same STREAM
+frame (its existence, and two bit conditions on the one streamId field it carries) -- the engine
+matches an event once and advances, so a later step cannot re-examine an already-matched event;
+folding same-event observations into one step (with the comment naming all of them) is the
+convention this suite already uses (see e.g. Rfc791DatagramDelivery.test's step 1, which covers
+three catalog IDs on one event). Mockup mapping: host A = client, host B = server.
+
+Scenario: examples/quic/basic3's own network and QuicClient/QuicDiscardServer apps, unmodified --
+this check does not need the 4000-octet common-mockup block (checks.md's own Procedure for this
+check only asks for "one bidirectional stream" with "data" on it, not a specific size), so
+QuicClient's hardcoded pair of writes (1000B then 500B, both explicitly tagged streamId=0 in
+QuicClient.cc) is the simplest, least contrived source of "the client's first stream": nothing in
+this test's ini chooses that number, it is the reference example's own fixed behaviour.
+
+*** Finding, contrary to the "expect this to fail" hint in the task brief: the assertion PASSES. ***
+The observed identifier is streamId=0, which is even (bit0=0: client-initiated, correct per
+RFC9000-STR-1) and has bit1=0 (bidirectional, also "correct"). But this is coincidence, not
+conformance: Quic.ned's own "Missing bits" section states plainly that "[this module does] not
+distinguish [stream types by opener/directionality]. All streams can be used bidirectional" -- and
+tracing the code confirms there is no encoding logic to violate. QuicClient.cc's
+socketEstablished() sets the id with a bare `tags.addTagIfAbsent<QuicStreamReq>()->setStreamID(0)`
+(and QuicTrafficgen.cc's getStreamId() just returns its "generatorId" parameter verbatim: "return
+generatorId;"). EstablishedConnectionState::processSendAppCommand() reads that tag's value with
+`pkt->getTag<QuicStreamReq>()->getStreamID()` and hands it straight to
+Connection::newStreamData()/findOrCreateStream(), which does `new Stream(streamId, this, stats)`
+with no validation, transformation, or role/directionality bookkeeping anywhere in between. The
+wire value is whatever raw integer the application chose. Had QuicClient (or a QuicTrafficgen
+generator) been written to pass streamId=1, this exact test would observe an odd, unidirectional-
+looking identifier from a stream that is, per the model's own documentation, always actually
+bidirectional -- and the check would rightly fail. This test asserts the encoding faithfully as
+checks.md states it (not weakened or inverted, per this suite's hard rule); it happens to pass
+only because 0 is what the reference client app happens to hardcode as its first stream ID, not
+because the model enforces or even represents RFC9000-STR-1's encoding.
+
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+cannot see inside a QUIC packet (no protocol dissector is registered for it -- see
+QuicChunks.h and Rfc9000ConnectionEstablishment.test's %description for the empirical evidence);
+this test reads the STREAM frame's streamId directly off the packet's own chunk tree via
+QuicChunks.h's findQuicChunk<StreamFrameHeader>().
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_stream_identifiers")
+        // Expected observations 1, 2 and 3, all on the one event: host A sends a datagram
+        // whose QUIC packet carries a STREAM frame (confirms the stimulus); the stream
+        // identifier's low bit is 0 (client-initiated, RFC9000-STR-1); and its second bit
+        // is 0 (bidirectional, RFC9000-STR-1). See the %description for the observed value
+        // (0) and why it passes only by coincidence, not by the model enforcing the
+        // encoding.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
+                      if (sf == nullptr)
+                          return false;
+                      uint64_t streamId = sf->getStreamId();
+                      return (streamId & 0x1) == 0        // low bit: client-initiated
+                          && (streamId & 0x2) == 0;        // second bit: bidirectional
+                  })
+                  .describe("host A's first STREAM frame: an even streamId whose second bit is 0")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_stream_identifiers compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+# examples/quic/basic3's own client/server apps, unmodified: the client opens a connection,
+# writes 1000B then 500B (both on stream 0, hardcoded in QuicClient.cc), and closes.
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[*].typename = "QuicClient"
+**.client.app[*].localPort = 1001
+**.client.app[*].connectPort = 1000
+**.client.app[*].connectAddress = "server"
+
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_stream_identifiers: PASS

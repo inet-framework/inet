@@ -1,0 +1,115 @@
+%description:
+
+RFC 9000 -- acknowledgment.
+
+Checks RFC9000-ACK-1 (must, for an ack-eliciting packet), from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
+doc/project/evidence/protocol/quic/checks.md#acknowledgment; the program steps below map one to one
+onto its expected observations. Mockup mapping: host A = client, host B = server.
+
+Scenario: same 4000-octet, one-shot, non-closing TrafficgenCompound+QuicTrafficgen scenario as
+Rfc9000ConnectionEstablishment.test (see that file's %description for why QuicClient's hardcoded
+1000B+500B pair cannot stand in for the 4000-octet common-mockup block). No flow-control override
+here: this check's own scenario constants in checks.md carry no special limit, unlike
+Rfc9000FlowControl.test's.
+
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+cannot see inside a QUIC packet; this test reads the STREAM and ACK frames' fields directly off the
+packet's own chunk tree via QuicChunks.h's findQuicChunk<T>(). The packet number is read off the
+ShortPacketHeader wrapping the STREAM frame -- QUIC's ApplicationData packet number space, the same
+space the returned ACK's largestAck is counted in (RFC9000-ACK-1's own point: an ACK frame
+acknowledges packet numbers in one space, not stream offsets).
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_acknowledgment")
+        // Expected observation 1: host A sends a datagram whose QUIC packet carries a
+        // STREAM frame, which is ack-eliciting. Confirms the stimulus. Record its packet
+        // number (ApplicationData packet number space).
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .capture("streamPn", [](const PacketEvent& e) {
+                      return cValue((intval_t)findQuicChunk<ShortPacketHeader>(e.packet)->getPacketNumber());
+                  })
+                  .describe("host A's ack-eliciting STREAM-frame-carrying datagram")
+                  .within(0.5))
+        // Expected observation 2: host B sends a datagram whose QUIC packet carries an
+        // ACK frame whose largest acknowledged number is at least the recorded one
+        // (RFC9000-ACK-1).
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto ack = findQuicChunk<AckFrameHeader>(c.event.packet);
+                      return ack != nullptr && ack->getLargestAck() >= (uint64_t)c.get("streamPn").intValue();
+                  })
+                  .describe("host B's ACK, covering at least the recorded packet number")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_acknowledgment compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_acknowledgment: PASS

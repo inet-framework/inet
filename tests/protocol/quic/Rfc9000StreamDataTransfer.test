@@ -1,0 +1,148 @@
+%description:
+
+RFC 9000 -- stream data transfer.
+
+Checks RFC9000-STR-2 (must), RFC9000-STR-3 (description), RFC9000-PKT-3 (must), from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
+doc/project/evidence/protocol/quic/checks.md#stream-data-transfer; the program steps below map one
+to one onto its expected observations. Mockup mapping: host A = client, host B = server.
+
+Scenario: same 4000-octet, one-shot, non-closing TrafficgenCompound+QuicTrafficgen scenario as
+Rfc9000ConnectionEstablishment.test (see that file's %description for why QuicClient's
+hardcoded 1000B+500B pair cannot stand in for the 4000-octet common-mockup block, and why the
+generator never signals "finished" -- an app-triggered close right after handing the data to
+the socket would race full delivery).
+
+Implementation notes:
+- As in Rfc9000ConnectionEstablishment.test, .packet("quic....")/evalPacketField() cannot see
+  inside a QUIC packet (no protocol dissector registered for it -- confirmed empirically by
+  the Task 0 probe); this test walks the chunk tree directly via QuicChunks.h's
+  findQuicChunk<T>().
+- Observation 3 ("host B's application receives 4000 octets in total") cannot be observed at
+  the application. QuicDiscardServer's own "bytesReceived" signal is observable (its emit()
+  call casts to (long), matching ProtocolTester's intval_t receiveSignal overload -- confirmed
+  by an authoring-time stateSignals dump), but it fires once per received chunk (1454, 546,
+  1453, 1, 546 in this scenario: never a running total), and .signal(name).is(v) can only match
+  one exact scalar value, so it cannot express "reaches 4000 in total". Quic's own
+  "totalRcvAppData" statistic *is* a running total (Connection.cc, processReceivedData(): a
+  file-static unsigned long accumulator, emitted every time), but emitting it crashes this
+  framework outright -- confirmed empirically: "Unsupported signal data type uintval_t for
+  signal totalRcvAppData_cid=0", because ProtocolTester::receiveSignal only implements the
+  intval_t overload and totalReceivedDataBytes is unsigned long, not long. (Also,
+  EventPattern::selectorMatches hard-blocks .match()/.packet() on any scalar (non-packet)
+  event -- `if (event.packet == nullptr && (!selExpr.empty() || predicate)) return false;` --
+  so even a type-safe cumulative signal could only ever be matched by exact value via .is(),
+  never accumulated in a lambda.) The nearest faithful, actually-observable proxy is therefore
+  the transport-level delivery this application-level number is derived from: the STREAM data
+  arriving at host B's UDP layer. Because the mockup path has no loss or reordering, the
+  frames arrive in send order, so the one whose offset+length reaches exactly 4000 is the
+  completing delivery -- checked directly against the model's own accounting (Stream frame
+  offsets/lengths), not against a hardcoded byte-fragmentation pattern.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_stream_data_transfer")
+        // Expected observation 1: host A sends a datagram whose QUIC packet carries a
+        // STREAM frame (RFC9000-STR-3). Confirms the stimulus: the application data
+        // entered a stream. Capture its packet number for observation 2.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .capture("pn1", [](const PacketEvent& e) {
+                      return cValue((intval_t)findQuicChunk<ShortPacketHeader>(e.packet)->getPacketNumber());
+                  })
+                  .describe("host A's first STREAM-frame-carrying datagram")
+                  .within(0.5))
+        // Expected observation 2: host A sends a second datagram whose QUIC packet
+        // carries a packet number different from the first one's, in the same packet
+        // number space (RFC9000-PKT-3) -- the 4000-octet block needs several packets at
+        // this MTU, so a second one necessarily follows.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
+                      if (sf == nullptr)
+                          return false;
+                      auto header = findQuicChunk<ShortPacketHeader>(c.event.packet);
+                      return header->getPacketNumber() != (uint64_t)c.get("pn1").intValue();
+                  })
+                  .describe("host A's second STREAM-frame-carrying datagram, a different packet number")
+                  .within(0.5))
+        // Expected observation 3: host B's application receives 4000 octets in total
+        // (RFC9000-STR-2). See the %description deviation note: observed as the
+        // transport-level delivery of the completing STREAM frame at host B's UDP layer.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
+                      return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
+                  })
+                  .describe("the STREAM frame completing all 4000 octets, arriving at host B")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_stream_data_transfer compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_stream_data_transfer: PASS

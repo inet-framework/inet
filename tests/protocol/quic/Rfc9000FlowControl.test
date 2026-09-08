@@ -1,0 +1,202 @@
+%description:
+
+RFC 9000 -- flow control.
+
+Checks RFC9000-FC-1 (must), from doc/project/evidence/standard/rfc9000/catalog.md. The English
+procedure and mockup are in doc/project/evidence/protocol/quic/checks.md#flow-control; the program
+steps below map one to one onto its expected observations. Mockup mapping: host A = client, host B
+= server.
+
+Scenario: host B's (the server's) initial stream flow-control limit is set to 2000 octets
+(`**.server.quic.initialMaxStreamData = 2000B` -- the parameter is declared `int
+initialMaxStreamData @unit(B)` in src/inet/transportlayer/quic/Quic.ned, so a bare byte literal is
+the right unit), smaller than the 4000-octet block, so the limit binds (checks.md's own scenario
+constants for this check). `sendMaxDataFramesImmediately` and `roundConsumedDataValue` are also set
+on host B, mirroring examples/quic/flow_control_limited/omnetpp.ini's own working configuration of
+the same mechanism, so the receiver raises the limit as soon as it has consumed enough rather than
+waiting to piggyback the MAX_STREAM_DATA frame on some other outgoing packet. Host A otherwise uses
+the same 4000-octet, one-shot, non-closing TrafficgenCompound+QuicTrafficgen scenario as
+Rfc9000ConnectionEstablishment.test.
+
+Implementation of observation 2 ("the total stream data host A sends, before any frame from host B
+raises the limit, does not exceed 2000 octets"): the task brief suggested either a `never` step for
+an over-limit STREAM frame before the first MAX_STREAM_DATA, or a sum accumulated in a lambda.
+Neither is directly usable as first imagined, for reasons specific to this engine (confirmed by
+reading tests/protocol/lib/ProtocolTester.cc/EventPattern.cc, not just guessed):
+  - A running byte sum can't be accumulated on the *signal* side: EventPattern::selectorMatches()
+    hard-blocks `.match()`/`.packet()` on a scalar (non-packet) event -- see the deviation note in
+    Rfc9000StreamDataTransfer.test -- so this would have to run on packet events, which is exactly
+    what this test does (see below).
+  - A `never` step naturally expresses "must not happen", but a `never` (like any greedy
+    Count-backed step) only resolves -- and hence only lets the *next* step start watching the
+    event stream -- once its own `.within()` window fully elapses (confirmed in
+    ProtocolTester.cc's handleMessage(), StepType::Never/Count deadline handling). This engine is
+    strictly sequential and single-pass (exactly one step is "current" at a time; a non-matching
+    event is simply gone once a step has looked at it -- confirmed in ProtocolTester::processMatch()
+    switching on `program->steps[currentStep]`). The gap between "host A's initial burst finishes"
+    and "host B's first MAX_STREAM_DATA arrives" is under 200 microseconds in this scenario (checked
+    empirically with a throwaway probe), far too small a target to size a `never` step's `.within()`
+    against reliably -- and any value large enough to be robust would run past the point where host
+    A finishes sending the remainder, so a subsequent step looking for that completion would never
+    see it (its event already went by while the long `never` was still "current").
+  - A predicate cannot signal failure by throwing, either: EventPattern::selectorMatches() wraps
+    every `.match()` call in a try/catch that turns *any* exception into a silent non-match (by
+    design, so a predicate that peeks a field absent from an unrelated packet fails safe) -- so a
+    `throw` from inside a lambda can never surface as a test failure here.
+  - What *does* survive across steps cleanly: `once` steps advance the instant they match, so they
+    never withhold events from whatever step follows -- and a `once` step's predicate, even while
+    returning false and "still waiting", still runs once per candidate event, so it can perform side
+    effects. This test therefore threads two `std::shared_ptr<bool>` flags (`raised`, `violated`)
+    through three sequential `once` steps' predicates. Every predicate call first records, as a side
+    effect, whether the event is host B raising the limit or host A sending stream data that (before
+    any raise) exceeds it; only *then* does it evaluate its own step's specific match condition,
+    which for the "raise" step also requires `!*violated`. Since events are examined by whichever
+    step is current with no gaps between steps, this reconstructs a `never`-like invariant over the
+    causal interval "before the first raise" exactly, without depending on any guessed timing: if a
+    violation is ever recorded, the "raise" step can never match (its own condition includes
+    `!*violated`, permanently false from then on) and fails honestly by deadline miss, naming the
+    step and its `.describe()` text -- a real, visible, correctly-attributed failure, not a silently
+    swallowed one.
+
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+cannot see inside a QUIC packet; this test reads the STREAM and MAX_STREAM_DATA frames' fields
+directly off the packet's own chunk tree via QuicChunks.h's findQuicChunk<T>().
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+#include <memory>
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    // Shared, mutable, causal-state flags threaded through the three steps below -- see the
+    // %description's implementation note for why this replaces a timing-based never/window.
+    auto raised = std::make_shared<bool>(false);     // host B has sent a MAX_STREAM_DATA frame
+    auto violated = std::make_shared<bool>(false);   // a STREAM frame exceeded 2000 before that
+
+    // Side effect only, run from every step's predicate on every candidate event: keeps
+    // `raised`/`violated` correct regardless of which step is "current" when the event arrives.
+    auto track = [raised, violated](const PacketEvent& e) {
+        if (e.packet == nullptr)
+            return;
+        if (e.signalName == "packetSentToLower") {
+            if (auto sf = findQuicChunk<StreamFrameHeader>(e.packet)) {
+                if (!*raised && sf->getOffset() + sf->getLength() > 2000)
+                    *violated = true;
+            }
+        }
+        else if (e.signalName == "packetReceivedFromLower") {
+            if (findQuicChunk<MaxStreamDataFrameHeader>(e.packet))
+                *raised = true;
+        }
+    };
+
+    return ProtocolTest("rfc9000_flow_control")
+        // Expected observation 1: host A sends a datagram whose QUIC packet carries a
+        // STREAM frame. Confirms the stimulus.
+        .once(on("client.udp")
+                  .match([track](const MatchContext& c) {
+                      track(c.event);
+                      return c.event.signalName == "packetSentToLower"
+                          && findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("host A's first STREAM frame")
+                  .within(0.5))
+        // Expected observation 2 (the whole of RFC9000-FC-1: the limit binds a sender, it
+        // does not merely inform it) folded into the match condition for observation 3's
+        // first half: this step can only match a MAX_STREAM_DATA frame for which no
+        // earlier STREAM frame (tracked continuously since the previous step, see above)
+        // has already exceeded 2000 octets. If one had, `*violated` stays true forever and
+        // this step fails by deadline miss instead -- see the %description.
+        .once(on("client.udp")
+                  .match([track, violated](const MatchContext& c) {
+                      track(c.event);
+                      return !*violated
+                          && c.event.signalName == "packetReceivedFromLower"
+                          && findQuicChunk<MaxStreamDataFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("host B raises the stream flow-control limit, with no STREAM frame from host A having exceeded 2000 octets beforehand")
+                  .within(1.0))
+        // Expected observation 3, second half: host A then sends the remainder, so that
+        // host B's application receives all 4000 octets -- observed, as in
+        // Rfc9000StreamDataTransfer.test, as the STREAM frame whose offset+length
+        // completes the 4000-octet block (no loss/reordering in this mockup, so this is
+        // the last one sent).
+        .once(on("client.udp")
+                  .match([track](const MatchContext& c) {
+                      track(c.event);
+                      if (c.event.signalName != "packetSentToLower")
+                          return false;
+                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
+                      return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
+                  })
+                  .describe("host A sends the remainder, completing all 4000 octets")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_flow_control compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives, with its initial stream flow-control
+# limit set below the 4000-octet block so the limit binds (checks.md's scenario constants).
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+**.server.quic.initialMaxStreamData = 2000B
+**.server.quic.sendMaxDataFramesImmediately = true
+**.server.quic.roundConsumedDataValue = true
+
+%contains: stdout
+PROTOCOLTEST rfc9000_flow_control: PASS
