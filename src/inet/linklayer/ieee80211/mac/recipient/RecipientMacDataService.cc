@@ -18,8 +18,11 @@ Define_Module(RecipientMacDataService);
 
 void RecipientMacDataService::initialize()
 {
+    simtime_t maxReceiveLifetime = par("maxReceiveLifetime");
+    if (maxReceiveLifetime < SIMTIME_ZERO)
+        throw cRuntimeError("maxReceiveLifetime must not be negative");
     duplicateRemoval = new LegacyDuplicateRemoval();
-    basicReassembly = new BasicReassembly(par("maxReceiveLifetime"));
+    basicReassembly = new BasicReassembly(maxReceiveLifetime);
     reassemblyTimer = new cMessage("reassemblyTimer");
 }
 
