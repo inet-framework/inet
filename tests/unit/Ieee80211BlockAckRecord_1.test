@@ -1,0 +1,40 @@
+%description:
+Validate that a Block Ack record accepts the MPDU at WinStartR and reports Basic fragment and Compressed state.
+IEEE Std 802.11-2024, 10.25.6.3(b), case 1.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckRecord.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+static Ptr<Ieee80211DataHeader> makeReceivedQosHeader(SequenceNumber sequenceNumber)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setTid(5);
+    header->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+    header->setFragmentNumber(0);
+    return header;
+}
+
+%activity:
+{
+    BlockAckRecord record(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(101));
+    record.dataFrameReceived(makeReceivedQosHeader(101), 64);
+    record.dataFrameReceived(makeReceivedQosHeader(103), 64);
+    ASSERT(record.getAckState(SequenceNumberCyclic(101), 0));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(102), 0));
+    ASSERT(record.getAckState(SequenceNumberCyclic(103), 0));
+    ASSERT(record.getCompressedAckState(SequenceNumberCyclic(101)));
+    ASSERT(!record.getCompressedAckState(SequenceNumberCyclic(102)));
+    ASSERT(record.getCompressedAckState(SequenceNumberCyclic(103)));
+    EV << "IEEE Std 802.11-2024 10.25.6.3(b) WinStartR boundary is recorded in Basic and Compressed Block Ack state.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+IEEE Std 802.11-2024 10.25.6.3(b) WinStartR boundary is recorded in Basic and Compressed Block Ack state.
+.

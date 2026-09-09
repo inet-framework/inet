@@ -48,6 +48,7 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void computeModeIfTimerIsExpired(State& state);
 
   public:
+    virtual std::function<void()> saveModeSetState() override;
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;

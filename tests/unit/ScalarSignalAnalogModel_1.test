@@ -1,0 +1,26 @@
+%description:
+Scalar transmission and reception analog models preserve distinct chronological
+preamble, header, and data durations when forwarding to their shared base.
+
+%includes:
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+const auto preamble = SimTime(16, SIMTIME_US);
+const auto header = SimTime(4, SIMTIME_US);
+const auto data = SimTime(120, SIMTIME_US);
+ScalarTransmissionAnalogModel tx(preamble, header, data, GHz(2.4), MHz(20), mW(1));
+ScalarReceptionAnalogModel rx(preamble, header, data, GHz(2.4), MHz(20), mW(1));
+for (const ISignalAnalogModel *model : {static_cast<const ISignalAnalogModel *>(&tx), static_cast<const ISignalAnalogModel *>(&rx)}) {
+    ASSERT(model->getPreambleDuration() == preamble);
+    ASSERT(model->getHeaderDuration() == header);
+    ASSERT(model->getDataDuration() == data);
+    ASSERT(model->getDuration() == preamble + header + data);
+}
+EV << "Scalar TX/RX analog phase durations preserved.\n";
+
+%contains: stdout
+Scalar TX/RX analog phase durations preserved.

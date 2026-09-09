@@ -172,6 +172,36 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     ASSERT(zeroLength->getSupportedRates().numRates == 0);
 }
 
+template<typename T>
+static void checkMalformedAssociationIds()
+{
+    for (uint16_t status : {0, 0x1234}) {
+        const std::vector<uint16_t> invalidAids = status == 0 ?
+                std::vector<uint16_t>{0x0001, 0x4001, 0x8001, 0xC000, 0xC7D8, 0xFFFF} :
+                std::vector<uint16_t>{0x0001, 0xC000, 0xC001};
+        for (auto aid : invalidAids) {
+            auto bytes = appendTrailingInformationElement({
+                0x00, 0x00, uint8_t(status), uint8_t(status >> 8), uint8_t(aid), uint8_t(aid >> 8),
+                0x01, 0x01, 0x0C, 0x32, 0x01, 0x18
+            });
+            auto frame = deserializeMalformedBody<T>(bytes);
+            MemoryInputStream stream(bytes);
+            Ieee80211MgmtFrameSerializer serializer;
+            auto decoded = serializer.deserialize(stream, typeid(T));
+            ASSERT(decoded->isIncorrect());
+            ASSERT(stream.getPosition() == B(bytes.size()));
+            ASSERT(frame->isIncorrect());
+            ASSERT(frame->isComplete());
+            ASSERT(frame->getStatusCode() == status);
+            ASSERT(frame->getAid() == 0);
+            ASSERT(frame->getSupportedRates().numRates == 1);
+            ASSERT(frame->getSupportedRates().rate[0] == 6);
+            ASSERT(frame->getExtendedSupportedRates().numRates == 1);
+            ASSERT(frame->getExtendedSupportedRates().rate[0] == 12);
+        }
+    }
+}
+
 %activity:
 
 {
@@ -267,17 +297,8 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     ASSERT(frame->getAid() == 0x0245);
 }
 
-bool missingAssociationIdMarkerRejected = false;
-try {
-    deserializeBody<Ieee80211AssociationResponseFrame>({
-        0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
-        0x01, 0x01, 0x0C
-    });
-}
-catch (const cRuntimeError&) {
-    missingAssociationIdMarkerRejected = true;
-}
-ASSERT(missingAssociationIdMarkerRejected);
+checkMalformedAssociationIds<Ieee80211AssociationResponseFrame>();
+checkMalformedAssociationIds<Ieee80211ReassociationResponseFrame>();
 
 bool successfulZeroAssociationIdRejected = false;
 try {

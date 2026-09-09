@@ -1,0 +1,98 @@
+%description:
+Verify that a PacketQueue using an external PacketBuffer reports one typed
+departure signal while the evicted packet is still valid, before the buffer
+deletes it.
+
+%file: TestPacketQueueDepartureSignal.cc
+
+#include <string>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/queueing/buffer/PacketBuffer.h"
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+#include "inet/queueing/queue/PacketQueue.h"
+
+namespace inet {
+namespace queueing {
+
+class TestPacketQueueDepartureSignal : public cSimpleModule, public cListener
+{
+  public:
+    TestPacketQueueDepartureSignal() : cSimpleModule(65536) {}
+
+  protected:
+    int notificationCount = 0;
+    std::string lastPacketName;
+    bool packetWasOwned = false;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(object);
+        auto reason = check_and_cast<PacketQueueRemovalDetails *>(details)->getReason();
+        ASSERT(reason == IPacketQueue::PacketRemovalReason::DROPPED);
+        notificationCount++;
+        lastPacketName = packet->getName();
+        packetWasOwned = packet->getOwner() != nullptr;
+    }
+
+    virtual void activity() override
+    {
+        auto queue = check_and_cast<PacketQueue *>(getModuleByPath("^.queue"));
+        auto buffer = check_and_cast<PacketBuffer *>(getModuleByPath("^.buffer"));
+        queue->subscribe(IPacketQueue::packetQueueDepartureSignal, this);
+        ASSERT(queue->getMaxNumPackets() == -1);
+        ASSERT(buffer->getMaxNumPackets() == 0);
+
+        auto packet = new Packet("external-buffer-packet");
+        queue->enqueuePacket(packet);
+
+        queue->unsubscribe(IPacketQueue::packetQueueDepartureSignal, this);
+        ASSERT(notificationCount == 1);
+        ASSERT(lastPacketName == "external-buffer-packet");
+        ASSERT(packetWasOwned);
+        ASSERT(queue->isEmpty());
+        ASSERT(buffer->isEmpty());
+        std::cout << "External PacketBuffer eviction notified the queue signal exactly once before deletion.\n";
+    }
+};
+
+Define_Module(TestPacketQueueDepartureSignal);
+
+} // namespace queueing
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.queueing.buffer.PacketBuffer;
+import inet.queueing.queue.PacketQueue;
+
+simple TestPacketQueueDepartureSignal extends SimpleModule
+{
+    parameters:
+        @class(::inet::queueing::TestPacketQueueDepartureSignal);
+}
+
+network PacketQueueDepartureSignalTestNetwork
+{
+    submodules:
+        buffer: PacketBuffer;
+        queue: PacketQueue;
+        test: TestPacketQueueDepartureSignal;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PacketQueueDepartureSignalTestNetwork
+sim-time-limit = 1us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.queue.bufferModule = "^.buffer"
+*.buffer.packetCapacity = 0
+*.buffer.dropperClass = "inet::queueing::PacketAtCollectionEndDropper"
+
+%contains: stdout
+External PacketBuffer eviction notified the queue signal exactly once before deletion.

@@ -1,0 +1,461 @@
+%description:
+Verify that runtime radioChannelChanged notifications revalidate channel and
+band changes against the active IIeee80211Band, dynamically fall back to 20 MHz
+BSS operation when a configured secondary channel offset is unsupported, restore
+40 MHz operation when returning to a capable channel, reject invalid channels
+with cRuntimeError before committing, defer HT-only validation until local HT
+operation is known, and keep advertised HT Operation and existing negotiated
+peer state consistent throughout.
+
+%file: TestIeee80211MgmtApChannelChange.cc
+
+#include <vector>
+
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestHt40Transmitter : public physicallayer::Ieee80211Transmitter
+{
+  public:
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override
+    {
+        return (channelWidth == MHz(20) || channelWidth == MHz(40)) &&
+               modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+    }
+};
+
+Define_Module(TestHt40Transmitter);
+
+class TestHt40Receiver : public physicallayer::Ieee80211Receiver
+{
+  public:
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override
+    {
+        return (channelWidth == MHz(20) || channelWidth == MHz(40)) &&
+               modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+    }
+};
+
+Define_Module(TestHt40Receiver);
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<Ptr<Ieee80211BeaconFrame>> sentBeacons;
+
+    using Ieee80211MgmtApBase::getHtOperationBand;
+
+  protected:
+    virtual void start() override
+    {
+        // Suppress automatic periodic beacons so test controls frame generation.
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        if (subtype == ST_BEACON) {
+            auto beacon = dynamicPtrCast<const Ieee80211BeaconFrame>(body);
+            if (beacon != nullptr)
+                sentBeacons.push_back(constPtrCast<Ieee80211BeaconFrame>(beacon));
+        }
+    }
+
+  public:
+    void emitBeaconNow()
+    {
+        Enter_Method("emitBeaconNow");
+        sendBeacon();
+    }
+
+    void submitAuthenticationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAuthenticationRequest");
+        auto packet = new Packet("AuthenticationRequest");
+        auto body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setSequenceNumber(1);
+        body->setStatusCode(SC_SUCCESSFUL);
+        body->setChunkLength(B(6));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_AUTHENTICATION);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleAuthenticationFrame(packet, header);
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID(ssid.c_str());
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        body->setSupportedRates(rates);
+        if (mib->isHtOperationSupported()) {
+            body->setHtCapabilitiesPresent(true);
+            auto staCaps = mib->localHtCapabilities;
+            staCaps.supportedChannelWidths.insert(MHz(20));
+            staCaps.supportedChannelWidths.insert(MHz(40));
+            body->setHtCapabilities(makeHtCapabilitiesElement(staCaps));
+        }
+        body->setChunkLength(B(100));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ASSOCIATIONREQUEST);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    uint64_t getPendingTransactionId(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it == staList.end() ? 0 : it->second.pendingAssociationTransactionId;
+    }
+
+    void finishAssociationResponse(const MacAddress& address)
+    {
+        Enter_Method("finishAssociationResponse");
+        auto response = new Packet("AssociationResponse");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ASSOCIATIONRESPONSE);
+        header->setReceiverAddress(address);
+        response->insertAtBack(header);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(getPendingTransactionId(address));
+        frameTransmissionFinished(response, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete response;
+    }
+};
+
+Define_Module(TestIeee80211MgmtAp);
+
+static const physicallayer::IIeee80211Mode *findHtMode(const physicallayer::Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth)
+{
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        const auto *mode = modeSet->getMode(i);
+        if (mode->getHtMcsIndex() == mcsIndex && mode->getDataMode()->getBandwidth() == bandwidth &&
+                !mode->isHtShortGuardInterval())
+            return mode;
+    }
+    return nullptr;
+}
+
+class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApChannelChangeTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.ap.wlan[0].radio"));
+        const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        const MacAddress staAddress("02:00:00:00:00:09");
+
+        // 1. Initial State: AP initialized on channel 0 (std channel 1) with HT40 SCA (+1)
+        ASSERT(mib->hasPrimaryChannel());
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
+        ASSERT(mib->getConfiguredSecondaryChannelOffset() == 1);
+        std::cout << "AP initialized with 40 MHz HT operation on channel 0.\n";
+
+        // 2. Station authenticates and associates
+        mgmt->submitAuthenticationRequest(staAddress);
+        mgmt->submitAssociationRequest(staAddress);
+        mgmt->finishAssociationResponse(staAddress);
+
+        const auto *peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState != nullptr);
+        ASSERT(peerState->valid);
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
+        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
+        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+
+        // Verify beacon advertised HT Operation matches 40 MHz SCA operation
+        mgmt->emitBeaconNow();
+        ASSERT(!mgmt->sentBeacons.empty());
+        auto beaconElem = mgmt->sentBeacons.back()->getHtOperation();
+        ASSERT(mgmt->sentBeacons.back()->getHtOperationPresent());
+        ASSERT(beaconElem.primaryChannel == 1); // standard channel 1 on wire
+        ASSERT(beaconElem.secondaryChannelOffset == 1); // SCA
+        ASSERT(beaconElem.staChannelWidth40Mhz);
+
+        // Verify rate selection selects 40 MHz mode for peer
+        const auto *mcs7_40 = findHtMode(modeSet, 7, MHz(40));
+        ASSERT(mcs7_40 != nullptr);
+        const auto *selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        ASSERT(selectedMode == mcs7_40);
+        std::cout << "Station associated and negotiated 40 MHz HT operation.\n";
+
+        // 3. Dynamic runtime channel change to channel index 10 (std channel 11)
+        // In 2.4 GHz band, channel 11 + offset 1 would require channel 15, which is outside the band.
+        radio->setChannelNumber(10);
+
+        // Verify MIB downgraded to 20 MHz BSS operation while keeping configured offset policy
+        ASSERT(mib->requirePrimaryChannel() == 10);
+        ASSERT(mib->getHtOperation().primaryChannel == 10);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        ASSERT(mib->getConfiguredSecondaryChannelOffset() == 1);
+
+        // Verify existing negotiated peer state is consistently updated
+        peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState != nullptr);
+        ASSERT(peerState->valid);
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 10);
+        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 0);
+        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(20));
+
+        // Verify beacon advertised HT Operation reflects 20 MHz BSS operation
+        mgmt->emitBeaconNow();
+        beaconElem = mgmt->sentBeacons.back()->getHtOperation();
+        ASSERT(beaconElem.primaryChannel == 11); // standard channel 11 on wire
+        ASSERT(beaconElem.secondaryChannelOffset == 0); // SCN
+        ASSERT(!beaconElem.staChannelWidth40Mhz);
+
+        // Verify rate selection for existing peer restricts to 20 MHz
+        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        ASSERT(selectedMode != nullptr);
+        ASSERT(selectedMode != mcs7_40);
+        ASSERT(selectedMode->getDataMode()->getBandwidth() == MHz(20));
+        std::cout << "Dynamic channel change to 11 downgraded to 20 MHz and updated peer state.\n";
+
+        // 4. Dynamic runtime channel change back to channel index 0 (std channel 1)
+        radio->setChannelNumber(0);
+
+        // Verify 40 MHz HT operation is restored
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
+
+        // Verify existing peer state is restored to 40 MHz
+        peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState != nullptr);
+        ASSERT(peerState->valid);
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
+        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
+        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+
+        // Verify beacon advertised HT Operation restored to 40 MHz
+        mgmt->emitBeaconNow();
+        beaconElem = mgmt->sentBeacons.back()->getHtOperation();
+        ASSERT(beaconElem.primaryChannel == 1);
+        ASSERT(beaconElem.secondaryChannelOffset == 1);
+        ASSERT(beaconElem.staChannelWidth40Mhz);
+
+        // Verify rate selection permits 40 MHz again
+        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        ASSERT(selectedMode == mcs7_40);
+        std::cout << "Dynamic channel change back to 0 restored 40 MHz HT operation.\n";
+
+        // 5. Invalid primary channel rejected before committing
+        // Both signal-driven notifications and direct MIB calls must validate against active band.
+        bool threwSignalInvalidChannel = false;
+        try {
+            radio->emit(physicallayer::Ieee80211Radio::radioChannelChangedSignal, 99);
+        }
+        catch (const cRuntimeError& e) {
+            threwSignalInvalidChannel = true;
+        }
+        ASSERT(threwSignalInvalidChannel);
+
+        bool threwMibInvalidChannel = false;
+        try {
+            mib->setPrimaryChannel(99, mgmt->getHtOperationBand());
+        }
+        catch (const cRuntimeError& e) {
+            threwMibInvalidChannel = true;
+        }
+        ASSERT(threwMibInvalidChannel);
+
+        // Prior state remains untouched
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
+        std::cout << "Invalid channel change rejected before commit.\n";
+
+        // 6. Dynamic band change
+        static const physicallayer::Ieee80211EnumeratedBand testBand5GHz("Test 5 GHz",
+                { GHz(5.180), GHz(5.200), GHz(5.220) },
+                { 36, 40, 44 });
+        radio->setBand(&testBand5GHz);
+        ASSERT(mgmt->getHtOperationBand() == &testBand5GHz);
+        ASSERT(mib->hasPrimaryChannel());
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
+
+        // Existing peer HT state should be re-negotiated against the new band
+        peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState != nullptr);
+        ASSERT(peerState->valid);
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
+        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
+        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+
+        // Advertised beacon reflects new band standard channel number (36)
+        mgmt->emitBeaconNow();
+        beaconElem = mgmt->sentBeacons.back()->getHtOperation();
+        ASSERT(beaconElem.primaryChannel == 36); // standard channel 36 on wire
+        ASSERT(beaconElem.secondaryChannelOffset == 1);
+        ASSERT(beaconElem.staChannelWidth40Mhz);
+
+        // Also verify that band change to a band without standard channel numbers throws
+        bool threwInvalidBand = false;
+        try {
+            mib->setPrimaryChannel(0, &physicallayer::Ieee80211CompliantBands::band5GHz);
+        }
+        catch (const cRuntimeError& e) {
+            threwInvalidBand = true;
+        }
+        ASSERT(threwInvalidBand);
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+
+        std::cout << "Dynamic band change revalidated against new active band.\n";
+
+        // 7. Band notifications may arrive during initialization before the MAC
+        // publishes whether HT operation is supported. A legacy/non-HT AP must
+        // retain the radio's channel without applying HT-only band validation.
+        mib->updateLocalHtCapabilities(nullptr, {}, 0);
+        ASSERT(!mib->isHtOperationSupported());
+        bool threwNonHtBandChange = false;
+        try {
+            radio->setBand(&physicallayer::Ieee80211CompliantBands::band5GHz);
+        }
+        catch (const cRuntimeError&) {
+            threwNonHtBandChange = true;
+        }
+        ASSERT(!threwNonHtBandChange);
+        ASSERT(mib->hasPrimaryChannel());
+        ASSERT(mib->requirePrimaryChannel() == 0);
+        std::cout << "Non-HT band notification deferred HT-only validation.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApChannelChangeTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Transmitter;
+
+module TestHt40Transmitter extends Ieee80211Transmitter
+{
+    parameters:
+        @class(::inet::ieee80211::TestHt40Transmitter);
+}
+
+module TestHt40Receiver extends Ieee80211Receiver
+{
+    parameters:
+        @class(::inet::ieee80211::TestHt40Receiver);
+}
+
+simple TestIeee80211MgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtAp);
+}
+
+simple Ieee80211MgmtApChannelChangeTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApChannelChangeTest);
+}
+
+network Ieee80211MgmtApChannelChangeTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtAp";
+        }
+        test: Ieee80211MgmtApChannelChangeTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApChannelChangeTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50us
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+**.hasStatus = true
+
+*.ap.wlan[0].mgmt.numAuthSteps = 2
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.ap.wlan[0].radio.channelNumber = 0
+*.ap.wlan[0].mib.htSecondaryChannelOffset = 1
+*.ap.wlan[0].radio.transmitter.typename = "TestHt40Transmitter"
+*.ap.wlan[0].radio.receiver.typename = "TestHt40Receiver"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+
+%contains: stdout
+AP initialized with 40 MHz HT operation on channel 0.
+
+%contains: stdout
+Station associated and negotiated 40 MHz HT operation.
+
+%contains: stdout
+Dynamic channel change to 11 downgraded to 20 MHz and updated peer state.
+
+%contains: stdout
+Dynamic channel change back to 0 restored 40 MHz HT operation.
+
+%contains: stdout
+Invalid channel change rejected before commit.
+
+%contains: stdout
+Dynamic band change revalidated against new active band.
+
+%contains: stdout
+Non-HT band notification deferred HT-only validation.

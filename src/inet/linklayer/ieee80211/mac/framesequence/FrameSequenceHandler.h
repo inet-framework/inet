@@ -21,21 +21,23 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     IFrameSequenceHandler::ICallback *callback = nullptr;
     IFrameSequence *frameSequence = nullptr;
     FrameSequenceContext *context = nullptr;
+    bool frameSequenceCancellationRequested = false;
 
   protected:
     virtual void startFrameSequenceStep();
     virtual void finishFrameSequenceStep();
     virtual void finishFrameSequence();
-    virtual void abortFrameSequence();
 
   public:
     virtual const FrameSequenceContext *getContext() const override { return context; }
     virtual const IFrameSequence *getFrameSequence() const override { return frameSequence; }
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback) override;
-    virtual void processResponse(Packet *frame) override;
+    virtual bool processResponse(Packet *frame) override;
     virtual void transmissionComplete() override;
     virtual void handleStartRxTimeout() override;
     virtual bool isSequenceRunning() override { return frameSequence != nullptr; }
+    virtual void cancelFrameSequence() override { if (isSequenceRunning()) frameSequenceCancellationRequested = true; }
+    virtual void abortFrameSequence() override;
 
     virtual ~FrameSequenceHandler();
 };
@@ -44,4 +46,3 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
 } /* namespace inet */
 
 #endif
-

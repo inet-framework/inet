@@ -1,0 +1,134 @@
+%description:
+Checks that a non-selectable legacy responseCtsFrameBitrate is rejected during
+rate-selection resolution for both DCF and QoS selections and both 2.4 GHz HT profiles.
+
+%file: Test.cc
+#include <iostream>
+#include <cstdio>
+#include <string>
+
+#include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211InvalidConfiguredCtsRate {
+
+template<typename Selector>
+static void checkRejected(const char *selectorName, Selector& selector)
+{
+    double bitrate = selector.par("responseCtsFrameBitrate");
+    char formattedBitrate[64];
+    std::snprintf(formattedBitrate, sizeof(formattedBitrate), "%g", bitrate);
+    for (const char *profile : {"n(mixed-2.4Ghz)", "n(greenfield-2.4Ghz)"}) {
+        bool rejected = false;
+        try {
+            selector.resolveConfiguredModesForTest(Ieee80211ModeSet::getModeSet(profile));
+        }
+        catch (const cRuntimeError& error) {
+            rejected = true;
+            auto message = error.getFormattedMessage();
+            if (message.find(std::string("responseCtsFrameBitrate=") + formattedBitrate) == std::string::npos ||
+                message.find("operation mode '" + std::string(profile) + "'") == std::string::npos ||
+                message.find("selectable mode") == std::string::npos)
+                throw cRuntimeError("%s diagnostic for %s at %g bps is incomplete: %s", selectorName, profile, bitrate, message.c_str());
+        }
+        if (!rejected)
+            throw cRuntimeError("%s accepted legacy CTS bitrate %g bps in %s", selectorName, bitrate, profile);
+    }
+}
+
+class TestRateSelection : public RateSelection
+{
+  public:
+    void resolveConfiguredModesForTest(const Ieee80211ModeSet *modeSet) { applyModeSet(modeSet); }
+
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LINK_LAYER) {
+            checkRejected("DCF RateSelection", *this);
+            std::cout << "DCF rejected configured legacy responseCtsFrameBitrate for both HT profiles.\n";
+        }
+    }
+};
+
+class TestQosRateSelection : public QosRateSelection
+{
+  public:
+    void resolveConfiguredModesForTest(const Ieee80211ModeSet *modeSet) { applyModeSet(modeSet); }
+
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LINK_LAYER) {
+            checkRejected("QoS RateSelection", *this);
+            std::cout << "QoS rejected configured legacy responseCtsFrameBitrate for both HT profiles.\n";
+        }
+    }
+};
+
+Define_Module(TestRateSelection);
+Define_Module(TestQosRateSelection);
+
+} // namespace Ieee80211InvalidConfiguredCtsRate
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
+
+simple TestRateSelection extends RateSelection
+{
+    parameters:
+        @class(TestRateSelection);
+        rateControlModule = "";
+        mibModule = "";
+        responseCtsFrameBitrate = default(6Mbps);
+}
+
+simple TestQosRateSelection extends QosRateSelection
+{
+    parameters:
+        @class(TestQosRateSelection);
+        rateControlModule = "";
+        mibModule = "";
+        responseCtsFrameBitrate = default(6Mbps);
+}
+
+simple TestRateSelection24 extends TestRateSelection
+{
+    parameters:
+        responseCtsFrameBitrate = default(24Mbps);
+}
+
+simple TestQosRateSelection24 extends TestQosRateSelection
+{
+    parameters:
+        responseCtsFrameBitrate = default(24Mbps);
+}
+
+network TestInvalidConfiguredCtsRate
+{
+    submodules:
+        dcfRateSelection6: TestRateSelection;
+        dcfRateSelection24: TestRateSelection24;
+        qosRateSelection6: TestQosRateSelection;
+        qosRateSelection24: TestQosRateSelection24;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestInvalidConfiguredCtsRate
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+seed-set = 0
+
+%contains: stdout
+DCF rejected configured legacy responseCtsFrameBitrate for both HT profiles.
+%contains: stdout
+QoS rejected configured legacy responseCtsFrameBitrate for both HT profiles.

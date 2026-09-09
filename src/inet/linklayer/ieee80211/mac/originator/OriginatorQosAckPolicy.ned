@@ -26,4 +26,3 @@ simple OriginatorQosAckPolicy extends SimpleModule like IOriginatorQosAckPolicy
 
         @display("i=block/control");
 }
-

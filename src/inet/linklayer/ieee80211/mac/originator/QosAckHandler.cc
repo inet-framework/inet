@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -178,6 +180,21 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
         throw cRuntimeError("Unknown block ack request");
 }
 
+bool QosAckHandler::releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid)
+{
+    bool changed = false;
+    for (auto& entry : ackStatuses) {
+        auto& id = entry.first;
+        auto& status = entry.second;
+        if (id.first == peerAddress && id.second.first == tid &&
+                (status == Status::BLOCK_ACK_NOT_YET_REQUESTED || status == Status::WAITING_FOR_BLOCK_ACK)) {
+            status = Status::BLOCK_ACK_NOT_ARRIVED;
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (header->getType() == ST_DATA_WITH_QOS) {
@@ -198,20 +215,23 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     for (auto& ackStatus : ackStatuses) {
+        auto receiverAddress = ackStatus.first.first;
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
         auto& status = ackStatus.second;
         if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-            if (basicBlockAckReq->getTidInfo() == tid) {
+            if (receiverAddress == blockAckReq->getReceiverAddress() && basicBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum)
+                // IEEE Std 802.11-2024, 10.25.6.1: the Basic bitmap covers 64 sequence numbers.
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && BlockAckWindow::isWithin(startingSeqNum, 64, SequenceNumberCyclic(seqCtrlField.getSequenceNumber())))
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
-            if (compressedBlockAckReq->getTidInfo() == tid) {
+            if (receiverAddress == blockAckReq->getReceiverAddress() && compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO ASSERT(seqCtrlField.second == 0)?
+                // IEEE Std 802.11-2024, 10.25.6.1: the non-HE bitmap covers 64 sequence numbers.
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && BlockAckWindow::isWithin(startingSeqNum, 64, SequenceNumberCyclic(seqCtrlField.getSequenceNumber())) && seqCtrlField.getFragmentNumber() == 0)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
@@ -276,6 +296,7 @@ std::string QosAckHandler::getStatusString(Status status)
         case Status::BLOCK_ACK_ARRIVED_ACKED: return "BLOCK_ACK_ARRIVED_ACKED";
         case Status::WAITING_FOR_BLOCK_ACK: return "WAITING_FOR_BLOCK_ACK";
         case Status::NORMAL_ACK_ARRIVED: return "NORMAL_ACK_ARRIVED";
+        case Status::BLOCK_ACK_NOT_ARRIVED: return "BLOCK_ACK_NOT_ARRIVED";
         default: throw cRuntimeError("Unknown status");
     }
 }
@@ -291,4 +312,3 @@ void QosAckHandler::printAckStatuses()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

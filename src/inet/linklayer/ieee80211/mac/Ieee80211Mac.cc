@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
+#include <tuple>
+
 #include <algorithm>
 
 #include "inet/common/INETUtils.h"
@@ -67,24 +69,12 @@ void Ieee80211Mac::initialize(int stage)
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
-                modeSet->getMaximumNumberOfSpatialStreams());
-        std::set<Hz> operationalChannelWidths;
-        if (modeSet->isHtOperationSupported()) {
-            const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
-            const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
-            if (transmitter == nullptr || receiver == nullptr)
-                throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
-            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
-                if (transmitter->isHtChannelWidthSupported(channelWidth) &&
-                        receiver->isHtChannelWidthSupported(channelWidth))
-                    operationalChannelWidths.insert(channelWidth);
-        }
-        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
+        updateLocalHtCapabilities();
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();
@@ -95,6 +85,24 @@ void Ieee80211Mac::initialize(int stage)
         if (mib->qos && !hcf)
             throw cRuntimeError("Missing hcf module, required for QoS");
     }
+}
+
+void Ieee80211Mac::updateLocalHtCapabilities()
+{
+    int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
+            modeSet->getMaximumNumberOfSpatialStreams());
+    std::set<Hz> operationalChannelWidths;
+    if (modeSet->isHtOperationSupported()) {
+        const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+        const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
+        if (transmitter == nullptr || receiver == nullptr)
+            throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
+        for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+            if (transmitter->isHtChannelWidthSupported(channelWidth) &&
+                    receiver->isHtChannelWidthSupported(channelWidth))
+                operationalChannelWidths.insert(channelWidth);
+    }
+    mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
 }
 
 void Ieee80211Mac::initializeRadioMode()
@@ -346,6 +354,30 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
     }
 }
 
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == modesetChangedSignal && obj != modeSet)
+        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+}
+
+void Ieee80211Mac::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    updateLocalHtCapabilities();
+}
+
+std::function<void()> Ieee80211Mac::saveModeSetState()
+{
+    Enter_Method_Silent();
+    auto restoreMib = mib->saveHtState();
+    return [this, state = std::make_tuple(modeSet), restoreMib]() mutable {
+        std::tie(modeSet) = std::move(state);
+        restoreMib();
+    };
+}
+
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
 {
     if (radio->getRadioMode() != radioMode) {
@@ -391,6 +423,15 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
         sendDown(pendingRadioConfigMsg);
         pendingRadioConfigMsg = nullptr;
     }
+}
+
+void Ieee80211Mac::cancelManagementTransaction(uint64_t transactionId)
+{
+    Enter_Method("cancelManagementTransaction");
+    if (mib->qos)
+        hcf->cancelManagementTransaction(transactionId);
+    else
+        dcf->cancelManagementTransaction(transactionId);
 }
 
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)

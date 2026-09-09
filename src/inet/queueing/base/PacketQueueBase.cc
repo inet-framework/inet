@@ -7,8 +7,12 @@
 
 #include "inet/queueing/base/PacketQueueBase.h"
 
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+
 #include "inet/common/Simsignals.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/TimeTag.h"
 
 namespace inet {
 namespace queueing {
@@ -53,6 +57,21 @@ Packet *PacketQueueBase::dequeuePacket()
     return packet;
 }
 
+void PacketQueueBase::notifyPacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason)
+{
+    PacketQueueRemovalDetails details(reason);
+    emit(IPacketQueue::packetQueueDepartureSignal, packet, &details);
+}
+
+void PacketQueueBase::recordPacketDequeued(Packet *packet)
+{
+    auto queueingTime = simTime() - packet->getArrivalTime();
+    auto packetEvent = new PacketEvent();
+    insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);
+    increaseTimeTag<QueueingTimeTag>(packet, queueingTime, queueingTime);
+    emit(packetPulledSignal, packet);
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal || signal == packetPushStartedSignal)
@@ -92,4 +111,3 @@ std::string PacketQueueBase::resolveDirective(char directive) const
 
 } // namespace queueing
 } // namespace inet
-

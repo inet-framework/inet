@@ -24,6 +24,7 @@ class INET_API IRecipientBlockAckAgreementPolicy
     virtual simtime_t getBlockAckTimeoutValue() const = 0;
     virtual bool aMsduSupported() const = 0;
     virtual bool delayedBlockAckPolicySupported() const = 0;
+    virtual bool isPeerCompressedBlockAckSupported(const MacAddress& peerAddress) const = 0;
     virtual int getMaximumAllowedBufferSize() const = 0;
 };
 

@@ -27,6 +27,8 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
 {
   protected:
     IReassembly *basicReassembly = nullptr;
+    cMessage *receiveLifetimeTimer = nullptr;
+    simtime_t maxReceiveLifetime = SIMTIME_MAX;
 
     IMpduDeaggregation *aMpduDeaggregation = nullptr;
 //    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
@@ -41,18 +43,21 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
   protected:
     virtual ~RecipientQosMacDataService();
     virtual void initialize() override;
+    virtual void handleMessage(cMessage *message) override;
 
+    virtual void expireReceiveLifetime();
+    virtual void scheduleReceiveLifetimeTimer();
     virtual Packet *defragment(std::vector<Packet *> completeFragments);
     virtual Packet *defragment(Packet *mgmtFragment);
 
   public:
     virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
     virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
-    virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
+    virtual ManagementFrameReceptionResult managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
+    virtual void resetBlockAckReordering(Tid tid, MacAddress originatorAddr) override;
 };
 
 } /* namespace ieee80211 */
 } /* namespace inet */
 
 #endif
-
