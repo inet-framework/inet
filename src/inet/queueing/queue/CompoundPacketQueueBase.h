@@ -26,17 +26,28 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     PassivePacketSinkRef consumer;
     PassivePacketSourceRef provider;
     IPacketCollection *collection = nullptr;
+    IPacketExtractor *packetExtractor = nullptr;
+    std::vector<IPacketQueue *> childQueues;
+    Packet *packetBeingRemoved = nullptr;
 
     IPacketDropperFunction *packetDropperFunction = nullptr;
 
   protected:
+    using cListener::finish;
+
     virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void preDelete(cComponent *root) override;
+    virtual void registerQueueFrontier(cModule *module);
+    virtual void unsubscribeChildQueues();
 
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
 
     virtual bool isOverloaded() const;
 
   public:
+    using PacketQueueBase::dequeuePacket;
+
     virtual ~CompoundPacketQueueBase() { delete packetDropperFunction; }
 
     virtual int getMaxNumPackets() const override { return packetCapacity; }
@@ -48,6 +59,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
@@ -61,6 +74,7 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason);
 };
 
 } // namespace queueing

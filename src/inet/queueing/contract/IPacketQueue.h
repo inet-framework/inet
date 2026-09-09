@@ -9,6 +9,7 @@
 #define __INET_IPACKETQUEUE_H
 
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketExtractor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
@@ -18,8 +19,22 @@ namespace queueing {
 /**
  * This class defines the interface for packet queues.
  */
-class INET_API IPacketQueue : public virtual IPacketCollection, public virtual IPassivePacketSink, public virtual IPassivePacketSource
+class INET_API IPacketQueue : public virtual IPacketCollection, public virtual IPacketExtractor, public virtual IPassivePacketSink, public virtual IPassivePacketSource
 {
+  public:
+    enum class PacketRemovalReason {
+        DEQUEUED,  // Normal queue processing transferred ownership out of the queue.
+        REMOVED,   // Explicit removal outside normal queue processing.
+        DROPPED,   // The queue destructively removed the packet.
+    };
+
+    /**
+     * Emitted once per logical departure, after detachment and before transfer/deletion.
+     * The Packet and PacketQueueRemovalDetails are borrowed for synchronous delivery.
+     * Listeners must filter the source to their subscribed logical queue.
+     */
+    static simsignal_t packetQueueDepartureSignal;
+
   public:
     /**
      * Enqueues the packet into the packet queue. The onwership of the packet
@@ -36,10 +51,17 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
      * The queue must not be empty. The returned packet must not be nullptr.
      */
     virtual Packet *dequeuePacket() = 0;
+
+    virtual Packet *findPacket(const PacketPredicate& predicate) const = 0;
+
+    /**
+     * Dequeues the first matching packet according to the queue provider's
+     * scheduling policy. Ownership is transferred to the caller.
+     */
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) = 0;
 };
 
 } // namespace queueing
 } // namespace inet
 
 #endif
-
