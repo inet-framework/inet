@@ -26,6 +26,18 @@ namespace inet {
 
 namespace visualizer {
 
+// cOsgCanvas/getOsgCanvas() and setScene()/getScene() are deprecated in favour of the
+// renderer-neutral cCanvas3D/c3DSceneNode API, but INET's OSG visualizers must keep
+// compiling against OMNeT++ 6.4, which has no such API. Stay on the compatibility path
+// until 6.4 is no longer supported.
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 Define_Module(SceneOsgEarthVisualizer);
 
 #ifdef WITH_OSGEARTH
@@ -101,6 +113,12 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setEarthViewpoint(cOsgCanvas::EarthViewpoint(geographicSrsEye.longitude.get<deg>(), geographicSrsEye.latitude.get<deg>(), geographicSrsEye.altitude.get<m>(), -45, -45, cameraDistanceFactor * radius));
 }
+
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
 
 #endif // ifdef WITH_OSGEARTH
 
