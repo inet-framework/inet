@@ -41,6 +41,11 @@ Classify each change by the contracts it can affect:
 - build integration; and
 - test behavior.
 
+For the API contract, the change summary's `--usage` pass has already asked the two questions that
+[AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface) and
+[AR-EXT-VIRTUAL-IS-A-PROMISE](../rule/architecture.md#ar-ext-virtual-is-a-promise) put to every new
+member: is it called, and is it overridden. Carry its *Questions for the review* into this pass.
+
 Use the inventory to select callers, configurations, generated consumers, standards evidence, and
 tests. A changed file can participate in several contracts, and a contract can span several artifact
 kinds.

@@ -121,6 +121,20 @@ that means both "user override" and "computed value." *Not a violation:* a dimen
 FLAG a change that adds a protocol by modifying `common/` or a dispatcher/registry switch, rather than
 registering through existing contract/registration points.
 
+**[AR-EXT-MINIMAL-SURFACE] Is a new member more visible than its callers need?**
+Start from the *Questions for the review* section of the change summary. QUESTION each new public
+function marked *uncalled* — who is it for? — and each marked *tests only* — is the test testing
+behavior or reaching in? A public setter on a value built once is a value type asking to be immutable.
+*Not a violation:* an override, whose visibility the base fixes; a documented API for out-of-tree
+users, when the comment says so.
+
+**[AR-EXT-VIRTUAL-IS-A-PROMISE] Is a new virtual a stated extension point?**
+For each new virtual marked *overridden nowhere* in the summary, ask: if a user overrode this, what
+would they be trying to do? FLAG a virtual private-looking helper with no comment saying what an
+override is for. *Not a violation:* fulfilling a framework hook (`initialize`, `handleMessage`,
+`receiveSignal`, `stop`); a virtual whose comment names what an override would do; a template-method
+step in a class designed for subclassing.
+
 **[AR-BUILD-DECLARATIVE] Are build values hardcoded?**
 FLAG absolute machine paths, `-march=native`, or per-machine flags baked into build scripts instead of
 declared in the build descriptors.

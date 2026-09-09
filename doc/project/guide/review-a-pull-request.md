@@ -72,6 +72,11 @@ Read each commit against the rules that need judgment:
   solver version change — is correct as it stands, and its own message carries the reason.
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
+- **[AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface)** and
+  **[AR-EXT-VIRTUAL-IS-A-PROMISE](../rule/architecture.md#ar-ext-virtual-is-a-promise)** — generate
+  the summary with `--usage`; its *Questions for the review* section lists every new public function
+  that nothing calls or only a test calls, and every new virtual that nothing overrides. Each is a
+  question to the author, not a finding: *who is this for?* and *what would an override do?*
 
 ## 4. Review each commit's correctness
 

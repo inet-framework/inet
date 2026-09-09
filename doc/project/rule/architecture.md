@@ -108,6 +108,8 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [AR-EXT-NOCORE](#ar-ext-nocore) | New protocols are added purely through existing contracts and registration points |
 | [AR-EXT-ATTACH](#ar-ext-attach) | Shared core structures are extended by attaching protocol-specific data |
 | [AR-EXT-FEATURES](#ar-ext-features) | Optional functionality is partitioned into independently disableable features |
+| [AR-EXT-MINIMAL-SURFACE](#ar-ext-minimal-surface) | A member is as private as its callers allow |
+| [AR-EXT-VIRTUAL-IS-A-PROMISE](#ar-ext-virtual-is-a-promise) | A function is virtual because someone overrides it, or because the class says what an override would do |
 
 **Build & Project Structure (AR-BUILD)**
 
@@ -812,6 +814,67 @@ subsystems must not hard-depend on an optional feature's symbols; interaction go
 contracts and registries so that a disabled feature leaves the rest compilable and runnable. This is
 what lets a user build exactly the subset they need and keeps the framework from collapsing into one
 monolithic must-build-everything blob.
+
+### AR-EXT-MINIMAL-SURFACE
+
+**A member is as private as its callers allow**
+
+A function is `public` because something outside the class calls it, `protected` because a subclass
+does, and `private` otherwise. Visibility is decided by the callers that exist, not by the callers
+that might.
+
+Every public member is a promise to every user of the class, inside the tree and out: *this will
+keep existing, keep its meaning, and keep its signature*. A member made public without a caller is a
+promise made for nothing, and it costs what every promise costs — it cannot be renamed, removed or
+re-signed without a release note ([RR-BREAK-MIGRATE](release.md#rr-break-migrate)) and a deprecation
+cycle ([RR-DEPRECATE-FIRST](release.md#rr-deprecate-first)). Making it public later, when a caller
+appears, costs nothing. The asymmetry decides the default.
+
+Two shapes need a second look rather than a verdict. **A public function whose only caller is a
+test** is either a test of behavior that happens to need a seam, or a test reaching into the
+implementation; the second kind pins the implementation and breaks on every refactor
+([TR-CAT-MATCH](testing.md#tr-cat-match)). **A public setter on a value that is otherwise built once**
+is usually a value type asking to be immutable. Both are questions for the author, not findings.
+
+**An override is exempt.** Its visibility is fixed by the base class, and changing it there is a
+different decision.
+
+*Enforced at T3 — `opp_summarize_changes --usage` marks every added public function that nothing
+calls, or that only a test calls; T4 for the answer.*
+
+### AR-EXT-VIRTUAL-IS-A-PROMISE
+
+**A function is virtual because someone overrides it, or because the class says what an override
+would do**
+
+`virtual` is not a modifier; it is a contract. It says *a subclass may replace this, and I will call
+the replacement* — and once said, it cannot be unsaid: removing `virtual` silently stops calling
+every override outside the tree, which is the same quiet break as a default body in an interface
+([AR-ORG-CONTRACT-PURITY](#ar-org-contract-purity)). So a virtual is either **fulfilling** a promise
+— it overrides a base — or **making** one, and a promise made is a promise documented.
+
+INET has 9986 virtual member declarations against 6503 non-virtual — 60 % — because OMNeT++ models
+are extended by subclassing, and a model author cannot know which step a user will need to replace.
+That is a real reason, and it is why this rule does not say *never*. It says: **make it on purpose**.
+A new virtual that nothing in the tree overrides, on a function whose comment does not say what an
+override is for, is a promise made by reflex. It also drags the class toward the inheritance-based
+extension that [AR-MOD-COMPOSITION](#ar-mod-composition) argues against — the more of a class is
+virtual, the more its subclasses depend on its internals.
+
+The test a reviewer applies: *if a user overrode this, what would they be trying to do, and would the
+class still work?* If the answer is a sentence, put it in the comment and keep the `virtual`. If the
+answer is "I don't know", it is not an extension point yet.
+
+**A private helper is the common case.** A step of an algorithm that is `virtual` so the algorithm
+could in principle be varied is a `private` non-virtual until someone varies it. The
+[template-method](#ar-mod-composition) shape — a non-virtual public entry that calls private
+virtuals — is the disciplined form of the same idea, and it names its extension points by making
+*only* those virtual.
+
+*Enforced at T3 — `opp_summarize_changes --usage` marks every added virtual that nothing in the tree
+overrides and that does not itself override; T4 for whether the comment says what an override is
+for. A framework hook fulfilled — `initialize`, `handleMessage`, `receiveSignal`, `stop` — is never
+marked.*
 
 ## Build & Project Structure (AR-BUILD)
 
