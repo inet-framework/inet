@@ -82,6 +82,18 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         scheduleAfter(ifs, endIfsTimer);
 }
 
+bool Tx::cancelPendingTransmission(ITx::ICallback *owner)
+{
+    Enter_Method("cancelPendingTransmission");
+    if (this->txCallback != owner || transmitting || frame == nullptr || !endIfsTimer->isScheduled())
+        return false;
+    cancelEvent(endIfsTimer);
+    delete frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    return true;
+}
+
 void Tx::radioTransmissionFinished()
 {
     Enter_Method("radioTransmissionFinished");
@@ -114,4 +126,3 @@ void Tx::handleMessage(cMessage *msg)
 
 } // namespace ieee80211
 } // namespace inet
-
