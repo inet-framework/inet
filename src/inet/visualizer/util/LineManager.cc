@@ -28,6 +28,13 @@ LineManager *LineManager::getOsgLineManager(const cCanvas *canvas)
     return &osgLineManagers[canvas];  // inserts element if not yet exists
 }
 
+LineManager *LineManager::getVsgLineManager(const cCanvas *canvas)
+{
+    static int vsgLineManagersHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::vsgLineManagers");
+    auto& vsgLineManagers = getSimulationOrSharedDataManager()->getSharedVariable<std::map<const cCanvas *, LineManager>>(vsgLineManagersHandle);
+    return &vsgLineManagers[canvas];  // inserts element if not yet exists
+}
+
 bool LineManager::compareModuleLines(const ModuleLine *moduleLine1, const ModuleLine *moduleLine2)
 {
     auto v1 = moduleLine1->sourceModuleId < moduleLine1->destinationModuleId ? moduleLine1->shiftPriority : -moduleLine1->shiftPriority;
