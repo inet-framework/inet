@@ -1,0 +1,160 @@
+%description:
+Test Heightfield: bilinear elevation on a flat plane, FlatGround equivalence
+over flat terrain (the flat-PLY == FlatGround cross-check), normals on flat and
+ramp surfaces, elevation profile across a step (building wall), out-of-extent
+NaN behavior, the maxCells guard, and one- and two-cell spike removal.
+
+%includes:
+#include <cmath>
+#include "inet/common/geometry/common/Heightfield.h"
+
+using namespace inet;
+
+%global:
+
+#define CHECK(label, cond)  EV << label << ": " << ((cond) ? "OK" : "FAIL") << "\n";
+
+static void makeGrid(std::vector<double>& xs, std::vector<double>& ys, std::vector<double>& zs,
+        double x0, double x1, double y0, double y1, double spacing, double (*zf)(double, double))
+{
+    for (double x = x0; x <= x1 + 1e-9; x += spacing)
+        for (double y = y0; y <= y1 + 1e-9; y += spacing) {
+            xs.push_back(x);
+            ys.push_back(y);
+            zs.push_back(zf(x, y));
+        }
+}
+
+static double zFlat(double, double) { return 5; }
+static double zRamp(double x, double) { return x; }
+static double zStep(double x, double) { return x < 10 ? 0 : 30; }
+
+%activity:
+
+// --- flat plane at z=5: bilinear elevation is exact, normal is straight up ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 10, 0, 10, 0.5, zFlat);
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 1);
+    CHECK("flat elevation", std::fabs(hf.getElevation(3.3, 4.7) - 5) < 1e-6);
+    Coord n = hf.getNormal(5, 5);
+    CHECK("flat normal", n.z > 0.999 && std::fabs(n.x) < 1e-6 && std::fabs(n.y) < 1e-6);
+    CHECK("out of extent NaN", std::isnan(hf.getElevation(-100, -100)));
+}
+
+// --- flat terrain is FlatGround-equivalent. PointCloudGround.computeGroundProjection returns
+//     (x, y, heightfield.getElevation(x,y)) and computeGroundNormal returns heightfield.getNormal(),
+//     while FlatGround returns (x, y, elevation) and (0,0,1). So over a flat tile the heightfield
+//     must reproduce FlatGround exactly at every point, grid-aligned or not — that is the
+//     flat-PLY == FlatGround cross-check, at the layer PointCloudGround actually delegates to. ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 40, 0, 40, 1, zFlat); // flat plane at z=5, i.e. FlatGround(elevation=5)
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 2);
+    bool elevationEquiv = true, normalEquiv = true;
+    double probes[][2] = {{5, 5}, {12.3, 7.8}, {20, 20}, {33.33, 4.5}, {2.5, 38}, {38.9, 38.9}};
+    for (auto& p : probes) {
+        if (std::fabs(hf.getElevation(p[0], p[1]) - 5) > 1e-6) elevationEquiv = false;    // FlatGround z = 5
+        Coord n = hf.getNormal(p[0], p[1]);
+        if (n.z < 1 - 1e-6 || std::fabs(n.x) > 1e-6 || std::fabs(n.y) > 1e-6) normalEquiv = false; // FlatGround (0,0,1)
+    }
+    CHECK("flatground elevation equivalence", elevationEquiv);
+    CHECK("flatground normal equivalence", normalEquiv);
+}
+
+// --- ramp z=x: elevation increases along x, normal tilts against the slope ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 20, 0, 10, 0.25, zRamp);
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 1);
+    CHECK("ramp monotonic", hf.getElevation(15, 5) > hf.getElevation(5, 5) + 5);
+    Coord n = hf.getNormal(10, 5);
+    CHECK("ramp normal tilt", n.x < -0.5 && n.z > 0.5 && std::fabs(n.y) < 0.1);
+}
+
+// --- step (building wall) at x=10: profile from low to high side crosses it ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 20, 0, 20, 0.5, zStep);
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 1);
+    CHECK("step low side", std::fabs(hf.getElevation(3, 10)) < 1e-6);
+    CHECK("step high side", std::fabs(hf.getElevation(17, 10) - 30) < 1e-6);
+    std::vector<double> profile = hf.computeProfile(Coord(2, 10, 0), Coord(18, 10, 0), 1);
+    double lo = profile[0], hi = profile[0];
+    for (double e : profile) { lo = std::min(lo, e); hi = std::max(hi, e); }
+    CHECK("profile spans the wall", profile.size() >= 16 && lo < 1 && hi > 29 && profile.front() < 1 && profile.back() > 29);
+}
+
+// --- maxCells guard rejects oversized grids with a helpful error ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 100, 0, 100, 10, zFlat);
+    Heightfield hf;
+    try {
+        hf.buildFromPoints(xs, ys, zs, 0.01, 10);
+        EV << "maxCells guard: FAIL\n";
+    } catch (cRuntimeError& e) {
+        EV << "maxCells guard: OK\n";
+    }
+}
+
+// --- despike: an isolated 1-cell spike is clamped, a real multi-cell building survives ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 20, 0, 20, 0.5, zStep); // "building" occupying x>=10 at z=30
+    xs.push_back(5); ys.push_back(5); zs.push_back(500); // stray LIDAR return
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 1, 67108864, 8, 50);
+    CHECK("spike clamped", hf.getElevation(5, 5) < 10);
+    CHECK("building survives despike", std::fabs(hf.getElevation(17, 10) - 30) < 1e-6);
+}
+
+// --- despike catches a TWO-cell spike (each cell shields the other from the "taller than every
+//     neighbor" test, but not from the second-highest-neighbor test), still sparing the building ---
+{
+    std::vector<double> xs, ys, zs;
+    makeGrid(xs, ys, zs, 0, 20, 0, 20, 0.5, zStep);       // building at x>=10, z=30
+    xs.push_back(4); ys.push_back(4); zs.push_back(400);  // two adjacent stray returns (one grid cell apart)
+    xs.push_back(4.5); ys.push_back(4); zs.push_back(400);
+    Heightfield hf;
+    hf.buildFromPoints(xs, ys, zs, 0.5, 67108864, 8, 50);
+    CHECK("two-cell spike clamped", hf.getElevation(4, 4) < 10 && hf.getElevation(4.5, 4) < 10);
+    CHECK("building survives two-cell despike", std::fabs(hf.getElevation(17, 10) - 30) < 1e-6);
+}
+
+// --- degenerate input rejected ---
+{
+    std::vector<double> xs(3, 1), ys(3, 1), zs(3, 1); // all points at the same x/y
+    Heightfield hf;
+    try {
+        hf.buildFromPoints(xs, ys, zs, 1);
+        EV << "degenerate rejected: FAIL\n";
+    } catch (cRuntimeError& e) {
+        EV << "degenerate rejected: OK\n";
+    }
+}
+
+EV << ".\n";
+
+%contains: stdout
+flat elevation: OK
+flat normal: OK
+out of extent NaN: OK
+flatground elevation equivalence: OK
+flatground normal equivalence: OK
+ramp monotonic: OK
+ramp normal tilt: OK
+step low side: OK
+step high side: OK
+profile spans the wall: OK
+maxCells guard: OK
+spike clamped: OK
+building survives despike: OK
+two-cell spike clamped: OK
+building survives two-cell despike: OK
+degenerate rejected: OK
+.

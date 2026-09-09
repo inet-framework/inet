@@ -1,0 +1,114 @@
+%description:
+Test PlyPointCloudReader: ascii and binary_little_endian formats, property
+location by name with mixed types and extra columns, per-channel color
+normalization, bounding box, and rejection of malformed files.
+
+%includes:
+#include <fstream>
+#include "inet/common/geometry/common/PlyPointCloudReader.h"
+
+using namespace inet;
+
+%global:
+
+static void writeTextFile(const char *name, const char *content)
+{
+    std::ofstream out(name, std::ios::binary);
+    out << content;
+}
+
+#define CHECK(label, cond)  EV << label << ": " << ((cond) ? "OK" : "FAIL") << "\n";
+
+%activity:
+
+// --- ascii PLY: float/double coordinates, uchar RGB, extra (ignored) column ---
+writeTextFile("ascii.ply",
+    "ply\n"
+    "format ascii 1.0\n"
+    "comment synthetic test cloud\n"
+    "element vertex 3\n"
+    "property float x\n"
+    "property float y\n"
+    "property double z\n"
+    "property uchar red\n"
+    "property uchar green\n"
+    "property uchar blue\n"
+    "property float intensity\n"
+    "end_header\n"
+    "0 0 1 255 0 0 42\n"
+    "10 0 2 0 255 0 42\n"
+    "10 20 3.5 0 0 255 42\n");
+PlyPointCloud a = PlyPointCloudReader::read("ascii.ply");
+CHECK("ascii count", a.getNumPoints() == 3);
+CHECK("ascii coords", a.xs[2] == 10 && a.ys[2] == 20 && a.zs[2] == 3.5);
+CHECK("ascii rgb normalized", a.hasRGB && a.rs[0] == 1 && a.gs[0] == 0 && a.bs[0] == 0 && a.gs[1] == 1 && a.bs[2] == 1);
+CHECK("ascii bbox", a.minX == 0 && a.maxX == 10 && a.minY == 0 && a.maxY == 20 && a.minZ == 1 && a.maxZ == 3.5);
+
+// --- binary_little_endian PLY: double x/y + float z, no color ---
+{
+    std::ofstream out("binary.ply", std::ios::binary);
+    out << "ply\n"
+           "format binary_little_endian 1.0\n"
+           "element vertex 2\n"
+           "property double x\n"
+           "property double y\n"
+           "property float z\n"
+           "end_header\n";
+    double xy[2];
+    float z;
+    xy[0] = 1.25; xy[1] = -2.5; z = 10.0f;
+    out.write((char *)xy, 16); out.write((char *)&z, 4);
+    xy[0] = 3.0; xy[1] = 4.0; z = -1.5f;
+    out.write((char *)xy, 16); out.write((char *)&z, 4);
+}
+PlyPointCloud b = PlyPointCloudReader::read("binary.ply");
+CHECK("binary count", b.getNumPoints() == 2);
+CHECK("binary coords", b.xs[0] == 1.25 && b.ys[0] == -2.5 && b.zs[0] == 10 && b.zs[1] == -1.5);
+CHECK("binary no rgb", !b.hasRGB);
+CHECK("binary bbox", b.minX == 1.25 && b.maxX == 3 && b.minZ == -1.5 && b.maxZ == 10);
+
+// --- malformed inputs are rejected with cRuntimeError ---
+writeTextFile("nomagic.ply", "solid nonsense\n");
+try {
+    PlyPointCloudReader::read("nomagic.ply");
+    EV << "missing magic: FAIL\n";
+} catch (cRuntimeError& e) {
+    EV << "missing magic: OK\n";
+}
+writeTextFile("bigendian.ply", "ply\nformat binary_big_endian 1.0\nelement vertex 1\nproperty float x\nproperty float y\nproperty float z\nend_header\n");
+try {
+    PlyPointCloudReader::read("bigendian.ply");
+    EV << "big endian rejected: FAIL\n";
+} catch (cRuntimeError& e) {
+    EV << "big endian rejected: OK\n";
+}
+writeTextFile("truncated.ply", "ply\nformat ascii 1.0\nelement vertex 5\nproperty float x\nproperty float y\nproperty float z\nend_header\n1 2 3\n");
+try {
+    PlyPointCloudReader::read("truncated.ply");
+    EV << "truncation detected: FAIL\n";
+} catch (cRuntimeError& e) {
+    EV << "truncation detected: OK\n";
+}
+try {
+    PlyPointCloudReader::read("doesnotexist.ply");
+    EV << "missing file: FAIL\n";
+} catch (cRuntimeError& e) {
+    EV << "missing file: OK\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+ascii count: OK
+ascii coords: OK
+ascii rgb normalized: OK
+ascii bbox: OK
+binary count: OK
+binary coords: OK
+binary no rgb: OK
+binary bbox: OK
+missing magic: OK
+big endian rejected: OK
+truncation detected: OK
+missing file: OK
+.
