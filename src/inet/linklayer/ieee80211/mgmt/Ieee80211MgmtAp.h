@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 
 namespace inet {
@@ -22,11 +23,25 @@ namespace ieee80211 {
  */
 class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 {
+  protected:
+    enum class AssociationResponseDisposition {
+        IGNORE,
+        RETAIN,
+        COMPLETE,
+    };
+
   public:
     /** Describes a STA */
     struct StaInfo {
         MacAddress address;
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
+        bool pendingAssociationSuccessful = false;
+        uint64_t pendingAssociationTransactionId = 0;
+        bool pendingHtStateAvailable = false;
+        bool pendingHtCapabilitiesValid = false;
+        Ieee80211HtCapabilities pendingHtCapabilities;
+        bool pendingHtOperationValid = false;
+        Ieee80211HtOperation pendingHtOperation;
 //        int consecFailedTrans; // TODO
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };
@@ -57,6 +72,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     // state
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
+    uint64_t nextAssociationTransactionId = 0;
 
   public:
     Ieee80211MgmtAp() {}
@@ -75,11 +91,20 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     using Ieee80211MgmtApBase::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status);
+
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
     virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
 
     /** Utility function: set fields in the given frame and send it out to the address */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr, uint64_t transactionId = 0);
+
+    virtual uint64_t createAssociationTransactionId();
+    virtual void clearPendingAssociation(StaInfo *sta);
+
+    /** Classifies a terminal management-MPDU result using its transaction tag and fragment state. */
+    static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame,
+            uint64_t pendingTransactionId, FrameTransmissionStatus status);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();
