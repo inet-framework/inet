@@ -8,6 +8,7 @@
 #ifndef __INET_OSGEARTHGROUND_H
 #define __INET_OSGEARTHGROUND_H
 
+#include "inet/common/Module.h"
 #include "inet/environment/contract/IGround.h"
 
 #if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)

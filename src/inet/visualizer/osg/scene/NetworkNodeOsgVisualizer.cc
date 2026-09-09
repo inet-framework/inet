@@ -9,6 +9,12 @@
 
 #include <omnetpp/osgutil.h>
 
+#ifdef WITH_OSGEARTH
+#include <osgEarth/MapNode>
+#include <osgEarth/Registry>
+#include <osgEarth/ShaderGenerator>
+#endif // ifdef WITH_OSGEARTH
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/osg/util/OsgScene.h"
 #include "inet/visualizer/osg/util/OsgUtils.h"
@@ -78,6 +84,16 @@ void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualizat
     networkNodeVisualizations[networkNodeOsgVisualization->networkNode->getId()] = networkNodeOsgVisualization;
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(networkNodeOsgVisualization);
+#ifdef WITH_OSGEARTH
+    // An osgEarth map renders through shaders and its programs take over the whole scene,
+    // so the fixed-function state of the node icon (its texture above all) is ignored and
+    // the icon disappears. Generating shaders for the subgraph puts that state back. Only
+    // do it when there is a map: without one the scene is drawn by the fixed-function
+    // pipeline, which the generated shaders would then override with a flat, textureless
+    // rendering of their own.
+    if (osgEarth::MapNode::findMapNode(visualizationTargetModule->getOsgCanvas()->getScene()) != nullptr)
+        osgEarth::Registry::shaderGenerator().run(networkNodeOsgVisualization);
+#endif // ifdef WITH_OSGEARTH
 }
 
 void NetworkNodeOsgVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)

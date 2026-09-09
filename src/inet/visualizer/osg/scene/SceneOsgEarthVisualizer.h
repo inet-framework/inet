@@ -14,7 +14,6 @@
 #ifdef WITH_OSGEARTH
 #include <osgEarth/GeoTransform>
 #include <osgEarth/MapNode>
-#include <osgEarthAnnotation/RectangleNode>
 #endif // ifdef WITH_OSGEARTH
 
 namespace inet {

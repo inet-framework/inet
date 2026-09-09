@@ -62,7 +62,8 @@ ifeq ($(WITH_VISUALIZATIONOSG), enabled)
   ifeq ($(WITH_OSG), yes)
     OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?
     ifeq ($(WITH_OSGEARTH), yes)
-      OMNETPP_LIBS += -losgEarth -losgEarthUtil # TODO: use $(OSGEARTH_LIBS) from Makefile.inc? -lgeos_c might also be needed. Is that included? Should it be?
+      # osgEarth 3 merged osgEarthUtil/osgEarthAnnotation/osgEarthSymbology into libosgEarth
+      OMNETPP_LIBS += -losgEarth
     endif
   else
     $(error Please rebuild OMNeT++/OMNEST with OSG support, or disable 'VisualizationOsg' feature in INET )

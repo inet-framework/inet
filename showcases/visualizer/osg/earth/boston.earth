@@ -5,7 +5,7 @@ Demonstrates the use of a Resource Library in order to apply "typical" textures
 to extruded buildings.
 -->
 
-<map name="Boston Demo" type="geocentric" version="2">
+<map name="Boston Demo">
 
     <options lighting="true" elevation_tile_size="15">
         <terrain lighting="false"/>
@@ -15,10 +15,10 @@ to extruded buildings.
         <!-- <cache_policy usage="cache_only"/> -->
      </options>
 
-    <image name="osm_mapnik" driver="xyz">
-        <url>http://[abc].tile.openstreetmap.org/{z}/{x}/{y}.png</url>
+    <XYZImage name="osm_mapnik">
+        <url>https://[abc].tile.openstreetmap.org/{z}/{x}/{y}.png</url>
         <profile>spherical-mercator</profile>
-    </image>
+    </XYZImage>
 
 <!--
     <model name="buildings" driver="feature_geom">
