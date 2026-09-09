@@ -17,8 +17,8 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 namespace inet {
 
@@ -51,9 +51,7 @@ void Ieee80211MgmtAp::initialize(int stage)
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)
             throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
-        channelNumber = -1; // value will arrive from physical layer in receiveChangeNotification()
         WATCH(ssid);
-        WATCH(channelNumber);
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
         WATCH(staList);
@@ -82,17 +80,6 @@ void Ieee80211MgmtAp::handleTimer(cMessage *msg)
 void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
 {
     throw cRuntimeError("handleCommand(): no commands supported");
-}
-
-void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == Ieee80211Radio::radioChannelChangedSignal) {
-        EV << "updating channel number\n";
-        channelNumber = value;
-    }
-    Ieee80211MgmtApBase::receiveSignal(source, signalID, value, details);
 }
 
 void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -141,12 +128,17 @@ void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211M
 void Ieee80211MgmtAp::sendBeacon()
 {
     EV << "Sending beacon\n";
+    // Generic radios may not publish an IEEE channel; retain the legacy unknown value.
+    int primaryChannel = mib->hasPrimaryChannel() ? mib->requirePrimaryChannel() : -1;
     const auto& body = makeShared<Ieee80211BeaconFrame>();
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
-    body->setChannelNumber(channelNumber);
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body));
+    body->setChannelNumber(primaryChannel);
+    addHtCapabilities(body);
+    if (mib->isHtOperationSupported())
+        setHtOperation(body, getHtOperationBand(), mib->getHtOperation());
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("Beacon", body, ST_BEACON, MacAddress::BROADCAST_ADDRESS);
 }
 
@@ -337,12 +329,17 @@ void Ieee80211MgmtAp::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
+    // Generic radios may not publish an IEEE channel; retain the legacy unknown value.
+    int primaryChannel = mib->hasPrimaryChannel() ? mib->requirePrimaryChannel() : -1;
     const auto& body = makeShared<Ieee80211ProbeResponseFrame>();
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
-    body->setChannelNumber(channelNumber);
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body));
+    body->setChannelNumber(primaryChannel);
+    addHtCapabilities(body);
+    if (mib->isHtOperationSupported())
+        setHtOperation(body, getHtOperationBand(), mib->getHtOperation());
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 

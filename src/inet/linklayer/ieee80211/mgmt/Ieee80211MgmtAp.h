@@ -51,7 +51,6 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
   protected:
     // configuration
     std::string ssid;
-    int channelNumber = -1;
     simtime_t beaconInterval;
     int numAuthSteps = 0;
 
@@ -73,8 +72,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
-    /** Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    using Ieee80211MgmtApBase::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
