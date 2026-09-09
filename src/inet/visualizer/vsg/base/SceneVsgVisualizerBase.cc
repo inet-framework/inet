@@ -10,6 +10,7 @@
 #include <vsg/maths/transform.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/environment/ground/PointCloudGround.h"
 #include "inet/visualizer/vsg/scene/NetworkNodeVsgVisualizer.h"
 #include "inet/visualizer/vsg/util/VsgScene.h"
 #include "inet/visualizer/vsg/util/VsgUtils.h"
@@ -69,12 +70,35 @@ void SceneVsgVisualizerBase::initializeAxis(double axisLength)
 void SceneVsgVisualizerBase::initializeSceneFloor()
 {
     Box sceneBounds = getSceneBounds();
-    if (sceneBounds.getMin() != sceneBounds.getMax()) {
+    if (sceneBounds.getMin() == sceneBounds.getMax())
+        return;
+    auto scene = inet::vsg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    const char *groundModel = par("groundModel");
+    const char *sceneModel = par("sceneModel");
+    if (groundModel != nullptr && *groundModel != '\0') {
+        // Render the physics ground's own heightfield as a shaded mesh, so the displayed surface is
+        // exactly the one the radio models sample. The path (relative to the network) must name a
+        // PointCloudGround module; its heightfield is already built at this init stage (INITSTAGE_LAST).
+        auto module = getSimulation()->getSystemModule()->getModuleByPath(groundModel);
+        auto ground = dynamic_cast<physicalenvironment::PointCloudGround *>(module);
+        if (ground == nullptr)
+            throw cRuntimeError("groundModel '%s' does not resolve to a PointCloudGround module", groundModel);
+        const Heightfield& heightfield = ground->getHeightfield();
+        if (!heightfield.isValid())
+            throw cRuntimeError("groundModel '%s' has no valid heightfield", groundModel);
+        scene->addChild(inet::vsg::createTerrainMeshFromHeightfield(heightfield));
+    }
+    else if (sceneModel != nullptr && *sceneModel != '\0') {
+        // Load an external terrain model (a PLY point cloud, e.g. a LIDAR scan) as the ground, in place
+        // of the flat quad. The path is resolved relative to the working directory (the example dir).
+        auto terrain = inet::vsg::createTerrainFromPLY(sceneModel, sceneBounds.getMin(), sceneBounds.getMax());
+        scene->addChild(terrain);
+    }
+    else {
         auto color = cFigure::Color(par("sceneColor"));
         double opacity = par("sceneOpacity");
         // TODO: textured floor (sceneImage) and exponential edge shading (sceneShading) not yet ported.
         auto sceneFloor = createSceneFloor(sceneBounds.getMin(), sceneBounds.getMax(), color, opacity);
-        auto scene = inet::vsg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(sceneFloor);
     }
 }
