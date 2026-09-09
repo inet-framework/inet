@@ -12,10 +12,6 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
-#include <osgEarth/MapNode>
-#endif
-
 namespace inet {
 
 class INET_API GeoCoord
@@ -142,29 +138,6 @@ class INET_API Wgs84AnchoredGeographicCoordinateSystem : public SimpleModule, pu
     virtual GeoCoord computeGeographicCoordinate(const Coord& sceneCoordinate) const override;
 };
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
-
-class INET_API OsgGeographicCoordinateSystem : public SimpleModule, public IGeographicCoordinateSystem
-{
-  protected:
-    GeoCoord scenePosition = GeoCoord::NIL;
-    Quaternion sceneOrientation = Quaternion::NIL;
-    osgEarth::MapNode *mapNode = nullptr;
-    osg::Matrixd locatorMatrix;
-    osg::Matrixd inverseLocatorMatrix;
-
-  protected:
-    virtual void initialize(int stage) override;
-
-  public:
-    virtual GeoCoord getScenePosition() const override { return scenePosition; }
-    virtual Quaternion getSceneOrientation() const override { return sceneOrientation; }
-
-    virtual Coord computeSceneCoordinate(const GeoCoord& geographicCoordinate) const override;
-    virtual GeoCoord computeGeographicCoordinate(const Coord& sceneCoordinate) const override;
-};
-
-#endif // WITH_OSGEARTH
 
 } // namespace inet
 

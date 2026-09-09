@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
+#include "inet/common/geometry/common/OsgGeographicCoordinateSystem.h"
 
 #include "inet/common/geometry/common/Wgs84.h"
 
