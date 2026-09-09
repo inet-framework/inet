@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -69,7 +71,7 @@ void Hcf::initialize(int stage)
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue signal listeners after all child initialization has completed.
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
-            check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+            check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(queueing::IPacketQueue::packetQueueDepartureSignal, this);
     }
 }
 
@@ -154,19 +156,25 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
 }
 
-void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Hcf::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
-        auto packet = check_and_cast<Packet *>(obj);
-        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
-            FrameTransmissionDetails transmissionDetails;
-            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
-            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
-        }
+    if (signal == queueing::IPacketQueue::packetQueueDepartureSignal) {
+        Enter_Method("packetQueueDeparture");
+        if (source->isSubscribed(signal, this))
+            handlePacketRemoved(check_and_cast<Packet *>(object), check_and_cast<queueing::PacketQueueRemovalDetails *>(details)->getReason());
     }
     else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
+        ModeSetListener::receiveSignal(source, signal, object, details);
+}
+
+void Hcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
+{
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
+        FrameTransmissionDetails transmissionDetails;
+        transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+        emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+    }
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -828,4 +836,3 @@ Hcf::~Hcf()
 
 } // namespace ieee80211
 } // namespace inet
-
