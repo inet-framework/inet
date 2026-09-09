@@ -5,7 +5,7 @@ because of it.
 
 Checks RFC791-TTL-1 (must), RFC791-CKSUM-1 (description), and RFC791-TTL-3 (description) from
 doc/project/evidence/standard/rfc791/catalog.md. The English procedure and the mockup are in
-doc/project/evidence/protocol/ipv4/checks.md#ttl-decrement; the program steps below map one to one onto its expected
+doc/project/evidence/protocol/ipv4/checks/ttl.md#ttl-decrement; the program steps below map one to one onto its expected
 observations, except that observation 4 (the checksum) shares its wire event with observation 2
 (both properties belong to the one datagram sent on link 2), so one program step asserts both.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB; link 1 =
@@ -66,7 +66,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#ttl-decrement: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/ttl.md#ttl-decrement: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

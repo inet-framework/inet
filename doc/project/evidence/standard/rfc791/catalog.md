@@ -13,8 +13,8 @@ Source, cached in this folder:
   <https://www.rfc-editor.org/rfc/rfc791.txt>.
 
 RFC 791 delegates error reports to ICMP. Those statements belong to RFC 792 and live in
-[`rfc792/catalog.md`](../rfc792/catalog.md). The two documents, their relatives, and the
-in-scope set are in [`standards.md`](../../protocol/ipv4/standards.md). A feature that spans both documents is
+[`rfc792/catalog.md`](../rfc792/catalog.md). The documents of the in-scope set, their relatives, and the
+override rows are in [`standards.md`](../../protocol/ipv4/standards.md). A feature that spans both documents is
 in [`features.md`](../../protocol/ipv4/features.md).
 
 Quotes are verbatim. A reference such as `rfc791.txt:1012` points to a line of the cached
@@ -62,9 +62,11 @@ new test or a new run must never force an edit here.
   - `internal` — state inside a module; not visible from outside.
   - `encoding` — the exact bit layout of a field; a serializer concern.
 - **Overridden by** — appears only when a later document of the in-scope set changes the
-  statement. No entry carries the field today, because the in-scope set is RFC 791 and
-  RFC 792 alone. The known future overrides, for example RFC 6864 over RFC791-ID-1, wait
-  in the override table of [`standards.md`](../../protocol/ipv4/standards.md#override-table).
+  statement. Five entries carry it since RFC 1122 and RFC 6864 entered the in-scope set:
+  the identification rule, the don't-fragment rule, the checksum discard, and the two
+  reassembly statements. The entry and its ID stay; a test targets the entry that governs.
+  The rows are in the override table of
+  [`standards.md`](../../protocol/ipv4/standards.md#override-table).
 
 ## Time to live
 
@@ -169,6 +171,9 @@ new test or a new run must never force an edit here.
   error-signal ([RFC792-DU-4](../rfc792/catalog.md#rfc792-du-4)).
 - Check idea: send a datagram with DF = 1 that is larger than the MTU of the second link.
   No fragment of it may appear after the gateway, and the destination must not receive it.
+- Overridden by: [RFC6864-ID-6](../rfc6864/catalog.md#rfc6864-id-6), the same rule with a
+  keyword; [RFC6864-ID-7](../rfc6864/catalog.md#rfc6864-id-7) adds that a transit device
+  does not clear the bit.
 
 ### RFC791-FRAG-6
 
@@ -194,6 +199,8 @@ new test or a new run must never force an edit here.
 - Strength: description. Class: end-to-end.
 - Check idea: after fragmentation on the path, the destination must deliver the complete
   original data to the next protocol layer in one piece.
+- Overridden by: [RFC1122-REASM-1](../rfc1122/catalog.md#rfc1122-reasm-1), which turns
+  the procedure into an obligation of every host.
 
 ### RFC791-REASM-2
 
@@ -203,6 +210,8 @@ new test or a new run must never force an edit here.
 > whole or in fragments)." — §3.1, `rfc791.txt:961-963`
 
 - Strength: must. Class: end-to-end.
+- Overridden by: [RFC1122-REASM-2](../rfc1122/catalog.md#rfc1122-reasm-2), which names the
+  quantity (EMTU_R) and adds two should clauses.
 
 ### RFC791-REASM-3
 
@@ -234,6 +243,8 @@ new test or a new run must never force an edit here.
 > which detects the error." — §1.4, `rfc791.txt:365-366`
 
 - Strength: description (with "is discarded" as plain fact). Class: wire (absence).
+- Overridden by: [RFC1122-CKSUM-1](../rfc1122/catalog.md#rfc1122-cksum-1), which states
+  the verification and the silent discard as a must for every received datagram.
 
 ## Identification
 
@@ -249,6 +260,10 @@ active.**
 - Strength: must. Class: wire.
 - Check idea: two datagrams of one flow, sent close together, must show two different
   identification values.
+- Overridden by: [RFC6864-ID-5](../rfc6864/catalog.md#rfc6864-id-5). The rule now applies
+  to non-atomic datagrams only, within one maximum datagram lifetime;
+  [RFC6864-ID-3](../rfc6864/catalog.md#rfc6864-id-3) tells every device to ignore the
+  field of an atomic datagram.
 
 ## Header format
 

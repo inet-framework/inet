@@ -4,7 +4,7 @@ RFC 791 — a gateway fragments a large datagram and the destination reassembles
 
 Checks RFC791-FRAG-1, RFC791-FRAG-2, RFC791-FRAG-3, RFC791-FRAG-4, and RFC791-REASM-1 from
 doc/project/evidence/standard/rfc791/catalog.md. The English procedure, the mockup, and the size arithmetic are in
-doc/project/evidence/protocol/ipv4/checks.md#fragment-and-reassembly. A 1028-octet datagram meets a 576-octet MTU on link 2:
+doc/project/evidence/protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly. A 1028-octet datagram meets a 576-octet MTU on link 2:
 the expected split is 552 + 456 data octets, so the last fragment sits at octet offset 552.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB.
 
@@ -69,7 +69,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#fragment-and-reassembly: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

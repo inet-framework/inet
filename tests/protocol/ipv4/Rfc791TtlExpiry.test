@@ -4,7 +4,7 @@ RFC 791 / RFC 792 — a gateway destroys a datagram whose time to live reaches z
 reports the drop to the source.
 
 Checks RFC791-TTL-2 (must) and RFC792-TE-1 (must + may) from doc/project/evidence/standard/rfc791/catalog.md. The English
-procedure and the mockup are in doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry; the program steps below map one
+procedure and the mockup are in doc/project/evidence/protocol/ipv4/checks/ttl.md#ttl-expiry; the program steps below map one
 to one onto its expected observations. Host A sends with TTL 1, so the datagram survives
 exactly one hop; the gateway decrements it to zero and must destroy it. Mapping of the mockup:
 host A = hostA, gateway R = router, host B = hostB; link 1 = hostA-router, link 2 =
@@ -13,7 +13,7 @@ router-hostB.
 The ICMP step (observation 3) asserts a "may" clause of RFC 792. A silent discard also
 conforms to the RFCs. If this step fails on some implementation, record an implementation gap
 against the "may" clause, not a specification violation (see
-doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry, Notes).
+doc/project/evidence/protocol/ipv4/checks/ttl.md#ttl-expiry, Notes).
 
 %includes:
 #include "ProtocolTest.h"
@@ -65,7 +65,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#ttl-expiry: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/ttl.md#ttl-expiry: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

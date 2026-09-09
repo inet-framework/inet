@@ -1,0 +1,132 @@
+%description:
+
+RFC 6864 — every device ignores the identification of an atomic datagram, and a gateway does
+not clear the DF bit.
+
+Checks RFC6864-ID-3 (must) and RFC6864-ID-7 (must not) from
+doc/project/evidence/standard/rfc6864/catalog.md; also covers RFC6864-ID-6 and notes
+RFC6864-ID-2. The English procedure is in
+doc/project/evidence/protocol/ipv4/checks/identification.md#atomic-identification; the
+program steps below map one to one onto its expected observations. Mapping of the mockup
+with a relay: host A = hostA, gateway R = router, relay T = tap, host B = hostB. Two
+100-octet datagrams with DF set leave host A at the same time, to ports 5000 and 5001. The
+relay rewrites the identification of datagram 2 to that of datagram 1 and keeps the
+checksum valid.
+
+How the relay knows the identification of datagram 1: the model draws identifications from
+one counter per network layer, so datagram 2 carries datagram 1's value plus one, and the
+relay subtracts one. This is model knowledge inside the test, and expected observation 5
+confirms the result on the wire; if the assumption ever fails, that step fails, not the
+check as a whole vacuously.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6864_atomic_identification")
+        // The relay rewrites the identification of datagram 2 to that of datagram 1.
+        .intercept(intercept("tap").match("udp.destPort == 5001").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setIdentification(h.getIdentification() - 1); }); })
+                     .describe("datagram 2 (set its identification to that of datagram 1)"))
+        // Expected observation 1: datagram 1 on link 1 is atomic: DF = 1, MF = 0, offset 0. Record ID1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
+                  .capture("id1", "ipv4.identification")
+                  .describe("the atomic datagram 1 on link 1")
+                  .within(0.5))
+        // Expected observation 2: datagram 1 on link 2 still carries DF = 1 and is whole
+        // (RFC6864-ID-7, RFC6864-ID-6). The gateway forwards it before host A has finished
+        // sending datagram 2, so this step comes before the next one.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false")
+                  .describe("datagram 1 on link 2 with DF still set and no fragmentation")
+                  .within(0.1))
+        // Expected observation 3: datagram 2 on link 1, DF = 1, with another identification.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001 && ipv4.dontFragment == true && ipv4.identification != {id1}")
+                  .describe("the atomic datagram 2 on link 1 with a different identification")
+                  .within(0.1))
+        // Expected observation 4: host B's UDP receives datagram 1.
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .describe("datagram 1 at host B's UDP")
+                  .within(0.1))
+        // Expected observation 5: datagram 2 arrives at host B's interface with identification ID1
+        // and DF = 1 -- the rewrite took effect.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5001 && ipv4.identification == {id1} && ipv4.dontFragment == true")
+                  .describe("datagram 2 at host B's interface with the identification of datagram 1")
+                  .within(0.1))
+        // Expected observation 6: host B's UDP receives datagram 2 (RFC6864-ID-3).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5001 && udp.totalLengthField == 108B")
+                  .describe("datagram 2 at host B's UDP, despite the repeated identification")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6864_atomic_identification compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum; the relay recomputes it after the rewrite.
+**.ipv4.ip.checksumMode = "computed"
+
+# Two UDP datagrams of 100 octets with DF set, at the same time, to two ports of host B.
+*.hostA.numApps = 2
+*.hostA.app[*].typename = "UdpBasicApp"
+*.hostA.app[*].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[1].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[1].localPort = 4001
+*.hostA.app[*].messageLength = 100B
+*.hostA.app[*].dontFragment = true
+*.hostA.app[*].startTime = 0.1s
+*.hostA.app[*].sendInterval = 1s
+*.hostB.numApps = 2
+*.hostB.app[*].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST rfc6864_atomic_identification: PASS

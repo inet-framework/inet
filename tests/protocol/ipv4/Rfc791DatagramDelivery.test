@@ -5,7 +5,7 @@ the addressed program.
 
 Checks RFC791-FWD-1, RFC791-DLV-1, RFC791-PROTO-1, RFC791-HDR-1, RFC791-HDR-2, and RFC791-HDR-3
 (all description) from doc/project/evidence/standard/rfc791/catalog.md. The English procedure and the mockup are in
-doc/project/evidence/protocol/ipv4/checks.md#datagram-delivery; the program steps below map one to one onto its
+doc/project/evidence/protocol/ipv4/checks/delivery.md#datagram-delivery; the program steps below map one to one onto its
 expected observations. Mapping of the mockup: host A = hostA, gateway R = router, host B =
 hostB; link 1 = hostA-router, link 2 = router-hostB.
 
@@ -33,13 +33,15 @@ recognizes. The nearest faithful, actually-observable proxy is UDP's own upward 
 Udp::sendUp() (src/inet/transportlayer/udp/Udp.cc) emits packetSentToUpperSignal -- a
 recognized kind -- on the fully-stripped, 100-octet application payload immediately before
 send()ing it to the socket that resolves to hostB.app[0]. This is the same reasoning
-checks.md's own Notes section already applies one layer down ("host B's UDP receiving the
+checks/delivery.md's own Notes section already applies one layer down ("host B's UDP receiving the
 datagram is the observable form of 'passes the data to the application program'"): here it is
 UDP's act of *handing the data upward* that stands for the program receiving it, one step
 closer to the program than observation 3.
 
 %includes:
 #include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "PacketField.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
@@ -52,11 +54,14 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc791_datagram_delivery")
         // Expected observation 1: link 1 shows version 4, a header length of 20 octets, a
-        // total length of 128 octets, and the UDP protocol number (17) -- confirms the
-        // stimulus and covers RFC791-HDR-1, HDR-2, HDR-3 and the wire half of PROTO-1.
+        // total length of 128 octets, the UDP protocol number (17), and host A's own address
+        // as source -- confirms the stimulus and covers RFC791-HDR-1, HDR-2, HDR-3, the wire
+        // half of PROTO-1, and RFC1122-ADDR-1.
         // Record the source and destination addresses for the observation-2 comparison.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .packet("udp.destPort == 5000 && ipv4.version == 4 && ipv4.headerLength == 20B && ipv4.totalLengthField == 128B && ipv4.protocolId == 17")
+                  // the source address is one of host A's own addresses (RFC1122-ADDR-1)
+                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == L3AddressResolver().resolve("hostA").str(); })
                   .capture("srcAddr", [](const PacketEvent& e) {
                       return evalPacketField(e.packet, "ipv4.srcAddress").pointerValue().get<Ipv4Address>()->str();
                   })
@@ -105,7 +110,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#datagram-delivery: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/delivery.md#datagram-delivery: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

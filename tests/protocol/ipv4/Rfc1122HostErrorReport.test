@@ -1,0 +1,115 @@
+%description:
+
+RFC 1122 — a host reports a datagram to a closed port with Destination Unreachable, and the
+report quotes the datagram's header and first 8 octets unchanged.
+
+Checks RFC1122-ERR-1 (must, "wherever practical"), RFC1122-DU-1 (should), RFC1122-ICMP-2
+(must: the quote is unchanged) and RFC1122-ICMP-4 (should: TOS zero) from
+doc/project/evidence/standard/rfc1122/catalog.md. The English procedure is in
+doc/project/evidence/protocol/ipv4/checks/error-report.md#host-error-report; the program
+steps below map one to one onto its expected observations. Mapping of the mockup: host A =
+hostA, gateway R = router, host B = hostB.
+
+Deviation: expected observations 3 and 4 read one message at two points. The TOS byte is an
+outer header field, read where the frame arrives at host A's interface; the quoted header is
+read at host A's network layer, where the ICMP message is the front of the packet
+(packetSentToUpper of hostA.ipv4.ip), so the quote can be walked without the outer headers.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_host_error_report")
+        // Expected observation 1: the datagram to port 5001 on link 1; record identification,
+        // addresses and ports.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001 && udp.srcPort == 4000")
+                  .capture("id", "ipv4.identification")
+                  .capture("src", [](const PacketEvent& e) { return ipv4Address(e.packet, "ipv4.srcAddress"); })
+                  .capture("dst", [](const PacketEvent& e) { return ipv4Address(e.packet, "ipv4.destAddress"); })
+                  .describe("the datagram to the closed port 5001 on link 1")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP finds no program for port 5001 -- the in-time
+        // observation.
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; }) // the drop record carries no protocol tag; read the header
+                  .describe("host B's UDP discards the datagram for want of a port")
+                  .within(0.1))
+        // Expected observation 3: host A receives Destination Unreachable, type 3 code 3, with
+        // TOS 0 (RFC1122-ERR-1, RFC1122-DU-1, RFC1122-ICMP-4).
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 3 && icmpv4.code == 3 && ipv4.typeOfService == 0")
+                  .describe("the Destination Unreachable (port unreachable) message at host A, TOS 0")
+                  .within(0.1))
+        // Expected observation 4: the quoted header carries the recorded identification,
+        // addresses and protocol, and the 8 octets after it are the UDP header with the
+        // recorded ports (RFC1122-ICMP-2).
+        .once(on("hostA.ipv4.ip").signal("packetSentToUpper")
+                  .packet("icmpv4.type == 3 && icmpv4.code == 3")
+                  .match([](const MatchContext& c) {
+                      const auto& ip = quotedIpv4Header(c.event.packet);
+                      const auto& udp = quotedUdpHeader(c.event.packet);
+                      return ip->getIdentification() == c.get("id").intValue()
+                          && ip->getProtocolId() == IP_PROT_UDP
+                          && ip->getSrcAddress().str() == c.get("src").stdstringValue()
+                          && ip->getDestAddress().str() == c.get("dst").stdstringValue()
+                          && udp->getSourcePort() == 4000 && udp->getDestinationPort() == 5001;
+                  })
+                  .describe("the same report handed up at host A, quoting the datagram's header and UDP ports unchanged")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_host_error_report compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The common mockup: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# One UDP datagram, 100 octets, from port 4000 to port 5001 on host B. No program listens there.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc1122_host_error_report: PASS

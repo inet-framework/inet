@@ -1,0 +1,105 @@
+%description:
+
+RFC 1122 — an ICMP message of unknown type is silently discarded.
+
+Checks RFC1122-ICMP-1 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/input-validation.md#unknown-icmp-type; the program
+steps below map one to one onto its expected observations. Mapping of the mockup with a
+relay: host A = hostA, gateway R = router, relay T = tap, host B = hostB. Host A sends one
+echo request as the vehicle; the relay rewrites its ICMP type to 42, a number that names no
+message. The ICMP checksum stays valid: the model's ICMP runs in its declared checksum mode,
+in which the field is correct by declaration, which is the simulation form of a rewriter
+that recomputes it.
+
+Expected result: FAIL. The model stops the simulation with a runtime error on an unknown
+ICMP type (Icmp::processIcmpMessage, the default branch of the type switch), so no verdict
+line is printed at all, and the runner counts the missing line as a failure. "Silently
+discarded" leaves the host running; a stop is a failure of the check. See
+doc/project/evidence/model/ipv4/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_unknown_icmp_type")
+        // The relay rewrites the ICMP type of the echo request to 42.
+        .intercept(intercept("tap").match("icmpv4.type == 8").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<IcmpHeader>(frame, [](IcmpHeader& h) { h.setType(static_cast<IcmpType>(42)); }); })
+                     .describe("the echo request (set its ICMP type to 42)"))
+        // Expected observation 1: at host B's interface an ICMP message of type 42 arrives.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 42")
+                  .describe("an ICMP message of the unknown type 42 at host B's interface")
+                  .within(0.5))
+        // Expected observation 2: host B discards it (RFC1122-ICMP-1); the record may sit at any
+        // module of the host.
+        .once(on("hostB").signal("packetDropped")
+                  .packet("icmpv4.type == 42")
+                  .describe("host B's discard of the unknown ICMP message")
+                  .within(0.1))
+        // Expected observation 3: from then on, no ICMP message leaves host B: neither an echo
+        // reply nor an error report.
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv4.type >= 0")
+                  .describe("any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_unknown_icmp_type compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# One echo request of 56 octets from host A to host B, the vehicle of the unknown type.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "hostB"
+*.hostA.app[0].packetSize = 56B
+*.hostA.app[0].count = 1
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].printPing = false
+*.hostB.numApps = 0
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc1122_unknown_icmp_type: PASS

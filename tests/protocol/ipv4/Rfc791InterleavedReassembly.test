@@ -1,0 +1,135 @@
+%description:
+
+RFC 791 / RFC 1122 — the fragments of two datagrams that arrive interleaved are reassembled
+into two datagrams and do not mix.
+
+Checks RFC791-REASM-3 (description) and RFC1122-REASM-1 (must) from the catalogs under
+doc/project/evidence/standard/; also covers RFC791-REASM-1. The English procedure is in
+doc/project/evidence/protocol/ipv4/checks/fragmentation.md#interleaved-reassembly; the
+program steps below map one to one onto its expected observations. Mapping of the mockup
+with a relay: host A = hostA, gateway R = router, relay T = tap, host B = hostB; link 2 =
+router-tap-hostB with MTU 576. Two 1000-octet datagrams to ports 5000 and 5001 leave host
+A at the same time; the relay holds the first fragment of datagram 1 for 2 ms, so host B
+receives the trains interleaved.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_interleaved_reassembly")
+        // The relay holds the first fragment with offset 0 -- the first fragment of datagram 1 --
+        // for 2 ms.
+        .intercept(intercept("tap")
+                     .match("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true").nth(1)
+                     .delay(0.002)
+                     .describe("the first fragment of datagram 1 (hold it for 2 ms)"))
+        // Expected observation 1: the first fragment of datagram 1 on link 2; record ID1.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
+                  .capture("id1", "ipv4.identification")
+                  .describe("the first fragment of datagram 1 on link 2")
+                  .within(0.5))
+        // Expected observation 2: the last fragment of datagram 1 on link 2.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 552 && ipv4.moreFragments == false")
+                  .describe("the last fragment of datagram 1 on link 2")
+                  .within(0.1))
+        // Expected observation 3: the first frame at host B's interface is the last fragment of
+        // datagram 1 -- the held fragment is not in front of it.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 552")
+                  .describe("the last fragment of datagram 1 at host B, ahead of the held first fragment")
+                  .within(0.1))
+        // Expected observation 4: a first fragment with another identification -- datagram 2.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true && ipv4.identification != {id1}")
+                  .capture("id2", "ipv4.identification")
+                  .describe("the first fragment of datagram 2 at host B")
+                  .within(0.1))
+        // Expected observation 5: the last fragment of datagram 2.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.identification == {id2} && ipv4.fragmentOffset == 552")
+                  .describe("the last fragment of datagram 2 at host B")
+                  .within(0.1))
+        // Expected observation 6: host B's UDP receives datagram 2 whole, before the held
+        // fragment arrives (RFC1122-REASM-1, RFC791-REASM-3).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5001 && udp.totalLengthField == 1008B")
+                  .describe("the reassembled datagram 2 at host B's UDP")
+                  .within(0.1))
+        // Expected observation 7: the held first fragment of datagram 1 arrives.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
+                  .describe("the held first fragment of datagram 1 at host B")
+                  .within(0.1))
+        // Expected observation 8: host B's UDP receives datagram 1 whole (RFC791-REASM-1).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 1008B")
+                  .describe("the reassembled datagram 1 at host B's UDP")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_interleaved_reassembly compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Link 2 forces fragmentation at the gateway.
+*.router.eth[1].mac.mtu = 576B
+
+# Two UDP datagrams of 1000 octets at the same time, to two ports of host B.
+*.hostA.numApps = 2
+*.hostA.app[*].typename = "UdpBasicApp"
+*.hostA.app[*].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[1].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[1].localPort = 4001
+*.hostA.app[*].messageLength = 1000B
+*.hostA.app[*].startTime = 0.1s
+*.hostA.app[*].sendInterval = 1s
+*.hostB.numApps = 2
+*.hostB.app[*].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST rfc791_interleaved_reassembly: PASS

@@ -1,0 +1,141 @@
+%description:
+
+RFC 791 — the receiver combines only fragments that agree in all four fields: identification,
+source, destination, and protocol.
+
+Checks RFC791-REASM-1 (description; the four-field key) and RFC791-REASM-3 (description)
+from doc/project/evidence/standard/rfc791/catalog.md. The English procedure is in
+doc/project/evidence/protocol/ipv4/checks/fragmentation.md#same-identification-different-protocol;
+the program steps below map one to one onto its expected observations. Mapping of the mockup
+with a relay: host A = hostA, gateway R = router, host B = hostB; the relay T is two taps in
+series on link 2, tap1 and tap2, because the relay does two things: tap1 rewrites the
+identification of both ICMP fragments to that of the UDP datagram (protocol 1 selects them),
+and tap2 holds the last UDP fragment for 1 ms so that the ICMP fragments arrive between the
+two UDP fragments. Host A sends a 1000-octet UDP datagram to port 5000 and, 100 us later,
+an echo request with 900 octets of data; link 2 has MTU 576, so each splits in two.
+
+How tap1 knows the identification of the UDP datagram: the model draws identifications from
+one counter per network layer, so the echo request carries the UDP datagram's value plus
+one, and tap1 subtracts one. Expected observation 3 confirms the result on the wire.
+
+Expected result: FAIL. The model keys its reassembly buffers on identification, source and
+destination only (Ipv4FragBuf::Key), so the ICMP fragments land in the UDP datagram's buffer,
+neither datagram is reassembled intact, and expected observation 4 misses its deadline. See
+doc/project/evidence/model/ipv4/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_same_id_different_protocol")
+        // tap1 rewrites the identification of every ICMP fragment to that of the UDP datagram.
+        .intercept(intercept("tap1").match("ipv4.protocolId == 1")
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setIdentification(h.getIdentification() - 1); }); })
+                     .describe("every fragment of the echo request (set its identification to that of the UDP datagram)"))
+        // tap2 holds the last UDP fragment for 1 ms, so the ICMP fragments overtake it.
+        .intercept(intercept("tap2").match("ipv4.fragmentOffset == 552 && ipv4.moreFragments == false").nth(1)
+                     .delay(0.001)
+                     .describe("the last fragment of the UDP datagram (hold it for 1 ms)"))
+        // Expected observation 1: the first UDP fragment on link 2; record ID1.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.protocolId == 17 && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true") // a fragment is not dissected beyond IP; the protocol number selects it
+                  .capture("id1", "ipv4.identification")
+                  .describe("the first fragment of the UDP datagram on link 2")
+                  .within(0.5))
+        // Expected observation 2: the first ICMP fragment on link 2 with another identification.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification != {id1}")
+                  .describe("the first fragment of the echo request on link 2, with its own identification")
+                  .within(0.1))
+        // Expected observation 3: at host B's interface the ICMP fragment carries ID1 -- the
+        // rewrite took effect.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification == {id1}")
+                  .describe("the first fragment of the echo request at host B with the identification of the UDP datagram")
+                  .within(0.1))
+        // Expected observations 4 and 5, in either order: host B's UDP receives the UDP datagram
+        // whole, and host B answers the echo request (RFC791-REASM-1, RFC791-REASM-3).
+        .unordered({ on("hostB.udp").signal("packetReceivedFromLower")
+                         .packet("udp.destPort == 5000 && udp.totalLengthField == 1008B")
+                         .describe("the reassembled UDP datagram at host B's UDP")
+                         .within(0.1),
+                     on("hostB.eth[0].mac").signal("packetSentToLower")
+                         .packet("icmpv4.type == 0")
+                         .describe("host B's echo reply, proof that the echo request was reassembled from its own fragments")
+                         .within(0.1) });
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_same_id_different_protocol compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay, where the relay is two taps in series: hostA -- router -- tap1 -- tap2 -- hostB.
+network Rfc791TwoTapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap1: PacketTap { @display("p=470,100"); }
+        tap2: PacketTap { @display("p=590,100"); }
+        hostB: StandardHost { @display("p=740,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap1.a;       // link 2 = router.eth[1], before the relay
+        tap1.b <--> Eth100M <--> tap2.a;
+        tap2.b <--> Eth100M <--> hostB.ethg++;        // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TwoTapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum; tap1 recomputes it after the rewrite.
+**.ipv4.ip.checksumMode = "computed"
+
+# Link 2 forces fragmentation at the gateway.
+*.router.eth[1].mac.mtu = 576B
+
+# A 1000-octet UDP datagram to port 5000, then an echo request with 900 octets of data.
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1000B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "PingApp"
+*.hostA.app[1].destAddr = "hostB"
+*.hostA.app[1].packetSize = 900B
+*.hostA.app[1].count = 1
+*.hostA.app[1].startTime = 0.1001s
+*.hostA.app[1].printPing = false
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc791_same_id_different_protocol: PASS

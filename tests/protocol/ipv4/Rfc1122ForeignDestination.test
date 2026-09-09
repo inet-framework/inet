@@ -1,0 +1,111 @@
+%description:
+
+RFC 1122 — a host silently discards a datagram that is not destined for it.
+
+Checks RFC1122-ADDR-2 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/input-validation.md#foreign-destination; the
+program steps below map onto its expected observations. Mapping of the mockup with a relay:
+host A = hostA, gateway R = router, relay T = tap, host B = hostB. The relay rewrites the
+destination address to 192.168.99.99, which no node owns, and keeps the checksum valid; the
+frame still reaches host B's interface.
+
+Deviation: expected observations 3 and 4 (nothing upward, nothing leaves host B on account
+of the datagram) are one absence watch over the whole host, because two consecutive watches
+cannot cover the same window. The watch also covers a forwarded copy of the datagram.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_foreign_destination")
+        // The relay rewrites the destination address and keeps the checksum valid.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setDestAddress(Ipv4Address("192.168.99.99")); }); })
+                     .describe("the datagram (set its destination to 192.168.99.99)"))
+        // Expected observation 1: at host B's interface the datagram carries the foreign destination.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.destAddress") == "192.168.99.99"; })
+                  .capture("id", "ipv4.identification")
+                  .describe("the datagram at host B's interface addressed to 192.168.99.99")
+                  .within(0.5))
+        // Expected observation 2: host B discards it (RFC1122-ADDR-2).
+        .once(on("hostB.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id}")
+                  .describe("host B's discard of the datagram that is not destined for it")
+                  .within(0.1))
+        // Expected observations 3 and 4: nothing goes up to UDP, and neither a forwarded copy nor
+        // an ICMP message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) {
+                      return silenceBroken(c.event, "hostB", "udp.destPort == 5000")
+                          || (c.event.kind == EventKind::SentToLower && c.event.sourcePath == "hostB.eth[0].mac"
+                              && matchesExpression(c.event.packet, ("ipv4.identification == " + std::to_string(c.get("id").intValue())).c_str()));
+                  })
+                  .describe("the datagram at host B's UDP, a forwarded copy of it, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_foreign_destination compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum; the relay's rewrite is the only wrong value.
+**.ipv4.ip.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_foreign_destination: PASS

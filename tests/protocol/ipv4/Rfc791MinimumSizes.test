@@ -4,7 +4,7 @@ RFC 791 — every internet module can forward a 68-octet datagram whole, and a h
 576-octet datagram that arrives as fragments.
 
 Checks RFC791-FRAG-6 (must) and RFC791-REASM-2 (must) from doc/project/evidence/standard/rfc791/catalog.md. The English
-procedure and the size arithmetic are in doc/project/evidence/protocol/ipv4/checks.md#minimum-sizes; the program steps
+procedure and the size arithmetic are in doc/project/evidence/protocol/ipv4/checks/fragmentation.md#minimum-sizes; the program steps
 below map one to one onto its expected observations. Mapping of the mockup: host A = hostA,
 gateway R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB with its MTU
 set to 68 octets, the smallest the RFC lets a module demand.
@@ -77,7 +77,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#minimum-sizes: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/fragmentation.md#minimum-sizes: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

@@ -1,0 +1,90 @@
+%description:
+
+RFC 1122 — no ICMP error message is sent about a datagram destined to an IP broadcast
+address.
+
+Checks RFC1122-ICMP-6 (must not) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/error-report.md#no-error-for-a-broadcast; the
+program steps below map one to one onto its expected observations. The mockup is the
+one-link variant: host A = hostA and host B = hostB share link 1, and host A sends to the
+limited broadcast address and to a port that no program opened at host B.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_no_error_for_broadcast")
+        // Expected observation 1: the datagram to 255.255.255.255, port 5001, on link 1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001")
+                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.destAddress") == "255.255.255.255"; })
+                  .describe("the datagram to the limited broadcast address and the closed port 5001")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP finds no program for port 5001 -- the point
+        // where a report would be due.
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; }) // the drop record carries no protocol tag; read the header
+                  .describe("host B's UDP discards the broadcast datagram for want of a port")
+                  .within(0.1))
+        // Expected observation 3: from then on, host B sends no ICMP message (RFC1122-ICMP-6).
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv4.type >= 0")
+                  .describe("any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_no_error_for_broadcast compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The one-link variant of the mockup: hostA -- hostB.
+network Rfc1122LanNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc1122LanNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host A may send to the limited broadcast address (the model gates it behind a switch).
+*.hostA.ipv4.ip.limitedBroadcast = true
+
+# One UDP datagram, 100 octets, to 255.255.255.255 port 5001. No program listens at host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "255.255.255.255"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc1122_no_error_for_broadcast: PASS

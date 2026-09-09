@@ -1,0 +1,99 @@
+%description:
+
+RFC 1122 — no ICMP error message is sent about an ICMP error message.
+
+Checks RFC1122-ICMP-5 (must not) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/error-report.md#no-error-about-an-error; the
+program steps below map one to one onto its expected observations. Host B's default TTL is
+1, so the Destination Unreachable that host B returns for a closed port expires at the
+gateway; the gateway must discard it and must not answer it with Time Exceeded. Mapping of
+the mockup: host A = hostA, gateway R = router, host B = hostB.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_no_error_about_error")
+        // Expected observation 1: the datagram to the closed port on link 1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001")
+                  .describe("the datagram to the closed port 5001 on link 1")
+                  .within(0.5))
+        // Expected observation 2: host B's Destination Unreachable with TTL 1 on link 2 --
+        // an error message about to expire. Record the identification of its datagram.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv4.type == 3 && icmpv4.code == 3 && ipv4.timeToLive == 1")
+                  .capture("rid", "ipv4.identification")
+                  .describe("host B's Destination Unreachable message with TTL 1 on link 2")
+                  .within(0.1))
+        // Expected observation 3: the gateway discards the expired error message.
+        .once(on("router.ipv4.ip").signal("packetDropped")
+                  .packet("icmpv4.type == 3 && ipv4.identification == {rid}")
+                  .describe("the gateway's discard of the expired error message")
+                  .within(0.1))
+        // Expected observation 4: from then on, the gateway sends no Time Exceeded toward
+        // host B (RFC1122-ICMP-5).
+        .never(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("icmpv4.type == 11")
+                  .describe("a Time Exceeded message from the gateway toward host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_no_error_about_error compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The common mockup: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host B's own datagrams -- its error reports among them -- leave with TTL 1, so the report
+# expires at the gateway. Scenario configuration, not a change of the model.
+*.hostB.ipv4.ip.timeToLive = 1
+
+# One UDP datagram, 100 octets, to port 5001 on host B. No program listens there.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc1122_no_error_about_error: PASS

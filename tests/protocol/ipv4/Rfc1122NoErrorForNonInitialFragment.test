@@ -1,0 +1,121 @@
+%description:
+
+RFC 1122 — no ICMP error message is sent about a non-initial fragment.
+
+Checks RFC1122-ICMP-8 (must not) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/error-report.md#no-error-for-a-non-initial-fragment;
+the program steps below map one to one onto its expected observations. The mockup is the
+two-gateway variant: host A = hostA, R1 = r1, R2 = r2, host B = hostB; link 2 = r1-r2 with
+MTU 576. Host A sends 1000 octets with TTL 2: r1 fragments the datagram and decrements the
+TTL to 1; r2 decrements each fragment to 0 and discards both. It may report the first
+fragment with Time Exceeded (RFC792-TE-1, a may, neither required nor forbidden here); it
+must not report the second.
+
+Expected observation 6 reads the quoted header of any Time Exceeded that r2 hands to its
+network layer (packetReceivedFromUpper of r2.ipv4.ip), where the ICMP message is the front
+of the packet.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_no_error_for_non_initial_fragment")
+        // Expected observation 1: the datagram on link 1 with TTL 2.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 2")
+                  .describe("the datagram on link 1 with TTL 2")
+                  .within(0.5))
+        // Expected observation 2: the first fragment on link 2, TTL 1; record the identification.
+        .once(on("r1.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true && ipv4.timeToLive == 1")
+                  .capture("id", "ipv4.identification")
+                  .describe("the first fragment on link 2 with TTL 1")
+                  .within(0.1))
+        // Expected observation 3: r2 discards the first fragment. It arrives at r2 before r1 has
+        // finished sending the last fragment, so this step comes before the next one.
+        .once(on("r2.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id} && ipv4.fragmentOffset == 0")
+                  .describe("R2's discard of the first fragment")
+                  .within(0.1))
+        // Expected observation 4: the last fragment on link 2, offset 552, TTL 1.
+        .once(on("r1.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv4.identification == {id} && ipv4.fragmentOffset == 552 && ipv4.moreFragments == false && ipv4.timeToLive == 1")
+                  .describe("the last fragment on link 2 at octet offset 552 with TTL 1")
+                  .within(0.1))
+        // Expected observation 5: r2 discards the last fragment.
+        .once(on("r2.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id} && ipv4.fragmentOffset == 552")
+                  .describe("R2's discard of the last fragment")
+                  .within(0.1))
+        // Expected observation 6: from then on, r2 sends no ICMP error whose quoted header has a
+        // non-zero fragment offset (RFC1122-ICMP-8).
+        .never(on("r2.ipv4.ip").signal("packetReceivedFromUpper")
+                  .packet("icmpv4.type == 11")
+                  .match([](const MatchContext& c) { return quotedIpv4Header(c.event.packet)->getFragmentOffset() != 0; })
+                  .describe("a Time Exceeded message from R2 that quotes a non-initial fragment")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_no_error_for_non_initial_fragment compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The two-gateway variant of the mockup: hostA -- r1 -- r2 -- hostB.
+network Rfc1122TwoGatewayNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        r1: Router { @display("p=350,100"); }
+        r2: Router { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> r1.ethg++; // link 1 = r1.eth[0]
+        r1.ethg++ <--> Eth100M <--> r2.ethg++;    // link 2 = r1.eth[1] / r2.eth[0], MTU 576
+        r2.ethg++ <--> Eth100M <--> hostB.ethg++; // link 3 = r2.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc1122TwoGatewayNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Link 2 forces fragmentation at r1.
+*.r1.eth[1].mac.mtu = 576B
+
+# One UDP datagram, 1000 octets, TTL 2: fragmented at r1, expired at r2.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1000B
+*.hostA.app[0].timeToLive = 2
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_no_error_for_non_initial_fragment: PASS

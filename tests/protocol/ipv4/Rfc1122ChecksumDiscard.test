@@ -1,0 +1,117 @@
+%description:
+
+RFC 1122 / RFC 791 — a host silently discards a datagram whose header checksum is bad.
+
+Checks RFC1122-CKSUM-1 (must), which governs RFC791-CKSUM-2 (description), from the
+catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv4/checks/checksum.md#checksum-discard; the program steps
+below map onto its expected observations. Mapping of the mockup with a relay: host A =
+hostA, gateway R = router, relay T = tap, host B = hostB. The relay replaces the header
+checksum of the datagram with its one's complement and changes nothing else; every node
+computes header checksums (checksumMode = "computed" on the IPv4 modules).
+
+Expected result: FAIL. The model consults the checksum only when the header is already
+structurally wrong (Ipv4::handleIncomingDatagram, `!isCorrect() && !verifyChecksum()`), so
+a well-formed header with a wrong checksum is delivered, and expected observation 3 misses
+its deadline. See doc/project/evidence/model/ipv4/results.md.
+
+Deviation: expected observations 4 and 5 (nothing upward, nothing back) are one absence
+watch over the whole host, because two consecutive watches cannot cover the same window.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_checksum_discard")
+        // The relay corrupts the header checksum of the datagram and changes nothing else.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { corruptIpv4Checksum(frame); })
+                     .describe("the datagram (replace its header checksum with the one's complement)"))
+        // Expected observation 1: the datagram on link 2, before the relay; record its checksum.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .capture("id", "ipv4.identification")
+                  .capture("ck", "ipv4.checksum")
+                  .describe("the datagram on link 2 before the relay")
+                  .within(0.5))
+        // Expected observation 2: at host B's interface the checksum differs -- the corruption
+        // took effect.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("ipv4.identification == {id} && ipv4.checksum != {ck}")
+                  .describe("the datagram at host B's interface with a changed header checksum")
+                  .within(0.1))
+        // Expected observation 3: host B discards the datagram (RFC1122-CKSUM-1, RFC791-CKSUM-2).
+        .once(on("hostB.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id}")
+                  .describe("host B's discard of the datagram with the bad checksum")
+                  .within(0.1))
+        // Expected observations 4 and 5: nothing goes up to UDP and no ICMP message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", "udp.destPort == 5000"); })
+                  .describe("the datagram at host B's UDP, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_checksum_discard compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum; the relay's rewrite is the only wrong value.
+**.ipv4.ip.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc1122_checksum_discard: PASS

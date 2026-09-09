@@ -1,0 +1,109 @@
+%description:
+
+RFC 1122 — a host silently discards a datagram whose version is not 4.
+
+Checks RFC1122-VER-1 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/ipv4/checks/input-validation.md#version-discard; the program
+steps below map onto its expected observations. Mapping of the mockup with a relay: host A
+= hostA, gateway R = router, relay T = tap, host B = hostB. The relay sets the version to 5
+and keeps the header checksum valid (it recomputes it), so the version is the only reason a
+receiver has to discard the datagram.
+
+Expected result: FAIL. The model does not examine the version field on receipt
+(Ipv4::handleIncomingDatagram), so the datagram is delivered and expected observation 2
+misses its deadline. See doc/project/evidence/model/ipv4/results.md.
+
+Deviation: expected observations 3 and 4 (nothing upward, nothing back) are one absence
+watch over the whole host, because two consecutive watches cannot cover the same window.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv4Mutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_version_discard")
+        // The relay rewrites the version to 5 and keeps the checksum valid.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setVersion(5); }); })
+                     .describe("the datagram (set its version to 5)"))
+        // Expected observation 1: at host B's interface the datagram carries version 5.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && ipv4.version == 5")
+                  .capture("id", "ipv4.identification")
+                  .describe("the datagram at host B's interface with version 5")
+                  .within(0.5))
+        // Expected observation 2: host B discards it (RFC1122-VER-1).
+        .once(on("hostB.ipv4.ip").signal("packetDropped")
+                  .packet("ipv4.identification == {id}")
+                  .describe("host B's discard of the version-5 datagram")
+                  .within(0.1))
+        // Expected observations 3 and 4: nothing goes up to UDP and no ICMP message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", "udp.destPort == 5000"); })
+                  .describe("the datagram at host B's UDP, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_version_discard compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc791TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum; the relay's rewrite is the only wrong value.
+**.ipv4.ip.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc1122_version_discard: PASS

@@ -4,7 +4,7 @@ RFC 791 — the sender does not reuse an identification value for two consecutiv
 the same destination and protocol.
 
 Checks RFC791-ID-1 (must) from doc/project/evidence/standard/rfc791/catalog.md. The English procedure and the mockup
-are in doc/project/evidence/protocol/ipv4/checks.md#identification; the program steps below map one to one onto its
+are in doc/project/evidence/protocol/ipv4/checks/identification.md#identification; the program steps below map one to one onto its
 expected observations. Mapping of the mockup: host A = hostA, gateway R = router, host B =
 hostB; link 1 = hostA-router, link 2 = router-hostB (this check only observes link 1; the
 gateway and host B play no active part in it).
@@ -48,7 +48,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/ipv4/checks.md#identification: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/protocol/ipv4/checks/identification.md#identification: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:
