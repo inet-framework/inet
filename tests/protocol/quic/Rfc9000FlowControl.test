@@ -3,7 +3,7 @@
 RFC 9000 -- flow control.
 
 Checks RFC9000-FC-1 (must), from doc/project/evidence/standard/rfc9000/catalog.md. The English
-procedure and mockup are in doc/project/evidence/protocol/quic/checks.md#flow-control; the program
+procedure and mockup are in doc/project/evidence/protocol/quic/checks/flow-control.md#flow-control; the program
 steps below map one to one onto its expected observations. Mockup mapping: host A = client, host B
 = server.
 

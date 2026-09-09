@@ -4,7 +4,7 @@ RFC 9000 -- acknowledgment.
 
 Checks RFC9000-ACK-1 (must, for an ack-eliciting packet), from
 doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
-doc/project/evidence/protocol/quic/checks.md#acknowledgment; the program steps below map one to one
+doc/project/evidence/protocol/quic/checks/acknowledgment.md#acknowledgment; the program steps below map one to one
 onto its expected observations. Mockup mapping: host A = client, host B = server.
 
 Scenario: same 4000-octet, one-shot, non-closing TrafficgenCompound+QuicTrafficgen scenario as

@@ -1,12 +1,14 @@
-# QUIC checks — run results and model analysis (pass 1, level 2)
+# QUIC checks — run results and model analysis (pass 2, level 3)
 
-> **Kind:** report · **Status:** snapshot 2026-09-08 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9000/catalog.md), [checks.md](../../protocol/quic/checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9000/catalog.md), [checks.md](../../protocol/quic/checks.md)
 
 Step 7 artifact of the standards test workflow. This is the first document of the QUIC
 workflow that may reference code.
 
-- Date: 2026-09-08. Tree: `inet-rfc-tests-quic`, branch `topic/rfc-tests-quic` on top of
-  `topic/rfc-tests-ipv4`, source identical to `master`.
+- Pass 1, level 2. Date: 2026-09-08. Tree: `inet-rfc-tests-quic`, branch
+  `topic/rfc-tests-quic` on top of `topic/rfc-tests-ipv4`, source identical to `master`.
+- Pass 2, level 3. Date: 2026-09-09. Tree: `inet-master`, branch `master`, source unchanged
+  by this pass.
 - Command, after the `setenv` scripts of OMNeT++ and INET:
 
   ```sh
@@ -25,14 +27,139 @@ workflow that may reference code.
 | Rfc9000Acknowledgment.test | RFC9000-ACK-1 | PASS |
 | Rfc9000ConnectionClose.test | RFC9000-CLOSE-1 | PASS |
 
-Summary: 6 PASS in 0.4 s. No `%# expected-result: FAIL` marker was necessary, and no test
-failed. The rest of this document is about what those passes do and do not establish,
+Summary of pass 1: 6 PASS in 0.4 s. No `%# expected-result: FAIL` marker was necessary, and
+no test failed. Much of this document is about what those passes do and do not establish,
 because for QUIC that gap is wider than for the three protocols already in this tree.
+
+Pass 2, level 3, with the two level 2 blockers closed first:
+
+| Test | Checks | Verdict |
+| --- | --- | --- |
+| Rfc9000ReorderedDelivery.test | RFC9000-STR-2, at its edge | PASS |
+| Rfc9000AntiAmplification.test | RFC9000-AMP-1 | PASS |
+| Rfc9000ServerInitialSize.test | RFC9000-SIZE-1, the server half | **FAIL**, model gap 1 |
+| Rfc9000VersionNegotiation.test | RFC9000-VER-1 | **FAIL**, model gap 2 |
+| Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **FAIL**, model gap 3 |
+
+Summary after pass 2: 11 tests, 8 PASS, 3 FAIL, each failure declared with
+`%# expected-result: FAIL`. The other four suites of the same tree stay where they were:
+IPv4 23 (17 PASS, 6 expected FAIL), UDP 13 (10 PASS, 3 expected FAIL), TCP 19 (15 PASS, 4
+expected FAIL), IPv6 29 (21 PASS, 8 expected FAIL).
+
+Two of the passes are worth as much as the failures. The reordering check puts the buffering
+half of RFC9000-STR-2 under load for the first time, and the model keeps the data that
+arrives early. The anti-amplification check establishes a bound over a window, and the model
+stays far inside it.
+
+## Two probes, before any test was written
+
+The level 2 ledger left two blockers, and each one was settled by a probe rather than by a
+guess. Both probes were thrown away afterwards; what they found is here.
+
+### Probe 1 — the model has one stream identifier
+
+The level 2 notes ended with "Finding out why the second stream does not appear is the first
+task of the next pass." The answer is that the second stream does appear, and it is stream 0.
+
+With two generators, whose identifiers are 0 and 1, every stream frame the client sends
+carries `streamId = 0`, and the second generator's bytes continue the first one's offsets:
+0, 1454, 2907, then 4000, 5453, 6906. With a single generator asked for identifier 1, the
+client still sends on stream 0.
+
+So the model has one stream identifier and no path that assigns another. A check on the wire
+that asks anything of the identifier cannot fail, whatever it asks. RFC9000-STR-1 therefore
+becomes `no check` in the ledger, with this reason, rather than a check that passes because
+the only value it can see happens to be lawful. That is the honest form of the level 2
+blocker, and it closes it: the feature keeps its `partial` value for a stated cause and not
+for a missing test.
+
+### Probe 2 — the server's Initial datagram is 27 octets
+
+The level 2 notes suspected an undeclared gap in the 1200-octet floor. The probe found it.
+The server's four handshake datagrams are 27, 38, 24 and 22 octets, and the first of them
+carries an Initial packet with a CRYPTO frame, which is exactly the case §14.1 names. This
+became `Rfc9000ServerInitialSize.test` and model gap 1.
+
+## Model gaps
+
+### Gap 1 — the server does not expand its Initial datagram
+
+**Statement.** [RFC9000-SIZE-1](../../standard/rfc9000/catalog.md#rfc9000-size-1), must, the
+server half: "Similarly, a server MUST expand the payload of all UDP datagrams carrying
+ack-eliciting Initial packets to at least the smallest allowed maximum datagram size of 1200
+bytes", §14.1, `rfc9000.txt:4648-4650`.
+
+**What the model does.** It sends 27 octets. The packet carries a CRYPTO frame, so it is
+ack-eliciting and the requirement applies to it.
+
+**Why it is a gap.** The floor is not decoration. It is what gives a server room to answer
+under the anti-amplification bound of §8.1, and it is what makes a path prove it can carry a
+1200-octet datagram before a connection depends on it.
+
+**Half implemented, and the missing half undeclared.** The client half passes: the client's
+Initial datagram is padded to exactly 1200, and `Rfc9000AntiAmplification.test` depends on
+it. `Quic.ned` declares twelve deviations and this is not among them, which is why the level
+2 pass called it undeclared and left it for a check.
+
+### Gap 2 — a version nobody speaks buys a full connection
+
+**Statement.** [RFC9000-VER-1](../../standard/rfc9000/catalog.md#rfc9000-ver-1): "If the
+version selected by the client is not acceptable to the server, the server responds with a
+Version Negotiation packet", §6.1, `rfc9000.txt:1644-1646`.
+
+**What the model does.** Nothing about the version at all. The relay wrote 0x0A0A0A0A into
+the version field of the client's Initial packets. The run shows 22 packets carrying that
+version, a HandshakeDone frame, and 75 stream frames: the handshake completed and the data
+flowed.
+
+**Why it is a gap.** The version is the first thing a QUIC endpoint reads, before anything it
+must decrypt, and answering it is the one decision a server can take with no state. A server
+that ignores the field cannot tell a peer of a future version that it speaks something else,
+and the mechanism that lets QUIC change versions at all is absent.
+
+### Gap 3 — an unknown frame type stops the run
+
+**Statement.** [RFC9000-ERR-1](../../standard/rfc9000/catalog.md#rfc9000-err-1), must: "An
+endpoint MUST treat the receipt of a frame of unknown type as a connection error of type
+FRAME_ENCODING_ERROR", §12.4, `rfc9000.txt:3980-3981`.
+
+**What the model does.** It stops the simulation:
+
+```
+Error: Unknown Frame Header Type -- in module (inet::quic::Quic) QuicTapNet.server.quic
+(id=67), at t=0.10024426s, event #150
+```
+
+`ConnectionState.cc` dispatches an incoming frame on `getFrameType()`, and the default branch
+of that switch throws.
+
+**Why it is a gap.** A connection error is an answer to the peer and the end of one
+connection. A stop is neither: the endpoint does not survive, and the peer learns nothing.
+Frame types come from a registry that grows, so an endpoint meets unknown ones in the
+ordinary course of the internet.
+
+**A pattern across this tree.** This is the third protocol whose model stops on a crafted but
+lawful input: IPv4 on an unknown ICMP type, TCP on a Source Quench, and QUIC here. The causes
+are separate switches in three modules, and the shape is the same one.
 
 ## The tooling finding: the framework cannot see QUIC
 
 This is the first protocol in this tree whose packets the test framework cannot dissect,
 and it changed how every check had to be written.
+
+**What pass 2 adds to it.** The absence of a dissector does not stop a relay. A relay selects
+a datagram by a UDP field, which the filter can read, or by its size, and the mutator then
+looks at the chunks and decides for itself. Three checks of pass 2 change a QUIC field this
+way. Two costs came with it, and both are worth knowing before the next protocol without a
+dissector:
+
+- **Size is a poor selector near the 1200-octet floor.** The client's Initial datagram is
+  padded to exactly 1200, so a threshold of 1000 selects the handshake rather than the data.
+  The reordering check uses 1300.
+- **A mutator that sees every datagram must decline politely.** `mutateFirstQuicChunk`
+  returns false when the packet carries no chunk of the type it was asked for, so a relay
+  with no content filter can be pointed at a whole direction and still change one kind of
+  packet.
 
 1. **No protocol dissector is registered for QUIC.** A repository-wide search for
    `Register_Protocol_Dissector` finds none for `Protocol::quic`. `PacketDissector`
@@ -89,7 +216,7 @@ So an application that asks for stream 1 gets stream 1 on the wire, and 1 is an 
 identifier, which RFC 9000 §2.1 reserves for the server. The encoding is not maintained.
 
 **A decisive check was attempted and withdrawn.** The check
-[stream identifier assignment](../../protocol/quic/checks.md#stream-identifier-assignment)
+[stream identifier assignment](../../protocol/quic/checks/streams.md#stream-identifier-assignment)
 states it: with two application streams, every identifier the client sends on must be a
 multiple of four. A test was written for it and it passed — but the application's second
 stream never reached the observation point, so the test passed without exercising the case
@@ -211,14 +338,23 @@ The verdicts above feed the support column and the achieved level of the coverag
 
 ## Sharpening candidates for the next pass
 
-- **A protocol dissector for QUIC**, or an agreed convention that QUIC checks read chunk
-  types. This is the gate on everything else.
-- **Find out why a second application stream does not reach the wire**, and then run the
-  withdrawn stream-identifier assignment check. It is the one check that would settle
-  RFC9000-STR-1 rather than coincide with it.
-- **The server-side 1200-octet expansion**, which the code does not do and the model does
-  not declare.
-- **Level 3:** ordered delivery under reordering; connection errors; the anti-amplification
-  limit; version negotiation. RFC 9000 already holds the text for all of them.
+Four items of the pass 1 list are done. The second is answered rather than done: the second
+stream does reach the wire, and it is stream 0.
+
+- **Done:** the two probes above; ordered delivery under reordering; the anti-amplification
+  limit; version negotiation; connection errors through the unknown frame type; the
+  server-side 1200-octet expansion, which is now gap 1.
+- **A protocol dissector for QUIC**, still. It is not a gate any more — the level 3 checks
+  read and now also **change** chunk types, and that works — but every QUIC check in this
+  suite pays for its absence in hand-written code, and a dissector would turn all of them
+  into ordinary field filters.
+- **Correct the frame type switch** so that a type it does not know ends the connection
+  instead of the run. The same shape waits in the ICMP module for IPv4 and TCP.
+- **A check for RFC9000-VER-2**, that no endpoint answers a Version Negotiation packet with
+  another. The relay can make such a packet now that it can change a version field; this
+  pass did not.
+- **Level 3, what remains:** the stateless reset, address validation with Retry and tokens,
+  path validation and migration, stream reset, and the handling of a packet that cannot be
+  decrypted.
 - **Level 4:** RFC 9002, and with it loss detection, congestion control, the idle timeout
   and the acknowledgment delay bound.

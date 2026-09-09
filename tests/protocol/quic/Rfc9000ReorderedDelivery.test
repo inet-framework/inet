@@ -1,0 +1,150 @@
+%description:
+
+RFC 9000 — an endpoint buffers stream data that arrives out of order and still delivers an
+ordered byte stream.
+
+Checks RFC9000-STR-2 (must) at its edge, from
+doc/project/evidence/standard/rfc9000/catalog.md. Level 2 established the first sentence of
+that statement on a path that delivers in order, where nothing needs to be buffered. This
+check exercises the second sentence. The English procedure is in
+doc/project/evidence/protocol/quic/checks/streams.md#ordered-delivery-under-reordering; the
+program steps below map onto its expected observations. Mapping of the mockup with a relay:
+host A = client, relay T = tap, host B = server.
+
+The relay holds the first datagram that carries stream data for 20 ms and lets every other
+one pass at once. The two datagrams that follow therefore arrive before it. The hold is short
+next to any timeout, so nothing is treated as lost. A datagram carrying stream data is told
+from a handshake datagram by its size: the handshake datagrams of this model are tens of
+octets and a full data packet is about 1454.
+
+The last step is what tells buffering from discarding. If the server threw away the data that
+arrived early, the client would have to send those offsets again. It never does.
+
+What the client does send again is the datagram the relay is holding. It reaches the server
+twice: once as a fast retransmission at t=0.10124, while the relay still holds the original,
+and once as the original at t=0.12024. That is a sender's ordinary answer to what looks like
+a loss, and it does not change what the check asks: the offsets that arrived early were kept,
+and the block completed while the gap was still open.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The offset of the first stream frame of a packet, or -1 when it carries none.
+static long streamOffset(const Packet *pkt)
+{
+    auto sf = findQuicChunk<StreamFrameHeader>(pkt);
+    return sf == nullptr ? -1 : (long)sf->getOffset();
+}
+
+// True the second time the client sends a stream frame at offset 1454, which would mean the
+// server had not kept the copy that arrived early.
+static bool resentTheEarlyData(const Packet *pkt)
+{
+    static int seen = 0;
+    if (streamOffset(pkt) == 1454)
+        return ++seen > 1;
+    return false;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_reordered_delivery")
+        // The relay holds the first datagram that carries stream data.
+        .intercept(intercept("tap").match("udp.destPort == 1000").minBytes(1300).nth(1)
+                     .delay(0.02)
+                     .describe("the first datagram carrying stream data (hold it for 20 ms)"))
+        // Observation 1: the server receives data from later in the stream first.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return streamOffset(c.event.packet) == 1454; })
+                  .describe("the stream frame at offset 1454, arriving before the one at offset 0")
+                  .within(1.0))
+        // Observation 2: the whole block arrives (RFC9000-STR-2). The completing frame comes
+        // while the gap at offset 0 is still open, which is what makes the buffering visible.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
+                      return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
+                  })
+                  .describe("the stream frame completing all 4000 octets, while offset 0 is still missing")
+                  .within(2.0))
+        // Observation 3: the gap is filled afterwards.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return streamOffset(c.event.packet) == 0; })
+                  .describe("the stream frame at offset 0, filling the gap")
+                  .within(2.0))
+        // Observation 4: the client never sends the data that arrived early a second time, so
+        // the server kept it rather than discarding it.
+        .never(on("client.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return resentTheEarlyData(c.event.packet); })
+                  .describe("a second copy of the stream frame at offset 1454")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_reordered_delivery compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md#the-mockup-with-a-relay:
+// client -- relay T -- server.
+network QuicTapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        server: StandardHost { @display("p=500,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicTapNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_reordered_delivery: PASS

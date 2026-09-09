@@ -28,6 +28,9 @@ The comparison against the standards that the model claims to implement is
 | [QUIC-F-FLOW-CONTROL](#quic-f-flow-control) | A receiver advertises limits per stream and per connection, and a sender respects them. |
 | [QUIC-F-ACKNOWLEDGE](#quic-f-acknowledge) | An ack-eliciting packet is acknowledged. |
 | [QUIC-F-CLOSE](#quic-f-close) | A CONNECTION_CLOSE frame ends the connection at once. |
+| [QUIC-F-VERSION-NEGOTIATION](#quic-f-version-negotiation) | A server that does not accept the client's version says so, and no endpoint answers such a packet with another. |
+| [QUIC-F-ADDRESS-VALIDATION](#quic-f-address-validation) | Until the client's address is validated, a server sends at most three times what it received. |
+| [QUIC-F-FRAME-VALIDATION](#quic-f-frame-validation) | A frame an endpoint cannot understand ends the connection with a stated error, and nothing worse. |
 
 ## Summary table
 
@@ -39,12 +42,17 @@ The comparison against the standards that the model claims to implement is
 | [QUIC-F-FLOW-CONTROL](#quic-f-flow-control) | mandatory | RFC 9000 §4.1 | RFC9000-FC-1 |
 | [QUIC-F-ACKNOWLEDGE](#quic-f-acknowledge) | mandatory | RFC 9000 §13.2.1 | RFC9000-ACK-1 |
 | [QUIC-F-CLOSE](#quic-f-close) | mandatory | RFC 9000 §10.2 | RFC9000-CLOSE-1 |
+| [QUIC-F-VERSION-NEGOTIATION](#quic-f-version-negotiation) | mandatory | RFC 9000 §6.1 | RFC9000-VER-1, RFC9000-VER-2 |
+| [QUIC-F-ADDRESS-VALIDATION](#quic-f-address-validation) | mandatory | RFC 9000 §8.1 | RFC9000-AMP-1 |
+| [QUIC-F-FRAME-VALIDATION](#quic-f-frame-validation) | mandatory | RFC 9000 §12.4 | RFC9000-ERR-1 |
 
-Six features, all mandatory. Together they describe one QUIC connection from its first
-Initial packet to its close: the packets it uses, the size floor that makes the path
-usable, the streams it multiplexes, the limits that pace it, the acknowledgments that
-carry its reliability, and the frame that ends it. Loss recovery and congestion control
-are RFC 9002's features and level 4; the cryptographic handshake is RFC 9001's and level 5.
+Nine features, all mandatory. The first six describe one QUIC connection from its first
+Initial packet to its close: the packets it uses, the size floor that makes the path usable,
+the streams it multiplexes, the limits that pace it, the acknowledgments that carry its
+reliability, and the frame that ends it. The three the level 3 pass added describe what an
+endpoint owes to a packet it did not expect: a version it does not speak, an address it has
+not yet trusted, and a frame it cannot read. Loss recovery and congestion control are
+RFC 9002's features and level 4; the cryptographic handshake is RFC 9001's and level 5.
 
 ## QUIC-F-PACKET
 
@@ -130,6 +138,53 @@ are RFC 9002's features and level 4; the cryptographic handshake is RFC 9001's a
   closing state. No application data follows it.
 - **Checks** — core: RFC9000-CLOSE-1.
 
+## QUIC-F-VERSION-NEGOTIATION
+
+**A server that does not accept the client's version says so, and no endpoint answers such a
+packet with another.**
+
+- **Sources** — RFC 9000 §6.1, `rfc9000.txt:1644-1648`.
+- **Level** — mandatory (reason: only path). A server that speaks no common version has one
+  answer the document gives it, and the prohibition beside it has a keyword.
+- **Description** — a QUIC packet names its version in the clear, so a server can read it
+  before it does anything else. If the version is one the server does not accept, it answers
+  with a packet whose version field is zero and which lists the versions it will accept. It
+  keeps no state for the attempt. The prohibition stops two endpoints from answering each
+  other without end.
+- **Checks** — core: RFC9000-VER-1 (the answer), RFC9000-VER-2 (no answer to an answer).
+
+## QUIC-F-ADDRESS-VALIDATION
+
+**Until the client's address is validated, a server sends at most three times what it
+received.**
+
+- **Sources** — RFC 9000 §8.1, `rfc9000.txt:2200-2224`.
+- **Level** — mandatory (reason: keyword, MUST NOT).
+- **Description** — anyone can write someone else's address into a packet. A server that
+  answered such a packet freely would send its answer to the victim, and a small forged
+  packet would buy a large flood. So a server keeps a budget: three times what it has
+  received, until it knows the address is real. Receiving a Handshake packet from the peer
+  is what settles that.
+- **Checks** — core: RFC9000-AMP-1. The floor of
+  [QUIC-F-INITIAL-SIZE](#quic-f-initial-size) is the other side of the same design: it makes
+  sure the budget is large enough for a handshake to finish.
+
+## QUIC-F-FRAME-VALIDATION
+
+**A frame an endpoint cannot understand ends the connection with a stated error, and nothing
+worse.**
+
+- **Sources** — RFC 9000 §12.4, `rfc9000.txt:3980-3981`.
+- **Level** — mandatory (reason: keyword, MUST).
+- **Description** — frame types are a registry, and a QUIC version defines the ones it uses.
+  A type outside that set means the packet cannot be trusted, so the connection ends. It ends
+  in the way the document names: a connection error of type FRAME_ENCODING_ERROR, which the
+  peer is told about. Ignoring the frame would leave two endpoints with different ideas of
+  the stream; stopping would be worse still.
+- **Checks** — core: RFC9000-ERR-1. The frame that carries the news is the one of
+  [QUIC-F-CLOSE](#quic-f-close).
+
+
 ## Coverage of the catalog
 
 | Catalog area | Feature |
@@ -140,11 +195,14 @@ are RFC 9002's features and level 4; the cryptographic handshake is RFC 9001's a
 | Flow control | QUIC-F-FLOW-CONTROL |
 | Acknowledgment | QUIC-F-ACKNOWLEDGE |
 | Connection termination | QUIC-F-CLOSE |
+| Version negotiation | QUIC-F-VERSION-NEGOTIATION |
+| Address validation | QUIC-F-ADDRESS-VALIDATION |
+| Frame validation | QUIC-F-FRAME-VALIDATION |
 
-All 10 entries of the catalog appear in the map.
+All 14 entries of the catalog appear in the map.
 
-Out of scope in the map, because the catalog puts them out of scope: the error and reset
-mechanisms, version negotiation, address validation and migration, loss detection and
-congestion control, the cryptographic handshake, and the frame types beyond STREAM, ACK,
-PADDING and CONNECTION_CLOSE. The catalog's closing section names the level that reaches
-each one.
+Out of scope in the map, because the catalog still puts them out of scope: the stateless
+reset, address validation with Retry and tokens, path validation and migration, stream reset,
+the handling of a packet that cannot be decrypted, loss detection and congestion control, the
+cryptographic handshake, and the frame types beyond STREAM, ACK, CRYPTO, PADDING and
+CONNECTION_CLOSE. The catalog's closing section names the level that reaches each one.

@@ -40,6 +40,14 @@ file in this folder.
 | [RFC9000-FC-1](#rfc9000-fc-1) | A sender sends no data beyond the stream limit or the connection limit. |
 | [RFC9000-ACK-1](#rfc9000-ack-1) | An ack-eliciting packet is acknowledged within the declared maximum delay. |
 | [RFC9000-CLOSE-1](#rfc9000-close-1) | A CONNECTION_CLOSE frame terminates the connection immediately. |
+| [RFC9000-VER-1](#rfc9000-ver-1) | A server that does not accept the client's version answers with a Version Negotiation packet. |
+| [RFC9000-VER-2](#rfc9000-ver-2) | No endpoint answers a Version Negotiation packet with another one. |
+| [RFC9000-AMP-1](#rfc9000-amp-1) | Before the client's address is validated, a server sends at most three times the bytes it received. |
+| [RFC9000-ERR-1](#rfc9000-err-1) | A frame of unknown type is a connection error of type FRAME_ENCODING_ERROR. |
+
+The rows above the line come from the level 2 pass, which read the document for the normal
+path of a connection. The rows below come from the level 3 pass, which read it for the
+answers a QUIC endpoint owes to a packet it did not expect.
 
 ## How to read an entry
 
@@ -211,16 +219,83 @@ keywords throughout, so the strength of a statement is the keyword it carries.
 - Check idea: the endpoint that closes sends a CONNECTION_CLOSE frame, and no application
   data follows it in either direction.
 
+
+## Version negotiation
+
+### RFC9000-VER-1
+
+**A server that does not accept the client's version answers with a Version Negotiation
+packet.**
+
+> "If the version selected by the client is not acceptable to the server, the server
+> responds with a Version Negotiation packet; see Section 17.2.1. This includes a list of
+> versions that the server will accept." — §6.1, `rfc9000.txt:1644-1647`
+
+- Strength: description, stated as what a server does. Class: wire.
+- Check idea: put a version number that names no QUIC version in the client's first packet.
+  The server answers with a packet whose version field is zero, which is what marks a
+  Version Negotiation packet, and the connection does not open.
+
+### RFC9000-VER-2
+
+**No endpoint answers a Version Negotiation packet with another one.**
+
+> "An endpoint MUST NOT send a Version Negotiation packet in response to receiving a
+> Version Negotiation packet." — §6.1, `rfc9000.txt:1647-1648`
+
+- Strength: must not. Class: wire (absence).
+- Check idea: the rule guards against two endpoints that answer each other without end. A
+  check needs a Version Negotiation packet delivered to an endpoint, and then silence.
+
+## Address validation
+
+### RFC9000-AMP-1
+
+**Before the client's address is validated, a server sends at most three times the bytes it
+received.**
+
+> "Prior to validating the client address, servers MUST NOT send more than three times as
+> many bytes as the number of bytes they have received. This limits the magnitude of any
+> amplification attack that can be mounted using spoofed source addresses." — §8.1,
+> `rfc9000.txt:2221-2224`
+
+- Strength: must not. Class: wire, counted over a window.
+- Check idea: count what the server sends and what it receives, from the first packet of a
+  connection until the point where the address counts as validated, which §8.1 puts at the
+  successful processing of a Handshake packet from the peer. The sent count never passes
+  three times the received count.
+- Note: this is the rule that keeps a QUIC server from becoming an amplifier for an
+  attacker who writes someone else's address into a packet. It is also the reason the
+  1200-octet floor of [RFC9000-SIZE-1](#rfc9000-size-1) exists: a client that sends little
+  would leave a server too little budget to answer.
+
+## Frame validation
+
+### RFC9000-ERR-1
+
+**A frame of unknown type is a connection error of type FRAME_ENCODING_ERROR.**
+
+> "An endpoint MUST treat the receipt of a frame of unknown type as a connection error of
+> type FRAME_ENCODING_ERROR." — §12.4, `rfc9000.txt:3980-3981`
+
+- Strength: must. Class: error-signal plus end-to-end.
+- Check idea: put a type number that Table 3 of §12.4 does not list into a frame of a
+  packet in flight. The receiver closes the connection and says why, with a CONNECTION_CLOSE
+  frame that names the error. It does not ignore the frame, and it does not stop.
+
 ## Out of scope in this catalog
 
 RFC 9000 is a large document, and this catalog holds its normal path only. What it leaves
 out, with the level that reaches it:
 
-- **Level 3, and available in RFC 9000 itself:** connection errors and frame encoding
-  errors; the stateless reset; version negotiation; the anti-amplification limit and
+- **Level 3, and available in RFC 9000 itself.** The level 3 pass took four of these:
+  version negotiation (RFC9000-VER-1 and VER-2), the anti-amplification limit
+  (RFC9000-AMP-1), the frame encoding error (RFC9000-ERR-1), and the edge of ordered
+  delivery, which needed no new entry because RFC9000-STR-2 already carries the sentence
+  about buffering data received out of order. What is still out: the stateless reset;
   address validation with Retry and tokens; path validation and connection migration;
-  stream reset with RESET_STREAM and STOP_SENDING; the handling of a packet that cannot be
-  decrypted or parsed.
+  stream reset with RESET_STREAM and STOP_SENDING; and the handling of a packet that cannot
+  be decrypted or parsed.
 - **Level 4, needing RFC 9002:** loss detection, congestion control, the probe timeout,
   the idle timeout, and the timing bound of RFC9000-ACK-1.
 - **Level 5:** the cryptographic handshake and packet protection (RFC 9001), transport

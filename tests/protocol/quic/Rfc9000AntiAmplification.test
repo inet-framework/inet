@@ -1,0 +1,133 @@
+%description:
+
+RFC 9000 — before the client's address is validated, a server sends at most three times the
+bytes it received.
+
+Checks RFC9000-AMP-1 (must not) from doc/project/evidence/standard/rfc9000/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/quic/checks/address-validation.md#anti-amplification-limit; the
+program steps below map onto its expected observations. Mapping of the plain mockup: host A =
+client, host B = server.
+
+Nothing is crafted. The check watches the handshake the model produces on its own, and counts
+both directions at the server. §8.1 says when the counting stops: once an endpoint has
+successfully processed a Handshake packet from the peer, it can consider the peer address to
+have been validated. The watch therefore ends when a Handshake packet from the client reaches
+the server.
+
+The rule is a bound over a window and not a property of one packet, so the watch keeps two
+running sums. It reports the first moment at which the sent sum passes three times the
+received sum.
+
+Expected result: PASS. The client's Initial datagram is padded to 1200 octets, which is the
+requirement of RFC9000-SIZE-1, so the server's budget is 3600 octets from the first packet it
+receives. The server's whole handshake is far smaller than that. The two rules are one design:
+the floor exists so that this bound does not stop a handshake from finishing.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The running state of the anti-amplification budget at the server. Returns true at the
+// first moment the server has sent more than three times what it has received, while the
+// client's address is still unvalidated.
+static bool amplificationLimitBroken(const PacketEvent& event)
+{
+    static long received = 0;
+    static long sent = 0;
+    static bool validated = false;
+    if (validated)
+        return false;
+    if (event.kind == EventKind::ReceivedFromLower) {
+        received += event.packet->getByteLength();
+        // §8.1: a Handshake packet from the peer validates the address.
+        if (findQuicChunk<HandshakePacketHeader>(event.packet) != nullptr)
+            validated = true;
+        return false;
+    }
+    if (event.kind == EventKind::SentToLower) {
+        sent += event.packet->getByteLength();
+        return sent > 3 * received;
+    }
+    return false;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_anti_amplification")
+        // Observation 1: the client's first Initial packet reaches the server. This opens the
+        // window the rule is about.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return findQuicChunk<InitialPacketHeader>(c.event.packet) != nullptr; })
+                  .describe("the client's Initial packet at the server")
+                  .within(1.0))
+        // Observation 2: at no moment before the address is validated has the server sent more
+        // than three times what it received (RFC9000-AMP-1).
+        .never(on("server.udp")
+                  .match([](const MatchContext& c) { return amplificationLimitBroken(c.event); })
+                  .describe("the server sending more than three times what it received")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_anti_amplification compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc9000_anti_amplification: PASS

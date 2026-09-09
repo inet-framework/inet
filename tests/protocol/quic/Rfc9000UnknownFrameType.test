@@ -1,0 +1,125 @@
+%description:
+
+RFC 9000 — a frame of unknown type is a connection error of type FRAME_ENCODING_ERROR.
+
+Checks RFC9000-ERR-1 (must) from doc/project/evidence/standard/rfc9000/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/quic/checks/frame-validation.md#unknown-frame-type; the program
+steps below map onto its expected observations. Mapping of the mockup with a relay: host A =
+client, relay T = tap, host B = server.
+
+The relay changes the type of the client's first stream frame to 0x3f and changes nothing
+else. Table 3 of §12.4 lists the frame types this version of QUIC defines, and it ends at
+0x1e; 0x3f is outside it, so the frame is one of unknown type in the sense the requirement
+means. The connection is established and running when the frame arrives, so the receiver has
+every reason to read it and none to expect it.
+
+Expected result: FAIL. The model stops the simulation:
+
+    Error: Unknown Frame Header Type -- in module (inet::quic::Quic) QuicTapNet.server.quic
+    (id=67), at t=0.10024426s, event #150
+
+`ConnectionState.cc` dispatches an incoming frame on its type, and the default branch of that
+switch throws. RFC 9000 asks for a connection error, which is an answer to the peer and the
+end of one connection; a stop is neither. See doc/project/evidence/model/quic/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_unknown_frame_type")
+        // The relay writes a frame type that no version of QUIC defines.
+        .intercept(intercept("tap").match("udp.destPort == 1000").minBytes(1300).nth(1)
+                     .mutate([](Packet *frame) {
+                         mutateFirstQuicChunk<StreamFrameHeader>(frame, [](StreamFrameHeader& h) {
+                             h.setFrameType(static_cast<FrameHeaderType>(0x3f));
+                         });
+                     })
+                     .describe("the first stream frame (set its type to 0x3f, which no version defines)"))
+        // Observation 1: the frame reaches the server carrying the unknown type.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      for (const auto& f : findAllQuicChunks<FrameHeader>(c.event.packet))
+                          if (f->getFrameType() == static_cast<FrameHeaderType>(0x3f))
+                              return true;
+                      return false;
+                  })
+                  .describe("the frame of unknown type at the server")
+                  .within(1.0))
+        // Observation 2: the server ends the connection and says why (RFC9000-ERR-1).
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<ConnectionCloseFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("the server's CONNECTION_CLOSE frame, naming the error")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_unknown_frame_type compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md#the-mockup-with-a-relay:
+// client -- relay T -- server.
+network QuicTapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        server: StandardHost { @display("p=500,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicTapNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc9000_unknown_frame_type: PASS

@@ -4,7 +4,7 @@ RFC 9000 -- connection establishment.
 
 Checks RFC9000-PKT-1, RFC9000-PKT-2 (description), RFC9000-SIZE-1 (must), from
 doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
-doc/project/evidence/protocol/quic/checks.md#connection-establishment; the program steps below map
+doc/project/evidence/protocol/quic/checks/establishment.md#connection-establishment; the program steps below map
 one to one onto its expected observations (steps 1+2 share one datagram, since observations 1 and 2
 both describe that same first datagram). Mockup mapping: host A = client, host B = server.
 

@@ -38,6 +38,9 @@
 #ifndef __INET_PROTOCOLTEST_QUIC_QUICCHUNKS_H
 #define __INET_PROTOCOLTEST_QUIC_QUICCHUNKS_H
 
+#include <functional>
+#include <vector>
+
 #include "ProtocolTest.h"
 
 #include "inet/common/packet/chunk/SequenceChunk.h"
@@ -95,6 +98,37 @@ inline std::vector<Ptr<const T>> findAllQuicChunks(const Packet *pkt)
             result.push_back(t);
     }
     return result;
+}
+
+// Replaces the first chunk of type T with a copy that fn has changed, and puts the packet
+// back together. The content of a QUIC datagram is a flat list of chunks -- the link and
+// network headers first when the observation point is a relay on the path, then the QUIC
+// packet header, then each frame's header and its data -- so a change means replacing one
+// entry of that list and inserting the list again in order. Returns false when the packet
+// carries no chunk of that type, which lets a relay that sees every datagram change only the
+// ones it means to.
+//
+// Every use here changes a field without changing its size, so no length field and no
+// checksum needs a correction afterwards.
+template<typename T>
+inline bool mutateFirstQuicChunk(Packet *frame, std::function<void(T&)> fn)
+{
+    auto chunks = quicChunks(frame);
+    size_t index = chunks.size();
+    for (size_t i = 0; i < chunks.size(); i++) {
+        if (dynamicPtrCast<const T>(chunks[i]) != nullptr) {
+            index = i;
+            break;
+        }
+    }
+    if (index == chunks.size())
+        return false;
+    auto changed = staticPtrCast<T>(chunks[index]->dupShared());
+    fn(*changed);
+    frame->removeAtFront<Chunk>(frame->getDataLength());
+    for (size_t i = 0; i < chunks.size(); i++)
+        frame->insertAtBack(i == index ? staticPtrCast<const Chunk>(changed) : chunks[i]);
+    return true;
 }
 
 } // namespace protocoltest

@@ -4,7 +4,7 @@ RFC 9000 -- stream data transfer.
 
 Checks RFC9000-STR-2 (must), RFC9000-STR-3 (description), RFC9000-PKT-3 (must), from
 doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
-doc/project/evidence/protocol/quic/checks.md#stream-data-transfer; the program steps below map one
+doc/project/evidence/protocol/quic/checks/streams.md#stream-data-transfer; the program steps below map one
 to one onto its expected observations. Mockup mapping: host A = client, host B = server.
 
 Scenario: same 4000-octet, one-shot, non-closing TrafficgenCompound+QuicTrafficgen scenario as

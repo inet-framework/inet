@@ -22,7 +22,13 @@ a packet on a link, so these are protocol tests. What it does change is the cost
 one and the fragility of the result, and [`results.md`](results.md) records that as a
 tooling finding.
 
-## Decisions for the six checks
+Three rows of the pass 1 guidance are done and are removed from the table below: ordered
+delivery of reordered data, connection errors with version negotiation, and the
+anti-amplification limit. The first two are protocol tests with interception, as the guidance
+predicted. The third is not: it needed no crafted packet at all, only a running count, which
+is a shape the guidance had not foreseen.
+
+## Decisions for the checks of pass 1, level 2
 
 ### Connection establishment (RFC9000-PKT-1, PKT-2, SIZE-1) → protocol test
 
@@ -61,15 +67,54 @@ The frame is an ordinary packet on the path and the silence that follows is an a
 The closing and draining states behind it are internal; a check of those is a module test
 with a state signal.
 
+## Decisions for the checks of pass 2, level 3
+
+Three of the five are **protocol tests with interception**; two are ordinary protocol tests
+that needed no relay, only an observation nobody had made.
+
+### Server Initial datagram size (RFC9000-SIZE-1, the server half) → protocol test
+
+No interception. The case the requirement names occurs in every handshake this model runs;
+what was missing was a step that looked for it. The check reads the size of a datagram and
+the kinds of chunk it carries, both of which the level 2 toolset already reached.
+
+### Anti-amplification limit (RFC9000-AMP-1) → protocol test
+
+No interception either, but a different shape of observation: a bound over a window rather
+than a property of one packet. The watch keeps two running sums and a flag for the moment the
+window closes. This is the first check in this tree that is a running total, and it shows that
+a `never` step with a stateful predicate can carry one.
+
+### Ordered delivery under reordering (RFC9000-STR-2) → protocol test with interception
+
+The relay holds one datagram. This is the mildest interception in the tree — nothing is
+changed and nothing is forged — and it is enough to put the buffering half of a requirement
+under load.
+
+### Version negotiation, unknown frame type (RFC9000-VER-1, ERR-1) → protocol test with interception
+
+Each needs a field written that no endpoint would write: a version nobody speaks, a frame type
+no version defines. The observations afterwards are ordinary: a packet of a particular kind
+comes back, or does not.
+
+### A note on selecting a datagram without a dissector
+
+The relay's own filter cannot see QUIC, so these checks select by what it can see. Two
+selectors served: the UDP port, and the size. Size is sharper than it looks and more
+dangerous than it looks — the client's Initial datagram is padded to exactly 1200 octets, so
+a threshold below that catches the handshake instead of the data. Where neither served, the
+mutator takes every datagram of a direction and declines the ones that carry no chunk of the
+type it wants.
+
 ## Category guidance for the open catalog entries
 
 | Entry or area | Likely category | Reason |
 | --- | --- | --- |
-| Ordered delivery of reordered data (the other half of RFC9000-STR-2) | protocol test with interception | needs a path that reorders |
+| The stateless reset, stream reset, path validation and migration | protocol test with interception | each needs a crafted packet or a changed path |
+| RFC9000-VER-2, no Version Negotiation packet in answer to one | protocol test with interception | needs such a packet delivered to an endpoint; the relay can write a version field, so it can make one |
 | The acknowledgment delay bound (the other half of RFC9000-ACK-1) | statistical test | a distribution against a declared bound; level 4 |
 | Loss detection and congestion control (RFC 9002) | statistical test | the congestion window trajectory is the observable |
-| Connection errors, stateless reset, version negotiation | protocol test with injection | need a crafted or invalid packet |
-| Address validation with Retry, the anti-amplification limit | protocol test with injection | need a server that challenges an unverified address |
+| Address validation with Retry and tokens | protocol test with interception | needs a server that challenges an unverified address |
 | Packet protection and the handshake (RFC 9001) | unit test | the cryptographic transforms are algorithmic, and no wire observation reaches them |
 | The connection state machine | module test with a state signal | the closing and draining states are internal |
 

@@ -4,7 +4,7 @@ RFC 9000 -- stream identifiers.
 
 Checks RFC9000-STR-1 (description of the encoding, normative), from
 doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
-doc/project/evidence/protocol/quic/checks.md#stream-identifiers; the program step below maps onto
+doc/project/evidence/protocol/quic/checks/streams.md#stream-identifiers; the program step below maps onto
 all three of its expected observations at once, because all three describe the very same STREAM
 frame (its existence, and two bit conditions on the one streamId field it carries) -- the engine
 matches an event once and advances, so a later step cannot re-examine an already-matched event;

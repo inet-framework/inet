@@ -1,6 +1,6 @@
 # QUIC — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-08 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/quic/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/quic/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/quic/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/quic/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
@@ -68,14 +68,25 @@ ledger, and the level of the feature, by the table of step 8.
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
 | QUIC-F-PACKET | mandatory | yes, RFC 9000 by number; the connection identifier is a declared exception | supported | **confirmed**, with the identifier degenerate |
-| QUIC-F-INITIAL-SIZE | mandatory | yes, and no deviation is declared for it | partial | **partial** — the client half holds; the server half is neither checked nor implemented |
-| QUIC-F-STREAMS | mandatory | the ordered stream, yes; the identifier encoding is a **declared exception** | partial | **declined** for the encoding, **confirmed** for the rest |
+| QUIC-F-INITIAL-SIZE | mandatory | yes, and no deviation is declared for it | partial | **defect** for the server half, finding 3; **confirmed** for the client half |
+| QUIC-F-STREAMS | mandatory | the ordered stream, yes; the identifier encoding is a **declared exception** | partial | **declined** for the encoding, **confirmed** for the rest, including its buffering half |
 | QUIC-F-FLOW-CONTROL | mandatory | yes, with a declared exception for the three stream-type parameters | supported | **confirmed** for the stream limit |
 | QUIC-F-ACKNOWLEDGE | mandatory | yes | supported | **confirmed** |
 | QUIC-F-CLOSE | mandatory | yes | supported | **confirmed** |
+| QUIC-F-VERSION-NEGOTIATION | mandatory | yes, RFC 9000 by number, and no deviation is declared for it | not supported | **defect** — finding 4 |
+| QUIC-F-ADDRESS-VALIDATION | mandatory | the amplification limit is a **declared exception** ("Missing bits") | supported | **undocumented** — the model does more than it claims, finding 5 |
+| QUIC-F-FRAME-VALIDATION | mandatory | yes, and no deviation is declared for it | not supported | **defect** — finding 6 |
 
-Four confirmed, one partial, one split between a declined half and a confirmed half. No
-`defect` — but one candidate for the next pass, below.
+Five confirmed, one split between a declined half and a confirmed half, three `defect`, one
+`undocumented`.
+
+Pass 1 recorded no `defect` and named one candidate for the next pass: the server's Initial
+datagram. That candidate is now a `defect`, because a check covers it. Two more joined it,
+and one feature turned out better than the model claims.
+
+A `defect` is the matrix's word for a feature the model claims and does not do. It is a
+strong word, and it is the right one here: RFC 9000 is claimed by number, none of these three
+requirements is in the model's own list of missing bits, and each has a check that fails.
 
 ## Findings
 
@@ -104,7 +115,7 @@ mandatory requirement is still a limit on what the model can be used for: a stud
 multiplexing, of unidirectional streams, or of anything where the peer's view of who may
 send on a stream matters, is outside what this model represents.
 
-### 3. One deviation that is not declared: the server's Initial datagram
+### 3. The first undeclared deviation: the server's Initial datagram
 
 RFC 9000 §14.1 requires **both** endpoints to expand datagrams carrying Initial packets to
 1200 octets — the client always, the server whenever the datagram is ack-eliciting. The
@@ -113,15 +124,49 @@ client side is implemented at
 The server side is not: `buildServerInitialPacket` has no padding.
 
 The "Missing bits" list does not name it. It names amplification-attack mitigation, which is
-the neighbouring requirement of §8 and a different rule. So this is the one place where the
-model's behavior departs from RFC 9000 without the model saying so — the single undeclared
-gap in an otherwise exemplary declaration.
+the neighbouring requirement of §8 and a different rule. Pass 1 called this the single
+undeclared gap in an otherwise exemplary declaration. Pass 2 found two more, in findings 4 and
+6, so the sentence needs correcting: there are three, and this is the smallest of them.
 
-No check covers it, so the matrix cannot rule on it and the verdict for the feature is
-`partial` rather than `defect`. Writing that check, on a scenario where the server's Initial
-datagram is ack-eliciting, is the first conformance task of the next pass.
+**Pass 2 wrote that check.** `Rfc9000ServerInitialSize.test` finds the server sending an
+Initial packet with a CRYPTO frame in a datagram of 27 octets. The verdict for the feature is
+now `defect` for the server half: a requirement the model claims, does not declare an
+exception to, and does not meet.
 
-### 4. A documentation gap outside the module
+### 4. Version negotiation is absent, and it is not declared
+
+RFC 9000 §6.1 gives a server one answer to a version it does not accept. The model gives
+none: it ignores the version field, and a client claiming 0x0A0A0A0A completes a handshake and
+transfers data. The "Missing bits" list does not name version negotiation.
+
+This is the second undeclared departure, and it is larger than the first. The version field is
+what lets QUIC change versions at all, and a deployment of this model would tell a future peer
+nothing about what it speaks. See gap 2 of [`results.md`](results.md).
+
+### 5. The anti-amplification limit holds, and the model says it does not
+
+The "Missing bits" list names amplification-attack mitigation among the things the model does
+not implement. The check finds the bound respected: the server never sends more than three
+times what it received before the address is validated.
+
+The matrix calls that `undocumented` — the model does more than it claims. The reason is worth
+knowing, because it is luck rather than design: the client pads its Initial datagram to 1200
+octets, which gives the server a 3600-octet budget from the first packet, and the server's
+whole handshake is a hundred octets. A model that implemented the server's own 1200-octet
+padding (finding 3) would spend more of that budget, and a model with a smaller client floor
+would have less of it. The bound is not enforced anywhere; it simply is not reached.
+
+### 6. An unknown frame type stops the run, and it is not declared
+
+RFC 9000 §12.4 requires an endpoint to treat a frame of unknown type as a connection error of
+type FRAME_ENCODING_ERROR. The model throws instead, from the default branch of the frame
+switch in `ConnectionState.cc`. The "Missing bits" list does not name it.
+
+This is the third undeclared departure, and the one with the widest reach: frame types come
+from a registry that grows, so any peer of a later version can stop this endpoint. See gap 3
+of [`results.md`](results.md).
+
+### 7. A documentation gap outside the module
 
 The showcase at `showcases/quic/linksharing/doc/index.rst` describes QUIC's TLS 1.3
 encryption and its connection migration as properties of QUIC, without saying that this

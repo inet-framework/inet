@@ -64,7 +64,7 @@ A decisive check was written — two application streams, every client identifie
 multiple of four — and **it passed too**, because the application's second stream never
 reached the observation point. Rather than keep a green test whose pass could not be
 explained, the test was removed and the check left in
-[`checks.md`](../../protocol/quic/checks.md#stream-identifier-assignment) without one.
+[`checks.md`](../../protocol/quic/checks/streams.md#stream-identifier-assignment) without one.
 
 The lesson generalises past QUIC: **a check that cannot fail is not evidence.** Both of
 these passed, and neither established anything. The ledger records the feature as `partial`
@@ -72,7 +72,45 @@ for that reason, departing from the mechanical rule of step 7 on purpose.
 
 Finding out why the second stream does not appear is the first task of the next pass.
 
+**Pass 2 found out, and the answer changes the conclusion rather than the verdict.** The
+second stream does appear. It is stream 0. With two generators the client sends every frame
+on stream 0 and the second generator's bytes continue the first one's offsets; with one
+generator asked for identifier 1, the client still sends on stream 0. The model has one
+identifier and no path that assigns another.
+
+So the withdrawn test could not have worked, and neither can any successor of it. The
+statement is now `no check` in the ledger with that proof behind it, instead of a candidate
+waiting for a better scenario. The lesson above stands and gains a second half: **a check that
+cannot fail is not evidence, and finding out why it cannot fail is worth more than another
+attempt at writing it.**
+
 ## Model quirks
+
+### A model can stop where a standard says it must answer
+
+Three models in this tree stop the simulation on an input a standard describes: IPv4 on an
+unknown ICMP type, TCP on a Source Quench, and QUIC on a frame type no version defines. Each
+is the default branch of a switch, in a different module written by different people.
+
+The QUIC one is the widest in reach. Frame types come from a registry that grows by design,
+so any peer of a later version can stop this endpoint by using a frame it is entitled to use.
+RFC 9000 asks for a connection error, which is an answer to the peer and the end of one
+connection; a throw is neither.
+
+### The version field is read and ignored
+
+A packet whose version is 0x0A0A0A0A completes a handshake with this model and transfers
+data. The field is the first thing a QUIC endpoint reads and the one decision it can take
+with no state at all, and the model takes none.
+
+### A bound can hold by luck
+
+The anti-amplification limit of §8.1 is respected in every run, and nothing in the model
+enforces it. The client's Initial datagram is padded to 1200 octets, so the server has a
+3600-octet budget from the first packet, and the server's whole handshake is about a hundred
+octets. The model's own list of missing bits names amplification mitigation as absent, and
+the check agrees with the list rather than with the behaviour. A reader who saw only the
+green verdict would draw the wrong conclusion.
 
 ### The 1200-octet floor is half implemented, and the missing half is undeclared
 
@@ -109,21 +147,52 @@ packet protection: it would silently disable most of this suite.
 connection migration as properties of QUIC, without saying that this model implements
 neither. The module documentation is careful; the showcase does not inherit that care.
 
+## Tooling quirks, added at level 3
+
+### A relay can work without a dissector
+
+The relay's filter cannot see QUIC fields, and that turned out not to matter. Select a
+datagram by its UDP port or its size, and let the mutator look at the chunks and decide. A
+mutator that returns false for a packet it does not want lets one relay be pointed at a whole
+direction.
+
+### Size is a sharp selector, and 1200 is a trap
+
+A QUIC client pads its Initial datagram to exactly 1200 octets. A size threshold below that
+selects the handshake rather than the data, which is how the reordering check first delayed
+the wrong packet. Use 1300 or more to mean "a datagram carrying data".
+
+### Holding one packet makes the sender retransmit
+
+The reordering check holds the first data packet for 20 ms. The client does not wait: it
+retransmits that packet quickly, so the gap is filled by the copy and the held original
+arrives afterwards as a duplicate. The check had to be ordered around that, and the discard
+question had to be asked of a different offset. A relay that holds a packet is producing a
+loss as far as the sender is concerned.
+
 ## Follow-ups, in the order I would do them
 
-1. **A protocol dissector for QUIC**, or an agreed convention that QUIC checks read chunk
-   types. Everything else is gated on this. With a dissector the checks become ordinary
-   field filters and stop depending on a hand-written helper.
-2. **Find out why a second application stream does not reach the wire**, then run the
-   withdrawn stream-identifier assignment check. It is the one check that would settle
-   RFC9000-STR-1 rather than coincide with it.
-3. **A check for the server's Initial datagram expansion**, on a scenario where the
-   server's Initial packet is ack-eliciting. It is the one undeclared gap.
-4. **Fix the tester's scalar-signal overload** so `totalRcvAppData` can be observed instead
-   of aborting the run, and so an application's own byte counters become usable.
-5. **Level 3, all of it available in RFC 9000 already**: ordered delivery under reordering,
-   connection errors, version negotiation, the anti-amplification limit, stream reset.
-6. **Level 4 needs RFC 9002**: loss detection, congestion control, the idle timeout and the
+Items 2, 3 and most of 5 are done. Item 1 turned out not to gate the rest. What follows is
+the list as pass 2 leaves it.
+
+1. **Correct the frame type switch** so that a type the module does not know ends the
+   connection with FRAME_ENCODING_ERROR instead of ending the run. It is the gap with the
+   widest reach, and the same shape waits in the ICMP module for IPv4 and TCP.
+2. **Implement version negotiation**, or declare its absence in the module's "Missing bits"
+   list. Either would be an improvement; today the model neither does it nor says it does
+   not.
+3. **Pad the server's ack-eliciting Initial datagram** to 1200 octets, or declare that half
+   as an exception the way the eleven others are declared.
+4. **A protocol dissector for QUIC.** Not a gate any more: pass 2 read and changed QUIC
+   chunks without one. It would make every check of this suite shorter, and it would let the
+   relay's own filter select on QUIC fields instead of on size.
+5. **Fix the tester's scalar-signal overload** so `totalRcvAppData` can be observed instead
+   of aborting the run, and so an application's own byte counters become usable. This is
+   what keeps every "the application received" observation a proxy at the transport layer.
+6. **Level 3, what remains**: the stateless reset, address validation with Retry and tokens,
+   path validation and migration, stream reset, and a packet that cannot be decrypted. Also
+   RFC9000-VER-2, which the relay can now reach.
+7. **Level 4 needs RFC 9002**: loss detection, congestion control, the idle timeout and the
    acknowledgment delay bound.
-7. **Add the model's caveats to the showcase page**, or link it to the module's "Missing
+8. **Add the model's caveats to the showcase page**, or link it to the module's "Missing
    bits" list.

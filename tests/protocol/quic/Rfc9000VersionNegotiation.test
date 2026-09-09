@@ -1,0 +1,131 @@
+%description:
+
+RFC 9000 — a server that does not accept the client's version answers with a Version
+Negotiation packet.
+
+Checks RFC9000-VER-1 (description, what a server does) from
+doc/project/evidence/standard/rfc9000/catalog.md. The English procedure is in
+doc/project/evidence/protocol/quic/checks/version-negotiation.md#version-negotiation; the
+program steps below map onto its expected observations. Mapping of the mockup with a relay:
+host A = client, relay T = tap, host B = server.
+
+The relay changes the version field of the client's Initial packet to 0x0a0a0a0a, a number
+that names no QUIC version, and changes nothing else. The relay sees every datagram the
+client sends and changes only the ones that carry an Initial packet header, which is what
+mutateFirstQuicChunk's return value is for.
+
+The version sits in the clear in a long header, before anything a receiver must decrypt, so
+this is one of the few decisions a QUIC server can take with no state at all. §17.2.1 marks a
+Version Negotiation packet by a version field of zero.
+
+Expected result: FAIL. The server does not answer at all. It reads the packet, ignores the
+version field, and completes the handshake: the run shows 22 packets carrying version
+0x0A0A0A0A (168430090), a HandshakeDone frame, and 75 stream frames. A client that claims a
+version nobody speaks therefore gets a full connection from this model. See
+doc/project/evidence/model/quic/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_version_negotiation")
+        // The relay writes a version nobody speaks into the client's Initial packet.
+        .intercept(intercept("tap").match("udp.destPort == 1000")
+                     .mutate([](Packet *frame) {
+                         mutateFirstQuicChunk<InitialPacketHeader>(frame, [](InitialPacketHeader& h) {
+                             h.setVersion(0x0a0a0a0a);
+                         });
+                     })
+                     .describe("every Initial packet from the client (set its version to 0x0a0a0a0a)"))
+        // Observation 1: the packet reaches the server carrying the unknown version.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto h = findQuicChunk<InitialPacketHeader>(c.event.packet);
+                      return h != nullptr && h->getVersion() == 0x0a0a0a0a;
+                  })
+                  .describe("the Initial packet at the server, carrying a version nobody speaks")
+                  .within(1.0))
+        // Observation 2: the server answers with a Version Negotiation packet (RFC9000-VER-1).
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<VersionNegotiationPacketHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("the server's Version Negotiation packet")
+                  .within(1.0))
+        // Observation 3: the connection does not open, so no stream data crosses the path.
+        .never(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
+                  })
+                  .describe("stream data reaching the server")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_version_negotiation compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md#the-mockup-with-a-relay:
+// client -- relay T -- server.
+network QuicTapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        server: StandardHost { @display("p=500,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicTapNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc9000_version_negotiation: PASS

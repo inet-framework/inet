@@ -1,0 +1,122 @@
+%description:
+
+RFC 9000 — a server expands a datagram that carries an ack-eliciting Initial packet to at
+least 1200 octets.
+
+Checks RFC9000-SIZE-1 (must), the server half, from
+doc/project/evidence/standard/rfc9000/catalog.md. The client half is checked in
+Rfc9000ConnectionEstablishment.test. The English procedure is in
+doc/project/evidence/protocol/quic/checks/establishment.md#server-initial-datagram-size; the
+program steps below map onto its expected observations. Mapping of the plain mockup: host A =
+client, host B = server.
+
+Nothing is crafted here. The check watches the handshake the model produces on its own, and
+reads the size of every datagram that carries an Initial packet with an ack-eliciting frame.
+A CRYPTO frame is ack-eliciting; ACK, PADDING and CONNECTION_CLOSE are not.
+
+QUIC has no protocol dissector in this tree, so no `quic.<field>` filter works. The steps
+read the packet's chunk list directly, as every check of this suite does; see QuicChunks.h.
+
+Expected result: FAIL. The server sends its Initial packet in a datagram of 27 octets, and
+that packet carries a CRYPTO frame, which is the case the requirement names. The model pads
+the client's Initial datagram and not the server's: `Quic.ned` declares the client half and
+says nothing of the server half. The run shows the server's handshake datagrams at 27, 38, 24
+and 22 octets. See doc/project/evidence/model/quic/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "QuicChunks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when the packet carries an Initial packet header and a frame that makes it
+// ack-eliciting. RFC 9000 §13.2.1: a packet is ack-eliciting when it carries a frame other
+// than ACK, PADDING or CONNECTION_CLOSE. A CRYPTO frame is the one a handshake uses.
+static bool ackElicitingInitial(const Packet *pkt)
+{
+    return findQuicChunk<InitialPacketHeader>(pkt) != nullptr
+        && (findQuicChunk<CryptoFrameHeader>(pkt) != nullptr
+         || findQuicChunk<StreamFrameHeader>(pkt) != nullptr
+         || findQuicChunk<PingFrameHeader>(pkt) != nullptr);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9000_server_initial_size")
+        // Observation 1: the server sends a datagram that carries an ack-eliciting Initial
+        // packet. This confirms that the case the requirement names occurs in this run.
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return ackElicitingInitial(c.event.packet); })
+                  .describe("the server's datagram carrying an ack-eliciting Initial packet")
+                  .within(1.0))
+        // Observation 2: that datagram is at least 1200 octets (RFC9000-SIZE-1, the server
+        // half).
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return ackElicitingInitial(c.event.packet) && c.event.packet->getByteLength() >= 1200;
+                  })
+                  .describe("that datagram expanded to at least 1200 octets")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9000_server_initial_size compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Mockup of doc/project/evidence/protocol/quic/checks.md's "Common mockup":
+// host A (client) -- path P -- host B (server).
+network QuicNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        client: StandardHost { @display("p=250,100"); }
+        server: StandardHost { @display("p=450,100"); }
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = QuicNet
+sim-time-limit = 5s
+seed-set = 0
+
+**.quic.typename = "Quic"
+
+# client: a single 4000-octet burst on one stream (checks.md's common-mockup data block).
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "TrafficgenCompound"
+**.client.app[0].numGenerators = 1
+**.client.app[0].generator[0].typename = "TrafficgenSimple"
+**.client.app[0].generator[0].id = 0
+**.client.app[0].generator[0].packetSize = 4000B
+**.client.app[0].generator[0].packetCount = -1
+**.client.app[0].generator[0].packetInterval = 10s
+**.client.app[0].generator[0].startTime = 0.1s
+**.client.app[0].generator[0].ordered = false
+**.client.app[0].handler.typename = "QuicTrafficgen"
+**.client.app[0].handler.localPort = 1001
+**.client.app[0].handler.connectPort = 1000
+**.client.app[0].handler.connectAddress = "server"
+
+# server: reads and discards everything it receives.
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[*].typename = "QuicDiscardServer"
+**.server.app[*].localAddress = ""
+**.server.app[*].localPort = 1000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc9000_server_initial_size: PASS

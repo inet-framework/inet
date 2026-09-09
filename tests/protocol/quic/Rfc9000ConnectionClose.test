@@ -4,7 +4,7 @@ RFC 9000 -- connection close.
 
 Checks RFC9000-CLOSE-1 (description of the mechanism), from
 doc/project/evidence/standard/rfc9000/catalog.md. The English procedure and mockup are in
-doc/project/evidence/protocol/quic/checks.md#connection-close; the program steps below map one to
+doc/project/evidence/protocol/quic/checks/close.md#connection-close; the program steps below map one to
 one onto its expected observations. Mockup mapping: host A = client, host B = server.
 
 Scenario: examples/quic/basic3's own network and QuicClient/QuicDiscardServer apps, unmodified.
