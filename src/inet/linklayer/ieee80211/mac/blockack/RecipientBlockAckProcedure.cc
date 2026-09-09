@@ -21,7 +21,7 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
 {
     numReceivedBlockAckReq++;
     if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        auto agreement = blockAckAgreementHandler->getAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
+        auto agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
             auto duration = ackPolicy->computeBasicBlockAckDurationField(blockAckPacketReq, basicBlockAckReq);
@@ -71,4 +71,3 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

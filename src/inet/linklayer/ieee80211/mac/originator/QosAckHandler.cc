@@ -178,6 +178,21 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
         throw cRuntimeError("Unknown block ack request");
 }
 
+bool QosAckHandler::releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid)
+{
+    bool changed = false;
+    for (auto& entry : ackStatuses) {
+        auto& id = entry.first;
+        auto& status = entry.second;
+        if (id.first == peerAddress && id.second.first == tid &&
+                (status == Status::BLOCK_ACK_NOT_YET_REQUESTED || status == Status::WAITING_FOR_BLOCK_ACK)) {
+            status = Status::BLOCK_ACK_NOT_ARRIVED;
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (header->getType() == ST_DATA_WITH_QOS) {
@@ -276,6 +291,7 @@ std::string QosAckHandler::getStatusString(Status status)
         case Status::BLOCK_ACK_ARRIVED_ACKED: return "BLOCK_ACK_ARRIVED_ACKED";
         case Status::WAITING_FOR_BLOCK_ACK: return "WAITING_FOR_BLOCK_ACK";
         case Status::NORMAL_ACK_ARRIVED: return "NORMAL_ACK_ARRIVED";
+        case Status::BLOCK_ACK_NOT_ARRIVED: return "BLOCK_ACK_NOT_ARRIVED";
         default: throw cRuntimeError("Unknown status");
     }
 }
@@ -291,4 +307,3 @@ void QosAckHandler::printAckStatuses()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
