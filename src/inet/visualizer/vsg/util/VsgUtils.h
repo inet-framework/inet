@@ -141,6 +141,33 @@ ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, const c
 // billboard AutoScaleTransform) — the VSG counterpart of an OSG icon under AutoTransform.
 ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position, double screenSize, const cFigure::Color& tint = cFigure::WHITE, double opacity = 1.0);
 
+// --- mutable line with optional arrowheads (port of OSG LineNode) -------------------------
+// Used by LinkVsgVisualizerBase for links whose endpoints move. Color/style/width are baked
+// into the geometry (VSG has no detachable state set), so they are set together with the
+// endpoints. Updating an endpoint rebuilds the (small) line subgraph.
+class INET_API LineNode : public Inherit<Group, LineNode>
+{
+  protected:
+    Coord start, end;
+    cFigure::Arrowhead startArrowhead = cFigure::ARROW_NONE;
+    cFigure::Arrowhead endArrowhead = cFigure::ARROW_NONE;
+    cFigure::Color color = cFigure::BLACK;
+    cFigure::LineStyle style = cFigure::LINE_SOLID;
+    double lineWidth = 1.0;
+    double opacity = 1.0;
+
+    void rebuild();
+
+  public:
+    LineNode() {}
+
+    void set(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
+            const cFigure::Color& color, const cFigure::LineStyle& style, double lineWidth);
+    void setStart(const Coord& start);
+    void setEnd(const Coord& end);
+    void setAlpha(double opacity);   // for fade-out; rebuilds the line at the new opacity
+};
+
 } // namespace vsg
 
 } // namespace inet

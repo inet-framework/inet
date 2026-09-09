@@ -588,6 +588,47 @@ ref_ptr<Node> createTexturedBillboard(ref_ptr<Data> image, const Coord& position
     return autoScale;
 }
 
+// ---------------------------------------------------------------------------------------------
+// LineNode (mutable line with optional arrowheads)
+// ---------------------------------------------------------------------------------------------
+
+void LineNode::rebuild()
+{
+    children.clear();
+    addChild(createLine(start, end, startArrowhead, endArrowhead, color, style, lineWidth, opacity));
+}
+
+void LineNode::set(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead,
+        const cFigure::Color& color, const cFigure::LineStyle& style, double lineWidth)
+{
+    this->start = start;
+    this->end = end;
+    this->startArrowhead = startArrowhead;
+    this->endArrowhead = endArrowhead;
+    this->color = color;
+    this->style = style;
+    this->lineWidth = lineWidth;
+    rebuild();
+}
+
+void LineNode::setStart(const Coord& start)
+{
+    this->start = start;
+    rebuild();
+}
+
+void LineNode::setEnd(const Coord& end)
+{
+    this->end = end;
+    rebuild();
+}
+
+void LineNode::setAlpha(double opacity)
+{
+    this->opacity = opacity;
+    rebuild();
+}
+
 } // namespace vsg
 
 } // namespace inet
