@@ -127,23 +127,34 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 }
 
 //
+void NonQosRecoveryProcedure::discardFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
+}
+
+void NonQosRecoveryProcedure::discardRtsFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader)
+{
+    auto id = SequenceControlField(protectedHeader->getSequenceNumber().get(), protectedHeader->getFragmentNumber());
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
+}
+
 // After dropping a frame because it reached its retry limit we need to clear the
 // retry counters
 //
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    discardFrame(packet, header);
+    emit(retryLimitReachedSignal, packet);
+}
+
+void NonQosRecoveryProcedure::rtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader)
+{
+    EV_WARN << "RTS retry limit reached for " << *packet << ".\n";
+    discardRtsFrame(protectedHeader);
     emit(retryLimitReachedSignal, packet);
 }
 
@@ -247,4 +258,3 @@ bool NonQosRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeade
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

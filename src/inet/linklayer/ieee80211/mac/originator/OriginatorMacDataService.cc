@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorMacDataService.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
 
@@ -32,21 +33,37 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
         emit(packetFragmentedSignal, frame);
+        auto transactionTag = frame->findTag<Ieee80211AddbaTransactionTag>();
+        bool hasTransactionTag = transactionTag != nullptr;
+        auto transactionId = hasTransactionTag ? transactionTag->getTransactionId() : 0;
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
+        if (hasTransactionTag)
+            for (auto fragment : *fragmentFrames)
+                fragment->addTagIfAbsent<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
         return fragmentFrames;
     }
     return nullptr;
 }
 
+bool OriginatorMacDataService::isFrameEligible(const Packet *packet) const
+{
+    return !frameEligibilityFunction || frameEligibilityFunction(packet);
+}
+
+bool OriginatorMacDataService::hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const
+{
+    return pendingQueue->findPacket([this](const Packet *packet) { return isFrameEligible(packet); }) != nullptr;
+}
+
 std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
-    if (pendingQueue->isEmpty())
+    auto packet = pendingQueue->dequeuePacket([this](const Packet *packet) { return isFrameEligible(packet); });
+    if (packet == nullptr)
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
-        Packet *packet = pendingQueue->dequeuePacket();
         take(packet);
         if (sequenceNumberAssignment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
@@ -76,4 +93,3 @@ OriginatorMacDataService::~OriginatorMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
