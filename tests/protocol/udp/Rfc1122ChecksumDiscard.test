@@ -1,0 +1,122 @@
+%description:
+
+RFC 1122 — a host silently discards a datagram whose checksum is non-zero and wrong.
+
+Checks RFC1122-UCK-4 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/udp/checks/checksum.md#checksum-discard; the program steps
+below map onto its expected observations. Mapping of the mockup with a relay: host A =
+hostA, gateway R = router, relay T = tap, host B = hostB. The relay replaces the checksum
+of the UDP header with a value that is wrong for the datagram and is never zero, and
+changes nothing else. Both hosts compute and check real checksums
+(checksumMode = "computed" on the UDP modules), because the discard rule speaks about a
+value that a receiver can recompute.
+
+A program listens on port 5000 at host B on purpose, so that only the checksum can be the
+reason for a discard.
+
+Deviation: expected observations 4 and 5 (nothing upward, nothing back) are one absence
+watch over the whole host, because two consecutive watches cannot cover the same window.
+
+Note on expected observation 3: the drop record of the UDP module carries no protocol tag,
+and the module pops the UDP header before it records a drop for a wrong checksum, so the
+record cannot be filtered by port. Only one datagram is in flight, and its data length
+identifies it; see UdpMutations.h, droppedDatagramWithData.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_checksum_discard")
+        // The relay replaces the UDP checksum with a wrong, non-zero value.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { corruptUdpChecksum(frame); })
+                     .describe("the datagram (replace its UDP checksum with a wrong, non-zero value)"))
+        // Expected observation 1: the datagram on link 2, before the relay; record its checksum.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .capture("ck", "udp.checksum")
+                  .describe("the datagram on link 2 before the relay")
+                  .within(0.5))
+        // Expected observation 2: at host B's interface the checksum differs and is not zero --
+        // the change took effect, and it stayed inside the discard rule.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.checksum != {ck} && udp.checksum != 0")
+                  .describe("the datagram at host B's interface with a changed, non-zero checksum")
+                  .within(0.1))
+        // Expected observation 3: host B's UDP discards the datagram (RFC1122-UCK-4).
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
+                  .describe("host B's UDP discards the datagram with the wrong checksum")
+                  .within(0.1))
+        // Expected observations 4 and 5: nothing goes up to the program and no message leaves
+        // host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
+                  .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_checksum_discard compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Both hosts use the checksum that RFC 768 defines, so that the relay's value is the only
+# wrong one and the receiver can recompute it.
+**.udp.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_checksum_discard: PASS

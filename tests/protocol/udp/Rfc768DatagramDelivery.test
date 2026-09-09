@@ -7,7 +7,7 @@ carried as IP protocol 17.
 Checks RFC768-HDR-2, RFC768-HDR-3 and RFC768-PROTO-1 (all description) and RFC768-UI-1
 (should) from doc/project/evidence/standard/rfc768/catalog.md. Also covers RFC768-HDR-1
 (description). The English procedure and the mockup are in
-doc/project/evidence/protocol/udp/checks.md#datagram-delivery; the program steps below map one
+doc/project/evidence/protocol/udp/checks/delivery.md#datagram-delivery; the program steps below map one
 to one onto its expected observations. Mapping of the mockup: host A = hostA, host B = hostB;
 link 1 = hostA-hostB.
 
@@ -104,7 +104,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/udp/checks.md#datagram-delivery: hostA -- hostB.
+// The mockup of doc/project/evidence/protocol/udp/checks/delivery.md#datagram-delivery: hostA -- hostB.
 network Rfc768DatagramDeliveryNet
 {
     submodules:

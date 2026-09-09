@@ -8,7 +8,7 @@ selects none.
 Checks RFC792-DU-3 (may). Also covers RFC768-HDR-2 (the closed-port half) from
 doc/project/evidence/standard/rfc768/catalog.md (the RFC792 catalog holds RFC792-DU-3 itself).
 The English procedure and the mockup are in
-doc/project/evidence/protocol/udp/checks.md#port-unreachable; the program steps below map one
+doc/project/evidence/protocol/udp/checks/port-unreachable.md#port-unreachable; the program steps below map one
 to one onto its expected observations. Mapping of the mockup: host A = hostA, host B = hostB;
 link 1 = hostA-hostB. Host B opens no application port at all (numApps = 0), so port 6000 is
 certainly closed.
@@ -16,7 +16,7 @@ certainly closed.
 The ICMP step (observation 3) asserts a "may" clause of RFC 792, the same status the
 Rfc791TtlExpiry.test ICMP step already carries: a silent discard also conforms to the RFCs. If
 this step fails on some implementation, record an implementation gap against the "may" clause,
-not a specification violation (see doc/project/evidence/protocol/udp/checks.md#port-unreachable,
+not a specification violation (see doc/project/evidence/protocol/udp/checks/port-unreachable.md#port-unreachable,
 Notes). Verified in Udp.cc: Udp::processUndeliverablePacket() is reached when
 findSocketForUnicastPacket() finds no match; it emits packetDroppedSignal (reason
 NO_PORT_FOUND) on the packet before it builds the Icmpv4SendErrorReq (type 3 /
@@ -101,7 +101,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/udp/checks.md#port-unreachable: hostA -- hostB.
+// The mockup of doc/project/evidence/protocol/udp/checks/port-unreachable.md#port-unreachable: hostA -- hostB.
 network Rfc768PortUnreachableNet
 {
     submodules:

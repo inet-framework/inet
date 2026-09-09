@@ -1,0 +1,96 @@
+%description:
+
+RFC 1122 — a program sets the TTL and the TOS of a datagram it sends, and the values reach
+the IP layer unchanged.
+
+Checks RFC1122-UAPI-1 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/udp/checks/app-interface.md#ttl-and-tos-from-the-program; the
+program steps below map onto its expected observations. Mapping of the plain mockup:
+host A = hostA, host B = hostB.
+
+The sending program names a TTL of 33 and a TOS of 8. Neither value is one a host would use
+on its own, so the datagram cannot carry them by chance. The check reads the fields on the
+first link, before any gateway can decrement the TTL.
+
+The third value the requirement names, the IP options, is not here. The sending program
+offers no interface for options, and the results record that.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_application_ttl_and_tos")
+        // Expected observations 1 and 2: on link 1 the datagram carries the TTL and the TOS the
+        // program named (RFC1122-UAPI-1).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 33 && ipv4.typeOfService == 8")
+                  .describe("host A's datagram with the TTL and the TOS the program named")
+                  .within(0.5))
+        // Expected observation 3: host B's UDP hands the 100 octets upward, so neither value
+        // stopped the delivery.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .describe("the 100 octets handed up from host B's UDP toward the program")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_application_ttl_and_tos compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: hostA -- hostB.
+network Rfc1122AppInterfaceNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc1122AppInterfaceNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host A: 100 octets to port 5000, with a TTL and a TOS the program names itself.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[0].timeToLive = 33
+*.hostA.app[0].tos = 8
+
+# Host B: one receiving program, on port 5000.
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_application_ttl_and_tos: PASS

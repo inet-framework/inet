@@ -45,6 +45,11 @@ The conventions of an entry — strength, class, and the `Overridden by` field �
 ones of [`rfc791/catalog.md`](../rfc791/catalog.md#how-to-read-an-entry). RFC 768 predates
 RFC 2119 and uses one `must` and one `should`; everything else is description.
 
+Two entries point into [`rfc1122/catalog.md`](../rfc1122/catalog.md). RFC 1122 §4.1 states
+the host requirements for UDP with the keywords of RFC 2119. Where it raises the strength
+of a statement of this document, the entry here carries `Overridden by`; where it only
+says the same thing again, the entry says `Restated by`.
+
 ## Header
 
 ### RFC768-HDR-1
@@ -100,8 +105,12 @@ RFC 2119 and uses one `must` and one `should`; everything else is description.
 > protection against misrouted datagrams." — Fields, `rfc768.txt:78-80`
 
 - Strength: description. Class: encoding.
-- Check idea: the arithmetic is a serializer concern; a unit test computes the value over a
-  known datagram and compares. A wire check can establish only that a checksum is present.
+- Overridden by [RFC1122-UCK-1](../rfc1122/catalog.md#rfc1122-uck-1): for a host, RFC 1122
+  §4.1.3.4 makes the generation and the check of this value mandatory.
+- Check idea: a check on the wire alone can establish only that a checksum is present. A
+  check that can change a datagram in flight establishes the coverage: change one octet of
+  the data, or one address of the pseudo header, keep the checksum field, and the receiver
+  must reject the datagram.
 
 ### RFC768-CKSUM-2
 
@@ -114,6 +123,10 @@ RFC 2119 and uses one `must` and one `should`; everything else is description.
 
 - Strength: description; the second sentence is a permission for the transmitter. Class:
   wire plus end-to-end.
+- Restated by [RFC1122-UCK-6](../rfc1122/catalog.md#rfc1122-uck-6), an IMPLEMENTATION note
+  of RFC 1122 §4.1.3.4 with the same strength. The receive half of the entry, that an
+  all-zero checksum is not a failed checksum, is the subject of
+  [RFC1122-UCK-5](../rfc1122/catalog.md#rfc1122-uck-5).
 - Check idea: a sender that generates a checksum transmits a nonzero value; a sender that
   generates none transmits zero; the receiver accepts both.
 

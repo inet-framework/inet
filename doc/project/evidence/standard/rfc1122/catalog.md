@@ -1,11 +1,18 @@
-# RFC 1122 (host requirements, internet layer) — catalog of checkable statements
+# RFC 1122 (host requirements) — catalog of checkable statements
 
-> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC1122-*` · **Stands on:** [standards.md](../../protocol/ipv4/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
+> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC1122-*` · **Stands on:** [ipv4/standards.md](../../protocol/ipv4/standards.md), [udp/standards.md](../../protocol/udp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
 This document is the step 3 artifact of the standards test workflow, for one document of
-the in-scope set: RFC 1122, the sections of §3 that the IPv4 standards map pins
-([`standards.md`](../../protocol/ipv4/standards.md#in-scope-set)). The catalog comes from
+the in-scope set: RFC 1122. Two protocols share it, and each one pins its own sections. The
+sections of §3 come from the IPv4 standards map
+([`ipv4/standards.md`](../../protocol/ipv4/standards.md#in-scope-set)); §4.1, the host
+requirements for UDP, comes from the UDP standards map
+([`udp/standards.md`](../../protocol/udp/standards.md#in-scope-set)). The catalog comes from
 the RFC text only. It contains no simulation model names and no code references.
+
+The entries of §3 carry the identifiers of the internet layer and the entries of §4.1 carry
+identifiers that start with `U`. One document holds both, because one document owns the
+`RFC1122-*` identifiers; a reader of either protocol reads the same text.
 
 Source, cached in this folder:
 
@@ -22,8 +29,9 @@ Quotes are verbatim. A reference such as `rfc1122.txt:1686` points to a line of 
 file in this folder.
 
 The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`ipv4/coverage.md`](../../model/ipv4/coverage.md). Keeping it out is deliberate: this
+what the run said — is **not** in this document. It lives in the coverage ledgers,
+[`ipv4/coverage.md`](../../model/ipv4/coverage.md) and
+[`udp/coverage.md`](../../model/udp/coverage.md). Keeping it out is deliberate: this
 catalog states what the standard says, so a new test or a new run must never force an edit
 here.
 
@@ -68,6 +76,26 @@ here.
 | [RFC1122-PP-1](#rfc1122-pp-1) | A host should generate Parameter Problem messages. |
 | [RFC1122-PP-2](#rfc1122-pp-2) | A received Parameter Problem is passed to the transport layer. |
 | [RFC1122-ERR-1](#rfc1122-err-1) | Wherever practical, a host returns an ICMP error on an error. |
+| [RFC1122-UCK-1](#rfc1122-uck-1) | A host implements the generation and the check of the UDP checksum. |
+| [RFC1122-UCK-2](#rfc1122-uck-2) | An application may be able to control whether a checksum is generated. |
+| [RFC1122-UCK-3](#rfc1122-uck-3) | The generation of the checksum is on by default. |
+| [RFC1122-UCK-4](#rfc1122-uck-4) | A datagram whose checksum is non-zero and wrong is silently discarded. |
+| [RFC1122-UCK-5](#rfc1122-uck-5) | An application may be able to control what happens to a datagram without a checksum. |
+| [RFC1122-UCK-6](#rfc1122-uck-6) | A computed checksum of zero is transmitted as all ones. |
+| [RFC1122-UPORT-1](#rfc1122-uport-1) | A datagram for a port with no listener should draw an ICMP Port Unreachable message. |
+| [RFC1122-UERR-1](#rfc1122-uerr-1) | UDP passes every ICMP error message it receives up to the application. |
+| [RFC1122-UOPT-1](#rfc1122-uopt-1) | UDP passes a received IP option to the application unchanged. |
+| [RFC1122-UOPT-2](#rfc1122-uopt-2) | An application can specify the IP options of a sent datagram. |
+| [RFC1122-UMH-1](#rfc1122-umh-1) | The specific destination address of a received datagram goes up to the application. |
+| [RFC1122-UMH-2](#rfc1122-umh-2) | An application can choose the source address of a datagram. |
+| [RFC1122-UMH-3](#rfc1122-umh-3) | There should be a way to tell the application which source address was chosen. |
+| [RFC1122-UADDR-1](#rfc1122-uaddr-1) | A datagram whose IP source address is invalid is discarded, by UDP or by the IP layer. |
+| [RFC1122-UADDR-2](#rfc1122-uaddr-2) | The source address of a datagram a host sends is an address of that host. |
+| [RFC1122-UAPI-1](#rfc1122-uapi-1) | An application can set the TTL, the TOS and the IP options of a datagram it sends. |
+| [RFC1122-UAPI-2](#rfc1122-uapi-2) | UDP may pass the received TOS up to the application. |
+| [RFC1122-UAPI-3](#rfc1122-uapi-3) | The application interface of UDP gives the full service of the IP transport interface. |
+
+The rows above the line hold §3, the internet layer. The rows below hold §4.1, UDP.
 
 ## How to read an entry
 
@@ -80,8 +108,9 @@ here.
   - `error-signal` — an ICMP message that reports a failure, or its absence;
   - `internal` — state or an interface inside a module; not visible from outside;
   - `encoding` — the exact bit layout of a field; a serializer concern.
-- **Governs** — the RFC 791 entry that this entry restates with a keyword. That entry
-  carries the matching `Overridden by` field.
+- **Governs** — the entry of a base document that this entry restates with a keyword, or
+  the entry of another layer that states the same rule. That entry carries the matching
+  `Overridden by` field when the strength changes.
 - **Overridden by** — present only when a later in-scope document changes this statement.
   One entry carries it: RFC 6864 replaces the identification permission of §3.2.1.5.
 
@@ -563,12 +592,245 @@ a rule prohibits the message.**
   The prohibitions are [RFC1122-ICMP-5](#rfc1122-icmp-5) to
   [RFC1122-ICMP-9](#rfc1122-icmp-9).
 
+## UDP checksums
+
+### RFC1122-UCK-1
+
+**A host implements the generation and the check of the UDP checksum.**
+
+> "A host MUST implement the facility to generate and validate UDP checksums." — §4.1.3.4,
+> `rfc1122.txt:4584-4585`
+
+- Strength: must. Class: wire plus end-to-end.
+- Governs: [RFC768-CKSUM-1](../rfc768/catalog.md#rfc768-cksum-1). RFC 768 defines the
+  checksum but demands nothing; this entry makes both halves mandatory for a host.
+- Check idea: a datagram that a host sends carries the checksum that RFC 768 defines, and a
+  datagram whose checksum is wrong does not reach the program at the receiver.
+
+### RFC1122-UCK-2
+
+**An application may be able to control whether a checksum is generated.**
+
+> "An application MAY optionally be able to control whether a UDP checksum will be
+> generated" — §4.1.3.4, `rfc1122.txt:4585-4586`
+
+- Strength: may. Class: internal.
+- Check idea: none from the wire. The statement permits an interface; it demands no
+  behaviour that two nodes can show each other.
+
+### RFC1122-UCK-3
+
+**The generation of the checksum is on by default.**
+
+> "but it MUST default to checksumming on." — §4.1.3.4, `rfc1122.txt:4586-4587`
+
+- Strength: must. Class: wire.
+- Check idea: a host sends a datagram, and no program and no configuration says anything
+  about the checksum. The datagram on the wire carries the checksum that RFC 768 defines:
+  the one's complement sum over the pseudo header, the UDP header and the data.
+
+### RFC1122-UCK-4
+
+**A datagram whose checksum is non-zero and wrong is silently discarded.**
+
+> "If a UDP datagram is received with a checksum that is non-zero and invalid, UDP MUST
+> silently discard the datagram." — §4.1.3.4, `rfc1122.txt:4589-4590`
+
+- Strength: must. Class: end-to-end (absence) plus error-signal (absence).
+- Check idea: change a datagram in flight, so that its checksum no longer matches what it
+  covers, and leave the checksum non-zero. The receiver hands nothing to the program and
+  sends nothing back. The change can be to the checksum itself, to the data, or to a field
+  of the pseudo header; the three are the same statement seen from three sides.
+
+### RFC1122-UCK-5
+
+**An application may be able to control what happens to a datagram without a checksum.**
+
+> "An application MAY optionally be able to control whether UDP datagrams without checksums
+> should be discarded or passed to the application." — §4.1.3.4, `rfc1122.txt:4591-4593`
+
+- Strength: may. Class: internal, with an end-to-end consequence.
+- Check idea: the permission itself is an interface. What a test can see is the behaviour
+  when no application uses the permission: a datagram whose checksum is all zero reaches
+  the program, because RFC 768 says an all-zero checksum means that the sender generated
+  none.
+
+### RFC1122-UCK-6
+
+**A computed checksum of zero is transmitted as all ones.**
+
+> "If the transmitter really calculates a UDP checksum of zero, it must transmit the
+> checksum as all 1's (65535)." — §4.1.3.4, IMPLEMENTATION, `rfc1122.txt:4618-4620`
+
+- Strength: description. The sentence is in an IMPLEMENTATION note and its "must" is not
+  one of the keywords of §1.3.2.
+- Governs: [RFC768-CKSUM-2](../rfc768/catalog.md#rfc768-cksum-2).
+- Check idea: a sender whose data gives a sum of zero puts 65535 on the wire. A test cannot
+  choose the data that gives this sum without knowledge of the addresses and the ports that
+  the run assigns.
+
+## UDP ports
+
+### RFC1122-UPORT-1
+
+**A datagram for a port with no listener should draw an ICMP Port Unreachable message.**
+
+> "If a datagram arrives addressed to a UDP port for which there is no pending LISTEN call,
+> UDP SHOULD send an ICMP Port Unreachable message." — §4.1.3.1, `rfc1122.txt:4527-4529`
+
+- Strength: should. Class: error-signal.
+- Governs: [RFC792-DU-3](../rfc792/catalog.md#rfc792-du-3). RFC 792 says a host **may**
+  send the message; for a host that follows RFC 1122 the strength is **should**.
+- Check idea: send a datagram to a port on which no program listens. The receiver answers
+  with Destination Unreachable, code 3.
+
+## UDP and ICMP errors
+
+### RFC1122-UERR-1
+
+**UDP passes every ICMP error message it receives up to the application.**
+
+> "UDP MUST pass to the application layer all ICMP error messages that it receives from the
+> IP layer." — §4.1.3.3, `rfc1122.txt:4565-4566`
+
+- Strength: must. Class: internal.
+- Check idea: the observation is at the interface between UDP and the program, not on a
+  link. A test that watches the traffic between two nodes cannot see it.
+
+## UDP and IP options
+
+### RFC1122-UOPT-1
+
+**UDP passes a received IP option to the application unchanged.**
+
+> "UDP MUST pass any IP option that it receives from the IP layer transparently to the
+> application layer." — §4.1.3.2, `rfc1122.txt:4533-4534`
+
+- Strength: must. Class: internal.
+- Check idea: the observation is at the interface between UDP and the program.
+
+### RFC1122-UOPT-2
+
+**An application can specify the IP options of a sent datagram, and UDP passes them down.**
+
+> "An application MUST be able to specify IP options to be sent in its UDP datagrams, and
+> UDP MUST pass these options to the IP layer." — §4.1.3.2, `rfc1122.txt:4536-4538`
+
+- Strength: must. Class: internal, with a wire consequence.
+- Check idea: a program asks for an IP option, and the datagram on the wire carries it.
+
+## UDP multihoming
+
+### RFC1122-UMH-1
+
+**The specific destination address of a received datagram goes up to the application.**
+
+> "When a UDP datagram is received, its specific-destination address MUST be passed up to
+> the application layer." — §4.1.3.5, `rfc1122.txt:4626-4627`
+
+- Strength: must. Class: internal.
+- Check idea: the observation is at the interface between UDP and the program.
+
+### RFC1122-UMH-2
+
+**An application can choose the source address of a datagram, or leave the choice open.**
+
+> "An application program MUST be able to specify the IP source address to be used for
+> sending a UDP datagram or to leave it unspecified (in which case the networking software
+> will choose an appropriate source address)." — §4.1.3.5, `rfc1122.txt:4629-4632`
+
+- Strength: must. Class: internal, with a wire consequence.
+- Check idea: a program on a host with two interfaces names one of the two addresses, and
+  the datagram on the wire carries the address that the program named.
+
+### RFC1122-UMH-3
+
+**There should be a way to tell the application which source address was chosen.**
+
+> "There SHOULD be a way to communicate the chosen source address up to the application
+> layer" — §4.1.3.5, `rfc1122.txt:4632-4634`
+
+- Strength: should. Class: internal.
+- Check idea: the observation is at the interface between UDP and the program.
+
+## UDP addresses
+
+### RFC1122-UADDR-1
+
+**A datagram whose IP source address is invalid is discarded, by UDP or by the IP layer.**
+
+> "A UDP datagram received with an invalid IP source address (e.g., a broadcast or multicast
+> address) must be discarded by UDP or by the IP layer" — §4.1.3.6, `rfc1122.txt:4646-4648`
+
+The requirements summary of §4.1.5 lists the statement in the MUST column:
+
+> "Bad IP src addr silently discarded by UDP/IP |4.1.3.6 |x| | | | |" — §4.1.5,
+> `rfc1122.txt:4731`
+
+- Strength: must. Class: end-to-end (absence).
+- Governs: [RFC1122-ADDR-3](#rfc1122-addr-3), for a datagram that carries UDP. The two
+  entries state one rule for two layers: §4.1.3.6 lets either layer do the discard, and it
+  points at §3.2.1.3 for the address forms that are invalid.
+- Check idea: put a broadcast or multicast address in the source field of a datagram in
+  flight and keep every checksum valid. The receiver hands nothing to the program.
+
+### RFC1122-UADDR-2
+
+**The source address of a datagram a host sends is an address of that host.**
+
+> "When a host sends a UDP datagram, the source address MUST be (one of) the IP address(es)
+> of the host." — §4.1.3.6, `rfc1122.txt:4650-4651`
+
+- Strength: must. Class: wire.
+- Governs: [RFC1122-ADDR-1](#rfc1122-addr-1), for a datagram that carries UDP.
+- Check idea: read the source address of every datagram that a host sends and compare it
+  with the addresses of the interfaces of that host.
+
+## UDP and the application interface
+
+### RFC1122-UAPI-1
+
+**An application can set the TTL, the TOS and the IP options of a datagram it sends, and
+these values reach the IP layer unchanged.**
+
+> "An application-layer program MUST be able to set the TTL and TOS values as well as IP
+> options for sending a UDP datagram, and these values must be passed transparently to the
+> IP layer." — §4.1.4, `rfc1122.txt:4675-4677`
+
+- Strength: must. Class: internal, with a wire consequence.
+- Check idea: a program names a TTL, and the datagram that leaves the host carries that
+  TTL.
+
+### RFC1122-UAPI-2
+
+**UDP may pass the received TOS up to the application.**
+
+> "UDP MAY pass the received TOS up to the application layer." — §4.1.4, `rfc1122.txt:4678`
+
+- Strength: may. Class: internal.
+- Check idea: the observation is at the interface between UDP and the program.
+
+### RFC1122-UAPI-3
+
+**The application interface of UDP gives the full service of the IP transport interface.**
+
+> "The application interface to UDP MUST provide the full services of the IP/transport
+> interface described in Section 3.4" — §4.1.4, `rfc1122.txt:4655-4656`
+
+- Strength: must. Class: internal.
+- Check idea: the statement names the calls of §3.4, which are an interface and not a
+  behaviour on a link. The standards map leaves §3.4 out of the in-scope set for the same
+  reason.
+
 ## Out of scope in this catalog
 
-Three statements of the in-scope sections are left out on purpose: the All-Subnets-MTU
-configuration flag of §3.3.3 (a `may` about a host with several subnets), and the two
-sentences of §3.2.2.1 and §3.2.2.3 that tell the **transport** layer how to act on a
-received report; those belong to the UDP and TCP catalogs.
+Three statements of the in-scope sections of §3 are left out on purpose: the
+All-Subnets-MTU configuration flag of §3.3.3 (a `may` about a host with several subnets),
+and the two sentences of §3.2.2.1 and §3.2.2.3 that tell the **transport** layer how to act
+on a received report.
+
+§4.1 is here in full. Its two other parts hold no checkable statement: §4.1.1 introduces
+UDP, and §4.1.2 says that the specification of UDP has no known error.
 
 The parts of §3 that the standards map leaves out of the IPv4 set: type of service
 (§3.2.1.6), the options (§3.2.1.8) and source route forwarding (§3.3.5), the subnet
@@ -576,5 +838,6 @@ requirement and the broadcast address forms as destinations (§3.2.1.3, §3.3.6)
 and host routing (§3.2.2.2, §3.3.1, §3.3.4), source quench (§3.2.2.3), the ICMP query
 messages (§3.2.2.6 to §3.2.2.9), IGMP and multicasting (§3.2.3, §3.3.7), and the layer
 interface of §3.4. The reasons are in
-[`standards.md`](../../protocol/ipv4/standards.md#in-scope-set). §4 of the document, the
-transport layer, belongs to the UDP and TCP catalogs.
+[`ipv4/standards.md`](../../protocol/ipv4/standards.md#in-scope-set). §4.2 of the document,
+the host requirements for TCP, is not here; the TCP pass works from RFC 9293, which is the
+current specification of TCP and holds the RFC 1122 rules already.

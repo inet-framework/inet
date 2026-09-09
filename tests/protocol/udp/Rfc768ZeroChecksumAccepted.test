@@ -1,0 +1,111 @@
+%description:
+
+RFC 768 — an all-zero checksum means that the sender generated none, and the receiver
+accepts such a datagram.
+
+Checks RFC768-CKSUM-2 (description) from doc/project/evidence/standard/rfc768/catalog.md
+and RFC1122-UCK-5 (may) from doc/project/evidence/standard/rfc1122/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/udp/checks/checksum.md#zero-checksum-accepted; the program
+steps below map onto its expected observations. Mapping of the mockup with a relay: host A =
+hostA, gateway R = router, relay T = tap, host B = hostB.
+
+The relay sets the checksum field of the datagram to zero and changes nothing else. What
+remains is a datagram whose checksum field says "no checksum was generated", although the
+value that was there did match. This is the other half of the discard rule of
+RFC1122-UCK-4, which names a checksum that is "non-zero and invalid": zero is outside that
+rule, and no program asked for datagrams without checksums to be discarded.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_zero_checksum_accepted")
+        // The relay sets the UDP checksum to zero and changes nothing else.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { zeroUdpChecksum(frame); })
+                     .describe("the datagram (set its UDP checksum to zero)"))
+        // Expected observation 1: the datagram on link 2 before the relay carries a non-zero
+        // checksum -- the sender did generate one.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && udp.checksum != 0")
+                  .describe("the datagram on link 2 before the relay, with a checksum")
+                  .within(0.5))
+        // Expected observation 2: at host B's interface the checksum field is all zero.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.checksum == 0")
+                  .describe("the datagram at host B's interface with an all-zero checksum")
+                  .within(0.1))
+        // Expected observation 3: host B's UDP hands the 100 octets upward -- an all-zero
+        // checksum is not a failed checksum (RFC768-CKSUM-2, RFC1122-UCK-5).
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .describe("the 100 octets handed up from host B's UDP toward the program")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_zero_checksum_accepted compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Host A generates the checksum that RFC 768 defines, so that the relay has a real value to
+# replace with zero; host B computes and checks, so that it would notice a wrong one.
+**.udp.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc768_zero_checksum_accepted: PASS

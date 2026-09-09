@@ -5,7 +5,7 @@ generates none transmits zero; the receiver accepts a datagram of either kind.
 
 Checks RFC768-CKSUM-2 (description). Also covers RFC768-CKSUM-1 (description, presence only)
 from doc/project/evidence/standard/rfc768/catalog.md. The English procedure and the mockup are
-in doc/project/evidence/protocol/udp/checks.md#checksum-presence-and-absence; the program steps
+in doc/project/evidence/protocol/udp/checks/checksum.md#checksum-presence-and-absence; the program steps
 below map one to one onto its expected observations. Mapping of the mockup: host A = hostA,
 host B = hostB, host C = hostC; link 1 = hostA-hostB, link 2 = hostB-hostC.
 
@@ -87,7 +87,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/udp/checks.md#checksum-presence-and-absence:
+// The mockup of doc/project/evidence/protocol/udp/checks/checksum.md#checksum-presence-and-absence:
 // hostA -- hostB -- hostC, host B between the other two, no forwarding needed (both sends
 // terminate at host B itself).
 network Rfc768ChecksumNet

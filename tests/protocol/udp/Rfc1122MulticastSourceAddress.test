@@ -1,0 +1,128 @@
+%description:
+
+RFC 1122 — a host discards a datagram whose IP source address is a multicast address.
+
+Checks RFC1122-UADDR-1 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/udp/checks/input-validation.md#multicast-source-address; the
+program steps below map onto its expected observations. Mapping of the mockup with a relay:
+host A = hostA, gateway R = router, relay T = tap, host B = hostB. The relay rewrites the
+source address to 224.0.0.1, the all-hosts multicast address, and keeps the IPv4 header
+checksum valid. A program listens on port 5000 at host B on purpose, so that only the
+source address can be the reason for a discard.
+
+The scenario says nothing about the UDP checksum, so the datagram keeps the value it was
+sent with. This is deliberate: a checksum that covered the pseudo header would no longer
+match after the rewrite, and the receiver could then discard the datagram for the checksum
+and not for the address. The check is about the address.
+
+The requirement names two layers -- "discarded by UDP or by the IP layer" -- so expected
+observation 2 accepts a discard record from either one.
+
+Expected result: FAIL. Neither layer validates the source address of a received datagram
+(Ipv4::handleIncomingDatagram, Ipv4::preroutingFinish, Udp::processUdpPacket), so the
+datagram reaches the program and expected observation 2 misses its deadline. The run showed
+the program receiving `224.0.0.1:4000 --> 10.0.0.6:5000`. The IPv4 suite records the same
+gap for the broadcast form of the rule, in
+tests/protocol/ipv4/Rfc1122InvalidSourceAddress.test. See
+doc/project/evidence/model/udp/results.md.
+
+Deviation: expected observation 3 (nothing upward, nothing back) is one absence watch over
+the whole host, because two consecutive watches cannot cover the same window.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_multicast_source_address")
+        // The relay rewrites the source address and keeps the IPv4 header checksum valid.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setSrcAddress(Ipv4Address("224.0.0.1")); }); })
+                     .describe("the datagram (set its source to the multicast address 224.0.0.1)"))
+        // Expected observation 1: at host B's interface the datagram carries the multicast source.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == "224.0.0.1"; })
+                  .capture("id", "ipv4.identification")
+                  .describe("the datagram at host B's interface with source 224.0.0.1")
+                  .within(0.5))
+        // Expected observation 2: host B discards it, at the network layer or at UDP
+        // (RFC1122-UADDR-1).
+        .anyOf({ on("hostB.ipv4.ip").signal("packetDropped")
+                     .packet("ipv4.identification == {id}")
+                     .describe("host B's network layer discards the datagram with the multicast source")
+                     .within(0.1),
+                 on("hostB.udp").signal("packetDropped")
+                     .match([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
+                     .describe("host B's UDP discards the datagram with the multicast source")
+                     .within(0.1) })
+        // Expected observation 3: nothing goes up to the program and no message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
+                  .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_multicast_source_address compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum, so the relay's rewrite leaves a valid one.
+**.ipv4.ip.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc1122_multicast_source_address: PASS

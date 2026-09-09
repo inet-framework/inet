@@ -1,0 +1,123 @@
+%description:
+
+RFC 768 — the checksum covers the data, so a change of one octet of the data is caught.
+
+Checks RFC768-CKSUM-1 (description) from doc/project/evidence/standard/rfc768/catalog.md
+and RFC1122-UCK-4 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/udp/checks/checksum.md#checksum-covers-the-data; the program
+steps below map onto its expected observations. Mapping of the mockup with a relay: host A =
+hostA, gateway R = router, relay T = tap, host B = hostB.
+
+The relay changes one octet of the data and leaves every header field alone, the checksum
+field included. The data of a generated datagram is a length without content, so the relay
+first replaces the data with the octets it stands for and then changes one of them; the
+change is therefore a change on the wire and not a flag inside the simulation. See
+UdpMutations.h, corruptUdpData.
+
+Expected result: PASS.
+
+Deviation: expected observation 4 (nothing upward, nothing back) is one absence watch over
+the whole host, because two consecutive watches cannot cover the same window.
+
+Note on expected observation 3: the drop record of the UDP module carries no protocol tag,
+and the module pops the UDP header before it records a drop for a wrong checksum, so the
+record cannot be filtered by port. Only one datagram is in flight, and its data length
+identifies it; see UdpMutations.h, droppedDatagramWithData.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_checksum_covers_data")
+        // The relay changes one octet of the data and keeps every header field.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { corruptUdpData(frame); })
+                     .describe("the datagram (change one octet of its data)"))
+        // Expected observation 1: the datagram on link 2, before the relay; record its checksum.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .capture("ck", "udp.checksum")
+                  .describe("the datagram on link 2 before the relay")
+                  .within(0.5))
+        // Expected observation 2: at host B's interface the datagram carries the same length and
+        // the same checksum field; only the data differs.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B && udp.checksum == {ck}")
+                  .describe("the datagram at host B's interface, same length and same checksum field")
+                  .within(0.1))
+        // Expected observation 3: host B's UDP discards it (RFC768-CKSUM-1, RFC1122-UCK-4).
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
+                  .describe("host B's UDP discards the datagram whose data no longer matches the checksum")
+                  .within(0.1))
+        // Expected observation 4: nothing goes up to the program and no message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
+                  .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_checksum_covers_data compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Both hosts use the checksum that RFC 768 defines; the coverage of the data is what the
+# check is about, and only a computed value covers anything.
+**.udp.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc768_checksum_covers_data: PASS

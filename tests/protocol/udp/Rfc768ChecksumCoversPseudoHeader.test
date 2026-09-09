@@ -1,0 +1,123 @@
+%description:
+
+RFC 768 — the checksum covers a pseudo header of addresses, which gives protection against
+misrouted datagrams.
+
+Checks RFC768-CKSUM-1 (description) from doc/project/evidence/standard/rfc768/catalog.md
+and RFC1122-UCK-4 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/udp/checks/checksum.md#checksum-covers-the-pseudo-header; the
+program steps below map onto its expected observations. Mapping of the mockup with a relay:
+host A = hostA, gateway R = router, relay T = tap, host B = hostB.
+
+The relay rewrites the source address of the datagram to 192.168.7.7, a normal unicast
+address that the mockup assigns to no node, and keeps the IPv4 header checksum valid. The
+address needs no owner: host B never answers this datagram, and the check is about the
+value the receiver sums, not about who sent it. A unicast address is what matters, so that
+no rule about invalid source addresses can explain the discard. Nothing in the UDP header and nothing in the data changes. A receiver that summed
+only the UDP header and the data would therefore accept the datagram.
+
+Expected result: PASS.
+
+Deviation: expected observation 3 (nothing upward, nothing back) is one absence watch over
+the whole host, because two consecutive watches cannot cover the same window.
+
+Note on expected observation 3: the drop record of the UDP module carries no protocol tag,
+and the module pops the UDP header before it records a drop for a wrong checksum, so the
+record cannot be filtered by port. Only one datagram is in flight, and its data length
+identifies it; see UdpMutations.h, droppedDatagramWithData.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc768_checksum_covers_pseudo_header")
+        // The relay rewrites the source address and keeps the IPv4 header checksum valid.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setSrcAddress(Ipv4Address("192.168.7.7")); }); })
+                     .describe("the datagram (set its source address to 192.168.7.7)"))
+        // Expected observation 1: at host B's interface the datagram carries the new source
+        // address and the checksum the sender computed for the old one.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == "192.168.7.7"; })
+                  .describe("the datagram at host B's interface with the rewritten source address")
+                  .within(0.5))
+        // Expected observation 2: host B's UDP discards it (RFC768-CKSUM-1, RFC1122-UCK-4).
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
+                  .describe("host B's UDP discards the datagram whose pseudo header no longer matches the checksum")
+                  .within(0.1))
+        // Expected observation 3: nothing goes up to the program and no message leaves host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
+                  .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
+                  .within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_checksum_covers_pseudo_header compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum, so the relay's rewrite leaves a valid one.
+**.ipv4.ip.checksumMode = "computed"
+
+# Both hosts use the checksum that RFC 768 defines; the pseudo header is part of it only
+# when the value is computed.
+**.udp.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc768_checksum_covers_pseudo_header: PASS

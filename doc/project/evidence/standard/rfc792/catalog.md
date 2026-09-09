@@ -36,13 +36,14 @@ new test or a new run must never force an edit here.
 | [RFC792-DU-3](#rfc792-du-3) | Closed port: destination unreachable, code 3. |
 
 The conventions of an entry — strength, class, and the `Overridden by` field — are
-the ones of [`rfc791/catalog.md`](../rfc791/catalog.md#how-to-read-an-entry). No entry here
-carries `Overridden by`, for two different reasons. The two messages of the RFC 791 checks
-are gateway reports, and RFC 1122 governs hosts, so the gateway stays under this text until
-RFC 1812 enters an in-scope set. The closed-port message is a host report, and RFC 1122
-does raise its strength; but the in-scope set differs per protocol — RFC 1122 is in the IPv4
-set and not in the UDP one — so the change is recorded as a note under the entry rather than
-as an override of the shared catalog.
+the ones of [`rfc791/catalog.md`](../rfc791/catalog.md#how-to-read-an-entry). One entry of
+the three carries `Overridden by`. The two messages of the RFC 791 checks are gateway
+reports, and RFC 1122 governs hosts, so the gateway stays under this text until RFC 1812
+enters an in-scope set. The closed-port message is a host report, and RFC 1122 raises its
+strength to a should; both protocols that share this catalog hold RFC 1122 in their in-scope
+set, IPv4 from level 3 and UDP from level 3, so the entry carries the override. The note
+under the entry says which section governs which protocol, because a check written for the
+UDP set at level 2 still reads the entry as a may.
 
 ## Error signals for the RFC 791 checks
 
@@ -99,12 +100,16 @@ unreachable, code 3.**
 - Pairs with [RFC768-HDR-2](../rfc768/catalog.md#rfc768-hdr-2): a port that no program
   opened selects no receiver. A host that sends the message shows the cooperative behavior;
   the RFC permits silence.
-- Note on the strength: this is a host report, unlike the two above. Where RFC 1122 is in
-  the in-scope set, §3.2.2.1 raises the may to a should
-  ([RFC1122-DU-1](../rfc1122/catalog.md#rfc1122-du-1)), and §3.3.8 asks a host to report
-  wherever practical ([RFC1122-ERR-1](../rfc1122/catalog.md#rfc1122-err-1)); the five
-  prohibitions of §3.2.2 take precedence over both. RFC 1122 is in the IPv4 in-scope set
-  and not in the UDP one, so a UDP check reads this entry as a may.
+- Overridden by [RFC1122-UPORT-1](../rfc1122/catalog.md#rfc1122-uport-1): RFC 1122 §4.1.3.1
+  states the same report as a **should**, for UDP itself.
+- Note on the strength: this is a host report, unlike the two above. Three entries of
+  RFC 1122 raise the may to a should, from two directions. §4.1.3.1 says that UDP should
+  send the message (RFC1122-UPORT-1); §3.2.2.1 says the same of the IP layer
+  ([RFC1122-DU-1](../rfc1122/catalog.md#rfc1122-du-1)); and §3.3.8 asks a host to report
+  wherever practical ([RFC1122-ERR-1](../rfc1122/catalog.md#rfc1122-err-1)). The five
+  prohibitions of §3.2.2 take precedence over all three. RFC 1122 is in the IPv4 in-scope
+  set and, from level 3 on, in the UDP one; a UDP check at level 2 reads this entry as a
+  may, and a UDP check at level 3 reads it as a should.
 
 ## Out of scope in this catalog
 

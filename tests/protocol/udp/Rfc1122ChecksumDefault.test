@@ -1,0 +1,142 @@
+%description:
+
+RFC 1122 — the generation of the UDP checksum is on by default, and the value is the one
+RFC 768 defines.
+
+Checks RFC1122-UCK-3 (must) from doc/project/evidence/standard/rfc1122/catalog.md. Also
+covers RFC1122-UCK-1 (must, the generate half) and RFC768-CKSUM-1 (description, the
+arithmetic). The English procedure is in
+doc/project/evidence/protocol/udp/checks/checksum.md#checksum-by-default; the program steps
+below map onto its expected observations. Mapping of the plain mockup: host A = hostA,
+host B = hostB, host C = hostC.
+
+Host A is the subject: nothing in the scenario says anything about its checksum, so it
+sends in the state a host has when no one configures it. Host C is a control: it is told to
+compute the value that RFC 768 defines. The two hosts let the program tell two failures
+apart. If step 1 fails, the arithmetic in this test is wrong. If step 1 passes and step 2
+fails, the arithmetic is right and the default state of a host is the finding.
+
+The value each step compares against is computed from the datagram on the wire, over a
+pseudo header of addresses, the UDP header and the data; see UdpMutations.h,
+expectedUdpChecksum.
+
+Expected result: FAIL. The `checksumMode` parameter of the ~Udp module
+(src/inet/transportlayer/udp/Udp.ned) is `default("declared")`, and that mode writes the
+constant 0xC00D into the checksum field instead of a sum (Udp::insertChecksum,
+Udp.cc:826-827). A receiver that computes cannot validate that value, and
+UdpHeaderSerializer::serializeFields refuses to write such a header to a wire at all. Step 2
+therefore fails while step 1 passes. See doc/project/evidence/model/udp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when the checksum field of the datagram holds the value RFC 768 defines for it.
+static bool carriesTheRfc768Checksum(const Packet *frame)
+{
+    return udpChecksumField(frame) == expectedUdpChecksum(frame);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_checksum_default")
+        // Step 1, the control: host C was told to compute the checksum, and the value on the
+        // wire is the one RFC 768 defines. This step establishes that the arithmetic below is
+        // right, so that step 2 speaks about the model and not about the test.
+        .once(on("hostC.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001 && udp.checksum != 0")
+                  .match([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
+                  .describe("host C's datagram, whose checksum is the value RFC 768 defines")
+                  .within(0.5))
+        // Expected observation 1: host A's datagram carries a checksum that is not zero. A zero
+        // would mean that the sender generated none, which is the state that must not be the
+        // default.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && udp.checksum != 0")
+                  .describe("host A's datagram, sent with no configuration, with a non-zero checksum")
+                  .within(0.5))
+        // Expected observation 2: that value is the one RFC 768 defines (RFC1122-UCK-3).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
+                  .describe("host A's checksum is the value RFC 768 defines, with nothing configured")
+                  .within(0.5))
+        // Expected observation 3: host B hands host A's 100 octets upward.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .describe("host A's 100 octets handed up from host B's UDP")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_checksum_default compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: hostA -- hostB -- hostC.
+network Rfc1122DefaultNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        hostB: StandardHost { @display("p=400,100"); }
+        hostC: StandardHost { @display("p=600,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1 (hostB.eth[0])
+        hostB.ethg++ <--> Eth100M <--> hostC.ethg++; // link 2 (hostB.eth[1])
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc1122DefaultNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Nothing is said about host A's checksum: that absence is the subject of the check.
+# Host C is the control, and it is told to compute the value RFC 768 defines.
+*.hostC.udp.checksumMode = "computed"
+
+# Host A: 100 octets to port 5000, with nothing configured beyond the send itself.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+
+# Host C: 200 octets to port 5001.
+*.hostC.numApps = 1
+*.hostC.app[0].typename = "UdpBasicApp"
+*.hostC.app[0].destAddresses = "hostB"
+*.hostC.app[0].destPort = 5001
+*.hostC.app[0].localPort = 4001
+*.hostC.app[0].messageLength = 200B
+*.hostC.app[0].startTime = 0.2s
+*.hostC.app[0].sendInterval = 1s
+
+# Host B: one receiving program per port.
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 5001
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc1122_checksum_default: PASS

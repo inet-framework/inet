@@ -1,0 +1,134 @@
+%description:
+
+RFC 768 — the length field counts the header and the data, so its minimum is eight, and a
+receiver accepts a datagram of that size.
+
+Checks RFC768-HDR-3 (description), the minimum, from
+doc/project/evidence/standard/rfc768/catalog.md. The English procedure is in
+doc/project/evidence/protocol/udp/checks/delivery.md#empty-datagram; the program steps below
+map onto its expected observations. Mapping of the mockup with a relay: host A = hostA,
+gateway R = router, relay T = tap, host B = hostB.
+
+The level 2 pass could not reach this observation. No sending program in the model can build
+a datagram with no data, because a chunk of length zero is refused
+(Packet::insertAt, src/inet/common/packet/Packet.cc), and the level 2 results recorded the
+gap and left it for the level 3 toolset. This test uses that toolset: the relay takes a
+normal datagram and removes its data, so that an 8-octet datagram reaches host B without a
+sender that could build one.
+
+The relay sets the UDP checksum to zero at the same time, which RFC 768 reads as "the
+transmitter generated no checksum". A value that covered the old data would be wrong for the
+new datagram, and the receiver would then discard it for the checksum and not answer the
+question this check asks. See UdpMutations.h, emptyUdpDatagram.
+
+Expected result: FAIL, and the reason is not the UDP module. The run shows that UDP accepted
+the 8-octet datagram and handed zero octets to the program: `Sending payload up to socket
+sockId=1`, and `UdpSink: Received packet: ... (0 B) ... 10.0.0.1:4000 --> 10.0.0.6:5000`.
+The run then stopped with a runtime error, before the tester could record the verdict:
+
+    Error: Returning an empty chunk is not allowed according to the flags: 0 while
+    processing statistic signal 'packetReceived' ... emitted from (inet::UdpSink)
+
+The receiving program declares `@statistic[endToEndDelay](source="dataAge(packetReceived)")`
+(src/inet/applications/udpapp/UdpSink.ned:36). That filter is
+DataAgeFilter::receiveSignal (src/inet/common/ResultFilters.cc), which calls
+`packet->peekData()` with no flags; for a packet of zero length the call returns an empty
+chunk, which is refused (EmptyChunk.h:51). A datagram of the smallest size RFC 768 allows
+therefore stops a simulation whose receiver is a standard application.
+
+The statistic stays on, and the scenario does not turn it off. Turning it off would make the
+test pass and would hide the finding: what a user of the model meets is exactly this error.
+A runtime error is a FAIL for the test runner. See doc/project/evidence/model/udp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "UdpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    // The relay removes the data and leaves the 8-octet header.
+    return ProtocolTest("rfc768_empty_datagram")
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { emptyUdpDatagram(frame); })
+                     .describe("the datagram (remove its data, leaving the 8-octet header)"))
+        // Expected observation 1: the datagram on link 2 before the relay carries 100 octets of
+        // data, so the change below is visible against it.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .describe("the datagram on link 2 before the relay, 108 octets long")
+                  .within(0.5))
+        // Expected observation 2: at host B's interface the length field is eight, the minimum
+        // (RFC768-HDR-3).
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 8B")
+                  .describe("the datagram at host B's interface with a length field of eight")
+                  .within(0.1))
+        // Expected observation 3: host B's UDP hands zero octets upward -- it accepted the
+        // smallest datagram the format allows.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getDataLength() == B(0); })
+                  .describe("zero octets handed up from host B's UDP toward the program")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc768_empty_datagram compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay: hostA -- router -- tap -- hostB.
+network Rfc768TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        router: Router { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc768TapNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes the IPv4 header checksum, so the relay's rewrite leaves a valid one.
+**.ipv4.ip.checksumMode = "computed"
+
+# One UDP datagram, 100 octets, to port 5000 on host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc768_empty_datagram: PASS
