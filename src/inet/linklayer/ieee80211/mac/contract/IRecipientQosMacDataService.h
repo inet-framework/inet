@@ -18,11 +18,11 @@ namespace ieee80211 {
 class INET_API IRecipientQosMacDataService
 {
   public:
-    // A duplicate has already been consumed and must not be processed as a
-    // management body; the coordination function may apply a subtype-specific
-    // response rule using the duplicate flag.
     struct ManagementFrameReceptionResult {
         std::vector<Packet *> completeFrames;
+        // IEEE Std 802.11-2024, 10.5: a management body becomes available to
+        // the coordination function only after the complete MMPDU is present.
+        Ptr<const Ieee80211MgmtHeader> completeHeader;
         bool duplicate = false;
     };
 

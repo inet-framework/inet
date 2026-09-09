@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -33,10 +34,21 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     defragmentedHeader->setMoreFragments(false);
     defragmentedFrame->insertAtFront(defragmentedHeader);
     defragmentedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    if (defragmentedHeader->getType() == ST_ACTION && defragmentedHeader->getChunkLength() == makeShared<Ieee80211MgmtHeader>()->getChunkLength()) {
+        // Decode the completed action from the reassembled on-air bytes; an
+        // individual fragment intentionally has no typed action body.
+        const auto& trailer = defragmentedFrame->popAtBack<Ieee80211MacTrailer>(B(4));
+        auto decodedFrame = new Packet(defragmentedFrame->getName(), defragmentedFrame->peekDataAsBytes());
+        decodedFrame->insertAtBack(trailer);
+        decodedFrame->copyTags(*defragmentedFrame);
+        decodedFrame->getRegionTags().copyTags(defragmentedFrame->getRegionTags(), defragmentedFrame->getFrontOffset(), decodedFrame->getFrontOffset(), defragmentedFrame->getDataLength());
+        decodedFrame->peekAtFront<Ieee80211MgmtHeader>();
+        delete defragmentedFrame;
+        defragmentedFrame = decodedFrame;
+    }
     EV_TRACE << "Created " << *defragmentedFrame << ".\n";
     return defragmentedFrame;
 }
 
 } // namespace ieee80211
 } // namespace inet
-

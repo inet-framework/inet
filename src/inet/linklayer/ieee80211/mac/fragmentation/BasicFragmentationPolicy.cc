@@ -29,23 +29,38 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
         std::vector<int> sizes;
         int payloadLength = 0;
         int headerLength = 0;
-        // Mgmt frames don't have payload
         const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
+        // IEEE Std 802.11-2024, 10.4: only individually addressed MPDUs
+        // carrying an MSDU or MMPDU are eligible for fragmentation.
+        if (header->getReceiverAddress().isMulticast())
+            return {};
         const auto& trailer = frame->peekAtBack<Ieee80211MacTrailer>(B(4));
         int trailerLength = trailer->getChunkLength().get<B>();
         if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             headerLength = header->getChunkLength().get<B>();
             payloadLength = frame->getByteLength() - headerLength - trailerLength;
         }
+        else if (dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
+            // Management subclasses currently combine the common MAC header
+            // and typed MMPDU body. Only the common header is repeated.
+            headerLength = makeShared<Ieee80211MgmtHeader>()->getChunkLength().get<B>();
+            payloadLength = frame->getByteLength() - headerLength - trailerLength;
+        }
         else
-            headerLength = frame->getByteLength();
+            return {};
         int maxFragmentPayload = fragmentationThreshold - headerLength - trailerLength;
+        if (maxFragmentPayload <= 0)
+            throw cRuntimeError("Fragmentation threshold %d is not larger than the %d byte header and trailer", fragmentationThreshold, headerLength + trailerLength);
+        // IEEE Std 802.11-2024, 10.4: all non-final fragments have the same
+        // even number of body octets; only the final fragment may be odd.
+        maxFragmentPayload &= ~1;
+        if (maxFragmentPayload == 0)
+            throw cRuntimeError("Fragmentation threshold %d leaves no even-length fragment body", fragmentationThreshold);
         if (payloadLength > maxFragmentPayload * MAX_NUM_FRAGMENTS)
             throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
-        for (int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
-            auto size = fragmentationThreshold - headerLength - trailerLength;
-            EV_TRACE << "Computed fragment: i = " << i << ", size = " << size << ".\n";
-            sizes.push_back(size);
+        for (int i = 0; payloadLength > maxFragmentPayload; i++) {
+            EV_TRACE << "Computed fragment: i = " << i << ", size = " << maxFragmentPayload << ".\n";
+            sizes.push_back(maxFragmentPayload);
             payloadLength -= maxFragmentPayload;
         }
         if (payloadLength != 0) {
@@ -61,4 +76,3 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
 
 } // namespace ieee80211
 } // namespace inet
-

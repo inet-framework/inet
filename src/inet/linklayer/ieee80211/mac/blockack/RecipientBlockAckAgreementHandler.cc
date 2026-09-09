@@ -172,6 +172,10 @@ void RecipientBlockAckAgreementHandler::processDuplicateAddbaRequest(const Ptr<c
 
 std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
+    // IEEE Std 802.11-2024, 10.4 and 11.5.3.5: the DELBA MMPDU has not
+    // been transmitted while a later fragment is still outstanding.
+    if (delba->getMoreFragments())
+        return nullptr;
     return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
 }
 
