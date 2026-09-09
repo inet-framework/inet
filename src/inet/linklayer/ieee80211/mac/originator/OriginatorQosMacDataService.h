@@ -38,18 +38,22 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
 //    PsDeferQueueing *psDeferQueueing = nullptr;
     IMpduAggregationPolicy *aMpduAggregationPolicy = nullptr;
     IMpduAggregation *aMpduAggregation = nullptr;
+    FrameEligibilityFunction frameEligibilityFunction;
 
   protected:
     virtual void initialize() override;
 
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
-    virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue);
+    virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *candidate);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
   public:
     virtual ~OriginatorQosMacDataService();
 
+    virtual void setFrameEligibilityFunction(const FrameEligibilityFunction& frameEligibilityFunction) override { this->frameEligibilityFunction = frameEligibilityFunction; }
+    virtual bool isFrameEligible(const Packet *packet) const override;
+    virtual bool hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const override;
     virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };
 
@@ -57,4 +61,3 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
 } /* namespace inet */
 
 #endif
-
