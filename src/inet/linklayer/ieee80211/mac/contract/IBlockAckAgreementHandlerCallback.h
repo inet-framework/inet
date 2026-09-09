@@ -18,12 +18,20 @@ class Packet;
 
 namespace ieee80211 {
 
+enum class BlockAckAgreementRole
+{
+    ORIGINATOR,
+    RECIPIENT,
+};
+
 class INET_API IBlockAckAgreementHandlerCallback
 {
   public:
     virtual ~IBlockAckAgreementHandlerCallback() {}
 
-    virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
+    // The deadline is an absolute simulation timestamp. The role identifies
+    // which half of the shared HCF inactivity timer supplied the deadline.
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) = 0;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) = 0;
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) = 0;
     // Removes queued siblings of a sender-local DELBA without assuming that

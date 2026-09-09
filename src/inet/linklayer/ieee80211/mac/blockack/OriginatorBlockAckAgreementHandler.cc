@@ -38,7 +38,7 @@ simtime_t OriginatorBlockAckAgreementHandler::computeEarliestExpirationTime()
     simtime_t earliestTime = SIMTIME_MAX;
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
-        if (agreement->getIsAddbaResponseReceived()) {
+        if (agreement->getIsAddbaResponseReceived() && !agreement->isInactivityExpired()) {
             ASSERT(earliestTime >= 0);
             ASSERT(agreement->getExpirationTime() >= 0);
             earliestTime = std::min(earliestTime, agreement->getExpirationTime());
@@ -107,7 +107,8 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     simtime_t now = simTime();
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
-        if (agreement->getExpirationTime() == now) {
+        if (agreement->getIsAddbaResponseReceived() && !agreement->isInactivityExpired() && agreement->getExpirationTime() <= now) {
+            agreement->markInactivityExpired();
             MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
@@ -144,7 +145,7 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
 {
     if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {
         auto agreement = getAgreement(basicBlockAck->getTransmitterAddress(), basicBlockAck->getTidInfo());
-        if (agreement) {
+        if (agreement && !agreement->isInactivityExpired()) {
             agreement->setStartingSequenceNumber(basicBlockAck->getStartingSequenceNumber());
             agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
@@ -157,8 +158,8 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
 void OriginatorBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback)
 {
     simtime_t earliestExpirationTime = computeEarliestExpirationTime();
-    if (earliestExpirationTime != SIMTIME_MAX)
-        callback->scheduleInactivityTimer(earliestExpirationTime);
+    if (callback != nullptr)
+        callback->scheduleInactivityTimer(BlockAckAgreementRole::ORIGINATOR, earliestExpirationTime);
 }
 
 void OriginatorBlockAckAgreementHandler::scheduleAddbaResponseTimer(IBlockAckAgreementHandlerCallback *callback)
@@ -362,6 +363,7 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
             return nullptr;
         bool cancelPendingTransaction = agreement->isPending();
         std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+        scheduleInactivityTimer(callback);
         pendingTeardownTransactionIds[std::make_pair(delba->getReceiverAddress(), delba->getTid())] = generationId;
         scheduleAddbaResponseTimer(callback);
         if (cancelPendingTransaction)
@@ -373,6 +375,7 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
     bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
     auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
     std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+    scheduleInactivityTimer(callback);
     scheduleAddbaResponseTimer(callback);
     if (cancelPendingTransaction)
         callback->cancelAddbaTransaction(transactionId, nullptr);
@@ -396,22 +399,34 @@ bool OriginatorBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet
     return true;
 }
 
-bool OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+OriginatorBlockAckAgreementAbortResult OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
 {
     auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
     if (!delba->getInitiator())
-        return false;
+        return {};
     auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
     if (agreementTag != nullptr) {
-        auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+        auto agreementId = std::make_pair(delba->getReceiverAddress(), delba->getTid());
+        auto it = pendingTeardownTransactionIds.find(agreementId);
         if (it != pendingTeardownTransactionIds.end() && it->second == agreementTag->getGenerationId()) {
             auto transactionId = it->second;
             pendingTeardownTransactionIds.erase(it);
-            callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), transactionId, packet);
-            return true;
+            if (callback != nullptr)
+                callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), transactionId, packet);
+            return { true, nullptr };
+        }
+        auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
+        if (agreement != nullptr && agreement->getTransactionId() == agreementTag->getGenerationId() && agreement->isInactivityExpired()) {
+            OriginatorBlockAckAgreementAbortResult result;
+            result.handled = true;
+            result.terminatedAgreement.reset(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+            scheduleInactivityTimer(callback);
+            if (callback != nullptr)
+                callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), agreementTag->getGenerationId(), packet);
+            return result;
         }
     }
-    return false;
+    return {};
 }
 
 std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
@@ -426,6 +441,7 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
         if (pendingTeardownIt != pendingTeardownTransactionIds.end())
             pendingTeardownTransactionIds.erase(pendingTeardownIt);
         std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
+        scheduleInactivityTimer(callback);
         scheduleAddbaResponseTimer(callback);
         if (cancelPendingTransaction)
             callback->cancelAddbaTransaction(transactionId, nullptr);
