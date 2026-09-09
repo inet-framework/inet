@@ -1,0 +1,105 @@
+%description:
+
+RFC 8200 / RFC 4443 — a router does not fragment; it discards a packet too large for the
+next link and originates Packet Too Big to the source.
+
+Checks RFC8200-FRAG-1 (description), RFC4443-PTB-1 (must) and RFC4443-ERR-2 (description)
+from the catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks.md#packet-too-big; the program steps below map one
+to one onto its expected observations. Link 2 has MTU 1280 and host A sends a 1500-octet
+packet. Mapping of the mockup: host A = hostA, router R = router, host B = hostB.
+
+Expected observation 2, the router's origination of the report, is observed where the
+router's ICMPv6 hands the message to its IPv6 layer (packetReceivedFromUpper of
+router.ipv6.ipv6); the report is created in the same instant as the decision. The MTU field
+of the message is the subject of Rfc4443PacketTooBigMtu.test, kept apart so that its value
+does not hide the result of the two rules here.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_packet_too_big")
+        // Expected observation 1: the packet on link 1, whole: next header 17, payload length 1460.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
+                  .describe("the 1500-octet packet on link 1, whole")
+                  .within(6.0))
+        // Expected observation 2: the router originates Packet Too Big, type 2, at the moment of
+        // the discard (RFC4443-PTB-1).
+        .once(on("router.ipv6.ipv6").signal("packetReceivedFromUpper")
+                  .packet("icmpv6.type == 2")
+                  .describe("the router's Packet Too Big message at the moment of the discard")
+                  .within(0.5))
+        // Expected observation 3: host A receives it, addressed to host A (RFC4443-ERR-2).
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 2")
+                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .describe("the Packet Too Big message at host A, addressed to host A")
+                  .within(0.5))
+        // Expected observation 4: from then on, neither a fragment nor the packet itself appears
+        // on link 2 (RFC8200-FRAG-1).
+        .never(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("ipv6.protocolId == 17 || ipv6.protocolId == 44")
+                  .describe("a fragment or the packet itself on link 2")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_packet_too_big compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+// The common mockup of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- hostB, IPv6 only.
+network Rfc8200Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=250,100"); }
+        router: Router6 { @display("p=400,100"); }
+        hostB: StandardHost6 { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Link 2 has the minimum IPv6 link MTU; the router cannot forward the 1500-octet packet.
+*.router.eth[1].mac.mtu = 1280B
+
+%contains: stdout
+PROTOCOLTEST rfc4443_packet_too_big: PASS

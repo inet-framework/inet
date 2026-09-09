@@ -1,0 +1,101 @@
+%description:
+
+RFC 8200 / RFC 4443 — a router discards a packet whose hop limit reaches zero and originates
+Time Exceeded to the source.
+
+Checks RFC8200-HL-2 (description), RFC4443-TE-1 (must) and RFC4443-ERR-2 (description) from
+the catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks.md#hop-limit-expiry; the program steps below map
+one to one onto its expected observations. Host A sends with hop limit 1, so the packet
+survives exactly one hop. Mapping of the mockup: host A = hostA, router R = router, host B =
+hostB.
+
+Expected observation 2, the router's origination of the report, is observed where the
+router's ICMPv6 hands the message to its IPv6 layer (packetReceivedFromUpper of
+router.ipv6.ipv6); the model records no discard signal for a hop limit of zero, and the
+report is created in the same instant as the decision.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_hop_limit_expiry")
+        // Expected observation 1: the packet on link 1 with hop limit 1 -- the stimulus.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 1")
+                  .describe("the packet on link 1 with hop limit 1")
+                  .within(6.0))
+        // Expected observation 2: the router originates Time Exceeded, type 3 code 0, at the
+        // moment of the discard (RFC8200-HL-2, RFC4443-TE-1).
+        .once(on("router.ipv6.ipv6").signal("packetReceivedFromUpper")
+                  .packet("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
+                  .describe("the router's Time Exceeded message at the moment of the discard")
+                  .within(0.5))
+        // Expected observation 3: host A receives it, addressed to host A (RFC4443-ERR-2).
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
+                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .describe("the Time Exceeded message at host A, addressed to host A")
+                  .within(0.5))
+        // Expected observation 4: from then on, the packet never appears on link 2.
+        .never(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .describe("the packet on link 2")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_hop_limit_expiry compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+// The common mockup of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- hostB, IPv6 only.
+network Rfc8200Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=250,100"); }
+        router: Router6 { @display("p=400,100"); }
+        hostB: StandardHost6 { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 1
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc8200_hop_limit_expiry: PASS

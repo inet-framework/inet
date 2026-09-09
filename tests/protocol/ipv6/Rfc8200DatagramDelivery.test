@@ -1,0 +1,117 @@
+%description:
+
+RFC 8200 — a packet crosses the router to the addressed program: the header fields describe
+it, the addresses survive the router, the hop limit drops by one, and the UDP checksum is
+present.
+
+Checks RFC8200-HDR-1, HDR-2, HDR-3, HDR-4, DLV-1, HL-1 (description) and RFC8200-CKSUM-1
+(must) from doc/project/evidence/standard/rfc8200/catalog.md. The English procedure and the
+mockup are in doc/project/evidence/protocol/ipv6/checks.md#datagram-delivery; the program
+steps below map one to one onto its expected observations. Mapping of the mockup: host A =
+hostA, router R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB.
+
+Deviations: expected observation 1 compares the addresses by a typed predicate, because a
+filter expression holds an address as an opaque value; the UDP checksum is read with the
+model's computed checksum mode on (`**.udp.checksumMode = "computed"`), as the mockup
+requires. Expected observation 4, the program's receipt, is observed as UDP's upward handoff
+of the 100 octets, the last recognizable event before the program.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_datagram_delivery")
+        // Expected observation 1: link 1 shows version 6, payload length 108, next header 17,
+        // hop limit 64, host A as source, host B as destination, a non-zero UDP checksum
+        // (RFC8200-HDR-1, HDR-2, HDR-3, HDR-4, CKSUM-1). Record the addresses and the hop limit.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.version == 6 && ipv6.payloadLength == 108B && ipv6.protocolId == 17 && ipv6.hopLimit == 64 && udp.checksum != 0")
+                  .match([](const MatchContext& c) {
+                      return ipv6Address(c.event.packet, "ipv6.srcAddress") == nodeIpv6Address("hostA")
+                          && ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostB");
+                  })
+                  .capture("hl", "ipv6.hopLimit")
+                  .capture("src", [](const PacketEvent& e) { return ipv6Address(e.packet, "ipv6.srcAddress"); })
+                  .capture("dst", [](const PacketEvent& e) { return ipv6Address(e.packet, "ipv6.destAddress"); })
+                  .describe("the packet on link 1 with version 6, payload length 108, next header 17, hop limit 64, host A to host B, and a UDP checksum")
+                  .within(6.0))
+        // Expected observation 2: link 2 shows the same addresses and payload length, and hop
+        // limit 63 (RFC8200-HDR-4, RFC8200-HL-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.payloadLength == 108B && ipv6.hopLimit == 63 && ipv6.hopLimit == {hl} - 1")
+                  .match([](const MatchContext& c) {
+                      return ipv6Address(c.event.packet, "ipv6.srcAddress") == c.get("src").stdstringValue()
+                          && ipv6Address(c.event.packet, "ipv6.destAddress") == c.get("dst").stdstringValue();
+                  })
+                  .describe("the same packet on link 2 with the same addresses and hop limit 63")
+                  .within(0.5))
+        // Expected observation 3: host B's UDP receives the 108-octet datagram (RFC8200-DLV-1).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .describe("the datagram at host B's UDP with 100 octets of data")
+                  .within(0.5))
+        // Expected observation 4: the program on host B receives the 100 octets.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .describe("the 100 octets of data handed up from host B's UDP toward the program")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_datagram_delivery compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+// The common mockup of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- hostB, IPv6 only.
+network Rfc8200Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=250,100"); }
+        router: Router6 { @display("p=400,100"); }
+        hostB: StandardHost6 { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Every node computes the UDP checksum; the check reads the field.
+**.udp.checksumMode = "computed"
+
+%contains: stdout
+PROTOCOLTEST rfc8200_datagram_delivery: PASS

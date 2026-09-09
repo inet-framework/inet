@@ -1,0 +1,94 @@
+%description:
+
+RFC 8200 — the hop limit discard is a forwarding rule; the destination delivers a packet
+that arrives with hop limit 1.
+
+Checks RFC8200-HL-3 (should) from doc/project/evidence/standard/rfc8200/catalog.md; also
+covers RFC8200-HL-1. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks.md#hop-limit-1-at-the-destination; the program
+steps below map one to one onto its expected observations. Host A sends with hop limit 2,
+exactly the hop count of the path. Mapping of the mockup: host A = hostA, router R =
+router, host B = hostB.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_hop_limit_one_at_destination")
+        // Expected observation 1: the packet on link 1 with hop limit 2 -- the stimulus.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 2")
+                  .describe("the packet on link 1 with hop limit 2")
+                  .within(6.0))
+        // Expected observation 2: the packet on link 2 with hop limit 1 (RFC8200-HL-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 1")
+                  .describe("the packet on link 2 with hop limit 1")
+                  .within(0.5))
+        // Expected observation 3: host B's UDP receives it (RFC8200-HL-3).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .describe("the datagram at host B's UDP, delivered although it arrived with hop limit 1")
+                  .within(0.5))
+        // Expected observation 4: host A receives no Time Exceeded message.
+        .never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 3")
+                  .describe("a Time Exceeded message at host A")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_hop_limit_one_at_destination compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+// The common mockup of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- hostB, IPv6 only.
+network Rfc8200Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=250,100"); }
+        router: Router6 { @display("p=400,100"); }
+        hostB: StandardHost6 { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 2
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc8200_hop_limit_one_at_destination: PASS

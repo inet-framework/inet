@@ -1,0 +1,120 @@
+%description:
+
+RFC 8200 — a source fragments a 1500-octet packet for a 1280-octet link, the router forwards
+the fragments untouched, and the destination reassembles them.
+
+Checks RFC8200-FRAG-3 (must), FRAG-4, FRAG-5 (description; their structure, without the
+payload length), FRAG-6 (must not), EXT-1, REASM-1, REASM-2 (description) and MTU-4 (must)
+from doc/project/evidence/standard/rfc8200/catalog.md; also covers HDR-3. The payload length
+of the fragments is Rfc8200FragmentPayloadLength.test, kept apart so that one wrong field
+does not hide the reassembly verdicts. The English
+procedure, the mockup and the size arithmetic are in
+doc/project/evidence/protocol/ipv6/checks.md#source-fragmentation-and-reassembly; the
+program steps below map one to one onto its expected observations. Host A's interface to
+link 1 has MTU 1280; a 1500-octet packet (1452 octets of data) splits into pieces of 1232
+and 228 octets, so the last fragment sits at octet offset 1232 (154 units). Mapping of the
+mockup: host A = hostA, router R = router, host B = hostB.
+
+Deviation: a fragment is not dissected beyond its fragment header, so the UDP header of the
+first fragment (expected observation 1) is read from the chunk sequence by a typed
+predicate. The fragment offset field of the model counts octets, and the steps compare it
+in octets (1232 = 154 units of 8).
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_source_fragmentation")
+        // Expected observation 1: the first fragment on link 1: next header 44, a fragment header
+        // with next header 17, offset 0, M = 1, the UDP header behind it (RFC8200-FRAG-4,
+        // HDR-3). Record the identification. The payload length is the subject of
+        // Rfc8200FragmentPayloadLength.test.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("ipv6.protocolId == 44 && Ipv6FragmentHeader.nextHeaderProtocol == 17 && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .match([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
+                  .capture("id", "Ipv6FragmentHeader.identification")
+                  .describe("the first fragment on link 1: next header 44, offset 0, M = 1, the UDP header inside")
+                  .within(6.0))
+        // Expected observation 2: the last fragment on link 1: the same identification, offset
+        // 1232 octets, M = 0 (RFC8200-FRAG-5; the arithmetic of FRAG-3 and FRAG-6 is in the
+        // check document).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("ipv6.protocolId == 44 && Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
+                  .describe("the last fragment on link 1 at octet offset 1232")
+                  .within(0.5))
+        // Expected observation 3: the first fragment on link 2, untouched by the router (RFC8200-EXT-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .describe("the first fragment on link 2 with its fragment header unchanged")
+                  .within(0.5))
+        // Expected observation 4: the last fragment on link 2.
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
+                  .describe("the last fragment on link 2")
+                  .within(0.5))
+        // Expected observation 5: host B's UDP receives the reassembled 1460-octet datagram
+        // (RFC8200-REASM-1, REASM-2, MTU-4).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 1460B")
+                  .describe("the reassembled 1460-octet UDP datagram at host B's UDP")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_source_fragmentation compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+// The common mockup of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- hostB, IPv6 only.
+network Rfc8200Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=250,100"); }
+        router: Router6 { @display("p=400,100"); }
+        hostB: StandardHost6 { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
+*.hostA.eth[0].mac.mtu = 1280B
+
+%contains: stdout
+PROTOCOLTEST rfc8200_source_fragmentation: PASS
