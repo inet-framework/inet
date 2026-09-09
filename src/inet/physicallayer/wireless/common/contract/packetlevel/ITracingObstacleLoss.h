@@ -20,6 +20,12 @@ class INET_API ITracingObstacleLoss : public IObstacleLoss
   public:
     class INET_API ObstaclePenetratedEvent : public cObject {
       public:
+        /**
+         * The penetrated physical object, or nullptr for obstructions that
+         * are not physical objects (e.g. terrain). When an object is present,
+         * the intersection points and normals below are in the object's local
+         * coordinate frame; when it is nullptr, they are world coordinates.
+         */
         const physicalenvironment::IPhysicalObject *object;
         const Coord intersection1;
         const Coord intersection2;
