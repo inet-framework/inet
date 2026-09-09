@@ -33,6 +33,13 @@ class INET_API ITx
 
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    /**
+     * Cancels a transmission that is still waiting for its inter-frame
+     * space. The owner must be the callback supplied to transmitFrame().
+     * Returns true only when no copy has been handed to the lower layer yet.
+     * A transmission that is already in progress is left untouched.
+     */
+    virtual bool cancelPendingTransmission(ICallback *owner) = 0;
     virtual void radioTransmissionFinished() = 0;
 };
 
@@ -40,4 +47,3 @@ class INET_API ITx
 } // namespace inet
 
 #endif
-
