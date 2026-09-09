@@ -172,6 +172,27 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     ASSERT(zeroLength->getSupportedRates().numRates == 0);
 }
 
+template<typename T>
+static void checkMalformedAssociationIds()
+{
+    for (uint16_t wireAid : {0x0001, 0x4001, 0x8001, 0xC000, 0xC7D8, 0xFFFF}) {
+        auto frame = deserializeMalformedBody<T>({0, 0, 0, 0,
+                static_cast<uint8_t>(wireAid), static_cast<uint8_t>(wireAid >> 8), 1, 1, 0x0C});
+        ASSERT(frame->isIncorrect());
+        ASSERT(frame->isComplete());
+        ASSERT(frame->getAid() == 0);
+        ASSERT(frame->getSupportedRates().numRates == 1);
+    }
+    for (uint16_t wireAid : {0x0001, 0xC000, 0xC001}) {
+        auto frame = deserializeMalformedBody<T>({0, 0, 1, 0,
+                static_cast<uint8_t>(wireAid), static_cast<uint8_t>(wireAid >> 8), 1, 1, 0x0C});
+        ASSERT(frame->isIncorrect());
+        ASSERT(frame->isComplete());
+        ASSERT(frame->getAid() == 0);
+        ASSERT(frame->getSupportedRates().numRates == 1);
+    }
+}
+
 %activity:
 
 {
@@ -267,17 +288,8 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     ASSERT(frame->getAid() == 0x0245);
 }
 
-bool missingAssociationIdMarkerRejected = false;
-try {
-    deserializeBody<Ieee80211AssociationResponseFrame>({
-        0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
-        0x01, 0x01, 0x0C
-    });
-}
-catch (const cRuntimeError&) {
-    missingAssociationIdMarkerRejected = true;
-}
-ASSERT(missingAssociationIdMarkerRejected);
+checkMalformedAssociationIds<Ieee80211AssociationResponseFrame>();
+checkMalformedAssociationIds<Ieee80211ReassociationResponseFrame>();
 
 bool successfulZeroAssociationIdRejected = false;
 try {
