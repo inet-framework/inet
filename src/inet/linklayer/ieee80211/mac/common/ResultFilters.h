@@ -9,6 +9,7 @@
 #define __INET_RESULTFILTERS_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 
 namespace inet {
 
@@ -41,6 +42,16 @@ class INET_API Ieee80211RetryFilter : public cObjectResultFilter
 class INET_API Ieee80211NotRetryFilter : public cObjectResultFilter
 {
   public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API FrameTransmissionStatusFilter : public cObjectResultFilter
+{
+  protected:
+    FrameTransmissionStatus status;
+
+  public:
+    FrameTransmissionStatusFilter(FrameTransmissionStatus status) : status(status) {}
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 

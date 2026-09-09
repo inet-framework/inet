@@ -37,6 +37,9 @@ class Ieee80211MacHeader;
  */
 class INET_API Ieee80211Mac : public MacProtocolBase
 {
+  public:
+    static simsignal_t frameTransmissionOutcomeSignal;
+
   protected:
     FcsMode fcsMode;
 

@@ -43,6 +43,7 @@ module Dcf extends Module like IDcf
         @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
+        @signal[frameTransmissionOutcome](type=inet::Packet);
         @signal[frameSequenceStarted];
         @signal[frameSequenceFinished];
         @signal[datarateSelected](type=double);

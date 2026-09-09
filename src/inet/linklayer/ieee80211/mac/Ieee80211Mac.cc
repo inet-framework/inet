@@ -23,7 +23,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -38,6 +37,8 @@ namespace ieee80211 {
 using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
+
+simsignal_t Ieee80211Mac::frameTransmissionOutcomeSignal = cComponent::registerSignal("frameTransmissionOutcome");
 
 Ieee80211Mac::Ieee80211Mac()
 {
