@@ -290,8 +290,9 @@ std::vector<Packet *> BasicReassembly::removeExpiredFragments(simtime_t currentT
     return expiredFragments;
 }
 
-void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
+std::vector<Packet *> BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
+    std::vector<Packet *> purgedFragments;
     auto isInSequenceRange = [startSeqNumber, endSeqNumber](int sequenceNumber) {
         return startSeqNumber <= endSeqNumber ?
                 sequenceNumber >= startSeqNumber && sequenceNumber <= endSeqNumber :
@@ -301,7 +302,8 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
         auto sequenceNumber = getRawSequenceNumber(it->first.extendedSequenceNumber);
         if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange(sequenceNumber)) {
             for (auto fragment : it->second.fragments)
-                delete fragment;
+                if (fragment != nullptr)
+                    purgedFragments.push_back(fragment);
             it = fragmentsMap.erase(it);
         }
         else
@@ -324,6 +326,7 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
         else
             ++it;
     }
+    return purgedFragments;
 }
 
 BasicReassembly::~BasicReassembly()
