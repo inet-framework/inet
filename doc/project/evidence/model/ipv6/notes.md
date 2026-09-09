@@ -150,11 +150,34 @@ One tap carries one rule. When the node under test behaves and the *other* node 
 the reply, a second tap that drops the reply lets the first verdict stand, and the crash
 gets a test of its own (the unrecognized-next-header pair).
 
-### A crashing test can take minutes
+### A crash need not cost minutes
 
-A C++ assertion in a debug build ends with a symbolized stack trace of the 880 MB library;
-the atomic-fragment test takes about nine minutes for that reason alone. Keep the test; it
-is the finding.
+A C++ assertion in a debug build ends with a symbolized stack trace of the 880 MB library.
+The atomic-fragment test took about nine minutes for that reason alone, which was the whole
+runtime of the suite.
+
+The cost is not the crash; it is the trace. OMNeT++'s common library installs
+`backward::SignalHandling`, a global object that catches SIGABRT and prints a stack trace
+annotated with source lines. Twenty-five frames resolved against a debug build of all of INET
+take those minutes. The trace has no value in a test whose expected result is the crash and
+whose description already names the file and the line.
+
+The cure is one line in the test, at file scope, after the runtime's own handler is installed:
+
+```cpp
+static const int restoreDefaultAbortHandler = (signal(SIGABRT, SIG_DFL), 0);
+```
+
+The suite went from 9 minutes 4 seconds to 2.4 seconds, with the same 29 tests and the same
+21 PASS and 8 expected FAIL. The assertion message still reaches `test.err`, so the diagnosis
+is unchanged; only the frames are gone, and removing the line brings them back while somebody
+works on the gap.
+
+Two conditions decide whether a test needs this. It needs it when the model **aborts** — an
+assertion, a `std::terminate`, a segmentation fault. It does not need it when the model raises
+a `cRuntimeError`, which OMNeT++ reports and exits cleanly: the other three crashing tests of
+this suite end in under a second for that reason. Keep the test either way; the crash is the
+finding.
 
 ### Nodes and configurator
 

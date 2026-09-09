@@ -15,10 +15,11 @@ Expected result: FAIL. The model's fragment buffer stops the simulation with a C
 assertion when a single fragment completes a datagram: Ipv6FragBuf::addFragment looks the
 buffer up before it creates it, and on completion erases the stale end iterator
 (Ipv6FragBuf.cc:168). No verdict line is printed, and the runner counts the missing line
-as a failure. The stop takes several minutes in a debug build, because the runtime prints
-a symbolized stack trace. See doc/project/evidence/model/ipv6/results.md.
+as a failure. See doc/project/evidence/model/ipv6/results.md.
 
 %includes:
+#include <csignal>
+
 #include "ProtocolTest.h"
 #include "Ipv6Fields.h"
 
@@ -26,6 +27,18 @@ a symbolized stack trace. See doc/project/evidence/model/ipv6/results.md.
 
 using namespace inet;
 using namespace inet::protocoltest;
+
+// The model aborts on this input, through an assertion of the standard library, and the
+// verdict of this test is the missing verdict line that follows. The runtime installs a
+// handler for SIGABRT that prints a stack trace annotated with source lines
+// (backward::SignalHandling, in OMNeT++'s common library), and resolving 25 frames against a
+// debug build of the whole of INET costs several minutes. The trace adds nothing here: the
+// cause is named in the description above and in the results document, with the file and the
+// line. This restores the default handler, so the process ends at once. The check is
+// untouched, and so is its verdict.
+//
+// Remove this line to get the trace back while working on the gap.
+static const int restoreDefaultAbortHandler = (signal(SIGABRT, SIG_DFL), 0);
 
 Define_ProtocolTestProgram()
 {

@@ -16,9 +16,17 @@ repeated in the table below, because every test ran again on this tree.
   ```
 
   The `ipv6` suite also holds the two pre-existing Mobile IPv6 tests; they ran and passed
-  and are not part of this pass. One test of this pass, the atomic fragment, takes about
-  nine minutes: the model stops with a C++ assertion, and the runtime prints a symbolized
-  stack trace of the debug library before it exits.
+  and are not part of this pass.
+
+  The whole suite runs in about 2.5 seconds. It used to need nine minutes, and one test
+  accounted for all of it: the atomic fragment, where the model stops with an assertion of
+  the standard library. The runtime installs a handler for SIGABRT that prints a stack trace
+  annotated with source lines, and resolving 25 frames against a debug build of the whole of
+  INET costs those minutes. The test now restores the default handler for that signal, so the
+  process ends at once. Nothing about the check changed, and neither did its verdict: the
+  model still aborts, the assertion message is still printed, and the missing verdict line is
+  still the failure. See the note in
+  [`notes.md`](notes.md#a-crash-need-not-cost-minutes).
 
 ## Verdicts
 
