@@ -116,7 +116,22 @@ Define_Module(OsgGeographicCoordinateSystem);
 void OsgGeographicCoordinateSystem::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+// cOsgCanvas::setScene()/getScene() are deprecated in favour of the renderer-neutral
+// c3DSceneNode API, but INET's OSG visualizers must keep compiling against OMNeT++ 6.4,
+// which has no such API. Stay on the compatibility path until 6.4 is no longer supported.
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
         auto mapScene = getParentModule()->getOsgCanvas()->getScene();
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
         mapNode = osgEarth::MapNode::findMapNode(mapScene);
         if (mapNode == nullptr)
             throw cRuntimeError("Count not find map node in the scene");

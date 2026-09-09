@@ -91,7 +91,22 @@ void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualizat
     // do it when there is a map: without one the scene is drawn by the fixed-function
     // pipeline, which the generated shaders would then override with a flat, textureless
     // rendering of their own.
+// cOsgCanvas::setScene()/getScene() are deprecated in favour of the renderer-neutral
+// c3DSceneNode API, but INET's OSG visualizers must keep compiling against OMNeT++ 6.4,
+// which has no such API. Stay on the compatibility path until 6.4 is no longer supported.
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     if (osgEarth::MapNode::findMapNode(visualizationTargetModule->getOsgCanvas()->getScene()) != nullptr)
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
         osgEarth::Registry::shaderGenerator().run(networkNodeOsgVisualization);
 #endif // ifdef WITH_OSGEARTH
 }
