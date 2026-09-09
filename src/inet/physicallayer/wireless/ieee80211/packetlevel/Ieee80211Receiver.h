@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211RECEIVER_H
 #define __INET_IEEE80211RECEIVER_H
 
+#include <functional>
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -20,6 +22,10 @@ namespace physicallayer {
 class INET_API Ieee80211Receiver : public FlatReceiverBase
 {
   protected:
+    W htCca20Sensitivity = W(NaN);
+    W htCca40Sensitivity = W(NaN);
+    W htCcaEnergyDetection = W(NaN);
+
     const Ieee80211ModeSet *modeSet = nullptr;
     const IIeee80211Band *band = nullptr;
     const Ieee80211Channel *channel = nullptr;
@@ -30,14 +36,24 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual bool isHtCcaOperation() const;
+    virtual bool computeHtCcaBusy(const IListening *listening, const IInterference *interference) const;
+
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
   public:
     virtual ~Ieee80211Receiver();
 
+    virtual const Ieee80211Channel *getChannel() const { return channel; }
+
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
+    const Ieee80211ModeSet *getModeSet() const { return modeSet; }
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    // Captures geometry for a synchronous radio configuration transaction.
+    // The returned one-shot restore callback neither throws nor emits signals.
+    std::function<void()> saveChannelState();
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int channelNumber);

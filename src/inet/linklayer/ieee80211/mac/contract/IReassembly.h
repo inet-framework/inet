@@ -8,9 +8,14 @@
 #ifndef __INET_IREASSEMBLY_H
 #define __INET_IREASSEMBLY_H
 
+#include <vector>
+
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
+
+class Packet;
+
 namespace ieee80211 {
 
 class Ieee80211DataOrMgmtHeader;
@@ -33,15 +38,27 @@ class INET_API IReassembly
     virtual Packet *addFragment(Packet *frame) = 0;
 
     /**
-     * Discard fragments from the reassembly buffer. Frames are identified by the transmitter
-     * address, the TID, and the sequence number range [startSeqNumber, endSeqNumber[.
-     * Set tid=-1 for non-QoS frames.
+     * Return the earliest receive-lifetime deadline among incomplete frames,
+     * or SIMTIME_MAX when the reassembly buffer is empty.
      */
-    virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
+    virtual simtime_t getNextExpirationTime() const = 0;
+
+    /**
+     * Remove incomplete frames whose receive lifetime has elapsed and return
+     * their fragments to the caller for drop signaling and deletion.
+     */
+    virtual std::vector<Packet *> removeExpiredFragments(simtime_t currentTime) = 0;
+
+    /**
+     * Discard fragments from the reassembly buffer and return the detached
+     * fragments to the caller. Frames are identified by the transmitter
+     * address, the TID, and the inclusive sequence number range
+     * [startSeqNumber, endSeqNumber]. Set tid=-1 for non-QoS frames.
+     */
+    virtual std::vector<Packet *> purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

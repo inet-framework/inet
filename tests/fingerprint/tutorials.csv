@@ -15,10 +15,10 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           7f72-228e/tplx;44d7-fbf3/~tNl;48a0-6adb/~tND;c38c-98ef/tyf, PASS,    wireless EthernetMac Ipv4
 /tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;095d-75bd/tyf, PASS,   wireless # Step10A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;4d60-fcf9/tyf, PASS,   wireless # Step10B extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx;4a61-20ba/~tNl;c614-3445/~tND;f078-56fe/tyf, PASS,    wireless Ipv4
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           a656-0030/tplx;242a-82e0/~tNl;8c19-997b/~tND;f078-56fe/tyf, PASS,    wireless Ipv4
 /tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           49cf-d241/tplx;725c-f075/~tNl;15a3-3f79/~tND;7082-ff49/tyf, PASS, EthernetMac Ipv4
-/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           a186-bbc1/tplx;7370-3135/~tNl;1438-e824/~tND;4b03-e5a1/tyf, PASS,    wireless EthernetMac Ipv4
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           6b79-6d4d/tplx;e096-244c/~tNl;0d73-0d34/~tND;4b03-e5a1/tyf, PASS,    wireless EthernetMac Ipv4
 
 /tutorials/rip/,                     -f omnetpp.ini -c Step1 -r 0,                              100s,           2c94-a8bb/tplx;b4e0-1e61/~tNl;4bd3-4530/~tND;1e4a-2625/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step2 -r 0,                              100s,           6019-f318/tplx;9372-788f/~tNl;dec7-8e56/~tND;a345-d423/tyf, PASS,   # Step2 extended
@@ -200,4 +200,3 @@
 /tutorials/queueing/,                -f omnetpp.ini -c RequestResponse -r 0,                    100s,           7d97-5413/tplx;0000-0000/~tNl;0000-0000/~tND;1aeb-2f3a/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c Telnet -r 0,                             100s,           f176-070e/tplx;0000-0000/~tNl;0000-0000/~tND;43fd-14e6/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c ExampleNetwork -r 0,                     10s,           3783-f5ed/tplx;0000-0000/~tNl;0000-0000/~tND;5a45-9aba/tyf, PASS, queueing
-

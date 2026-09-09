@@ -63,7 +63,8 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
     parameters:
         string interfaceTableModule;
         string energySourceModule = default("");
-        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","n(greenfield-2.4Ghz)","p","ac") = default("g(mixed)");
+        string htSecondaryChannelOffset @enum("none", "above", "below") = default("none");
         string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
                                                    // "auto". "auto" values will be replaced by
                                                    // a generated MAC address in init stage 0.
@@ -71,6 +72,8 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         double bitrate @unit(bps) = default(-1bps);
         **.opMode = this.opMode;
         **.bitrate = this.bitrate;
+        radio.htSecondaryChannelOffset = default(this.htSecondaryChannelOffset);
+        mib.htSecondaryChannelOffset = default(this.htSecondaryChannelOffset == "above" ? 1 : this.htSecondaryChannelOffset == "below" ? 3 : 0);
         mac.modeSet = default(this.opMode);
         mac.*.rateSelection.dataFrameBitrate = default(this.bitrate);
         *.macModule = default(absPath(".mac"));
@@ -129,4 +132,3 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn;
 }
-

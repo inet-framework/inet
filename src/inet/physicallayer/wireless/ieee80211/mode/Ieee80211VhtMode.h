@@ -96,6 +96,8 @@ class INET_API Ieee80211VhtSignalMode : public IIeee80211HeaderMode, public Ieee
     virtual b getLength() const override;
     virtual bps getNetBitrate() const override { return Ieee80211VhtModeBase::getNetBitrate(); }
     virtual bps getGrossBitrate() const override { return Ieee80211VhtModeBase::getGrossBitrate(); }
+    // IEEE Std 802.11-2024, Table 21-5: VHT-SIG uses the long-GI symbol
+    // interval independently of the data field's selected guard interval.
     virtual const simtime_t getSymbolInterval() const override { return Ieee80211HtTimingRelatedParametersBase::getSymbolInterval(); }
     virtual const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
     virtual const Ieee80211VhtCode *getCode() const { return code; }
@@ -148,6 +150,7 @@ class INET_API Ieee80211VhtPreambleMode : public IIeee80211PreambleMode, public 
     virtual const simtime_t getSecondAndSubsequentHTLongTrainingFielDuration() const { return 4E-6; } // HT-LTFs, s = 2,3,..,n
     virtual unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
 
+    virtual const simtime_t getDurationBeforeHeader() const;
     virtual const simtime_t getDuration() const override;
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211VhtPhyPreamble>(); }
@@ -237,7 +240,10 @@ class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee8021
     virtual bps getGrossBitrate() const override { return Ieee80211VhtModeBase::getGrossBitrate(); }
     virtual const Ieee80211Vhtmcs *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
     virtual const Ieee80211VhtCode *getCode() const { return modulationAndCodingScheme->getCode(); }
-    virtual const simtime_t getSymbolInterval() const override { return Ieee80211HtTimingRelatedParametersBase::getSymbolInterval(); }
+    virtual const simtime_t getGuardInterval() const override { return guardIntervalType == HT_GUARD_INTERVAL_LONG ? getGIDuration() : getShortGIDuration(); }
+    // IEEE Std 802.11-2024, Tables 21-5 and 21-8: the VHT Data symbol
+    // interval is TSYML for long GI and TSYMS for short GI.
+    virtual const simtime_t getSymbolInterval() const override { return getDFTPeriod() + getGuardInterval(); }
     virtual const Ieee80211OfdmModulation *getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
 
@@ -280,7 +286,10 @@ class INET_API Ieee80211VhtMode : public Ieee80211ModeBase
     virtual int getMpduMaxLength() const override { return 65535; } // in octets
     virtual BandMode getCenterFrequencyMode() const { return centerFrequencyMode; }
 
-    virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + getDataDuration(dataBitLength); }
+    virtual const simtime_t getPreambleDuration() const override { return preambleMode->getDurationBeforeHeader(); }
+    virtual const simtime_t getHeaderDuration() const override { return preambleMode->getDuration() - getPreambleDuration(); }
+    virtual const simtime_t getDataDuration(b dataBitLength) const override;
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)
@@ -679,7 +688,7 @@ class INET_API Ieee80211VhtCompliantModes
   protected:
     static OPP_THREAD_LOCAL const Ieee80211VhtCompliantModes singleton;
 
-    mutable std::map<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int>, const Ieee80211VhtMode *> modeCache;
+    mutable std::map<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int, Ieee80211VhtMode::BandMode, Ieee80211VhtPreambleMode::HighTroughputPreambleFormat>, const Ieee80211VhtMode *> modeCache;
 
   public:
     Ieee80211VhtCompliantModes();

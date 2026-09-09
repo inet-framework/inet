@@ -16,37 +16,47 @@ void PriorityScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
+        for (size_t i = 0; i < providers.size(); i++) {
+            auto provider = providers[i].get();
+            collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+            auto packetExtractor = dynamic_cast<IPacketExtractor *>(provider);
+            packetExtractors.push_back(packetExtractor);
+        }
     }
 }
 
 int PriorityScheduler::getNumPackets() const
 {
     int size = 0;
-    for (auto collection : collections)
-        if (collection != nullptr)
-            size += collection->getNumPackets();
-        else
-            return -1;
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
+        if (collection == nullptr)
+            throw cRuntimeError("Cannot getNumPackets(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+        size += collection->getNumPackets();
+    }
     return size;
 }
 
 b PriorityScheduler::getTotalLength() const
 {
     b totalLength(0);
-    for (auto collection : collections)
-        if (collection != nullptr)
-            totalLength += collection->getTotalLength();
-        else
-            return b(-1);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
+        if (collection == nullptr)
+            throw cRuntimeError("Cannot getTotalLength(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+        totalLength += collection->getTotalLength();
+    }
     return totalLength;
 }
 
 Packet *PriorityScheduler::getPacket(int index) const
 {
     int origIndex = index;
-    for (auto collection : collections) {
+    for (size_t i = 0; i < collections.size(); i++)
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot getPacket(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
         auto numPackets = collection->getNumPackets();
         if (index < numPackets)
             return collection->getPacket(index);
@@ -59,7 +69,11 @@ Packet *PriorityScheduler::getPacket(int index) const
 void PriorityScheduler::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
-    for (auto collection : collections) {
+    for (size_t i = 0; i < collections.size(); i++)
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot removePacket(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
         int numPackets = collection->getNumPackets();
         for (int j = 0; j < numPackets; j++) {
             if (collection->getPacket(j) == packet) {
@@ -71,9 +85,53 @@ void PriorityScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
+Packet *PriorityScheduler::findPacket(const PacketPredicate& predicate) const
+{
+    for (size_t i = 0; i < packetExtractors.size(); i++)
+        if (packetExtractors[i] == nullptr)
+            throw cRuntimeError("Cannot findPacket(): input provider at gate index %d does not implement IPacketExtractor", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto index = reverseOrder ? collections.size() - i - 1 : i;
+        if (packetExtractors[index] == nullptr)
+            throw cRuntimeError("Cannot findPacket(): input provider at gate index %d does not implement IPacketExtractor", (int)index);
+        auto packet = packetExtractors[index]->findPacket(predicate);
+        if (packet != nullptr)
+            return packet;
+    }
+    return nullptr;
+}
+
+Packet *PriorityScheduler::dequeuePacket(const PacketPredicate& predicate)
+{
+    Enter_Method("dequeuePacket");
+    for (size_t i = 0; i < packetExtractors.size(); i++)
+        if (packetExtractors[i] == nullptr)
+            throw cRuntimeError("Cannot dequeuePacket(): input provider at gate index %d does not implement IPacketExtractor", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto index = reverseOrder ? collections.size() - i - 1 : i;
+        if (packetExtractors[index] == nullptr)
+            throw cRuntimeError("Cannot dequeuePacket(): input provider at gate index %d does not implement IPacketExtractor", (int)index);
+        auto packet = packetExtractors[index]->dequeuePacket(predicate);
+        if (packet == nullptr)
+            continue;
+        take(packet);
+        handlePacketProcessed(packet);
+        emit(packetPulledSignal, packet);
+        if (collector != nullptr)
+            animatePullPacket(packet, outputGate, collector.getReferencedGate());
+        drop(packet);
+        return packet;
+    }
+    return nullptr;
+}
+
 void PriorityScheduler::removeAllPackets()
 {
     Enter_Method("removeAllPackets");
+    for (size_t i = 0; i < collections.size(); i++) {
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot removeAllPackets(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    }
     for (auto collection : collections)
         collection->removeAllPackets();
 }
@@ -107,4 +165,3 @@ void PriorityScheduler::handleCanPullPacketChanged(const cGate *gate)
 
 } // namespace queueing
 } // namespace inet
-

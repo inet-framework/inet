@@ -1,0 +1,249 @@
+%description:
+Verify rejected combined HT40-to-legacy commands restore radio, PHY, and participant state without publication, followed by a successful bandwidth-only HT20 transition and AP beacon generation.
+
+%file: Test.cc
+#include <vector>
+#include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<Ptr<Ieee80211BeaconFrame>> sentBeacons;
+
+    using Ieee80211MgmtApBase::getHtOperationBand;
+
+  protected:
+    virtual void start() override
+    {
+        // Suppress automatic periodic beacons so test controls frame generation.
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        if (subtype == ST_BEACON) {
+            auto beacon = dynamicPtrCast<const Ieee80211BeaconFrame>(body);
+            if (beacon != nullptr)
+                sentBeacons.push_back(constPtrCast<Ieee80211BeaconFrame>(beacon));
+        }
+    }
+
+  public:
+    void emitBeaconNow()
+    {
+        Enter_Method("emitBeaconNow");
+        sendBeacon();
+    }
+
+};
+Define_Module(TestIeee80211MgmtAp);
+
+class CcaCheckingReceiver : public physicallayer::Ieee80211Receiver
+{
+  public:
+    using Ieee80211Receiver::isHtCcaOperation;
+};
+Define_Module(CcaCheckingReceiver);
+
+class RejectingParticipant : public cListener, public physicallayer::IIeee80211ModeSetListener
+{
+  public:
+    const physicallayer::Ieee80211ModeSet *state = nullptr;
+    bool applied = false;
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return state; }
+    virtual std::function<void()> saveModeSetState() override
+    {
+        return [this, oldState = state]() { state = oldState; };
+    }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *target) override
+    {
+        state = target;
+        applied = true;
+        throw cRuntimeError("test participant rejection");
+    }
+};
+
+class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
+{
+  public:
+    bool checking = false;
+    int notifications = 0;
+    void rejectCombinedCommands()
+    {
+        Enter_Method("rejectCombinedCommands");
+        auto tx = check_and_cast<const physicallayer::Ieee80211Transmitter *>(getTransmitter());
+        auto rx = check_and_cast<const physicallayer::Ieee80211Receiver *>(getReceiver());
+        auto oldMode = tx->getMode();
+        auto oldModeSet = modeSet;
+        auto oldOpMode = opMode;
+        auto oldBand = band;
+        auto oldTxFrequency = tx->getCenterFrequency();
+        auto oldRxFrequency = rx->getCenterFrequency();
+        auto oldChannelNumber = getChannel()->getChannelNumber();
+        auto oldOffset = getChannel()->getSecondaryChannelOffset();
+        auto oldTimer = receptionTimer;
+        RejectingParticipant participant;
+        participant.state = oldModeSet;
+        subscribe(radioChannelChangedSignal, this);
+        subscribe(listeningChangedSignal, this);
+        // Reject at mode mapping, fixed-rate selection, HT width validation,
+        // and finally a participant after all built-in consumers have applied.
+        for (int probe : {0, 1, 2, 3}) {
+            if (probe == 3)
+                getSimulation()->getSystemModule()->subscribe(modesetChangedSignal, &participant);
+            auto message = new cMessage("rejectedConfigure", physicallayer::RADIO_C_CONFIGURE);
+            auto command = new physicallayer::Ieee80211ConfigureRadioCommand();
+            auto target = physicallayer::Ieee80211ModeSet::getModeSet(probe >= 2 ? "n(mixed-2.4Ghz)" : "g(mixed)");
+            command->setOpMode(target->getName());
+            command->setBandwidth(probe == 3 ? MHz(40) : MHz(20));
+            command->setChannelNumber(oldChannelNumber + 1);
+            if (probe != 0)
+                command->setMode(target->getMode(Mbps(24)));
+            message->setControlInfo(command);
+            bool rejected = false;
+            try { handleUpperCommand(message); }
+            catch (const cRuntimeError& error) {
+                const char *expected[] = {"Cannot map current mode", "Unknown mode for bitrate range",
+                    "40 MHz HT operation requires", "test participant rejection"};
+                ASSERT(std::string(error.what()).find(expected[probe]) != std::string::npos);
+                rejected = true;
+                delete message;
+            }
+            ASSERT(rejected);
+            ASSERT(tx->getBandwidth() == MHz(40) && rx->getBandwidth() == MHz(40));
+            ASSERT(tx->getCenterFrequency() == oldTxFrequency && rx->getCenterFrequency() == oldRxFrequency);
+            ASSERT(getChannel()->getChannelNumber() == oldChannelNumber);
+            ASSERT(tx->getChannel()->getChannelNumber() == oldChannelNumber);
+            ASSERT(getChannel()->getSecondaryChannelOffset() == oldOffset);
+            ASSERT(tx->getChannel()->getSecondaryChannelOffset() == oldOffset);
+            ASSERT(htSecondaryChannelOffset == oldOffset && band == oldBand && opMode == oldOpMode);
+            ASSERT(modeSet == oldModeSet && tx->getModeSet() == oldModeSet && rx->getModeSet() == oldModeSet);
+            ASSERT(tx->getMode() == oldMode && receptionTimer == oldTimer);
+            ASSERT(participant.state == oldModeSet);
+            for (cComponent *component = this; component != nullptr; component = component->getParentModule())
+                for (auto listener : component->getLocalSignalListeners(modesetChangedSignal))
+                    if (auto consumer = dynamic_cast<physicallayer::IIeee80211ModeSetListener *>(listener))
+                        ASSERT(consumer->getModeSet() == oldModeSet);
+            ASSERT(notifications == 0);
+        }
+        ASSERT(participant.applied);
+        getSimulation()->getSystemModule()->unsubscribe(modesetChangedSignal, &participant);
+        unsubscribe(radioChannelChangedSignal, this);
+        unsubscribe(listeningChangedSignal, this);
+    }
+    void narrow()
+    {
+        Enter_Method("narrow");
+        checking = true;
+        subscribe(radioChannelChangedSignal, this);
+        auto message = new cMessage("configure", physicallayer::RADIO_C_CONFIGURE);
+        auto command = new physicallayer::ConfigureRadioCommand();
+        command->setBandwidth(MHz(20));
+        message->setControlInfo(command);
+        handleUpperCommand(message);
+        ASSERT(notifications == 1);
+        updateCcaState();
+        ASSERT(!getCcaSnapshot().isHt40());
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t, intval_t, cObject *) override
+    {
+        notifications++;
+        if (checking) {
+            const auto *rx = check_and_cast<const physicallayer::Ieee80211Receiver *>(getReceiver());
+            ASSERT(rx->getBandwidth() == MHz(20));
+            ASSERT(rx->getCenterFrequency() == getChannel()->getCenterFrequency());
+            ASSERT(getChannel()->getSecondaryChannelOffset() == physicallayer::IEEE80211_SECONDARY_CHANNEL_NONE);
+        }
+    }
+    void checkCca()
+    {
+        Enter_Method("checkCca");
+        updateCcaState();
+        ASSERT(getCcaSnapshot().isHt40());
+        ASSERT(check_and_cast<const CcaCheckingReceiver *>(getReceiver())->isHtCcaOperation());
+    }
+};
+Define_Module(ConfiguringRadio);
+
+class ChannelWidthTest : public cSimpleModule
+{
+  public:
+    ChannelWidthTest() : cSimpleModule(65536) {}
+    virtual void activity() override
+    {
+        auto radio = check_and_cast<ConfiguringRadio *>(getModuleByPath("^.ap.wlan[0].radio"));
+        auto mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        const auto *rx = check_and_cast<const physicallayer::Ieee80211Receiver *>(radio->getReceiver());
+        ASSERT(rx->getBandwidth() == MHz(40));
+        ASSERT(rx->getCenterFrequency() == radio->getChannel()->getBondedCenterFrequency());
+        radio->checkCca();
+        mgmt->emitBeaconNow();
+        ASSERT(mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        radio->rejectCombinedCommands();
+        radio->narrow();
+        ASSERT(rx->getBandwidth() == MHz(20));
+        ASSERT(rx->getCenterFrequency() == radio->getChannel()->getCenterFrequency());
+        mgmt->emitBeaconNow();
+        ASSERT(mgmt->sentBeacons.back()->getHtOperationPresent());
+        ASSERT(!mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        ASSERT(mgmt->sentBeacons.back()->getHtOperation().secondaryChannelOffset == 0);
+        std::cout << "HT40 initialization, CCA, atomic HT20 transition and beacon width verified.\n";
+    }
+};
+Define_Module(ChannelWidthTest);
+} }
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.wireless.AccessPoint;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
+module CcaCheckingReceiver extends Ieee80211Receiver { parameters: @class(::inet::ieee80211::CcaCheckingReceiver); }
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple TestIeee80211MgmtAp extends Ieee80211MgmtAp { parameters: @class(::inet::ieee80211::TestIeee80211MgmtAp); }
+module ConfiguringRadio extends Ieee80211Radio { parameters: @class(::inet::ieee80211::ConfiguringRadio); }
+simple ChannelWidthTest extends SimpleModule { parameters: @class(::inet::ieee80211::ChannelWidthTest); }
+network ChannelWidthNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        test: ChannelWidthTest;
+}
+%inifile: omnetpp.ini
+[General]
+network = ChannelWidthNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50us
+seed-set = 0
+**.wlan[*].mgmt.typename = "TestIeee80211MgmtAp"
+**.wlan[*].radio.receiver.typename = "CcaCheckingReceiver"
+**.wlan[*].radio.typename = "ConfiguringRadio"
+**.wlan[*].radio.channelNumber = 4
+**.wlan[*].radio.bandwidth = 40MHz
+**.wlan[*].radio.htSecondaryChannelOffset = "above"
+**.wlan[*].mib.htSecondaryChannelOffset = 1
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 135Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+%contains: stdout
+HT40 initialization, CCA, atomic HT20 transition and beacon width verified.

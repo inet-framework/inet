@@ -19,6 +19,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
 namespace inet {
 
@@ -43,6 +44,7 @@ void Ieee80211MgmtApBase::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER)
         mib->bssData.bssid = mib->address;
     else if (stage == INITSTAGE_LAST && mib->isHtOperationSupported()) {
+        mib->setPrimaryChannel(mib->requirePrimaryChannel(), getHtOperationBand());
         const auto& operation = mib->getHtOperation();
         if (operation.operatingChannelWidth == MHz(40) &&
                 !getHtOperationBand()->isHt40OperationSupported(operation.primaryChannel, operation.secondaryChannelOffset))
@@ -57,7 +59,15 @@ void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID
 
     if (source == radio && signalID == ieee80211RadioChannelChangedSignal) {
         EV << "Updating AP primary channel to " << value << ".\n";
-        mib->setPrimaryChannel(value);
+        if (mib->isHtOperationSupported()) {
+            const auto *radioContract = check_and_cast<const physicallayer::IRadio *>(radio);
+            const auto *receiverWidths = check_and_cast<const physicallayer::Ieee80211Receiver *>(radioContract->getReceiver());
+            const auto *transmitterWidths = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radioContract->getTransmitter());
+            mib->setPrimaryChannel(value, getHtOperationBand(),
+                    receiverWidths->isHtChannelWidthSupported(MHz(40)) && transmitterWidths->isHtChannelWidthSupported(MHz(40)));
+        }
+        else
+            mib->setPrimaryChannel(value);
     }
 }
 

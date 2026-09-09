@@ -23,7 +23,7 @@ struct SequenceNumberCyclic
     SequenceNumber value;
 
   private:
-    SequenceNumber modulo4096(SequenceNumber value) const { ASSERT(value != -1); return (value % 4096 + 4096) % 4096; } // always returns positive result
+    SequenceNumber modulo4096(SequenceNumber value) const { return (value % 4096 + 4096) % 4096; } // always returns positive result
     SequenceNumber distance4096(SequenceNumber other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
 
   public:

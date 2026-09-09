@@ -20,4 +20,3 @@ simple RecipientQosAckPolicy extends SimpleModule like IRecipientQosAckPolicy
         string rateSelectionModule;
         @display("i=block/control");
 }
-

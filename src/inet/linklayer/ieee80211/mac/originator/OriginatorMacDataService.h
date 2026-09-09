@@ -30,6 +30,7 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
 //    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
     IFragmentationPolicy *fragmentationPolicy = nullptr;
     IFragmentation *fragmentation = nullptr;
+    FrameEligibilityFunction frameEligibilityFunction;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
 //    MpduHeaderPlusFcs *mpduHeaderPlusFcs = nullptr;
 
@@ -42,6 +43,9 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
   public:
     virtual ~OriginatorMacDataService();
 
+    virtual void setFrameEligibilityFunction(const FrameEligibilityFunction& frameEligibilityFunction) override { this->frameEligibilityFunction = frameEligibilityFunction; }
+    virtual bool isFrameEligible(const Packet *packet) const override;
+    virtual bool hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const override;
     virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };
 
@@ -49,4 +53,3 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
 } /* namespace inet */
 
 #endif
-

@@ -30,6 +30,10 @@ namespace ieee80211 {
  */
 class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetListener
 {
+  public:
+    virtual std::function<void()> saveModeSetState() override;
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IContention *contention = nullptr;
     IChannelAccess::ICallback *callback = nullptr;
@@ -86,6 +90,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     // IChannelAccess
     virtual void requestChannel(IChannelAccess::ICallback *callback) override;
     virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
+    virtual void restartChannelAccess(IChannelAccess::ICallback *callback);
 
     // IContention::ICallback
     virtual void channelAccessGranted() override;

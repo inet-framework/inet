@@ -1,3 +1,5 @@
+#local files
+implementation_plan*
 # local and generated files not to be committed
 doc/src/showcases
 doc/src/tutorials

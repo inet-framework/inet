@@ -12,7 +12,7 @@ namespace inet {
 namespace physicallayer {
 
 ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
-    NarrowbandSignalAnalogModel(preambleDuration, dataDuration, headerDuration, centerFrequency, bandwidth),
+    NarrowbandSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth),
     power(power)
 {
 }
