@@ -884,6 +884,57 @@ EV << "Cyclic sequence arithmetic wraps through zero without invalid intermediat
     EV << "Basic and Compressed BAR rate selection is variant-agnostic.\n";
 }
 
+{
+    // Sparse Basic Block Ack request limits transmitted-BAR transitions to the 64-sequence window.
+    QosAckHandler handler;
+    MacAddress receiver("10:20:30:40:50:60");
+    std::vector<Ptr<Ieee80211DataHeader>> headers;
+    for (int offset : {0, 63, 64, 100}) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setReceiverAddress(receiver);
+        header->setTid(5);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setSequenceNumber(SequenceNumberCyclic((4090 + offset) % 4096));
+        header->setFragmentNumber(0);
+        headers.push_back(header);
+        handler.frameGotInProgress(header);
+        handler.processTransmittedDataOrMgmtFrame(header);
+    }
+    auto basicBar = makeShared<Ieee80211BasicBlockAckReq>();
+    basicBar->setReceiverAddress(receiver);
+    basicBar->setTidInfo(5);
+    basicBar->setStartingSequenceNumber(SequenceNumberCyclic(4090));
+    handler.processTransmittedBlockAckReq(basicBar);
+
+    ASSERT(handler.getQoSDataAckStatus(headers[0]) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(handler.getQoSDataAckStatus(headers[1]) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(handler.getQoSDataAckStatus(headers[2]) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    ASSERT(handler.getQoSDataAckStatus(headers[3]) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    ASSERT(handler.isOutstandingFrame(headers[2]));
+    ASSERT(handler.isOutstandingFrame(headers[3]));
+
+    auto basicBlockAck = makeShared<Ieee80211BasicBlockAck>();
+    basicBlockAck->setTransmitterAddress(receiver);
+    basicBlockAck->setTidInfo(5);
+    basicBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(4090));
+    for (int i = 0; i < 64; i++)
+        basicBlockAck->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 0xFF)));
+    auto acked = handler.processReceivedBlockAck(basicBlockAck);
+    ASSERT(acked.size() == 2);
+    ASSERT(handler.getQoSDataAckStatus(headers[0]) == QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED);
+    ASSERT(handler.getQoSDataAckStatus(headers[1]) == QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED);
+    ASSERT(handler.getQoSDataAckStatus(headers[2]) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    ASSERT(handler.getQoSDataAckStatus(headers[3]) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+
+    auto nextBar = makeShared<Ieee80211BasicBlockAckReq>(*basicBar);
+    nextBar->setStartingSequenceNumber(SequenceNumberCyclic((4090 + 64) % 4096));
+    handler.processTransmittedBlockAckReq(nextBar);
+    ASSERT(handler.getQoSDataAckStatus(headers[2]) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(handler.getQoSDataAckStatus(headers[3]) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    EV << "Sparse Basic BAR limits waiting statuses to 64 positions across sequence wrap.\n";
+}
+
 EV << ".\n";
 
 %contains: stdout
@@ -918,4 +969,5 @@ Originator capability, agreement, and fragmentation gates passed.
 Legacy Basic BAR and BA remain byte-exact.
 Accepted delayed agreement is retained for Basic BAR fallback.
 Basic and Compressed BAR rate selection is variant-agnostic.
+Sparse Basic BAR limits waiting statuses to 64 positions across sequence wrap.
 .
