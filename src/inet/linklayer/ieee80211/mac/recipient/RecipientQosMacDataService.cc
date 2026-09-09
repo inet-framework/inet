@@ -30,6 +30,21 @@ void RecipientQosMacDataService::initialize()
     blockAckReordering = new BlockAckReordering();
 }
 
+void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress originatorAddr)
+{
+    Enter_Method("resetBlockAckReordering");
+    if (blockAckReordering) {
+        auto droppedFrames = blockAckReordering->resetReceiveBuffer(tid, originatorAddr);
+        for (auto packet : droppedFrames) {
+            take(packet);
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
+}
+
 Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFragments)
 {
     for (auto fragment : completeFragments) {
@@ -112,25 +127,25 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     return deaggregatedFrames;
 }
 
-std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
+IRecipientQosMacDataService::ManagementFrameReceptionResult RecipientQosMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     Enter_Method("managementFrameReceived");
     take(mgmtPacket);
     // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
-        return std::vector<Packet *>();
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader)) {
+        delete mgmtPacket;
+        return { {}, true };
+    }
     if (basicReassembly) { // FIXME defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
-    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
-        blockAckReordering->processReceivedDelba(delba);
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
     if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
         delete mgmtPacket;
-        return std::vector<Packet *>();
+        return { {}, false };
     }
     else
-        return std::vector<Packet *>({ mgmtPacket });
+        return { { mgmtPacket }, false };
 }
 
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
@@ -196,4 +211,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

@@ -65,29 +65,6 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
 }
 
 //
-// An originator that intends to use the Block Ack mechanism for the transmission of QoS data frames to an
-// intended recipient should first check whether the intended recipient STA is capable of participating in Block
-// Ack mechanism by discovering and examining its Delayed Block Ack and Immediate Block Ack capability
-// bits. If the intended recipient STA is capable of participating, the originator sends an ADDBA Request frame
-// indicating the TID for which the Block Ack is being set up.
-//
-RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
-{
-    MacAddress originatorAddr = addbaReq->getTransmitterAddress();
-    auto id = std::make_pair(originatorAddr, addbaReq->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it == blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), addbaReq->getBlockAckTimeoutValue());
-        blockAckAgreements[id] = agreement;
-        EV_DETAIL << "Block Ack Agreement is added with the following parameters: " << *agreement << endl;
-        return agreement;
-    }
-    else
-        // TODO update?
-        return it->second;
-}
-
-//
 // When a timeout of BlockAckTimeout is detected, the STA shall send a DELBA frame to the peer STA with the Reason Code
 // field set to TIMEOUT and shall issue a MLME-DELBA.indication primitive with the ReasonCode
 // parameter having a value of TIMEOUT. The procedure is illustrated in Figure 10-14.
@@ -102,10 +79,14 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddre
     return delba;
 }
 
-const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, bool accepted)
 {
     auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
     addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
+    // IEEE Std 802.11-2024, 9.6.4.2 and 11.5.2.3: the response copies the
+    // request's Dialog Token and reports whether the agreement was accepted.
+    addbaResponse->setDialogToken(addbaRequest->getDialogToken());
+    addbaResponse->setStatusCode(accepted ? 0 : 1); // 1: REFUSED_REASON_UNSPECIFIED
     // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
     Tid tid = addbaRequest->getTid();
     addbaResponse->setTid(tid);
@@ -116,27 +97,17 @@ const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaR
     return addbaResponse;
 }
 
-void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
-{
-    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it != blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = it->second;
-        agreement->addbaResposneSent();
-    }
-    else
-        throw cRuntimeError("Agreement is not found");
-}
-
-void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::removeAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
+    lastAddbaResponses.erase(agreementId);
     auto it = blockAckAgreements.find(agreementId);
     if (it != blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = it->second;
+        auto agreement = it->second;
         blockAckAgreements.erase(it);
-        delete agreement;
+        return agreement;
     }
+    return nullptr;
 }
 
 RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid tid, MacAddress originatorAddr)
@@ -146,35 +117,69 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid 
     return it != blockAckAgreements.end() ? it->second : nullptr;
 }
 
-void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback)
-{
-    updateAgreement(addbaResp);
-    scheduleInactivityTimer(callback);
-}
-
-void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
 {
     EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
-        EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
-        auto agreement = addAgreement(addbaRequest);
-        EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
-        EV_DETAIL << "Building Addba Response" << endl;
-        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
-        auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
-        callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
+    bool accepted = addbaRequest->getDialogToken() != 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest);
+    EV_DETAIL << "Building Addba Response" << endl;
+    auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy, accepted);
+    auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+    bool hadAgreement = blockAckAgreements.find(id) != blockAckAgreements.end();
+    // Keep the immutable response body that corresponds to the most recently
+    // processed request identity. This is response replay state, not a second
+    // duplicate detector; RecipientQosMacDataService remains authoritative.
+    if (accepted || hadAgreement)
+        lastAddbaResponses[id] = addbaResponse;
+    else
+        lastAddbaResponses.erase(id);
+    auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
+    RecipientBlockAckAgreement *agreement = nullptr;
+    if (accepted) {
+        // IEEE Std 802.11-2024, 10.25.2 and 11.5.2.3: accepting the
+        // request establishes or modifies the recipient agreement when the
+        // successful response is formed; transmission is not a state gate.
+        agreement = new RecipientBlockAckAgreement(addbaRequest->getTransmitterAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue());
+        auto it = blockAckAgreements.find(id);
+        if (it != blockAckAgreements.end()) {
+            delete it->second;
+            it->second = agreement;
+        }
+        else
+            blockAckAgreements[id] = agreement;
+        scheduleInactivityTimer(agreementHandlerCallback);
+    }
+    procedureCallback->processMgmtFrame(addbaResponsePacket, addbaResponse);
+    return agreement;
+}
+
+void RecipientBlockAckAgreementHandler::processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback)
+{
+    auto agreement = getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+    if (agreement != nullptr) {
+        // IEEE Std 802.11-2024, 10.3.2.14.3 normally discards duplicate management bodies.
+        // Replaying the already generated response is an explicit robustness/model
+        // extension; it does not modify the agreement, reorder window, or inactivity timer.
+        auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+        auto it = lastAddbaResponses.find(id);
+        if (it == lastAddbaResponses.end())
+            return;
+        // Copy the immutable snapshot so outbound sequence assignment uses COW
+        // and cannot modify the cached body used by a later retransmission.
+        auto addbaResponse = staticPtrCast<Ieee80211AddbaResponse>(it->second->dupShared());
+        procedureCallback->processMgmtFrame(new Packet("AddbaResponse", addbaResponse), addbaResponse);
     }
 }
 
-void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
+std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
 }
 
-void RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
+std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     if (blockAckAgreementPolicy->isDelbaAccepted(delba))
-        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+        return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
+    return nullptr;
 }
 
 RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
@@ -185,4 +190,3 @@ RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
 
 } // namespace ieee80211
 } // namespace inet
-
