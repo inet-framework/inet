@@ -74,11 +74,45 @@ endif
 # VisualizationVsg feature requires VulkanSceneGraph (the OSG-free 3D replacement).
 # VSG_CFLAGS/VSG_LIBS come from OMNeT++'s Makefile.inc (set when WITH_VSG=yes).
 #
+# Optional Rocky geospatial SDK (github.com/pelicanmapping/rocky, the VSG-based
+# successor to osgEarth): enables RockyGround / SceneRockyVisualizer. Detected here
+# rather than through an OMNeT++ configure option, the same way the omnetpp 3d-demo
+# sample does it, so a build without Rocky simply leaves those two modules out instead
+# of failing. Override the prefixes on the make command line for a non-standard
+# install, e.g.: make ROCKY_ROOT=/path/to/rocky-install
+ROCKY_ROOT ?= $(shell pkg-config --variable=prefix rocky 2>/dev/null)
+VULKAN_INCDIR ?= $(shell pkg-config --variable=includedir vulkan 2>/dev/null)
+VULKAN_LIBDIR ?= $(shell pkg-config --variable=libdir vulkan 2>/dev/null)
+ifneq ($(wildcard $(ROCKY_ROOT)/include/rocky),)
+  HAVE_ROCKY = yes
+endif
 WITH_VISUALIZATIONVSG := $(shell (cd .. && $(FEATURETOOL) -q isenabled VisualizationVsg && echo enabled) )
 ifeq ($(WITH_VISUALIZATIONVSG), enabled)
   ifeq ($(WITH_VSG), yes)
     CFLAGS += $(VSG_CFLAGS)
     OMNETPP_LIBS += $(VSG_LIBS)
+    ifeq ($(HAVE_ROCKY), yes)
+      $(info Rocky found under $(ROCKY_ROOT) -- building RockyGround and SceneRockyVisualizer)
+      # -DWITH_ROCKY here (rather than via the generated opp_defines.h) keeps the macro and the
+      # include path in the same CFLAGS, so the two can never get out of sync.
+      CFLAGS += -DWITH_ROCKY -I$(ROCKY_ROOT)/include
+      # Rocky looks its shaders up at runtime under ROCKY_FILE_PATH, so a simulation would need
+      # that set in the environment to start at all. Bake in the share/ dir of the very install
+      # this was built against, as the default SceneRockyVisualizer falls back to.
+      CFLAGS += -DROCKY_RESOURCE_PATH='"$(ROCKY_ROOT)/share/rocky"'
+      ifneq ($(VULKAN_INCDIR),)
+        CFLAGS += -isystem $(VULKAN_INCDIR)
+      endif
+      OMNETPP_LIBS += -L$(ROCKY_ROOT)/lib -lrocky -Wl,-rpath,$(ROCKY_ROOT)/lib
+      # Rocky's public headers inline spdlog calls, so a source file that includes one
+      # references spdlog (and fmt) itself. Empty where spdlog is header-only.
+      OMNETPP_LIBS += $(shell pkg-config --libs spdlog 2>/dev/null)
+      ifneq ($(VULKAN_LIBDIR),)
+        OMNETPP_LIBS += -L$(VULKAN_LIBDIR) -Wl,-rpath,$(VULKAN_LIBDIR)
+      endif
+    else
+      $(info Rocky SDK not found -- RockyGround and SceneRockyVisualizer will not be built)
+    endif
   else
     $(error Please rebuild OMNeT++/OMNEST with VSG support (WITH_VSG=yes), or disable 'VisualizationVsg' feature in INET )
   endif
