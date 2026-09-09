@@ -166,6 +166,7 @@ class CompressedBlockAckValidation : public SimpleModule
         agreement.setIsAddbaResponseReceived(true);
         agreement.setIsCompressedBlockAckSupported(true);
         OriginatorQosAckPolicy policy;
+        policy.applyModeSet(physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"));
         QosAckHandler handler;
         std::vector<Packet *> frames;
         for (int offset : {0, 63, 64, 100}) {
@@ -205,6 +206,51 @@ class CompressedBlockAckValidation : public SimpleModule
         }
         // A later BAR can request both residual frames.
         auto nextBar = makeShared<Ieee80211CompressedBlockAckReq>(*bar);
+        nextBar->setStartingSequenceNumber(SequenceNumberCyclic((start + 64) % 4096));
+        handler.processTransmittedBlockAckReq(nextBar);
+        for (int i : {2, 3})
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        for (auto frame : frames)
+            delete frame;
+    }
+
+    void checkSparseBasic(int start, bool timeout) {
+        QosAckHandler handler;
+        std::vector<Packet *> frames;
+        for (int offset : {0, 63, 64, 100}) {
+            auto header = dataHeader((start + offset) % 4096);
+            frames.push_back(new Packet("outstanding", header));
+            handler.frameGotInProgress(header);
+            handler.processTransmittedDataOrMgmtFrame(header);
+        }
+        auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+        bar->setReceiverAddress(LOCAL);
+        bar->setTidInfo(5);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(start));
+        handler.processTransmittedBlockAckReq(bar);
+        for (int i = 0; i < 4; i++)
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) ==
+                (i < 2 ? QosAckHandler::Status::WAITING_FOR_BLOCK_ACK : QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED));
+        if (timeout)
+            handler.processFailedBlockAckReq(bar);
+        else {
+            auto ba = makeShared<Ieee80211BasicBlockAck>();
+            ba->setTransmitterAddress(LOCAL);
+            ba->setTidInfo(5);
+            ba->setStartingSequenceNumber(SequenceNumberCyclic(start));
+            for (int i = 0; i < 64; i++)
+                ba->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 255)));
+            ASSERT(handler.processReceivedBlockAck(ba).size() == 2);
+        }
+        for (int i = 0; i < 4; i++) {
+            auto header = frames[i]->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(handler.getQoSDataAckStatus(header) == (i >= 2 ? QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED :
+                timeout ? QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED : QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED));
+            if (i >= 2)
+                ASSERT(handler.isOutstandingFrame(header));
+        }
+        // A later BAR can request both residual frames.
+        auto nextBar = makeShared<Ieee80211BasicBlockAckReq>(*bar);
         nextBar->setStartingSequenceNumber(SequenceNumberCyclic((start + 64) % 4096));
         handler.processTransmittedBlockAckReq(nextBar);
         for (int i : {2, 3})
@@ -272,9 +318,12 @@ class CompressedBlockAckValidation : public SimpleModule
         checkRecipient(true, false, true, 0);
         checkRecipient(true, true, false, 0);
         checkRecipient(false, true, true, 0);
-        for (int start : {0, 4090})
-            for (bool timeout : {false, true})
+        for (int start : {0, 4090}) {
+            for (bool timeout : {false, true}) {
                 checkSparse(start, timeout);
+                checkSparseBasic(start, timeout);
+            }
+        }
         std::cout << "Compressed BAR validation preserves receive state and limits transmit state to 64 positions.\n";
     }
 };

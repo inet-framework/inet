@@ -222,7 +222,8 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
             if (receiverAddress == blockAckReq->getReceiverAddress() && basicBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum)
+                // IEEE Std 802.11-2024, 10.25.6.1: the Basic bitmap covers 64 sequence numbers.
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && BlockAckWindow::isWithin(startingSeqNum, 64, SequenceNumberCyclic(seqCtrlField.getSequenceNumber())))
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
