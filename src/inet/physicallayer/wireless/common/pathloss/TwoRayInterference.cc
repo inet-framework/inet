@@ -1,6 +1,10 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayInterference.h"
 
+#include <cmath>
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/environment/contract/IGround.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
@@ -26,6 +30,8 @@ TwoRayInterference::TwoRayInterference() :
 void TwoRayInterference::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        // optional: when unset (the default), ground is assumed flat at z=0, as in the original Veins model
+        physicalEnvironment = findModuleFromPar<physicalenvironment::IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
         epsilon_r = par("epsilon_r");
         const std::string polarization_str = par("polarization");
         if (polarization_str == "horizontal") {
@@ -59,10 +65,29 @@ double TwoRayInterference::computePathLoss(const ITransmission *transmission, co
     return computeTwoRayInterference(transmission->getStartPosition(), arrival->getStartPosition(), waveLength);
 }
 
+double TwoRayInterference::computeHeightAboveGround(const Coord& position) const
+{
+    // The model needs antenna heights above the reflecting ground. Without a
+    // physical environment the ground is assumed flat at z=0 (the original
+    // Veins behavior); with one, heights are measured above its ground model
+    // (e.g. terrain), falling back to raw z where the ground is undefined.
+    if (physicalEnvironment != nullptr) {
+        auto ground = physicalEnvironment->getGround();
+        if (ground != nullptr) {
+            Coord projection = ground->computeGroundProjection(position);
+            if (std::isfinite(projection.z))
+                return position.distance(projection);
+        }
+    }
+    return position.z;
+}
+
 double TwoRayInterference::computeTwoRayInterference(const Coord& pos_t, const Coord& pos_r, m lambda) const
 {
-    const double h_sum = pos_t.z + pos_r.z;
-    const double h_diff = pos_t.z - pos_r.z;
+    const double h_t = computeHeightAboveGround(pos_t);
+    const double h_r = computeHeightAboveGround(pos_r);
+    const double h_sum = h_t + h_r;
+    const double h_diff = h_t - h_r;
 
     // direct line of sight between Tx and Rx antenna
     const double d_los = pos_r.distance(pos_t);
