@@ -8,10 +8,13 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -46,6 +49,11 @@ void Dcf::initialize(int stage)
         stationRetryCounters = new StationRetryCounters();
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
         WATCH_EXPR("frameSequenceInfo", frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "");
+    }
+    else if (stage == INITSTAGE_LAST) {
+        // Dcaf resolves its pending queue at the link-layer stage. Install
+        // this signal listener after all child initialization has completed.
+        check_and_cast<cModule *>(channelAccess->getPendingQueue())->subscribe(packetDroppedSignal, this);
     }
 }
 
@@ -111,6 +119,21 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
 void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     throw cRuntimeError("Unknown management frame");
+}
+
+void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID == packetDroppedSignal) {
+        Enter_Method("%s", cComponent::getSignalName(signalID));
+        auto packet = check_and_cast<Packet *>(obj);
+        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+        }
+    }
+    else
+        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -267,6 +290,11 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         details.setLimit(recoveryProcedure->getShortRetryLimit());
         emit(packetDroppedSignal, packet, &details);
         emit(linkBrokenSignal, packet);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+        }
     }
 }
 
@@ -311,6 +339,11 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
         channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         ackHandler->dropFrame(lastTransmittedDataOrMgmtHeader);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedDataOrMgmtHeader)) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, lastTransmittedPacket, &transmissionDetails);
+        }
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
@@ -344,6 +377,11 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         details.setLimit(-1); // TODO
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader)) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, failedPacket, &transmissionDetails);
+        }
     }
     else {
         EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";

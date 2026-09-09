@@ -46,6 +46,7 @@ module Hcf extends Module like IHcf
         @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
+        @signal[frameTransmissionOutcome](type=inet::Packet);
         @signal[edcaCollisionDetected](type=unsigned long);
         @signal[frameSequenceStarted];
         @signal[frameSequenceFinished];

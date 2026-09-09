@@ -8,13 +8,16 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -61,6 +64,12 @@ void Hcf::initialize(int stage)
             originatorBlockAckProcedure = new OriginatorBlockAckProcedure();
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
         }
+    }
+    else if (stage == INITSTAGE_LAST) {
+        // Edca resolves its Edcaf array at the link-layer stage. Install the
+        // queue signal listeners after all child initialization has completed.
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+            check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
     }
 }
 
@@ -143,6 +152,21 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
             edca->requestChannelAccess(ac, this);
         }
     }
+}
+
+void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID == packetDroppedSignal) {
+        Enter_Method("%s", cComponent::getSignalName(signalID));
+        auto packet = check_and_cast<Packet *>(obj);
+        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+        }
+    }
+    else
+        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -261,6 +285,11 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, internallyCollidedFrame, &details);
             emit(linkBrokenSignal, internallyCollidedFrame);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(internallyCollidedHeader)) {
+                FrameTransmissionDetails transmissionDetails;
+                transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+                emit(Ieee80211Mac::frameTransmissionOutcomeSignal, internallyCollidedFrame, &transmissionDetails);
+            }
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
         }
@@ -410,6 +439,11 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, packet, &details);
             emit(linkBrokenSignal, packet);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
+                FrameTransmissionDetails transmissionDetails;
+                transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+                emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+            }
         }
     }
     else
@@ -531,6 +565,11 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, failedPacket, &details);
             emit(linkBrokenSignal, failedPacket);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader)) {
+                FrameTransmissionDetails transmissionDetails;
+                transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+                emit(Ieee80211Mac::frameTransmissionOutcomeSignal, failedPacket, &transmissionDetails);
+            }
         }
         else {
             EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
@@ -597,6 +636,11 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
         edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
+            FrameTransmissionDetails transmissionDetails;
+            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, lastTransmittedPacket, &transmissionDetails);
+        }
     }
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
         EV_INFO << "BasicBlockAck has arrived" << std::endl;
