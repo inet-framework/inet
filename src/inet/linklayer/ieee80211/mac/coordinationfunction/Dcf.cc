@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -53,7 +55,7 @@ void Dcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         // Dcaf resolves its pending queue at the link-layer stage. Install
         // this signal listener after all child initialization has completed.
-        check_and_cast<cModule *>(channelAccess->getPendingQueue())->subscribe(packetDroppedSignal, this);
+        check_and_cast<cModule *>(channelAccess->getPendingQueue())->subscribe(queueing::IPacketQueue::packetQueueDepartureSignal, this);
     }
 }
 
@@ -121,19 +123,25 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
     throw cRuntimeError("Unknown management frame");
 }
 
-void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Dcf::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
-        auto packet = check_and_cast<Packet *>(obj);
-        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
-            FrameTransmissionDetails transmissionDetails;
-            transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
-            emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
-        }
+    if (signal == queueing::IPacketQueue::packetQueueDepartureSignal) {
+        Enter_Method("packetQueueDeparture");
+        if (source->isSubscribed(signal, this))
+            handlePacketRemoved(check_and_cast<Packet *>(object), check_and_cast<queueing::PacketQueueRemovalDetails *>(details)->getReason());
     }
     else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
+        ModeSetListener::receiveSignal(source, signal, object, details);
+}
+
+void Dcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
+{
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
+        FrameTransmissionDetails transmissionDetails;
+        transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
+        emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
+    }
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -429,4 +437,3 @@ Dcf::~Dcf()
 
 } // namespace ieee80211
 } // namespace inet
-
