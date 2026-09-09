@@ -19,6 +19,9 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
 
 namespace inet {
+
+class Packet;
+
 namespace ieee80211 {
 
 class INET_API IRecipientBlockAckAgreementHandler
@@ -29,11 +32,15 @@ class INET_API IRecipientBlockAckAgreementHandler
     virtual RecipientBlockAckAgreement *processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback) = 0;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
-    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
+    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(Packet *packet) = 0;
+    virtual bool processAcknowledgedDelba(Packet *, IBlockAckAgreementHandlerCallback *) { return false; }
+    virtual bool processAbortedDelba(Packet *, IBlockAckAgreementHandlerCallback *) { return false; }
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) = 0;
+    virtual uint64_t getPendingTeardownGenerationId(Tid, MacAddress) const { return 0; }
+    virtual bool isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const { return true; }
 };
 
 } // namespace ieee80211
