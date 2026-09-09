@@ -74,8 +74,10 @@ void Ieee80211Mac::initialize(int stage)
                 modeSet->getMaximumNumberOfSpatialStreams());
         std::set<Hz> operationalChannelWidths;
         if (modeSet->isHtOperationSupported()) {
-            const auto *transmitter = check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
-            const auto *receiver = check_and_cast<const Ieee80211Receiver *>(radio->getReceiver());
+            const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+            const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
+            if (transmitter == nullptr || receiver == nullptr)
+                throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
             for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
                 if (transmitter->isHtChannelWidthSupported(channelWidth) &&
                         receiver->isHtChannelWidthSupported(channelWidth))
