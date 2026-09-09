@@ -22,6 +22,9 @@ class INET_API RecipientBlockAckAgreement : public cObject
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
     simtime_t expirationTime = -1;
+    // The agreement stays installed until the timeout DELBA is transmitted;
+    // prevent that pending teardown from being re-armed by late activity.
+    bool inactivityExpired = false;
     uint64_t generationId = 0;
 
   public:
@@ -36,8 +39,13 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
     virtual uint64_t getGenerationId() const { return generationId; }
 
-    virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
+    virtual void calculateExpirationTime() {
+        if (!inactivityExpired)
+            expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue;
+    }
     virtual simtime_t getExpirationTime() { return expirationTime; }
+    virtual bool isInactivityExpired() const { return inactivityExpired; }
+    virtual void markInactivityExpired() { inactivityExpired = true; expirationTime = SIMTIME_MAX; }
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);
 };
 
