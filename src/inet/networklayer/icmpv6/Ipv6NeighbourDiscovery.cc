@@ -836,19 +836,22 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
        the IP source is set to the unspecified address and the IP
        destination is set to the solicited-node multicast address of the
        target address.*/
-    Ipv6Address destAddr = tentativeAddr.formSolicitedNodeMulticastAddress();
-    // Send a NS
-    createAndSendNsPacket(tentativeAddr, destAddr,
-            Ipv6Address::UNSPECIFIED_ADDRESS, ie);
-    dadEntry->numNSSent++;
-
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
     dadEntry->timeoutMsg = msg;
 
-    // added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
-    // group which is delay up to one 1 second (RFC 4862, 5.4.2)
-    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
+    /*RFC 4862: Section 5.4.2
+       Before sending a Neighbor Solicitation, an interface MUST join the
+       all-nodes multicast address and the solicited-node multicast address
+       of the tentative address.*/
+    /*If the Neighbor Solicitation is going to be the first message sent
+       from an interface after interface (re)initialization, the node SHOULD
+       delay joining the solicited-node multicast address by a random delay
+       between 0 and MAX_RTR_SOLICITATION_DELAY as specified in [RFC4861].*/
+    // The join has to precede the solicitation, so delaying the join delays the
+    // solicitation with it. processDadTimeout() sends this first solicitation and
+    // every later one, each separated by RetransTimer.
+    scheduleAfter(uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
 
     emit(startDadSignal, 1);
 }
