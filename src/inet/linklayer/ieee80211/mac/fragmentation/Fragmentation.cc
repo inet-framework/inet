@@ -51,11 +51,12 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
     const auto& frameHeader = frame->popAtFront<Ieee80211DataOrMgmtHeader>();
     frame->popAtBack<Ieee80211MacTrailer>(B(4));
     const auto& actionFrame = dynamicPtrCast<const Ieee80211ActionFrame>(frameHeader);
-    if (actionFrame != nullptr) {
+    const auto& managementHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(frameHeader);
+    if (managementHeader != nullptr && managementHeader->getChunkLength() > makeShared<Ieee80211MgmtHeader>()->getChunkLength()) {
         // IEEE Std 802.11-2024, 10.4: a fragment frame body carries only a
-        // portion of the MMPDU. Move the action body out of INET's combined
+        // portion of the MMPDU. Move the management body out of INET's combined
         // typed header before slicing it into fragment bodies.
-        Packet serializedHeader("serializedActionHeader", frameHeader);
+        Packet serializedHeader("serializedManagementHeader", frameHeader);
         const auto& headerBytes = serializedHeader.peekDataAsBytes()->getBytes();
         auto bodyOffset = makeShared<Ieee80211MgmtHeader>()->getChunkLength().get<B>();
         frame->insertAtFront(makeShared<BytesChunk>(std::vector<uint8_t>(headerBytes.begin() + bodyOffset, headerBytes.end())));
@@ -75,15 +76,16 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
         fragment->getRegionTags().copyTags(frame->getRegionTags(), frame->getFrontOffset() + offset, fragment->getFrontOffset(), length);
         offset += length;
         Ptr<Ieee80211DataOrMgmtHeader> fragmentHeader;
+        if (managementHeader != nullptr)
+            fragmentHeader = copyManagementHeader(managementHeader);
+        else
+            fragmentHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         if (actionFrame != nullptr) {
-            fragmentHeader = copyManagementHeader(actionFrame);
             auto actionContext = staticPtrCast<Ieee80211ActionFrame>(actionFrame->dupShared());
             actionContext->setFragmentNumber(i);
             actionContext->setMoreFragments(!lastFragment);
             fragment->addTag<Ieee80211FragmentedActionContextTag>()->setActionFrame(actionContext);
         }
-        else
-            fragmentHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);
