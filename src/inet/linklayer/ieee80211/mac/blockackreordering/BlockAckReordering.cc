@@ -185,18 +185,17 @@ ReceiveBuffer *BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
         return it->second;
 }
 
-void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
+std::vector<Packet *> BlockAckReordering::resetReceiveBuffer(Tid tid, MacAddress originatorAddr)
 {
-    Tid tid = delba->getTid();
-    MacAddress originatorAddr = delba->getTransmitterAddress();
+    std::vector<Packet *> frames;
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
+        frames = it->second->extractFrames();
         delete it->second;
         receiveBuffers.erase(it);
     }
-    else
-        EV_DETAIL << "Receive buffer is not found" << endl;
+    return frames;
 }
 
 void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber)
@@ -244,4 +243,3 @@ BlockAckReordering::~BlockAckReordering()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

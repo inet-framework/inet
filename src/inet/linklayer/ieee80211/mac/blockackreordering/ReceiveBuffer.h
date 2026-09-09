@@ -37,6 +37,7 @@ class INET_API ReceiveBuffer
     bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     void dropFramesUntil(SequenceNumberCyclic sequenceNumber);
     void removeFrame(SequenceNumberCyclic sequenceNumber);
+    Fragments extractFrames();
 
     const ReorderBuffer& getBuffer() { return buffer; }
     int getLength() { return length; }
@@ -50,4 +51,3 @@ class INET_API ReceiveBuffer
 } /* namespace inet */
 
 #endif
-
