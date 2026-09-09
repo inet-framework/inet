@@ -1,0 +1,148 @@
+%description:
+
+RFC 9293 — a received ICMP Source Quench is silently discarded.
+
+Checks RFC9293-ICMP-2 (must, MUST-55) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/icmp.md#source-quench; the program steps below map
+onto its expected observations. Mapping of the mockup with a relay and a gateway: host A =
+host1, relay T = tap, gateway R = router, host B = host2.
+
+The vehicle is the same real report that Rfc9293SoftIcmpError.test uses: the relay sets the
+time to live of the first data segment to 1, the gateway answers with an ICMP Time Exceeded,
+and a second relay then rewrites the type of that message to 4, Source Quench, on its way to
+host A. Two relays are needed because one relay holds one rule. The message therefore quotes a real datagram of this connection, which is what a Source
+Quench does. The ICMP module keeps its declared checksum mode, in which the field is correct
+by declaration; that is the simulation form of a rewriter that computes the checksum again.
+
+Source Quench was deprecated for routers by RFC 6633, and RFC 9293 keeps the receive rule
+for exactly that reason: a host still meets the message and must ignore it.
+
+Expected result: FAIL. The model does not know the message. `Icmp::processIcmpMessage`
+switches on the type, and its default branch throws
+`cRuntimeError("Unknown ICMP type %d")` (src/inet/networklayer/ipv4/Icmp.cc). The run stops
+before TCP is ever offered the message:
+
+    Error: Unknown ICMP type 4 -- in module (inet::Icmp) Rfc9293IcmpNet.host1.ipv4.icmp
+    (id=48), at t=0.20016446s, event #84
+
+No verdict line is printed, and the runner counts the missing line as a failure. A stop is
+not a silent discard.
+
+This is the same branch that tests/protocol/ipv4/Rfc1122UnknownIcmpType.test reaches with a
+type that names no message at all. The two findings share one cause and one correction; this
+one shows that the branch is reached by a type the standards still describe, and that a TCP
+host meets it. See doc/project/evidence/model/tcp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_source_quench")
+        // The relay sets the time to live of the first data segment to 1, so that the gateway
+        // produces a real report about this connection.
+        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setTimeToLive(1); }); })
+                     .describe("the first data segment (set its time to live to 1)"))
+        // The relay then rewrites that report into a Source Quench on its way to host A.
+        .intercept(intercept("tap2").match("icmpv4.type == 11").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<IcmpHeader>(frame, [](IcmpHeader& h) { h.setType(ICMP_SOURCEQUENCH); }); })
+                     .describe("the gateway's report (rewrite its type to 4, Source Quench)"))
+        // Observation 1: host A sends its SYN. Record ISS_A.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: the Source Quench reaches host A's interface. This confirms the
+        // stimulus.
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 4")
+                  .describe("the Source Quench at host A's interface")
+                  .within(1.0))
+        // Observation 3: host A ends nothing. No reset leaves it (RFC9293-ICMP-2: the message
+        // is discarded, and a discard changes nothing).
+        .never(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.rstBit == true")
+                  .describe("a reset from host A")
+                  .within(0.5))
+        // Observation 4: the connection carries on and the whole stream is acknowledged.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .describe("the cumulative acknowledgment of the whole 5000-octet stream")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_source_quench compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay and a gateway of
+// doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- relay U -- gateway R -- host B. Two relays in series, because a tap
+// holds one rule at a time and this check needs two: one on the way out and one on the way
+// back. Both relays see both directions.
+network Rfc9293IcmpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=300,100"); }
+        tap2: PacketTap { @display("p=400,100"); }
+        router: Router { @display("p=520,100"); }
+        host2: StandardHost { @display("p=650,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> tap2.a;
+        tap2.b <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293IcmpNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums. The setting names the TCP modules alone: the ICMP
+# module keeps its declared mode, so that the relay can change the type of a message without
+# having to compute an ICMP checksum, exactly as tests/protocol/ipv4/Rfc1122UnknownIcmpType.test does.
+**.tcp.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc9293_source_quench: PASS

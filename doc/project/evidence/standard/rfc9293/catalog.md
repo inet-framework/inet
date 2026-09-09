@@ -50,6 +50,24 @@ new test or a new run must never force an edit here.
 | [RFC9293-RST-1](#rfc9293-rst-1) | A segment for a connection that does not exist is answered with a reset. |
 | [RFC9293-ISS-1](#rfc9293-iss-1) | Each side chooses its own initial sequence number. |
 | [RFC9293-ISS-2](#rfc9293-iss-2) | The initial sequence number is clock-driven, and should add a pseudorandom function. |
+| [RFC9293-SEGA-1](#rfc9293-sega-1) | A segment is acceptable when its sequence number falls in the receive window. |
+| [RFC9293-SEGA-2](#rfc9293-sega-2) | An unacceptable segment draws an empty acknowledgment, and the state does not change. |
+| [RFC9293-RST-2](#rfc9293-rst-2) | A reset is not sent when it is not clear that the segment does not belong to the connection. |
+| [RFC9293-RST-3](#rfc9293-rst-3) | A reset is not sent in answer to a reset. |
+| [RFC9293-RSTP-1](#rfc9293-rstp-1) | A reset is valid only when its sequence number is in the window. |
+| [RFC9293-RSTP-2](#rfc9293-rstp-2) | A valid reset on a synchronized connection aborts it. |
+| [RFC9293-WND-3](#rfc9293-wnd-3) | A receiver should not shrink the window. |
+| [RFC9293-WND-4](#rfc9293-wnd-4) | A sender is robust when the peer shrinks the window. |
+| [RFC9293-WND-5](#rfc9293-wnd-5) | With a negative usable window, the sender sends no new data. |
+| [RFC9293-ICMP-1](#rfc9293-icmp-1) | An ICMP error message is acted on, and directed to the connection that caused it. |
+| [RFC9293-ICMP-2](#rfc9293-icmp-2) | A received ICMP Source Quench is silently discarded. |
+| [RFC9293-ICMP-3](#rfc9293-icmp-3) | A soft ICMP error does not abort the connection. |
+| [RFC9293-ICMP-4](#rfc9293-icmp-4) | A hard ICMP error should abort the connection. |
+
+The rows above the line come from the level 2 pass, which read the document for the normal
+path. The rows below come from the level 3 pass, which read it for the edges: the segment
+that does not fit, the reset a third party could forge, the window that moves backward, and
+the error the layer below reports.
 
 ## How to read an entry
 
@@ -62,6 +80,10 @@ new test or a new run must never force an edit here.
   statement. No entry carries the field, because RFC 9293 is alone in the in-scope set. It
   is itself the override of RFC 793; see the override table of
   [`standards.md`](../../protocol/tcp/standards.md#override-table).
+
+Some rules of this document appear twice, once in the prose of §3.5 or §3.8 and once in the
+event processing of §3.10. Where that happens the entry quotes both places. Where the two
+carry different keywords, the weaker one governs and the entry says so.
 
 ## Connection establishment
 
@@ -384,14 +406,213 @@ new test or a new run must never force an edit here.
   sequence number zero, and an acknowledgment of the SYN's sequence number plus one; the
   attempt ends.
 
+## Segment acceptance
+
+### RFC9293-SEGA-1
+
+**A segment is acceptable when its sequence number falls in the receive window.**
+
+> "There are four cases for the acceptability test for an incoming segment" — §3.10.7.4,
+> `rfc9293.txt:3491-3492`, followed by Table 6, `rfc9293.txt:3494-3514`. For a segment that
+> carries data and a receive window above zero the test is
+> "RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND".
+
+- Strength: description, as a rule of the state machine. Class: end-to-end.
+- Check idea: give a segment a sequence number far above the right edge of the window. The
+  receiver does not deliver its data to the program.
+
+### RFC9293-SEGA-2
+
+**An unacceptable segment draws an empty acknowledgment, and the connection does not
+change state.**
+
+> "any unacceptable segment (out-of-window sequence number or unacceptable acknowledgment
+> number) must be responded to with an empty acknowledgment segment (without any user data)
+> containing the current send sequence number and an acknowledgment indicating the next
+> sequence number expected to be received, and the connection remains in the same state."
+> — §3.5.2, `rfc9293.txt:1494-1499`
+>
+> "If an incoming segment is not acceptable, an acknowledgment should be sent in reply
+> (unless the RST bit is set, if so drop the segment and return): <SEQ=SND.NXT>
+> <ACK=RCV.NXT><CTL=ACK>" — §3.10.7.4, `rfc9293.txt:3523-3527`
+
+- Strength: description in §3.5.2, `should` in §3.10.7.4. The two say the same thing about
+  the same event; the strength of the weaker one governs.
+- Class: wire plus end-to-end (the connection lives on).
+- Check idea: send an out-of-window segment on a live connection. The answer is a segment
+  with ACK set, no data, and the acknowledgment field unchanged at the sequence number the
+  receiver still expects. The connection carries on afterwards.
+
+## Reset generation
+
+### RFC9293-RST-2
+
+**A reset is not sent when it is not clear that the segment does not belong to the
+connection.**
+
+> "As a general rule, reset (RST) is sent whenever a segment arrives that apparently is not
+> intended for the current connection. A reset must not be sent if it is not clear that
+> this is the case." — §3.5.2, `rfc9293.txt:1462-1464`
+
+- Strength: must not. Class: wire (absence).
+- Check idea: an out-of-window segment on a live connection is answered, but never with a
+  reset. The rule guards a connection against a segment that a third party crafted.
+
+### RFC9293-RST-3
+
+**A reset is not sent in answer to a reset.**
+
+> "If the connection does not exist (CLOSED), then a reset is sent in response to any
+> incoming segment except another reset." — §3.5.2, `rfc9293.txt:1468-1469`
+>
+> "If an incoming segment is not acceptable, an acknowledgment should be sent in reply
+> (unless the RST bit is set, if so drop the segment and return)" — §3.10.7.4,
+> `rfc9293.txt:3523-3525`
+
+- Strength: description, as a rule of the state machine. Class: wire (absence).
+- Check idea: deliver a reset to a port on which nothing listens. Nothing comes back. Two
+  hosts that both answered a reset with a reset would exchange them without end.
+
+## Reset processing
+
+### RFC9293-RSTP-1
+
+**A reset is valid only when its sequence number is in the window.**
+
+> "In all states except SYN-SENT, all reset (RST) segments are validated by checking their
+> SEQ fields. A reset is valid if its sequence number is in the window." — §3.5.3,
+> `rfc9293.txt:1509-1511`
+>
+> "If the RST bit is set and the sequence number is outside the current receive window,
+> silently drop the segment." — §3.10.7.4, `rfc9293.txt:3559-3561`. This sentence is one of
+> three checks that apply to a stack which implements the mitigation of RFC 5961; the
+> §3.5.3 rule above holds for every stack.
+
+- Strength: description, as a rule of the state machine. Class: end-to-end (the connection
+  lives on).
+- Check idea: deliver a reset whose sequence number lies far outside the window of a live
+  connection. The connection carries on and the data that follows still arrives. This is
+  what stops a blind reset from a third party who cannot see the sequence numbers.
+
+### RFC9293-RSTP-2
+
+**A valid reset on a synchronized connection aborts it.**
+
+> "The receiver of a RST first validates it, then changes state. ... otherwise, the
+> receiver aborts the connection and goes to the CLOSED state. If the receiver was in any
+> other state, it aborts the connection and advises the user and goes to the CLOSED state."
+> — §3.5.3, `rfc9293.txt:1515-1521`
+
+- Strength: description, as a rule of the state machine. Class: end-to-end.
+- Check idea: deliver a reset whose sequence number is the next one the receiver expects.
+  The connection ends, and no more data crosses it.
+
+## Window shrinking
+
+### RFC9293-WND-3
+
+**A receiver should not shrink the window.**
+
+> "A TCP receiver SHOULD NOT shrink the window, i.e., move the right window edge to the
+> left (SHLD-14)." — §3.8.6, `rfc9293.txt:2150-2151`
+
+- Strength: should not. Class: wire.
+- Check idea: read the right edge of the window, the acknowledgment number plus the window
+  field, in every segment a receiver sends. It never moves backward.
+
+### RFC9293-WND-4
+
+**A sender is robust when the peer shrinks the window.**
+
+> "However, a sending TCP peer MUST be robust against window shrinking, which may cause the
+> 'usable window' (see Section 3.8.6.2.1) to become negative (MUST-34)." — §3.8.6,
+> `rfc9293.txt:2151-2153`
+
+- Strength: must. Class: end-to-end.
+- Check idea: move the right edge of the window backward on a live connection, behind the
+  sequence number the sender has already reached. The sender carries on: it does not stop,
+  it does not fail, and the connection still finishes.
+
+### RFC9293-WND-5
+
+**With a negative usable window, the sender sends no new data.**
+
+> "If this happens, the sender SHOULD NOT send new data (SHLD-15), but SHOULD retransmit
+> normally the old unacknowledged data between SND.UNA and SND.UNA+SND.WND (SHLD-16)."
+> — §3.8.6, `rfc9293.txt:2155-2157`
+
+- Strength: should not. Class: wire (absence).
+- Check idea: after the right edge moves backward, no segment carrying new data goes past
+  the new edge. A retransmission of data already sent is allowed and is not new data.
+
+## ICMP
+
+### RFC9293-ICMP-1
+
+**An ICMP error message is acted on, and directed to the connection that caused it.**
+
+> "TCP implementations MUST act on an ICMP error message passed up from the IP layer,
+> directing it to the connection that created the error (MUST-54). The necessary
+> demultiplexing information can be found in the IP header contained within the ICMP
+> message." — §3.9.2.2, `rfc9293.txt:2828-2831`
+
+- Strength: must. Class: internal.
+- Check idea: what "act on" means is the subject of the three entries below. The choice of
+  connection happens inside the module, at the interface between the ICMP module and TCP.
+
+### RFC9293-ICMP-2
+
+**A received ICMP Source Quench is silently discarded.**
+
+> "TCP implementations MUST silently discard any received ICMP Source Quench messages
+> (MUST-55)." — §3.9.2.2, `rfc9293.txt:2841-2842`
+
+- Strength: must. Class: end-to-end (absence of a change) plus error-signal (absence).
+- Check idea: deliver a Source Quench for a live connection. Nothing changes: no answer, no
+  break in the flow.
+
+### RFC9293-ICMP-3
+
+**A soft ICMP error does not abort the connection.**
+
+> "Since these Unreachable messages indicate soft error conditions, a TCP implementation
+> MUST NOT abort the connection (MUST-56), and it SHOULD make the information available to
+> the application (SHLD-25)." — §3.9.2.2, `rfc9293.txt:2852-2854`
+
+The document lists the soft errors for IPv4 as "Destination Unreachable -- codes 0, 1, 5;
+Time Exceeded -- codes 0, 1; and Parameter Problem", §3.9.2.2, `rfc9293.txt:2845-2846`.
+
+- Strength: must not. Class: end-to-end.
+- Check idea: deliver a Destination Unreachable with code 0 for a live connection. The
+  connection stays open and the transfer finishes.
+
+### RFC9293-ICMP-4
+
+**A hard ICMP error should abort the connection.**
+
+> "These are hard error conditions, so TCP implementations SHOULD abort the connection
+> (SHLD-26)." — §3.9.2.2, `rfc9293.txt:2859-2860`
+
+The document lists the hard errors as "Destination Unreachable -- codes 2-4", §3.9.2.2,
+`rfc9293.txt:2857`.
+
+- Strength: should. Class: end-to-end.
+- Check idea: deliver a Destination Unreachable with code 3 for a live connection. The
+  connection ends. The document itself notes that many implementations do not do this in a
+  synchronized state, so silence here is a `declined` and not a defect.
+
 ## Out of scope in this catalog
 
 The state machine as a whole, retransmission and the retransmission timer, congestion
-control, a shrunk or zero window beyond the probe statement, the options other than MSS
-(window scale, timestamps, SACK), reset handling on a live connection and the acceptance
-rules for a received reset, urgent data, keep-alives, simultaneous open and simultaneous
-close, and the TIME-WAIT duration.
+control, the zero window beyond the probe statement, the options other than MSS (window
+scale, timestamps, SACK), urgent data, keep-alives, simultaneous open and simultaneous
+close, silly window avoidance, and the TIME-WAIT duration.
 
 Every one of those needs either a companion document from
 [`standards.md`](../../protocol/tcp/standards.md) or a test class beyond a single wire
 observation.
+
+The level 3 pass took four subjects off this list, because RFC 9293 states each one and a
+relay on the path can produce the event: the acceptance rules for a received segment, reset
+handling on a live connection, the shrinking of the window, and the ICMP messages that reach
+a connection. They are entries of this catalog now.

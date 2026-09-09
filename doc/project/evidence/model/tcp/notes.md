@@ -87,6 +87,39 @@ dimensionless number`. The cause is in `tests/protocol/lib/EventPattern.cc`,
 the step's expression uses it. The workaround is to capture the number without its unit
 through a lambda. A fix in the framework would remove the trap.
 
+### A relay holds one rule at a time
+
+`ProtocolTester` calls `configure` on the tap once per intercept clause, and each call
+replaces the last. Two clauses on the same tap therefore leave only the second, and the tap
+reports `mutated 0` for the rule that disappeared. A check that needs two changes needs two
+relays in series; both see both directions, so it does not matter which relay carries which
+rule. The IPv6 pass met this first; it costs a debugging cycle to meet again.
+
+### A relay that removes a payload must not remove the trailer
+
+At a tap the frame is the link-layer frame, so what follows a transport header is the payload
+**and** the link-layer trailer. A helper that asks the packet for "the rest" takes both, and
+the frame that leaves is malformed and is dropped before any protocol sees it. Take the
+payload length from the network header instead: the IPv4 total length less the two header
+lengths.
+
+### An interface reports a send when the transmission ends
+
+This is the same quirk the IPv4 notes record for the order of steps, and at level 3 it
+decides whether a verdict is trustworthy. A check that asks "did the sender still send this
+after it learned that" must watch the sending **module**, not its interface: the interface can
+report a send that was decided before the news arrived. Watching the module also costs
+something — the packet has no network header there, so a predicate that reads IPv4 fields
+cannot run. Choose the point by what the rule is about.
+
+### A description written before the run can outlive the reason for it
+
+While the Source Quench check was still broken by the one-rule-per-tap trap, it failed for a
+reason that looked exactly like the finding it was meant to record, and the test file already
+described that finding. The claim was true in the end, but it was written before the evidence
+and it would have gone unnoticed for the wrong run. Write the expected result after the run
+says so, and quote what the run printed.
+
 ### A step can pass on the wrong segment
 
 Found in review, not by a failure: the data-transfer step for "the stream continues at
@@ -97,18 +130,28 @@ segment.
 
 ## Follow-ups, in the order I would do them
 
-1. **A closing window**, with `autoRead = false` on the receiver. It is the half of flow
+Item 2 of the pass 2 list is done: level 3 is reached, and it needed no new document. What
+follows is the list as pass 3 leaves it.
+
+1. **Correct the ICMP type switch** so that a message the module does not handle is
+   discarded and not thrown. Two findings wait on it, one from TCP and one from IPv4, and it
+   is the only one of the four gaps that stops a run.
+2. **Decide what the default checksum mode should be**, for TCP and for UDP together. For TCP
+   the document is stricter than for UDP: the checksum is never optional, and there is no
+   lawful mode in which a sender writes none.
+3. **Look at the send decision when the usable window is negative.** The sender survives,
+   which is the requirement with the keyword; it also sends new data past the edge, which the
+   document says it should not.
+4. **A closing window**, with `autoRead = false` on the receiver. It is the half of flow
    control the default mode cannot show, and the model documents the mode itself.
-2. **Level 3 needs no new document.** RFC 9293 already holds the text for RFC9293-CKSUM-2
-   (a corrupted segment), reset on a live connection, a shrunk window and ICMP handling.
-   All need interception or injection.
-3. **Level 4 needs RFC 6298 and RFC 5681** in the in-scope set: the retransmission timer,
+5. **Level 4 needs RFC 6298 and RFC 5681** in the in-scope set: the retransmission timer,
    congestion control, the zero-window probe and the acknowledgment delay bound, all as
-   statistical checks.
-4. **Name the current documents in `Tcp.ned`.** The module is already the model for how to
+   statistical checks. Three checks of pass 3 already wait on the retransmission timeout,
+   which is a hint of how much of TCP lives there.
+6. **Name the current documents in `Tcp.ned`.** The module is already the model for how to
    state standards; updating the five obsolete numbers, and saying where the model
    deliberately keeps older behavior, would make it exemplary.
-5. **RFC9293-SEQ-2** on the existing mockup — a pure ACK occupies no sequence space — and
+7. **RFC9293-SEQ-2** on the existing mockup — a pure ACK occupies no sequence space — and
    **RFC9293-ISS-2** split into its MUST-8 and SHLD-1 halves.
-6. **Fix the capture substitution** in the test framework so a unit-bearing field can be
+8. **Fix the capture substitution** in the test framework so a unit-bearing field can be
    captured directly.

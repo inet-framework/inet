@@ -1,0 +1,120 @@
+%description:
+
+RFC 9293 — a sender is robust when the peer moves the right edge of the window backward, and
+it sends no new data past the new edge.
+
+Checks RFC9293-WND-4 (must, MUST-34) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/window.md#shrunk-window; the program steps below map
+onto its expected observations. Mapping of the mockup with a relay: host A = host1, relay T =
+tap, host B = host2.
+
+The relay rewrites the window field of the fourth acknowledgment from host B to 100 octets
+and computes the checksum again. By that time host A has several segments in flight, so the
+right edge the relay writes falls behind the sequence number host A has already reached: the
+usable window is negative, which is the state MUST-34 names. Host B itself never shrinks its
+window; the relay is what a peer that does would look like from host A's side.
+
+The other half of the same event, that the sender writes no new data past the new right
+edge, is a separate test: Rfc9293ShrunkWindowNoNewData.test. The two are apart on purpose.
+The model fails that one, and a single test would have hidden whether it survives the
+shrinking at all, which is the stronger requirement of the two.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_shrunk_window")
+        // The relay shrinks the window of the fourth acknowledgment from host B.
+        .intercept(intercept("tap").match("tcp.srcPort == 1000 && tcp.ackBit == true").nth(4)
+                     .mutate([](Packet *frame) {
+                         rewriteTcpHeader(frame, [](TcpHeader& h) { h.setWindow(100); });
+                     })
+                     .describe("host B's fourth acknowledgment (shrink its window to 100 octets)"))
+        // Observation 1: host A sends its SYN. Record ISS_A.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: the shrunk acknowledgment reaches host A. Record where it says the
+        // stream stands; the new right edge is that number plus 100.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.window == 100")
+                  .capture("una", "tcp.ackNo")
+                  .describe("the shrunk acknowledgment at host A, advertising 100 octets")
+                  .within(1.0))
+        // Observation 3: host A survives the shrinking (RFC9293-WND-4). The connection carries
+        // on and the whole stream is acknowledged, so the negative window neither stopped it
+        // nor broke it.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .describe("the cumulative acknowledgment of the whole 5000-octet stream")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_shrunk_window compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- host B.
+network Rfc9293TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=550,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2). The relay computes them again after every change it makes.
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_shrunk_window: PASS

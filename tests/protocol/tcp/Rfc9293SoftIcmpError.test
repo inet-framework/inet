@@ -1,0 +1,122 @@
+%description:
+
+RFC 9293 — a soft ICMP error reaches the connection that caused it and does not abort it.
+
+Checks RFC9293-ICMP-3 (must not, MUST-56) from
+doc/project/evidence/standard/rfc9293/catalog.md. Also covers RFC9293-ICMP-1 (must,
+MUST-54): the report is directed to the connection that created the error. The English
+procedure is in doc/project/evidence/protocol/tcp/checks/icmp.md#soft-icmp-error; the program
+steps below map onto its expected observations. Mapping of the mockup with a relay and a
+gateway: host A = host1, relay T = tap, gateway R = router, host B = host2.
+
+The error is a real one, not a forged message. The relay sets the time to live of the first
+data segment to 1 and keeps the header checksum valid. The gateway then decrements it to
+zero and answers host A with an ICMP Time Exceeded that quotes the datagram. RFC 9293 lists
+Time Exceeded code 0 among the soft errors, and the quoted header carries the addresses and
+the ports of the connection unchanged, so host A's TCP can and must direct the report to it.
+
+The data of that segment is lost with it, so host A retransmits after its timeout. The
+connection that finishes afterwards is the proof that the report did not end it.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_soft_icmp_error")
+        // The relay sets the time to live of the first data segment to 1.
+        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setTimeToLive(1); }); })
+                     .describe("the first data segment (set its time to live to 1)"))
+        // Observation 1: host A sends its SYN. Record ISS_A.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: the gateway reports the expiry to host A with an ICMP Time Exceeded,
+        // type 11 code 0, which RFC 9293 counts as a soft error.
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv4.type == 11")
+                  .describe("the ICMP Time Exceeded from the gateway at host A")
+                  .within(1.0))
+        // Observation 3: host A does not end the connection. No reset leaves it.
+        .never(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.rstBit == true")
+                  .describe("a reset from host A")
+                  .within(0.5))
+        // Observation 4: the connection carries on and the whole stream is acknowledged.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .describe("the cumulative acknowledgment of the whole 5000-octet stream")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_soft_icmp_error compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay and a gateway of
+// doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- gateway R -- host B. The relay sits before the gateway, so that it can
+// change a segment on its way out and see the report the gateway sends back.
+network Rfc9293IcmpNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        router: Router { @display("p=500,100"); }
+        host2: StandardHost { @display("p=650,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293IcmpNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant).
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_soft_icmp_error: PASS

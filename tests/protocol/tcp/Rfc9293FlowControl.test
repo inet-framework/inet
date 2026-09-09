@@ -7,7 +7,7 @@ size bounds what the sender transmits.
 Checks RFC9293-WND-1 and RFC9293-WND-2 (description, with the SHLD-15 rule), and covers
 RFC9293-ACKD-1 (must, as a scenario condition) from
 doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup are
-in doc/project/evidence/protocol/tcp/checks.md#flow-control; the program steps below map one
+in doc/project/evidence/protocol/tcp/checks/flow-control.md#flow-control; the program steps below map one
 to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
 host2, link L = host1-host2.
 
@@ -127,7 +127,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
 // host A -- link L -- host B.
 network Rfc9293TcpNet
 {
@@ -159,7 +159,7 @@ seed-set = 0
 *.host2.tcp.advertisedWindow = 300
 *.host2.tcp.delayedAcksEnabled = true
 
-# The scenario constants of checks.md#common-mockup, except tClose (see the %description
+# The scenario constants of checks.md#common-mockups, except tClose (see the %description
 # deviation note: this check's own procedure has no close step, and the windowed transfer
 # is still in progress well past the common mockup's 0.4 s close time).
 *.host1.numApps = 1

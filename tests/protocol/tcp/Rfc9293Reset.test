@@ -5,7 +5,7 @@ connection attempt ends.
 
 Checks RFC9293-RST-1 (description, a rule of the state machine) from
 doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup are
-in doc/project/evidence/protocol/tcp/checks.md#connection-reset; the program steps below map
+in doc/project/evidence/protocol/tcp/checks/reset.md#connection-reset; the program steps below map
 one to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
 host2, link L = host1-host2.
 
@@ -62,7 +62,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
 // host A -- link L -- host B.
 network Rfc9293TcpNet
 {

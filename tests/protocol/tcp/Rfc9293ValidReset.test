@@ -1,0 +1,121 @@
+%description:
+
+RFC 9293 — a reset whose sequence number is the one the receiver expects aborts the
+connection.
+
+Checks RFC9293-RSTP-2 (description, as a rule of the state machine) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/reset.md#valid-reset; the program steps below map
+onto its expected observations. Mapping of the mockup with a relay: host A = host1, relay T =
+tap, host B = host2.
+
+The relay turns the first data segment into a reset and keeps its sequence number, which is
+exactly the next one host B expects. This is the other half of the rule that
+Rfc9293BlindReset.test checks: a reset in the window is obeyed.
+
+The proof that host B threw the connection away is what happens afterwards. Host A knows
+nothing of the abort, so it retransmits after its timeout; the segment then reaches a host
+that has no such connection, and host B answers it with a reset of its own
+(RFC9293-RST-1).
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_valid_reset")
+        // The relay turns the first data segment into a reset at the sequence number host B
+        // expects.
+        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { makeReset(frame, tcpSequenceNumberOf(frame)); })
+                     .describe("the first data segment (turn it into a reset at the expected sequence number)"))
+        // Observation 1: host A sends its SYN. Record ISS_A.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: the reset reaches host B at ISS_A + 1, the next sequence number it
+        // expects. This confirms the stimulus.
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.rstBit == true && tcp.sequenceNo == {issA} + 1")
+                  .describe("the valid reset at host B's TCP")
+                  .within(1.0))
+        // Observation 3: host B sends nothing more for this connection. It has none.
+        .never(on("host2.tcp").signal("packetSentToLower")
+                  .packet("tcp.srcPort == 1000 && tcp.ackBit == true && tcp.rstBit == false")
+                  .describe("any further acknowledgment from host B")
+                  .within(0.5))
+        // Observation 4: host A retransmits after its timeout, and the segment now reaches a
+        // host with no such connection, which answers with a reset (RFC9293-RST-1). This is
+        // the proof that host B aborted.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.rstBit == true")
+                  .describe("host B's reset for a connection that no longer exists")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_valid_reset compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- host B.
+network Rfc9293TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=550,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2). The relay computes them again after every change it makes.
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_valid_reset: PASS

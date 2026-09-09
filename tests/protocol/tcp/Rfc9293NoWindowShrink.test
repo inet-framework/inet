@@ -1,0 +1,114 @@
+%description:
+
+RFC 9293 — a receiver does not shrink the window: the right edge never moves to the left.
+
+Checks RFC9293-WND-3 (should not, SHLD-14) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/window.md#no-window-shrink; the program steps below
+map onto its expected observations. Mapping of the plain mockup: host A = host1, host B =
+host2.
+
+No relay takes part. The check watches what host B advertises of its own accord over a whole
+transfer. The right edge of the window is the acknowledgment number plus the window field;
+the rule is that this sum never decreases. The watch keeps the largest edge it has seen and
+reports a segment whose edge is smaller, which is the shape of the rule and needs no
+captured value.
+
+Bound: the check establishes the rule for the transfer this scenario produces, in which the
+receiving program consumes everything at once. A receiver whose program reads slowly is
+where an implementation is tempted to shrink; that scenario needs a program that stalls, and
+no application in the model offers one.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when this segment's right edge lies to the left of the largest edge seen so far.
+static bool rightEdgeMovedLeft(const Packet *frame)
+{
+    static double highestEdge = -1;
+    double edge = evalPacketField(frame, "tcp.ackNo").doubleValue()
+                + evalPacketField(frame, "tcp.window").doubleValue();
+    if (highestEdge >= 0 && edge < highestEdge)
+        return true;
+    if (edge > highestEdge)
+        highestEdge = edge;
+    return false;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_no_window_shrink")
+        // Observation 1: host A sends its SYN. Record ISS_A, and anchor the watch below.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: over the whole transfer, no segment from host B carries a right edge
+        // to the left of one it advertised earlier (RFC9293-WND-3).
+        .never(on("host2.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true")
+                  .match([](const MatchContext& c) { return rightEdgeMovedLeft(c.event.packet); })
+                  .describe("a segment from host B whose right window edge moved to the left")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_no_window_shrink compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: host A -- link L -- host B.
+network Rfc9293WindowNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293WindowNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant).
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_no_window_shrink: PASS

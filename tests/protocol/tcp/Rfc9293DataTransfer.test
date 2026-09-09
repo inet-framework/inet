@@ -6,7 +6,7 @@ MSS, and the receiver's cumulative acknowledgment names the next octet it expect
 Checks RFC9293-DATA-1 and RFC9293-SEG-1 (must) and RFC9293-ACK-1 (description), and covers
 RFC9293-ACK-2 (description) from doc/project/evidence/standard/rfc9293/catalog.md. The
 English procedure and the mockup are in
-doc/project/evidence/protocol/tcp/checks.md#data-transfer; the program steps below map one
+doc/project/evidence/protocol/tcp/checks/data-transfer.md#data-transfer; the program steps below map one
 to one onto its expected observations. Mapping of the mockup: host A = host1, host B =
 host2, link L = host1-host2.
 
@@ -103,7 +103,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
 // host A -- link L -- host B.
 network Rfc9293TcpNet
 {
@@ -130,7 +130,7 @@ seed-set = 0
 # is never optional, MUST-2).
 **.checksumMode = "computed"
 
-# The scenario constants of checks.md#common-mockup.
+# The scenario constants of checks.md#common-mockups.
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"

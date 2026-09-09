@@ -5,7 +5,7 @@ RFC 9293 — a connection opens with the three-way handshake.
 Checks RFC9293-EST-1, RFC9293-EST-2, RFC9293-SEQ-1, RFC9293-HDR-1 (description) and
 RFC9293-CKSUM-1 (must), and covers RFC9293-ISS-1 (description) and RFC9293-OPT-1 (should)
 from doc/project/evidence/standard/rfc9293/catalog.md. The English procedure and the mockup
-are in doc/project/evidence/protocol/tcp/checks.md#connection-establishment; the program
+are in doc/project/evidence/protocol/tcp/checks/establishment.md#connection-establishment; the program
 steps below map one to one onto its expected observations. Mapping of the mockup: host A =
 host1, host B = host2, link L = host1-host2.
 
@@ -85,7 +85,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockup:
+// The mockup of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
 // host A -- link L -- host B.
 network Rfc9293TcpNet
 {
@@ -113,7 +113,7 @@ seed-set = 0
 # src/inet/transportlayer/tcp/Tcp.cc), so the checksum field would stay at its unset 0.
 **.checksumMode = "computed"
 
-# The scenario constants of checks.md#common-mockup.
+# The scenario constants of checks.md#common-mockups.
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"

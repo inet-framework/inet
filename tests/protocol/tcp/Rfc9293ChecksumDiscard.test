@@ -1,0 +1,122 @@
+%description:
+
+RFC 9293 — the receiver checks the checksum, and a segment whose checksum is wrong is
+discarded without an acknowledgment.
+
+Checks RFC9293-CKSUM-2 (must, MUST-3) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/checksum.md#checksum-discard; the program steps
+below map onto its expected observations. Mapping of the mockup with a relay: host A =
+host1, relay T = tap, host B = host2.
+
+The relay replaces the checksum of the first data segment with its one's complement and
+changes nothing else. Both hosts compute real checksums, so the value the relay writes is
+the only wrong one on the wire.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_checksum_discard")
+        // The relay corrupts the checksum of the first data segment. A segment that carries
+        // data is told from a bare acknowledgment by the length of its IP datagram: 40 octets
+        // hold the two headers alone, and a full segment holds 536 octets more.
+        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { corruptTcpChecksum(frame); })
+                     .describe("the first data segment (replace its checksum with the one's complement)"))
+        // Observation 1: host A sends its SYN. Record ISS_A.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("issA", "tcp.sequenceNo")
+                  .describe("host A's SYN, carrying ISS_A").within(0.5))
+        // Observation 2: host B's TCP discards the segment (RFC9293-CKSUM-2). The drop record
+        // keeps the TCP header at its front, so the port can be read from it.
+        .once(on("host2.tcp").signal("packetDropped")
+                  .packet("tcp.destPort == 1000")
+                  .describe("host B's TCP discards the segment whose checksum is wrong")
+                  .within(1.0))
+        // Observation 3: host B does not acknowledge the data of that segment. The
+        // acknowledgment ISS_A + 537 can only follow a retransmission, which comes later.
+        .never(on("host2.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo == {issA} + 537")
+                  .describe("an acknowledgment of the discarded segment's data")
+                  .within(0.2))
+        // Observation 4: the connection recovers. Host A receives an acknowledgment of the
+        // whole stream, so the discard was silent and the stream stayed reliable. The window
+        // is generous on purpose: host A has one segment in flight when the loss happens, so
+        // no duplicate acknowledgment can arrive and the recovery waits for the
+        // retransmission timeout, which starts at three seconds. The acknowledgment is
+        // matched with `>=` because host A's program closes while data is still unsent, so
+        // the FIN travels with the tail of the stream and host B acknowledges both at once.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .describe("the cumulative acknowledgment of the whole 5000-octet stream")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_checksum_discard compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- host B.
+network Rfc9293TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=550,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2). The relay computes them again after every change it makes.
+**.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_checksum_discard: PASS

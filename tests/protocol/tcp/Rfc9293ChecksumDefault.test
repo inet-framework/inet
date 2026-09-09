@@ -1,0 +1,118 @@
+%description:
+
+RFC 9293 — the checksum is never optional: the sender generates it, and the value is the one
+the document defines.
+
+Checks RFC9293-CKSUM-1 (must, MUST-2) from
+doc/project/evidence/standard/rfc9293/catalog.md, the half that level 2 could not reach: not
+that a field is present, but that it holds the value RFC 9293 defines. The English procedure
+is in doc/project/evidence/protocol/tcp/checks/checksum.md#checksum-by-default; the program
+steps below map onto its expected observations. Mapping of the plain mockup: host A = host1,
+host B = host2.
+
+Host A is the subject: nothing in the scenario says anything about its checksum, so it sends
+in the state a host has when no one configures it. Host B is a control: it is told to compute
+the value the document defines. The two let the program tell two failures apart. If step 1
+fails, the arithmetic in this test is wrong. If step 1 passes and step 2 fails, the
+arithmetic is right and the default state of a host is the finding.
+
+The value each step compares against is computed from the segment on the wire, over a pseudo
+header of the two addresses, the TCP header with a zero checksum field, and the data; see
+TcpMutations.h, expectedTcpChecksum. It is the same computation the model itself performs in
+TcpChecksumInsertionHook::computeChecksum.
+
+Expected result: FAIL. The `checksumMode` parameter of the ~Tcp module
+(src/inet/transportlayer/tcp/Tcp.ned:189) is `default("declared")`. In that mode no checksum
+is computed at all: the field stays zero and the header carries a flag that asserts it
+correct, which `Tcp::checkChecksum` then believes without arithmetic. RFC 9293 says the
+checksum is never optional. Step 2 therefore fails while step 1 passes. See
+doc/project/evidence/model/tcp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when the checksum field of the segment holds the value RFC 9293 defines for it.
+static bool carriesTheRfc9293Checksum(const Packet *frame)
+{
+    return tcpChecksumField(frame) == expectedTcpChecksum(frame);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_checksum_default")
+        // Step 1, the control: host B was told to compute the checksum, and the value on the
+        // wire is the one the document defines. This step establishes that the arithmetic
+        // below is right, so that step 2 speaks about the model and not about the test.
+        .once(on("host2.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.srcPort == 1000")
+                  .match([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
+                  .describe("host B's segment, whose checksum is the value RFC 9293 defines")
+                  .within(1.0))
+        // Observation 1: host A's segment carries that same value, with nothing configured.
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("tcp.destPort == 1000")
+                  .match([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
+                  .describe("host A's checksum is the value RFC 9293 defines, with nothing configured")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_checksum_default compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: host A -- link L -- host B.
+network Rfc9293DefaultNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293DefaultNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Nothing is said about host A's checksum: that absence is the subject of the check.
+# Host B is the control, and it is told to compute the value the document defines.
+*.host2.tcp.checksumMode = "computed"
+
+# The scenario constants of checks.md#common-mockups. Host B only receives: echoFactor = 0
+# keeps the reverse direction free of data, so that the segments from host B are pure
+# acknowledgments and an observation about them cannot be confused with an echo.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].tClose = 0.4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc9293_checksum_default: PASS

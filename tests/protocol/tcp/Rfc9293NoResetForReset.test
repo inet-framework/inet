@@ -1,0 +1,95 @@
+%description:
+
+RFC 9293 — a reset is not answered with a reset.
+
+Checks RFC9293-RST-3 (description, as a rule of the state machine) from
+doc/project/evidence/standard/rfc9293/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/reset.md#no-reset-for-a-reset; the program steps
+below map onto its expected observations. Mapping of the mockup with a relay: host A = host1,
+relay T = tap, host B = host2.
+
+Host B runs no application at all, so nothing listens on port 1000 and no connection exists
+there. The relay turns host A's first SYN into a reset. A segment for a connection that does
+not exist is normally answered with a reset (RFC9293-RST-1), and the rule under test is the
+exception the same sentence makes: not when the segment is itself a reset. Two hosts that
+each answered a reset with a reset would exchange them without end.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9293_no_reset_for_reset")
+        // The relay turns host A's first SYN into a reset.
+        .intercept(intercept("tap").match("tcp.destPort == 1000 && tcp.synBit == true").nth(1)
+                     .mutate([](Packet *frame) { makeReset(frame, tcpSequenceNumberOf(frame)); })
+                     .describe("host A's first SYN (turn it into a reset)"))
+        // Observation 1: the reset reaches host B, where no connection exists. This confirms
+        // the stimulus.
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.rstBit == true && tcp.destPort == 1000")
+                  .describe("the reset at host B's TCP, for a connection that does not exist")
+                  .within(1.0))
+        // Observation 2: nothing comes back. Host B answers a reset with silence.
+        .never(on("host2.tcp").signal("packetSentToLower")
+                  .describe("any segment from host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9293_no_reset_for_reset compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/tcp/checks.md#common-mockups:
+// host A -- relay T -- host B.
+network Rfc9293TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=550,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc9293TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# Every node computes real TCP checksums (checks.md's common mockup constant: the checksum
+# is never optional, MUST-2). The relay computes them again after every change it makes.
+**.checksumMode = "computed"
+
+# Host B runs no application, so nothing listens on port 1000.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc9293_no_reset_for_reset: PASS

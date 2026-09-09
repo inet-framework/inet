@@ -1,6 +1,6 @@
 # TCP — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-08 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
@@ -84,13 +84,22 @@ ledger, and the level of the feature, by the table of step 8.
 | TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported; supporting PSH-1 failed | **confirmed**, with finding 3 |
 | TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — RFC9293-CKSUM-2 has not run; level 3 |
+| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4 |
 | TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-RESET | mandatory | yes, through RFC 793 | supported | **confirmed** |
+| TCP-F-SEGMENT-ACCEPTANCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
+| TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** |
+| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported; supporting WND-5 failed | **confirmed**, with finding 5 |
+| TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | partial | **partial** — a Source Quench stops the run, finding 6 |
 
-Eight features `confirmed`, one `partial`. No feature reaches `defect` by the rules of the
-matrix. One MUST is violated all the same, on a supporting statement; finding 3 says so
-rather than let the matrix's shape hide it.
+Eleven features `confirmed`, two `partial`. No feature reaches `defect` by the rules of the
+matrix. Three MUST-level statements are violated all the same, two of them on supporting
+statements; findings 3, 4 and 6 say so rather than let the matrix's shape hide it.
+
+Pass 3 added four features and changed one verdict. The four new ones describe the same
+connection under attack or under a fault, and three of them are `confirmed` on every core
+check. That is the headline of this pass: the rules that keep a connection alive when a third
+party crafts a segment, or when a peer misbehaves, hold in this model.
 
 ## Findings
 
@@ -116,7 +125,7 @@ RFC 9293 §3.9.1.2 binds a sender whose SEND call offers no PUSH flag: it MUST s
 last buffered segment (MUST-61). The model's send interface offers no PUSH flag, and the
 model never sets the bit; its own code marks the place `TODO when to set PSH bit?` and the
 SEND processing `FIXME how to support PUSH?` (the exact references are in
-[`results.md`](results.md#the-model-gap-the-psh-bit-is-never-set)). `Rfc9293Push.test`
+[`results.md`](results.md#model-gap-1-pass-2-the-psh-bit-is-never-set)). `Rfc9293Push.test`
 keeps the faithful assertion and declares its failure.
 
 The matrix does not show this as a `defect`, because the push rule is a supporting
@@ -126,7 +135,41 @@ stream does arrive. It is still a MUST that a real peer would notice on the wire
 belongs on the list of the model's owner. The same comments mark urgent data (MUST-30 to
 MUST-32) unsupported; that one is level 5.
 
-### 4. Flow control exists, and the default mode never uses it
+### 4. The checksum is never optional, and by default the model writes none
+
+RFC 9293 §3.1 leaves no room: "The TCP checksum is never optional. The sender MUST generate
+it (MUST-2)." The default `checksumMode` of the ~Tcp module is `"declared"`, in which the
+field stays at zero and a flag asserts it correct. A run with the defaults therefore carries
+segments with no checksum, and two INET hosts accept each other only because both read the
+same flag.
+
+The receive half of the same feature is now checked and passes: a segment whose checksum is
+wrong is discarded in silence and the stream still arrives. So the model implements the
+mechanism, and the finding is about which mode a user gets without asking. The UDP pass found
+the same default one layer down; the two share a correction. See gap 2 of
+[`results.md`](results.md).
+
+### 5. New data goes past a window edge that moved backward
+
+RFC 9293 §3.8.6 asks two things of a sender whose peer shrinks the window: survive it
+(MUST-34), and send no new data past the new edge (SHLD-15). The model does the first and not
+the second. With the right edge at 26708 it sent a full segment starting at 27144.
+
+The two are separate tests on purpose, so that the failure of the weaker requirement cannot
+hide the verdict on the stronger one. See gap 3 of [`results.md`](results.md).
+
+### 6. A Source Quench stops the simulation
+
+RFC 9293 §3.9.2.2 requires a TCP implementation to silently discard a received Source Quench
+(MUST-55). The model never offers the message to TCP: the ICMP module throws on an unknown
+type, and type 4 is unknown to it. The run stops.
+
+The rule exists because the message still arrives at hosts even though RFC 6633 deprecated it
+for routers. The same branch is what the IPv4 suite reaches with a type that names no message
+at all, so one correction in the ICMP module closes both findings. See gap 4 of
+[`results.md`](results.md).
+
+### 7. Flow control exists, and the default mode never uses it
 
 `Tcp.ned:53-58` says that in the default "autoread" mode the advertised window never
 decreases, "so there is effectively no flow control". The flow-control check confirms the
@@ -135,17 +178,26 @@ receiver's half, a window that closes, without the "explicit-read" mode the same
 names. Not a defect; a boundary on what "confirmed" means for this feature, and the first
 flow-control check of the next pass.
 
-### 5. Nothing else is contradicted at level 2
+### 8. Nothing else is contradicted at level 2, and little at level 3
 
-Within nine features and seventeen passing statements, on one topology and without loss,
-the model does what RFC 9293 describes on the normal path. Pass 1 stopped at level 2 partial
-with flow control undeclared; this pass declares it and passes it.
+Within nine features and seventeen passing statements, on one topology and without loss, the
+model does what RFC 9293 describes on the normal path. Pass 1 stopped at level 2 partial with
+flow control undeclared; pass 2 declares it and passes it.
+
+Pass 3 took the same model off the normal path, with a corrupt segment, a segment outside the
+window, two crafted resets, a window that moved backward and two ICMP reports. Twenty-seven
+statements now carry a PASS and four a declared FAIL. Of the three gaps this pass found, one
+is a choice of default, one is a `should not` beside a `must` that holds, and one is a
+missing case in a module of another layer. None of them is a failure of the connection logic
+itself, which is what these eleven checks were built to attack.
 
 ## What this document does not establish
 
 - It says nothing about the documents outside the in-scope set. The model claims 15 RFCs;
   this pass checks against one.
-- It says nothing about the areas the catalog puts out of scope: retransmission,
-  congestion control, the options, urgent data, and reset handling on a live connection.
+- It says nothing about the areas the catalog still puts out of scope: retransmission,
+  congestion control, the options, urgent data, silly window avoidance, the simultaneous
+  cases, and the TIME-WAIT duration. Reset handling on a live connection left that list at
+  level 3 and is checked now.
 - A `confirmed` verdict means the checks of the feature passed. It does not mean the
   feature is complete.

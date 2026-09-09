@@ -31,6 +31,10 @@ comparison against the standards that the model claims to implement is
 | [TCP-F-CHECKSUM](#tcp-f-checksum) | Every segment carries a checksum; the sender generates it and the receiver checks it. |
 | [TCP-F-HEADER](#tcp-f-header) | The data offset gives the header length in 32-bit words, at least five. |
 | [TCP-F-RESET](#tcp-f-reset) | A segment for a connection that does not exist is answered with a reset. |
+| [TCP-F-SEGMENT-ACCEPTANCE](#tcp-f-segment-acceptance) | A segment outside the receive window is not delivered; it draws an empty acknowledgment and never a reset. |
+| [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation) | A reset ends the connection only when its sequence number is in the window. |
+| [TCP-F-WINDOW-ROBUSTNESS](#tcp-f-window-robustness) | A sender survives a peer that moves the right edge of the window backward. |
+| [TCP-F-ICMP-HANDLING](#tcp-f-icmp-handling) | An ICMP error reaches the connection that caused it; a soft error does not end it. |
 
 ## Summary table
 
@@ -45,12 +49,19 @@ comparison against the standards that the model claims to implement is
 | [TCP-F-CHECKSUM](#tcp-f-checksum) | mandatory | RFC 9293 §3.1 | RFC9293-CKSUM-1, RFC9293-CKSUM-2 |
 | [TCP-F-HEADER](#tcp-f-header) | mandatory | RFC 9293 §3.1 | RFC9293-HDR-1 |
 | [TCP-F-RESET](#tcp-f-reset) | mandatory | RFC 9293 §3.5.2, §3.10.7.1 | RFC9293-RST-1 |
+| [TCP-F-SEGMENT-ACCEPTANCE](#tcp-f-segment-acceptance) | mandatory | RFC 9293 §3.5.2, §3.10.7.4 | RFC9293-SEGA-1, RFC9293-SEGA-2, RFC9293-RST-2 |
+| [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation) | mandatory | RFC 9293 §3.5.3, §3.10.7.4 | RFC9293-RSTP-1, RFC9293-RSTP-2 |
+| [TCP-F-WINDOW-ROBUSTNESS](#tcp-f-window-robustness) | mandatory | RFC 9293 §3.8.6 | RFC9293-WND-4 |
+| [TCP-F-ICMP-HANDLING](#tcp-f-icmp-handling) | mandatory | RFC 9293 §3.9.2.2 | RFC9293-ICMP-1, RFC9293-ICMP-2, RFC9293-ICMP-3 |
 
-Nine features, all mandatory. What a run showed about them is in
-[`coverage.md`](../../model/tcp/coverage.md). Together they describe one connection from
-open to close, the stream it carries, the window that paces it, the checksum that guards
-it, and the reset that answers a connection that is not there. Congestion control, the
-retransmission timer, and the options are other documents' features and later levels.
+Thirteen features, all mandatory. What a run showed about them is in
+[`coverage.md`](../../model/tcp/coverage.md). The first nine describe one connection from
+open to close, the stream it carries, the window that paces it, the checksum that guards it,
+and the reset that answers a connection that is not there. The four that the level 3 pass
+added describe the same connection under attack or under a fault: a segment that does not
+fit, a reset a third party could have forged, a window that moves backward, and an error
+that the layer below reports. Congestion control, the retransmission timer, and the options
+are other documents' features and later levels.
 
 ## TCP-F-ESTABLISH
 
@@ -156,10 +167,12 @@ and delivered in order.**
   the checksum be absent.
 - **Description** — the checksum covers a pseudo header, the TCP header and the data. The
   sender must generate it; the receiver must check it and discard on failure.
-- **Checks** — core: RFC9293-CKSUM-1 (the sender generates it: nonzero on the wire),
-  RFC9293-CKSUM-2 (the receiver checks it: a wrong checksum is discarded). The second
-  needs a corrupted segment in flight and is level 3; at level 2 the feature stands on the
-  first alone, with a `partial` support value until the second runs.
+- **Checks** — core: RFC9293-CKSUM-1 (the sender generates it), RFC9293-CKSUM-2 (the
+  receiver checks it: a wrong checksum is discarded). The second needs a corrupted segment
+  in flight; the level 3 pass supplies it. The first has two halves, and level 3 separates
+  them: that a segment carries a checksum at all, which level 2 established, and that the
+  value is the one the document defines, which needs the value to be computed from the
+  segment on the wire.
 
 ## TCP-F-HEADER
 
@@ -182,9 +195,73 @@ and delivered in order.**
 - **Description** — a SYN to a port with no listener is answered with a segment that carries
   RST and ACK, sequence number zero, and an acknowledgment of the SYN's sequence number plus
   one. The connection attempt ends.
-- **Checks** — core: RFC9293-RST-1.
-- **Bound** — the closed-port case only. Reset on a live connection, and the acceptance
-  rules for a received reset, are level 3.
+- **Checks** — core: RFC9293-RST-1. Supporting: RFC9293-RST-3, that a reset draws no reset
+  in return.
+- **Bound** — the closed-port case only. A reset that arrives on a live connection belongs
+  to [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation), which the level 3 pass added.
+
+## TCP-F-SEGMENT-ACCEPTANCE
+
+**A segment outside the receive window is not delivered; it draws an empty acknowledgment
+and never a reset.**
+
+- **Sources** — RFC 9293 §3.5.2, `rfc9293.txt:1492-1499`; §3.10.7.4,
+  `rfc9293.txt:3491-3530`.
+- **Level** — mandatory (reason: only path). The acceptance test is the gate every received
+  segment passes, and the document gives one answer for a segment that fails it.
+- **Description** — a receiver compares the sequence number of each segment with its window.
+  A segment that falls outside carries no data the receiver can use, so nothing goes up to
+  the program. The receiver answers with an empty acknowledgment that repeats where the
+  stream stands, which lets an honest peer that lost its place recover. It does not answer
+  with a reset: a reset would let anyone who can guess a connection destroy it.
+- **Checks** — core: RFC9293-SEGA-1 (the acceptance test), RFC9293-SEGA-2 (the empty
+  acknowledgment, and the state that does not change), RFC9293-RST-2 (no reset when it is
+  not clear).
+
+## TCP-F-RESET-VALIDATION
+
+**A reset ends the connection only when its sequence number is in the window.**
+
+- **Sources** — RFC 9293 §3.5.3, `rfc9293.txt:1509-1521`; §3.10.7.4,
+  `rfc9293.txt:3559-3561`.
+- **Level** — mandatory (reason: only path). The document gives one rule for deciding
+  whether a reset counts, and the connection either ends or does not.
+- **Description** — a reset is a single segment that ends a connection, so a receiver checks
+  where it claims to sit in the stream before it obeys. A reset whose sequence number lies
+  in the window is obeyed and the connection goes to CLOSED. One that lies outside is
+  dropped without a word. The two halves are one feature: a stack that obeys every reset is
+  open to anyone who can guess the ports, and a stack that obeys none never closes.
+- **Checks** — core: RFC9293-RSTP-1 (the window rule), RFC9293-RSTP-2 (a valid reset
+  aborts).
+
+## TCP-F-WINDOW-ROBUSTNESS
+
+**A sender survives a peer that moves the right edge of the window backward.**
+
+- **Sources** — RFC 9293 §3.8.6, `rfc9293.txt:2143-2162`.
+- **Level** — mandatory (reason: keyword, MUST-34).
+- **Description** — a receiver should never shrink its window, and a sender must not depend
+  on that. When the right edge moves backward, the usable window can turn negative. The
+  sender stops sending new data, keeps the connection, and retransmits what is still
+  unacknowledged.
+- **Checks** — core: RFC9293-WND-4 (the sender is robust). Supporting: RFC9293-WND-3 (a
+  receiver should not shrink), RFC9293-WND-5 (no new data past the new edge).
+
+## TCP-F-ICMP-HANDLING
+
+**An ICMP error reaches the connection that caused it; a soft error does not end it.**
+
+- **Sources** — RFC 9293 §3.9.2.2, `rfc9293.txt:2826-2867`.
+- **Level** — mandatory (reason: keyword, MUST-54, MUST-55 and MUST-56).
+- **Description** — the layer below reports failures that a connection cannot see for
+  itself. TCP directs each report to the connection named in the quoted header and then
+  weighs it. A soft error says the path is troubled, and the connection must survive it. A
+  hard error says the path is gone, and the connection should end. A Source Quench is
+  discarded without a trace.
+- **Checks** — core: RFC9293-ICMP-1 (the report reaches the right connection),
+  RFC9293-ICMP-2 (Source Quench is discarded), RFC9293-ICMP-3 (a soft error does not
+  abort). Supporting: RFC9293-ICMP-4 (a hard error should abort; the document itself notes
+  that many implementations do not).
 
 ## Coverage of the catalog
 
@@ -199,12 +276,18 @@ and delivered in order.**
 | Checksum | TCP-F-CHECKSUM |
 | Header | TCP-F-HEADER, TCP-F-ESTABLISH (the MSS option) |
 | Reset | TCP-F-RESET |
+| Acknowledgment delay | TCP-F-ACKNOWLEDGE (supporting; a level 4 timer) |
+| Segment acceptance | TCP-F-SEGMENT-ACCEPTANCE |
+| Reset generation | TCP-F-RESET, TCP-F-SEGMENT-ACCEPTANCE |
+| Reset processing | TCP-F-RESET-VALIDATION |
+| Window shrinking | TCP-F-WINDOW-ROBUSTNESS |
+| ICMP | TCP-F-ICMP-HANDLING |
 
-Every area of the catalog appears in the map.
+Every area of the catalog appears in the map, and all 35 entries appear in a feature.
 
 Out of scope in the map, because the catalog puts them out of scope: retransmission and its
 timer, congestion control, the options other than MSS, keep-alives, the simultaneous cases,
-and the TIME-WAIT duration. Urgent data is a judgment call recorded here: the document
+silly window avoidance, and the TIME-WAIT duration. Urgent data is a judgment call recorded here: the document
 requires the mechanism (MUST-30 to MUST-32), and discourages its use; no ordinary transfer
 exercises it, so it is not a normal-path mechanism for level 2 and waits for level 5. Congestion control and the retransmission
 timer need RFC 5681 and RFC 6298 in the in-scope set first; see
