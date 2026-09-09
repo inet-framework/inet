@@ -282,9 +282,11 @@ interface is ready to transmit one. They have several input gates and
 one output gate.
 
 Modules that are connected to the inputs of a scheduler must implement
-the :cpp:`IPacketQueue` C++ interface. Schedulers also implement the
-:cpp:`IPacketQueue` interface, so they can be cascaded to other
-schedulers and used as the output module of :ned:`IPacketQueue`'s.
+the :cpp:`IPassivePacketSource` C++ interface. Collection and predicate
+extraction operations additionally require the corresponding input provider
+to implement :cpp:`IPacketCollection` and :cpp:`IPacketExtractor`, respectively.
+Schedulers can be cascaded and used as the output module of compound packet
+queues when those additional interfaces are available.
 
 There are several possible scheduling disciplines (first come/first
 served, priority, weighted fair, weighted round-robin, deadline-based,
@@ -589,4 +591,3 @@ implement three different drop priorities within the class. BE packets are
 stored in a drop tail queue. Packets from AFxy and BE queues are
 scheduled by a WRR scheduler, which ensures that the remaining bandwidth
 is allocated among the classes according to the specified weights.
-

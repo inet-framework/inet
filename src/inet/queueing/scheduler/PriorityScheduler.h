@@ -10,14 +10,16 @@
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketExtractor.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IPacketCollection
+class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IPacketCollection, public virtual IPacketExtractor
 {
   protected:
     std::vector<IPacketCollection *> collections;
+    std::vector<IPacketExtractor *> packetExtractors;
 
   protected:
     virtual void initialize(int stage) override;
@@ -33,6 +35,8 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
@@ -42,4 +46,3 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
 } // namespace inet
 
 #endif
-

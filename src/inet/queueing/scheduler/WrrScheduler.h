@@ -10,6 +10,7 @@
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketExtractor.h"
 
 namespace inet {
 namespace queueing {
@@ -17,17 +18,20 @@ namespace queueing {
 /**
  * This module implements a Weighted Round Robin Scheduler.
  */
-class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacketCollection
+class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacketCollection, public virtual IPacketExtractor
 {
   protected:
     unsigned int *weights = nullptr; // array of weights (has numInputs elements)
     unsigned int *buckets = nullptr; // array of tokens in buckets (has numInputs elements)
 
     std::vector<IPacketCollection *> collections;
+    std::vector<IPacketExtractor *> packetExtractors;
 
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
+    virtual int findInput(const PacketPredicate& predicate) const;
+    virtual void consumeBucket(int index);
 
   public:
     virtual ~WrrScheduler();
@@ -39,8 +43,10 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
     virtual b getTotalLength() const override;
 
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
-    virtual Packet *getPacket(int index) const override { throw cRuntimeError("Invalid operation"); }
-    virtual void removePacket(Packet *packet) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *getPacket(int index) const override;
+    virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 };
 
@@ -48,4 +54,3 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
 } // namespace inet
 
 #endif
-
