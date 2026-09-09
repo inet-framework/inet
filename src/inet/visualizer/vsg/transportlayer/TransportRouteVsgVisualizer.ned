@@ -1,0 +1,28 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+
+package inet.visualizer.vsg.transportlayer;
+
+import inet.visualizer.base.PathVisualizerBase;
+import inet.visualizer.contract.ITransportRouteVisualizer;
+
+//
+// Visualizes transport layer routes on a 3D VulkanSceneGraph scene. It displays
+// a polyline arrow for each active route in the network. See the documentation
+// of the base module for what constitutes an active route. The arrow points
+// from the source towards the destination. If a route is used in both directions
+// then there are separate paths for them. Each polyline fades out over time
+// as the route becomes inactive unless it is reinforced by another packet. The
+// polyline automatically follows the movement of mobile nodes.
+//
+// @see ~TransportRouteCanvasVisualizer, ~TransportRouteVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
+//
+simple TransportRouteVsgVisualizer extends PathVisualizerBase like ITransportRouteVisualizer
+{
+    parameters:
+        @class(TransportRouteVsgVisualizer);
+}
