@@ -8,6 +8,7 @@
 #ifndef __INET_ROUTINGTABLEOSGVISUALIZER_H
 #define __INET_ROUTINGTABLEOSGVISUALIZER_H
 
+#include <osg/Node>
 #include <osg/ref_ptr>
 
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
