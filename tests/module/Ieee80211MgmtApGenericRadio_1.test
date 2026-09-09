@@ -1,0 +1,134 @@
+%description:
+A non-HT AP with a GenericRadio generates beacons and probe responses without
+an authoritative IEEE channel. Both retain the legacy unknown channel (-1) and
+omit HT elements. The real beacon timer and management frame dispatch reach the
+production generators; checked frames continue to the real MAC and radio.
+
+%file: TestIeee80211MgmtApGenericRadio.cc
+
+#include <iostream>
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtApGenericRadio : public Ieee80211MgmtAp
+{
+  protected:
+    cMessage *probeTimer = nullptr;
+    int beacons = 0;
+    int probeResponses = 0;
+
+    virtual void initialize(int stage) override
+    {
+        Ieee80211MgmtAp::initialize(stage);
+        if (stage == INITSTAGE_LAST) {
+            ASSERT(!mib->isHtOperationSupported());
+            ASSERT(!mib->hasPrimaryChannel());
+            probeTimer = new cMessage("injectProbe");
+            scheduleAt(SimTime(2, SIMTIME_MS), probeTimer);
+        }
+    }
+
+    virtual void handleTimer(cMessage *message) override
+    {
+        if (message != probeTimer) {
+            Ieee80211MgmtAp::handleTimer(message);
+            return;
+        }
+        auto body = makeShared<Ieee80211ProbeRequestFrame>();
+        body->setSSID("");
+        body->setChunkLength(B(2));
+        auto packet = new Packet("ProbeRequest", body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_PROBEREQUEST);
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        processFrame(packet, header);
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& address, uint64_t transactionId = 0) override
+    {
+        ASSERT(!mib->hasPrimaryChannel());
+        auto discovery = dynamicPtrCast<Ieee80211BeaconFrame>(body);
+        ASSERT(discovery != nullptr);
+        ASSERT(discovery->getChannelNumber() == -1);
+        ASSERT(!discovery->getHtCapabilitiesPresent());
+        ASSERT(!discovery->getHtOperationPresent());
+        if (subtype == ST_BEACON) {
+            ASSERT(address == MacAddress::BROADCAST_ADDRESS);
+            beacons++;
+        }
+        else {
+            ASSERT(subtype == ST_PROBERESPONSE);
+            ASSERT(address == MacAddress("02:00:00:00:00:02"));
+            probeResponses++;
+        }
+        Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, address, transactionId);
+    }
+
+    using cListener::finish;
+
+    virtual void finish() override
+    {
+        ASSERT(beacons > 0);
+        ASSERT(probeResponses == 1);
+        std::cout << "GenericRadio AP generated legacy beacons and a probe response with unknown channel and no HT elements.\n";
+    }
+
+  public:
+    virtual ~TestIeee80211MgmtApGenericRadio() { cancelAndDelete(probeTimer); }
+};
+
+Define_Module(TestIeee80211MgmtApGenericRadio);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
+
+simple TestIeee80211MgmtApGenericRadio extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApGenericRadio);
+}
+
+network Ieee80211MgmtApGenericRadioTestNetwork
+{
+    submodules:
+        radioMedium: RadioMedium;
+        ap: AccessPoint;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApGenericRadioTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 5ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.typename = "TestIeee80211MgmtApGenericRadio"
+*.ap.wlan[0].mgmt.beaconInterval = 1ms
+*.ap.wlan[0].opMode = "g(erp)"
+*.ap.wlan[0].bitrate = 6Mbps
+*.ap.wlan[0].radio.typename = "GenericRadio"
+*.ap.wlan[0].radio.transmitter.bitrate = 6Mbps
+*.ap.wlan[0].radio.transmitter.analogModel.communicationRange = 100m
+*.radioMedium.signalAnalogRepresentation = "unitDisk"
+*.ap.wlan[0].radio.signalAnalogRepresentation = "unitDisk"
+*.ap.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+*.ap.mobility.initialZ = 0m
+
+%contains: stdout
+GenericRadio AP generated legacy beacons and a probe response with unknown channel and no HT elements.

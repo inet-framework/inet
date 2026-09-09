@@ -1,0 +1,333 @@
+%description:
+Verify that an AP safely validates peer-provided HT Capabilities in
+Association Request and Reassociation Request frames, rejecting malformed
+field-based elements with SC_UNSUP_CAP without terminating the simulation.
+
+%file: TestIeee80211MgmtApMalformedHtCap.cc
+
+#include <vector>
+#include <string>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211MgmtApMalformedHtCapAp : public Ieee80211MgmtAp
+{
+  public:
+    struct SentFrame {
+        std::string name;
+        int subtype = -1;
+        MacAddress destAddr;
+        uint64_t transactionId = 0;
+        Ieee80211StatusCode statusCode = SC_SUCCESSFUL;
+        short aid = 0;
+    };
+
+    std::vector<SentFrame> sentFrames;
+
+  protected:
+    virtual void start() override
+    {
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        SentFrame f;
+        f.name = name;
+        f.subtype = subtype;
+        f.destAddr = destAddr;
+        f.transactionId = transactionId;
+        if (auto resp = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(body)) {
+            f.statusCode = static_cast<Ieee80211StatusCode>(resp->getStatusCode());
+            f.aid = resp->getAid();
+        }
+        else if (auto reassResp = dynamicPtrCast<const Ieee80211ReassociationResponseFrame>(body)) {
+            f.statusCode = static_cast<Ieee80211StatusCode>(reassResp->getStatusCode());
+            f.aid = reassResp->getAid();
+        }
+        sentFrames.push_back(f);
+    }
+
+  public:
+    void markAuthenticated(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void submitAssociationRequest(const MacAddress& address, bool malformed, short exponent = 4)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setHtCapabilitiesPresent(true);
+        auto elem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        if (malformed)
+            elem.maxAmpduLengthExponent = exponent;
+        body->setHtCapabilities(elem);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    void submitAssociationRequestWithElement(const MacAddress& address, const Ieee80211HtCapabilitiesElement& elem)
+    {
+        Enter_Method("submitAssociationRequestWithElement");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setHtCapabilitiesPresent(true);
+        body->setHtCapabilities(elem);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    void submitReassociationRequest(const MacAddress& address, bool malformed, short exponent = 4)
+    {
+        Enter_Method("submitReassociationRequest");
+        auto packet = new Packet("ReassociationRequest");
+        auto body = makeShared<Ieee80211ReassociationRequestFrame>();
+        body->setCurrentAP(mib->address);
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setHtCapabilitiesPresent(true);
+        auto elem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        if (malformed)
+            elem.maxAmpduLengthExponent = exponent;
+        body->setHtCapabilities(elem);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleReassociationRequestFrame(packet, header);
+    }
+
+    uint64_t getPendingTransactionId(const MacAddress& address) const
+    {
+        return staList.at(address).pendingAssociationTransactionId;
+    }
+
+    void finishResponse(const MacAddress& address, Ieee80211FrameType subtype)
+    {
+        Enter_Method("finishResponse");
+        auto response = new Packet(subtype == ST_ASSOCIATIONRESPONSE ? "AssociationResponse" : "ReassociationResponse");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(subtype);
+        header->setReceiverAddress(address);
+        response->insertAtBack(header);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(getPendingTransactionId(address));
+        frameTransmissionFinished(response, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete response;
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+};
+
+Define_Module(Ieee80211MgmtApMalformedHtCapAp);
+
+class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApMalformedHtCapTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<Ieee80211MgmtApMalformedHtCapAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        const MacAddress sta1("02:00:00:00:00:09");
+        const MacAddress sta2("02:00:00:00:00:0A");
+
+        mgmt->markAuthenticated(sta1);
+
+        // 1. Malformed AssociationRequest (exponent = 4) refused with SC_UNSUP_CAP without terminating simulation
+        mgmt->submitAssociationRequest(sta1, true, 4);
+        ASSERT(!mgmt->sentFrames.empty());
+        ASSERT(mgmt->sentFrames.back().name == "AssocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta1));
+        mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta1) == nullptr);
+        ASSERT(mib->bssAccessPointData.associationIds.find(sta1) == mib->bssAccessPointData.associationIds.end());
+        std::cout << "Malformed AssociationRequest (exponent 4) refused with SC_UNSUP_CAP.\n";
+
+        // 2. Malformed AssociationRequest (exponent = -1) refused with SC_UNSUP_CAP
+        mgmt->submitAssociationRequest(sta1, true, -1);
+        ASSERT(mgmt->sentFrames.back().name == "AssocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta1));
+        mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta1) == nullptr);
+        std::cout << "Malformed AssociationRequest (exponent -1) refused with SC_UNSUP_CAP.\n";
+
+        // 3. Valid AssociationRequest succeeds
+        mgmt->submitAssociationRequest(sta1, false);
+        ASSERT(mgmt->sentFrames.back().name == "AssocResp-OK");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_SUCCESSFUL);
+        ASSERT(mgmt->sentFrames.back().aid > 0);
+        mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mib->findPeerHtState(sta1) != nullptr);
+        std::cout << "Valid AssociationRequest succeeded with SC_SUCCESSFUL.\n";
+
+        // 4. Malformed ReassociationRequest (exponent = 4) from associated station
+        // IEEE Std 802.11-2024, 11.3.5.5(n): acknowledged refusal clears existing association
+        mgmt->submitReassociationRequest(sta1, true, 4);
+        ASSERT(mgmt->sentFrames.back().name == "ReassocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta1));
+        mgmt->finishResponse(sta1, ST_REASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta1) == nullptr);
+        ASSERT(mib->bssAccessPointData.associationIds.find(sta1) == mib->bssAccessPointData.associationIds.end());
+        std::cout << "Malformed ReassociationRequest (exponent 4) refused with SC_UNSUP_CAP and cleared association.\n";
+
+        // 5. Malformed ReassociationRequest (exponent = -1) from authenticated station
+        mgmt->markAuthenticated(sta2);
+        mgmt->submitReassociationRequest(sta2, true, -1);
+        ASSERT(mgmt->sentFrames.back().name == "ReassocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta2));
+        mgmt->finishResponse(sta2, ST_REASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta2));
+        ASSERT(mib->bssAccessPointData.stations.at(sta2) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta2) == nullptr);
+        std::cout << "Malformed ReassociationRequest (exponent -1) refused with SC_UNSUP_CAP.\n";
+
+        // 6. Malformed AssociationRequest with contradictory Tx MCS set fields refused with SC_UNSUP_CAP
+        auto badTxElem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        badTxElem.txMcsSetDefined = false;
+        badTxElem.txRxMcsSetNotEqual = true;
+        mgmt->submitAssociationRequestWithElement(sta1, badTxElem);
+        ASSERT(mgmt->sentFrames.back().name == "AssocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta1));
+        mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta1) == nullptr);
+        std::cout << "Malformed AssociationRequest (contradictory Tx MCS) refused with SC_UNSUP_CAP.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApMalformedHtCapTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211MgmtApMalformedHtCapAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApMalformedHtCapAp);
+}
+
+simple Ieee80211MgmtApMalformedHtCapTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApMalformedHtCapTest);
+}
+
+network Ieee80211MgmtApMalformedHtCapNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtApMalformedHtCapAp";
+        }
+        test: Ieee80211MgmtApMalformedHtCapTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApMalformedHtCapNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.ap.wlan[0].radio.channelNumber = 6
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+
+%contains: stdout
+Malformed AssociationRequest (exponent 4) refused with SC_UNSUP_CAP.
+
+%contains: stdout
+Malformed AssociationRequest (exponent -1) refused with SC_UNSUP_CAP.
+
+%contains: stdout
+Valid AssociationRequest succeeded with SC_SUCCESSFUL.
+
+%contains: stdout
+Malformed ReassociationRequest (exponent 4) refused with SC_UNSUP_CAP and cleared association.
+
+%contains: stdout
+Malformed ReassociationRequest (exponent -1) refused with SC_UNSUP_CAP.
+
+%contains: stdout
+Malformed AssociationRequest (contradictory Tx MCS) refused with SC_UNSUP_CAP.

@@ -1,0 +1,294 @@
+%description:
+Verify that AP lifecycle teardown clears station association records,
+association IDs, reservations, and peer HT state on shutdown, and that
+after restarting the AP, a former station is no longer accepted as associated
+until it authenticates and associates again.
+
+%file: TestIeee80211MgmtApLifecycle.cc
+
+#include <vector>
+
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<int> sentSubtypes;
+    std::vector<Ieee80211ReasonCode> sentDeauthReasons;
+
+  protected:
+    virtual void start() override
+    {
+        // Suppress periodic beacon timers so they do not interfere with
+        // microsecond-scale lifecycle state transitions.
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        sentSubtypes.push_back(subtype);
+        if (subtype == ST_DEAUTHENTICATION) {
+            auto deauth = dynamicPtrCast<const Ieee80211DeauthenticationFrame>(body);
+            if (deauth != nullptr)
+                sentDeauthReasons.push_back(deauth->getReasonCode());
+        }
+    }
+
+  public:
+    void submitAuthenticationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAuthenticationRequest");
+        auto packet = new Packet("AuthenticationRequest");
+        auto body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setSequenceNumber(1);
+        body->setStatusCode(SC_SUCCESSFUL);
+        body->setChunkLength(B(6));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_AUTHENTICATION);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleAuthenticationFrame(packet, header);
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID(ssid.c_str());
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        body->setSupportedRates(rates);
+        if (mib->isHtOperationSupported()) {
+            body->setHtCapabilitiesPresent(true);
+            body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
+        }
+        body->setChunkLength(B(100));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ASSOCIATIONREQUEST);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    uint64_t getPendingTransactionId(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it == staList.end() ? 0 : it->second.pendingAssociationTransactionId;
+    }
+
+    void finishAssociationResponse(const MacAddress& address)
+    {
+        Enter_Method("finishAssociationResponse");
+        auto response = new Packet("AssociationResponse");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ASSOCIATIONRESPONSE);
+        header->setReceiverAddress(address);
+        response->insertAtBack(header);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(getPendingTransactionId(address));
+        frameTransmissionFinished(response, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete response;
+    }
+
+    bool hasStation(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.stations.find(address) != mib->bssAccessPointData.stations.end();
+    }
+
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
+    {
+        auto it = mib->bssAccessPointData.stations.find(address);
+        return it == mib->bssAccessPointData.stations.end() ? Ieee80211Mib::NOT_AUTHENTICATED : it->second;
+    }
+
+    bool hasCommittedAid(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+    }
+
+    bool hasPeerHtState(const MacAddress& address) const
+    {
+        return mib->findPeerHtState(address) != nullptr;
+    }
+
+    bool isStaListEmpty() const
+    {
+        return staList.empty();
+    }
+};
+
+Define_Module(TestIeee80211MgmtAp);
+
+class Ieee80211MgmtApLifecycleTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApLifecycleTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        const MacAddress staAddress("02:00:00:00:00:09");
+
+        // 1. Initial State: station authenticates and associates
+        mgmt->submitAuthenticationRequest(staAddress);
+        ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::AUTHENTICATED);
+
+        mgmt->submitAssociationRequest(staAddress);
+        mgmt->finishAssociationResponse(staAddress);
+
+        // Verify station is fully associated
+        ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->hasCommittedAid(staAddress));
+        ASSERT(mgmt->hasPeerHtState(staAddress));
+        std::cout << "Station successfully associated before AP shutdown.\n";
+
+        // 2. AP is shut down at t=10us via ScenarioManager
+        wait(SimTime(15, SIMTIME_US)); // wait until t=15us (AP is down)
+
+        // Verify AP teardown: stations, AIDs, and peer HT states are completely cleared
+        ASSERT(mib->bssAccessPointData.stations.empty());
+        ASSERT(mib->bssAccessPointData.associationIds.empty());
+        ASSERT(mgmt->isStaListEmpty());
+        ASSERT(!mgmt->hasPeerHtState(staAddress));
+        std::cout << "AP lifecycle teardown cleared all station, AID, and peer HT states.\n";
+
+        // 3. AP is restarted at t=20us via ScenarioManager
+        wait(SimTime(10, SIMTIME_US)); // wait until t=25us (AP is restarted and up)
+
+        // Verify former station is NO LONGER accepted as associated
+        ASSERT(!mgmt->hasStation(staAddress) || mgmt->getStationStatus(staAddress) != Ieee80211Mib::ASSOCIATED);
+        ASSERT(!mgmt->hasCommittedAid(staAddress));
+        ASSERT(!mgmt->hasPeerHtState(staAddress));
+
+        // 4. Former station attempts to associate directly WITHOUT authenticating first
+        size_t deauthCountBefore = mgmt->sentDeauthReasons.size();
+        mgmt->submitAssociationRequest(staAddress);
+
+        // AP must reject unauthenticated association request with Deauthentication (RC_NONAUTH_ASS_REQUEST)
+        ASSERT(mgmt->sentDeauthReasons.size() == deauthCountBefore + 1);
+        ASSERT(mgmt->sentDeauthReasons.back() == RC_NONAUTH_ASS_REQUEST);
+        ASSERT(!mgmt->hasStation(staAddress) || mgmt->getStationStatus(staAddress) != Ieee80211Mib::ASSOCIATED);
+        ASSERT(!mgmt->hasCommittedAid(staAddress));
+        ASSERT(!mgmt->hasPeerHtState(staAddress));
+        std::cout << "Former station unauthenticated association request correctly rejected with deauthentication.\n";
+
+        // 5. Former station authenticates again
+        mgmt->submitAuthenticationRequest(staAddress);
+        ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(!mgmt->hasCommittedAid(staAddress));
+
+        // 6. Former station associates again
+        mgmt->submitAssociationRequest(staAddress);
+        mgmt->finishAssociationResponse(staAddress);
+
+        // Verify station is accepted as associated once again
+        ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->hasCommittedAid(staAddress));
+        ASSERT(mgmt->hasPeerHtState(staAddress));
+        std::cout << "Former station successfully re-authenticated and re-associated after AP restart.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApLifecycleTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211MgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtAp);
+}
+
+simple Ieee80211MgmtApLifecycleTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApLifecycleTest);
+}
+
+network Ieee80211MgmtApLifecycleTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        scenarioManager: ScenarioManager;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtAp";
+        }
+        test: Ieee80211MgmtApLifecycleTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApLifecycleTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50us
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+*.ap.wlan[0].mgmt.numAuthSteps = 2
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.ap.wlan[0].radio.channelNumber = 6
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+
+%file: scenario.xml
+
+<scenario>
+    <at t="10us">
+        <shutdown module="ap"/>
+    </at>
+    <at t="20us">
+        <startup module="ap"/>
+    </at>
+</scenario>
+
+%contains: stdout
+Station successfully associated before AP shutdown.
+
+%contains: stdout
+AP lifecycle teardown cleared all station, AID, and peer HT states.
+
+%contains: stdout
+Former station unauthenticated association request correctly rejected with deauthentication.
+
+%contains: stdout
+Former station successfully re-authenticated and re-associated after AP restart.
