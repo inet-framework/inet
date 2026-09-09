@@ -6,6 +6,7 @@
 #define __INET_TWORAYINTERFERENCE_H
 
 #include "inet/common/Module.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include <inet/physicallayer/wireless/common/contract/packetlevel/IPathLoss.h>
 
 namespace inet {
@@ -32,10 +33,12 @@ class INET_API TwoRayInterference : public Module, public IPathLoss
   protected:
     double epsilon_r;
     char polarization;
+    const physicalenvironment::IPhysicalEnvironment *physicalEnvironment = nullptr; // optional: antenna heights above its ground model instead of raw z
 
   protected:
     virtual double computeTwoRayInterference(const Coord& posTx, const Coord& posRx, m waveLength) const;
     virtual double reflectionCoefficient(double cos_theta, double sin_theta) const;
+    virtual double computeHeightAboveGround(const Coord& position) const;
 };
 
 } // namespace physicallayer
