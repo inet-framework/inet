@@ -1,0 +1,26 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+
+package inet.visualizer.vsg.environment;
+
+import inet.visualizer.base.PhysicalEnvironmentVisualizerBase;
+import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
+
+//
+// Visualizes a physical environment on a 3D VulkanSceneGraph scene. It displays
+// the physical objects present in the physical environment. The visualizer
+// considers all object properties that affect appearance such as position,
+// orientation, shape, colors, opacity, etc.
+//
+// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
+//
+simple PhysicalEnvironmentVsgVisualizer extends PhysicalEnvironmentVisualizerBase like IPhysicalEnvironmentVisualizer
+{
+    parameters:
+        @class(PhysicalEnvironmentVsgVisualizer);
+        bool enableObjectOpacity = default(true); // Display physical objects potentially transparently as specified in the opacity attribute (might cause z-fighting for transparent objects)
+}
