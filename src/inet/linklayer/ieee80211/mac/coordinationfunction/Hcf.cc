@@ -17,6 +17,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
@@ -70,9 +71,9 @@ void Hcf::initialize(int stage)
             originatorBlockAckProcedure = new OriginatorBlockAckProcedure();
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
             originatorDataService->setFrameEligibilityFunction([this](const Packet *packet) {
-                if (auto addbaReq = dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>()))
+                if (auto addbaReq = findFragmentedActionContext<Ieee80211AddbaRequest>(packet))
                     return originatorBlockAckAgreementHandler->isAddbaRequestPending(packet, addbaReq);
-                if (auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>()))
+                if (auto delba = findFragmentedActionContext<Ieee80211Delba>(packet))
                     return originatorBlockAckAgreementHandler->isDelbaPending(packet, delba);
                 auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
                 // Hold this peer/TID while its ADDBA response is pending so no
@@ -133,7 +134,7 @@ void Hcf::rebuildPendingFrameEligibility()
 bool Hcf::processDroppedBlockAckSetupFrame(Packet *packet)
 {
     if (originatorBlockAckAgreementHandler) {
-        auto addbaReq = dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto addbaReq = findFragmentedActionContext<Ieee80211AddbaRequest>(packet);
         if (addbaReq != nullptr && originatorBlockAckAgreementHandler->isAddbaRequestPending(packet, addbaReq)) {
             originatorBlockAckAgreementHandler->processDroppedAddbaReq(packet, addbaReq, originatorBlockAckAgreementPolicy, this);
             rebuildPendingFrameEligibility();
@@ -146,7 +147,7 @@ bool Hcf::processDroppedBlockAckSetupFrame(Packet *packet)
 bool Hcf::processDroppedBlockAckTeardownFrame(Packet *packet)
 {
     if (originatorBlockAckAgreementHandler) {
-        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
         if (delba != nullptr && originatorBlockAckAgreementHandler->processAbortedDelba(packet, this)) {
             rebuildPendingFrameEligibility();
             return true;
@@ -534,7 +535,8 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
         auto receptionResult = recipientDataService->managementFrameReceived(packet, mgmtHeader);
         sendUp(receptionResult.completeFrames);
-        recipientProcessReceivedManagementFrame(mgmtHeader, receptionResult.duplicate);
+        if (receptionResult.completeHeader != nullptr)
+            recipientProcessReceivedManagementFrame(receptionResult.completeHeader, receptionResult.duplicate);
     }
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
@@ -657,7 +659,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO QoSDataFrame, NonQoSDataFrame
-        auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(protectedHeader);
+        auto addbaRequest = findFragmentedActionContext<Ieee80211AddbaRequest>(packet);
         bool staleAddbaRequest = addbaRequest != nullptr && originatorBlockAckAgreementHandler != nullptr && !originatorBlockAckAgreementHandler->isAddbaRequestPending(packet, addbaRequest);
         if (retryLimitReached || staleAddbaRequest) {
             if (retryLimitReached) {
@@ -733,13 +735,13 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
     auto edcaf = edca->getEdcaf(ac);
     if (originatorAckPolicy->isAckNeeded(mgmtHeader))
         edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(mgmtHeader);
-    if (auto addbaReq = dynamicPtrCast<const Ieee80211AddbaRequest>(mgmtHeader)) {
+    if (auto addbaReq = findFragmentedActionContext<Ieee80211AddbaRequest>(packet)) {
         if (originatorBlockAckAgreementHandler)
             originatorBlockAckAgreementHandler->processTransmittedAddbaReq(packet, addbaReq, originatorBlockAckAgreementPolicy, this);
     }
-    else if (dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader))
+    else if (findFragmentedActionContext<Ieee80211AddbaResponse>(packet))
         ; // Recipient agreement was established when the successful response was formed.
-    else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
+    else if (auto delba = findFragmentedActionContext<Ieee80211Delba>(packet)) {
         if (delba->getInitiator()) {
             bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(delba->getReceiverAddress(), delba->getTid());
             auto agreement = originatorBlockAckAgreementHandler->processTransmittedDelba(packet, this);
@@ -807,7 +809,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO qos, nonqos
-        auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(failedHeader);
+        auto addbaRequest = findFragmentedActionContext<Ieee80211AddbaRequest>(failedPacket);
         bool staleAddbaRequest = addbaRequest != nullptr && originatorBlockAckAgreementHandler != nullptr && !originatorBlockAckAgreementHandler->isAddbaRequestPending(failedPacket, addbaRequest);
         if (retryLimitReached || staleAddbaRequest) {
             if (retryLimitReached) {
@@ -900,7 +902,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             throw cRuntimeError("Unknown frame"); // TODO qos, nonqos frame
         auto lastTransmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
-        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(lastTransmittedHeader)) {
+        if (auto delba = findFragmentedActionContext<Ieee80211Delba>(lastTransmittedPacket)) {
             if (delba->getInitiator() && originatorBlockAckAgreementHandler != nullptr && originatorBlockAckAgreementHandler->processAcknowledgedDelba(lastTransmittedPacket, this))
                 rebuildPendingFrameEligibility();
         }

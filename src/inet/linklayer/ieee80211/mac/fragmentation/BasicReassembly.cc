@@ -26,12 +26,11 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     // Frame is not fragmented
     if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
         return packet;
-    // FIXME temporary fix for mgmt frames
-    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
-        return packet;
     // find entry for this frame
     Key key;
     key.macAddress = header->getTransmitterAddress();
+    key.receiverAddress = header->getReceiverAddress();
+    key.type = header->getType();
     key.tid = -1;
     if (header->getType() == ST_DATA_WITH_QOS)
         if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
@@ -39,7 +38,25 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     key.seqNum = header->getSequenceNumber().get();
     short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
-    auto& value = fragmentsMap[key];
+    auto it = fragmentsMap.find(key);
+    if (it != fragmentsMap.end() && it->second.expired) {
+        // A non-Retry fragment 0 can be a new MMPDU after sequence-number
+        // reuse. All other fragments of the expired MMPDU are discarded.
+        if (fragNum == 0 && !header->getRetry()) {
+            fragmentsMap.erase(it);
+            it = fragmentsMap.end();
+        }
+        else {
+            delete packet;
+            return nullptr;
+        }
+    }
+    if (it == fragmentsMap.end()) {
+        Value value;
+        value.receptionStartTime = simTime();
+        it = fragmentsMap.emplace(key, value).first;
+    }
+    auto& value = it->second;
     value.fragments.resize(16);
 
     // update entry
@@ -71,28 +88,47 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         return nullptr;
 }
 
+simtime_t BasicReassembly::getNextExpirationTime() const
+{
+    simtime_t nextExpirationTime = SIMTIME_MAX;
+    for (const auto& entry : fragmentsMap)
+        if (!entry.second.expired)
+            nextExpirationTime = std::min(nextExpirationTime, entry.second.receptionStartTime + maxReceiveLifetime);
+    return nextExpirationTime;
+}
+
+std::vector<Packet *> BasicReassembly::removeExpiredFragments(simtime_t currentTime)
+{
+    std::vector<Packet *> expiredFragments;
+    for (auto& entry : fragmentsMap) {
+        auto& value = entry.second;
+        if (!value.expired && currentTime >= value.receptionStartTime + maxReceiveLifetime) {
+            for (auto fragment : value.fragments)
+                if (fragment != nullptr)
+                    expiredFragments.push_back(fragment);
+            value.fragments.clear();
+            value.receivedFragments = 0;
+            value.allFragments = 0;
+            value.expired = true;
+        }
+    }
+    return expiredFragments;
+}
+
 void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
-    Key key;
-    key.macAddress = address;
-    key.tid = tid;
-    key.seqNum = startSeqNumber;
-    auto itStart = fragmentsMap.lower_bound(key);
-    key.seqNum = endSeqNumber;
-    auto itEnd = fragmentsMap.upper_bound(key);
-
-    if (endSeqNumber < startSeqNumber) {
-        for (auto it = itStart; it != fragmentsMap.end();) {
+    for (auto it = fragmentsMap.begin(); it != fragmentsMap.end();) {
+        auto sequenceNumber = it->first.seqNum;
+        bool isInSequenceRange = startSeqNumber <= endSeqNumber ?
+                sequenceNumber >= startSeqNumber && sequenceNumber <= endSeqNumber :
+                sequenceNumber >= startSeqNumber || sequenceNumber <= endSeqNumber;
+        if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange) {
             for (auto fragment : it->second.fragments)
                 delete fragment;
             it = fragmentsMap.erase(it);
         }
-        itStart = fragmentsMap.begin();
-    }
-    for (auto it = itStart; it != itEnd;) {
-        for (auto fragment : it->second.fragments)
-            delete fragment;
-        it = fragmentsMap.erase(it);
+        else
+            it++;
     }
 }
 
@@ -105,4 +141,3 @@ BasicReassembly::~BasicReassembly()
 
 } // namespace ieee80211
 } // namespace inet
-
