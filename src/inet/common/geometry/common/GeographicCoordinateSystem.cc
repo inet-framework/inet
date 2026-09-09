@@ -158,7 +158,7 @@ Coord OsgGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geog
     auto mapSrs = mapNode->getMapSRS();
     osg::Vec3d ecefCoordinate;
     osg::Vec3d osgGeographicCoordinate(geographicCoordinate.longitude.get<deg>(), geographicCoordinate.latitude.get<deg>(), geographicCoordinate.altitude.get<m>());
-    mapSrs->getGeographicSRS()->transform(osgGeographicCoordinate, mapSrs->getECEF(), ecefCoordinate);
+    mapSrs->getGeographicSRS()->transform(osgGeographicCoordinate, mapSrs->getGeocentricSRS(), ecefCoordinate);
     auto sceneCoordinate = osg::Vec4d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z(), 1.0) * inverseLocatorMatrix;
     return Coord(sceneCoordinate.x(), sceneCoordinate.y(), sceneCoordinate.z());
 }
@@ -168,7 +168,7 @@ GeoCoord OsgGeographicCoordinateSystem::computeGeographicCoordinate(const Coord&
     auto ecefCoordinate = osg::Vec4d(sceneCoordinate.x, sceneCoordinate.y, sceneCoordinate.z, 1.0) * locatorMatrix;
     auto mapSrs = mapNode->getMapSRS();
     osg::Vec3d geographicCoordinate;
-    mapSrs->getECEF()->transform(osg::Vec3d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z()), mapSrs->getGeographicSRS(), geographicCoordinate);
+    mapSrs->getGeocentricSRS()->transform(osg::Vec3d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z()), mapSrs->getGeographicSRS(), geographicCoordinate);
     return GeoCoord(deg(geographicCoordinate.y()), deg(geographicCoordinate.x()), m(geographicCoordinate.z()));
 }
 

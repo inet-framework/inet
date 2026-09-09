@@ -18,6 +18,7 @@
 #include <osg/Group>
 #include <osgDB/ReadFile>
 #include <osgEarth/Capabilities>
+#include <osgEarth/Common>
 #include <osgEarth/Viewpoint>
 #endif // ifdef WITH_OSGEARTH
 
@@ -30,7 +31,6 @@ Define_Module(SceneOsgEarthVisualizer);
 #ifdef WITH_OSGEARTH
 
 using namespace osgEarth;
-using namespace osgEarth::Annotation;
 using namespace inet::physicalenvironment;
 
 void SceneOsgEarthVisualizer::initialize(int stage)
@@ -56,6 +56,10 @@ void SceneOsgEarthVisualizer::initialize(int stage)
 void SceneOsgEarthVisualizer::initializeScene()
 {
     SceneOsgVisualizerBase::initializeScene();
+    // osgEarth 3 needs this before anything else of its own is created: it installs the
+    // capabilities and the shader factory that its layers compose their GLSL against.
+    // Without it the programs fail to link and the map draws black.
+    osgEarth::initialize();
     std::string mapFileString = getEnvir()->getConfig()->substituteVariables(par("mapFile"));
     auto mapScene = osgDB::readNodeFile(mapFileString.c_str());
     if (mapScene == nullptr)
@@ -67,6 +71,10 @@ void SceneOsgEarthVisualizer::initializeScene()
     mapNode = MapNode::findMapNode(mapScene);
     if (mapNode == nullptr)
         throw cRuntimeError("Could not find map node in the scene");
+    // osgEarth 3 builds the terrain engine on open(), not on load, and the nodes hung off
+    // the map (the geo transform below, the physical objects) need it right away.
+    if (!mapNode->open())
+        throw cRuntimeError("Could not open earth map file '%s'", mapFileString.c_str());
     geoTransform = new osgEarth::GeoTransform();
     topLevelScene->addChild(geoTransform);
     localTransform = new osg::PositionAttitudeTransform();
