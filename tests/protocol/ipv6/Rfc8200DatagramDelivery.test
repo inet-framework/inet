@@ -6,7 +6,7 @@ present.
 
 Checks RFC8200-HDR-1, HDR-2, HDR-3, HDR-4, DLV-1, HL-1 (description) and RFC8200-CKSUM-1
 (must) from doc/project/evidence/standard/rfc8200/catalog.md. The English procedure and the
-mockup are in doc/project/evidence/protocol/ipv6/checks.md#datagram-delivery; the program
+mockup are in doc/project/evidence/protocol/ipv6/checks/delivery.md#datagram-delivery; the program
 steps below map one to one onto its expected observations. Mapping of the mockup: host A =
 hostA, router R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB.
 

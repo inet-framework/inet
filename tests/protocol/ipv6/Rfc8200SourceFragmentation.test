@@ -9,7 +9,7 @@ from doc/project/evidence/standard/rfc8200/catalog.md; also covers HDR-3. The pa
 of the fragments is Rfc8200FragmentPayloadLength.test, kept apart so that one wrong field
 does not hide the reassembly verdicts. The English
 procedure, the mockup and the size arithmetic are in
-doc/project/evidence/protocol/ipv6/checks.md#source-fragmentation-and-reassembly; the
+doc/project/evidence/protocol/ipv6/checks/fragmentation.md#source-fragmentation-and-reassembly; the
 program steps below map one to one onto its expected observations. Host A's interface to
 link 1 has MTU 1280; a 1500-octet packet (1452 octets of data) splits into pieces of 1232
 and 228 octets, so the last fragment sits at octet offset 1232 (154 units). Mapping of the

@@ -1,0 +1,95 @@
+%description:
+
+RFC 8200 — a destination processes a packet that arrives with hop limit 0; only forwarding
+discards for the hop limit.
+
+Checks RFC8200-HL-3 (should), the exact case, from doc/project/evidence/standard/rfc8200/catalog.md. The
+English procedure is in doc/project/evidence/protocol/ipv6/checks/hop-limit.md#hop-limit-0-at-the-destination;
+the program steps below map one to one onto its expected observations. Mapping of the
+mockup with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB. The
+relay rewrites the hop limit to 0 on link 2, after the router.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_hop_limit_zero_at_destination")
+        // The relay rewrites the hop limit of the packet to 0.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setHopLimit(0); }); })
+                     .describe("the packet (set its hop limit to 0)"))
+        // Expected observation 1: at host B's interface the packet arrives with hop limit 0.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 0")
+                  .describe("the packet at host B's interface with hop limit 0")
+                  .within(6.0))
+        // Expected observation 2: host B's UDP receives it (RFC8200-HL-3).
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .describe("the datagram at host B's UDP, delivered although it arrived with hop limit 0")
+                  .within(0.5))
+        // Expected observation 3: host A receives no Time Exceeded message.
+        .never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 3")
+                  .describe("a Time Exceeded message at host A")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_hop_limit_zero_at_destination compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc8200_hop_limit_zero_at_destination: PASS

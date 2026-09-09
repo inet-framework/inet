@@ -4,7 +4,7 @@ RFC 8200 — two packets fragmented by one source for one destination carry diff
 identifications.
 
 Checks RFC8200-FRAG-2 (must) from doc/project/evidence/standard/rfc8200/catalog.md. The
-English procedure is in doc/project/evidence/protocol/ipv6/checks.md#fragment-identification;
+English procedure is in doc/project/evidence/protocol/ipv6/checks/fragmentation.md#fragment-identification;
 the program steps below map one to one onto its expected observations. Host A's interface
 to link 1 has MTU 1280, and two applications send a 1452-octet datagram each at the same
 time, to ports 5000 and 5001 of host B. Mapping of the mockup: host A = hostA, router R =

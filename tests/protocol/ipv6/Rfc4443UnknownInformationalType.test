@@ -1,0 +1,94 @@
+%description:
+
+RFC 4443 — an ICMPv6 informational message of unknown type is silently discarded.
+
+Checks RFC4443-MPR-2 (must) from doc/project/evidence/standard/rfc4443/catalog.md. The English procedure is
+in doc/project/evidence/protocol/ipv6/checks/input-validation.md#unknown-icmpv6-informational-type; the
+program steps below map one to one onto its expected observations. Host A sends one echo
+request as the vehicle; the relay rewrites its type from 128 to 200, a number that names no
+message. Mapping of the mockup with a relay: host A = hostA, router R = router, relay T =
+tap, host B = hostB.
+
+Expected result: FAIL. The model stops the simulation with a runtime error on an unknown
+ICMPv6 type (Icmpv6::processICMPv6Message, the default branch of the type switch), so no
+verdict line is printed, and the runner counts the missing line as a failure. "Silently
+discarded" leaves the host running; a stop is a failure of the check. See
+doc/project/evidence/model/ipv6/results.md. The anchor of the absence watch is the arrival
+of the message at host B's interface: the model's internet layer emits no signal when it
+hands an ICMPv6 message to its ICMPv6 module, and the arrival precedes the decision.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_unknown_informational_type")
+        // The relay rewrites the type of the echo request to 200.
+        .intercept(intercept("tap").match("icmpv6.type == 128").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Icmpv6Header>(frame, [](Icmpv6Header& h) { h.setType(static_cast<Icmpv6Type>(200)); }); })
+                     .describe("the echo request (set its type to 200)"))
+        // Expected observation 1: at host B's interface an ICMPv6 message of type 200 arrives.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 200")
+                  .describe("an ICMPv6 message of the unknown informational type 200 at host B's interface")
+                  .within(6.0))
+        // Expected observation 2: from then on, host B sends no reply and no error (RFC4443-MPR-2).
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv6.type < 128 || icmpv6.type == 129")
+                  .describe("an echo reply or any ICMPv6 error message from host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_unknown_informational_type compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One echo request of 56 octets from host A to host B at 5 s, the vehicle of the unknown type.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "hostB"
+*.hostA.app[0].packetSize = 56B
+*.hostA.app[0].count = 1
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].printPing = false
+*.hostB.numApps = 0
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc4443_unknown_informational_type: PASS

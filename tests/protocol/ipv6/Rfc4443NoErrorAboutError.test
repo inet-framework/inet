@@ -1,0 +1,98 @@
+%description:
+
+RFC 4443 — no ICMPv6 error message is originated about an ICMPv6 error message.
+
+Checks RFC4443-MPR-4 (must not) from doc/project/evidence/standard/rfc4443/catalog.md. The English procedure
+is in doc/project/evidence/protocol/ipv6/checks/error-report.md#no-error-about-an-error; the program steps
+below map one to one onto its expected observations. Host B returns Destination Unreachable
+for a closed port; the relay rewrites the hop limit of that report to 1 on link 2, so it
+expires at the router, which must discard it and must not report the expiry. Mapping of the
+mockup with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_no_error_about_error")
+        // The relay rewrites the hop limit of host B's report to 1.
+        .intercept(intercept("tap").match("icmpv6.type == 1").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setHopLimit(1); }); })
+                     .describe("host B's Destination Unreachable (set its hop limit to 1)"))
+        // Expected observation 1: the datagram to the closed port on link 1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5001")
+                  .describe("the datagram to the closed port 5001 on link 1")
+                  .within(6.0))
+        // Expected observation 2: the router's interface on link 2 receives the report with hop
+        // limit 1 -- an error message about to expire; the anchor.
+        .once(on("router.eth[1].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 1 && ipv6.hopLimit == 1")
+                  .describe("host B's Destination Unreachable with hop limit 1 at the router")
+                  .within(0.5))
+        // Expected observation 3: from then on, the router sends no Time Exceeded and forwards no
+        // copy of the expired report (RFC4443-MPR-4).
+        .never(on("router")
+                  .match([](const MatchContext& c) {
+                      return c.event.kind == EventKind::SentToLower && c.event.sourcePath.rfind("router.eth", 0) == 0
+                          && matchesExpression(c.event.packet, "icmpv6.type == 3 || icmpv6.type == 1");
+                  })
+                  .describe("a Time Exceeded message from the router, or the expired report itself")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_no_error_about_error compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to port 5001 on host B, where no program listens. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc4443_no_error_about_error: PASS

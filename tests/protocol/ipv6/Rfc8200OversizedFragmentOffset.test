@@ -1,0 +1,100 @@
+%description:
+
+RFC 8200 — a fragment whose offset would push the reassembled packet past 65,535 octets is
+discarded and reported with Parameter Problem code 0.
+
+Checks RFC8200-REASM-8 (must discard; should report) from
+doc/project/evidence/standard/rfc8200/catalog.md. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/fragmentation.md#oversized-fragment-offset; the program steps below
+map one to one onto its expected observations. Host A fragments a 1500-octet packet for its
+1280-octet link; the relay rewrites the offset of the second fragment to 65,528 octets, the
+largest the field carries. Mapping of the mockup with a relay: host A = hostA, router R =
+router, relay T = tap, host B = hostB.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_oversized_fragment_offset")
+        // The relay rewrites the offset of the second fragment to 65528.
+        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6FragmentHeader>(frame, [](Ipv6FragmentHeader& fh) { fh.setFragmentOffset(65528); }); })
+                     .describe("the second fragment (set its offset to 65528)"))
+        // Expected observation 1: at host B's interface a fragment with offset 65528.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6FragmentHeader.fragmentOffset == 65528 && Ipv6FragmentHeader.moreFragments == false")
+                  .describe("a fragment at host B's interface with offset 65528")
+                  .within(6.0))
+        // Expected observation 2: host A receives Parameter Problem, type 4 code 0.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0")
+                  .describe("the Parameter Problem message, code 0, at host A")
+                  .within(0.5))
+        // Expected observation 3: nothing of the datagram reaches UDP at host B (RFC8200-REASM-8).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000"); })
+                  .describe("the datagram at host B's UDP")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_oversized_fragment_offset compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
+*.hostA.eth[0].mac.mtu = 1280B
+
+%contains: stdout
+PROTOCOLTEST rfc8200_oversized_fragment_offset: PASS

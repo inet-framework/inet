@@ -1,0 +1,105 @@
+%description:
+
+RFC 8504 / RFC 8200 — a receiver processes an atomic fragment (offset 0, M = 0) as a fully
+reassembled packet.
+
+Checks RFC8504-NR-4, the receiver half (should), which governs RFC8200-REASM-6, from the
+catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/fragmentation.md#atomic-fragment; the program steps below map one
+to one onto its expected observations. Host A fragments a 1500-octet packet for its
+1280-octet link; the relay clears the M flag of the first fragment, which then is a whole
+datagram by the definition of RFC 8200 §4.5. Mapping of the mockup with a relay: host A =
+hostA, router R = router, relay T = tap, host B = hostB.
+
+Expected result: FAIL. The model's fragment buffer stops the simulation with a C++
+assertion when a single fragment completes a datagram: Ipv6FragBuf::addFragment looks the
+buffer up before it creates it, and on completion erases the stale end iterator
+(Ipv6FragBuf.cc:168). No verdict line is printed, and the runner counts the missing line
+as a failure. The stop takes several minutes in a debug build, because the runtime prints
+a symbolized stack trace. See doc/project/evidence/model/ipv6/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_atomic_fragment")
+        // The relay clears the M flag of the first fragment.
+        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6FragmentHeader>(frame, [](Ipv6FragmentHeader& fh) { fh.setMoreFragments(false); }); })
+                     .describe("the first fragment (clear its M flag: an atomic fragment)"))
+        // Expected observation 1: at host B's interface an atomic fragment arrives.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == false")
+                  .capture("id", "Ipv6FragmentHeader.identification")
+                  .describe("an atomic fragment at host B's interface: offset 0, M = 0")
+                  .within(6.0))
+        // Expected observation 2: host B's internet layer hands its content to UDP as a whole
+        // packet (RFC8504-NR-4, RFC8200-REASM-6).
+        .once(on("hostB.ipv6.ipv6").signal("packetSentToUpper")
+                  .packet("udp.destPort == 5000")
+                  .describe("the content of the atomic fragment handed to UDP at host B as a whole packet")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_atomic_fragment compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
+*.hostA.eth[0].mac.mtu = 1280B
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc8200_atomic_fragment: PASS

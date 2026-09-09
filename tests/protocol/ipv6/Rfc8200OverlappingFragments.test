@@ -1,0 +1,113 @@
+%description:
+
+RFC 8504 / RFC 8200 — a receiver that finds an overlapping fragment silently discards the
+whole datagram.
+
+Checks RFC8504-NR-3, the receiver half (must), which governs RFC8200-REASM-5, from the
+catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/fragmentation.md#overlapping-fragments; the program steps below map
+one to one onto its expected observations. Host A fragments a 1500-octet packet for its
+1280-octet link; the relay rewrites the offset of the second fragment from 1232 to 1224, so
+its piece overlaps the first by 8 octets. Mapping of the mockup with a relay: host A = hostA,
+router R = router, relay T = tap, host B = hostB.
+
+Expected result: FAIL. The model's reassembly buffer merges overlapping regions
+(ChunkBuffer::replace) and completes a 1452-octet datagram instead of discarding the set;
+the completed datagram then stops the simulation with the model's own assertion in
+Ipv6::decapsulate (its header still carries the original payload length of 1460, another
+gap of this pass), so no verdict line is printed and the runner counts the missing line as
+a failure. See doc/project/evidence/model/ipv6/results.md.
+
+Deviation: expected observation 3 (nothing reaches UDP, nothing goes back) is one absence
+watch over the whole host, because two consecutive watches cannot cover the same window.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_overlapping_fragments")
+        // The relay moves the second fragment 8 octets back, onto the first.
+        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6FragmentHeader>(frame, [](Ipv6FragmentHeader& fh) { fh.setFragmentOffset(1224); }); })
+                     .describe("the second fragment (set its offset to 1224: an overlap of 8 octets)"))
+        // Expected observation 1: the first fragment at host B's interface; record the identification.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .capture("id", "Ipv6FragmentHeader.identification")
+                  .describe("the first fragment at host B's interface")
+                  .within(6.0))
+        // Expected observation 2: a fragment of the same datagram at offset 1224 -- the overlap.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1224 && Ipv6FragmentHeader.moreFragments == false")
+                  .describe("the second fragment at host B's interface, at offset 1224, overlapping the first")
+                  .within(0.5))
+        // Expected observation 3: nothing of the datagram reaches UDP at host B, and host B sends
+        // no ICMPv6 message about it (RFC8504-NR-3, RFC8200-REASM-5).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000") || icmpv6ErrorLeaves(c.event, "hostB"); })
+                  .describe("the datagram at host B's UDP, or any ICMPv6 error message from host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_overlapping_fragments compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
+*.hostA.eth[0].mac.mtu = 1280B
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc8200_overlapping_fragments: PASS

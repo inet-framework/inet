@@ -62,17 +62,57 @@ as the payload length: it fails, and the mechanism around it passes.
 
 A 1500-octet packet on both links and at UDP; wire and end-to-end evidence.
 
+## Decisions for the eighteen level 3 checks
+
+### Hop limit 0 at the destination (RFC8200-HL-3) → protocol test with interception
+
+One rewritten field on the last link and a delivery at UDP.
+
+### Atomic fragment, overlapping fragments, short fragment, oversized fragment offset (RFC8504-NR-3, NR-4, RFC8200-REASM-4, REASM-8) → protocol tests with interception
+
+The relay rewrites a flag, an offset, or the length of one fragment; the evidence is a
+delivery or an absence at UDP, and a Parameter Problem on link 1. Two of the four end in a
+stop of the simulation, which the check records as a failure; the category does not change.
+
+### Host error report and report source address (RFC4443-DU-4, ERR-1, ERR-2, SRC-1, SRC-2) → protocol tests
+
+Every field the checks read is in one ICMPv6 message on the wire: type, code, the two
+addresses, the payload length that proves the whole invoking packet was quoted.
+
+### No error about an error, for a multicast destination, for a link-layer multicast, for a link-layer broadcast, for an unspecified source (RFC4443-MPR-4, MPR-6, MPR-7, MPR-8, MPR-9) → protocol tests
+
+An absence of an ICMPv6 message on the wire, anchored on the node's own record of the
+event or on the arrival of the crafted packet. Three need the relay, one needs the one-link
+mockup, one needs only a closed port.
+
+### Error for an unknown protocol (RFC4443-MPR-3, MPR-4) → protocol test with interception
+
+The relay crafts the packet that makes host B send a report about an unknown protocol; the
+evidence is host A's silence, and the model's stop is the failure.
+
+### Zero UDP checksum, unrecognized and unassigned next header (RFC8200-CKSUM-1, RFC8504-NR-6) → protocol tests with interception
+
+A rewritten field, a discard record or a Parameter Problem, and an absence at UDP.
+
+### Unknown ICMPv6 error type and informational type (RFC4443-MPR-4, MPR-2) → protocol tests with interception
+
+A rewritten type and the absence of any answer. The handoff of an unknown error type to the
+upper-layer process (RFC4443-MPR-1) is not a protocol-test observable; see the open entries.
+
 ## Category guidance for the open catalog entries
 
 | Entry | Likely category | Reason |
 | --- | --- | --- |
-| RFC8200-REASM-4, REASM-5, REASM-6 | protocol test with interception | crafted fragments: a wrong length, an overlap, a whole packet inside a fragment header; level 3 |
+| RFC4443-MPR-1 (the handoff), UL-1, UL-2, UL-3 | module test | the handoff of a received report to the upper-layer process happens inside the node; the model carries it as an indication that no packet signal shows |
+| RFC8200-REASM-7, RFC8504-NR-8 (receiver half) | protocol test with interception | a first fragment shorter than its upper-layer header; a later pass |
+| RFC4443-MPR-5 | protocol test | a redirect in flight; needs a neighbor discovery scenario |
+| RFC4443-DU-P | protocol test | a point-to-point link in the mockup |
+| RFC8200-EXT-2, RFC8504-NR-7 | protocol test at level 5 | two or more extension headers in one packet |
+| RFC4443-MPR-10, DU-C | statistical test at level 4 | a rate, and a congested queue |
 | RFC8200-REASM-3 | protocol test at level 4, statistical test for the value | a 60-second timer and its report |
 | RFC8200-MTU-3 | protocol test at level 4 | path MTU discovery is a control loop driven by Packet Too Big; blocked until the MTU field is filled |
 | RFC8200-MTU-5 | none | a rule for the upper layer; the scenarios stay at 1500 octets |
 | RFC8200-MTU-1 | none | a scenario constraint on links, obeyed by every check |
 | RFC8200-CKSUM-2; the 8-octet unit of the fragment offset | unit test | serializer concerns |
-| RFC8200-CKSUM-1, the discard half | protocol test with interception | a zero UDP checksum crafted in flight; level 3 |
-| RFC8200-HL-3, the hop limit 0 case | protocol test with injection | a crafted sender; level 3 |
 | RFC4443-DU-4 | protocol test | a closed port; belongs with a UDP-over-IPv6 pass |
-| RFC4443-ERR-1 | protocol test | the length of the quote in a report; level 3 |
+| the pointer field of Parameter Problem (RFC8200-EXT-3, REASM-4, REASM-8) | protocol test | one more field in a message this pass already observes |

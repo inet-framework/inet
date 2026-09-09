@@ -5,7 +5,7 @@ Time Exceeded to the source.
 
 Checks RFC8200-HL-2 (description), RFC4443-TE-1 (must) and RFC4443-ERR-2 (description) from
 the catalogs under doc/project/evidence/standard/. The English procedure is in
-doc/project/evidence/protocol/ipv6/checks.md#hop-limit-expiry; the program steps below map
+doc/project/evidence/protocol/ipv6/checks/hop-limit.md#hop-limit-expiry; the program steps below map
 one to one onto its expected observations. Host A sends with hop limit 1, so the packet
 survives exactly one hop. Mapping of the mockup: host A = hostA, router R = router, host B =
 hostB.

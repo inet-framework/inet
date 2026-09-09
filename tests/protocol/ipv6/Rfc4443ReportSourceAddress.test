@@ -1,18 +1,13 @@
 %description:
 
-RFC 4443 — the MTU field of a Packet Too Big message carries the MTU of the next-hop link.
+RFC 4443 — a router's report about a packet it forwarded carries one of the router's own
+unicast addresses, the one of its interface toward the source.
 
-Checks RFC4443-PTB-2 (description; the field definition of a mandatory message) from
-doc/project/evidence/standard/rfc4443/catalog.md. The English procedure is in
-doc/project/evidence/protocol/ipv6/checks/packet-too-big.md#packet-too-big-the-mtu-field; the program steps
-below map one to one onto its expected observations. Link 2 has MTU 1280 and host A sends a
-1500-octet packet; the message must say 1280. Mapping of the mockup: host A = hostA, router R
-= router, host B = hostB.
-
-Expected result: FAIL. The model sends the message with an MTU field of 0
-(Icmpv6::sendErrorMessage calls createPacketTooBigMsg(0), marked "TODO implement MTU
-support"), so expected observation 2 misses its deadline. See
-doc/project/evidence/model/ipv6/results.md.
+Checks RFC4443-SRC-2 (must; should) from doc/project/evidence/standard/rfc4443/catalog.md. The English
+procedure is in doc/project/evidence/protocol/ipv6/checks/error-report.md#report-source-address; the program
+steps below map one to one onto its expected observations. Host A sends with hop limit 1;
+the router's Time Exceeded must come from a unicast address of the router. Mapping of the
+mockup: host A = hostA, router R = router (its interface on link 1 is eth0), host B = hostB.
 
 %includes:
 #include "ProtocolTest.h"
@@ -25,23 +20,24 @@ using namespace inet::protocoltest;
 
 Define_ProtocolTestProgram()
 {
-    return ProtocolTest("rfc4443_packet_too_big_mtu")
-        // Expected observation 1: the packet on link 1, whole, payload length 1460.
+    return ProtocolTest("rfc4443_report_source_address")
+        // Expected observation 1: the packet on link 1 with hop limit 1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
-                  .describe("the 1500-octet packet on link 1, whole")
+                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 1")
+                  .describe("the packet on link 1 with hop limit 1")
                   .within(6.0))
-        // Expected observation 2: host A receives Packet Too Big, type 2 code 0, with MTU 1280
-        // (RFC4443-PTB-2).
+        // Expected observation 2: the Time Exceeded at host A comes from the router's own address
+        // on link 1 (RFC4443-SRC-2).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 2 && Icmpv6PacketTooBigMsg.code == 0 && Icmpv6PacketTooBigMsg.MTU == 1280")
-                  .describe("the Packet Too Big message at host A with the next-hop MTU 1280")
+                  .packet("icmpv6.type == 3")
+                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.srcAddress") == nodeIpv6Address("router%eth0"); })
+                  .describe("the Time Exceeded message at host A with the router's link 1 address as source")
                   .within(0.5));
 }
 
 %activity:
 // present only so opp_test compiles the %global above; this module is not in the network.
-EV << "rfc4443_packet_too_big_mtu compiled\n";
+EV << "rfc4443_report_source_address compiled\n";
 
 %file: test.ned
 
@@ -77,17 +73,13 @@ seed-set = 0
 *.hostA.app[0].destAddresses = "hostB"
 *.hostA.app[0].destPort = 5000
 *.hostA.app[0].localPort = 4000
-*.hostA.app[0].messageLength = 1452B
-*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 1
 *.hostA.app[0].startTime = 5s
 *.hostA.app[0].sendInterval = 10s
 *.hostB.numApps = 1
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 5000
 
-# Link 2 has the minimum IPv6 link MTU; the router cannot forward the 1500-octet packet.
-*.router.eth[1].mac.mtu = 1280B
-
-%# expected-result: FAIL
 %contains: stdout
-PROTOCOLTEST rfc4443_packet_too_big_mtu: PASS
+PROTOCOLTEST rfc4443_report_source_address: PASS

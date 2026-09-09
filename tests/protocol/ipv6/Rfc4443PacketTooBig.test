@@ -5,7 +5,7 @@ next link and originates Packet Too Big to the source.
 
 Checks RFC8200-FRAG-1 (description), RFC4443-PTB-1 (must) and RFC4443-ERR-2 (description)
 from the catalogs under doc/project/evidence/standard/. The English procedure is in
-doc/project/evidence/protocol/ipv6/checks.md#packet-too-big; the program steps below map one
+doc/project/evidence/protocol/ipv6/checks/packet-too-big.md#packet-too-big; the program steps below map one
 to one onto its expected observations. Link 2 has MTU 1280 and host A sends a 1500-octet
 packet. Mapping of the mockup: host A = hostA, router R = router, host B = hostB.
 

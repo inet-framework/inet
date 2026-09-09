@@ -7,10 +7,13 @@ document adds what the model says it intends to do, and compares the two at the 
 features, never at the level of a single test.
 
 - Claim scan: 2026-09-09, worktree at commit `95f9805952`. A grep for `RFC 8200`,
-  `RFC8200`, `RFC 2460`, `RFC2460`, `RFC 4443`, `RFC4443` and `RFC 2463` over
-  `src/inet/networklayer/ipv6/`, `src/inet/networklayer/icmpv6/` and
-  `src/inet/networklayer/contract/ipv6/`, plus a read of the module documentation comments.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-09.
+  `RFC8200`, `RFC 2460`, `RFC2460`, `RFC 4443`, `RFC4443`, `RFC 2463`, `RFC 8504`,
+  `RFC 5722`, `RFC 6946` and `RFC 8021` over `src/inet/networklayer/ipv6/`,
+  `src/inet/networklayer/icmpv6/` and `src/inet/networklayer/contract/ipv6/`, plus a read of
+  the module documentation comments. The pass 2 additions (RFC 8504 and the four documents
+  it restates) return no line.
+- Support values: [`coverage.md`](coverage.md#feature-support), from the level 3 run of
+  2026-09-09.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalogs, the feature map, or the check
@@ -44,11 +47,14 @@ descriptions.
   RFC 2460 in July 2017 and folded nine updates into it. "Implements the IPv6 protocol"
   is read, as in the IPv4 pass, as an implicit claim on the Internet Standard, which is
   RFC 8200; the RFC 2460 citations are recorded as the version the authors had in view.
-  The two texts agree on every level 2 statement of this pass except in wording, so the
-  reading does not change a verdict here. It will at level 3: RFC 8200 §4.5 added the rules
-  on overlapping fragments (RFC 5722), on atomic fragments (RFC 6946), and on the first
-  fragment carrying the upper-layer header (RFC 7112), and the reassembly code quotes
-  RFC 2460 for exactly that section.
+  At level 3 the reading matters: RFC 8200 §4.5 added the rules on overlapping fragments
+  (RFC 5722) and on atomic fragments (RFC 6946), the reassembly code quotes RFC 2460 for
+  exactly that section, and exactly those two rules fail.
+- **RFC 8504 is not claimed**, and no line names the documents it restates. Its
+  behavior-level statements govern the reassembly and the next-header rules in the matrix;
+  the reading keeps the claim on the RFC 8200 base statement and records the RFC 8504
+  restatement as unclaimed. The verdicts below are the same either way, because every
+  RFC 8504 rule that fails also fails as an RFC 8200 rule.
 
 ## Part 2 — conformance matrix
 
@@ -61,16 +67,22 @@ ledger, and the level of the feature, by the table of step 8.
 | IPV6-F-DELIVERY | mandatory | yes (implicit, RFC 8200) | supported | **confirmed** |
 | IPV6-F-HOP-LIMIT | mandatory | yes (implicit, RFC 8200) | supported | **confirmed** |
 | IPV6-F-SOURCE-FRAGMENTATION | optional | yes (RFC 2460 §4.5 cited on the fragment header) | partial | **partial** — RFC8200-FRAG-4, FRAG-5: the payload length of every fragment is the original's |
-| IPV6-F-REASSEMBLY | mandatory | yes (RFC 2460 §4.5 cited in the reassembly code) | supported | **confirmed** |
+| IPV6-F-REASSEMBLY | mandatory | yes (RFC 2460 §4.5 cited in the reassembly code) | partial | **partial** — RFC8504-NR-3, RFC8200-REASM-5: overlapping fragments are merged and the result stops the node; the atomic fragment (a should) stops it too |
 | IPV6-F-PACKET-TOO-BIG | mandatory | yes (explicit, RFC 4443) | partial | **partial** — RFC4443-PTB-2: the MTU field is 0 |
 | IPV6-F-PACKET-SIZE | mandatory | yes (implicit, RFC 8200) | supported | **confirmed** |
 | IPV6-F-ERROR-REPORT | mandatory | yes (explicit, RFC 4443) | supported | **confirmed** |
-| IPV6-F-UPPER-LAYER-CHECKSUM | mandatory | yes (implicit, RFC 8200) | supported | **confirmed** (the compute half; the discard of a zero checksum is untested) |
+| IPV6-F-UPPER-LAYER-CHECKSUM | mandatory | yes (implicit, RFC 8200) | supported | **confirmed** |
+| IPV6-F-INPUT-VALIDATION | mandatory | yes (implicit, RFC 8200; explicit, RFC 4443) | partial | **partial** — RFC4443-MPR-2: an unknown informational type stops the node |
+| IPV6-F-ERROR-SUPPRESSION | mandatory | yes (explicit, RFC 4443) | partial | **partial** — RFC4443-MPR-7, MPR-8: a report is sent about a link-layer multicast or broadcast |
+| IPV6-F-ERROR-DELIVERY | mandatory | yes (explicit, RFC 4443) | untested | **unverified** — every core statement is internal; and RFC4443-MPR-3, a supporting statement, stops the node |
 
-Six features `confirmed`, three `partial`. No `defect`, no `unverified`, no `undocumented`,
-no `declined`.
+Five features `confirmed`, six `partial`, one `unverified`. No `defect` in the strict sense
+of the table: every failing feature also has a core check that passed. No `undocumented`,
+no `declined` at the feature level.
 
 ## Findings
+
+The two findings of pass 1 stand and come first; the level 3 findings follow.
 
 ### 1. Packet Too Big says MTU 0, against an explicit claim
 
@@ -92,17 +104,38 @@ receiver that follows §4.5 reads the wrong length. Two features read `partial` 
 field, because the field is both a header rule (HDR-2) and a fragmentation rule (FRAG-4,
 FRAG-5).
 
-### 3. The model cites the obsoleted base document
+### 3. Four crafted inputs stop the simulation instead of being discarded
+
+RFC 8200 and RFC 4443 ask a node to discard, silently or with a report, an overlapping
+fragment set, an atomic fragment (to process it as a whole), an ICMPv6 informational message
+of unknown type, and a report about a packet whose upper-layer protocol it does not
+implement. The model answers each with an assertion or a runtime error: the fragment buffer
+erases a stale iterator on a single-fragment datagram; the merged overlapping datagram
+trips the payload-length assertion; the ICMPv6 type switch throws on a type it does not
+know; and the report about an unknown protocol reaches a dispatcher that throws. A model
+that stops on crafted or unusual input cannot be used for any scenario that carries it, so
+these four rank above the field gaps. The unknown *error* type, by contrast, passes: the
+model routes every type below 128 as an error and stays silent.
+
+### 4. A report about a link-layer multicast or broadcast
+
+RFC 4443 §2.4 (e.4) and (e.5) forbid a report about a packet that arrived as a link-layer
+multicast or broadcast. The model's ICMPv6 decides from the IPv6 addresses only. The same
+gap as in IPv4, found the same way.
+
+### 5. The model cites the obsoleted base document, and it shows
 
 `Ipv6Header.msg`, `Ipv6ExtensionHeaders.msg`, `Ipv6ExtensionHeaders.cc` and `Ipv6FragBuf.cc`
 cite RFC 2460, and `Icmpv6.h` cites RFC 2463; both were replaced (2017 and 2006). One
-comment in `Ipv6.cc` cites RFC 8200. At level 2 the difference costs nothing, because the
-level 2 statements did not change. The reassembly rules did change, and the reassembly code
-quotes the old text. A documentation pass that names RFC 8200 and RFC 4443 in `Ipv6.ned`
-and in the message definitions would make the claim explicit and current; the ICMPv6
-module already shows the house style.
+comment in `Ipv6.cc` cites RFC 8200. At level 2 the difference cost nothing. At level 3 the
+two reassembly rules that RFC 8200 added after RFC 2460 — overlapping fragments (RFC 5722)
+and atomic fragments (RFC 6946) — are the two that fail, and the reassembly code quotes
+RFC 2460 §4.5 above the very loop that merges an overlap. The citation is not a cosmetic
+gap: it names the version the code follows. A documentation pass that names RFC 8200 and
+RFC 4443 in `Ipv6.ned` and in the message definitions, and a reassembly pass against
+RFC 8200 §4.5, belong together.
 
-### 4. No claim is contradicted on the normal path
+### 6. No claim is contradicted on the normal path
 
 Within nine features and 34 statements, on one topology with one packet size per check, the
 model does what RFC 8200 and RFC 4443 describe on the normal path: it forwards, decrements,
@@ -111,10 +144,11 @@ The two gaps are fields, not mechanisms.
 
 ## What this document does not establish
 
-- It says nothing about the documents outside the in-scope set: RFC 8504 (the node
-  requirements), RFC 8201 (path MTU discovery), RFC 4861 and RFC 4862 (neighbor discovery
-  and autoconfiguration), the flow label and the traffic class.
-- It says nothing about level 3 and beyond: crafted fragments, a packet that arrives with
-  hop limit 0, the zero UDP checksum, the five cases in which no error is sent, the timers.
+- It says nothing about the documents outside the in-scope set: RFC 8201 (path MTU
+  discovery), RFC 4861 and RFC 4862 (neighbor discovery and autoconfiguration), the flow
+  label and the traffic class.
+- It says nothing about level 4 and beyond: the reassembly timer, the rate limit,
+  congestion, the other extension headers; nor about the redirect and point-to-point cases
+  the mockup cannot produce.
 - A `confirmed` verdict means the checks of the feature passed. It does not mean the
   feature is complete.

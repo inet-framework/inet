@@ -1,0 +1,116 @@
+%description:
+
+RFC 8504 / RFC 8200 — a destination that meets a next header value nobody assigned discards
+the packet and sends Parameter Problem code 1.
+
+Checks RFC8504-NR-6 (must), which governs RFC8200-EXT-3 (should), from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/input-validation.md#unassigned-next-header; the program steps
+below map one to one onto its expected observations. The relay rewrites the next header of
+the packet to 200, a protocol number that IANA has not assigned and that no node knows. The
+relay is two taps in series, tap1 and tap2, because it does two things: tap1 rewrites the
+next header, and tap2 drops host B's report on its way back, because host A stops the
+simulation when that report reaches it (see Rfc4443ErrorForUnknownProtocol.test); host B's
+side is judged here. Mapping of the mockup with a relay: host A = hostA, router R =
+router, relay T = tap1 and tap2, host B = hostB.
+
+Expected observation 2, host B's origination of the report, is observed where host B's
+ICMPv6 hands the message to its IPv6 layer (packetReceivedFromUpper of hostB.ipv6.ipv6),
+created in the same instant as the decision; expected observation 3 observes the report as
+it leaves host B, since the relay removes it after that.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_unassigned_next_header")
+        // The relay rewrites the next header to 200 ...
+        .intercept(intercept("tap1").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setProtocolId(static_cast<IpProtocolId>(200)); }); })
+                     .describe("the packet (set its next header to 200)"))
+        // ... and keeps host B's report away from host A, whose handling of it is another check.
+        .intercept(intercept("tap2").match("icmpv6.type == 4").nth(1).drop()
+                     .describe("host B's Parameter Problem message (drop it before host A)"))
+        // Expected observation 1: at host B's interface the packet carries next header 200.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return ipv6NextHeader(c.event.packet) == 200; }) // no dissector for the number: read the header
+                  .describe("the packet at host B's interface with next header 200")
+                  .within(6.0))
+        // Expected observation 2: host B originates Parameter Problem, type 4 code 1, at the moment
+        // of the decision (RFC8504-NR-6, RFC8200-EXT-3).
+        .once(on("hostB.ipv6.ipv6").signal("packetReceivedFromUpper")
+                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 1")
+                  .describe("host B's Parameter Problem message, code 1, at the moment of the discard")
+                  .within(0.5))
+        // Expected observation 3: the report leaves host B toward host A, addressed to host A.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 1")
+                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .describe("the Parameter Problem message, code 1, leaving host B for host A")
+                  .within(0.5))
+        // Expected observation 4: from then on, nothing of the packet reaches UDP at host B.
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", nullptr); })
+                  .describe("anything handed to UDP at host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_unassigned_next_header compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay, where the relay is two taps in series: hostA -- router -- tap1 -- tap2 -- hostB.
+network Rfc8200TwoTapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap1: PacketTap { @display("p=470,100"); }
+        tap2: PacketTap { @display("p=590,100"); }
+        hostB: StandardHost6 { @display("p=740,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap1.a;       // link 2 = router.eth[1], before the relay
+        tap1.b <--> Eth100M <--> tap2.a;
+        tap2.b <--> Eth100M <--> hostB.ethg++;        // link 2, after the relay
+}
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TwoTapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc8200_unassigned_next_header: PASS

@@ -1,0 +1,107 @@
+%description:
+
+RFC 4443 — a node that receives an error report about a packet whose upper-layer protocol
+it does not implement stays silent and keeps running.
+
+Checks RFC4443-MPR-3 (description: the upper-layer process is selected by the quoted
+protocol, and a report that selects none is dropped) and RFC4443-MPR-4 (must not: no error
+about an error) from doc/project/evidence/standard/rfc4443/catalog.md. The English
+procedure is in doc/project/evidence/protocol/ipv6/checks/error-report.md#error-for-an-unknown-protocol;
+the program steps below map one to one onto its expected observations. The relay rewrites
+the next header of host A's datagram to 253; host B reports it with Parameter Problem code
+1, and the report, which quotes a packet of protocol 253, returns to host A. Mapping of
+the mockup with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB.
+
+Expected result: FAIL. Host A's ICMPv6 selects the upper-layer process from the quoted
+protocol number and hands the report to a dispatcher that has no such process, which stops
+the simulation ("Unknown protocol: protocolId = 78, protocolName = nexthopforwarding" in
+the message dispatcher of hostA.ipv6). No verdict line is printed, and the runner counts
+the missing line as a failure. See doc/project/evidence/model/ipv6/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_error_for_unknown_protocol")
+        // The relay rewrites the next header to 253.
+        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setProtocolId(static_cast<IpProtocolId>(253)); }); })
+                     .describe("the packet (set its next header to 253)"))
+        // Expected observation 1: at host B's interface the packet carries next header 253.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return ipv6NextHeader(c.event.packet) == 253; })
+                  .describe("the packet at host B's interface with next header 253")
+                  .within(6.0))
+        // Expected observation 2: host A receives host B's Parameter Problem, type 4 code 1, which
+        // quotes a packet of protocol 253 -- the stimulus for host A.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 1")
+                  .describe("the Parameter Problem message about the protocol-253 packet at host A")
+                  .within(0.5))
+        // Expected observation 3: from then on, host A sends no ICMPv6 error message and keeps
+        // running (RFC4443-MPR-3, RFC4443-MPR-4).
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv6.type < 128")
+                  .describe("any ICMPv6 error message from host A")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_error_for_unknown_protocol compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc4443_error_for_unknown_protocol: PASS

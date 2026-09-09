@@ -3,7 +3,7 @@
 RFC 8200 — a node accepts a packet as large as the MTU of its link.
 
 Checks RFC8200-MTU-2 (must) from doc/project/evidence/standard/rfc8200/catalog.md. The
-English procedure is in doc/project/evidence/protocol/ipv6/checks.md#link-mtu-packet; the
+English procedure is in doc/project/evidence/protocol/ipv6/checks/packet-size.md#link-mtu-packet; the
 program steps below map one to one onto its expected observations. Both links keep the
 1500-octet Ethernet MTU and host A sends a packet of exactly 1500 octets. Mapping of the
 mockup: host A = hostA, router R = router, host B = hostB.

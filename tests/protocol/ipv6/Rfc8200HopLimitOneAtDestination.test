@@ -5,7 +5,7 @@ that arrives with hop limit 1.
 
 Checks RFC8200-HL-3 (should) from doc/project/evidence/standard/rfc8200/catalog.md; also
 covers RFC8200-HL-1. The English procedure is in
-doc/project/evidence/protocol/ipv6/checks.md#hop-limit-1-at-the-destination; the program
+doc/project/evidence/protocol/ipv6/checks/hop-limit.md#hop-limit-1-at-the-destination; the program
 steps below map one to one onto its expected observations. Host A sends with hop limit 2,
 exactly the hop count of the path. Mapping of the mockup: host A = hostA, router R =
 router, host B = hostB.

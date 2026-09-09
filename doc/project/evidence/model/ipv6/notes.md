@@ -61,6 +61,35 @@ The header and extension header definitions, the extension header order, and the
 reassembly code cite the obsoleted RFC 2460; `Icmpv6.h` cites RFC 2463. One comment cites
 RFC 8200. The reassembly section is the one RFC 8200 changed most.
 
+### Four crafted inputs stop the simulation
+
+- An **atomic fragment** (offset 0, M = 0): `Ipv6FragBuf::addFragment` finds the buffer
+  before it creates it and erases the stale end iterator when the first fragment completes
+  the datagram ([Ipv6FragBuf.cc:168](../../../../../src/inet/networklayer/ipv6/Ipv6FragBuf.cc#L168)).
+  A C++ library assertion, and a nine-minute stack trace in a debug build. Any
+  single-fragment datagram does it.
+- **Overlapping fragments**: `ChunkBuffer::replace` merges them, the buffer completes a
+  short datagram, and `Ipv6::decapsulate` asserts on the payload length, because the header
+  still says 1460. RFC 5722 wants a silent discard.
+- An **unknown ICMPv6 type of 128 or above**: `throw cRuntimeError("Unknown ICMPv6 message
+  type ...")` ([Icmpv6.cc:191](../../../../../src/inet/networklayer/icmpv6/Icmpv6.cc#L191)).
+  A type below 128 is fine: the switch treats every such type as an error first.
+- A **report about a packet of an unknown upper-layer protocol**, received at the source:
+  ICMPv6 hands the indication to a dispatcher that has no such protocol, and the dispatcher
+  throws. Protocol numbers 253 and 254 carry INET-internal names ("nexthopforwarding",
+  "echo"), which is why the error message names one.
+
+### The suppression rules stop at the IP layer
+
+`Icmpv6::validateDatagramPromptingError` covers the multicast destination, the unspecified
+and multicast source, and the error-about-error case; not the link-layer multicast or
+broadcast. Same as IPv4.
+
+### The fragment identification is a counter
+
+`curFragmentId++`, from 0. RFC 8504 §5.1 says a node should avoid predictable values; a
+declined should, recorded in the ledger.
+
 ## Tooling quirks
 
 ### IPv6 needs about 4 s before a host can send
@@ -96,6 +125,37 @@ message.
 as a dimensionless number", as the TCP pass found; capture such a field with a lambda that
 returns a plain number.
 
+### The frame at a relay begins with a physical-layer header
+
+A `PacketTap` hands the mutator the frame as it travels: an 8-octet Ethernet physical-layer
+header precedes the link-layer header. A helper that measures a payload from the front of
+the frame is off by 8; measure from the IPv6 header's own position (`shortenFrame()` in
+`Ipv6Fields.h` does).
+
+### A protocol number without a dissector cannot be filtered
+
+`ipv6.protocolId == 253` never matches: the dissector has no handler for the number, and the
+filter turns the exception into a non-match. Read the base header by type
+(`ipv6NextHeader()`).
+
+### The internet layer hands ICMPv6 over without a signal
+
+`Ipv6` sends an ICMPv6 message to its ICMPv6 module without `packetSentToUpper`
+([Ipv6.cc:887-888](../../../../../src/inet/networklayer/ipv6/Ipv6.cc#L887-L888)). A step
+that waits for that signal never fires; anchor on the arrival at the interface instead.
+
+### Two relay rules need two taps, and a relay can hide a crash
+
+One tap carries one rule. When the node under test behaves and the *other* node crashes on
+the reply, a second tap that drops the reply lets the first verdict stand, and the crash
+gets a test of its own (the unrecognized-next-header pair).
+
+### A crashing test can take minutes
+
+A C++ assertion in a debug build ends with a symbolized stack trace of the 880 MB library;
+the atomic-fragment test takes about nine minutes for that reason alone. Keep the test; it
+is the finding.
+
 ### Nodes and configurator
 
 `StandardHost6` and `Router6` are `StandardHost` and `Router` with `hasIpv4 = false` and
@@ -105,17 +165,21 @@ limit.
 
 ## Follow-ups, in the order I would do them
 
-1. **Report the two gaps to the model**: the Packet Too Big MTU field and the fragment
-   payload length. Both are one line each in the code named above; neither belongs in this
+1. **Report the four stops to the model first**: the atomic fragment (any single-fragment
+   datagram crashes the buffer), the unknown ICMPv6 type, the report about an unknown
+   protocol, and the overlapping fragments. Each is a few lines; none belongs in this
    branch (the tests measure the model as it is, and a failing test is the finding).
-2. **A documentation pass** that names RFC 8200 and RFC 4443 in `Ipv6.ned` and the message
-   definitions, in the style `Icmpv6.ned` already uses.
-3. **Level 3 with RFC 8504**: the message processing rules of RFC 4443 §2.4, the crafted
-   fragments of REASM-4 to REASM-6 (the reassembly code quotes RFC 2460 for them, and
-   RFC 8200 changed the section), a packet that arrives with hop limit 0, the zero UDP
-   checksum, and the content of a report (ERR-1). The relay of the IPv4 pass carries over;
-   the rewrite helper needs an IPv6 variant without a header checksum to recompute.
-4. **A UDP-over-IPv6 pass** for RFC4443-DU-4 and the transport side of RFC 8200 §8.1.
-5. **Level 4**: the reassembly timer, and path MTU discovery once the MTU field is filled.
-6. **A serializer unit test** for the ICMPv6 pseudo-header checksum and the 8-octet unit of
+2. **Then the field gaps**: the Packet Too Big MTU, the fragment payload length, and the
+   two link-layer suppression cases.
+3. **A reassembly pass against RFC 8200 §4.5**, which the model still reads as RFC 2460,
+   together with a documentation pass that names RFC 8200 and RFC 4443 in `Ipv6.ned` and
+   the message definitions.
+4. **Module tests for the handoffs** of IPV6-F-ERROR-DELIVERY (RFC4443-MPR-1, UL-1 to
+   UL-3), which no protocol test can see.
+5. **Cheap sharpenings**: the pointer field of Parameter Problem, a first fragment without
+   its upper-layer header (REASM-7), a multicast source for MPR-9.
+6. **Level 4**: the reassembly timer, the rate limit, congestion, and path MTU discovery
+   once the MTU field is filled. **Level 5**: the other extension headers, where
+   RFC8200-EXT-2 and RFC8504-NR-7 wait.
+7. **A serializer unit test** for the ICMPv6 pseudo-header checksum and the 8-octet unit of
    the fragment offset.

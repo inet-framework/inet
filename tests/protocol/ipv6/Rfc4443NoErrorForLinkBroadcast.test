@@ -1,0 +1,106 @@
+%description:
+
+RFC 4443 — no ICMPv6 error message is originated about a packet that arrived as a
+link-layer broadcast.
+
+Checks RFC4443-MPR-8 (must not) from doc/project/evidence/standard/rfc4443/catalog.md. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/error-report.md#no-error-for-a-link-layer-broadcast; the program steps below map one to one onto
+its expected observations. The relay rewrites the destination of the Ethernet frame to the
+broadcast address of the link layer, ff:ff:ff:ff:ff:ff; the IPv6 destination stays host B's unicast address, and the datagram goes to port
+5001, on which no program listens, so a report would otherwise be due. Mapping of the mockup
+with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB.
+
+Expected result: FAIL. The model decides about an error report from the IPv6 addresses
+only (Icmpv6::validateDatagramPromptingError) and never consults the link-layer
+destination, so it answers with Destination Unreachable and the absence watch of expected
+observation 3 fires. See doc/project/evidence/model/ipv6/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_no_error_for_link_broadcast")
+        // The relay rewrites the link-layer destination of the frame.
+        .intercept(intercept("tap").match("udp.destPort == 5001").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<EthernetMacHeader>(frame, [](EthernetMacHeader& h) { h.setDest(MacAddress::BROADCAST_ADDRESS); }); })
+                     .describe("the datagram's frame (set its link-layer destination to the broadcast address)"))
+        // Expected observation 1: at host B's interface the datagram arrives in a broadcast frame.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5001")
+                  .match([](const MatchContext& c) {
+                      const auto& macInd = c.event.packet->findTag<MacAddressInd>();
+                      if (macInd != nullptr)
+                          return macInd->getDestAddress().isBroadcast();
+                      return c.event.packet->peekAtFront<EthernetMacHeader>()->getDest().isBroadcast();
+                  })
+                  .describe("the datagram at host B's interface inside a link-layer broadcast frame")
+                  .within(6.0))
+        // Expected observation 2: host B's UDP finds no program for port 5001.
+        .once(on("hostB.udp").signal("packetDropped")
+                  .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; })
+                  .describe("host B's UDP discards the datagram for want of a port")
+                  .within(0.5))
+        // Expected observation 3: from then on, host B sends no ICMPv6 error message (RFC4443-MPR-8).
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv6.type < 128")
+                  .describe("any ICMPv6 error message from host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_no_error_for_link_broadcast compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to port 5001 on host B, where no program listens. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 0
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc4443_no_error_for_link_broadcast: PASS

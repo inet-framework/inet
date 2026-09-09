@@ -5,7 +5,7 @@ the original packet.
 
 Checks the payload-length halves of RFC8200-FRAG-4 and RFC8200-FRAG-5 (description) and
 RFC8200-HDR-2 for a fragment, from doc/project/evidence/standard/rfc8200/catalog.md. The
-English procedure is in doc/project/evidence/protocol/ipv6/checks.md#fragment-payload-length;
+English procedure is in doc/project/evidence/protocol/ipv6/checks/fragmentation.md#fragment-payload-length;
 the program steps below map one to one onto its expected observations. Host A's interface
 to link 1 has MTU 1280; the 1500-octet packet splits into pieces of 1232 and 228 octets, so
 the fragment packets have payload lengths 1240 and 236. Mapping of the mockup: host A =

@@ -1,0 +1,94 @@
+%description:
+
+RFC 4443 — a node that receives an ICMPv6 error message of unknown type sends no error
+about it and keeps running; the message is to be passed to the upper-layer process.
+
+Checks RFC4443-MPR-4 (must not) for an error of unknown type, and notes RFC4443-MPR-1
+(must; internal), from doc/project/evidence/standard/rfc4443/catalog.md. The English procedure is in
+doc/project/evidence/protocol/ipv6/checks/input-validation.md#unknown-icmpv6-error-type; the program steps
+below map one to one onto its expected observations. Host B returns Destination Unreachable
+for a closed port; the relay rewrites its type from 1 to 100 on link 2, and the router
+forwards it to host A. Mapping of the mockup with a relay: host A = hostA, router R =
+router, relay T = tap, host B = hostB.
+
+The anchor of the absence watch is the arrival of the message at host A's interface: the
+model's internet layer emits no signal when it hands an ICMPv6 message to its ICMPv6
+module, and the arrival precedes the decision.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4443_unknown_error_type")
+        // The relay rewrites the type of host B's report to 100.
+        .intercept(intercept("tap").match("icmpv6.type == 1").nth(1)
+                     .mutate([](Packet *frame) { rewriteHeader<Icmpv6Header>(frame, [](Icmpv6Header& h) { h.setType(static_cast<Icmpv6Type>(100)); }); })
+                     .describe("host B's Destination Unreachable (set its type to 100)"))
+        // Expected observation 1: at host A's interface an ICMPv6 message of type 100 arrives.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("icmpv6.type == 100")
+                  .describe("an ICMPv6 message of the unknown error type 100 at host A's interface")
+                  .within(6.0))
+        // Expected observation 2: from then on, host A sends no ICMPv6 error message (RFC4443-MPR-4).
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("icmpv6.type < 128")
+                  .describe("any ICMPv6 error message from host A")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4443_unknown_error_type compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay of doc/project/evidence/protocol/ipv6/checks.md: hostA -- router -- tap -- hostB, IPv6 only.
+network Rfc8200TapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap.a;        // link 2 = router.eth[1], before the relay
+        tap.b <--> Eth100M <--> hostB.ethg++;         // link 2, after the relay
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to port 5001 on host B, where no program listens. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5001
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc4443_unknown_error_type: PASS

@@ -40,6 +40,8 @@ here.
 | [RFC8200-HL-2](#rfc8200-hl-2) | A forwarding node discards a packet whose hop limit was zero or reaches zero. |
 | [RFC8200-HL-3](#rfc8200-hl-3) | The destination should not discard a packet for a hop limit of zero. |
 | [RFC8200-EXT-1](#rfc8200-ext-1) | Nodes en route do not process, insert, or delete extension headers. |
+| [RFC8200-EXT-2](#rfc8200-ext-2) | The destination processes extension headers strictly in order. |
+| [RFC8200-EXT-3](#rfc8200-ext-3) | An unrecognized next header should discard the packet with Parameter Problem code 1. |
 | [RFC8200-FRAG-1](#rfc8200-frag-1) | Only source nodes fragment; routers do not. |
 | [RFC8200-FRAG-2](#rfc8200-frag-2) | The identification differs from any recent fragmented packet of the same source and destination. |
 | [RFC8200-FRAG-3](#rfc8200-frag-3) | Fragments fit the path MTU; each but the last is a multiple of 8 octets. |
@@ -52,6 +54,8 @@ here.
 | [RFC8200-REASM-4](#rfc8200-reasm-4) | A non-final fragment whose length is not a multiple of 8 is discarded, with Parameter Problem code 0. |
 | [RFC8200-REASM-5](#rfc8200-reasm-5) | Overlapping fragments abandon the reassembly. |
 | [RFC8200-REASM-6](#rfc8200-reasm-6) | A fragment with offset 0 and M = 0 is processed as a whole packet. |
+| [RFC8200-REASM-7](#rfc8200-reasm-7) | A first fragment without the upper-layer header should be discarded with Parameter Problem code 3. |
+| [RFC8200-REASM-8](#rfc8200-reasm-8) | A fragment that would push the reassembled length past 65,535 is discarded, with Parameter Problem code 0. |
 | [RFC8200-MTU-1](#rfc8200-mtu-1) | Every link has an MTU of at least 1280 octets. |
 | [RFC8200-MTU-2](#rfc8200-mtu-2) | A node accepts packets as large as the MTU of each attached link. |
 | [RFC8200-MTU-3](#rfc8200-mtu-3) | A node should discover the path MTU, or send no more than 1280 octets. |
@@ -72,8 +76,9 @@ here.
   - `internal` — state inside a module; not visible from outside.
   - `encoding` — the exact bit layout of a field; a serializer concern.
 - **Overridden by** — appears only when a later document of the in-scope set changes the
-  statement. No entry carries the field today, because the in-scope set is RFC 8200 and
-  RFC 4443 alone.
+  statement. Four entries carry it since RFC 8504 entered the in-scope set: the overlap
+  rule, the atomic fragment, the unrecognized next header, and the first fragment's header
+  chain. The entry and its ID stay; a test targets the entry that governs.
 
 ## Header format
 
@@ -177,7 +182,8 @@ zero when decremented.**
 - Strength: should. Class: end-to-end.
 - Check idea: a packet whose hop limit is exactly the hop count of the path arrives at the
   destination with hop limit 1 and is delivered; the rule that discards is a forwarding
-  rule. A packet that arrives with hop limit 0 needs a crafted sender and is a later pass.
+  rule. The exact case, a packet that arrives with hop limit 0, needs a rewrite on the last
+  link.
 
 ## Extension headers
 
@@ -194,6 +200,38 @@ hop-by-hop options header.**
 - Strength: description. Class: wire.
 - Check idea: a fragment header that leaves the source appears unchanged on the link after
   the gateway.
+
+### RFC8200-EXT-2
+
+**The destination processes the extension headers strictly in the order they appear.**
+
+> "Therefore, extension headers must be processed strictly in the order they appear in the
+> packet; a receiver must not, for example, scan through a packet looking for a particular
+> kind of extension header and process that header prior to processing all preceding
+> ones." — §4, `rfc8200.txt:459-463`
+
+- Strength: must; must not. Class: internal.
+- Note: observable only with two or more extension headers in one packet; level 5.
+
+### RFC8200-EXT-3
+
+**A destination that meets an unrecognized next header value should discard the packet and
+send Parameter Problem code 1 with the pointer at the offending field.**
+
+> "If, as a result of processing a header, the destination node is required to proceed to
+> the next header but the Next Header value in the current header is unrecognized by the
+> node, it should discard the packet and send an ICMP Parameter Problem message to the
+> source of the packet, with an ICMP Code value of 1 ("unrecognized Next Header type
+> encountered") and the ICMP Pointer field containing the offset of the unrecognized value
+> within the original packet.  The same action should be taken if a node encounters a Next
+> Header value of zero in any header other than an IPv6 header." — §4,
+> `rfc8200.txt:465-473`
+
+- Strength: should. Class: end-to-end (absence) plus error-signal.
+- Overridden by: [RFC8504-NR-6](../rfc8504/catalog.md#rfc8504-nr-6), which makes the
+  action a must and extends it to an unrecognized upper-layer protocol.
+- Check idea: deliver a packet whose next header is an unassigned protocol number. Nothing
+  is delivered, and the source receives type 4 code 1.
 
 ## Fragmentation
 
@@ -361,7 +399,8 @@ Parameter Problem code 0 should be sent.**
 
 - Strength: must (discard); should (the report). Class: end-to-end (absence) plus
   error-signal.
-- Note: needs a crafted fragment; level 3.
+- Check idea: shorten a non-final fragment by a few octets. Nothing is delivered, and the
+  source receives type 4 code 0.
 
 ### RFC8200-REASM-5
 
@@ -373,7 +412,9 @@ Parameter Problem code 0 should be sent.**
 > next page of the text.
 
 - Strength: must. Class: end-to-end (absence).
-- Note: needs crafted fragments; level 3.
+- Overridden by: [RFC8504-NR-3](../rfc8504/catalog.md#rfc8504-nr-3), which adds
+  "silently" and forbids the creation of overlapping fragments.
+- Check idea: deliver two fragments whose pieces overlap. Nothing reaches the upper layer.
 
 ### RFC8200-REASM-6
 
@@ -387,7 +428,41 @@ Parameter Problem code 0 should be sent.**
 > processed independently." — §4.5, `rfc8200.txt:1133-1140`
 
 - Strength: should. Class: end-to-end.
-- Note: needs a crafted fragment header; level 3.
+- Overridden by: [RFC8504-NR-4](../rfc8504/catalog.md#rfc8504-nr-4), which keeps the
+  receiver rule and forbids a source to generate such a fragment.
+- Check idea: deliver a fragment with offset 0 and M = 0. Its content is handed upward as a
+  whole packet.
+
+### RFC8200-REASM-7
+
+**A first fragment that does not include all headers through the upper-layer header should
+be discarded, with Parameter Problem code 3.**
+
+> "If the first fragment does not include all headers through an Upper-Layer header, then
+> that fragment should be discarded and an ICMP Parameter Problem, Code 3, message should
+> be sent to the source of the fragment, with the Pointer field set to zero." — §4.5,
+> `rfc8200.txt:1168-1171`
+
+- Strength: should. Class: end-to-end (absence) plus error-signal.
+- Overridden by: [RFC8504-NR-8](../rfc8504/catalog.md#rfc8504-nr-8), which makes the
+  sender's half a must.
+- Note: needs a crafted first fragment shorter than its upper-layer header; a later pass.
+
+### RFC8200-REASM-8
+
+**A fragment whose length and offset would push the reassembled payload past 65,535 octets
+is discarded, and Parameter Problem code 0 should be sent.**
+
+> "If the length and offset of a fragment are such that the Payload Length of the packet
+> reassembled from that fragment would exceed 65,535 octets, then that fragment must be
+> discarded and an ICMP Parameter Problem, Code 0, message should be sent to the source of
+> the fragment, pointing to the Fragment Offset field of the fragment packet." — §4.5,
+> `rfc8200.txt:1161-1166`
+
+- Strength: must (discard); should (the report). Class: end-to-end (absence) plus
+  error-signal.
+- Check idea: deliver a fragment whose offset is the largest the field can carry. Nothing is
+  delivered, and the source receives type 4 code 0.
 
 ## Packet size
 
