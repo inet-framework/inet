@@ -11,8 +11,15 @@ import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
 
 //
-// Implements ONOE, a credit-based rate control algorithm originally
-// developed by Atheros.
+// Implements Atsushi Onoe's credit-based rate adaptation rules, following
+// MadWifi ath_rate/onoe/onoe.c (revision a7531fd223a1f454d3fd74a975b4581cde5411bb).
+// Evaluates completed normal-ACK frames after the interval, including the
+// completion that reaches the deadline. Insufficient samples are retained;
+// upward credit requires at least ten completions and no terminal failures.
+// A peer's first interval starts when it is first seen. Rate queries do not
+// trigger evaluation. Startup uses initialRate and retries use the stored rate;
+// MadWifi's multirate retry series is not modeled. RTS/CTS and Block Ack feedback
+// equivalence, and HT-or-newer adaptation fidelity, are not established.
 //
 simple OnoeRateControl extends SimpleModule like IRateControl
 {

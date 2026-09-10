@@ -52,20 +52,24 @@ void OnoeRateControl::handleMessage(cMessage *msg)
 void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
     State& state = getState(getReceiverAddress(frame));
-    computeModeIfTimerIsExpired(state);
+    if (!isSuccessful && !isGivenUp)
+        return;
+    // Recovery owns the per-packet counter. Commit it once, at completion, so
+    // unfinished retries (including other TIDs) cannot enter an evaluated sample.
+    ASSERT(retryCount >= 0);
+    state.numOfRetries += retryCount;
     if (isSuccessful)
         state.numOfSuccTransmissions++;
-    else if (isGivenUp)
+    else
         state.numOfGivenUpTransmissions++;
-    if (retryCount > 0)
-        state.numOfRetries++;
+    computeModeIfTimerIsExpired(state);
 }
 
 void OnoeRateControl::computeModeIfTimerIsExpired(State& state)
 {
     if (simTime() - state.timer >= interval) {
-        computeMode(state);
         state.timer = simTime();
+        computeMode(state);
     }
 }
 
@@ -75,29 +79,35 @@ void OnoeRateControl::frameReceived(Packet *frame)
 
 void OnoeRateControl::computeMode(State& state)
 {
-    int numOfFrameTransmitted = state.numOfSuccTransmissions + state.numOfGivenUpTransmissions + state.numOfRetries;
-    state.avgRetriesPerFrame = double(state.numOfRetries) / (state.numOfSuccTransmissions + state.numOfGivenUpTransmissions);
-
-    if (state.numOfSuccTransmissions > 0) {
-        if (numOfFrameTransmitted >= 10 && state.avgRetriesPerFrame > 1) {
-            state.mode = decreaseRateIfPossible(state.mode);
-            emitDatarateChangedSignal(state.address, state.mode);
-            EV_DETAIL << "Decreased rate to " << *state.mode << endl;
-            state.credit = 0;
-        }
-        else if (state.avgRetriesPerFrame >= 0.1)
-            state.credit--;
-        else
-            state.credit++;
-
-        if (state.credit >= 10) {
+    // Decision semantics: MadWifi ath_rate/onoe/onoe.c, ath_rate_ctl(), revision
+    // a7531fd223a1f454d3fd74a975b4581cde5411bb. This is an implementation reference,
+    // not an IEEE 802.11 normative algorithm.
+    bool enough = state.numOfSuccTransmissions + state.numOfGivenUpTransmissions >= 10;
+    auto previousMode = state.mode;
+    if ((state.numOfGivenUpTransmissions > 0 && state.numOfSuccTransmissions == 0) ||
+        (enough && state.numOfSuccTransmissions < state.numOfRetries))
+    {
+        state.mode = decreaseRateIfPossible(state.mode);
+        state.credit = 0;
+    }
+    // Ten percent is integer-truncated in the reference. Dividing by ten is
+    // equivalent to multiplying by ten then dividing by 100, without overflow.
+    else if (enough && state.numOfGivenUpTransmissions == 0 && state.numOfRetries < state.numOfSuccTransmissions / 10) {
+        if (++state.credit == 10) {
             state.mode = increaseRateIfPossible(state.mode);
-            emitDatarateChangedSignal(state.address, state.mode);
-            EV_DETAIL << "Increased rate to " << *state.mode << endl;
             state.credit = 0;
         }
+    }
+    else if (enough && state.credit > 0)
+        state.credit--;
 
+    // A small failed-only sample at the floor is retained: attempting to lower
+    // the rate does not count as a rate change.
+    if (state.mode != previousMode || enough)
         resetStatisticalVariables(state);
+    if (state.mode != previousMode) {
+        EV_DETAIL << "Changed rate to " << *state.mode << endl;
+        emitDatarateChangedSignal(state.address, state.mode);
     }
 }
 
@@ -105,7 +115,6 @@ const IIeee80211Mode *OnoeRateControl::getRate(const MacAddress& receiverAddress
 {
     Enter_Method("getRate");
     State& state = getState(receiverAddress);
-    computeModeIfTimerIsExpired(state);
     EV_INFO << "The current mode is " << state.mode << " the net bitrate is " << state.mode->getDataMode()->getNetBitrate() << std::endl;
     return state.mode;
 }

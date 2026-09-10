@@ -14,21 +14,20 @@ namespace inet {
 namespace ieee80211 {
 
 /**
- * Implements the Onoe rate control algorithms.
+ * Implements Onoe's completed-sample rate adaptation rules.
  */
 class INET_API OnoeRateControl : public RateControlBase
 {
   protected:
-    // Per-receiver adaptive state (formerly single-instance module members).
+    // Completed-sample statistics and adaptation state belong to each receiver.
     struct State {
         MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
         const physicallayer::IIeee80211Mode *mode = nullptr;
         simtime_t timer = SIMTIME_ZERO;
-        int numOfRetries = 0;
-        int numOfSuccTransmissions = 0;
-        int numOfGivenUpTransmissions = 0;
-        double avgRetriesPerFrame = 0;
-        int credit = 0;
+        int64_t numOfRetries = 0; // failed attempts of completed frames, including terminal failures
+        int64_t numOfSuccTransmissions = 0;
+        int64_t numOfGivenUpTransmissions = 0;
+        int credit = 0; // 0 through 9 after each evaluation
     };
     std::map<MacAddress, State> stations;
 

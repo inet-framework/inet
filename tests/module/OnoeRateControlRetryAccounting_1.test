@@ -1,0 +1,133 @@
+%description:
+Check Onoe's completed-sample arithmetic and credit boundaries against MadWifi
+ath_rate_ctl(), revision a7531fd223a1f454d3fd74a975b4581cde5411bb,
+ath_rate/onoe/onoe.c. Distinct peers isolate samples; only the final completion
+reaches the deadline. Expected values are fixed reference cases, not an oracle
+copied from the implementation under test.
+
+%file: FeedbackTest.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class ObservedOnoe : public OnoeRateControl
+{
+  public:
+    void check(const MacAddress& receiver, int credit, int64_t successes, int64_t errors, int64_t retries) const
+    {
+        const auto& state = stations.at(receiver);
+        ASSERT(state.credit == credit);
+        ASSERT(state.numOfSuccTransmissions == successes);
+        ASSERT(state.numOfGivenUpTransmissions == errors);
+        ASSERT(state.numOfRetries == retries);
+    }
+};
+Define_Module(ObservedOnoe);
+
+class FeedbackTest : public cSimpleModule
+{
+  public:
+    FeedbackTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto control = check_and_cast<ObservedOnoe *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
+        int receiverIndex = 1;
+        auto sample = [&](int successes, int giveUps, int retries, int initialCredit, double expectedRate, int expectedCredit) {
+            MacAddress receiver("02:00:00:00:00:00");
+            receiver.setAddressByte(5, receiverIndex++);
+            auto frame = new Packet("feedback");
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setReceiverAddress(receiver);
+            frame->insertAtFront(header);
+            ASSERT(control->getRate(receiver)->getDataMode()->getNetBitrate().get() == 24e6);
+            for (int period = 0; period < initialCredit; period++) {
+                for (int i = 0; i < 9; i++)
+                    control->frameTransmitted(frame, 0, true, false);
+                wait(SimTime(1, SIMTIME_S));
+                control->frameTransmitted(frame, 0, true, false);
+            }
+            control->check(receiver, initialCredit, 0, 0, 0);
+            for (int i = 0; i < successes + giveUps; i++) {
+                bool success = i < successes;
+                int failures = i == 0 ? retries - giveUps + (success ? 0 : 1) : (success ? 0 : 1);
+                for (int retry = 1; retry <= failures - (success ? 0 : 1); retry++)
+                    control->frameTransmitted(frame, retry, false, false);
+                if (i == successes + giveUps - 1)
+                    wait(SimTime(1, SIMTIME_S));
+                control->frameTransmitted(frame, failures, success, !success);
+            }
+            ASSERT(control->getRate(receiver)->getDataMode()->getNetBitrate().get() == expectedRate);
+            bool retained = successes + giveUps < 10 && expectedRate == 24e6;
+            control->check(receiver, expectedCredit, retained ? successes : 0, retained ? giveUps : 0, retained ? retries : 0);
+            delete frame;
+        };
+        sample(4, 0, 4, 0, 24e6, 0);
+        sample(5, 0, 5, 0, 24e6, 0);
+        sample(4, 0, 8, 2, 24e6, 2); // attempts do not make a sufficient sample or decay credit
+        sample(9, 0, 10, 2, 24e6, 2); // immediately below the completion threshold
+        sample(1, 2, 8, 0, 24e6, 0);
+        sample(2, 2, 8, 0, 24e6, 0);
+        sample(0, 1, 1, 2, 18e6, 0); // failed-only fallback does not require ten completions
+        sample(8, 2, 9, 2, 18e6, 0);
+        sample(10, 0, 10, 2, 24e6, 1);
+        sample(10, 0, 11, 2, 18e6, 0);
+        sample(10, 0, 0, 0, 24e6, 1);
+        sample(10, 0, 1, 0, 24e6, 0);
+        sample(19, 0, 1, 2, 24e6, 1); // integer truncation
+        sample(20, 0, 1, 2, 24e6, 3);
+        sample(100, 1, 1, 2, 24e6, 1); // errors prohibit credit even with few retries
+        sample(10, 0, 0, 9, 36e6, 0);
+        std::cout << "OnoeRateControlRetryAccounting verified.\n";
+    }
+};
+Define_Module(FeedbackTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple FeedbackTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::FeedbackTest);
+}
+simple ObservedOnoe extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::ObservedOnoe);
+}
+network FeedbackNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: FeedbackTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FeedbackNetwork
+sim-time-limit = 80s
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta.wlan[0].mac.dcf.rateControl.typename = "ObservedOnoe"
+*.sta.wlan[0].mac.dcf.rateControl.initialRate = 24Mbps
+*.sta.wlan[0].mac.dcf.rateControl.interval = 1s
+
+%contains: stdout
+OnoeRateControlRetryAccounting verified.
