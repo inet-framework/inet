@@ -239,6 +239,16 @@ bps Ieee80211HtModeBase::getGrossBitrate() const
     return grossBitrate;
 }
 
+const simtime_t Ieee80211HtDataMode::getGuardInterval() const
+{
+    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
+        return getGIDuration();
+    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
+        return getShortGIDuration();
+    else
+        throw cRuntimeError("Unknown guard interval type");
+}
+
 int Ieee80211HtModeBase::getNumberOfDataSubcarriers() const
 {
     return Ieee80211Htmcs::getNumberOfDataSubcarriers(bandwidth, mcsIndex);

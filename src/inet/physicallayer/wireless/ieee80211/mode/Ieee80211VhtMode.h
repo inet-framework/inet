@@ -237,6 +237,7 @@ class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee8021
     virtual bps getGrossBitrate() const override { return Ieee80211VhtModeBase::getGrossBitrate(); }
     virtual const Ieee80211Vhtmcs *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
     virtual const Ieee80211VhtCode *getCode() const { return modulationAndCodingScheme->getCode(); }
+    virtual const simtime_t getGuardInterval() const override { return guardIntervalType == HT_GUARD_INTERVAL_LONG ? getGIDuration() : getShortGIDuration(); }
     virtual const simtime_t getSymbolInterval() const override { return Ieee80211HtTimingRelatedParametersBase::getSymbolInterval(); }
     virtual const Ieee80211OfdmModulation *getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
