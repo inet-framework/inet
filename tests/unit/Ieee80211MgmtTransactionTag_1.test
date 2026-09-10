@@ -9,6 +9,9 @@ generic body region tag is clipped and rebased for each fragment.
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicFragmentationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
@@ -52,6 +55,54 @@ ASSERT(secondRegionTags.front().getLength() == B(3));
 for (auto fragment : *fragments)
     delete fragment;
 delete fragments;
+
+// Exercise the policy and fragmentation with an actual typed non-action response.
+auto policyModule = cModuleType::get("inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy")->create("fragmentationPolicy", this);
+policyModule->par("fragmentationThreshold").setIntValue(32);
+policyModule->callInitialize();
+auto policy = check_and_cast<BasicFragmentationPolicy *>(policyModule);
+auto response = makeShared<Ieee80211AssociationResponseFrame>();
+response->setStatusCode(SC_SUCCESSFUL);
+response->setAid(291);
+Ieee80211SupportedRatesElement rates;
+rates.numRates = 1;
+rates.rate[0] = 6;
+response->setSupportedRates(rates);
+response->setChunkLength(B(9));
+auto responsePacket = new Packet("typedAssociationResponse", response);
+auto responseHeader = makeShared<Ieee80211MgmtHeader>();
+responseHeader->setType(ST_ASSOCIATIONRESPONSE);
+responseHeader->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+responseHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+responseHeader->setSequenceNumber(SequenceNumberCyclic(17));
+responsePacket->insertAtFront(responseHeader);
+responsePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+auto sizes = policy->computeFragmentSizes(responsePacket);
+ASSERT(sizes == std::vector<int>({4, 4, 1}));
+auto responseFragments = fragmentation.fragmentFrame(responsePacket, sizes);
+std::vector<uint8_t> reassembledBody;
+for (size_t i = 0; i < responseFragments->size(); i++) {
+    auto fragment = responseFragments->at(i);
+    ASSERT(fragment->getByteLength() <= 32);
+    ASSERT(fragment->findTag<Ieee80211FragmentedActionContextTag>() == nullptr);
+    auto fragmentHeader = fragment->popAtFront<Ieee80211MgmtHeader>();
+    ASSERT(fragmentHeader->getChunkLength() == B(24));
+    ASSERT(fragmentHeader->getType() == ST_ASSOCIATIONRESPONSE);
+    ASSERT(fragmentHeader->getReceiverAddress() == responseHeader->getReceiverAddress());
+    ASSERT(fragmentHeader->getTransmitterAddress() == responseHeader->getTransmitterAddress());
+    ASSERT(fragmentHeader->getSequenceNumber() == SequenceNumberCyclic(17));
+    ASSERT(fragmentHeader->getFragmentNumber() == i);
+    ASSERT(fragmentHeader->getMoreFragments() == (i + 1 < responseFragments->size()));
+    fragment->popAtBack<Ieee80211MacTrailer>(B(4));
+    auto bytes = fragment->peekDataAsBytes()->getBytes();
+    ASSERT(bytes.size() == sizes[i]);
+    reassembledBody.insert(reassembledBody.end(), bytes.begin(), bytes.end());
+    delete fragment;
+}
+ASSERT(reassembledBody == std::vector<uint8_t>({0, 0, 0, 0, 0x23, 0xC1, 1, 1, 0x0C}));
+delete responseFragments;
+policyModule->callFinish();
+policyModule->deleteModule();
 
 EV << "Management transaction packet tag survived frame replacement.\n";
 

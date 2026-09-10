@@ -26,24 +26,39 @@ class INET_API BlockAckReordering
     typedef std::vector<Packet *> Fragments;
     typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
-  protected:
-    std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
+    // Values in ReorderBuffer results from processReceivedQoSFrame() and
+    // processReceivedBlockAckReq() contain complete fragment vectors ordered
+    // by ascending Fragment Number. The vectors only reorder packet pointers;
+    // packet ownership remains with the caller of those methods.
 
   protected:
+    std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
+    simtime_t maxReceiveLifetime = SIMTIME_MAX;
+
+  protected:
+    static Fragments sortFragmentsByFragmentNumber(const Fragments& fragments);
     ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
     ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 
     std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
-    bool isComplete(const Fragments& fragments);
     void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
     void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
     ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
     bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum);
 
   public:
+    struct QosFrameProcessingResult {
+        ReorderBuffer frames;
+        Fragments tombstonedFragments;
+    };
+
+    explicit BlockAckReordering(simtime_t maxReceiveLifetime = SIMTIME_MAX) : maxReceiveLifetime(maxReceiveLifetime) {}
     virtual ~BlockAckReordering();
 
-    void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
+    std::vector<Packet *> resetReceiveBuffer(Tid tid, MacAddress originatorAddr);
+    simtime_t getNextExpirationTime() const;
+    std::vector<Packet *> removeExpiredFragments(simtime_t currentTime);
+    QosFrameProcessingResult processReceivedQoSFrameWithResult(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
@@ -52,4 +67,3 @@ class INET_API BlockAckReordering
 } /* namespace inet */
 
 #endif
-
