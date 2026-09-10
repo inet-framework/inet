@@ -4,6 +4,24 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Migrating AARF Rate Control
+--------------------------
+
+``AarfRateControl`` now follows the packet-timer and recovery transitions in
+INRIA RR-5208, Appendix A. Remove assignments to its former ``interval`` parameter
+and configure the packet timer through the parameters declared in
+:ned:`AarfRateControl`. There is no general conversion from seconds to packet
+counts: choose the packet threshold for the experiment's intended probing policy.
+
+Ordinary fallback now uses each packet's MAC retry count, rather than combining
+failures across packets. Recovery persists through failed attempts until success;
+a failed probe adapts both the success threshold and packet timeout. Rate queries
+and idle time no longer cause probes. These corrections change rate trajectories
+and simulation results, so existing studies should be revalidated.
+
+Subclasses that used the former elapsed-time helpers or the receiver-wide failure
+counter must adapt to the new packet-feedback state machine.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

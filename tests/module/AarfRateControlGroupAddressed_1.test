@@ -1,17 +1,6 @@
 %description:
-Tests that AarfRateControl keeps no adaptive state for a group-addressed receiver.
+Group-addressed traffic bypasses AARF: no per-receiver rate state or rate signals.
 
-A group-addressed frame is never acknowledged, so the rate control never gets feedback about
-it. If such a frame were served from adaptive state of its own, that state would be created on
-the first broadcast and then raised once per interval by the periodic increase, with nothing
-able to lower it again.
-
-The source sends a unicast stream to sink and a broadcast stream at the same time. Every rate
-the rate control reports must therefore belong to sink: the count of the aggregate
-datarateChanged statistic must equal the count of sink's own dataratePerStation series, because
-a rate emitted for a group address would be untagged and would show up only in the aggregate.
-
-%#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
@@ -53,10 +42,10 @@ cmdenv-express-mode = true
 *.sink.mobility.initialY = 0m
 *.sink.mobility.initialZ = 0m
 
-# a short interval, so an unfed group-addressed state would be raised many times over the run
+# Rate control must remain unused for group-addressed data.
 *.source.wlan[*].mac.dcf.rateControl.typename = "AarfRateControl"
 *.source.wlan[*].mac.dcf.rateControl.initialRate = 6Mbps
-*.source.wlan[*].mac.dcf.rateControl.interval = 0.05s
+*.source.wlan[*].mac.dcf.rateControl.minTimerThreshold = 100000
 *.source.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = -1bps
 
 # a unicast stream; the group-addressed frames come from ARP, which broadcasts its requests

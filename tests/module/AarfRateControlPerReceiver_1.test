@@ -7,15 +7,6 @@ away on a link poor enough that frames to it are lost and retried. The rate towa
 the near peer must therefore stay at the initial 54 Mbps, while the rate towards the
 far peer falls well below it, and both peers must keep receiving.
 
-Measured here: 54 Mbps towards the near peer and 24.7 Mbps towards the far one, with
-3653 and 1350 packets delivered.
-
-With one set of adaptive state per module (the behavior before rate control was keyed
-on the receiver) the two peers share a single rate, which the far peer's retries drag
-down to a blend of the two: 29.6 Mbps time-average, with the near peer served at that
-blended rate instead of the 54 Mbps its own link supports, delivering 3080 packets to
-the near peer and only 380 to the far one.
-
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
