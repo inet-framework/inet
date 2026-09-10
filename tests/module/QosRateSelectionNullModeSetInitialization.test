@@ -1,0 +1,54 @@
+%description:
+QosRateSelection must reject reaching link-layer initialization without a mode set.
+
+%file: Test.cc
+#include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace QosRateSelectionNullModeSetInitialization {
+
+class NullModeSetQosRateSelection : public QosRateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LINK_LAYER)
+            QosRateSelection::initialize(stage);
+    }
+};
+
+Define_Module(NullModeSetQosRateSelection);
+
+} // namespace QosRateSelectionNullModeSetInitialization
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+
+simple NullModeSetQosRateSelection extends QosRateSelection
+{
+    parameters:
+        @class(NullModeSetQosRateSelection);
+        rateControlModule = "";
+        mibModule = "";
+}
+
+network TestQosRateSelectionNullModeSetInitialization
+{
+    submodules:
+        rateSelection: NullModeSetQosRateSelection;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestQosRateSelectionNullModeSetInitialization
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+
+%exitcode: 1
+
+%contains-regex: stderr
+QosRateSelection module TestQosRateSelectionNullModeSetInitialization\.rateSelection has no mode set at link-layer initialization

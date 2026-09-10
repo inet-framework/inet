@@ -14,6 +14,29 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+const IIeee80211Mode *selectGroupAddressedMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *requestedMode)
+{
+    // IEEE Std 802.11-2024, 10.6.5.1 and 10.6.5.4. The model advertises
+    // mandatory legacy operational modes as its BSS basic legacy rate set.
+    bool hasMandatoryLegacyMode = false;
+    const IIeee80211Mode *legacyMode = nullptr;
+    for (const auto *candidate : modeSet->getLegacyOperationalModes()) {
+        if (!modeSet->getIsMandatory(candidate))
+            continue;
+        hasMandatoryLegacyMode = true;
+        if (candidate->getDataMode()->getNetBitrate() > requestedMode->getDataMode()->getNetBitrate())
+            continue;
+        if (candidate == requestedMode)
+            return candidate;
+        if (legacyMode == nullptr || candidate->getDataMode()->getNetBitrate() > legacyMode->getDataMode()->getNetBitrate())
+            legacyMode = candidate;
+    }
+    if (legacyMode == nullptr && hasMandatoryLegacyMode)
+        throw cRuntimeError("No mandatory legacy mode at or below requested group-addressed mode '%s' in mode set '%s'",
+                requestedMode->getName(), modeSet->getName());
+    return legacyMode != nullptr ? legacyMode : requestedMode;
+}
+
 namespace {
 
 static const IIeee80211Mode *getLegacyFallback(const Ieee80211ModeSet *modeSet,
@@ -68,6 +91,11 @@ static bool isCompatibleHtMode(const IIeee80211Mode *mode, const Ieee80211Mib::P
             bandwidth > negotiated.operation.operatingChannelWidth)
         return false;
 
+    // IEEE Std 802.11-2024, 19.1.1 and 19.1.4: an HT-greenfield PPDU may only
+    // be transmitted to a receiver that advertised HT-greenfield support.
+    if (mode->isHtGreenfield() && !receiverCapabilities.receiverGreenfield)
+        return false;
+
     // IEEE Std 802.11-2024, 10.17 and Table 9-224: a short guard interval
     // is usable only when the receiver advertised it for this channel width.
     if (mode->isHtShortGuardInterval()) {
@@ -111,20 +139,26 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         return mode;
     if (modeSet == nullptr)
         throw cRuntimeError("Cannot select a peer-compatible HT mode without an IEEE 802.11 mode set");
-    if (!modeSet->containsMode(mode))
-        throw cRuntimeError("HT mode '%s' is not contained in IEEE 802.11 mode set '%s'",
+    if (!modeSet->supportsMode(mode))
+        throw cRuntimeError("HT mode '%s' is not supported by IEEE 802.11 mode set '%s'",
                 mode->getName(), modeSet->getName());
 
     if (peerHtState == nullptr || !peerHtState->valid || !peerHtState->negotiatedCapabilities.localTxPeerRx.valid)
         return getLegacyFallback(modeSet, mode, peerAddress);
-    if (isCompatibleHtMode(mode, peerHtState))
-        return mode;
+
+    const IIeee80211Mode *effectiveMode = mode;
+    if (effectiveMode->isHtGreenfield() && !peerHtState->negotiatedCapabilities.localTxPeerRx.receiverGreenfield)
+        effectiveMode = modeSet->findHtMixedMode(mode);
+    if (effectiveMode != nullptr && isCompatibleHtMode(effectiveMode, peerHtState))
+        return effectiveMode;
 
     auto candidateBitrate = mode->getDataMode()->getNetBitrate();
     const IIeee80211Mode *bestMode = nullptr;
     for (int i = 0; i < modeSet->getNumModes(); i++) {
         const auto *candidate = modeSet->getMode(i);
-        if (candidate->getHtMcsIndex() < 0 ||
+        if (candidate->isHtGreenfield() && !peerHtState->negotiatedCapabilities.localTxPeerRx.receiverGreenfield)
+            candidate = modeSet->findHtMixedMode(candidate);
+        if (candidate == nullptr || candidate->getHtMcsIndex() < 0 ||
                 candidate->getDataMode()->getNetBitrate() > candidateBitrate ||
                 !isCompatibleHtMode(candidate, peerHtState))
             continue;

@@ -27,7 +27,7 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
 {
     parameters:
         string energySourceModule = default("");
-        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","n(greenfield-2.4Ghz)","p","ac") = default("g(mixed)");
         double bitrate @unit(bps) = default(-1bps);
         **.opMode = this.opMode;
         **.bitrate = this.bitrate;
@@ -92,4 +92,3 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
 
         classifier.in <-- { @display("m=n"); } <-- tap.lowerLayerOut;
 }
-
