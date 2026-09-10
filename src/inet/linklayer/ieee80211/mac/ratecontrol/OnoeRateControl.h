@@ -40,6 +40,7 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void handleMessage(cMessage *msg) override;
 
     virtual State& getState(const MacAddress& receiverAddress);
+    virtual const physicallayer::IIeee80211Mode *getInitialMode() override;
     virtual void resetRateControl() override { stations.clear(); }
 
     virtual void computeMode(State& state);

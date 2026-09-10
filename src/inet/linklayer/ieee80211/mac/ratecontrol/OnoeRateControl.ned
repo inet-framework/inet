@@ -17,7 +17,11 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 // completion that reaches the deadline. Insufficient samples are retained;
 // upward credit requires at least ten completions and no terminal failures.
 // A peer's first interval starts when it is first seen. Rate queries do not
-// trigger evaluation. Startup uses initialRate and retries use the stored rate;
+// trigger evaluation. An explicit initialRate overrides automatic startup.
+// Automatic startup uses the fastest local 11b mode, or the fastest local
+// OFDM/ERP mode at or below 36 Mbps (the slowest mode if none qualifies).
+// These are local modes, not negotiated peer rates. HT/VHT retain the fastest
+// mandatory startup mode. Retries use the stored rate.
 // Failed RTS/CTS exchanges contribute to the completed packet's retry total;
 // RTS exhaustion counts as one terminal error. MadWifi's multirate retry series
 // is not modeled. Block Ack feedback equivalence and HT-or-newer adaptation
@@ -27,7 +31,7 @@ simple OnoeRateControl extends SimpleModule like IRateControl
 {
     parameters:
         @class(OnoeRateControl);
-        double initialRate @unit(bps) = default(-1bps); // -1 means the fastest mandatory rate
+        double initialRate @unit(bps) = default(-1bps); // -1 selects automatic startup as described above
         double interval @unit(s) = default(1s);
         displayStringTextFormat = default("{numStations} stations");
         @display("i=block/cogwheel");

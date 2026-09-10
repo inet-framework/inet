@@ -23,6 +23,32 @@ void OnoeRateControl::initialize(int stage)
     }
 }
 
+const IIeee80211Mode *OnoeRateControl::getInitialMode()
+{
+    if (double(par("initialRate")) != -1)
+        return RateControlBase::getInitialMode();
+
+    // Apply the reference startup ceiling to local legacy modes. Negotiated
+    // legacy peer rates are not available through the rate-control contract.
+    switch (modeSet->getPhyType()) {
+        case Ieee80211ModeSet::PhyType::HR_DSSS:
+            return modeSet->getFastestMode();
+        case Ieee80211ModeSet::PhyType::OFDM:
+        case Ieee80211ModeSet::PhyType::ERP: {
+            auto mode = modeSet->getFastestMode();
+            while (mode->getDataMode()->getNetBitrate() > Mbps(36)) {
+                auto slowerMode = modeSet->getSlowerMode(mode);
+                if (slowerMode == nullptr)
+                    break;
+                mode = slowerMode;
+            }
+            return mode;
+        }
+        default:
+            return RateControlBase::getInitialMode();
+    }
+}
+
 OnoeRateControl::State& OnoeRateControl::getState(const MacAddress& receiverAddress)
 {
     auto it = stations.find(receiverAddress);
