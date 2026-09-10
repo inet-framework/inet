@@ -962,6 +962,29 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay()); // random delay
         scheduleAfter(interval, rtrDisMsg);
     }
+    else if (AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie)) {
+        /*RFC 4861, Section 6.2.2
+           The term "advertising interface" refers to any functioning and enabled
+           interface that has at least one unicast IP address assigned to it and
+           whose corresponding AdvSendAdvertisements flag is TRUE.*/
+        /*RFC 4861, Section 6.2.4
+           For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
+           sent from an interface when it becomes an advertising interface, if the
+           randomly chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL,
+           the timer SHOULD be set to MAX_INITIAL_RTR_ADVERT_INTERVAL instead.*/
+        // The interface becomes an advertising interface here: it has just verified
+        // the link-local address that Section 4.2 makes the source of its Router
+        // Advertisements. createRaTimer() could not apply the clamp at startup,
+        // because it had no such address then and was not yet advertising.
+        simtime_t maxInitialInterval = ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
+        if (advIfEntry->raTimeoutMsg->getArrivalTime() > simTime() + maxInitialInterval) {
+            EV_INFO << "Interface has become an advertising interface, advertising in "
+                    << maxInitialInterval << " instead of at "
+                    << advIfEntry->raTimeoutMsg->getArrivalTime() << endl;
+            advIfEntry->nextScheduledRATime = simTime() + maxInitialInterval;
+            rescheduleAfter(maxInitialInterval, advIfEntry->raTimeoutMsg);
+        }
+    }
 
     // RFC 4862: If a global address was assigned tentative while link-local DAD
     // was in progress, start DAD for it now.
