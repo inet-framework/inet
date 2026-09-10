@@ -33,7 +33,10 @@ Notable backward incompatible changes are the following:
 
    External implementations of IIeee80211DataMode must implement the new pure
    virtual getGuardInterval() query. Return the modeled guard interval as a
-   simtime_t, or -1 when the PHY has no guard interval.
+   simtime_t, or -1 when the PHY has no guard interval. The bitrate-based
+   Ieee80211ModeSet getMode() and findMode() overloads also take a trailing,
+   defaulted guardInterval argument. Ordinary existing calls still compile;
+   member-function pointers must use the new signature. See the migration guide.
 
 Notable backward compatible changes are the following:
 

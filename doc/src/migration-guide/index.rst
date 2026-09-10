@@ -18,6 +18,12 @@ Return the modeled guard interval in simulation time units. For a PHY without a
 guard interval, use an explicit override returning ``-1``. FHSS, DSSS, HR-DSSS,
 and IR use this value; OFDM, HT, and VHT return their modeled interval.
 
+The bitrate-based ``Ieee80211ModeSet::getMode()`` and ``findMode()`` overloads
+now take a trailing ``simtime_t guardInterval = -1`` argument. Existing ordinary
+calls can omit it. Update member-function pointer declarations to include this
+argument and supply it when invoking through a pointer. Rebuild external code
+against the changed interface.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 
