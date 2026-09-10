@@ -189,11 +189,15 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 void Edcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == modesetChangedSignal && obj != modeSet)
+        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+}
 
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        calculateTimingParameters();
-    }
+void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
 }
 
 } // namespace ieee80211

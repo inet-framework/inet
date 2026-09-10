@@ -87,6 +87,9 @@ Notable backward compatible changes are the following:
    RateSelection and QosRateSelection now accept dataFrameGuardInterval to
    qualify a configured dataFrameBitrate. The default, -1s, leaves the GI
    unspecified; an explicit value must match the selected mode's modeled GI.
+   Mode-set listeners also coordinate runtime mode changes with MAC,
+   management, and rate selection state.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

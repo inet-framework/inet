@@ -24,6 +24,12 @@ calls can omit it. Update member-function pointer declarations to include this
 argument and supply it when invoking through a pointer. Rebuild external code
 against the changed interface.
 
+``Ieee80211Mac``, ``Ieee80211MgmtBase``, ``RateSelection``, and
+``ModeSetListener`` implement ``IIeee80211ModeSetListener``. External subclasses
+inherit this interface; adding the base does not itself require a source change.
+If a subclass replaces mode-set notification handling, preserve the inherited
+state updates required by its base class.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

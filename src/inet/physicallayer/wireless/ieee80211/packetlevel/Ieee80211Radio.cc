@@ -7,8 +7,13 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
+#include <algorithm>
+
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
+
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -58,13 +63,17 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
             const char *opMode = configureCommand->getOpMode();
-            if (*opMode)
-                setModeSet(Ieee80211ModeSet::getModeSet(opMode));
             const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
-            if (modeSet != nullptr)
-                setModeSet(modeSet);
+            // NOTE: When both modeSet and opMode are present, modeSet takes precedence
+            // and opMode is silently ignored. This differs from the previous behavior
+            // where both were applied sequentially (with modeSet as final state).
+            const Ieee80211ModeSet *newModeSet = modeSet != nullptr ? modeSet : (*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
             const IIeee80211Mode *mode = configureCommand->getMode();
-            if (mode != nullptr)
+            if (newModeSet != nullptr && mode != nullptr)
+                setModeSetAndMode(newModeSet, mode);
+            else if (newModeSet != nullptr)
+                setModeSet(newModeSet);
+            else if (mode != nullptr)
                 setMode(mode);
             const IIeee80211Band *band = configureCommand->getBand();
             if (band != nullptr)
@@ -82,13 +91,49 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 {
-    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
-    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
-    ieee80211Transmitter->setModeSet(modeSet);
-    ieee80211Receiver->setModeSet(modeSet);
-    EV << "Changing radio mode set to " << modeSet << endl;
+    Enter_Method("setModeSet");
+    changeModeSet(modeSet, nullptr, false);
+}
+
+void Ieee80211Radio::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    Enter_Method("setModeSetAndMode");
+    changeModeSet(modeSet, mode, true);
+}
+
+void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode)
+{
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant radio mode-set change");
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    auto transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(this->transmitter));
+    auto receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(this->receiver));
+    // Apply each behavioral consumer once before notifying observers.
+    std::vector<IIeee80211ModeSetListener *> participants;
+    for (cComponent *component = this; component != nullptr; component = component->getParentModule()) {
+        for (auto listener : component->getLocalSignalListeners(modesetChangedSignal)) {
+            auto participant = dynamic_cast<IIeee80211ModeSetListener *>(listener);
+            if (participant != nullptr && std::find(participants.begin(), participants.end(), participant) == participants.end())
+                participants.push_back(participant);
+        }
+    }
+    if (modeSet == nullptr && !participants.empty())
+        throw cRuntimeError("Cannot clear the radio mode set while MAC mode-set consumers are attached");
+    changingModeSet = true;
+    if (explicitMode)
+        transmitter->setModeSetAndMode(modeSet, mode);
+    else
+        transmitter->setModeSet(modeSet);
+    receiver->setModeSet(modeSet);
+    for (auto participant : participants)
+        participant->applyModeSet(modeSet);
     receptionTimer = nullptr;
+    if (modeSet != nullptr)
+        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
     emit(listeningChangedSignal, 0);
+    changingModeSet = false;
+    EV << "Changing radio mode set to " << modeSet << " and mode to " << transmitter->getMode() << endl;
 }
 
 void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
