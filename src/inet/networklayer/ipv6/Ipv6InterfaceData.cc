@@ -473,25 +473,33 @@ void Ipv6InterfaceData::choosePreferredAddress()
     // right away. Falling back to a link-local source for an off-link
     // destination would be non-routable (RFC 4291 Section 2.5.6), so link-local
     // is used only when no routable address exists at all.
+    Ipv6Address routableCandidate = Ipv6Address::UNSPECIFIED_ADDRESS;
+    simtime_t routableExpiry = SIMTIME_ZERO;
     Ipv6Address linkLocalCandidate = Ipv6Address::UNSPECIFIED_ADDRESS;
     simtime_t linkLocalExpiry = SIMTIME_ZERO;
     for (auto& elem : addresses) {
         if (!elem.address.isUnicast())
             continue;
         if (!elem.address.isLinkLocal()) {
-            preferredAddr = elem.address;
-            preferredAddrExpiryTime = elem.expiryTime;
-            if (changed)
-                changed1(F_IP_ADDRESS);
-            return;
+            routableCandidate = elem.address;
+            routableExpiry = elem.expiryTime;
+            break;
         }
         if (linkLocalCandidate.isUnspecified()) {
             linkLocalCandidate = elem.address;
             linkLocalExpiry = elem.expiryTime;
         }
     }
-    preferredAddr = linkLocalCandidate;
-    preferredAddrExpiryTime = linkLocalExpiry;
+
+    if (!routableCandidate.isUnspecified()) {
+        preferredAddr = routableCandidate;
+        preferredAddrExpiryTime = routableExpiry;
+    }
+    else {
+        preferredAddr = linkLocalCandidate;
+        preferredAddrExpiryTime = linkLocalExpiry;
+    }
+
     if (changed)
         changed1(F_IP_ADDRESS);
 }
