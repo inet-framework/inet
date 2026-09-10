@@ -74,4 +74,3 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
 } /* namespace inet */
 
 #endif
-

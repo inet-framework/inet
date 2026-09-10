@@ -36,4 +36,3 @@ class INET_API IRateControl
 } // namespace inet
 
 #endif
-

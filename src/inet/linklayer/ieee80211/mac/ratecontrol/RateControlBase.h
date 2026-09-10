@@ -45,4 +45,3 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
 } /* namespace inet */
 
 #endif
-

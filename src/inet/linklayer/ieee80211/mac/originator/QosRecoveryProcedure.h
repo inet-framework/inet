@@ -83,4 +83,3 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 } /* namespace inet */
 
 #endif
-

@@ -59,4 +59,3 @@ class INET_API AarfRateControl : public RateControlBase
 } /* namespace inet */
 
 #endif
-

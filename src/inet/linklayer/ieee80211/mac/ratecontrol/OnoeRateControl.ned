@@ -26,4 +26,3 @@ simple OnoeRateControl extends SimpleModule like IRateControl
         @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=sample-hold); // aggregate rate over all stations (interleaved)
         @statistic[dataratePerStation](title="data rate per station"; source=demux(datarateChanged); unit=bps; record=vector; interpolationmode=sample-hold); // one vector per receiver, demultiplexed by station
 }
-

@@ -112,4 +112,3 @@ const IIeee80211Mode *OnoeRateControl::getRate(const MacAddress& receiverAddress
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
