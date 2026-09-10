@@ -48,7 +48,6 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc1122NoErrorForLinkBroadcast.test | RFC1122-ICMP-7 | **FAIL (expected)** — model gap |
 | Rfc1122NoErrorForNonInitialFragment.test | RFC1122-ICMP-8 | PASS |
 | Rfc1122NoErrorForInvalidSource.test | RFC1122-ICMP-9 | PASS |
-| Fragmentation.test (pre-existing) | — | PASS |
 
 Summary: 23 tests, 17 PASS, 6 FAIL (expected), 0 unexpected, in 2.6 s. Every FAIL is a
 model gap declared with `%# expected-result: FAIL`; each test keeps the faithful assertion,

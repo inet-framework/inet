@@ -31,8 +31,6 @@ workflow that may reference code.
 | Rfc9293ConnectionTermination.test | RFC9293-FIN-1, FIN-2 | PASS |
 | Rfc9293FlowControl.test | RFC9293-WND-1, WND-2; ACKD-1 | PASS |
 | Rfc9293Reset.test | RFC9293-RST-1 | PASS |
-| TcpHandshake.test (pre-existing) | — | PASS |
-| TcpRetransmit.test (pre-existing) | — | PASS |
 
 Pass 3, level 3:
 

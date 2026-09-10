@@ -284,10 +284,11 @@ common ini settings via [`protocoltest-base.ini`](protocoltest-base.ini)
 A test does not need a `ProtocolTester` declared in its network. Define the program with
 `Define_ProtocolTestProgram()` (one per build, no name/selection) and the framework attaches
 a `ProtocolTester` to whatever network runs — so a test can target an **unmodified external
-network** just by pointing `network =` at it. See the `opp_test` examples in [`../`](..):
-`tcp/TcpHandshake.test`, `self/ViolationDetected.test`,
-`tcp/TcpRetransmit.test`. Each carries its program in `%global`, its (tester-less)
-network in `%file`, and asserts the verdict line with `%contains`.
+network** just by pointing `network =` at it. Every test in [`../self/`](../self) is such
+an example: `Basic.test` is the smallest one, `ViolationDetected.test` asserts that the
+framework reports a violation, and `InterceptMutate.test` drives a fault into the wire.
+Each carries its program in `%global`, its (tester-less) network in `%file`, and asserts
+the verdict line with `%contains`.
 
 How the attach works: defining a `Define_ProtocolTestProgram()` registers it as the default
 program; a simulation lifecycle listener (`ProtocolTestAttach.cc`) creates a `ProtocolTester`
@@ -326,7 +327,7 @@ two fail the run. Allowed values: `PASS` (the default when absent), `FAIL`, `ERR
 All snippets come from the `.test` files in the suite folders; the name in brackets is
 the test file that runs them.
 
-### TCP three-way handshake — sequence/ack relations (`../tcp/TcpHandshake.test`)
+### TCP three-way handshake — sequence/ack relations
 Observe SYN / SYN+ACK / ACK at the initiator, asserting the ack numbers follow seq+1 via
 captures.
 ```cpp
@@ -402,7 +403,7 @@ Author it by first setting `stateSignals = "controlStateChanged dataStateChanged
 curID rxCmd txCmd"` on the tester to read the real sequence. See
 [`../ethernet/PlcaBeaconCycle.test`](../ethernet/PlcaBeaconCycle.test).
 
-### Mobile IPv6 registration + route optimization (`../ipv6/Mipv6Registration.test`, RFC 6275)
+### Mobile IPv6 registration + route optimization (RFC 6275)
 MIPv6 is a message-exchange protocol (no FSM-state signal), so this asserts the Mobility Header
 sequence as packets. On a minimal MN/HA/CN handover network, after the mobile node
 roams to a foreign link it registers with its Home Agent (Binding Update → Binding Acknowledgement),

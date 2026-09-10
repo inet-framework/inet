@@ -22,9 +22,6 @@ repeated in the table below, because every test ran again on this tree.
   names them. Every verdict below is the verdict of the run above, and it repeats the
   verdict of the earlier pass.
 
-  The `ipv6` suite also holds the two pre-existing Mobile IPv6 tests; they ran and passed
-  and are not part of this pass.
-
   The whole suite runs in about 2.5 seconds. It used to need nine minutes, and one test
   accounted for all of it: the atomic fragment, where the model stops with an assertion of
   the standard library. The runtime installs a handler for SIGABRT that prints a stack trace
@@ -66,7 +63,6 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200UnassignedNextHeader.test | RFC8504-NR-6, for an unassigned value | PASS |
 | Rfc4443UnknownErrorType.test | RFC4443-MPR-4 (the silence); notes MPR-1 | PASS |
 | Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **FAIL (expected)** — model gap, a runtime error |
-| Mipv6Registration.test, Mipv6Interface.test (pre-existing) | — | PASS |
 
 Summary: 29 tests in the suite, 21 PASS, 8 FAIL (expected), 0 unexpected. Every FAIL is a
 model gap declared with `%# expected-result: FAIL`; each test keeps the faithful assertion
