@@ -8,7 +8,6 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 #include <algorithm>
-
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 

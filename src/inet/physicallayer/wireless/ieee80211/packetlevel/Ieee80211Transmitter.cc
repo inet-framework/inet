@@ -161,4 +161,3 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
 } // namespace physicallayer
 
 } // namespace inet
-

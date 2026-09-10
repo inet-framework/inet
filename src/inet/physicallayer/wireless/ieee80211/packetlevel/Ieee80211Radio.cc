@@ -334,4 +334,3 @@ const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::peekIeee80211PhyHeaderAtFron
 } // namespace physicallayer
 
 } // namespace inet
-
