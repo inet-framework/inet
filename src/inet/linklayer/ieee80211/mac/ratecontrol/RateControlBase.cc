@@ -32,6 +32,11 @@ void RateControlBase::rtsFrameTransmissionFailed(Packet *frame, int totalRetryCo
     // RTS failures do not describe an attempt at the controller's selected data rate.
 }
 
+void RateControlBase::frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount)
+{
+    // An internal collision does not attempt transmission at the selected data rate.
+}
+
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
 {
     const IIeee80211Mode *newMode = modeSet->getFasterMode(currentMode);

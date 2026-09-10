@@ -23,7 +23,10 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 // These are local modes, not negotiated peer rates. HT/VHT retain the fastest
 // mandatory startup mode. Retries use the stored rate.
 // Failed RTS/CTS exchanges contribute to the completed packet's retry total;
-// RTS exhaustion counts as one terminal error. MadWifi's multirate retry series
+// RTS exhaustion counts as one terminal error. As an INET modeling choice,
+// internal-collision exhaustion also counts as one terminal error, with the
+// packet's full recovery count (including internal collisions).
+// MadWifi's multirate retry series
 // is not modeled. Block Ack feedback equivalence and HT-or-newer adaptation
 // fidelity are not established.
 //

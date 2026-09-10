@@ -272,6 +272,14 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             throw cRuntimeError("Unknown frame");
         if (retryLimitReached) {
             EV_DETAIL << "The frame has reached its retry limit. Dropping it" << std::endl;
+            if (dataAndMgmtRateControl) {
+                int totalRetryCount;
+                if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(internallyCollidedHeader))
+                    totalRetryCount = dataRecoveryProcedure->getTotalRetryCount(dataHeader);
+                else
+                    totalRetryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getTotalRetryCount(internallyCollidedHeader);
+                dataAndMgmtRateControl->frameDroppedDueToInternalCollision(internallyCollidedFrame, totalRetryCount);
+            }
             if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(internallyCollidedHeader))
                 dataRecoveryProcedure->retryLimitReached(internallyCollidedFrame, dataHeader);
             else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(internallyCollidedHeader))

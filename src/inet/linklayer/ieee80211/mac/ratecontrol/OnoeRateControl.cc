@@ -101,6 +101,11 @@ void OnoeRateControl::rtsFrameTransmissionFailed(Packet *frame, int totalRetryCo
     frameTransmitted(frame, totalRetryCount, false, isGivenUp);
 }
 
+void OnoeRateControl::frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount)
+{
+    frameTransmitted(frame, totalRetryCount, false, true);
+}
+
 void OnoeRateControl::computeModeIfTimerIsExpired(State& state)
 {
     if (simTime() - state.timer >= interval) {

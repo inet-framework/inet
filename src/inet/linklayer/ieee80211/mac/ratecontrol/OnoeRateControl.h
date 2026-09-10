@@ -24,7 +24,7 @@ class INET_API OnoeRateControl : public RateControlBase
         MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
         const physicallayer::IIeee80211Mode *mode = nullptr;
         simtime_t timer = SIMTIME_ZERO;
-        int64_t numOfRetries = 0; // failed attempts of completed frames, including terminal failures
+        int64_t numOfRetries = 0; // recovery counts of completed frames, including internal collisions
         int64_t numOfSuccTransmissions = 0;
         int64_t numOfGivenUpTransmissions = 0;
         int credit = 0; // 0 through 9 after each evaluation
@@ -52,6 +52,7 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp) override;
+    virtual void frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount) override;
     virtual void frameReceived(Packet *frame) override;
 };
 

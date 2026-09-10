@@ -25,6 +25,7 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     // Controllers that use whole-packet outcomes override these extended hooks.
     virtual void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp) override;
+    virtual void frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
