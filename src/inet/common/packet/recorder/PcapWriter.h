@@ -64,6 +64,8 @@ class INET_API PcapWriter : public IPcapWriter
      * and throws an exception otherwise.
      */
     void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
+    void writePacketWithPrefix(simtime_t time, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+            Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
@@ -79,4 +81,3 @@ class INET_API PcapWriter : public IPcapWriter
 } // namespace inet
 
 #endif
-

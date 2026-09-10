@@ -14,9 +14,12 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
+#include "inet/common/packet/recorder/IPcapCaptureAdapter.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
 
 namespace inet {
+
+class PcapCaptureAdapterRegistry;
 
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
@@ -50,7 +53,15 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     bool verbose = false;
     bool recordEmptyPackets = false;
     bool enableConvertingPackets = true;
+    bool enableProtocolSpecificCaptureAdapters = false;
     bool recordPcap = false;
+    PcapCaptureAdapterRegistry *captureAdapterRegistry = nullptr;
+    // Transiently carries enriched capture data through the legacy virtual recordPacket(cPacket *) hook.
+    const PcapCaptureObservation *activeCaptureObservation = nullptr;
+    // Transiently carries one resolved protocol adapter through the legacy virtual writePacket() hooks.
+    bool captureAdapterResolutionActive = false;
+    const Protocol *activeCaptureAdapterProtocol = nullptr;
+    const IPcapCaptureAdapter *activeCaptureAdapter = nullptr;
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;
 
@@ -78,14 +89,21 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);
+    virtual void recordPacket(const cPacket *packetObject, Direction direction, cComponent *source);
+    virtual void recordPacket(const PcapCaptureObservation& observation, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
     virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const;
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
     virtual void writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
+    virtual void writePacket(const Protocol *protocol, const PcapCaptureObservation& observation, b frontOffset, b backOffset, NetworkInterface *networkInterface);
+    const IPcapCaptureAdapter *findProtocolCaptureAdapter(const Protocol *protocol) const;
+    PcapLinkType protocolToLinkTypeWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter);
+    void writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const Packet *packet,
+            b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
+    void writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const PcapCaptureObservation& observation,
+            b frontOffset, b backOffset, NetworkInterface *networkInterface);
 };
 
 } // namespace inet
 
 #endif
-

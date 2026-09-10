@@ -96,6 +96,9 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
 
     flush = false;
+    nextPcapngInterfaceId = 0;
+    interfaceModuleIdAndLinkTypeToPcapngInterfaceId.clear();
+    this->snaplen = snaplen;
 
     // TODO check validity of timePrecision
     this->timePrecision = timePrecision;
@@ -135,7 +138,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     ibh.blockTotalLength = blockTotalLength;
     ibh.linkType = linkType;
     ibh.reserved = 0;
-    ibh.snaplen = 0;
+    ibh.snaplen = snaplen;
     fwrite(&ibh, sizeof(ibh), 1, dumpfile);
 
     // interface name option
@@ -198,26 +201,39 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
 
 void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface, PcapLinkType linkType)
 {
+    writePacketWithPrefix(stime, {}, packet, frontOffset, backOffset, direction, networkInterface, linkType);
+}
+
+void PcapngWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+        Direction direction, NetworkInterface *networkInterface, PcapLinkType linkType)
+{
     EV_INFO << "Writing packet to file" << EV_FIELD(fileName) << EV_FIELD(packet) << EV_ENDL;
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
-    auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
+    // Enhanced Packet Blocks refer to an Interface Description Block, unlike classic PCAP
+    // records. Fail explicitly when no interface can be resolved instead of dereferencing null.
+    if (networkInterface == nullptr)
+        throw cRuntimeError("The interface entry not found for packet");
+
+    auto interfaceKey = std::make_pair(networkInterface->getId(), linkType);
+    auto it = interfaceModuleIdAndLinkTypeToPcapngInterfaceId.find(interfaceKey);
     int pcapngInterfaceId;
-    if (it != interfaceModuleIdToPcapngInterfaceId.end())
+    if (it != interfaceModuleIdAndLinkTypeToPcapngInterfaceId.end())
         pcapngInterfaceId = it->second;
     else {
         writeInterface(networkInterface, linkType);
         pcapngInterfaceId = nextPcapngInterfaceId++;
-        interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
+        interfaceModuleIdAndLinkTypeToPcapngInterfaceId[interfaceKey] = pcapngInterfaceId;
     }
 
-    if (networkInterface == nullptr)
-        throw cRuntimeError("The interface entry not found for packet");
-
-    b capturedLength = packet->getDataLength() - frontOffset - backOffset;
+    b packetLength = packet->getDataLength() - frontOffset - backOffset;
+    size_t originalLength = prefix.size() + packetLength.get<B>();
+    // Advertise and enforce the configured snaplen for PCAPng too. A zero snaplen means unlimited;
+    // otherwise the captured length is truncated while the original length remains unchanged.
+    size_t capturedLength = snaplen == 0 ? originalLength : std::min<size_t>(originalLength, snaplen);
     uint32_t optionsLength = (4 + 4) + 4;
-    uint32_t blockTotalLength = 32 + roundUp(capturedLength.get<B>()) + optionsLength;
+    uint32_t blockTotalLength = 32 + roundUp(capturedLength) + optionsLength;
     ASSERT(blockTotalLength % 4 == 0);
 
     // header
@@ -228,19 +244,25 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     uint64_t timestamp = stime.inUnit(static_cast<SimTimeUnit>(-timePrecision));
     pbh.timestampHigh = static_cast<uint32_t>((timestamp >> 32) & 0xFFFFFFFFLLU);
     pbh.timestampLow = static_cast<uint32_t>(timestamp & 0xFFFFFFFFLLU);
-    pbh.capturedPacketLength = capturedLength.get<B>();
-    pbh.originalPacketLength = capturedLength.get<B>();
+    pbh.capturedPacketLength = capturedLength;
+    pbh.originalPacketLength = originalLength;
     fwrite(&pbh, sizeof(pbh), 1, dumpfile);
 
-    if (capturedLength != b(0)) {
+    if (capturedLength != 0) {
         // packet data
-        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
-        auto bytes = data->getBytes();
-        fwrite(bytes.data(), bytes.size(), 1, dumpfile);
+        auto capturedPrefixLength = std::min(prefix.size(), capturedLength);
+        if (capturedPrefixLength != 0)
+            fwrite(prefix.data(), capturedPrefixLength, 1, dumpfile);
+        auto capturedPacketLength = capturedLength - capturedPrefixLength;
+        if (capturedPacketLength != 0) {
+            auto data = packet->peekDataAt<BytesChunk>(frontOffset, B(capturedPacketLength));
+            const auto& bytes = data->getBytes();
+            fwrite(bytes.data(), bytes.size(), 1, dumpfile);
+        }
 
         // packet padding
         char padding[] = { 0, 0, 0, 0 };
-        int paddingLength = pad(capturedLength.get<B>());
+        int paddingLength = pad(capturedLength);
         fwrite(padding, paddingLength, 1, dumpfile);
     }
 
@@ -284,4 +306,3 @@ void PcapngWriter::close()
 }
 
 } // namespace inet
-

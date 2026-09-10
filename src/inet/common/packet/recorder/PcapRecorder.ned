@@ -31,6 +31,11 @@ import inet.common.SimpleModule;
 // `sendingSignalNames` and `receivingSignalNames` parameters. The packets
 // themselves are expected as `cPacket*` signal values.
 //
+// Registered protocol-specific capture adapters are opt-in. In particular,
+// IEEE 802.11 uses the bare IEEE 802.11 link type (105) by default and the
+// Radiotap link type (127) only when both adapter and packet conversion are
+// enabled.
+//
 simple PcapRecorder extends SimpleModule
 {
     parameters:
@@ -38,6 +43,7 @@ simple PcapRecorder extends SimpleModule
         bool verbose = default(true);  // Whether to log packets on the module output
         bool recordEmptyPackets = default(true); // Specifies if zero length packets are recorded or not
         bool enableConvertingPackets = default(true); // Specifies if converting packets to link type is allowed or not
+        bool enableProtocolSpecificCaptureAdapters = default(false); // Enable registered protocol-specific capture formats; requires enableConvertingPackets
         string pcapFile = default(""); // The PCAP file to be written, suggested value: pcapFile = "${resultdir}/${configname}-#${runnumber}" + fullpath() + ".pcap"
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // Maximum number of bytes to record per packet
@@ -55,4 +61,3 @@ simple PcapRecorder extends SimpleModule
         @display("i=block/blackboard");
         @signal[packetRecorded](type=Packet);
 }
-
