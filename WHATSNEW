@@ -84,6 +84,9 @@ Notable backward compatible changes are the following:
    its unrounded short-GI airtime. Results and fingerprints may change for
    simulations using the affected modes and frame formats.
 
+   RateSelection and QosRateSelection now accept dataFrameGuardInterval to
+   qualify a configured dataFrameBitrate. The default, -1s, leaves the GI
+   unspecified; an explicit value must match the selected mode's modeled GI.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
