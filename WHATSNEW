@@ -75,7 +75,12 @@ Notable backward compatible changes are the following:
 
 5. IEEE 802.11 HT/VHT guard intervals and timing
 
-   HT MCS 32, 73, and 76 definitions are corrected.
+   HT MCS 32, 73, and 76 definitions are corrected. HT/VHT signal fields use
+   long-GI symbol timing independently of the data GI. Mixed-format HT and VHT
+   short-GI data airtimes are rounded to 4 us boundaries; HT greenfield retains
+   its unrounded short-GI airtime. Results and fingerprints may change for
+   simulations using the affected modes and frame formats.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

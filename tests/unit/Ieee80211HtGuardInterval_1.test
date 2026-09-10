@@ -47,6 +47,30 @@ catch (cRuntimeError&) {
     rejectedVhtGreenfieldAfterMixed = true;
 }
 ASSERT(rejectedVhtGreenfieldAfterMixed);
+const auto vhtLongMcs0 = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+const auto vhtShortMcs0 = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT);
+// IEEE Std 802.11-2024, Tables 21-5/21-8 and 21.4.3, Eqs. (21-109)/(21-110).
+ASSERT(vhtLongMcs0->getDataMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getSymbolInterval() == SimTime(3600, SIMTIME_NS));
+ASSERT(vhtLongMcs0->getHeaderMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtShortMcs0->getHeaderMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtLongMcs0->getHeaderMode()->getNetBitrate() == vhtShortMcs0->getHeaderMode()->getNetBitrate());
+ASSERT(vhtLongMcs0->getHeaderMode()->getGrossBitrate() == vhtShortMcs0->getHeaderMode()->getGrossBitrate());
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(24)) == SimTime(32400, SIMTIME_NS));
+ASSERT(vhtShortMcs0->getDataDuration(B(24)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(27)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataDuration(B(27)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(30)) == SimTime(39600, SIMTIME_NS));
+ASSERT(vhtShortMcs0->getDataDuration(B(30)) == SimTime(40, SIMTIME_US));
+ASSERT(vhtLongMcs0->getDataMode()->getDuration(B(24)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtLongMcs0->getDataDuration(B(24)) == SimTime(36, SIMTIME_US));
+for (auto vhtMode : {vhtLongMcs0, vhtShortMcs0})
+    for (auto dataLength : {B(24), B(27), B(30)})
+        ASSERT(vhtMode->getDuration(dataLength) == vhtMode->getPreambleDuration() + vhtMode->getHeaderDuration() + vhtMode->getDataDuration(dataLength));
 
 EV << "HT guard interval catalog, timing, and lookup checks passed.\n";
 

@@ -241,6 +241,13 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211VhtPreambleMode::getDurationBeforeHeader() const
+{
+    // IEEE Std 802.11-2024, 21.3.2: the L-SIG duration is part of the
+    // pre-header timing of the supported VHT mixed format.
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration();
+}
+
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 {
     // 21.3.4 Mathematical description of signals
@@ -251,12 +258,9 @@ const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 bps Ieee80211VhtSignalMode::computeGrossBitrate() const
 {
     unsigned int numberOfCodedBitsPerSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
-    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
-    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
-    else
-        throw cRuntimeError("Unknown guard interval type");
+    // IEEE Std 802.11-2024, Table 21-5: VHT-SIG fields use TSYML even
+    // when the Data field uses short GI; their signaling rate is GI-independent.
+    return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
 }
 
 bps Ieee80211VhtSignalMode::computeNetBitrate() const
@@ -637,6 +641,20 @@ const simtime_t Ieee80211VhtDataMode::getDuration(b dataLength) const
     unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
     int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get<b>() / dataBitsPerSymbol)); // TODO getBitLength(dataBitLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
+}
+
+const simtime_t Ieee80211VhtMode::getDataDuration(b dataBitLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataBitLength);
+    if (dataMode->getGuardInterval() == dataMode->getShortGIDuration()) {
+        // IEEE Std 802.11-2024, 21.4.3, Eq. (21-109): short-GI VHT data
+        // airtime is the raw TSYMS train rounded up to a TSYML boundary.
+        // This corrects the previous implementation that used the raw short-GI symbol train.
+        const auto longGiSymbolInterval = dataMode->getDFTPeriod() + dataMode->getGIDuration();
+        const auto numberOfLongGiSymbols = (dataDuration.raw() + longGiSymbolInterval.raw() - 1) / longGiSymbolInterval.raw();
+        dataDuration = SimTime::fromRaw(numberOfLongGiSymbols * longGiSymbolInterval.raw());
+    }
+    return dataDuration;
 }
 
 const simtime_t Ieee80211VhtMode::getSlotTime() const
