@@ -22,6 +22,51 @@ and simulation results, so existing studies should be revalidated.
 Subclasses that used the former elapsed-time helpers or the receiver-wide failure
 counter must adapt to the new packet-feedback state machine.
 
+Migrating Custom IEEE 802.11 Rate Controllers
+-------------------------------------------
+
+``IRateControl`` adds two pure virtual feedback hooks. Classes implementing this
+interface directly must implement both hooks, in addition to the existing
+four-argument ``frameTransmitted`` method, or they remain abstract:
+
+.. code-block:: c++
+
+   void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount,
+                         bool isSuccessful, bool isGivenUp) override;
+   void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount,
+                                   bool isGivenUp) override;
+
+To preserve an existing controller's data-attempt behavior, forward the new
+``frameTransmitted`` overload to its four-argument overload using ``retryCount``
+and implement the RTS hook as a no-op:
+
+.. code-block:: c++
+
+   void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount,
+                         bool isSuccessful, bool isGivenUp) override
+   {
+       frameTransmitted(frame, retryCount, isSuccessful, isGivenUp);
+   }
+
+   void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount,
+                                   bool isGivenUp) override {}
+
+``RateControlBase`` already provides these adapters, so its subclasses need no
+new overrides to preserve that behavior. If a subclass overrides the four-argument
+method and callers use the five-argument overload through the subclass type, add
+``using RateControlBase::frameTransmitted;`` to its public section to expose the
+inherited overload.
+
+Controllers that account for completed packets can instead consume
+``totalRetryCount``: the current sum of the packet's short and long retry counters,
+including RTS failures and the final failed attempt on exhaustion. It is a
+cumulative count, not an increment to add on every callback. The extended data
+callback marks completion when ``isSuccessful`` or ``isGivenUp`` is true; the RTS
+callback marks completion only when ``isGivenUp`` is true. Its ``frame`` is the
+protected data or management packet, not the RTS frame. Successful CTS reception
+is not packet completion. All feedback packets are borrowed for the duration of
+the call and must not be deleted or retained by the controller.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

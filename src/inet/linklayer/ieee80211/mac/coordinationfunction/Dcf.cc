@@ -280,7 +280,10 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
     EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
-    if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
+    bool retryLimitReached = recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader);
+    if (dataAndMgmtRateControl)
+        dataAndMgmtRateControl->rtsFrameTransmissionFailed(packet, recoveryProcedure->getTotalRetryCount(protectedHeader), retryLimitReached);
+    if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         channelAccess->getInProgressFrames()->dropFrame(packet);
         ackHandler->dropFrame(protectedHeader);
@@ -333,7 +336,8 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         auto lastTransmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         if (dataAndMgmtRateControl) {
             int retryCount = lastTransmittedHeader->getRetry() ? recoveryProcedure->getRetryCount(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader) : 0;
-            dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
+            int totalRetryCount = recoveryProcedure->getTotalRetryCount(lastTransmittedDataOrMgmtHeader);
+            dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, totalRetryCount, true, false);
         }
         recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
@@ -364,7 +368,8 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
     bool retryLimitReached = recoveryProcedure->isRetryLimitReached(failedPacket, failedHeader);
     if (dataAndMgmtRateControl) {
         int retryCount = recoveryProcedure->getRetryCount(failedPacket, failedHeader);
-        dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, false, retryLimitReached);
+        int totalRetryCount = recoveryProcedure->getTotalRetryCount(failedHeader);
+        dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, totalRetryCount, false, retryLimitReached);
     }
     ackHandler->processFailedFrame(failedHeader);
     if (retryLimitReached) {

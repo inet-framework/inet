@@ -18,8 +18,10 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 // upward credit requires at least ten completions and no terminal failures.
 // A peer's first interval starts when it is first seen. Rate queries do not
 // trigger evaluation. Startup uses initialRate and retries use the stored rate;
-// MadWifi's multirate retry series is not modeled. RTS/CTS and Block Ack feedback
-// equivalence, and HT-or-newer adaptation fidelity, are not established.
+// Failed RTS/CTS exchanges contribute to the completed packet's retry total;
+// RTS exhaustion counts as one terminal error. MadWifi's multirate retry series
+// is not modeled. Block Ack feedback equivalence and HT-or-newer adaptation
+// fidelity are not established.
 //
 simple OnoeRateControl extends SimpleModule like IRateControl
 {

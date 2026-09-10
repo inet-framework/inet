@@ -22,6 +22,16 @@ void RateControlBase::initialize(int stage)
     ModeSetListener::initialize(stage);
 }
 
+void RateControlBase::frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp)
+{
+    frameTransmitted(frame, retryCount, isSuccessful, isGivenUp);
+}
+
+void RateControlBase::rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp)
+{
+    // RTS failures do not describe an attempt at the controller's selected data rate.
+}
+
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
 {
     const IIeee80211Mode *newMode = modeSet->getFasterMode(currentMode);

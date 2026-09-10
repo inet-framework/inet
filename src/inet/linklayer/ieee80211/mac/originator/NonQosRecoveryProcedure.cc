@@ -106,18 +106,13 @@ void NonQosRecoveryProcedure::ctsFrameReceived(StationRetryCounters *stationCoun
 void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters)
 {
     auto id = SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber());
-    if (packet->getByteLength() >= rtsThreshold) {
+    if (packet->getByteLength() >= rtsThreshold)
         stationCounters->resetStationLongRetryCount();
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
+    else
         stationCounters->resetStationShortRetryCount();
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    // Completion retires both the RTS and data history for this packet identity.
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
 
     //
     // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
@@ -134,16 +129,8 @@ void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const 
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
     auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
     emit(retryLimitReachedSignal, packet);
 }
 
@@ -202,6 +189,15 @@ int NonQosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8
 int NonQosRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     return getRc(packet, dataOrMgmtHeader, shortRetryCounter);
+}
+
+int NonQosRecoveryProcedure::getTotalRetryCount(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
+{
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    auto shortCounter = shortRetryCounter.find(id);
+    auto longCounter = longRetryCounter.find(id);
+    return (shortCounter == shortRetryCounter.end() ? 0 : shortCounter->second) +
+           (longCounter == longRetryCounter.end() ? 0 : longCounter->second);
 }
 
 int NonQosRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)

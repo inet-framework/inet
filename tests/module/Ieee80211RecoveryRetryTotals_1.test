@@ -1,0 +1,155 @@
+%description:
+Check completed-packet retry totals and retirement in both recovery procedures.
+RTS and protected-data counters contribute once; CTS does not retire the packet.
+ACK and exhaustion retire both counters, including when the same sequence identity
+is reused. Other fragments and QoS TIDs retain their own histories. Station retry
+counter policy is unchanged; these checks concern per-packet accounting lifetime.
+
+%file: RetryTotals.cc
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+
+namespace inet {
+namespace ieee80211 {
+class RetryTotalsTest : public cSimpleModule
+{
+  public:
+    RetryTotalsTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto nonQos = check_and_cast<NonQosRecoveryProcedure *>(getModuleByPath("^.sta.wlan[0].mac.dcf.recoveryProcedure"));
+        auto qos = check_and_cast<QosRecoveryProcedure *>(getModuleByPath("^.sta.wlan[0].mac.hcf.edca.edcaf[1].recoveryProcedure"));
+        StationRetryCounters stationCounters;
+        auto makeFrame = [](int bytes, int tid, int fragment) {
+            auto packet = new Packet("retryTotals");
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+            header->setSequenceNumber(SequenceNumberCyclic(77));
+            header->setTid(tid);
+            header->setFragmentNumber(fragment);
+            packet->insertAtFront(header);
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(bytes)));
+            return packet;
+        };
+        auto packet = makeFrame(2000, 0, 0);
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        auto neighbor = makeFrame(2000, 0, 1);
+        auto neighborHeader = neighbor->peekAtFront<Ieee80211DataHeader>();
+        auto otherTid = makeFrame(2000, 6, 0);
+        auto otherTidHeader = otherTid->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(nonQos->getTotalRetryCount(header) == 0);
+        ASSERT(qos->getTotalRetryCount(header) == 0);
+        // Retain independent identities while retiring/reusing the primary one.
+        nonQos->rtsFrameTransmissionFailed(neighborHeader, &stationCounters);
+        qos->rtsFrameTransmissionFailed(neighborHeader);
+        qos->rtsFrameTransmissionFailed(otherTidHeader);
+        for (int terminal = 0; terminal < 3; terminal++) {
+            ASSERT(nonQos->getTotalRetryCount(header) == 0);
+            ASSERT(qos->getTotalRetryCount(header) == 0);
+            nonQos->rtsFrameTransmissionFailed(header, &stationCounters);
+            qos->rtsFrameTransmissionFailed(header);
+            nonQos->ctsFrameReceived(&stationCounters);
+            qos->ctsFrameReceived();
+            ASSERT(nonQos->getTotalRetryCount(header) == 1);
+            ASSERT(qos->getTotalRetryCount(header) == 1);
+            nonQos->dataOrMgmtFrameTransmissionFailed(packet, header, &stationCounters);
+            qos->dataFrameTransmissionFailed(packet, header);
+            ASSERT(nonQos->getRetryCount(packet, header) == 1);
+            ASSERT(qos->getRetryCount(packet, header) == 1);
+            ASSERT(nonQos->getTotalRetryCount(header) == 2);
+            ASSERT(qos->getTotalRetryCount(header) == 2);
+            if (terminal == 0) {
+                nonQos->ackFrameReceived(packet, header, &stationCounters);
+                qos->ackFrameReceived(packet, header);
+            }
+            else {
+                if (terminal == 1) {
+                    nonQos->dataOrMgmtFrameTransmissionFailed(packet, header, &stationCounters);
+                    qos->dataFrameTransmissionFailed(packet, header);
+                    ASSERT(nonQos->isRetryLimitReached(packet, header));
+                    ASSERT(qos->isRetryLimitReached(packet, header));
+                }
+                else {
+                    for (int i = 0; i < 2; i++) {
+                        nonQos->rtsFrameTransmissionFailed(header, &stationCounters);
+                        qos->rtsFrameTransmissionFailed(header);
+                    }
+                    ASSERT(nonQos->isRtsFrameRetryLimitReached(packet, header));
+                    ASSERT(qos->isRtsFrameRetryLimitReached(packet, header));
+                }
+                nonQos->retryLimitReached(packet, header);
+                qos->retryLimitReached(packet, header);
+            }
+            ASSERT(nonQos->getTotalRetryCount(header) == 0);
+            ASSERT(qos->getTotalRetryCount(header) == 0);
+            ASSERT(nonQos->getTotalRetryCount(neighborHeader) == 1);
+            ASSERT(qos->getTotalRetryCount(neighborHeader) == 1);
+            ASSERT(qos->getTotalRetryCount(otherTidHeader) == 1);
+        }
+        // Below the RTS threshold, data failures occupy SRC alone, not both maps.
+        auto small = makeFrame(100, 0, 0);
+        auto smallHeader = small->peekAtFront<Ieee80211DataHeader>();
+        nonQos->dataOrMgmtFrameTransmissionFailed(small, smallHeader, &stationCounters);
+        qos->dataFrameTransmissionFailed(small, smallHeader);
+        ASSERT(nonQos->getRetryCount(small, smallHeader) == 1);
+        ASSERT(qos->getRetryCount(small, smallHeader) == 1);
+        ASSERT(nonQos->getTotalRetryCount(smallHeader) == 1);
+        ASSERT(qos->getTotalRetryCount(smallHeader) == 1);
+        nonQos->ackFrameReceived(small, smallHeader, &stationCounters);
+        qos->ackFrameReceived(small, smallHeader);
+        ASSERT(nonQos->getTotalRetryCount(smallHeader) == 0);
+        ASSERT(qos->getTotalRetryCount(smallHeader) == 0);
+        nonQos->retryLimitReached(neighbor, neighborHeader);
+        qos->retryLimitReached(neighbor, neighborHeader);
+        qos->retryLimitReached(otherTid, otherTidHeader);
+        delete packet;
+        delete neighbor;
+        delete otherTid;
+        delete small;
+        std::cout << "Recovery retry totals and retirement verified.\n";
+    }
+};
+Define_Module(RetryTotalsTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple RetryTotalsTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::RetryTotalsTest);
+}
+network RetryTotalsNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: RetryTotalsTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RetryTotalsNetwork
+sim-time-limit = 1s
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta.wlan[0].mac.qosStation = true
+*.sta.wlan[0].mac.*.rtsPolicy.rtsThreshold = 1000B
+*.sta.wlan[0].mac.**.shortRetryLimit = 3
+*.sta.wlan[0].mac.**.longRetryLimit = 2
+
+%contains: stdout
+Recovery retry totals and retirement verified.

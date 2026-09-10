@@ -417,10 +417,14 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(protectedHeader)) {
             edcaf->getRecoveryProcedure()->rtsFrameTransmissionFailed(dataHeader);
             retryLimitReached = edcaf->getRecoveryProcedure()->isRtsFrameRetryLimitReached(packet, dataHeader);
+            if (dataAndMgmtRateControl)
+                dataAndMgmtRateControl->rtsFrameTransmissionFailed(packet, edcaf->getRecoveryProcedure()->getTotalRetryCount(dataHeader), retryLimitReached);
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
             edca->getMgmtAndNonQoSRecoveryProcedure()->rtsFrameTransmissionFailed(mgmtHeader, edcaf->getStationRetryCounters());
             retryLimitReached = edca->getMgmtAndNonQoSRecoveryProcedure()->isRtsFrameRetryLimitReached(packet, mgmtHeader);
+            if (dataAndMgmtRateControl)
+                dataAndMgmtRateControl->rtsFrameTransmissionFailed(packet, edca->getMgmtAndNonQoSRecoveryProcedure()->getTotalRetryCount(mgmtHeader), retryLimitReached);
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO QoSDataFrame, NonQoSDataFrame
@@ -531,7 +535,8 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             retryLimitReached = edcaf->getRecoveryProcedure()->isRetryLimitReached(failedPacket, dataHeader);
             if (dataAndMgmtRateControl) {
                 int retryCount = edcaf->getRecoveryProcedure()->getRetryCount(failedPacket, dataHeader);
-                dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, false, retryLimitReached);
+                int totalRetryCount = edcaf->getRecoveryProcedure()->getTotalRetryCount(dataHeader);
+                dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, totalRetryCount, false, retryLimitReached);
             }
             edcaf->getAckHandler()->processFailedFrame(dataHeader);
         }
@@ -541,7 +546,8 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             retryLimitReached = edca->getMgmtAndNonQoSRecoveryProcedure()->isRetryLimitReached(failedPacket, mgmtHeader);
             if (dataAndMgmtRateControl) {
                 int retryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(failedPacket, mgmtHeader);
-                dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, false, retryLimitReached);
+                int totalRetryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getTotalRetryCount(mgmtHeader);
+                dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, totalRetryCount, false, retryLimitReached);
             }
             edcaf->getAckHandler()->processFailedFrame(mgmtHeader);
         }
@@ -618,14 +624,16 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
                     retryCount = edcaf->getRecoveryProcedure()->getRetryCount(lastTransmittedPacket, dataHeader);
                 else
                     retryCount = 0;
-                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
+                int totalRetryCount = edcaf->getRecoveryProcedure()->getTotalRetryCount(dataHeader);
+                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, totalRetryCount, true, false);
             }
             edcaf->getRecoveryProcedure()->ackFrameReceived(lastTransmittedPacket, dataHeader);
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
                 int retryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(lastTransmittedPacket, mgmtHeader);
-                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
+                int totalRetryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getTotalRetryCount(mgmtHeader);
+                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, totalRetryCount, true, false);
             }
             edca->getMgmtAndNonQoSRecoveryProcedure()->ackFrameReceived(lastTransmittedPacket, mgmtHeader, edcaf->getStationRetryCounters());
         }

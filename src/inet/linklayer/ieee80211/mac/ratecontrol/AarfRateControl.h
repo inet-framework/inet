@@ -48,6 +48,7 @@ class INET_API AarfRateControl : public RateControlBase
     virtual void resetRateControl() override { stations.clear(); }
 
   public:
+    using RateControlBase::frameTransmitted;
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;

@@ -65,6 +65,16 @@ void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     computeModeIfTimerIsExpired(state);
 }
 
+void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp)
+{
+    frameTransmitted(frame, totalRetryCount, isSuccessful, isGivenUp);
+}
+
+void OnoeRateControl::rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp)
+{
+    frameTransmitted(frame, totalRetryCount, false, isGivenUp);
+}
+
 void OnoeRateControl::computeModeIfTimerIsExpired(State& state)
 {
     if (simTime() - state.timer >= interval) {

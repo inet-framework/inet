@@ -71,6 +71,8 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 
     virtual bool isRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
     virtual int getRetryCount(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
+    // Missing short or long counters contribute zero, including a clean first attempt.
+    virtual int getTotalRetryCount(const Ptr<const Ieee80211DataHeader>& header) const;
     virtual bool isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader);
 
     virtual void retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);

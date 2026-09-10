@@ -49,6 +49,8 @@ class INET_API OnoeRateControl : public RateControlBase
   public:
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
+    virtual void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp) override;
+    virtual void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;
 };
 
