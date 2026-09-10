@@ -312,6 +312,11 @@ void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
         Ipv6AddressInfo info(ownerp, addr);
         m->emit(ipv6AddressAssignedSignal, &info);
     }
+
+    // choosePreferredAddress() above drops an address whose valid lifetime has already
+    // run out, and leaves its group again; join only for one that is still held.
+    if (findAddress(addr) != -1)
+        joinSolicitedNodeMulticastGroup(addr);
 }
 
 void Ipv6InterfaceData::updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
@@ -425,6 +430,8 @@ void Ipv6InterfaceData::removeAddress(const Ipv6Address& address)
         Ipv6AddressInfo info(ownerp, address);
         m->emit(ipv6AddressRemovedSignal, &info);
     }
+
+    leaveSolicitedNodeMulticastGroup(address);
 }
 
 bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
@@ -448,9 +455,11 @@ void Ipv6InterfaceData::choosePreferredAddress()
     // remove expired addresses (expiryTime == 0 means infinite lifetime)
     simtime_t now = simTime();
     bool changed = false;
+    Ipv6AddressVector expired;
     for (auto it = addresses.begin(); it != addresses.end(); ) {
         if (it->expiryTime != SIMTIME_ZERO && it->expiryTime <= now) {
             EV_INFO << "Address " << it->address << " has expired, removing\n";
+            expired.push_back(it->address);
             it = addresses.erase(it);
             changed = true;
         }
@@ -460,6 +469,7 @@ void Ipv6InterfaceData::choosePreferredAddress()
 
     if (addresses.empty()) {
         preferredAddr = Ipv6Address();
+        leaveExpiredSolicitedNodeMulticastGroups(expired);
         return;
     }
 
@@ -502,6 +512,17 @@ void Ipv6InterfaceData::choosePreferredAddress()
 
     if (changed)
         changed1(F_IP_ADDRESS);
+
+    leaveExpiredSolicitedNodeMulticastGroups(expired);
+}
+
+void Ipv6InterfaceData::leaveExpiredSolicitedNodeMulticastGroups(const Ipv6AddressVector& expired)
+{
+    // Leaving hands control to a Multicast Listener Discovery module, which builds and
+    // sends a Done message, so it must not happen until this object's own state is
+    // consistent again: the address list erased and sorted, and preferredAddr chosen.
+    for (const auto& addr : expired)
+        leaveSolicitedNodeMulticastGroup(addr);
 }
 
 void Ipv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
@@ -559,6 +580,48 @@ void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 {
     Ipv6AddressVector empty;
     changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, empty, MCAST_INCLUDE_SOURCES, empty);
+}
+
+void Ipv6InterfaceData::joinSolicitedNodeMulticastGroup(const Ipv6Address& addr)
+{
+    // RFC 4861 Section 7.2.1: "When a multicast-capable interface becomes enabled, the
+    // node MUST join the all-nodes multicast address on that interface, as well as the
+    // solicited-node multicast address corresponding to each of the IP addresses assigned
+    // to the interface." Tentative addresses are included: RFC 4862 Section 5.4.2 requires
+    // the group to be joined before the first Duplicate Address Detection probe is sent.
+    //
+    // The loopback address is excluded because it is not a link address: its solicited-node
+    // address would collide with that of every real address ending in the same 24 bits.
+    if (!isSolicitedNodeGroupOwner(addr))
+        return;
+
+    joinMulticastGroup(addr.formSolicitedNodeMulticastAddress());
+}
+
+void Ipv6InterfaceData::leaveSolicitedNodeMulticastGroup(const Ipv6Address& addr)
+{
+    // RFC 4861 Section 7.2.1: "a node MUST NOT leave the solicited-node multicast group
+    // until all assigned addresses corresponding to that multicast address have been
+    // removed." Several unicast addresses map to one solicited-node address -- with
+    // stateless autoconfiguration a link-local and a global address formed from the same
+    // interface identifier always do -- so this is the common case, not the exception.
+    // changeMulticastGroupMembership() counts the joins, so one leave per address is
+    // enough: the group entry only goes away with the last of them.
+    if (!isSolicitedNodeGroupOwner(addr))
+        return;
+
+    // Membership, not the interface flags, decides whether a leave is due. The flags are
+    // read once when the address is assigned and again here, and a leave that never had a
+    // matching join would drive the reference count in changeMulticastGroupMembership()
+    // below zero, leaving the interface a member of a group it never joined.
+    Ipv6Address solNodeAddr = addr.formSolicitedNodeMulticastAddress();
+    if (isMemberOfMulticastGroup(solNodeAddr))
+        leaveMulticastGroup(solNodeAddr);
+}
+
+bool Ipv6InterfaceData::isSolicitedNodeGroupOwner(const Ipv6Address& addr) const
+{
+    return ownerp && ownerp->isMulticast() && addr.isUnicast() && !addr.isLoopback();
 }
 
 void Ipv6InterfaceData::changeMulticastGroupMembership(Ipv6Address multicastAddress,
@@ -846,6 +909,7 @@ Ipv6Address Ipv6InterfaceData::removeAddress(Ipv6InterfaceData::AddressType type
             Ipv6AddressInfo info(ownerp, addr);
             m->emit(ipv6AddressRemovedSignal, &info);
         }
+        leaveSolicitedNodeMulticastGroup(addr);
     }
 
     return addr;

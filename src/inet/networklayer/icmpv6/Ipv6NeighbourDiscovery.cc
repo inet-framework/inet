@@ -846,8 +846,10 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
     msg->setContextPointer(dadEntry);
     dadEntry->timeoutMsg = msg;
 
-    // added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
-    // group which is delay up to one 1 second (RFC 4862, 5.4.2)
+    // TODO the uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) term was meant for the RFC 4862
+    // Section 5.4.2 delay before joining the solicited-node group, but it is added to the
+    // timeout -- the wait for an answer -- instead of delaying the first probe. The group
+    // itself is now joined when the address is assigned. See issue #1179.
     scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
 
     emit(startDadSignal, 1);
