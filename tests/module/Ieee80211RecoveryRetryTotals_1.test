@@ -2,7 +2,7 @@
 Check completed-packet retry totals and retirement in both recovery procedures.
 RTS and protected-data counters contribute once; CTS does not retire the packet.
 ACK and exhaustion retire both counters, including when the same sequence identity
-is reused. Other fragments and QoS TIDs retain their own histories. Station retry
+is reused. Other receivers, fragments and QoS TIDs retain their own histories. Station retry
 counter policy is unchanged; these checks concern per-packet accounting lifetime.
 
 %file: RetryTotals.cc
@@ -104,6 +104,47 @@ class RetryTotalsTest : public cSimpleModule
         nonQos->retryLimitReached(neighbor, neighborHeader);
         qos->retryLimitReached(neighbor, neighborHeader);
         qos->retryLimitReached(otherTid, otherTidHeader);
+        // Interleave peers with identical TID, sequence and fragment numbers.
+        auto otherPeer = makeFrame(2000, 0, 0);
+        auto writableHeader = otherPeer->removeAtFront<Ieee80211DataHeader>();
+        writableHeader->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        otherPeer->insertAtFront(writableHeader);
+        auto otherPeerHeader = otherPeer->peekAtFront<Ieee80211DataHeader>();
+        for (int terminal = 0; terminal < 2; terminal++) {
+            qos->rtsFrameTransmissionFailed(header);
+            qos->ctsFrameReceived();
+            ASSERT(qos->getTotalRetryCount(otherPeerHeader) == 0);
+            // A clean completion must neither inherit nor erase the first peer's RTS failure.
+            qos->ackFrameReceived(otherPeer, otherPeerHeader);
+            ASSERT(qos->getTotalRetryCount(header) == 1);
+            qos->dataFrameTransmissionFailed(packet, header);
+            qos->rtsFrameTransmissionFailed(otherPeerHeader);
+            qos->rtsFrameTransmissionFailed(otherPeerHeader);
+            qos->dataFrameTransmissionFailed(otherPeer, otherPeerHeader);
+            qos->dataFrameTransmissionFailed(otherPeer, otherPeerHeader);
+            ASSERT(qos->getTotalRetryCount(header) == 2);
+            ASSERT(qos->getTotalRetryCount(otherPeerHeader) == 4);
+            ASSERT(qos->getRetryCount(packet, header) == 1);
+            ASSERT(qos->getRetryCount(otherPeer, otherPeerHeader) == 2);
+            ASSERT(!qos->isRetryLimitReached(packet, header));
+            ASSERT(qos->isRetryLimitReached(otherPeer, otherPeerHeader));
+            ASSERT(!qos->isRtsFrameRetryLimitReached(packet, header));
+            ASSERT(!qos->isRtsFrameRetryLimitReached(otherPeer, otherPeerHeader));
+            if (terminal == 0)
+                qos->ackFrameReceived(packet, header);
+            else {
+                qos->rtsFrameTransmissionFailed(header);
+                qos->rtsFrameTransmissionFailed(header);
+                ASSERT(qos->isRtsFrameRetryLimitReached(packet, header));
+                ASSERT(!qos->isRtsFrameRetryLimitReached(otherPeer, otherPeerHeader));
+                qos->retryLimitReached(packet, header);
+            }
+            ASSERT(qos->getTotalRetryCount(header) == 0);
+            ASSERT(qos->getTotalRetryCount(otherPeerHeader) == 4);
+            qos->retryLimitReached(otherPeer, otherPeerHeader);
+            ASSERT(qos->getTotalRetryCount(otherPeerHeader) == 0);
+        }
+        delete otherPeer;
         delete packet;
         delete neighbor;
         delete otherTid;
