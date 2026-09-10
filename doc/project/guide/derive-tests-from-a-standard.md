@@ -392,9 +392,73 @@ inet_run_protocol_tests -p inet -w ipv4
 
 (`-p inet` skips the project discovery; discovery crashes on a `~/.omnetpp` directory.)
 
+### The run record
+
+Every document under `model/<proto>/` carries a run record at its head. A date alone is
+not enough. A reader who sees only a date must guess which code ran, and the usual guess
+is "the latest version". That guess is wrong as soon as the branch moves, and the reader
+has no way to see the mistake.
+
+The run record answers one question: what ran, and where? These fields are mandatory.
+
+| Field | What to write |
+| --- | --- |
+| Date | The date and the time of the run, with the time zone. |
+| INET | The branch, the commit, and the state of the working tree. |
+| OMNeT++ | The version, and the commit when the checkout is a git repository. |
+| Build | The mode, `debug` or `release`, and where the libraries come from. |
+| Compiler | The name and the full version. |
+| Platform | The distribution, the kernel and the machine architecture. |
+| Command | The runner command, with every option. |
+
+Do not write a commit hash for a working tree that has uncommitted changes. The hash then
+names code that did not run. Write `dirty` beside the hash and list the changed files.
+
+Check that the build is newer than the sources. A stale `libINET.so` gives you the
+verdicts of an older commit under the name of the new one, and it gives no warning.
+
+Two fields decide more results than a reader expects. The compiler version changes
+floating-point results, and the build mode changes which library the test links. Write
+both, even when they look unimportant.
+
+This command prints the block. Run it in the worktree that you tested.
+
+```sh
+MODE=${MODE:-debug}
+LIB=src/libINET$([ "$MODE" = debug ] && echo _dbg).so
+if [ -z "$(git status --porcelain)" ]; then TREE=clean; else TREE="DIRTY -- the commit does not name the code that ran"; fi
+if [ -n "$(find src -name '*.cc' -newer "$LIB" -print -quit)" ]; then BUILD="STALE -- rebuild before you trust the run"; else BUILD="built from this commit"; fi
+echo "- Date: $(date '+%Y-%m-%d %H:%M %z')"
+echo "- INET: branch \`$(git symbolic-ref --quiet --short HEAD || echo detached)\`, commit \`$(git rev-parse --short HEAD)\`, tree $TREE"
+echo "- OMNeT++: $(opp_run -v | sed -n 's/^Version: \([^,]*\),.*/\1/p')"
+echo "- Build: $MODE, $BUILD"
+echo "- Compiler: $(clang++ --version | head -1)"
+echo "- Platform: $(. /etc/os-release; echo "$PRETTY_NAME"), $(uname -srm)"
+```
+
+It gives a block of this shape:
+
+```markdown
+- Date: 2026-09-10 15:11 +0200
+- INET: branch `master`, commit `7c6e39829e`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0 (...)
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -w ipv4`
+```
+
+Add the command line yourself, and add anything else that changed the run: a
+configuration option, a patched source file, or a container image.
+
+Three documents carry the run record: `results.md`, `coverage.md` and `conformance.md`.
+`categories.md` records decisions, not run data, so it does not need one.
+
+### What results.md holds
+
 Record in `results.md`:
 
-- the date, the INET commit, and the verdict of every test;
+- the run record, and the verdict of every test;
 - for each failure, its class: **test error** (fix the test), **model gap** (keep the
   faithful test, mark `%# expected-result: FAIL`, file the gap), or **specification
   misread** (fix the catalog and the check document);
@@ -411,7 +475,7 @@ ledger (`coverage.md`). Do not edit the feature map. The rule, per feature:
 - `not supported` — every `core` check that ran failed as a model gap;
 - `untested` — no `core` check of the feature ran.
 
-Record the date and the INET commit at the head of the ledger. The support statement is
+Record the run record at the head of the ledger. The support statement is
 bounded by the checks: a `supported` feature is supported as far as the checks reach, not
 proven complete. A failure of a `supporting` check does not lower the support value by
 itself; note it in the ledger, next to the feature.
@@ -449,7 +513,7 @@ cover its governing source document. Combine the claim, the support value of the
 The level row matters: a model that skips a `may` has not failed anything, and a matrix
 that calls it a `defect` teaches the reader to ignore defects.
 
-Record the date, the INET commit, and the ledger state that the matrix comes from. A
+Record the run record, and the ledger state that the matrix comes from. A
 `defect`, and an `unverified` feature with level `mandatory`, are the headlines for the
 next pass. An `undocumented` feature is a documentation task for the model, not a test
 task.
