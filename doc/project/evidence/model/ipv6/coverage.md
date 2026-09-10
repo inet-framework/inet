@@ -12,7 +12,16 @@ The ledger spans the documents of the in-scope set, so one table mixes RFC 8200,
 and RFC 8504 identifiers: a check may establish statements of two documents at once, and a
 later document may govern an earlier statement.
 
-State of the ledger: run of 2026-09-09, tree at commit `95f9805952`, target level 3.
+State of the ledger, from this run:
+
+- Date: 2026-09-10 15:18 +0200
+- INET: branch `master`, commit `0868c36c88`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -w ipv6`
+- Target level: 3
 
 ## Statement coverage
 

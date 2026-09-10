@@ -1,6 +1,6 @@
 # IPv6 — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/ipv6/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/ipv6/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/ipv6/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/ipv6/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
@@ -12,8 +12,11 @@ features, never at the level of a single test.
   `src/inet/networklayer/icmpv6/` and `src/inet/networklayer/contract/ipv6/`, plus a read of
   the module documentation comments. The pass 2 additions (RFC 8504 and the four documents
   it restates) return no line.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the level 3 run of
-  2026-09-09.
+  The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
+  identical to the file at the commit above, so the claims still hold.
+- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-10
+  on `master`, commit `0868c36c88`. Every verdict of that run repeats the verdict of the
+  earlier pass.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalogs, the feature map, or the check

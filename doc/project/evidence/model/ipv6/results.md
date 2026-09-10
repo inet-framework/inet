@@ -1,19 +1,26 @@
 # IPv6 checks — run results and model analysis (pass 2, level 3)
 
-> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [rfc8200/catalog.md](../../standard/rfc8200/catalog.md), [rfc4443/catalog.md](../../standard/rfc4443/catalog.md), [rfc8504/catalog.md](../../standard/rfc8504/catalog.md), [checks.md](../../protocol/ipv6/checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [rfc8200/catalog.md](../../standard/rfc8200/catalog.md), [rfc4443/catalog.md](../../standard/rfc4443/catalog.md), [rfc8504/catalog.md](../../standard/rfc8504/catalog.md), [checks.md](../../protocol/ipv6/checks.md)
 
 Step 7 artifact of the standards test workflow. This is the first document of the IPv6
 workflow that may reference code. It supersedes the pass 1 report; the pass 1 verdicts are
 repeated in the table below, because every test ran again on this tree.
 
-- Date: 2026-09-09. Tree: `inet-rfc-tests-ipv6`, branch `topic/rfc-tests-ipv6`, built from
-  commit `95f9805952` (`master`). No source file changed on this branch.
+- Date: 2026-09-10 15:18 +0200
+- INET: branch `master`, commit `0868c36c88`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
 - Command, after the `setenv` scripts of OMNeT++ and INET:
 
   ```sh
   cd tests/protocol/lib && MODE=debug ./build.sh
   inet_run_protocol_tests -p inet -w ipv6
   ```
+- Earlier passes ran on other trees. The pass log of [`coverage.md`](coverage.md#pass-log)
+  names them. Every verdict below is the verdict of the run above, and it repeats the
+  verdict of the earlier pass.
 
   The `ipv6` suite also holds the two pre-existing Mobile IPv6 tests; they ran and passed
   and are not part of this pass.

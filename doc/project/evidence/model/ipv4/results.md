@@ -1,20 +1,26 @@
 # IPv4 checks — run results and model analysis (pass 3, level 3)
 
-> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791/catalog.md](../../standard/rfc791/catalog.md), [rfc792/catalog.md](../../standard/rfc792/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc6864/catalog.md](../../standard/rfc6864/catalog.md), [checks.md](../../protocol/ipv4/checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791/catalog.md](../../standard/rfc791/catalog.md), [rfc792/catalog.md](../../standard/rfc792/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc6864/catalog.md](../../standard/rfc6864/catalog.md), [checks.md](../../protocol/ipv4/checks.md)
 
 Step 7 artifact of the standards test workflow. This is the first document of the IPv4
 workflow that may reference code. It supersedes the pass 2 report; the pass 2 verdicts are
 repeated in the table below, because every test ran again on this tree.
 
-- Date: 2026-09-09. Tree: `inet-rfc-tests-ipv4-level3`, branch `topic/rfc-tests-ipv4-level3`,
-  built from commit `da7ac0d5bf`. No source file changed on this branch; the IPv4, ICMP and
-  UDP sources are those of `master`.
+- Date: 2026-09-10 15:18 +0200
+- INET: branch `master`, commit `0868c36c88`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
 - Command, after the `setenv` scripts of OMNeT++ and INET:
 
   ```sh
   cd tests/protocol/lib && MODE=debug ./build.sh
   inet_run_protocol_tests -p inet -w ipv4
   ```
+- Earlier passes ran on other trees. The pass log of [`coverage.md`](coverage.md#pass-log)
+  names them. Every verdict below is the verdict of the run above, and it repeats the
+  verdict of the earlier pass.
 
 ## Verdicts
 

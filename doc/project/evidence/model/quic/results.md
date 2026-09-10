@@ -1,20 +1,25 @@
 # QUIC checks — run results and model analysis (pass 2, level 3)
 
-> **Kind:** report · **Status:** snapshot 2026-09-09 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9000/catalog.md), [checks.md](../../protocol/quic/checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9000/catalog.md), [checks.md](../../protocol/quic/checks.md)
 
 Step 7 artifact of the standards test workflow. This is the first document of the QUIC
 workflow that may reference code.
 
-- Pass 1, level 2. Date: 2026-09-08. Tree: `inet-rfc-tests-quic`, branch
-  `topic/rfc-tests-quic` on top of `topic/rfc-tests-ipv4`, source identical to `master`.
-- Pass 2, level 3. Date: 2026-09-09. Tree: `inet-master`, branch `master`, source unchanged
-  by this pass.
+- Date: 2026-09-10 15:18 +0200
+- INET: branch `master`, commit `0868c36c88`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
 - Command, after the `setenv` scripts of OMNeT++ and INET:
 
   ```sh
   cd tests/protocol/lib && MODE=debug ./build.sh
   inet_run_protocol_tests -p inet -w quic
   ```
+- Earlier passes ran on other trees. The pass log of [`coverage.md`](coverage.md#pass-log)
+  names them. Every verdict below is the verdict of the run above, and it repeats the
+  verdict of the earlier pass.
 
 ## Verdicts
 

@@ -8,8 +8,16 @@ changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
-State of the ledger: run of 2026-09-08, on top of the IPv4 branch, source identical to
-`master`.
+State of the ledger, from this run:
+
+- Date: 2026-09-10 15:18 +0200
+- INET: branch `master`, commit `0868c36c88`, tree clean
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -w tcp`
+- Target level: 3
 
 ## Statement coverage
 
