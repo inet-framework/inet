@@ -78,14 +78,16 @@ the `xid` alone cannot decide, because the values that two clients pick need not
 
 ### Scenario constants
 
-- The mockup with an injector.
+- The mockup with an injector, **and no server**. A client with no answer stays in SELECTING
+  for as long as it waits for offers, so the crafted message is the only answer it can get and
+  it arrives in the state the statement is about. With a server in the mockup the real
+  DHCPOFFER would arrive within microseconds of the DHCPDISCOVER, and no crafted message could
+  be placed before it.
 - The crafted message is a DHCPOFFER: `op` BOOTREPLY, the transaction identifier **of the
   client's own pending DHCPDISCOVER**, `yiaddr` 192.168.1.250, a `server identifier` option
   holding 192.168.1.9, an `IP address lease time` option of 600, and a `client identifier`
   option whose octets belong to **another** client.
 - The message is addressed to the client, to UDP port 68.
-- The crafted DHCPOFFER is put on the link before any answer from the real server, so that the
-  client is in SELECTING when it arrives.
 - Observation stops one second after the injection.
 
 ### Procedure
@@ -135,14 +137,16 @@ arriving DHCPACK messages must be silently discarded.
 
 ### Scenario constants
 
-- The mockup with an injector.
+- The mockup with an injector, **and no server**, for the reason the check above gives: a
+  client with no answer stays in SELECTING, and the crafted messages then arrive in the state
+  the statement is about.
 - Two crafted messages. The first is a DHCPOFFER with a transaction identifier that differs
   from the client's own, `yiaddr` 192.168.1.251, a `server identifier` option holding
   192.168.1.8, and a lease time of 600. The second is a DHCPACK with the client's **correct**
   transaction identifier, `yiaddr` 192.168.1.252 and the same `server identifier`.
-- Both are addressed to the client, to UDP port 68, and both are put on the link while the
-  client is in SELECTING, before the real server answers.
-- Observation stops one second after the injection.
+- Both are addressed to the client, to UDP port 68.
+- Observation runs long enough for the client to give up waiting for an offer and ask again,
+  which is what observation 5 reads.
 
 ### Procedure
 
@@ -164,9 +168,8 @@ arriving DHCPACK messages must be silently discarded.
    the foreign transaction identifier was discarded (RFC2131-XID-4).
 4. No frame leaves the client with 192.168.1.252 as its IP source address: the DHCPACK was
    discarded although its transaction identifier was right (RFC2131-XID-4).
-5. The client is still in SELECTING afterwards, which shows as a repeated DHCPDISCOVER or as an
-   ordinary DHCPREQUEST that answers the real server's DHCPOFFER, and not as a configured
-   client that holds 192.168.1.251 or 192.168.1.252.
+5. A second DHCPDISCOVER leaves the client: it never left SELECTING, gave up waiting, and
+   started again. A client that had accepted either crafted message would be configured instead.
 
 ### Notes
 
@@ -175,9 +178,9 @@ arriving DHCPACK messages must be silently discarded.
   identifier is right**, because a client in SELECTING has not asked for anything yet and an
   unrequested DHCPACK cannot be an answer. A check with the DHCPOFFER alone would leave that
   half untouched.
-- Observation 5 states what the client should look like afterwards in a way that admits two
-  outcomes, because which one occurs depends on how long the client waits for offers. Both show
-  the same thing: the client did not take the crafted address.
+- Observation 5 is the positive counterpart of the two absences. A check made only of absences
+  cannot tell a client that discarded the two messages from a client that stopped working, and
+  the second DHCPDISCOVER shows that the client is alive and still looking.
 - The two crafted messages carry two different addresses so that observation 4 can tell them
   apart. With one address, a client that took the first and refused the second would look the
   same as a client that refused both.

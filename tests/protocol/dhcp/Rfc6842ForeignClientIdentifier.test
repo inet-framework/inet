@@ -1,0 +1,153 @@
+%description:
+
+RFC 6842 -- a client discards, in silence, a reply whose client identifier is not its own.
+
+Checks RFC6842-CLID-3 (must) from doc/project/evidence/standard/rfc6842/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/dhcp/checks/client-identity.md#foreign-client-identifier-discarded;
+the program steps below map onto its expected observations. Mapping of the mockup with an
+injector and no server: client C = hostA, and hostE is the far end of the link and runs no DHCP.
+
+Level 3: the reply is crafted. It is correct in every way but one -- the transaction identifier
+matches, the type is right, the fields are well formed -- so a client that ignores it can be
+ignoring it for one reason only.
+
+There is no server in the mockup on purpose. A client with no answer stays in SELECTING, so the
+crafted message arrives in the state the statement is about. With a server, the real DHCPOFFER
+would arrive within microseconds of the DHCPDISCOVER and no crafted message could be placed
+before it.
+
+Expected result FAIL, model gap: DhcpClient::handleDhcpMessage tests the transaction identifier
+of an arriving reply and nothing else; it never reads the client identifier option of a reply
+(src/inet/applications/dhcp/DhcpClient.cc, the xid test and the SELECTING branch). So the client
+accepts the crafted DHCPOFFER and answers it with a DHCPREQUEST that names 192.168.1.9 and
+192.168.1.250, values that belong to no node of the mockup. The assertion stays as the standard
+states it; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The identifier of another client. The client of the mockup uses its own hardware address, and
+// the ini fixes that address, so the two cannot be equal by accident.
+static const char *FOREIGN_IDENTIFIER = "0A-AA-00-00-00-77";
+
+// A DHCPOFFER that is correct except for its client identifier.
+static Packet *buildOfferWithForeignIdentifier(const CaptureStore& captures)
+{
+    uint32_t xid = (uint32_t)captures.at("xid").intValue();
+    auto dhcp = makeDhcp(BOOTREPLY, xid, MacAddress("0A-AA-00-00-00-01"));
+    dhcp->setYiaddr(Ipv4Address("192.168.1.250"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPOFFER);
+    options.setServerIdentifier(Ipv4Address("192.168.1.9"));
+    options.setLeaseTime(SimTime(600, SIMTIME_S));
+    options.setSubnetMask(Ipv4Address("255.255.255.0"));
+    options.setClientIdentifier(MacAddress(FOREIGN_IDENTIFIER));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPOFFER", dhcp, Ipv4Address("192.168.1.9"),
+            Ipv4Address::ALLONES_ADDRESS, DHCP_SERVER_PORT, DHCP_CLIENT_PORT, "hostA");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6842_foreign_client_identifier")
+        // The client's own DHCPDISCOVER; its transaction identifier goes into the crafted reply,
+        // so that the identifier is the only thing wrong with it.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .capture("xid", "DhcpMessage.xid")
+                  .describe("a DHCPDISCOVER from the client, whose transaction identifier is recorded")
+                  .within(1.0))
+        .inject(inject("hostA").into("eth[0]", "upperLayerOut").after(0.05)
+                  .describe("a crafted DHCPOFFER with the client's own transaction identifier and another client's identifier")
+                  .packet(buildOfferWithForeignIdentifier))
+        // Expected observation 1: the crafted reply reaches the client, with the right
+        // transaction identifier and a foreign client identifier.
+        .once(on("hostA.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && dhcp->getXid() == (uint32_t)c.get("xid").intValue()
+                             && hasOption(dhcp, CLIENT_ID)
+                             && dhcp->getOptions().getClientIdentifier() == MacAddress(FOREIGN_IDENTIFIER);
+                  })
+                  .describe("the crafted DHCPOFFER arriving at the client with the right transaction identifier and a foreign client identifier")
+                  .within(0.2))
+        // Expected observations 2, 3 and 4 as one absence: the client neither answers the crafted
+        // offer nor uses the address it carries. Three watches cannot cover one window, so one
+        // predicate covers all three.
+        .never(on("hostA")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST) {
+                          const DhcpOptions& o = dhcp->getOptions();
+                          if (quad(o.getServerIdentifier()) == "192.168.1.9")     // observation 2
+                              return true;
+                          if (quad(o.getRequestedIp()) == "192.168.1.250")        // observation 3
+                              return true;
+                      }
+                      return ipv4Source(c.event.packet) == "192.168.1.250";        // observation 4
+                  })
+                  .describe("a DHCPREQUEST naming the crafted server or the crafted address, or any frame from that address")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6842_foreign_client_identifier compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector and no server: a client, a far end that runs no DHCP, and the
+// ability to put one crafted message onto the link.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='hostE' address='192.168.1.9' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        hostA: StandardHost { @display("p=450,100"); }
+        hostE: StandardHost { @display("p=450,260"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostE.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 5s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# A fixed hardware address for the client, so that the crafted identifier cannot be equal to it
+# by accident.
+*.hostA.eth[0].address = "0A-AA-00-00-00-01"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+# hostE is the far end of the link. It runs no DHCP, so nothing answers the client.
+*.hostE.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc6842_foreign_client_identifier: PASS

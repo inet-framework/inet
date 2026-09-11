@@ -1,0 +1,169 @@
+%description:
+
+RFC 2131 -- a client in SELECTING discards, in silence, a DHCPOFFER whose transaction identifier
+is not its own, and any DHCPACK at all.
+
+Checks RFC2131-XID-4 (must) from doc/project/evidence/standard/rfc2131/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/dhcp/checks/client-identity.md#foreign-transaction-identifier-discarded;
+the program steps below map onto its expected observations. Mapping of the mockup with an
+injector and no server: client C = hostA, and hostE is the far end of the link and runs no DHCP.
+
+Level 3: two crafted replies, one for each half of the statement. The second half is the sharper
+one: a DHCPACK is discarded in SELECTING even when its transaction identifier is right, because
+a client in SELECTING has not asked for anything yet and an unrequested DHCPACK cannot be an
+answer.
+
+There is no server in the mockup, so the client stays in SELECTING and the crafted messages
+arrive in the state the statement is about.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A DHCPOFFER whose transaction identifier is not the client's.
+static Packet *buildOfferWithForeignXid(const CaptureStore& captures)
+{
+    uint32_t xid = (uint32_t)captures.at("xid").intValue();
+    auto dhcp = makeDhcp(BOOTREPLY, xid ^ 0xFFFFFFFFu, MacAddress("0A-AA-00-00-00-01"));
+    dhcp->setYiaddr(Ipv4Address("192.168.1.251"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPOFFER);
+    options.setServerIdentifier(Ipv4Address("192.168.1.8"));
+    options.setLeaseTime(SimTime(600, SIMTIME_S));
+    options.setSubnetMask(Ipv4Address("255.255.255.0"));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPOFFER", dhcp, Ipv4Address("192.168.1.8"),
+            Ipv4Address::ALLONES_ADDRESS, DHCP_SERVER_PORT, DHCP_CLIENT_PORT, "hostA");
+}
+
+// A DHCPACK with the client's correct transaction identifier, which a client in SELECTING must
+// still discard.
+static Packet *buildUnrequestedAck(const CaptureStore& captures)
+{
+    uint32_t xid = (uint32_t)captures.at("xid").intValue();
+    auto dhcp = makeDhcp(BOOTREPLY, xid, MacAddress("0A-AA-00-00-00-01"));
+    dhcp->setYiaddr(Ipv4Address("192.168.1.252"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPACK);
+    options.setServerIdentifier(Ipv4Address("192.168.1.8"));
+    options.setLeaseTime(SimTime(600, SIMTIME_S));
+    options.setSubnetMask(Ipv4Address("255.255.255.0"));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPACK", dhcp, Ipv4Address("192.168.1.8"),
+            Ipv4Address::ALLONES_ADDRESS, DHCP_SERVER_PORT, DHCP_CLIENT_PORT, "hostA");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_foreign_transaction_id")
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .capture("xid", "DhcpMessage.xid")
+                  .describe("a DHCPDISCOVER from the client, whose transaction identifier is recorded")
+                  .within(1.0))
+        .inject(inject("hostA").into("eth[0]", "upperLayerOut").after(0.05)
+                  .describe("a crafted DHCPOFFER whose transaction identifier is not the client's")
+                  .packet(buildOfferWithForeignXid))
+        // Expected observation 1: the first crafted reply reaches the client.
+        .once(on("hostA.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && dhcp->getXid() != (uint32_t)c.get("xid").intValue();
+                  })
+                  .describe("the crafted DHCPOFFER arriving at the client with a foreign transaction identifier")
+                  .within(0.2))
+        .inject(inject("hostA").into("eth[0]", "upperLayerOut").after(0.05)
+                  .describe("a crafted DHCPACK with the client's own transaction identifier")
+                  .packet(buildUnrequestedAck))
+        // Expected observation 2: the second crafted reply reaches the client.
+        .once(on("hostA.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
+                             && dhcp->getXid() == (uint32_t)c.get("xid").intValue();
+                  })
+                  .describe("the crafted DHCPACK arriving at the client with the right transaction identifier")
+                  .within(0.2))
+        // Expected observations 3 and 4 as one absence: the client neither answers the crafted
+        // offer nor uses either crafted address.
+        .never(on("hostA")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST) {
+                          const DhcpOptions& o = dhcp->getOptions();
+                          if (quad(o.getServerIdentifier()) == "192.168.1.8")      // observation 3
+                              return true;
+                          if (quad(o.getRequestedIp()) == "192.168.1.251")         // observation 3
+                              return true;
+                      }
+                      std::string source = ipv4Source(c.event.packet);
+                      return source == "192.168.1.251" || source == "192.168.1.252"; // observation 4
+                  })
+                  .describe("a DHCPREQUEST naming the crafted server or the crafted address, or any frame from either crafted address")
+                  .within(40.0))
+        // Expected observation 5: the client gives up waiting and asks again, so it never left
+        // SELECTING.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .describe("a second DHCPDISCOVER from the client, which shows that it never left SELECTING")
+                  .within(40.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_foreign_transaction_id compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector and no server: a client, a far end that runs no DHCP, and the
+// ability to put one crafted message onto the link.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='hostE' address='192.168.1.9' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        hostA: StandardHost { @display("p=450,100"); }
+        hostE: StandardHost { @display("p=450,260"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostE.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 90s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# A fixed hardware address for the client, so that the crafted identifier cannot be equal to it
+# by accident.
+*.hostA.eth[0].address = "0A-AA-00-00-00-01"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+# hostE is the far end of the link. It runs no DHCP, so nothing answers the client.
+*.hostE.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2131_foreign_transaction_id: PASS

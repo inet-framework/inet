@@ -1,0 +1,146 @@
+%description:
+
+RFC 2131 -- a server answers a request for an address of a foreign subnet with a broadcast
+DHCPNAK that carries a server identifier and nothing else.
+
+Checks RFC2131-NAK-2 (should), NAK-3 (must), NAK-5 (must not), NAK-6 (must) and REQ-5 (must and
+must not), from doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet;
+the program steps below map onto its expected observations. Mapping of the mockup with an
+injector: server S = server, client C = hostA.
+
+Level 3: the message is crafted, because no client of the mockup can ask for an address of a
+subnet it is not on.
+
+Expected result FAIL, model gap: DhcpServer::processDhcpMessage asks the two questions of
+RFC 2131 section 4.3.2 in the wrong order. It looks the requested address up in its table of
+leases first, and only for an address it finds does it then test the subnet
+(src/inet/applications/dhcp/DhcpServer.cc, the init-reboot branch). An address of a foreign
+subnet is in no table, so the server takes the "no record of this client" path and stays silent.
+RFC 2131 orders the two the other way: "Determining whether a client in the INIT-REBOOT state is
+on the correct network is done by examining the contents of 'giaddr', the 'requested IP address'
+option, and a database lookup. If the DHCP server detects that the client is on the wrong net
+... then the server SHOULD send a DHCPNAK message to the client". The silence rule applies to a
+client the server has no record of **on the correct network**, and 10.0.0.7 is not on it. Step 1
+therefore misses its deadline. The assertion stays as the standard states it; see results.md.
+
+The statement is a SHOULD, so the conformance matrix reads the failure as a declined behaviour
+and not as a defect. What makes it worth recording anyway is that the same code path passes
+Rfc2131SilentUnknownClient.test: the model is silent in both cases, and the standard asks for
+silence in one of them only.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A DHCPREQUEST of a client in INIT-REBOOT asking for an address of a foreign subnet.
+static Packet *buildForeignSubnetRequest(const CaptureStore&)
+{
+    auto dhcp = makeDhcp(BOOTREQUEST, 0x5A5A0002, MacAddress("0A-AA-00-00-00-0A"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPREQUEST);
+    options.setClientIdentifier(MacAddress("0A-AA-00-00-00-0A"));
+    options.setRequestedIp(Ipv4Address("10.0.0.7"));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPREQUEST", dhcp, Ipv4Address::UNSPECIFIED_ADDRESS,
+            Ipv4Address::ALLONES_ADDRESS, DHCP_CLIENT_PORT, DHCP_SERVER_PORT, "server");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_nak_wrong_subnet")
+        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+                  .describe("a crafted DHCPREQUEST from INIT-REBOOT asking for 10.0.0.7, an address of a foreign subnet")
+                  .packet(buildForeignSubnetRequest))
+        // Expected observations 2 to 6: a DHCPNAK, broadcast at both layers, with a server
+        // identifier and no other option, and with its three address fields zero.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPNAK)
+                          return false;
+                      if (dhcp->getXid() != 0x5A5A0002)
+                          return false;
+                      // observation 3: broadcast at both layers
+                      bool broadcast = ipv4Destination(c.event.packet) == "255.255.255.255"
+                              && isLinkBroadcast(c.event.packet);
+                      // observation 4: a server identifier option
+                      bool serverId = hasOption(dhcp, SERVER_ID);
+                      // observation 5: no other option at all
+                      DhcpOptionScan scan = scanDhcpOptions(c.event.packet);
+                      bool onlyAllowed = scan.parsed;
+                      for (int code : scan.codes)
+                          if (code != 53 && code != 54 && code != 61 && code != 56 && code != 255)
+                              onlyAllowed = false;
+                      // observation 6: ciaddr, yiaddr and siaddr zero
+                      bool addressesZero = dhcp->getCiaddr().isUnspecified()
+                              && dhcp->getYiaddr().isUnspecified();
+                      return broadcast && serverId && onlyAllowed && addressesZero;
+                  })
+                  .describe("a DHCPNAK broadcast at both layers, carrying a server identifier and no configuration option, with ciaddr and yiaddr 0.0.0.0")
+                  .within(1.0))
+        // Expected observation 7: no DHCPACK answers the crafted message.
+        .never(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .describe("a DHCPACK from the server")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_nak_wrong_subnet compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector: the plain mockup plus the ability to put one crafted message
+// onto the link. A switch joins the nodes so that the mockup can hold more than two of them.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 3s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_nak_wrong_subnet: PASS

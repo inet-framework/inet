@@ -1,0 +1,117 @@
+%description:
+
+RFC 2131 -- a server with no record of a client in INIT-REBOOT stays silent.
+
+Checks RFC2131-NAK-7 (must) from doc/project/evidence/standard/rfc2131/catalog.md. The English
+procedure is in doc/project/evidence/protocol/dhcp/checks/nak.md#silence-for-an-unknown-client;
+the program steps below map onto its expected observations. Mapping of the mockup with an
+injector: server S = server, client C = hostA, and the crafted message stands for a client that
+no node of the mockup is.
+
+Level 3: the message is crafted. A client of the mockup reaches INIT-REBOOT only after a restart
+that keeps a remembered address, and the check needs an address in the server's subnet that the
+server never gave out, which no client of the mockup can ask for.
+
+The requested address 192.168.1.200 is inside the subnet, so the subnet test of RFC 2131 section
+4.3.2 passes, and above the pool the server gives out, so no exchange of the mockup can have
+bound it. The hardware address in chaddr belongs to no node.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A DHCPREQUEST of a client in INIT-REBOOT: no server identifier, the remembered address in the
+// requested IP address option, ciaddr zero, broadcast from 0.0.0.0 to the server port.
+static Packet *buildInitRebootRequest(const CaptureStore&)
+{
+    auto dhcp = makeDhcp(BOOTREQUEST, 0x5A5A0001, MacAddress("0A-AA-00-00-00-09"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPREQUEST);
+    options.setClientIdentifier(MacAddress("0A-AA-00-00-00-09"));
+    options.setRequestedIp(Ipv4Address("192.168.1.200"));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPREQUEST", dhcp, Ipv4Address::UNSPECIFIED_ADDRESS,
+            Ipv4Address::ALLONES_ADDRESS, DHCP_CLIENT_PORT, DHCP_SERVER_PORT, "server");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_silent_unknown_client")
+        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+                  .describe("a crafted DHCPREQUEST from INIT-REBOOT asking for 192.168.1.200, from a hardware address the server never served")
+                  .packet(buildInitRebootRequest))
+        // Expected observation 1: the crafted message reaches the server's transport module.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && hasOption(dhcp, REQUESTED_IP)
+                             && quad(dhcp->getOptions().getRequestedIp()) == "192.168.1.200"
+                             && !hasOption(dhcp, SERVER_ID)
+                             && dhcp->getCiaddr().isUnspecified();
+                  })
+                  .describe("the crafted DHCPREQUEST arriving at the server, asking for 192.168.1.200, with no server identifier and ciaddr 0.0.0.0")
+                  .within(0.1))
+        // Expected observation 2: from that instant on, the server sends no DHCP message at all.
+        .never(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isAnyDhcp(c.event.packet); })
+                  .describe("any DHCP message from the server")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_silent_unknown_client compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector: the plain mockup plus the ability to put one crafted message
+// onto the link. A switch joins the nodes so that the mockup can hold more than two of them.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 3s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_silent_unknown_client: PASS

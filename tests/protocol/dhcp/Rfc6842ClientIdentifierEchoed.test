@@ -1,0 +1,159 @@
+%description:
+
+RFC 6842 -- a server returns the client identifier option of the client, unaltered, in its
+DHCPOFFER and its DHCPACK.
+
+Checks RFC6842-CLID-1 (must), and covers RFC2132-CLID-1, from
+doc/project/evidence/standard/rfc6842/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/client-identity.md#client-identifier-echoed; the
+program steps below map onto its expected observations. Mapping of the mockup with two clients:
+server S = server, client C = hostA, client D = hostB.
+
+RFC 6842 reverses a MUST NOT of RFC 2131 table 3, so this check and the offer and
+acknowledgement contents checks read the same table row in opposite directions. The override row
+is in doc/project/evidence/protocol/dhcp/standards.md.
+
+Expected result FAIL, model gap: DhcpServer never writes a client identifier option into a
+DHCPOFFER, a DHCPACK or a DHCPNAK. The code sets subnet mask, router, domain name server, the
+two lease timers, the lease time and the server identifier, and nothing else
+(DhcpServer::sendOffer and DhcpServer::sendAck). That follows RFC 2131 table 3 and contradicts
+RFC 6842 section 3. The behaviour is sixteen years out of date, not wrong as of 1997; see
+results.md.
+
+RFC6842-CLID-2, the MUST NOT half, is not part of this test. It needs a client that sends no
+client identifier option, and the client of the model always sends one.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The two identifiers of the two clients, recorded from their DHCPDISCOVER messages.
+static MacAddress identifierA;
+static MacAddress identifierB;
+
+Define_ProtocolTestProgram()
+{
+    identifierA = MacAddress();
+    identifierB = MacAddress();
+    return ProtocolTest("rfc6842_client_identifier_echoed")
+        // Expected observation 1 and 5: each client sends an identifier, and the two differ.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
+                          return false;
+                      if (!hasOption(dhcp, CLIENT_ID))
+                          return false;
+                      identifierA = dhcp->getOptions().getClientIdentifier();
+                      return true;
+                  })
+                  .describe("a DHCPDISCOVER from client C carrying a client identifier option")
+                  .within(1.0))
+        .once(on("hostB.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
+                          return false;
+                      if (!hasOption(dhcp, CLIENT_ID))
+                          return false;
+                      identifierB = dhcp->getOptions().getClientIdentifier();
+                      return identifierB != identifierA;
+                  })
+                  .describe("a DHCPDISCOVER from client D carrying a different client identifier option")
+                  .within(1.0))
+        // Expected observations 2 and 3: client C gets its own identifier back, in both replies.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && hasOption(dhcp, CLIENT_ID)
+                             && dhcp->getOptions().getClientIdentifier() == identifierA;
+                  })
+                  .describe("a DHCPOFFER reaching client C with client C's own identifier, unaltered")
+                  .within(2.0))
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
+                             && hasOption(dhcp, CLIENT_ID)
+                             && dhcp->getOptions().getClientIdentifier() == identifierA;
+                  })
+                  .describe("a DHCPACK reaching client C with client C's own identifier, unaltered")
+                  .within(2.0))
+        // Expected observation 4: client D gets its own identifier and not client C's.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
+                             && hasOption(dhcp, CLIENT_ID)
+                             && dhcp->getOptions().getClientIdentifier() == identifierB;
+                  })
+                  .describe("a DHCPACK reaching client D with client D's own identifier and not client C's")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6842_client_identifier_echoed compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector: the plain mockup plus the ability to put one crafted message
+// onto the link. A switch joins the nodes so that the mockup can hold more than two of them.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+        hostB: StandardHost { @display("p=450,260"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 3s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.host*.numApps = 1
+*.host*.app[0].typename = "DhcpClient"
+*.host*.app[0].interface = "eth0"
+
+# The second client starts a tenth of a second later, so that each reply can be attributed to
+# the request it answers.
+*.hostB.app[0].startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST rfc6842_client_identifier_echoed: PASS

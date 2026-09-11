@@ -31,13 +31,15 @@ links to.
 | [Duplicate address declined](checks/decline.md#duplicate-address-declined) | `checks/decline.md` | RFC2131-DECL-1, DECL-2, DECL-5, DECL-6, DECL-7 |
 | [Inform answered without a lease](checks/inform.md#inform-answered-without-a-lease) | `checks/inform.md` | RFC2131-INF-1, INF-2, INF-3, INF-5, ACK-3 |
 | [Release on shutdown](checks/release.md#release-on-shutdown) | `checks/release.md` | RFC2131-REL-1, REL-3, REL-5 |
-| [Broadcast bit honoured](checks/reply-delivery.md#broadcast-bit-honoured) | `checks/reply-delivery.md` | RFC2131-BCAST-4, BCAST-5, BCAST-6 |
+| [Reply to a client that clears the broadcast bit](checks/reply-delivery.md#reply-to-a-client-that-clears-the-broadcast-bit) | `checks/reply-delivery.md` | RFC2131-BCAST-5, BCAST-6 (the clear half) |
+| [Reply to a client that sets the broadcast bit](checks/reply-delivery.md#reply-to-a-client-that-sets-the-broadcast-bit) | `checks/reply-delivery.md` | RFC2131-BCAST-4, BCAST-6 (the set half) |
+| [The flags field of a server reply](checks/reply-delivery.md#the-flags-field-of-a-server-reply) | `checks/reply-delivery.md` | RFC2131-OFF-6, ACK-8 (the `flags` half of each) |
 | [Discover repeated without a server](checks/retransmission.md#discover-repeated-without-a-server) | `checks/retransmission.md` | RFC2131-RETX-1, RETX-3 |
 | [Request repeated when the reply is lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost) | `checks/retransmission.md` | RFC2131-RETX-4 |
 | [Requested parameters returned](checks/parameters.md#requested-parameters-returned) | `checks/parameters.md` | RFC2131-SEL-4, RFC2132-PRL-1, RFC2132-MASK-1, RFC2132-ROUTER-1; covers SEL-5 |
 | [A parameter the server has no value for](checks/parameters.md#a-parameter-the-server-has-no-value-for) | `checks/parameters.md` | RFC2131-SEL-5 |
 
-Twenty-four checks. Eight of them need a fault or a crafted message and are therefore
+Twenty-six checks. Ten of them need a fault or a crafted message and are therefore
 level 3: the three that inject a message ([Negative acknowledgement for a wrong
 subnet](checks/nak.md#negative-acknowledgement-for-a-wrong-subnet), [Silence for an unknown
 client](checks/nak.md#silence-for-an-unknown-client), [Inform answered without a
@@ -69,7 +71,7 @@ here and not forgotten.
 
 ## Common mockups
 
-Six mockups serve the twenty-four checks. Every one of them is one IPv4 subnet, because DHCP
+Six mockups serve the twenty-six checks. Every one of them is one IPv4 subnet, because DHCP
 without a relay agent is a protocol of one subnet.
 
 **The plain mockup.** One server S and one client C on one link. S has a fixed address and a

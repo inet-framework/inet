@@ -1,0 +1,125 @@
+%description:
+
+RFC 2131 -- a server reply carries the flags field of the request it answers.
+
+Checks the flags half of RFC2131-OFF-6 (description) and of RFC2131-ACK-8 (description) from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply;
+the program steps below map onto its expected observations. Mapping of the mockup with an
+injector: server S = server, and the crafted request stands for a client that sets the BROADCAST
+bit.
+
+Level 3: the request is crafted, and the bit must be set for the check to say anything. Where
+every client of the mockup clears the bit, a server that always writes zero into the field passes
+by accident, which is why Rfc2131OfferContents.test can cover the field only for the value zero.
+
+Expected result FAIL, model gap: DhcpServer::sendOffer writes a constant into the field --
+"offer->setBroadcast(false); // unicast", src/inet/applications/dhcp/DhcpServer.cc:419 -- and
+DhcpServer::sendAck does the same at :338. RFC 2131 table 3 says the flags of a DHCPOFFER are the
+flags of the client DHCPDISCOVER and the flags of a DHCPACK are those of the client DHCPREQUEST.
+Only DhcpServer::sendNak copies the value, at :300, so the three replies of one server do not
+agree. The assertion stays as the standard states it; see results.md.
+
+The field matters to a relay agent and not to the client, and there is no relay agent in this
+mockup, so the consequence is invisible here. The rule is still a field rule.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A DHCPDISCOVER with the BROADCAST bit set, from a hardware address of its own.
+static Packet *buildDiscoverWithBroadcastBit(const CaptureStore&)
+{
+    auto dhcp = makeDhcp(BOOTREQUEST, 0x5A5A0005, MacAddress("0A-AA-00-00-00-0E"));
+    dhcp->setBroadcast(true);
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPDISCOVER);
+    options.setClientIdentifier(MacAddress("0A-AA-00-00-00-0E"));
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPDISCOVER", dhcp, Ipv4Address::UNSPECIFIED_ADDRESS,
+            Ipv4Address::ALLONES_ADDRESS, DHCP_CLIENT_PORT, DHCP_SERVER_PORT, "server");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_reply_flags_field")
+        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+                  .describe("a crafted DHCPDISCOVER with the BROADCAST bit set")
+                  .packet(buildDiscoverWithBroadcastBit))
+        // Expected observation 1: the crafted request reaches the server with the bit set.
+        .once(on("server.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
+                             && dhcp->getBroadcast();
+                  })
+                  .describe("the crafted DHCPDISCOVER arriving at the server with the BROADCAST bit set")
+                  .within(0.1))
+        // Expected observation 2: the DHCPOFFER carries the same value back.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && dhcp->getXid() == 0x5A5A0005
+                             && dhcp->getBroadcast();
+                  })
+                  .describe("a DHCPOFFER whose own flags field carries the BROADCAST bit set, the value the request carried")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_reply_flags_field compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector: the plain mockup plus the ability to put one crafted message
+// onto the link. A switch joins the nodes so that the mockup can hold more than two of them.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 3s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+
+
+%contains: stdout
+PROTOCOLTEST rfc2131_reply_flags_field: PASS

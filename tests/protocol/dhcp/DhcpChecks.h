@@ -37,6 +37,9 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -331,11 +334,30 @@ inline void finishDhcp(const Ptr<DhcpMessage>& dhcp)
     dhcp->setChunkLength(B(length));
 }
 
+// The interface identifier of a named interface of a named network node. An injected packet
+// enters above the MAC, so nothing has told it which interface it arrived on; a DHCP server
+// drops a message whose arrival interface is not the one it serves, and so does much else in
+// the stack. The identifier the crafted packet needs is the one a real arriving frame would
+// carry, and only the node's own interface table knows it.
+inline int interfaceIdOf(const char *nodeName, const char *interfaceName)
+{
+    auto network = cSimulation::getActiveSimulation()->getSystemModule();
+    auto node = network->getSubmodule(nodeName);
+    if (node == nullptr)
+        throw cRuntimeError("ProtocolTest: no node '%s' in the network", nodeName);
+    auto interfaceTable = check_and_cast<IInterfaceTable *>(node->getSubmodule("interfaceTable"));
+    auto interface = interfaceTable->findInterfaceByName(interfaceName);
+    if (interface == nullptr)
+        throw cRuntimeError("ProtocolTest: no interface '%s' at node '%s'", interfaceName, nodeName);
+    return interface->getInterfaceId();
+}
+
 // Wraps a crafted DHCP message in the UDP and IPv4 headers it needs and tags it as an inbound
 // datagram, so that pushing it into a node's upperLayerOut gate has the same effect as its
 // arrival from the wire. The pattern is the one of the framework's own injection self tests.
 inline Packet *wrapDhcp(const char *name, const Ptr<DhcpMessage>& dhcp,
-        const Ipv4Address& source, const Ipv4Address& destination, int sourcePort, int destinationPort)
+        const Ipv4Address& source, const Ipv4Address& destination, int sourcePort, int destinationPort,
+        const char *arrivalNode = nullptr, const char *arrivalInterface = "eth0")
 {
     auto packet = new Packet(name);
     packet->insertAtBack(dhcp);
@@ -363,6 +385,8 @@ inline Packet *wrapDhcp(const char *name, const Ptr<DhcpMessage>& dhcp,
     auto dispatchReq = packet->addTag<DispatchProtocolReq>();
     dispatchReq->setProtocol(&Protocol::ipv4);
     dispatchReq->setServicePrimitive(SP_INDICATION);
+    if (arrivalNode != nullptr)
+        packet->addTag<InterfaceInd>()->setInterfaceId(interfaceIdOf(arrivalNode, arrivalInterface));
     return packet;
 }
 

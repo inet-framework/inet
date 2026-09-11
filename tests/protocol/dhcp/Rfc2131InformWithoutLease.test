@@ -1,0 +1,141 @@
+%description:
+
+RFC 2131 -- a server answers a DHCPINFORM with a DHCPACK that carries parameters and no lease,
+unicast to the address in the ciaddr of the request.
+
+Checks RFC2131-INF-1 (may and should not), INF-2 (description and should), INF-3 (must not and
+should not) and INF-5 (must not), and covers ACK-3 and INF-6, from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/inform.md#inform-answered-without-a-lease; the program
+steps below map onto its expected observations. Mapping of the mockup with an injector:
+server S = server, and hostS is the statically addressed host the crafted message speaks for.
+
+Level 3: the message is crafted. A DHCPINFORM comes from a host that configured its address by
+other means, which is not a state a DHCP client of a mockup passes through.
+
+The address 192.168.1.50 is below the pool the server gives out, so the server has no binding for
+it and could not have given it out.
+
+Expected result FAIL, model gap: DhcpServer::processDhcpMessage handles DHCPDISCOVER and
+DHCPREQUEST and nothing else. Every other BOOTREQUEST falls to a warning and a drop --
+"BOOTREQUEST arrived, but DHCP message type is unknown. Dropping it."
+(src/inet/applications/dhcp/DhcpServer.cc). DHCPINFORM, DHCPDECLINE and DHCPRELEASE are all in
+that group, so the server answers nothing and step 1 misses its deadline. The assertion stays as
+the standard states it; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A DHCPINFORM from a host that holds its address by static configuration: ciaddr is that
+// address, there is no requested IP address option and no lease time option, and it asks for the
+// subnet mask and the router.
+static Packet *buildInform(const CaptureStore&)
+{
+    auto dhcp = makeDhcp(BOOTREQUEST, 0x5A5A0003, MacAddress("0A-AA-00-00-00-50"));
+    dhcp->setCiaddr(Ipv4Address("192.168.1.50"));
+    auto& options = dhcp->getOptionsForUpdate();
+    options.setMessageType(DHCPINFORM);
+    options.setParameterRequestListArraySize(2);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    finishDhcp(dhcp);
+    return wrapDhcp("craftedDHCPINFORM", dhcp, Ipv4Address("192.168.1.50"),
+            Ipv4Address("192.168.1.1"), DHCP_CLIENT_PORT, DHCP_SERVER_PORT, "server");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_inform_without_lease")
+        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+                  .describe("a crafted DHCPINFORM from 192.168.1.50, with no requested IP address and no lease time option")
+                  .packet(buildInform))
+        // Expected observations 2 to 7: the DHCPACK that answers it.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      if (dhcp->getXid() != 0x5A5A0003)
+                          return false;
+                      // observation 3: a unicast to the ciaddr of the DHCPINFORM
+                      bool unicastToClient = ipv4Destination(c.event.packet) == "192.168.1.50"
+                              && !isLinkBroadcast(c.event.packet);
+                      // observations 4 and 5: no lease time and no lease timers
+                      bool noLease = !hasOption(dhcp, LEASE_TIME) && !hasOption(dhcp, RENEWAL_TIME)
+                              && !hasOption(dhcp, REBIND_TIME);
+                      // observation 6: yiaddr is 0.0.0.0
+                      bool noAddress = dhcp->getYiaddr().isUnspecified();
+                      // observation 7: the two parameters the DHCPINFORM asked for
+                      bool parameters = hasOption(dhcp, SUBNET_MASK) && hasOption(dhcp, ROUTER);
+                      return unicastToClient && noLease && noAddress && parameters;
+                  })
+                  .describe("a DHCPACK unicast to 192.168.1.50, with no lease time and no lease timers, yiaddr 0.0.0.0, and the subnet mask and router options")
+                  .within(1.0))
+        // Expected observation 8: no DHCPOFFER and no DHCPNAK answers the crafted message.
+        .never(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDhcp(c.event.packet, DHCPOFFER) || isDhcp(c.event.packet, DHCPNAK);
+                  })
+                  .describe("a DHCPOFFER or a DHCPNAK from the server")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_inform_without_lease compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an injector: the plain mockup plus the ability to put one crafted message
+// onto the link. A switch joins the nodes so that the mockup can hold more than two of them.
+network Rfc2131InjectNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/><interface hosts='hostS' address='192.168.1.50' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostS: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostS.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131InjectNet
+sim-time-limit = 3s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+# hostS holds its address by static configuration and runs no DHCP. It is there so that the
+# address the crafted DHCPINFORM speaks for is a real address on the link.
+*.hostS.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2131_inform_without_lease: PASS
