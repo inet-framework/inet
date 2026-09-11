@@ -1,0 +1,111 @@
+%description:
+A-MSDU aggregation preserves TA and the resulting ACK target in all four DS directions.
+Aggregation and deaggregation declare the actual 26/32-byte QoS header size and preserve
+subframe payloads and source/destination addresses. IEEE Std 802.11-2024 9.3.2.1/9.3.2.2.
+Outer Address3/Address4 bytes follow the Basic A-MSDU BSSID rules in Table 9-60.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestAckProcedure : public RecipientAckProcedure
+{
+  public:
+    using RecipientAckProcedure::buildAck;
+};
+
+%activity:
+const MacAddress ra("02:00:00:00:00:01");
+const MacAddress ta("02:00:00:00:00:02");
+const MacAddress address3("02:00:00:00:00:03");
+const MacAddress address4("02:00:00:00:00:04");
+MsduAggregation aggregation;
+MsduDeaggregation deaggregation;
+TestAckProcedure ackProcedure;
+QoSSequenceNumberAssignment sequenceNumbers;
+// Independently specified Address3 bytes for (ToDS, FromDS) = 00, 01, 10, 11.
+// The four-address case models AP-to-AP transmission: BSSID is the transmitting AP.
+const std::vector<std::vector<uint8_t>> expectedAddress3 = {
+    {0x02, 0, 0, 0, 0, 0x03},
+    {0x02, 0, 0, 0, 0, 0x02},
+    {0x02, 0, 0, 0, 0, 0x01},
+    {0x02, 0, 0, 0, 0, 0x02}
+};
+const std::vector<uint8_t> expectedAddress4 = {0x02, 0, 0, 0, 0, 0x02};
+for (bool toDS : {false, true}) {
+    for (bool fromDS : {false, true}) {
+        std::vector<Packet *> frames;
+        const B headerLength(toDS && fromDS ? 32 : 26);
+        const std::vector<std::vector<uint8_t>> payloads = {
+            {1, 2, 3, 4, 5}, {6, 7, 8, 9, 10, 11}
+        };
+        for (size_t i = 0; i < payloads.size(); i++) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->setToDS(toDS);
+            header->setFromDS(fromDS);
+            header->setReceiverAddress(ra);
+            header->setTransmitterAddress(ta);
+            header->setAddress3(address3);
+            header->setAddress4(address4);
+            header->setTid(5);
+            header->setChunkLength(headerLength);
+            auto frame = new Packet(i == 0 ? "first" : "second", header);
+            frame->insertAtBack(makeShared<BytesChunk>(payloads[i]));
+            frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            frames.push_back(frame);
+        }
+        auto aggregate = aggregation.aggregateFrames(&frames);
+        // OriginatorQosMacDataService assigns the sequence after aggregation, before transmission.
+        auto sequencedHeader = aggregate->removeAtFront<Ieee80211DataHeader>();
+        sequenceNumbers.assignSequenceNumber(sequencedHeader);
+        aggregate->insertAtFront(sequencedHeader);
+        auto outer = aggregate->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(outer->getReceiverAddress() == ra);
+        ASSERT(outer->getTransmitterAddress() == ta);
+        ASSERT(outer->getToDS() == toDS && outer->getFromDS() == fromDS);
+        ASSERT(outer->getTid() == 5 && outer->getAMsduPresent());
+        ASSERT(outer->getChunkLength() == headerLength);
+        Packet outerPacket("outer", outer);
+        ASSERT(outerPacket.peekDataAsBytes()->getChunkLength() == headerLength);
+        const auto bytes = outerPacket.peekDataAsBytes()->getBytes();
+        ASSERT(std::vector<uint8_t>(bytes.begin() + 16, bytes.begin() + 22) == expectedAddress3[2 * toDS + fromDS]);
+        if (toDS && fromDS)
+            ASSERT(std::vector<uint8_t>(bytes.begin() + 24, bytes.begin() + 30) == expectedAddress4);
+        ASSERT(ackProcedure.buildAck(outer)->getReceiverAddress() == ta);
+
+        auto restored = deaggregation.deaggregateFrame(aggregate);
+        ASSERT(restored->size() == payloads.size());
+        for (size_t i = 0; i < restored->size(); i++) {
+            auto frame = restored->at(i);
+            auto header = frame->popAtFront<Ieee80211DataHeader>();
+            ASSERT(header->getTransmitterAddress() == ta);
+            ASSERT(header->getReceiverAddress() == ra);
+            ASSERT(header->getChunkLength() == headerLength);
+            ASSERT(header->getToDS() == toDS && header->getFromDS() == fromDS);
+            ASSERT(header->getTid() == 5 && !header->getAMsduPresent());
+            if (toDS || fromDS)
+                ASSERT(header->getAddress3() == address3);
+            if (toDS && fromDS)
+                ASSERT(header->getAddress4() == address4);
+            Packet headerPacket("restored-header", header);
+            ASSERT(headerPacket.peekDataAsBytes()->getChunkLength() == headerLength);
+            frame->popAtBack<Ieee80211MacTrailer>(B(4));
+            ASSERT(frame->peekDataAsBytes()->getBytes() == payloads[i]);
+            delete frame;
+        }
+        delete restored;
+    }
+}
+EV << "A-MSDU TA, ACK target, header lengths and payloads are preserved.\n";
+
+%contains: stdout
+A-MSDU TA, ACK target, header lengths and payloads are preserved.
