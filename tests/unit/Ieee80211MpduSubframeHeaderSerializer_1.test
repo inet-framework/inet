@@ -33,8 +33,8 @@ for (int length : {0, 255, 256, 0xABC, 4095}) {
     checkDecodedLength(bytes, length);
 }
 
-// Fixed input in the existing encoder's format, independent of the round trip.
-checkDecodedLength({0x0A, 0xBC, 0x00, 0x4E}, 0xABC);
+// Fixed HT delimiter bytes, independent of the round trip.
+checkDecodedLength({0xC0, 0xAB, 0x4C, 0x4E}, 0xABC);
 
 EV << "MPDU subframe lengths preserved across the 8-bit boundary.\n";
 
