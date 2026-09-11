@@ -11,8 +11,8 @@ Each rule has a stable identifier of the form `PR-<AREA>-<NAME>`, a one-line sta
 short rationale. The other documents in this folder say what the *code* must look like —
 [architectural-requirements.md](architecture.md),
 [naming-conventions.md](naming.md), [sealing.md](sealing.md). This one says what
-the *change* must look like. It is the concrete form of step 4 of the *Contributor workflow*
-(smallest change surface) and of the reviewable-patch clauses of
+the *change* must look like, and [classification.md](classification.md) says what the change *is*.
+It is the concrete form of step 4 of the *Contributor workflow* (smallest change surface) and of the reviewable-patch clauses of
 [AR-QUAL-FINGERPRINT](architecture.md) and
 [AR-QUAL-TRACEABILITY](architecture.md).
 
@@ -272,6 +272,11 @@ the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the m
 `ExternalProcess: don't kill the process group when a spawned command fails`, not "update
 ExternalProcess.cc" and not a list of file names or links.
 
+**Both the area and the kind word are optional**, and
+[CR-TAG-SUBJECT](classification.md#cr-tag-subject) says why: the `Change:` trailer states the scope
+and the kind in a controlled form, so the subject repeats them only where a reader who scans the
+log needs them. Keep on the one line what helps a reader find this commit among a hundred.
+
 ### PR-MSG-BODY
 
 **A commit whose subject cannot carry its reason has a body**
@@ -339,6 +344,13 @@ the fact itself. An issue or pull request number is a useful addition, never a r
 
 No attribution trailers for tools or assistants, no progress notes, no apologies, and no
 speculation about future work. Keep a `Fixes #<n>` style reference when it is accurate.
+
+### The classification trailer
+
+Every commit also ends with one `Change:` line that states its scope, its depth and what must move
+with it — see [classification.md](classification.md), which owns `CR-*`. The trailer is not part of
+the message rules above: [PR-MSG-WHY](#pr-msg-why) governs the *reason*, and the trailer governs
+the *classification*. Neither one says what the other says.
 
 ## The pull request (PR-REQ)
 

@@ -157,6 +157,7 @@ decision, not a free choice at writing time.
 | `QR-…` | a code quality rule | [quality.md](quality.md) |
 | `TR-…` | a test rule | [testing.md](testing.md) |
 | `PR-…` | a commit and pull request rule | [pull-request.md](pull-request.md) |
+| `CR-…` | a change classification rule | [classification.md](classification.md) |
 | `RR-…` | a release rule | [release.md](release.md) |
 | `SR-…` | a sealing rule | [sealing.md](sealing.md) |
 | `DR-…` | a documentation rule | this document |

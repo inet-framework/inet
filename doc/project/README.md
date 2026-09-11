@@ -79,6 +79,7 @@ In the order of the chain.
 | [rule/quality.md](rule/quality.md) | rule | `QR-*` | How does the code read? |
 | [rule/testing.md](rule/testing.md) | rule | `TR-*` | Which test backs which claim, and when may a baseline change? |
 | [rule/pull-request.md](rule/pull-request.md) | rule | `PR-*` | How is a change divided into commits, and what must a pull request hold? |
+| [rule/classification.md](rule/classification.md) | rule | `CR-*` | What is a commit, in scope, depth and obligation? |
 | [rule/release.md](rule/release.md) | rule | `RR-*` | What does a release owe its users? |
 | [rule/sealing.md](rule/sealing.md) | rule | `SR-*` | What does a seal mean, and what is the audit before it? |
 | [rule/documentation.md](rule/documentation.md) | rule | `DR-*` | Where does a fact live, and how is a document shaped? |
