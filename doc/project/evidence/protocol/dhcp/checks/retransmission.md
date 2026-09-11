@@ -95,17 +95,23 @@ state and restarts the initialization process.
 3. No message of type 6, DHCPNAK, reaches the client at any time in the window: neither of the
    two answers §3.1 names arrived.
 4. A second DHCPREQUEST leaves the client (RFC2131-RETX-4).
-5. The second DHCPREQUEST carries the same `requested IP address` option as the first one: the
-   client is still asking for the address it selected, and has not started a new transaction.
+5. No message of type 1, DHCPDISCOVER, leaves the client between the first DHCPREQUEST and the
+   second one: the second message is a repetition of the first and not the third message of a
+   new exchange.
+6. The second DHCPREQUEST carries the same `requested IP address` option as the first one: the
+   client is still asking for the address it selected.
 
 ### Notes
 
 - Observation 2 is the level 3 part. A DHCPACK always arrives on a working link, so the state
   that RFC2131-RETX-4 describes cannot be reached by observation.
-- Observation 5 separates a retransmission from a restart. Both produce a message from the
-  client, and only the retransmission keeps the address of the earlier offer. Without it a client
-  that gave up at once and began a new DHCPDISCOVER-DHCPOFFER-DHCPREQUEST cycle would pass
-  observation 4.
+- Observations 5 and 6 separate a retransmission from a restart, and observation 5 is the one
+  that does the work. A client that gives up and starts again also produces a DHCPREQUEST, and
+  it also asks for the same address, because the server offers the same address again. What it
+  cannot do without is a new DHCPDISCOVER first. Observation 6 alone would pass for a restart;
+  observation 5 will not.
+- The window must be long enough for a conforming retransmission and for a restart alike, so
+  that the check can tell which one happened rather than timing out before either.
 - The second half of the statement — that the client reverts to INIT after enough attempts — has
   no observation here. How many attempts is "enough" is an implementation decision that §3.1
   leaves open, with four as an example, and the total delay of four attempts under the figures

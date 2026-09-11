@@ -1,0 +1,139 @@
+%description:
+
+RFC 2131 and RFC 2132 -- the option area of every message starts with the magic cookie, parses
+by the rule "tag, length, value", ends with the end option, holds no code twice, and writes a
+multi-octet value in network byte order.
+
+Checks RFC2131-MSG-2 (description), MSG-4 (must), MSG-7 (must), MSG-8 (description), MSG-11
+(description, the first half), RFC2132-FMT-1, FMT-3, FMT-4 and END-1, from
+doc/project/evidence/standard/rfc2131/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/message-format.md#message-framing-on-the-wire; the
+program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+This is the one test of the suite that reads a message as octets. The message travels as a
+field-based chunk, so the octets do not exist until something writes them; scanDhcpOptions in
+DhcpChecks.h writes them and then walks the area the way a receiver's parser would. A message
+whose fields are all right and whose option area does not parse is a message no other node can
+read.
+
+The four messages of the exchange are checked in four steps, one per message, because the four
+are four events. The lease time of 300 seconds gives the one multi-octet value whose octets the
+scenario fixes: 00 00 01 2C.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// Observations 2 to 5 of every message: the cookie, a parse to the end with nothing left over,
+// an end option last, and no code twice.
+static bool areaIsWellFormed(const Packet *frame)
+{
+    DhcpOptionScan scan = scanDhcpOptions(frame);
+    return scan.cookieOk && scan.parsed && scan.endsWithEnd && !scan.anyCodeTwice();
+}
+
+// Observation 7, for a message the client sends: the 15 reserved bits of flags are zero, and
+// hops is zero.
+static bool clientFixedPartIsClean(const Ptr<const DhcpMessage>& dhcp)
+{
+    return dhcp->getReserved() == 0 && dhcp->getHops() == 0;
+}
+
+static bool isWellFormed(const MatchContext& c, DhcpMessageType type, bool fromClient)
+{
+    auto dhcp = dhcpOf(c.event.packet);
+    if (dhcp == nullptr || dhcp->getOptions().getMessageType() != type)
+        return false;
+    if (!areaIsWellFormed(c.event.packet))
+        return false;
+    return !fromClient || clientFixedPartIsClean(dhcp);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_message_framing")
+        // Expected observations 1 to 5 and 7, on the DHCPDISCOVER.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPDISCOVER, true); })
+                  .describe("a DHCPDISCOVER whose option area starts with the magic cookie, parses to an end option with nothing left over, holds no code twice, and whose reserved flags bits and hops are zero")
+                  .within(1.0))
+        // The DHCPOFFER.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPOFFER, false); })
+                  .describe("a DHCPOFFER whose option area starts with the magic cookie, parses to an end option with nothing left over, and holds no code twice")
+                  .within(1.0))
+        // The DHCPREQUEST.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPREQUEST, true); })
+                  .describe("a DHCPREQUEST whose option area starts with the magic cookie, parses to an end option with nothing left over, holds no code twice, and whose reserved flags bits and hops are zero")
+                  .within(1.0))
+        // The DHCPACK, and expected observation 6: the lease time as four octets in network byte
+        // order.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      if (!isWellFormed(c, DHCPACK, false))
+                          return false;
+                      DhcpOptionScan scan = scanDhcpOptions(c.event.packet);
+                      std::vector<uint8_t> lease = scan.valueOf(51);
+                      return lease == std::vector<uint8_t>{ 0x00, 0x00, 0x01, 0x2C }; // 300 seconds
+                  })
+                  .describe("a DHCPACK whose option area is well formed and whose lease time option holds the four octets 00 00 01 2C, 300 seconds in network byte order")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_message_framing compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_message_framing: PASS

@@ -1,0 +1,131 @@
+%description:
+
+RFC 2131 -- at T1 the client unicasts a DHCPREQUEST to the leasing server, with ciaddr set and
+neither the server identifier nor the requested IP address option.
+
+Checks RFC2131-LEASE-5 (description), REQ-6 (must and must not), LEASE-4 (description), BCAST-3
+(description), SRVID-3 (must) and RFC2132-T1-1, and covers LEASE-1, from
+doc/project/evidence/standard/rfc2131/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/lease.md#renewal-at-t1; the program steps below map
+onto its expected observations. Mapping of the plain mockup: server S = server, client C = hostA.
+
+The lease is 300 seconds, so T1 falls 150 seconds after the assignment. Step 1 admits a window
+of one second around that instant. The tolerance is not a statistical allowance: T1 here is a
+fixed fraction of a fixed lease. It covers the microseconds the first exchange itself needed.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What the renewal must name: the address the client holds and the server that leased it.
+struct Lease {
+    Ipv4Address address;
+    Ipv4Address serverId;
+    bool bound = false;
+};
+
+static Lease leaseRecord;
+
+Define_ProtocolTestProgram()
+{
+    leaseRecord = Lease();
+    return ProtocolTest("rfc2131_renew_at_t1")
+        // Expected observation 1: the client gets a lease of 300 seconds and an address.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      if (!hasOption(dhcp, LEASE_TIME) || dhcp->getOptions().getLeaseTime() != SimTime(300, SIMTIME_S))
+                          return false;
+                      if (dhcp->getYiaddr().isUnspecified())
+                          return false;
+                      leaseRecord.address = dhcp->getYiaddr();
+                      leaseRecord.serverId = dhcp->getOptions().getServerIdentifier();
+                      leaseRecord.bound = true;
+                      return true;
+                  })
+                  .describe("a DHCPACK reaching the client with a lease time of 300 and an address in yiaddr")
+                  .within(5.0))
+        // Expected observations 2 to 5: the renewal at T1, 150 seconds later.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
+                          return false;
+                      if (!leaseRecord.bound)
+                          return false;
+                      // observation 3: a unicast to the address of the server identifier option
+                      bool unicastToServer = ipv4Destination(c.event.packet) == quad(leaseRecord.serverId)
+                              && !isLinkBroadcast(c.event.packet);
+                      // observation 4: ciaddr holds the leased address
+                      bool ciaddrSet = dhcp->getCiaddr() == leaseRecord.address;
+                      // observation 5: neither the server identifier nor the requested IP address
+                      bool optionsAbsent = !hasOption(dhcp, SERVER_ID) && !hasOption(dhcp, REQUESTED_IP);
+                      return unicastToServer && ciaddrSet && optionsAbsent;
+                  })
+                  .describe("a DHCPREQUEST at T1: a unicast to the server identifier, ciaddr holding the leased address, and neither a server identifier nor a requested IP address option")
+                  .notBefore(149.0).within(151.0))
+        // Expected observation 6: the answer is a unicast to the ciaddr of the renewal.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDhcp(c.event.packet, DHCPACK)
+                             && ipv4Destination(c.event.packet) == quad(leaseRecord.address)
+                             && !isLinkBroadcast(c.event.packet);
+                  })
+                  .describe("a DHCPACK unicast to the address in the ciaddr of the renewal")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_renew_at_t1 compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 200s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_renew_at_t1: PASS

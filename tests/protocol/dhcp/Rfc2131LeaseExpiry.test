@@ -1,0 +1,154 @@
+%description:
+
+RFC 2131 -- when the lease runs out without a DHCPACK, the client stops using its address at
+once and starts again as an uninitialized client.
+
+Checks RFC2131-LEASE-8 (must) and LEASE-9 (must not), and covers LEASE-2, from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/lease.md#lease-expiry; the program steps below map
+onto its expected observations. Mapping of the mockup with a relay: server S = server,
+relay T = tap and tap2, client C = hostA.
+
+Level 3: two relays in series remove two DHCPACKs from the path. The first relay drops the
+second DHCPACK of the run, the answer to the renewal at T1. The second relay then sees only the
+first and the third, so its own second match is the third of the run, the answer to the
+rebinding at T2. Neither reacquisition succeeds and the lease runs out. One relay cannot do
+this: a relay holds one rule, and a rule names one occurrence or every one.
+
+The lease is 120 seconds, so T1 falls at 60 seconds, T2 at 105 and the expiry at 120.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Ipv4Address leasedAddress;
+
+Define_ProtocolTestProgram()
+{
+    leasedAddress = Ipv4Address();
+    return ProtocolTest("rfc2131_lease_expiry")
+        // The first relay drops the answer to the renewal.
+        .intercept(intercept("tap").match("DhcpMessage.options.messageType == 5").nth(2).drop()
+                     .describe("the second DHCPACK, which answers the renewal at T1"))
+        // The second relay drops the answer to the rebinding: its own second match, because the
+        // first relay already removed the run's second DHCPACK.
+        .intercept(intercept("tap2").match("DhcpMessage.options.messageType == 5").nth(2).drop()
+                     .describe("the DHCPACK that answers the rebinding at T2"))
+        // Expected observation 1, first part: the client gets a lease of 120 seconds. Its send
+        // instant is the anchor of the expiry, by RFC2131-LEASE-2.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPREQUEST); })
+                  .describe("the DHCPREQUEST of the first exchange, whose send instant anchors the lease")
+                  .within(5.0))
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      if (!hasOption(dhcp, LEASE_TIME) || dhcp->getOptions().getLeaseTime() != SimTime(120, SIMTIME_S))
+                          return false;
+                      leasedAddress = dhcp->getYiaddr();
+                      return !leasedAddress.isUnspecified();
+                  })
+                  .describe("the DHCPACK that grants a lease of 120 seconds")
+                  .within(1.0))
+        // Expected observation 1, second part: the renewal at T1 leaves the client.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && dhcp->getCiaddr() == leasedAddress && !isLinkBroadcast(c.event.packet);
+                  })
+                  .describe("the unicast renewal DHCPREQUEST at T1")
+                  .notBefore(59.0).within(61.0))
+        // Expected observation 1, third part: the rebinding at T2 leaves the client.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && dhcp->getCiaddr() == leasedAddress && isLinkBroadcast(c.event.packet);
+                  })
+                  .describe("the broadcast rebinding DHCPREQUEST at T2")
+                  .notBefore(44.0).within(46.0))
+        // Expected observation 2: no DHCPACK reaches the client from the rebinding to the expiry.
+        .never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .describe("a DHCPACK reaching the client between the rebinding and the expiry")
+                  .within(14.0))
+        // Expected observations 3 and 4: at the expiry the client asks again as an uninitialized
+        // client.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
+                             && dhcp->getCiaddr().isUnspecified()              // observation 4
+                             && ipv4Source(c.event.packet) == "0.0.0.0";       // observation 4
+                  })
+                  .describe("a DHCPDISCOVER at the expiry with ciaddr 0.0.0.0 and IP source 0.0.0.0")
+                  .within(3.0))
+        // Expected observation 5: nothing leaves the client with the expired address afterwards.
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return ipv4Source(c.event.packet) == quad(leasedAddress);
+                  })
+                  .describe("a frame from the client carrying the expired address as its IP source address")
+                  .within(15.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_lease_expiry compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay on the path: server -- relay -- client.
+network Rfc2131TwoTapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=320,100"); }
+        tap2: PacketTap { @display("p=400,100"); }
+        hostA: StandardHost { @display("p=500,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> tap2.a;
+        tap2.b <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131TwoTapNet
+sim-time-limit = 145s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 120s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_lease_expiry: PASS

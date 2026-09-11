@@ -87,36 +87,43 @@ T1 is earlier than T2, which is earlier than the expiry.
 
 ### Scenario constants
 
-- The mockup with a relay on the path. The lease is 300 seconds, so T1 falls at 150 seconds
-  and T2 at 262.5 seconds.
-- The relay lets the first exchange through untouched, and then drops every DHCPACK that the
-  server sends. The renewal at T1 therefore stays unanswered from the client's point of view,
-  and the client reaches T2.
-- Observation stops 290 seconds after the start: past T2 and before the expiry at 300
-  seconds.
+- The mockup with a relay on the path. **The lease is 120 seconds**, so T1 falls at 60 seconds,
+  T2 at 105 seconds and the expiry at 120 seconds.
+- The relay lets the first exchange through and drops the DHCPACK that answers the renewal at
+  T1. The renewal therefore stays unanswered from the client's point of view, and the client
+  reaches T2.
+- Observation stops 115 seconds after the start: past T2 and before the expiry.
+
+The lease is shorter here than the 300 seconds of the other checks, and the reason comes from
+the standard. RFC 2131 §4.4.3 names "a reasonable period of time (60 seconds or 4 tries if using
+timeout suggested in section 4.1)" for a client that waits for a DHCPACK, and a client that
+gives up after that period restarts from INIT. T2 must therefore fall **inside** that period
+after T1, or the client abandons the lease before it can rebind. The gap T2 − T1 is 0.375 of
+the lease, so a lease under 160 seconds keeps the gap under 60 seconds. A lease of 120 seconds
+gives a gap of 45 seconds, comfortably inside it.
 
 ### Procedure
 
 1. Build the mockup with a relay between the server and the client.
 2. Let the client start and get its address; the relay passes the first DHCPACK through.
-3. Arm the relay to drop every later DHCPACK.
+3. Arm the relay to drop the DHCPACK that answers the renewal.
 4. Observe the renewal at T1, the DHCPACK that the server sends in answer, the drop, and the
    next message the client sends.
 
 ### Expected observations
 
-1. The client gets its address, and a renewal leaves it at about 150 seconds. This confirms
-   the first half of the stimulus.
+1. The client gets its address, and a renewal leaves it at about 60 seconds, half the lease.
+   This confirms the first half of the stimulus.
 2. A DHCPACK leaves the server in answer to the renewal, and it does not reach the client.
    This confirms the second half of the stimulus: the client did not hear an answer because
    the answer was removed, and not because the server stayed silent.
-3. About 262.5 seconds after the assignment, a DHCPREQUEST leaves the client. Its instant lies
+3. About 105 seconds after the assignment, a DHCPREQUEST leaves the client. Its instant lies
    within one second of 0.875 of the lease (RFC2131-LEASE-6).
 4. Its IP destination address is 255.255.255.255 (RFC2131-REQ-7).
 5. Its `ciaddr` field holds the address the client holds, and its option area holds neither
    code 54 nor code 50 (RFC2131-REQ-7).
 6. The instant of observation 3 is later than the instant of the renewal of observation 1 and
-   earlier than 300 seconds after the assignment (RFC2131-LEASE-3).
+   earlier than 120 seconds after the assignment (RFC2131-LEASE-3).
 
 ### Notes
 
@@ -130,10 +137,10 @@ T1 is earlier than T2, which is earlier than the expiry.
   and for the expiry only as an upper bound. The rule is about three configured values, and a
   check reads them as three events.
 - RFC 2131 §4.4.5 also says a client should wait half the remaining time before it repeats an
-  unanswered renewal, RFC2131-LEASE-7. With the lease of this scenario that wait is about 56
-  seconds, so one repeat may fall inside the window between T1 and T2. Such a repeat is
-  expected and is not a violation; it is a DHCPREQUEST with the same shape as the one of
-  observation 1, addressed by unicast, and observation 3 asks for a broadcast.
+  unanswered renewal, RFC2131-LEASE-7. With the lease of this scenario that wait is about 22
+  seconds, so a repeat may fall inside the window between T1 and T2. Such a repeat is expected
+  and is not a violation; it is a DHCPREQUEST with the same shape as the one of observation 1,
+  addressed by unicast, and observation 3 asks for a broadcast.
 
 ## Lease expiry
 
@@ -151,18 +158,21 @@ its DHCPREQUEST plus the lease of the DHCPACK.
 
 ### Scenario constants
 
-- The mockup with a relay on the path. The lease is 300 seconds.
-- The relay lets the first exchange through untouched, and then drops every DHCPACK that the
-  server sends, so that neither the renewal at T1 nor the rebinding at T2 succeeds and the
+- The mockup with a relay on the path. **The lease is 120 seconds**, for the reason the check
+  above gives: T2 must fall within the period a client waits for a DHCPACK, or the client
+  abandons the lease before the rebinding.
+- The relay lets the first exchange through and then drops the DHCPACK that answers the
+  renewal at T1 and the one that answers the rebinding at T2, so that neither succeeds and the
   lease runs out.
-- Observation stops 340 seconds after the start, which is past the expiry at 300 seconds.
+- Observation stops 140 seconds after the start, which is past the expiry at 120 seconds.
 
 ### Procedure
 
 1. Build the mockup with a relay between the server and the client.
 2. Let the client start and get its address. Record the instant the client sent its
    DHCPREQUEST and the lease time of the DHCPACK.
-3. Arm the relay to drop every later DHCPACK.
+3. Arm the relay to drop the DHCPACK that answers the renewal and the one that answers the
+   rebinding.
 4. Observe the renewal, the rebinding, and what the client does at the expiry.
 
 ### Expected observations
@@ -171,7 +181,7 @@ its DHCPREQUEST plus the lease of the DHCPACK.
    the stimulus.
 2. Each DHCPACK the server sends after the first one leaves the server and does not reach the
    client. This confirms that the failure was on the path.
-3. At the recorded send instant plus 300 seconds, within one second, a message of type 1,
+3. At the recorded send instant plus 120 seconds, within one second, a message of type 1,
    DHCPDISCOVER, leaves the client (RFC2131-LEASE-8, RFC2131-LEASE-2).
 4. That DHCPDISCOVER carries IP source address 0.0.0.0 and `ciaddr` 0.0.0.0: the client is
    asking as an uninitialized client and not as one that holds an address (RFC2131-LEASE-8).

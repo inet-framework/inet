@@ -1,0 +1,160 @@
+%description:
+
+RFC 2131 -- what a DHCPREQUEST from SELECTING carries: the chosen server, the offered address,
+ciaddr zero, a broadcast destination, the secs of the DHCPDISCOVER, and the two lists the client
+must repeat.
+
+Checks RFC2131-REQ-1 (must), REQ-2 (must), REQ-3 (must), REQ-4 (must), REQ-8 (must), REQ-9
+(must) and RFC2132-REQIP-1, from doc/project/evidence/standard/rfc2131/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/exchange.md#request-contents; the program steps below
+map onto its expected observations. Mapping of the plain mockup: server S = server,
+client C = hostA.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What the DHCPREQUEST must repeat: two fields of the DHCPDISCOVER and two of the DHCPOFFER.
+struct Recorded {
+    int secs = -1;
+    std::vector<int> parameterList;
+    MacAddress clientId;
+    bool haveDiscover = false;
+    Ipv4Address offerYiaddr;
+    Ipv4Address offerServerId;
+    bool haveOffer = false;
+};
+
+static Recorded recorded;
+
+static std::vector<int> parameterListOf(const Ptr<const DhcpMessage>& dhcp)
+{
+    std::vector<int> codes;
+    const DhcpOptions& o = dhcp->getOptions();
+    for (size_t i = 0; i < o.getParameterRequestListArraySize(); i++)
+        codes.push_back(o.getParameterRequestList(i));
+    return codes;
+}
+
+Define_ProtocolTestProgram()
+{
+    recorded = Recorded();
+    return ProtocolTest("rfc2131_request_contents")
+        // The DHCPDISCOVER, whose secs, parameter request list and client identifier the
+        // DHCPREQUEST must repeat.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
+                          return false;
+                      recorded.secs = dhcp->getSecs();
+                      recorded.parameterList = parameterListOf(dhcp);
+                      recorded.clientId = dhcp->getOptions().getClientIdentifier();
+                      recorded.haveDiscover = true;
+                      return true;
+                  })
+                  .describe("a DHCPDISCOVER from the client, whose secs, parameter request list and client identifier are recorded")
+                  .within(1.0))
+        // Expected observation 1: a DHCPOFFER reaches the client, so that there is an offer to
+        // select. Record the two values the DHCPREQUEST must name.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPOFFER)
+                          return false;
+                      recorded.offerYiaddr = dhcp->getYiaddr();
+                      recorded.offerServerId = dhcp->getOptions().getServerIdentifier();
+                      recorded.haveOffer = true;
+                      return true;
+                  })
+                  .describe("a DHCPOFFER arriving at the client, whose yiaddr and server identifier are recorded")
+                  .within(1.0))
+        // Expected observations 2 to 7, on the DHCPREQUEST that follows.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
+                          return false;
+                      if (!recorded.haveDiscover || !recorded.haveOffer)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      // observation 2: broadcast to 255.255.255.255, as the DHCPDISCOVER was
+                      bool broadcastDestination = ipv4Destination(c.event.packet) == "255.255.255.255"
+                              && isLinkBroadcast(c.event.packet);
+                      // observation 3: the server identifier of the chosen offer
+                      bool namesServer = hasOption(dhcp, SERVER_ID)
+                              && o.getServerIdentifier() == recorded.offerServerId;
+                      // observation 4: the offered address in the requested IP address option
+                      bool namesAddress = hasOption(dhcp, REQUESTED_IP)
+                              && o.getRequestedIp() == recorded.offerYiaddr;
+                      // observation 5: ciaddr zero
+                      bool ciaddrZero = dhcp->getCiaddr().isUnspecified();
+                      // observation 6: the secs of the DHCPDISCOVER
+                      bool sameSecs = dhcp->getSecs() == recorded.secs;
+                      // observation 7: the same parameter request list and the same client identifier
+                      bool sameLists = hasOption(dhcp, PARAM_LIST)
+                              && parameterListOf(dhcp) == recorded.parameterList
+                              && hasOption(dhcp, CLIENT_ID)
+                              && o.getClientIdentifier() == recorded.clientId;
+                      return broadcastDestination && namesServer && namesAddress && ciaddrZero
+                             && sameSecs && sameLists;
+                  })
+                  .describe("the DHCPREQUEST: broadcast at both layers; the server identifier of the chosen offer; the offered address in the requested IP address option; ciaddr 0.0.0.0; the secs of the DHCPDISCOVER; and the same parameter request list and client identifier")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_request_contents compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_request_contents: PASS

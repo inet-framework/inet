@@ -1,0 +1,126 @@
+%description:
+
+RFC 2131 -- a server returns no option for a parameter it has no value for.
+
+Checks RFC2131-SEL-5 (must not) from doc/project/evidence/standard/rfc2131/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/dhcp/checks/parameters.md#a-parameter-the-server-has-no-value-for;
+the program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+The server of the mockup has no value for the domain name server option, code 6, and none for
+the network time protocol servers option, code 42. Neither has a default in the Host
+Requirements documents, so RFC 2131 section 4.3.1 reaches its last branch for both: "The server
+MUST NOT return a value for that parameter."
+
+Expected result FAIL, model gap: DhcpServer::sendOffer and DhcpServer::sendAck always write a
+domain name server option, with the never-assigned DhcpLease::dns field as its value --
+"setDnsArraySize(1); setDns(0, lease->dns);", src/inet/applications/dhcp/DhcpServer.cc:360 and
+:442. Nothing assigns lease->dns, so the field keeps its default and the option reaches the
+wire as code 6 with the value 0.0.0.0. The serializer writes the option because the array is
+not empty, not because the address is a real one. Observation 2 passes, because the server
+returns no option 42; observation 3 fails. The assertion stays as the standard states it; see
+results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// Observations 2 to 4: the reply carries no option for either parameter.
+static bool carriesNeither(const Packet *frame)
+{
+    DhcpOptionScan scan = scanDhcpOptions(frame);
+    return scan.parsed && !scan.has(42) && !scan.has(6);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_parameter_without_value")
+        // Expected observation 1: the client asks for both parameters.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      bool wantsDns = false, wantsNtp = false;
+                      for (size_t i = 0; i < o.getParameterRequestListArraySize(); i++) {
+                          if (o.getParameterRequestList(i) == DNS) wantsDns = true;
+                          if (o.getParameterRequestList(i) == NTP_SRV) wantsNtp = true;
+                      }
+                      return wantsDns && wantsNtp;
+                  })
+                  .describe("a DHCPDISCOVER whose parameter request list names the domain name server and the network time protocol servers")
+                  .within(1.0))
+        // Expected observation 4: the DHCPOFFER carries neither option.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDhcp(c.event.packet, DHCPOFFER) && carriesNeither(c.event.packet);
+                  })
+                  .describe("a DHCPOFFER that carries no option 6 and no option 42")
+                  .within(1.0))
+        // Expected observations 2 and 3: the DHCPACK carries neither option.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDhcp(c.event.packet, DHCPACK) && carriesNeither(c.event.packet);
+                  })
+                  .describe("a DHCPACK that carries no option 6 and no option 42")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_parameter_without_value compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_parameter_without_value: PASS

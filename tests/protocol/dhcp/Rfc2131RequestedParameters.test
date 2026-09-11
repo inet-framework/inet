@@ -1,0 +1,141 @@
+%description:
+
+RFC 2131 -- the server returns the address, the lease and the parameters the client asked for,
+each one once, with the subnet mask before the router.
+
+Checks RFC2131-SEL-4 (must), RFC2132-PRL-1 (must), RFC2132-MASK-1 (must) and RFC2132-ROUTER-1
+(must), and covers the no-duplicate half of RFC2131-SEL-5, from
+doc/project/evidence/standard/rfc2131/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/parameters.md#requested-parameters-returned; the
+program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+The prohibition half of RFC2131-SEL-5 -- return no option for a parameter the server has no
+value for -- has a check of its own, Rfc2131ParameterWithoutValue.test, so that a failure of the
+prohibition cannot hide the verdict on the four requirements here.
+
+The server's router address is the address of its own interface, which is what an unconfigured
+gateway defaults to and is a real router address for this subnet.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// Observations 3 to 6, which the DHCPACK and the DHCPOFFER must both satisfy.
+static bool carriesRequestedParameters(const Packet *frame)
+{
+    DhcpOptionScan scan = scanDhcpOptions(frame);
+    if (!scan.parsed)
+        return false;
+    // observation 3: the subnet mask, with the value of the subnet of the mockup
+    std::vector<uint8_t> mask = scan.valueOf(1);
+    if (mask != std::vector<uint8_t>{ 255, 255, 255, 0 })
+        return false;
+    // observation 4: the router option, with a length that is a multiple of 4
+    if (!scan.has(3) || scan.valueOf(3).empty() || scan.valueOf(3).size() % 4 != 0)
+        return false;
+    // observation 5: the subnet mask option comes before the router option
+    if (scan.offsetOf(1) >= scan.offsetOf(3))
+        return false;
+    // observation 6: no option code appears twice
+    return !scan.anyCodeTwice();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_requested_parameters")
+        // Expected observation 1: the client asks for the subnet mask and the router.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      bool wantsMask = false, wantsRouter = false;
+                      for (size_t i = 0; i < o.getParameterRequestListArraySize(); i++) {
+                          if (o.getParameterRequestList(i) == SUBNET_MASK) wantsMask = true;
+                          if (o.getParameterRequestList(i) == ROUTER) wantsRouter = true;
+                      }
+                      return wantsMask && wantsRouter;
+                  })
+                  .describe("a DHCPDISCOVER whose parameter request list names the subnet mask and the router")
+                  .within(1.0))
+        // Expected observation 7: the DHCPOFFER carries observations 3 to 6.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDhcp(c.event.packet, DHCPOFFER) && carriesRequestedParameters(c.event.packet);
+                  })
+                  .describe("a DHCPOFFER carrying the subnet mask 255.255.255.0, a router option whose length is a multiple of 4, the mask before the router, and no code twice")
+                  .within(1.0))
+        // Expected observations 2 to 6: the DHCPACK.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      // observation 2: the lease time and an address of the subnet in yiaddr
+                      if (!hasOption(dhcp, LEASE_TIME) || dhcp->getOptions().getLeaseTime() != SimTime(300, SIMTIME_S))
+                          return false;
+                      if (!dhcp->getYiaddr().prefixMatches(Ipv4Address("192.168.1.0"), 24))
+                          return false;
+                      return carriesRequestedParameters(c.event.packet);
+                  })
+                  .describe("a DHCPACK carrying a lease time of 300 and an address of the subnet in yiaddr, the subnet mask 255.255.255.0, a router option whose length is a multiple of 4, the mask before the router, and no code twice")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_requested_parameters compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_requested_parameters: PASS
