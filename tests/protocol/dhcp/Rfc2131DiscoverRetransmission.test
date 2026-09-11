@@ -9,7 +9,7 @@ doc/project/evidence/protocol/dhcp/checks/retransmission.md#discover-repeated-wi
 the program steps below map onto its expected observations. Mapping of the mockup with no server:
 client C = hostA, host E = hostE.
 
-Expected result FAIL, model gap: DhcpClient waits a constant time for an answer. The value is a
+Defect: DhcpClient waits a constant time for an answer. The value is a
 fixed 60 seconds -- "responseTimeout = 60; // response timeout in seconds RFC 2131, 4.4.3",
 src/inet/applications/dhcp/DhcpClient.cc:45 -- and scheduleTimerTO reschedules that same value
 every time, at :674. So the intervals between the repetitions are 60 seconds each and never grow.
@@ -26,7 +26,12 @@ The check states no bound on the instants of the repetitions, on purpose. Any bo
 bound on a distribution, and a run that drew an unlucky value would then fail for the wrong
 reason. The one thing a single run can say is that the second interval is longer than the first.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model claims this
+behaviour: it has code for the delay between retransmissions -- responseTimeout at
+src/inet/applications/dhcp/DhcpClient.cc:45 and scheduleTimerTO at :674 -- and that code puts a
+constant where RFC 2131 section 4.1 demands a randomized exponential law. A mechanism that is
+present with the wrong law is a defect, not a missing feature, so nothing declares this failure
+expected. See results.md.
 
 %includes:
 #include "ProtocolTest.h"

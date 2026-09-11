@@ -16,7 +16,7 @@ already has one. This is the one test of the suite that resolves
 addresses by traffic on the link and not without it, because the address resolution request is the
 stimulus.
 
-Expected result FAIL, model gap: DhcpClient never probes the address of the DHCPACK. handleDhcpAck
+Defect: DhcpClient never probes the address of the DHCPACK. handleDhcpAck
 records the lease and binds the address, and nothing in it sends an address resolution request or
 waits for an answer to one (src/inet/applications/dhcp/DhcpClient.cc, handleDhcpAck and
 bindLease). RFC 2131 section 4.4.1 makes the probe a SHOULD: "The client SHOULD perform a check on
@@ -28,7 +28,19 @@ The failure does not tell whether the client would obey RFC2131-DECL-2 if it eve
 conflict; it tells that it cannot find one. DhcpClient does have a sendDecline function, at :635,
 and nothing calls it. The results record both halves; see results.md.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. It is an untestable
+claim: the model claims the DHCPDECLINE and the check cannot reach it.
+
+The claim is code. DhcpClient::sendDecline is a complete function that builds the message
+(src/inet/applications/dhcp/DhcpClient.cc:632, declared at DhcpClient.h:115), so the model claims
+observations 5 to 7. What is missing is the trigger: the probe of observation 2 is a commented-out
+block at :315 to 320, so the client never learns of a conflict and nothing can provoke a
+DHCPDECLINE. No scenario and no crafted message can supply the trigger, because it would have to
+come from inside the client.
+
+So the test fails and declares nothing. A half-written mechanism is a claim -- "not finished" is
+not "not claimed" -- and the missing part is named here rather than left in a note that nothing
+checks. See results.md.
 
 %includes:
 #include "ProtocolTest.h"

@@ -12,7 +12,7 @@ server S = server, relay T = tap, client C = hostA.
 Level 3: the relay drops every DHCPACK the server sends. A DHCPACK always arrives on a working
 link, so the state the statement describes cannot be reached by observation alone.
 
-Expected result FAIL, model gap: DhcpClient does not retransmit a DHCPREQUEST. When the wait for
+Defect: DhcpClient does not retransmit a DHCPREQUEST. When the wait for
 an answer runs out it calls initClient(), which starts the whole process again from INIT --
 "else if (category == WAIT_ACK) { ... Restarting. ... initClient(); }",
 src/inet/applications/dhcp/DhcpClient.cc:225 to 228. RFC 2131 section 3.1 asks for the
@@ -28,7 +28,11 @@ this a check of retransmission and not of restart. A restart also produces a DHC
 also asks for the same address, because the server offers the same address again. What it cannot
 do without is a new DHCPDISCOVER first.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model claims this
+behaviour: the WAIT_ACK handler exists and decides what happens when no answer comes
+(src/inet/applications/dhcp/DhcpClient.cc:226 to 228). It decides wrongly -- it restarts where
+RFC 2131 section 3.1 asks it to retransmit first -- and a branch that exists and does the wrong
+thing is a defect. See results.md.
 
 %includes:
 #include "ProtocolTest.h"
