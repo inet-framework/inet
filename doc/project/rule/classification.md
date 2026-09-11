@@ -4,18 +4,24 @@
 
 What a commit *is*, said in a form that a reader can scan and a gate can check. Three dimensions
 answer three questions: **where** does the change reach, **how deep** does it go, and **what must
-move with it**. Every commit states all three in one line at its end.
+move with it**. A fourth, optional dimension answers a question about a commit's neighbours:
+**which other commits belong with it**. Every commit states them in one line at its end.
 
-The three dimensions are not bookkeeping. Each one is already the input of a rule that exists.
-Scope decides which tests must run ([TR-CAT-MATCH](testing.md#tr-cat-match)). Depth decides whether
+The dimensions are not bookkeeping. Each one is already the input of a rule that exists. Scope
+decides which tests must run ([TR-CAT-MATCH](testing.md#tr-cat-match)). Depth decides whether
 a recorded expectation may move ([TR-BASELINE-DELIBERATE](testing.md#tr-baseline-deliberate)) and
 whether the commit is divided correctly ([PR-SPLIT-MECHANICAL](pull-request.md#pr-split-mechanical)).
 Obligation decides what the release owes its users ([RR-BREAK-MIGRATE](release.md#rr-break-migrate)).
-A dimension that changes nothing anyone does does not belong here.
+The group decides what a reader must read together. A dimension that changes nothing anyone does
+does not belong here.
 
-**The classification is a claim, not a label.** The author knows one thing that no tool knows:
-whether a change to the source keeps the behavior. Everything else in the three dimensions follows
-from the diff. The value of the claim is that a test suite can prove it wrong.
+**The classification is a claim, not a decoration.** The author knows two things that no tool
+knows: whether a change to the source keeps the behavior, and which commits make one larger change.
+Everything else follows from the diff. The value of a claim is that a reader, a run or a gate can
+prove it wrong.
+
+**Three dimensions classify one commit. The fourth relates commits to each other.** That is why the
+group is different in kind, why it is optional, and why it comes last.
 
 ## Index
 
@@ -32,6 +38,10 @@ from the diff. The value of the claim is that a test suite can prove it wrong.
 | [CR-OBL-DERIVED](#cr-obl-derived) | The obligation follows from the scope and the depth |
 | [CR-OBL-INERT](#cr-obl-inert) | A commit below the behavior level moves no recorded expectation |
 | [CR-OBL-BASELINE](#cr-obl-baseline) | The author says which recorded expectations move |
+| [CR-GROUP-LABEL](#cr-group-label) | A commit that is one of several in a larger change names the group |
+| [CR-GROUP-SPANS](#cr-group-spans) | A group is not a pull request |
+| [CR-GROUP-STABLE](#cr-group-stable) | The label does not change, and it carries no ordinal |
+| [CR-GROUP-STANDALONE](#cr-group-standalone) | The label does not excuse a partial commit |
 | [CR-TAG-TRAILER](#cr-tag-trailer) | Every commit ends with one `Change:` line |
 | [CR-TAG-FORM](#cr-tag-form) | The trailer has three fields in a fixed order |
 | [CR-TAG-SUBJECT](#cr-tag-subject) | The subject carries only what the author judges important |
@@ -283,15 +293,92 @@ Three answers are acceptable, and silence is not one of them:
 *Enforced at T4 — the reviewer asks. T5 once a per-commit run exists
 ([TR-CI-EVERY-COMMIT](testing.md#tr-ci-every-commit)).*
 
+## The group (CR-GROUP)
+
+### CR-GROUP-LABEL
+
+**A commit that is one of several in a larger change names the group.**
+
+The label is a stable slug: lower case, words joined by a hyphen, one to four words. It names the
+change and not the mechanism, which is the test that
+[PR-MSG-SUBJECT](pull-request.md#pr-msg-subject) applies to a subject. Write
+`tcp-algorithm-hierarchy`, not `move-files` and not `part-2`.
+
+Where the work has a plan file under `plan/pending/`, **use the stem of that file**. The two names
+then agree for free, and a reader who finds one finds the other.
+
+```
+Change: src.transportlayer.tcp | structure | - | tcp-algorithm-hierarchy
+```
+
+A commit that stands alone has no group, and the fourth field is absent. Most commits are of that
+kind, so the field costs nothing when it is not needed.
+
+**What the label buys the reader.** A larger change arrives as five or ten commits, and each one is
+correct on its own. The reader who bisects to the third of them needs to know that seven more
+exist, because the answer to "why does this look half-finished" is in the other seven. Nothing else
+in the history says so.
+
+*Enforced at T4 — no tool can know which commits belong together. A gate can check the shape of the
+slug, and it can list the groups it finds in a series.*
+
+### CR-GROUP-SPANS
+
+**A group is not a pull request.**
+
+All three relations occur, so a tool cannot derive the label from the branch:
+
+- one pull request holds **one** group. This is the common case.
+- one pull request holds **two or more** groups. A stacked request, or a series that first prepares
+  a shared component and then changes the model that needs it
+  ([PR-SPLIT-UPSTREAM](pull-request.md#pr-split-upstream)).
+- one group spans **two or more** pull requests. The author divided the work to keep each request
+  small enough to review ([PR-REQ-TOPIC](pull-request.md#pr-req-topic)).
+
+**The label is what survives.** A merge with a squash or a rebase drops the number of the pull
+request from the history. The label stays in the body of every commit, so `git log --grep` finds
+the whole group years later, across the request boundaries and across every rebase.
+
+*Enforced at T4.*
+
+### CR-GROUP-STABLE
+
+**The label does not change, and it carries no ordinal.**
+
+Do not write `tcp-cleanup-3-of-7`. A rebase reorders the commits, a review inserts one, and a split
+turns one into two. Each of those makes the ordinal wrong. **A wrong ordinal is worse than no
+ordinal**, because a reader counts the commits, finds six, and looks for a seventh that never
+existed.
+
+Do not rename the label after the first commit carries it. A group with two names is two groups to
+everyone who greps for it, and the history keeps both names forever.
+
+*Enforced at T3 — a gate can check the shape of the slug and report two labels that differ by one
+character in the same series.*
+
+### CR-GROUP-STANDALONE
+
+**The label does not excuse a partial commit.**
+
+A group is a cross-reference, not a licence. Every commit in the group still builds and passes its
+tests ([PR-SERIES-BUILDS](pull-request.md#pr-series-builds)), still makes exactly one change
+([PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change)), and still carries its own reason
+without the others ([PR-MSG-STANDALONE](pull-request.md#pr-msg-standalone)).
+
+The test: forget every other commit of the group and read this one. If it no longer makes sense,
+the label hides a division fault. It does not repair one.
+
+*Enforced at T4 — the same review that judges the division of the series.*
+
 ## The trailer (CR-TAG)
 
 ### CR-TAG-TRAILER
 
 **Every commit ends with one `Change:` line.**
 
-The line is the last line of the message. One empty line comes before it. It states all three
-dimensions in a form that a reader scans in one second and a gate parses with one regular
-expression.
+The line is the last line of the message. One empty line comes before it. It states the three
+dimensions of the commit, and the group where the commit has one, in a form that a reader scans in
+one second and a gate parses with one regular expression.
 
 ```
 ieee80211: make rate control adapt per receiver
@@ -311,11 +398,14 @@ what the other says.
 
 ### CR-TAG-FORM
 
-**The trailer has three fields in a fixed order, separated by `|`.**
+**The trailer has three fields in a fixed order, separated by `|`, and an optional fourth.**
 
 ```
-Change: <area>[.<position>] | <depth>[.<direction>][.fix] | <obligations>
+Change: <area>[.<position>] | <depth>[.<direction>][.fix] | <obligations> [| <group>]
 ```
+
+The fourth field is last, so its absence is unambiguous and it needs no placeholder. A commit that
+belongs to no group writes three fields.
 
 | Field | Values |
 | --- | --- |
@@ -325,11 +415,13 @@ Change: <area>[.<position>] | <depth>[.<direction>][.fix] | <obligations>
 | direction | `add`, `remove`, `change`; more than one joined by `+`; only on `behavior` |
 | intent | `fix`, or omitted for a deliberate change |
 | obligations | any of `fingerprint`, `statistical`, `expected`, `test`, `whatsnew`, `migration`, separated by a space; or `-` for none; or `?` |
+| group | a stable slug, one to four lower-case words joined by a hyphen; the whole field is omitted when the commit stands alone |
 
 Write `?` rather than a guess. A guess that a reviewer trusts is worse than a question that a
 reviewer answers.
 
-Six real shapes:
+Eight real shapes. The last three are one group, in three commits, in the order a reader reads
+them:
 
 ```
 Change: src.ieee80211.Dcf | behavior.change.fix | fingerprint
@@ -338,7 +430,16 @@ Change: src.networklayer.L3AddressResolver | name | whatsnew migration
 Change: src.visualizer | format | -
 Change: tests.fingerprint | behavior.change | -
 Change: doc | behavior.change | -
+
+Change: src.transportlayer.tcp | location | - | tcp-algorithm-hierarchy
+Change: src.transportlayer.tcp | name | whatsnew migration | tcp-algorithm-hierarchy
+Change: src.transportlayer.tcp | structure | - | tcp-algorithm-hierarchy
 ```
+
+Read the three together and the group tells its own story: the files move, then the types take
+their new names, then the hierarchy changes shape. Each commit holds one depth level
+([CR-DEPTH-ONE](#cr-depth-one)), and no commit changes the behavior, so no baseline moves
+([CR-OBL-INERT](#cr-obl-inert)).
 
 *Enforced at T3 — one regular expression, and a comparison of each field with the diff.*
 

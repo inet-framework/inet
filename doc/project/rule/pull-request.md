@@ -347,8 +347,9 @@ speculation about future work. Keep a `Fixes #<n>` style reference when it is ac
 
 ### The classification trailer
 
-Every commit also ends with one `Change:` line that states its scope, its depth and what must move
-with it — see [classification.md](classification.md), which owns `CR-*`. The trailer is not part of
+Every commit also ends with one `Change:` line that states its scope, its depth, what must move
+with it, and — where the commit is one of several in a larger change — the label of that group.
+See [classification.md](classification.md), which owns `CR-*`. The trailer is not part of
 the message rules above: [PR-MSG-WHY](#pr-msg-why) governs the *reason*, and the trailer governs
 the *classification*. Neither one says what the other says.
 
