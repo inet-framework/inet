@@ -54,20 +54,23 @@ lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost)).
 
 ## Statements that no check carries
 
-Fifty-nine statements of the in-scope set have no check in this pass. They fall into six
-groups, and the group decides the reason.
+38 of the 132 statements of the in-scope set have no check in this pass: 26 that
+this level cannot reach at all, and 12 that wait for a tool the level does not have. They
+fall into six groups, and the group decides the reason.
 
-| Group | Statements | Why no check |
-| --- | --- | --- |
-| **Needs a relay agent** | RFC2131-NAK-4, BCAST-2 | Both hold only when a relay agent put an address in `giaddr`. A relay agent is a third node type, and RFC 1542 that defines it is out of the in-scope set. `giaddr` is zero in every message of every mockup here, so the condition never holds. |
-| **A distribution, not a value** | RFC2131-DISC-4, RETX-2, LEASE-7, LEASE-10, DECL-3 | Each one states a time with a random part: a start delay of one to ten seconds, a backoff of 4 then 8 then 64 seconds with a fuzz of one, a wait of half the remaining time, a fuzz on T1 and T2, a ten-second pause. A single run cannot tell a wrong distribution from an unlucky draw. Level 4 adds the statistical check and the tolerance that these need. |
-| **Inside a node, with no consequence on a link** | RFC2131-MSG-6, ID-1, SRVID-1, INF-4, SEL-1, SEL-2, SEL-3, DECL-4, REL-4, MISC-1, ACK-7, OFF-7, DECL-8, XID-2, XID-5, BCAST-1, LEASE-11, ID-2 | Each one is about what a node stores or decides, or about a second scenario that a check would have to build to see the consequence: which address a server prefers, whether it took an address out of service, whether it looked for a lease. A check of two nodes on a link can see the consequence only through a second exchange, which makes the check a check of the pool and not of the rule. A later pass can reach most of them with a second client in the mockup. |
-| **An encoding rule of a field the messages here do not use** | RFC2131-MSG-10, RFC2132-OVER-1, TFTP-1, BOOTF-1, PAD-1, FMT-2, FMT-5, MSGOPT-1, MAXSZ-1, VCLASS-1 | Option overload, the two options that replace an overloaded field, the pad option, the trailing-null rule, the site-specific range, the text option, the message size option and the vendor class option. A serializer unit test is the home of each one, and none of them appears in a message of the exchanges above. |
-| **A permission whose absence is not a failure** | RFC2131-DISC-6, OFF-1 (the answer half), REL-1 (the existence half), INF-1 (the existence half), REQ-5 (the entry half) | A `MAY` clause is not a violation when nothing happens. Where the permission has a visible form, the check observes that form and says so; where it does not, there is nothing to observe. |
-| **Covered by another check, no check of its own** | RFC2131-NAK-1, NAK-8, RETX-4 (the revert half), REQ-7 (the field half), LEASE-3, SRVID-2, ACK-6 | Each one is a `covered` entry of the ledger: a check that targets another statement establishes it on the way. |
+| Group | Count | Statements | Why no check |
+| --- | --- | --- | --- |
+| **A distribution, not a value** | 5 | DISC-4, LEASE-7, LEASE-10, RETX-2, DECL-3 | Each one states a time with a random part: a start delay of one to ten seconds, a backoff of 4 then 8 then 64 seconds with a fuzz of one, a wait of half the remaining time, a fuzz on T1 and T2, a pause of at least ten seconds. A single run cannot tell a wrong distribution from an unlucky draw. Level 4 adds the statistical check and the tolerance these need. |
+| **An encoding rule of a field the messages here do not use** | 7 | MSG-10, RFC2132 FMT-2, RFC2132 FMT-5, RFC2132 PAD-1, RFC2132 OVER-1, RFC2132 TFTP-1, RFC2132 BOOTF-1 | Option overload and the two options that replace an overloaded field, the pad option, the trailing-null rule of a text option, the site-specific code range. A serializer unit test is the home of each one, and none of them appears in a message of the exchanges above. |
+| **Needs a second client, a second exchange or a second interface** | 12 | XID-2, NAK-1, LEASE-11, DECL-4, REL-4, SRVID-1, ID-1, ID-2, SEL-1, SEL-2, MISC-1, RFC6842 CLID-2 | Each one is about what a node stores or decides, and its consequence shows only in what the **next** exchange gets: which address a server prefers, whether it took a declined address out of service, whether it freed a released one, whether it keys a lease on the client identifier. A richer mockup reaches all twelve at level 3, and none of them needs a new tool. |
+| **Nothing on a link can see it** | 9 | MSG-6, XID-5, DISC-6, OFF-7, ACK-7, NAK-8, DECL-8, INF-4, BCAST-1 | A client's ability to accept a 576-octet message or a unicast before it is configured, a permission the scenario does not exercise, a probe or its absence inside a server, a discard in a state no crafted message reaches, a client's restart after a DHCPNAK that no check of this pass makes a server send. |
+| **Needs a relay agent** | 2 | NAK-4, BCAST-2 | Both hold only when a relay agent put an address in `giaddr`. A relay agent is a third node type, and RFC 1542, which defines it, is out of the in-scope set. `giaddr` is zero in every message of every mockup here, so the condition never holds. |
+| **No message of the scenarios carries the option** | 3 | RFC2132 MSGOPT-1, RFC2132 MAXSZ-1, RFC2132 VCLASS-1 | The `message`, `maximum DHCP message size` and `vendor class identifier` options. Every one of the three is a `MAY` for the sender, and none of the scenarios above asks a node to send one. A check would have to craft the option itself, and it would then assert only its own input. |
 
-The coverage ledger records each of these with its status and this reason. They are listed
-here and not forgotten.
+The coverage ledger records each of these with its status and this reason, row by row. They are
+listed here and not forgotten. The first two groups are the ones a later level closes by adding a
+tool; the third is the one a later pass closes by enriching the mockup, and it is the largest
+group that needs no new tool at all.
 
 ## Common mockups
 
