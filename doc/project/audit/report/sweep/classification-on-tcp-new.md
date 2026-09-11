@@ -20,7 +20,7 @@
 
 | What the trailer buys | Verdict |
 | --- | --- |
-| The subject shortening of [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) | **Almost worthless here — and the rule has since been widened because of it.** See [finding 1](#f-1--the-subject-shortening-buys-almost-nothing-on-this-branch). |
+| The subject prefixes of [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) | **The rule was rewritten twice because of this branch** — first widened, then given a default. See [finding 1](#f-1--the-subject-shortening-buys-almost-nothing-on-this-branch). |
 | The depth field | **The strongest of the four.** 6 of 61 commits need no code review, and the trailer says so in one word. [Finding 2](#f-2--the-depth-field-is-the-strongest-of-the-four). |
 | The obligation field | **Strong, and it exposes a defect the branch already has.** [Finding 3](#f-3--the-obligation-field-exposes-a-defect-the-branch-already-carries). |
 | The group field | **Strong on this branch and weak on a short one.** [Finding 4](#f-4--the-group-is-strong-here-and-would-be-weak-on-a-short-branch). |
@@ -55,13 +55,14 @@ Every commit, in branch order, with the subject as the author would write it and
 [CR-TAG-FORM](../../../rule/classification.md#cr-tag-form) defines it. A ⚠ marks a commit whose
 trailer exposes a rule break; the findings below name each one.
 
-**The subjects apply [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) as widened on
-2026-09-11.** The policy is the one simu5g uses and the one this branch's own author half-used:
-`fix:`, `refactor:`, `comment:` and `name:` are written, and a plain addition of behavior stays
-unmarked, because the common case earns no word. **Twenty-four of the 61 subjects carry a kind
-marker** under that policy. Where the marker did not fit, the author traded something away, and
-[F-7](#f-7--the-kind-marker-costs-about-nine-characters-and-two-subjects-cannot-pay) counts the
-price.
+**The subjects apply [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) as it stands
+on 2026-09-11.** **All 61 carry a kind marker.** An earlier pass of this report marked only 24 and
+left a plain addition of behavior unmarked, on the ground that simu5g does the same. That was
+wrong, and [F-7](#f-7--writing-the-kind-on-every-subject-costs-one-commit-in-sixty-one) says why:
+simu5g has three markers, so absence there means "a feature", while this scheme has six depths and
+three directions, so absence means nothing at all.
+
+Where the marker did not fit, the scope went first. Six subjects carry a kind and no scope.
 
 **The layout below is the report's, not git's.** A real message keeps an empty line before the
 trailer ([CR-TAG-TRAILER](../../../rule/classification.md#cr-tag-trailer)); here the trailer is
@@ -73,19 +74,19 @@ indented under its subject so that 61 pairs stay readable.
 packet: fix: keep the fill byte when splitting a BitCountChunk or ByteCountChunk
     Change: src.common.packet.Chunk | behavior.change.fix | ?
 
-ppp: follow RFC 1661 rather than RFC 1331
+ppp: change: follow RFC 1661 rather than RFC 1331
     Change: src.linklayer.ppp.PppHeader | behavior.change | fingerprint whatsnew
 
 pcap: fix: record PPP traces as LINKTYPE_PPP rather than LINKTYPE_PPP_WITH_DIR
     Change: src.common.packet.recorder.PcapWriter | behavior.change.fix | -
 
-tcp: add the TCP Fast Open and AccECN header options, and the AE bit
+tcp: add: the TCP Fast Open and AccECN header options, and the AE bit
     Change: src.tcp.TcpHeader | behavior.add | - | tcp-modern-features
 
-tcp: extend the socket contract with the commands, tags and status fields
+tcp: add: extend the socket contract with the commands, tags and status fields
     Change: src.tcp.TcpSocket | behavior.add | whatsnew | tcp-modern-features
 
-tcp: allow the receive-window and timestamp parameters to change at runtime
+change: allow the receive-window and timestamp parameters to change at runtime
     Change: src.tcp.Tcp | behavior.change | whatsnew | tcp-modern-features
 
 ppp: fix: byte-align a packet truncated by a mid-transmission disconnect
@@ -103,22 +104,22 @@ ask without reading a diff.
 ### Phase B — the algorithm split (9 to 15)
 
 ```
-tcp: collect the TCP signals into one place   ⚠
+tcp: add: collect the TCP signals into one place   ⚠
     Change: src.tcp.TcpSimsignals | behavior.add | - | tcp-algorithm-split
 
-tcp: introduce the congestion-control and recovery interfaces   ⚠
+tcp: add: introduce the congestion-control and recovery interfaces   ⚠
     Change: src.tcp.ITcpCongestionControl | behavior.add | - | tcp-algorithm-split
 
-tcp: extract the RFC 5681 congestion control and fast recovery   ⚠
+tcp: add: extract the RFC 5681 congestion control and fast recovery   ⚠
     Change: src.tcp.Rfc5681CongestionControl | behavior.add | - | tcp-algorithm-split
 
-tcp: extract the RFC 6582 (NewReno) recovery   ⚠
+tcp: add: extract the RFC 6582 (NewReno) recovery   ⚠
     Change: src.tcp.Rfc6582Recovery | behavior.add | - | tcp-algorithm-split
 
 tcp: refactor: move SACK loss recovery into Rfc6675Recovery
     Change: src.tcp.Rfc6675Recovery | refactor | - | tcp-algorithm-split
 
-tcp: add TcpCubic (RFC 9438) with HyStart
+tcp: add: TcpCubic (RFC 9438) with HyStart
     Change: src.tcp.TcpCubic | behavior.add | test | tcp-modern-features
 
 flavours: name+refactor: move the classic flavours onto the split architecture   ⚠
@@ -131,52 +132,52 @@ Every commit of this phase adds a mechanism that no parameter reaches yet. The p
 commit 33. So the whole phase is inert, and its trailers say `-` seventeen times in a row.
 
 ```
-tcp: size segments against the space options actually leave   ⚠
+tcp: change: size segments against the space options actually leave   ⚠
     Change: src.tcp.TcpConnection | behavior.change | test | tcp-modern-features
 
-tcp: judge loss by transmission time (RFC 8985)   ⚠
+tcp: add: judge loss by transmission time (RFC 8985)   ⚠
     Change: src.tcp.Rfc8985Recovery | behavior.add | test | tcp-modern-features
 
-tcp: learn how far the path reorders   ⚠
+tcp: add: learn how far the path reorders   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test | tcp-modern-features
 
-tcp: pace the window down across recovery (RFC 6937)   ⚠
+tcp: add: pace the window down across recovery (RFC 6937)   ⚠
     Change: src.tcp.Rfc6937ProportionalRateReduction | behavior.add | test | tcp-modern-features
 
-tcp: undo a reduction that turned out to be unnecessary   ⚠
+tcp: add: undo a reduction that turned out to be unnecessary   ⚠
     Change: src.tcp.TcpLossUndo | behavior.add | test | tcp-modern-features
 
-tcp: recognise a premature retransmission timeout (RFC 5682)   ⚠
+tcp: add: recognise a premature retransmission timeout (RFC 5682)   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test | tcp-modern-features
 
-tcp: probe the tail rather than waiting out the timeout   ⚠
+tcp: add: probe the tail rather than waiting out the timeout   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test | tcp-modern-features
 
-tcp: TCP Fast Open (RFC 7413)   ⚠
+tcp: add: TCP Fast Open (RFC 7413)   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test whatsnew | tcp-modern-features
 
-tcp: Accurate ECN   ⚠
+tcp: add: Accurate ECN   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test whatsnew | tcp-modern-features
 
-tcp: separate the receive buffer from the advertised window   ⚠
+tcp: change: separate the receive buffer from the advertised window   ⚠
     Change: src.tcp.TcpReceiveQueue | behavior.change | test | tcp-modern-features
 
-tcp: adapt the acknowledgement delay to the connection   ⚠
+tcp: add: adapt the acknowledgement delay to the connection   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test | tcp-modern-features
 
-tcp: keepalive probing (RFC 1122 4.2.3.6)   ⚠
+tcp: add: keepalive probing (RFC 1122 4.2.3.6)   ⚠
     Change: src.tcp.TcpConnection | behavior.add | test whatsnew | tcp-modern-features
 
-tcp: the socket options the new behavior exposes   ⚠
+tcp: add: the socket options the new behavior exposes   ⚠
     Change: src.tcp.TcpSocket | behavior.add | whatsnew | tcp-modern-features
 
-tcp: mark write boundaries with PSH   ⚠
+tcp: add: mark write boundaries with PSH   ⚠
     Change: src.tcp.TcpSendQueue | behavior.add | test | tcp-modern-features
 
-tcp: segment-size negotiation and path MTU handling   ⚠
+tcp: add: segment-size negotiation and path MTU handling   ⚠
     Change: src.tcp.TcpConnection | behavior.add | - | tcp-modern-features
 
-tcp: retransmission, persist and handshake timing   ⚠
+tcp: change: retransmission, persist and handshake timing   ⚠
     Change: src.tcp.TcpAlgorithmBase | behavior.change | test | tcp-modern-features
 
 tcp: refactor: connection plumbing the modern features share   ⚠
@@ -186,19 +187,19 @@ tcp: refactor: connection plumbing the modern features share   ⚠
 ### Phase D — expose, default, record, follow (33 to 37)
 
 ```
-tcp: expose the new behavior as parameters, and modernize the defaults   ⚠
+add+change: expose the new behavior as parameters, and modernize the defaults   ⚠
     Change: src.tcp.Tcp | behavior.add+change | fingerprint whatsnew migration | tcp-modern-defaults
 
-tests: re-record the fingerprints the modernized defaults move   ⚠
+tests: change: re-record the fingerprints the modernized defaults move   ⚠
     Change: tests.fingerprint | behavior.change | - | tcp-modern-defaults
 
-tests: cover the new behavior, and pin the old defaults where tests predate them   ⚠
+add+change: cover the new behavior, and pin the old defaults where tests predate them   ⚠
     Change: tests | behavior.add+change | - | tcp-modern-defaults
 
 sctp: name: follow the TCP algorithm interface rename
     Change: src.sctp | name | - | tcp-algorithm-split
 
-tcpapp: let applications drive the new socket behavior
+tcpapp: add: let applications drive the new socket behavior
     Change: src.applications.tcpapp | behavior.add | whatsnew | tcp-modern-features
 ```
 
@@ -214,10 +215,10 @@ fix: finish the Fast Open option-form fallback, and the server's pre-ACK window 
 tcp: fix: match Linux's CUBIC HyStart delay detector
     Change: src.tcp.TcpCubic | behavior.change.fix | fingerprint whatsnew | tcp-review-fixes
 
-tcp: RFC 4821 packetized Path MTU discovery
+tcp: add: RFC 4821 packetized Path MTU discovery
     Change: src.tcp.TcpConnection | behavior.add | test whatsnew | tcp-modern-features
 
-tcp: model the receive buffer's memory limits, not just its byte count
+tcp: add: model the receive buffer's memory limits, not just its byte count
     Change: src.tcp.TcpReceiveQueue | behavior.add | test whatsnew | tcp-modern-features
 
 tcp: comment: document every RFC the module implements, and where it deviates
@@ -232,7 +233,7 @@ tcp: fix: clamp the snd_wnd-pipe underflow in RFC 6675 nextSeg rule (2)
 tcp: fix: drop unusable SACK options instead of aborting the simulation
     Change: src.tcp.TcpConnection | behavior.change.fix | - | tcp-review-fixes
 
-tcp: serialize the experimental TCP Fast Open option (kind 254)
+tcp: add: serialize the experimental TCP Fast Open option (kind 254)
     Change: src.tcp.TcpHeaderSerializer | behavior.add | test | tcp-review-fixes
 
 tcp: fix: compare increasedIWEnabled against initialWindow's real default
@@ -247,16 +248,16 @@ fix: count duplicate ACKs for every flavour again, not just the classic ones
 tcp: fix: deflate cwnd when non-SACK Reno leaves fast recovery
     Change: src.tcp.Rfc5681Recovery | behavior.change.fix | test fingerprint | tcp-review-fixes
 
-tcp: put TcpCubic on TcpClassicAlgorithmBase so it gets the shared plumbing
+change: put TcpCubic on TcpClassicAlgorithmBase so it gets the shared plumbing
     Change: src.tcp.TcpCubic | behavior.change | fingerprint | tcp-review-fixes
 
 tcpapp: fix: let TcpServerSocketIo keep a half-closed connection open again
     Change: src.applications.tcpapp.TcpServerSocketIo | behavior.change.fix | - | tcp-review-fixes
 
-tcp: drop the unused PRR entry helper and explain the dupack design it hints at   ⚠
+refactor: drop the unused PRR entry helper and explain the dupack design it hints at   ⚠
     Change: src.tcp.Rfc6937ProportionalRateReduction | refactor | - | tcp-review-fixes
 
-tcp: pick the fast-retransmit ssthresh by virtual, not by concrete-type sniffing
+tcp: refactor: pick the fast-retransmit ssthresh by virtual, not by type sniffing
     Change: src.tcp.TcpAlgorithmBase | refactor | - | tcp-review-fixes
 
 tcp: refactor: stop rescanning the SACK scoreboard several times per ACK
@@ -275,10 +276,10 @@ tcp_lwip: name: record the sent-seqno statistic under the same name as tcp
 tcp: comment: drop test-corpus provenance from code comments
     Change: src.tcp | comment | -
 
-split: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's
+refactor: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's
     Change: src.tcp.DcTcp | refactor | - | tcp-algorithm-split
 
-tests: re-record the fingerprints this TCP workstream moves   ⚠
+tests: change: re-record the fingerprints this TCP workstream moves   ⚠
     Change: tests.fingerprint | behavior.change | - | tcp-review-fixes
 ```
 
@@ -404,42 +405,70 @@ strategy is sound. **The subjects describe the intent of the phase and not the c
 commit**, and the depth field is what makes the gap visible: a reader who sees `behavior.add` next
 to the word "extract" asks the right question.
 
-### F-7 — The kind marker costs about nine characters, and two subjects cannot pay
+### F-7 — Writing the kind on every subject costs one commit in sixty-one
 
-**Rule:** [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject). **Note.**
+**Rule:** [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject). **Finding against the
+rule, and it has been repaired.**
 
-`fix: ` and `refactor: ` cost five and eleven characters on a line whose limit is 80. Measured
-across the branch:
+The first pass of this report marked 24 of the 61 subjects and left the rest bare, copying
+simu5g's convention that a feature goes unmarked. **The convention does not transfer.** simu5g has
+three markers, so an unmarked subject there carries the fourth value. This scheme has six depths
+and three directions, so an unmarked subject may be `behavior.add`, `behavior.change`,
+`behavior.add+change`, or an author in a hurry. A gate cannot see a missing marker either, so the
+check stayed silent on 37 of 61 commits.
 
-| | Over 72 (the aim) | Over 80 (the gate) |
+Marking every subject costs characters, and the branch measures how many:
+
+| | over 72 (the aim) | over 80 (the gate) |
 | --- | --- | --- |
 | the subjects as the author wrote them | 10 of 61 | 0 |
-| the same subjects with a kind marker | 18 of 61 | 6 |
+| the first pass of this report, 24 marked | 18 of 61 | 1 |
+| every subject marked, scope kept | 21 of 61 | 9 |
+| **every subject marked, scope dropped where needed** | **21 of 61** | **3** |
 
-The rule lets the author pay in three ways, and all three appear in the list above.
-
-- **Shorten the scope.** Commit 43 goes from `Tcp.ned:` to `tcp:` and fits.
-- **Drop the scope and keep the marker.** Commits 39 and 50 open with `fix:` and no scope at all.
-- **Drop the marker.** Commits 54 and 55 have topics so long that no prefix fits. Their trailers
-  still say `refactor`, so nothing is lost except the marker.
-
-The marker also pays a little back. Commit 38 read `three Fast Open fixes the oracle surfaced`;
-with `fix:` in front the word "fixes" is redundant, and the topic becomes `three Fast Open
-defects the oracle surfaced`, which says more in the same space.
-
-**Two of 61 cannot carry the marker.** That is the whole cost, and the rule already absorbs it by
-making every prefix optional.
-
-One subject does something the rule permits and no other subject here does: commit 60 writes
-`split:`, which is the **group**, in the place a scope would go.
+Nine falls to three as soon as the author gives up the scope instead of the kind, which is the
+priority the rule now states. Six subjects here carry a kind and no scope:
 
 ```
-split: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's
+change: allow the receive-window and timestamp parameters to change at runtime
+fix: finish the Fast Open option-form fallback, and the server's pre-ACK window
+fix: count duplicate ACKs for every flavour again, not just the classic ones
+change: put TcpCubic on TcpClassicAlgorithmBase so it gets the shared plumbing
+add+change: expose the new behavior as parameters, and modernize the defaults
+add+change: cover the new behavior, and pin the old defaults where tests predate them
 ```
 
-It is 72 characters, with room for exactly one prefix, and the group is the one worth having:
-this commit finishes the architecture split of commits 9 to 15, which are forty-five commits
-back. No other commit on the branch needed it.
+**The three that still exceed 80 are not a cost of the marker.** Two of them — commits 35 and 54 —
+carry an "and" and hold two changes each, so
+[PR-SPLIT-ONE-CHANGE](../../../rule/pull-request.md#pr-split-one-change) already splits them, and
+two shorter subjects both fit. The third, commit 55, has a 74-character topic on its own; it fits
+once the topic loses five characters, from "concrete-type sniffing" to "type sniffing", and the
+rule says that shortening the topic is the repair when even `fix: ` will not fit.
+
+**So the true cost is one commit in sixty-one**, and the one is a topic that was too long before
+the marker existed.
+
+Two small effects go the other way. A marker can absorb the topic's first word: `add: add the TCP
+Fast Open and AccECN header options` becomes `add: the TCP Fast Open and AccECN header options` at
+no cost. And `fix:` makes "fixes" redundant, so commit 38's topic goes from `three Fast Open fixes
+the oracle surfaced` to `three Fast Open defects the oracle surfaced`, which says more in the same
+space.
+
+**No subject on this branch carries the group, and the reason is worth recording.** Once the kind
+is written by default, the group and the scope compete for one slot, and the scope won every time
+anything fit at all.
+
+The one commit where the group would earn that slot is commit 60. It finishes the architecture
+split of commits 9 to 15, forty-five commits back, and nothing in its own subject says so:
+
+```
+split: refactor: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's   82
+refactor: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's          75
+```
+
+**The one commit that needs the group is the one commit with no room for it.** A shorter topic
+would buy the slot, and that is the author's call, not a rule's. The trailer still carries
+`tcp-algorithm-split`, so nothing is lost except the line in `git log --oneline`.
 
 ## What I would change in classification.md
 
@@ -448,10 +477,13 @@ back. No other commit on the branch needed it.
 it is the word INET writes — 71 of master's last 3000 subjects carry it. `location` and `name`
 stay as the two refactors that earn their own level.
 
-Three more amendments, all small, all produced by this trial. **One is applied; two are open.**
+Four more amendments, all small, all produced by this trial. **Two are applied; two are open.**
 
 1. ~~**Narrow `CR-TAG-SUBJECT` to the kind marker**~~ (F-1) — **superseded and applied.** The rule
    was widened rather than narrowed. See the finding.
+1b. ~~**Say which prefix to write when both do not fit**~~ (F-7) — **applied.** The kind is
+   written by default and the scope goes first when the line is tight, because absence of a kind
+   carries no value in a six-level scale.
 2. **Let depth `comment` and `format` list more than one area** in `CR-SCOPE-AREA` (F-5).
 3. **Allow `name+refactor` and the other mixed depths to be written**, rather than forcing the
    author to pick the deeper one. Commit 15 is honest as `name+refactor` and misleading as either

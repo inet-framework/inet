@@ -483,19 +483,50 @@ Both prefixes are optional and each one is free within its bounds.
 | the group | the label, shortened as far as it stays recognizable | field 4 |
 | the obligations | **never** | field 3 |
 
+The kind is one word in almost every case, because `behavior` is implied by the direction that
+follows it and is not written:
+
+| The trailer says | The subject writes |
+| --- | --- |
+| `behavior.add` | `add:` |
+| `behavior.change` | `change:` |
+| `behavior.remove` | `remove:` |
+| `behavior.change.fix`, `behavior.add.fix` | `fix:` |
+| `refactor`, `comment`, `format`, `location`, `name` | the same word |
+| a mixed depth or direction | both, as in `add+change:` or `name+refactor:` |
+
+A mixed marker is meant to look wrong. `add+change:` and `name+refactor:` are the subjects of
+commits that hold two changes, and [CR-DEPTH-ONE](#cr-depth-one) and
+[PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change) both say so.
+
 Five shapes, each one legal:
 
 ```
 EthernetMac: fix: drop the frame when the carrier goes before the preamble ends
 linklayer: refactor: hoist the shared frame-sequence steps into the base
 showcases.tsn: format: unindent the gate-schedule tables
-tcp: behavior.add: Tail Loss Probe (RFC 8985 section 7.2)
-size segments against the space options actually leave
+add: Tail Loss Probe (RFC 8985 section 7.2)
+split: fold DcTcp onto the shared ACK path
 ```
 
 The first writes the class and drops the area, the second writes the subsystem and drops the
-class, the third joins an area and a position, the fourth spells the depth and the direction in
-full, and the fifth writes no prefix at all.
+class, the third joins an area and a position, the fourth drops the scope and keeps the kind, and
+the fifth writes the group where a scope would go, on a commit whose group matters more than its
+subsystem.
+
+**Write the kind. Drop the scope first when the line is tight.** The two prefixes are equally
+optional in the grammar and they are not equally valuable, so the rule states the order.
+
+A missing kind is not a third way of saying something. In a scheme with three markers, absence can
+carry the fourth value — this is what simu5g does, where an unmarked subject is a feature. **This
+scheme has six depths and three directions, so absence carries nothing**: an unmarked subject may
+be `behavior.add`, `behavior.change`, `behavior.add+change`, or an author in a hurry. A gate cannot
+see a marker that is not there either, so an optional kind leaves the check silent on every subject
+that omits it.
+
+The scope is different. A reader recovers most of it from the topic and all of it from the file
+paths, so a subject survives its loss. Give up the scope first, the kind last, and the topic never.
+Where even `fix: ` will not fit, the topic is too long, and that is the thing to repair.
 
 **What the author must not do is disagree with the trailer.** A subject that says `fix:` over a
 trailer with no `.fix`, or `linklayer:` over a trailer that says `src.tcp`, is one commit with two
