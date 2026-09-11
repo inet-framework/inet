@@ -222,25 +222,31 @@ check whose own bookkeeping is wrong reports a pass that means nothing.
 
 ## Follow-ups, in the order I would do them
 
+The model items come first because five of them are a few lines each and every one of them turns a
+red test green.
+
 1. **Move the subnet test above the table lookup in the INIT-REBOOT branch** (gap 10). One
-   reordering. It closes a `SHOULD`, and four ledger rows change from `untested` to a verdict,
-   which takes [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) out of `unverified`.
-2. **Uncomment the duplicate detection** (gap 11). `sendDecline` is written and tested by the
-   check that exists; what is missing is the probe that triggers it and the wait for an answer.
-   Four more ledger rows change and
-   [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) leaves `unverified`.
-3. **Fix the four one-line field gaps**: `giaddr` in a DHCPOFFER (gap 2), `ciaddr` in a DHCPACK
+   reordering. It takes [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) out of `defect`
+   and gives four ledger rows a real verdict.
+2. **Uncomment the duplicate detection** (gap 11). `sendDecline` is written and complete; what is
+   missing is the probe that triggers it and the wait for an answer. It takes
+   [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) out of `defect` and gives four
+   more rows a real verdict. Items 1 and 2 are the two feature-level defects of the matrix, and
+   both are a trigger that never fires behind a mechanism that is already written.
+3. **Fix the four one-line field defects**: `giaddr` in a DHCPOFFER (gap 2), `ciaddr` in a DHCPACK
    (gap 3), the `flags` copy in both replies (gap 8), and the transaction identifier in
    `sendRequest` (gap 1). Four features leave `partial`.
 4. **Stop emitting a domain name server option with no value** (gap 4), and give the server a
    parameter for it while there. One `partial` feature becomes supported.
-5. **Decide what the model claims about RFC 6842** and act on the decision, which is item 3 of
+5. **Replace the single `responseTimeout` with a real backoff** (gaps 13 and 14). This is the
+   largest of the model changes and the one that needs level 4 to measure properly, but it is a
+   defect and not a missing feature: the code for the delay exists and carries the wrong law.
+6. **Write the thirteen checks the pass owes**, from
+   [the debt table](coverage.md#the-coverage-debt-thirteen-checks-this-pass-owes). Four mockups
+   clear eleven of them. This is the only test-work item, and it is what blocks level 3.
+7. **Decide what the model claims about RFC 6842** and act on it, which is item 3 of
    [`conformance.md`](conformance.md#headlines-for-the-next-pass). Either implement both halves or
    say in both NED files that the model implements RFC 2131 without its updates.
-6. **Add a second client to the mockups**, which is the cheapest coverage gain of the pass: it
-   reaches twelve `no check` statements at level 3 with no new tool.
-7. **Replace the single `responseTimeout` with a real backoff** (gaps 13 and 14), which is the
-   largest of the code changes and the one that needs level 4 to measure properly.
 8. **Name RFC 2132 in both NED files.** A documentation change with no code behind it; see item 4
    of [`conformance.md`](conformance.md#headlines-for-the-next-pass).
 9. **Correct the misleading warning** at `DhcpServer.cc:276`: the message type is unhandled, not

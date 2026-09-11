@@ -17,10 +17,10 @@ The ledger state this matrix comes from:
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -w dhcp`
 - Ledger: [`coverage.md`](coverage.md), achieved level 3 partial, 10 features supported, 7
-  partial, 3 not supported, 4 untested.
-- Suite: 26 tests, 13 PASS, 8 FAIL (expected), 5 FAIL (unexpected). The five undeclared failures
-  are the six defects of [`results.md`](results.md#the-class-of-every-failure); the eight declared
-  ones are features the model does not implement.
+  partial, 5 not supported, 2 untested, and 13 claimed statements owed a check.
+- Suite: 26 tests, 13 PASS, 5 FAIL (expected), 8 FAIL (unexpected). The eight undeclared failures
+  are in behavior the model claims; the five declared ones are behavior it does not. See
+  [`results.md`](results.md#the-rule-that-decides-the-declaration).
 
 ## Part 1 — what the model claims
 
@@ -135,22 +135,33 @@ governing document is RFC 6842 for the two statements RFC 6842 overrides.
 | [DHCP-F-INFORM](../../protocol/dhcp/features.md#dhcp-f-inform) | optional | yes | not supported | **declined** — the server handles no DHCPINFORM (gap 9) |
 | [DHCP-F-RELEASE](../../protocol/dhcp/features.md#dhcp-f-release) | optional | yes | not supported | **declined** — the client sends no DHCPRELEASE (gap 12), with a TODO that states why |
 | [DHCP-F-DUPLICATE-DETECTION](../../protocol/dhcp/features.md#dhcp-f-duplicate-detection) | optional | yes | not supported | **declined** — neither side probes (gap 11), and the client's half is written out as a comment |
-| [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) | mandatory | yes | untested | **unverified** — gap 10 removed the stimulus; the model does have a `sendNak` path this pass could not reach |
-| [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) | mandatory | yes | untested | **unverified** — gap 11 removed the stimulus |
-| [DHCP-F-INIT-REBOOT](../../protocol/dhcp/features.md#dhcp-f-init-reboot) | optional | yes | untested | **unverified** — reached only by a crafted message in this pass |
-| [DHCP-F-ADDRESS-SELECTION](../../protocol/dhcp/features.md#dhcp-f-address-selection) | optional | yes | untested | **unverified** — both core statements need a second exchange |
+| [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) | mandatory | yes | not supported | **defect** — `sendNak` is complete and gap 10 makes it unreachable for a foreign subnet |
+| [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) | mandatory | yes | not supported | **defect** — `sendDecline` is complete and gap 11 leaves it with no caller |
+| [DHCP-F-INIT-REBOOT](../../protocol/dhcp/features.md#dhcp-f-init-reboot) | optional | yes | untested | **unverified** — a check is owed; the model has the state machine and this pass wrote no check of it |
+| [DHCP-F-ADDRESS-SELECTION](../../protocol/dhcp/features.md#dhcp-f-address-selection) | optional | yes | untested | **unverified** — two checks are owed; the model has the preference code |
 
-Twenty-four features: **10 confirmed, 6 partial, 3 declined, 4 unverified, 1 out of claim**.
+Twenty-four features: **10 confirmed, 6 partial, 2 defect, 3 declined, 2 unverified, 1 out of claim**.
 
 ### How to read the four groups
 
-**Not one `defect` verdict in this matrix.** The word means one thing here and a different thing
-in [`results.md`](results.md#the-class-of-every-failure), and the two must not be confused. In this
-matrix a `defect` is a **whole mandatory feature** that the model claims and does not support, and
-there is none: six of the fourteen findings are defects at the level of a *statement*, and every
-one of them sits inside a feature that otherwise works, which is why those features read `partial`
-and not `defect`. That distinction is the point of a matrix that works on features and not on
-tests:
+**Two `defect` verdicts, and they are the headline.** The word means one thing here and a
+different thing in [`results.md`](results.md#the-rule-that-decides-the-declaration): in this matrix
+a `defect` is a **whole mandatory feature** that the model claims and does not support, while there
+a defect is one statement. Eight of the fourteen findings are statement-level defects, and six of
+those sit inside a feature that otherwise works, which is why six features read `partial`.
+
+The two feature-level defects are `DHCP-F-NAK` and `DHCP-F-DECLINE`, and they have the same shape:
+**the mechanism is written and the trigger never fires.** `DhcpServer::sendNak` builds a correct
+DHCPNAK and the branch that would send it for a foreign subnet is unreachable, because the INIT-REBOOT
+code tests its two conditions in the wrong order. `DhcpClient::sendDecline` builds a correct
+DHCPDECLINE and nothing calls it, because the address probe that would find a conflict is a
+commented-out block. Both are a few lines from working, and both are mandatory features of the
+protocol the model claims.
+
+An earlier version of this matrix read both as `unverified`, on the ground that a gap elsewhere had
+removed the stimulus their checks needed. That was wrong twice over: the checks did run and did
+fail, so the run answered the question; and `unverified` reads as "nobody looked", which is the
+opposite of what happened. The rest of the matrix stands:
 every mandatory feature is either confirmed or partial, except the two that a model gap left
 unverified and the one whose governing document the model does not claim. The model does what it
 says it does, in the large.
@@ -171,12 +182,12 @@ or a `SHOULD`, so no rule is broken. What the matrix adds is that the third one,
 detection, is the mechanism DHCP's central promise rests on — that no address serves two clients
 at once — so a scenario that models an address conflict cannot use this model as it stands.
 
-**The four `unverified` verdicts are the coverage debt of the pass, and three of them are the
-model's own doing.** DHCP-F-NAK and DHCP-F-DECLINE have checks that ran and could not be read,
-because gaps 10 and 11 removed the stimulus. That is the most interesting structural finding
-here: **a model gap in one place can make a second feature unmeasurable.** The model has a
-complete `sendNak` and a complete `sendDecline`; this pass reached neither, and the reason is
-not the toolset.
+**The two `unverified` verdicts are the coverage debt of the pass, and neither is the model's
+doing.** `DHCP-F-INIT-REBOOT` has a state machine in the model and this pass wrote no check of it;
+address selection has the preference code and no check of it. Both are owed a check, both are
+reachable with a richer mockup and no new tool, and
+[the debt table of the ledger](coverage.md#the-coverage-debt-thirteen-checks-this-pass-owes) says
+what each needs. An `unverified` verdict is a statement about the pass and never about the model.
 
 **The one `out of claim`** is [DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity),
 and it is a documentation task before it is a code task; see below.
@@ -184,16 +195,15 @@ and it is a documentation task before it is a code task; see below.
 ## Headlines for the next pass
 
 The guide says a `defect`, and an `unverified` feature with level `mandatory`, are the headlines.
-There is no `defect`, so the headlines are the two mandatory unverified features, and then the
-claim.
+There are two defects and no mandatory unverified feature, so the two defects lead.
 
-1. **Close gap 10, and DHCP-F-NAK becomes measurable.** The fix is the order of two tests in the
+1. **Close gap 10, and DHCP-F-NAK leaves `defect`.** The fix is the order of two tests in the
    INIT-REBOOT branch of `DhcpServer::processDhcpMessage`: test the subnet before the table of
-   leases, as RFC 2131 §4.3.2 states it. Four ledger rows change from `untested` to a verdict and
-   one mandatory feature leaves `unverified`, with no change to any test.
-2. **Close gap 11, and DHCP-F-DECLINE becomes measurable.** The code is written; the probe that
-   triggers it is a comment. Four more ledger rows change, and a second mandatory feature leaves
-   `unverified`.
+   leases, as RFC 2131 §4.3.2 states it. Four ledger rows change from FAIL to a real verdict and a
+   mandatory feature stops being a defect, with no change to any test.
+2. **Close gap 11, and DHCP-F-DECLINE leaves `defect`.** The code is written; the probe that
+   triggers it is a comment. Four more ledger rows change, and a second mandatory feature stops
+   being a defect.
 3. **Decide what the model claims about RFC 6842.** Two options, and the matrix does not choose
    between them. Either implement it — the server returns the option it received and the client
    compares it, which is a small change on both sides — or state in the NED documentation of both
@@ -208,3 +218,8 @@ claim.
 Item 4 is the `undocumented` direction of the matrix in a mild form: the model does more than it
 claims, and the table above has no row for it because the missing claim is a document and not a
 feature.
+
+5. **Write the thirteen checks the pass owes**, from
+   [the debt table](coverage.md#the-coverage-debt-thirteen-checks-this-pass-owes). Four mockups
+   clear eleven of them, and two features leave `unverified`. This is the largest of the five items
+   and the only one that is test work rather than model work.

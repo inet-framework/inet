@@ -76,8 +76,8 @@ The cost is that the check cannot reach the encoding statements that no message 
 exchange carries: the option overload rules, the pad option, the trailing-null rule of a text
 option, the site-specific code range, and the two options that replace an overloaded field. Those
 seven are exactly the `later (unit test)` rows of the ledger, and a serializer unit test suite is
-their home. This tree has no such suite for DHCP yet, and creating one is the seventh sharpening
-candidate of [`results.md`](results.md#sharpening-candidates-for-the-next-pass).
+their home. This tree has no such suite for DHCP yet, and creating one is item 7 of
+[what the next pass owes](results.md#what-the-next-pass-owes-in-the-order-i-would-do-it).
 
 ### The one check with a timing bound, and why it is not a statistical test
 

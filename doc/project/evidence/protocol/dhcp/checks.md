@@ -52,25 +52,27 @@ T2](checks/lease.md#rebinding-at-t2), [Lease expiry](checks/lease.md#lease-expir
 [Request repeated when the reply is
 lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost)).
 
-## Statements that no check carries
+## Statements this pass wrote no check for
 
-38 of the 132 statements of the in-scope set have no check in this pass: 26 that
-this level cannot reach at all, and 12 that wait for a tool the level does not have. They
-fall into six groups, and the group decides the reason.
+Thirty-eight of the 132 statements of the in-scope set have no check in this pass. This section
+says, for each group, **what a check would need**. It says nothing about the simulation model:
+whether the absence of a check is acceptable is a judgment about what the model claims, and that
+judgment lives in the coverage ledger, which gives each of these statements `owed` or `no check`.
+A reader who wants to know which compares the two documents.
 
-| Group | Count | Statements | Why no check |
+| Group | Count | Statements | What a check would need |
 | --- | --- | --- | --- |
-| **A distribution, not a value** | 5 | DISC-4, LEASE-7, LEASE-10, RETX-2, DECL-3 | Each one states a time with a random part: a start delay of one to ten seconds, a backoff of 4 then 8 then 64 seconds with a fuzz of one, a wait of half the remaining time, a fuzz on T1 and T2, a pause of at least ten seconds. A single run cannot tell a wrong distribution from an unlucky draw. Level 4 adds the statistical check and the tolerance these need. |
-| **An encoding rule of a field the messages here do not use** | 7 | MSG-10, RFC2132 FMT-2, RFC2132 FMT-5, RFC2132 PAD-1, RFC2132 OVER-1, RFC2132 TFTP-1, RFC2132 BOOTF-1 | Option overload and the two options that replace an overloaded field, the pad option, the trailing-null rule of a text option, the site-specific code range. A serializer unit test is the home of each one, and none of them appears in a message of the exchanges above. |
-| **Needs a second client, a second exchange or a second interface** | 12 | XID-2, NAK-1, LEASE-11, DECL-4, REL-4, SRVID-1, ID-1, ID-2, SEL-1, SEL-2, MISC-1, RFC6842 CLID-2 | Each one is about what a node stores or decides, and its consequence shows only in what the **next** exchange gets: which address a server prefers, whether it took a declined address out of service, whether it freed a released one, whether it keys a lease on the client identifier. A richer mockup reaches all twelve at level 3, and none of them needs a new tool. |
-| **Nothing on a link can see it** | 9 | MSG-6, XID-5, DISC-6, OFF-7, ACK-7, NAK-8, DECL-8, INF-4, BCAST-1 | A client's ability to accept a 576-octet message or a unicast before it is configured, a permission the scenario does not exercise, a probe or its absence inside a server, a discard in a state no crafted message reaches, a client's restart after a DHCPNAK that no check of this pass makes a server send. |
-| **Needs a relay agent** | 2 | NAK-4, BCAST-2 | Both hold only when a relay agent put an address in `giaddr`. A relay agent is a third node type, and RFC 1542, which defines it, is out of the in-scope set. `giaddr` is zero in every message of every mockup here, so the condition never holds. |
-| **No message of the scenarios carries the option** | 3 | RFC2132 MSGOPT-1, RFC2132 MAXSZ-1, RFC2132 VCLASS-1 | The `message`, `maximum DHCP message size` and `vendor class identifier` options. Every one of the three is a `MAY` for the sender, and none of the scenarios above asks a node to send one. A check would have to craft the option itself, and it would then assert only its own input. |
+| **A second client, a second exchange or a second interface in the mockup** | 12 | XID-2, NAK-1, LEASE-11, DECL-4, REL-4, SRVID-1, ID-1, ID-2, SEL-1, SEL-2, MISC-1, RFC6842 CLID-2 | Each one is about what a node decides, and the decision shows only in what the **next** exchange gets: which address is offered again, whether an address left the pool, whether a lease is keyed on the identifier or on the hardware address. Four mockups reach all twelve — two clients, a second exchange after a release, two renewals, and a client with two interfaces — and none of them needs a tool this level does not have. |
+| **One more crafted message** | 4 | MSG-6, XID-5, NAK-8, BCAST-1 | A reply padded to 576 octets; a DHCPACK during a renewal; a DHCPNAK at a client; a unicast reply before the client is configured. The framework builds all four already; this pass simply did not write them. |
+| **A distribution, not a value** | 5 | DISC-4, LEASE-7, LEASE-10, RETX-2, DECL-3 | Each states a time with a random part: a start delay of one to ten seconds, a backoff of 4 then 8 then 64 with a fuzz of one, a wait of half the remaining time, a fuzz on T1 and T2, a pause of at least ten seconds. A single run cannot tell a wrong distribution from an unlucky draw. Level 4 adds the statistical check and the tolerance these need. |
+| **An encoding rule of a field the messages here do not use** | 7 | MSG-10, RFC2132 FMT-2, FMT-5, PAD-1, OVER-1, TFTP-1, BOOTF-1 | Option overload and the two options that replace an overloaded field, the pad option, the trailing-null rule of a text option, the site-specific code range. A serializer unit test can build such a message; an ordinary exchange cannot produce one. |
+| **A relay agent in the path** | 2 | NAK-4, BCAST-2 | Both hold only when a relay agent put an address in `giaddr`. A relay agent is a third node type, and RFC 1542, which defines it, is out of the in-scope set. `giaddr` is zero in every message of every mockup here, so the condition never holds. |
+| **A sender that fills a field the scenarios leave empty** | 5 | DISC-6, OFF-7, ACK-7, DECL-8, INF-4 | An address hint in a DHCPDISCOVER, a probe before an offer and the absence of a second one, an announcement after an address goes into service, and a lease lookup that a reply cannot reveal. Each is a `MAY` or a `SHOULD` whose presence or absence the scenarios above do not arrange. |
+| **A field the messages of the scenarios have no room for** | 3 | RFC2132 MSGOPT-1, MAXSZ-1, VCLASS-1 | The `message`, `maximum DHCP message size` and `vendor class identifier` options. All three are a `MAY` for the sender, and no scenario above asks a node to send one, so a check would have to craft the option itself and would then assert only its own input. |
 
-The coverage ledger records each of these with its status and this reason, row by row. They are
-listed here and not forgotten. The first two groups are the ones a later level closes by adding a
-tool; the third is the one a later pass closes by enriching the mockup, and it is the largest
-group that needs no new tool at all.
+The four groups at the top are the reachable ones: twelve need a richer mockup and four need a
+crafted message, and both are level 3 work. The rest wait for a statistical suite, a serializer
+suite, or a document that is out of scope.
 
 ## Common mockups
 
