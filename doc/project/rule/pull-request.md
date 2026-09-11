@@ -56,6 +56,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
 | [PR-MSG-REPRODUCE](#pr-msg-reproduce) | A fix says how to reproduce the defect |
+| [PR-MSG-PLAN](#pr-msg-plan) | A commit that implements a plan names it |
 | [PR-MSG-GENERIC](#pr-msg-generic) | A shared-component commit explains itself in generic terms |
 | [PR-MSG-STANDALONE](#pr-msg-standalone) | The message carries its own context |
 | [PR-MSG-FACTS](#pr-msg-facts) | The message contains only facts about the change |
@@ -358,6 +359,33 @@ A fix is exactly the commit whose trailer carries `.fix` under
 opposite directions: one asks the author to declare the intent, the other asks for the evidence.
 
 *Enforced at T4 — agent review; T3 can check that a `.fix` commit has a body, not what is in it.*
+
+### PR-MSG-PLAN
+
+**A commit that implements a plan names it**
+
+Where the work follows a plan under `plan/pending/` or `plan/done/`, the message gives the plan's
+repository-relative path on a `Plan:` line, above the `Change:` trailer:
+
+```
+Plan: plan/pending/pr-1155-resolve-audit-findings.md
+Change: src.tcp.Rfc6675Recovery | behavior.change.fix | fingerprint | pr-1155-findings
+```
+
+A plan holds what no commit body has room for: the alternatives that were weighed, the order the
+steps must run in, the decisions a person made and why. A commit that implements step 5 of
+something is unreadable without step 1 to step 4, and the plan is where they are.
+
+**This does not weaken [PR-MSG-STANDALONE](#pr-msg-standalone).** That rule forbids a message that
+*replaces* its reason with a pointer. A plan reference is an addition: the body still gives the
+reason for this commit, and the plan gives the reason for the shape of the series. The difference
+from a ticket is that the plan is in the repository — it is fetched with the history, it survives
+the tracker, and `git log` and the file move together.
+
+`Plan:` comes before `Change:`, because
+[CR-TAG-TRAILER](classification.md#cr-tag-trailer) puts the classification last.
+
+*Enforced at T3 — a check that the path a `Plan:` line names exists in the tree at that commit.*
 
 ### PR-MSG-GENERIC
 

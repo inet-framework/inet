@@ -403,9 +403,12 @@ the label hides a division fault. It does not repair one.
 
 **Every commit ends with one `Change:` line.**
 
-The line is the last line of the message. One empty line comes before it. It states the three
-dimensions of the commit, and the group where the commit has one, in a form that a reader scans in
-one second and a gate parses with one regular expression.
+The line is the last line of the message, and one empty line comes before the trailer block it
+closes. It states the three dimensions of the commit, and the group where the commit has one, in a
+form that a reader scans in one second and a gate parses with one regular expression.
+
+Other trailers may sit above it — [PR-MSG-PLAN](pull-request.md#pr-msg-plan) puts a `Plan:` line
+there — and `Change:` stays last, because it is the line a reader's eye goes to.
 
 ```
 ieee80211: make rate control adapt per receiver

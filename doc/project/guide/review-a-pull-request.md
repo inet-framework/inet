@@ -155,6 +155,8 @@ Read each commit against the rules that need judgment:
   regression test only where the defect sits on a crossed path, could return under a refactor, or
   came from a misread standard. `git log --format='%h %s' --grep='^Change:.*\.fix' $MB..HEAD` lists
   the candidates once the branch carries trailers.
+- **[PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan)** — if the series follows a plan, does each
+  commit name it, and does the path still exist?
 - **[AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface)** and
   **[AR-EXT-VIRTUAL-IS-A-PROMISE](../rule/architecture.md#ar-ext-virtual-is-a-promise)** — generate
   the summary with `--usage`; its *Questions for the review* section lists every new public function
