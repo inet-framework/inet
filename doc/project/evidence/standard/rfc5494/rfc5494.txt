@@ -1,0 +1,395 @@
+
+
+
+
+
+
+Network Working Group                                           J. Arkko
+Request for Comments: 5494                                      Ericsson
+Updates: 826, 951, 1044, 1329, 2131,                        C. Pignataro
+         2132, 2176, 2225, 2834, 2835,                     Cisco Systems
+         3315, 4338, 4361, 4701                               April 2009
+Category: Standards Track
+
+
+  IANA Allocation Guidelines for the Address Resolution Protocol (ARP)
+
+Status of This Memo
+
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
+
+Copyright Notice
+
+   Copyright (c) 2009 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents in effect on the date of
+   publication of this document (http://trustee.ietf.org/license-info).
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+Abstract
+
+   This document specifies the IANA guidelines for allocating new values
+   in the Address Resolution Protocol (ARP).  This document also
+   reserves some numbers for experimentation purposes.  The changes also
+   affect other protocols that employ values from the ARP name spaces.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 1]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+1.  Introduction
+
+   This document specifies the IANA guidelines [RFC5226] for allocating
+   new values for various fields in the Address Resolution Protocol
+   (ARP) [RFC0826].  The change is also applicable to extensions of ARP
+   that use the same message format, such as [RFC0903], [RFC1931], and
+   [RFC2390].
+
+   The change also affects other protocols that employ values from the
+   ARP name spaces.  For instance, the ARP hardware address type
+   (ar$hrd) number space is also used in the "htype" (hardware address
+   type) fields in the Bootstrap Protocol (BOOTP) [RFC0951] and Dynamic
+   Host Configuration Protocol (DHCP) [RFC2131], as well as in the
+   "hardware type" field in the DHCP Unique Identifiers in DHCPv6
+   [RFC3315].  These protocols are therefore affected by the update in
+   the IANA rules.  Other affected specifications include the
+   specialized address resolution mechanisms in:
+
+   o  HYPERchannel [RFC1044]
+
+   o  DHCP options [RFC2132] [RFC4361]
+
+   o  ATM (Asynchronous Transfer Mode) ARP [RFC2225]
+
+   o  HARP (High-Performance Parallel Interface ARP) [RFC2834] [RFC2835]
+
+   o  Dual MAC (Media Access Control) FDDI (Fiber Distributed Data
+      Interface) ARP [RFC1329]
+
+   o  MAPOS (Multiple Access Protocol over Synchronous Optical Network/
+      Synchronous Digital Hierarchy) ARP [RFC2176]
+
+   o  FC (Fibre Channel) ARP [RFC4338]
+
+   o  DNS DHCID Resource Record [RFC4701]
+
+   The IANA guidelines are given in Section 2.  Previously, no IANA
+   guidance existed for such allocations.  The purpose of this document
+   is to allow IANA to manage number assignments based on these
+   guidelines in a consistent manner.
+
+   This document also reserves some numbers for experimentation
+   purposes.  These numbers are given in Section 3.
+
+
+
+
+
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 2]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+2.  IANA Considerations
+
+   The following rules apply to the fields of ARP:
+
+   ar$hrd (16 bits) Hardware address space
+
+      Requests for ar$hrd values below 256 or for a batch of more than
+      one new value are made through Expert Review [RFC5226].
+
+      Note that certain protocols, such as BOOTP and DHCPv4, employ
+      these values within an 8-bit field.  The expert should determine
+      that a need to allocate the new values exists and that the
+      existing values are insufficient to represent the new hardware
+      address types.  The expert should also determine the applicability
+      of the request and assign values higher than 255 for requests that
+      do not apply to BOOTP/DHCPv4.  Similarly, the expert should assign
+      1-octet values for requests that apply to BOOTP/DHCPv4, as for
+      example the "IPsec tunnel" with value 31 [RFC3456].  Conversely,
+      ARP-only uses, without a foreseeable reason to use the same value
+      in BOOTP/DHCPv4, should favor 2-octet values.
+
+      Requests for individual new ar$hrd values that do not specify a
+      value, or where the requested value is greater than 255, are made
+      through First Come First Served [RFC5226].  The assignment will
+      always result in a 2-octet value.
+
+   ar$pro (16 bits) Protocol address space
+
+      These numbers share the Ethertype space.  The Ethertype space is
+      administered as described in [RFC5342].
+
+   ar$op (16 bits) Opcode
+
+      Requests for new ar$op values are made through IETF Review or IESG
+      Approval [RFC5226].
+
+3.  Allocations Defined in This Document
+
+   When testing new protocol extension ideas, it is often necessary to
+   use an actual constant in order to use the new function, even when
+   testing in a closed environment.  This document reserves the
+   following numbers for experimentation purposes in ARP:
+
+   o  Two new ar$hrd values are allocated for experimental purposes:
+      HW_EXP1 (36) and HW_EXP2 (256).  Note that these two new values
+      were purposely chosen so that one would be below 256 and the other
+      would be above 255, and so that there would be different values in
+      the least and most significant octets.
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 3]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+   o  Two new values for the ar$op are allocated for experimental
+      purposes: OP_EXP1 (24) and OP_EXP2 (25).
+
+   Note that Appendix B.2 of [RFC5342] lists two Ethertypes that can be
+   used for experimental purposes.
+
+   In addition, for both ar$hrd and ar$op, the values 0 and 65535 are
+   marked as reserved.  This means that they are not available for
+   allocation.
+
+4.  Security Considerations
+
+   This specification does not change the security properties of the
+   affected protocols.
+
+   However, a few words are necessary about the use of the experimental
+   code points defined in Section 3.  Potentially harmful side effects
+   from the use of the experimental values need to be carefully
+   evaluated before deploying any experiment across networks that the
+   owner of the experiment does not entirely control.  Guidance given in
+   [RFC3692] about the use of experimental values needs to be followed.
+
+5.  Acknowledgments
+
+   The lack of any current rules has come up as new values were
+   requested from IANA, who contacted the IESG for advice.  The author
+   would like to thank Michelle Cotton in particular for bringing up
+   this issue.  The author would also like to thank Brian Carpenter,
+   Thomas Narten, Scott Bradner, Donald Eastlake, Andrew G. Malis, Brian
+   Haberman, Robert Sparks, Larry Zhu, and Dave Thaler for feedback.
+
+6.  References
+
+6.1.  Normative References
+
+   [RFC0826]  Plummer, D., "Ethernet Address Resolution Protocol: Or
+              converting network protocol addresses to 48.bit Ethernet
+              address for transmission on Ethernet hardware", STD 37,
+              RFC 826, November 1982.
+
+   [RFC0951]  Croft, B. and J. Gilmore, "Bootstrap Protocol", RFC 951,
+              September 1985.
+
+   [RFC1044]  Hardwick, K. and J. Lekashman, "Internet Protocol on
+              Network System's HYPERchannel: Protocol specification",
+              STD 45, RFC 1044, February 1988.
+
+
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 4]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+   [RFC1329]  Kuehn, P., "Thoughts on Address Resolution for Dual MAC
+              FDDI Networks", RFC 1329, May 1992.
+
+   [RFC2131]  Droms, R., "Dynamic Host Configuration Protocol",
+              RFC 2131, March 1997.
+
+   [RFC2132]  Alexander, S. and R. Droms, "DHCP Options and BOOTP Vendor
+              Extensions", RFC 2132, March 1997.
+
+   [RFC2176]  Murakami, K. and M. Maruyama, "IPv4 over MAPOS Version 1",
+              RFC 2176, June 1997.
+
+   [RFC2225]  Laubach, M. and J. Halpern, "Classical IP and ARP over
+              ATM", RFC 2225, April 1998.
+
+   [RFC2834]  Pittet, J., "ARP and IP Broadcast over HIPPI-800",
+              RFC 2834, May 2000.
+
+   [RFC2835]  Pittet, J., "IP and ARP over HIPPI-6400 (GSN)", RFC 2835,
+              May 2000.
+
+   [RFC3315]  Droms, R., Bound, J., Volz, B., Lemon, T., Perkins, C.,
+              and M. Carney, "Dynamic Host Configuration Protocol for
+              IPv6 (DHCPv6)", RFC 3315, July 2003.
+
+   [RFC3692]  Narten, T., "Assigning Experimental and Testing Numbers
+              Considered Useful", BCP 82, RFC 3692, January 2004.
+
+   [RFC4338]  DeSanti, C., Carlson, C., and R. Nixon, "Transmission of
+              IPv6, IPv4, and Address Resolution Protocol (ARP) Packets
+              over Fibre Channel", RFC 4338, January 2006.
+
+   [RFC4361]  Lemon, T. and B. Sommerfeld, "Node-specific Client
+              Identifiers for Dynamic Host Configuration Protocol
+              Version Four (DHCPv4)", RFC 4361, February 2006.
+
+   [RFC4701]  Stapp, M., Lemon, T., and A. Gustafsson, "A DNS Resource
+              Record (RR) for Encoding Dynamic Host Configuration
+              Protocol (DHCP) Information (DHCID RR)", RFC 4701,
+              October 2006.
+
+   [RFC5226]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", BCP 26, RFC 5226,
+              May 2008.
+
+   [RFC5342]  Eastlake. , D., "IANA Considerations and IETF Protocol
+              Usage for IEEE 802 Parameters", BCP 141, RFC 5342,
+              September 2008.
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 5]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+6.2.  Informative References
+
+   [RFC0903]  Finlayson, R., Mann, T., Mogul, J., and M. Theimer,
+              "Reverse Address Resolution Protocol", STD 38, RFC 903,
+              June 1984.
+
+   [RFC1931]  Brownell, D., "Dynamic RARP Extensions for Automatic
+              Network Address Acquisition", RFC 1931, April 1996.
+
+   [RFC2390]  Bradley, T., Brown, C., and A. Malis, "Inverse Address
+              Resolution Protocol", RFC 2390, September 1998.
+
+   [RFC3456]  Patel, B., Aboba, B., Kelly, S., and V. Gupta, "Dynamic
+              Host Configuration Protocol (DHCPv4) Configuration of
+              IPsec Tunnel Mode", RFC 3456, January 2003.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 6]
+
+RFC 5494                     ARP IANA Rules                   April 2009
+
+
+Appendix A.  Changes from the Original RFCs
+
+   This document specifies only the IANA rules associated with various
+   fields in ARP.  The specification of these rules also affects the
+   allocation of corresponding fields in protocols listed in Section 1
+   that share the registry.  This document does not make any changes in
+   the operation of these protocols themselves.
+
+Authors' Addresses
+
+   Jari Arkko
+   Ericsson
+   Jorvas  02420
+   Finland
+
+   EMail: jari.arkko@piuha.net
+
+
+   Carlos Pignataro
+   Cisco Systems
+   7200-12 Kit Creek Road
+   Research Triangle Park, NC  27709
+   USA
+
+   EMail: cpignata@cisco.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Arkko & Pignataro           Standards Track                     [Page 7]
+
