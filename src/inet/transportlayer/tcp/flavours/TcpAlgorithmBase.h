@@ -9,7 +9,7 @@
 #define __INET_TCPBASEALG_H
 
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
@@ -39,10 +39,10 @@ namespace tcp {
  * and not touched after that. Subclasses may redefine any of the virtual
  * functions here to add their congestion control code.
  */
-class INET_API TcpBaseAlg : public TcpAlgorithm
+class INET_API TcpAlgorithmBase : public TcpAlgorithm
 {
   protected:
-    TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
@@ -88,12 +88,12 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     /**
      * Ctor.
      */
-    TcpBaseAlg();
+    TcpAlgorithmBase();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpBaseAlg();
+    virtual ~TcpAlgorithmBase();
 
     /**
      * Create timers, etc.
@@ -135,6 +135,13 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual uint32_t getBytesInFlight() const override;
     virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 };
+
+
+// Deprecated: TcpBaseAlg was renamed to TcpAlgorithmBase in INET 4.6, because the old name said
+// what the class inherits rather than what it is -- it is the base of every TCP algorithm.
+// The alias keeps code outside this repository compiling for one release; it goes
+// away in the release after that.
+using TcpBaseAlg = TcpAlgorithmBase;
 
 } // namespace tcp
 } // namespace inet

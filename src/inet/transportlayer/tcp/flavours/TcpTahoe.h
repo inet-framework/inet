@@ -8,7 +8,7 @@
 #ifndef __INET_TCPTAHOE_H
 #define __INET_TCPTAHOE_H
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -16,12 +16,12 @@ namespace tcp {
 /**
  * State variables for TcpTahoe.
  */
-typedef TcpTahoeRenoFamilyStateVariables TcpTahoeStateVariables;
+typedef TcpClassicAlgorithmBaseStateVariables TcpTahoeStateVariables;
 
 /**
  * Implements Tahoe.
  */
-class INET_API TcpTahoe : public TcpTahoeRenoFamily
+class INET_API TcpTahoe : public TcpClassicAlgorithmBase
 {
   protected:
     TcpTahoeStateVariables *& state; // alias to TCLAlgorithm's 'state'

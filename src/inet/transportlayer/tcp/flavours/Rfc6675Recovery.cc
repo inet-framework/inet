@@ -191,7 +191,7 @@ void Rfc6675Recovery::step4()
 
     // Reduce cwnd/ssthresh per the connection's congestion-control flavour (Linux
     // icsk_ca_ops->ssthresh): the default is RFC 5681/6675's max(FlightSize/2, 2*SMSS)
-    // (TcpBaseAlg::calculateSsthreshForFastRecovery), but CUBIC applies its own
+    // (TcpAlgorithmBase::calculateSsthreshForFastRecovery), but CUBIC applies its own
     // beta (cwnd*0.7) -- hardcoding FlightSize/2 here gave CUBIC connections the wrong
     // post-recovery ssthresh (the fast_recovery/PRR scripts are all CUBIC).
     state->ssthresh = state->snd_cwnd = conn->getTcpAlgorithmForUpdate()->calculateSsthreshForFastRecovery();

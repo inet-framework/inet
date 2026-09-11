@@ -14,7 +14,7 @@ namespace tcp {
 std::string DcTcpFamilyStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpTahoeRenoFamilyStateVariables::str();
+    out << TcpClassicAlgorithmBaseStateVariables::str();
     out << " dctcp_alpha=" << dctcp_alpha;
     out << " dctcp_windEnd=" << dctcp_windEnd;
     out << " dctcp_bytesAcked=" << dctcp_bytesAcked;
@@ -27,7 +27,7 @@ std::string DcTcpFamilyStateVariables::str() const
 std::string DcTcpFamilyStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpTahoeRenoFamilyStateVariables::detailedInfo();
+    out << TcpClassicAlgorithmBaseStateVariables::detailedInfo();
     out << " dctcp_alpha=" << dctcp_alpha;
     out << " dctcp_windEnd=" << dctcp_windEnd;
     out << " dctcp_bytesAcked=" << dctcp_bytesAcked;
@@ -38,8 +38,8 @@ std::string DcTcpFamilyStateVariables::detailedInfo() const
 
 // ---
 
-DcTcpFamily::DcTcpFamily() : TcpTahoeRenoFamily(),
-    state((DcTcpFamilyStateVariables *&)TcpTahoeRenoFamily::state)
+DcTcpFamily::DcTcpFamily() : TcpClassicAlgorithmBase(),
+    state((DcTcpFamilyStateVariables *&)TcpClassicAlgorithmBase::state)
 {
 }
 

@@ -6,7 +6,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.transportlayer.tcp.flavours.TcpBaseAlgState;
+import inet.transportlayer.tcp.flavours.TcpAlgorithmBaseState;
 import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 namespace inet::tcp;
@@ -14,7 +14,7 @@ namespace inet::tcp;
 ///
 /// State variables for TcpWestwood.
 ///
-struct TcpWestwoodStateVariables extends TcpBaseAlgStateVariables
+struct TcpWestwoodStateVariables extends TcpAlgorithmBaseStateVariables
 {
     @descriptor(readonly);
 
