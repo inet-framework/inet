@@ -129,6 +129,12 @@ deleted file and a new file: the diff disappears, and the history of the file br
 point. Two commits keep the rename visible and keep the real edit small. This holds for `.ned`,
 `.msg` and C++ files, and for whole directories.
 
+**Rename the type in its own commit too, after the move.** A file whose name carries a type name
+takes three commits, not two: move the files, rename the type everywhere, then change the content.
+The move commit will not compile, and [PR-SERIES-BUILDS](#pr-series-builds) exempts it — the loss
+from a rename git cannot see is permanent, and the loss from a broken middle commit is one
+`git bisect skip`.
+
 ### PR-SPLIT-PREPARE
 
 **Preparation comes before the change that needs it**
@@ -228,6 +234,17 @@ the last commit.
 `git bisect` is the fastest tool for a regression that nobody can explain, and one broken
 middle commit makes it useless. The rule also protects review itself: a reviewer can judge
 commit N only if the tree after commit N is consistent.
+
+**One exemption: a pure move or rename commit may fail to build.**
+[PR-SPLIT-MOVE](#pr-split-move) asks for a commit that moves files and changes no content, and
+when the moved file declares the type being renamed, no such commit can compile — renaming
+`TcpBaseAlg.h` while it still declares `class TcpBaseAlg` breaks every file that includes it.
+The move is worth more than the build here, because a rename git cannot see costs the file its
+history permanently, and a broken build costs one `git bisect skip`.
+
+The exemption is narrow. It covers a commit whose diff is **only** moves and renames, it does not
+extend to the content commit that follows, and the run of broken commits is as short as the
+change allows — a move and then its rename, not a move and then twenty commits.
 
 ### PR-SERIES-ORDER
 

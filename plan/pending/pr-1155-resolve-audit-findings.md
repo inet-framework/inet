@@ -113,31 +113,31 @@ ended at this commit:
 
 `Changes-20051129.txt` is deleted and is not a rename; it stays in the content commit.
 
-**A `git mv` alone will not build, and that is the point of the split's shape.** Renaming
-`TcpBaseAlg.h` while it still declares `class TcpBaseAlg` breaks every file that includes it, so a
-literally content-free move commit fails
-[PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds). **The rename commit
-moves the files and renames the two types in the same change** — `TcpBaseAlg` →
-`TcpAlgorithmBase`, `TcpTahoeRenoFamily` → `TcpClassicAlgorithmBase`, everywhere. That is one
-mechanical sweep, it builds, and because only identifiers change, git's similarity for the six
-files stays near 100 % instead of 39 %.
+**Three commits, and the first one will not compile.** Renaming `TcpBaseAlg.h` while it still
+declares `class TcpBaseAlg` breaks every file that includes it, so a content-free move cannot
+build. [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) was given an
+exemption for exactly this on 2026-09-11: **a rename git cannot see costs the file its history
+permanently, and a broken middle commit costs one `git bisect skip`.**
 
 ```
+tcp: location: move the TcpBaseAlg and TcpTahoeRenoFamily files to their new names
+    Change: src.tcp.flavours | location | - | tcp-algorithm-split
 tcp: name: rename TcpBaseAlg and TcpTahoeRenoFamily for the split architecture
     Change: src.tcp.flavours | name | whatsnew migration | tcp-algorithm-split
 tcp: refactor: move the classic flavours onto the split architecture
     Change: src.tcp.flavours | refactor | - | tcp-algorithm-split
 ```
 
-**This exposes a gap in [PR-SPLIT-MOVE](../../doc/project/rule/pull-request.md#pr-split-move).** It
-says to move files "in a commit that does not change their content", which is right for a file
-move and impossible for a *type* rename, where the file name and the type name must travel
-together or nothing compiles. The rule needs a clause for that case; it is recorded in §8 as
-project work, not branch work.
+The first commit is `git mv` and nothing else, so every one of the six is `R100`. The second
+substitutes the two type names everywhere and restores the build. The third is the architecture
+change that is the point of the series.
 
-**Done when** `git show --name-status -M` on the first commit shows six `R09x` or `R100` lines and
-no `A`/`D` pair, the tree builds in both modes, and `check-commits.sh` no longer flags
-`PR-SPLIT-MOVE`.
+The body of the move commit says it does not build and why, so a bisecting reader reaches for
+`git bisect skip` instead of a bug report.
+
+**Done when** `git show --name-status -M` on the move commit shows six `R100` lines and no `A`/`D`
+pair, the tree builds in both modes **after the rename commit**, and `check-commits.sh` no longer
+flags `PR-SPLIT-MOVE`.
 
 **1b. Add the deprecation alias (F-2, part).** In the rename commit, one line per renamed type:
 
@@ -451,10 +451,6 @@ immediately. Step 5 is the clock: eleven fingerprint runs and eleven explanation
 
 ## 8. Out of scope
 
-- **A clause in `PR-SPLIT-MOVE` for a type rename.** The rule asks for a move commit that changes
-  no content, which cannot build when the moved file declares the type being renamed. Step 1a
-  shows the working shape — move the files and rename the type in one mechanical commit — and the
-  rule should say so. Project work, not branch work.
 - **The `T3` release-note check** that F-2's five occurrences argue for. It is a project change, not
   a branch change, and it needs its own plan.
 - **`AR-EXT-MINIMAL-SURFACE` and `AR-EXT-VIRTUAL-IS-A-PROMISE`** — 28 uncalled and 95 unoverridden
