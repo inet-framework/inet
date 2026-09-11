@@ -1,0 +1,132 @@
+%description:
+
+RFC 2131 -- a client with no address gets one in four messages: DISCOVER, OFFER, REQUEST, ACK.
+
+Checks RFC2131-MSG-1, MSG-3, MSG-5, OFF-1, ACK-1 and ACK-2 and RFC2132-TYPE-1
+from doc/project/evidence/standard/rfc2131/catalog.md and
+doc/project/evidence/standard/rfc2132/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/exchange.md#address-allocation-exchange; the
+program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+Every step reads the message type from the 'DHCP message type' option and not from the name
+of the packet, because RFC 2131 section 3 identifies a message by that option.
+
+The transaction identifier is not part of this check. It has a check of its own,
+Rfc2131TransactionIdentifier.test, so that a wrong identifier cannot stop this program at its
+first step and hide the verdict on the other three messages.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_address_allocation")
+        // Expected observation 1: a DHCPDISCOVER with op BOOTREQUEST to port 67.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
+                             && dhcp->getOp() == BOOTREQUEST
+                             && udpDestinationPort(c.event.packet) == DHCP_SERVER_PORT;
+                  })
+                  .describe("a DHCPDISCOVER from the client, op BOOTREQUEST, to UDP port 67")
+                  .within(1.0))
+        // Expected observation 2: a DHCPOFFER with op BOOTREPLY to port 68 and a
+        // non-zero yiaddr.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && dhcp->getOp() == BOOTREPLY
+                             && udpDestinationPort(c.event.packet) == DHCP_CLIENT_PORT
+                             && !dhcp->getYiaddr().isUnspecified();
+                  })
+                  .capture("yiaddr", "DhcpMessage.yiaddr")
+                  .describe("a DHCPOFFER from the server, op BOOTREPLY, to UDP port 68, with an address in yiaddr")
+                  .within(1.0))
+        // Expected observation 3: a DHCPREQUEST with op BOOTREQUEST to port 67.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && dhcp->getOp() == BOOTREQUEST
+                             && udpDestinationPort(c.event.packet) == DHCP_SERVER_PORT;
+                  })
+                  .describe("a DHCPREQUEST from the client, op BOOTREQUEST, to UDP port 67")
+                  .within(1.0))
+        // Expected observation 4: a DHCPACK with the offered address in yiaddr.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      auto offered = c.get("yiaddr").pointerValue().get<Ipv4Address>();
+                      return dhcp->getOp() == BOOTREPLY
+                             && udpDestinationPort(c.event.packet) == DHCP_CLIENT_PORT
+                             && dhcp->getYiaddr() == *offered;
+                  })
+                  .describe("a DHCPACK from the server with the offered address in yiaddr")
+                  .within(1.0))
+        // Expected observation 5: no DHCPNAK leaves the server.
+        .never(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPNAK); })
+                  .describe("a DHCPNAK from the server")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_address_allocation compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_address_allocation: PASS

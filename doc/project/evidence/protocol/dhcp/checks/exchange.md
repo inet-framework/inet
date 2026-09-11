@@ -5,16 +5,21 @@
 The common mockups, the rules and the index are in [`checks.md`](../checks.md). The
 procedures come from the specification only. They name no simulation model and no code.
 
-Five checks share one scenario: a client with no address gets one. The first check watches
-the four messages as a sequence; the other four read the contents of one message each. They
-are separate checks because a failure in one message must not hide the other three.
+Seven checks share one scenario: a client with no address gets one. The first check watches
+the four messages as a sequence, the second follows the transaction identifier through them,
+and the others read the contents of one message or one group of fields each. They are
+separate checks because a failure in one message must not hide the others.
+
+The transaction identifier has a check of its own and is not part of the sequence check. The
+reason is the rule that no check may hide another: a step that demanded both the right
+message type and the right transaction identifier would stop at the first message where
+either one was wrong, and the two statements would then share one verdict.
 
 ## Address allocation exchange
 
 Checks: **RFC2131-MSG-1** (description), **RFC2131-MSG-3** (must), **RFC2131-MSG-5**
-(description), **RFC2131-XID-1** (description), **RFC2131-XID-3** (description),
-**RFC2131-OFF-1** (may), **RFC2131-ACK-1** (description), **RFC2131-ACK-2** (description),
-**RFC2132-TYPE-1** (description).
+(description), **RFC2131-OFF-1** (may), **RFC2131-ACK-1** (description), **RFC2131-ACK-2**
+(description), **RFC2132-TYPE-1** (description).
 
 ### Requirement
 
@@ -23,8 +28,7 @@ that carries a free address in `yiaddr`; the client broadcasts a DHCPREQUEST tha
 chosen server; the chosen server commits the binding and answers with a DHCPACK whose
 `yiaddr` is the assigned address. §3: `op` is BOOTREQUEST from the client and BOOTREPLY from
 the server. §3: every message carries the `DHCP message type` option, whose values RFC 2132
-§9.6 defines. §4.1: a client sends to UDP port 67 and a server to UDP port 68. Table 1 and
-§4.3.1: one `xid`, chosen by the client, runs through all four messages.
+§9.6 defines. §4.1: a client sends to UDP port 67 and a server to UDP port 68.
 
 ### Scenario constants
 
@@ -44,17 +48,16 @@ the server. §3: every message carries the `DHCP message type` option, whose val
 ### Expected observations
 
 1. The client sends a message whose type option holds 1, DHCPDISCOVER, whose `op` is 1,
-   BOOTREQUEST, and whose UDP destination port is 67. Record its `xid`. This confirms the
-   stimulus (RFC2131-DISC-1, RFC2131-MSG-1, RFC2131-MSG-3, RFC2131-MSG-5, RFC2132-TYPE-1).
+   BOOTREQUEST, and whose UDP destination port is 67. This confirms the stimulus
+   (RFC2131-MSG-1, RFC2131-MSG-3, RFC2131-MSG-5, RFC2132-TYPE-1).
 2. The server sends a message whose type option holds 2, DHCPOFFER, whose `op` is 2,
-   BOOTREPLY, whose UDP destination port is 68, and whose `xid` is the recorded one. Its
-   `yiaddr` is an address of the subnet and is not 0.0.0.0. Record that address
-   (RFC2131-OFF-1, RFC2131-XID-3).
-3. The client sends a message whose type option holds 3, DHCPREQUEST, and whose `xid` is the
-   recorded one.
-4. The server sends a message whose type option holds 5, DHCPACK, whose `xid` is the
-   recorded one, and whose `yiaddr` is the address of observation 2 (RFC2131-ACK-1,
-   RFC2131-ACK-2).
+   BOOTREPLY, and whose UDP destination port is 68. Its `yiaddr` is an address of the subnet
+   and is not 0.0.0.0. Record that address (RFC2131-OFF-1).
+3. The client sends a message whose type option holds 3, DHCPREQUEST, whose `op` is 1 and
+   whose UDP destination port is 67.
+4. The server sends a message whose type option holds 5, DHCPACK, whose `op` is 2, whose UDP
+   destination port is 68, and whose `yiaddr` is the address of observation 2
+   (RFC2131-ACK-1, RFC2131-ACK-2).
 5. No message of type 6, DHCPNAK, leaves the server in the window.
 
 ### Notes
@@ -62,13 +65,59 @@ the server. §3: every message carries the `DHCP message type` option, whose val
 - Observation 5 is the negative half of the check. An exchange that ends in a DHCPACK and a
   DHCPNAK together has not allocated an address, and the four positive observations alone
   would not see the difference.
-- The `xid` of observation 1 is recorded and not predicted. RFC2131-XID-1 says the value is
-  random, so a check that named a number would check the wrong thing. That the same value
-  returns in three later messages is the observable part.
+- Observation 4 carries the address of observation 2 forward, and that is the one relation
+  this check follows across messages. It is the relation RFC2131-ACK-2 states: the address
+  the server commits is the address it offered.
 - RFC2131-OFF-1 is a `MAY`: a server need not answer. So this check does not establish that
   a server must answer; it establishes what the answer looks like when it comes. A server
   that stayed silent would fail observation 2, and the results would have to read that
   failure against §4.2, which lets an administrator configure silence.
+
+## Transaction identifier through the exchange
+
+Checks: **RFC2131-XID-3** (description). Also covers: **RFC2131-XID-1** (description).
+
+### Requirement
+
+RFC 2131 table 1: `xid` is a transaction identifier, a random number chosen by the client,
+used by the client and the server to associate messages and responses between a client and a
+server. §4.3.1: the server inserts the `xid` field from the DHCPDISCOVER message into the
+`xid` field of the DHCPOFFER message. §4.4.1: the DHCPREQUEST message contains the same `xid`
+as the DHCPOFFER message. Table 3: the `xid` of a DHCPACK is the `xid` of the DHCPREQUEST.
+
+### Scenario constants
+
+- The plain mockup. One client, so that only one transaction is open on the link.
+
+### Procedure
+
+1. Build the plain mockup.
+2. Let the client start, and record the `xid` of its DHCPDISCOVER.
+3. Read the `xid` of the DHCPOFFER, the DHCPREQUEST and the DHCPACK that follow it.
+
+### Expected observations
+
+1. A DHCPDISCOVER leaves the client. Record its `xid`. This confirms the stimulus.
+2. The `xid` of the DHCPOFFER equals the recorded one.
+3. The `xid` of the DHCPREQUEST equals the recorded one (RFC2131-XID-3).
+4. The `xid` of the DHCPACK equals the recorded one.
+
+### Notes
+
+- The value is recorded and not predicted. RFC2131-XID-1 says it is random, so a check that
+  named a number would check the wrong thing. That one value runs through four messages is
+  the observable part, and observation 1 covers RFC2131-XID-1 only to that extent: a client
+  that used the same constant on every run would pass this check.
+- Observation 3 is the one that can fail on its own. Observations 2 and 4 are the server
+  copying a value out of the message it answers, which is a table cell; observation 3 is the
+  client choosing to keep the value it started with, which a client that generates a fresh
+  identifier for every message it sends would not do.
+- A client that changes the identifier between the DHCPOFFER and the DHCPREQUEST still
+  completes an exchange on a quiet subnet, because the server answers whatever it receives.
+  What it loses is the ability of the other servers of the subnet to connect the request to
+  the offer they made, and the ability of a client with two transactions open to tell two
+  answers apart. That is why the statement matters although a simple exchange works without
+  it.
 
 ## Discover contents
 
@@ -155,8 +204,8 @@ echoed](client-identity.md#client-identifier-echoed).
    (RFC2131-OFF-4, RFC2132-LEASE-1).
 5. Its option area holds neither code 50, `requested IP address`, nor code 55, `parameter
    request list`, nor code 57, `maximum DHCP message size` (RFC2131-OFF-5).
-6. Its `hops` is 0, its `secs` is 0 and its `ciaddr` is 0.0.0.0; its `flags`, `giaddr` and
-   `chaddr` equal the recorded ones (RFC2131-OFF-6).
+6. Its `hops` is 0 and its `secs` is 0; its `flags` and its `chaddr` equal the recorded ones
+   (RFC2131-OFF-6, in part).
 
 ### Notes
 
@@ -169,6 +218,10 @@ echoed](client-identity.md#client-identifier-echoed).
   own default instead of the configured one would be caught.
 - The lease time is in seconds by RFC2131-LEASE-1, so the value 300 means 300 seconds and
   the check does not need a unit.
+- Observation 6 covers part of RFC2131-OFF-6 and not all of it. The two address fields of the
+  same table row, `ciaddr` and `giaddr`, are the subject of [Address fields of a server
+  reply](#address-fields-of-a-server-reply). They are separate because a wrong address field
+  would otherwise hide the verdict on the four options of observations 3 to 5.
 
 ## Request contents
 
@@ -241,7 +294,9 @@ request list`, `client identifier` and `maximum message size` are a `MUST NOT`; 
 `secs` is 0, and `xid`, `flags`, `giaddr` and `chaddr` come from the DHCPREQUEST. §3.1: the
 parameters of the DHCPACK should not conflict with those of the earlier DHCPOFFER.
 
-The `client identifier` row is overridden by RFC 6842 and is not part of this check.
+The `client identifier` row is overridden by RFC 6842 and is not part of this check. The two
+address fields, `ciaddr` and `giaddr`, are the subject of [Address fields of a server
+reply](#address-fields-of-a-server-reply).
 
 ### Scenario constants
 
@@ -257,8 +312,8 @@ The `client identifier` row is overridden by RFC 6842 and is not part of this ch
 ### Expected observations
 
 1. A DHCPREQUEST leaves the client. This confirms the stimulus.
-2. A DHCPACK answers it, and its `xid`, `flags`, `giaddr` and `chaddr` equal the recorded
-   ones; its `hops` is 0 and its `secs` is 0 (RFC2131-ACK-8).
+2. A DHCPACK answers it, and its `xid`, `flags` and `chaddr` equal the recorded ones; its
+   `hops` is 0 and its `secs` is 0 (RFC2131-ACK-8, in part).
 3. Its option area holds code 51, `IP address lease time`, with the value 300
    (RFC2131-ACK-3).
 4. Its option area holds code 54, `server identifier` (RFC2131-ACK-4).
@@ -274,3 +329,59 @@ The `client identifier` row is overridden by RFC 6842 and is not part of this ch
 - Observation 3 is the `MUST` half of RFC2131-ACK-3. The `MUST NOT` half — no lease time in
   the answer to a DHCPINFORM — is in [Inform answered without a
   lease](inform.md#inform-answered-without-a-lease), because it needs a different stimulus.
+
+## Address fields of a server reply
+
+Checks: **RFC2131-OFF-6** (description, the `ciaddr` and `giaddr` half), **RFC2131-ACK-8**
+(description, the `ciaddr` and `giaddr` half).
+
+### Requirement
+
+RFC 2131 table 3, DHCPOFFER column: `ciaddr` is 0 and `giaddr` is the `giaddr` from the client
+DHCPDISCOVER message. DHCPACK column: `ciaddr` is the `ciaddr` from the DHCPREQUEST or 0, and
+`giaddr` is the `giaddr` from the client DHCPREQUEST message. Table 1: `ciaddr` is the client IP
+address, filled in only if the client is in BOUND, RENEW or REBINDING state; `giaddr` is the
+relay agent IP address, used in booting via a relay agent.
+
+### Scenario constants
+
+- The plain mockup. Neither the DHCPDISCOVER nor the DHCPREQUEST of a client in SELECTING
+  carries an address: `ciaddr` is 0.0.0.0 in both by RFC2131-DISC-2 and RFC2131-REQ-3, and
+  `giaddr` is 0.0.0.0 in both because no relay agent is in the path.
+- So both replies must carry 0.0.0.0 in both fields, and the check can name the value.
+
+### Procedure
+
+1. Build the plain mockup.
+2. Let the client start. Record the `ciaddr` and the `giaddr` of the DHCPDISCOVER and of the
+   DHCPREQUEST.
+3. Read the `ciaddr` and the `giaddr` of the DHCPOFFER and of the DHCPACK.
+
+### Expected observations
+
+1. The DHCPDISCOVER and the DHCPREQUEST both carry `ciaddr` 0.0.0.0 and `giaddr` 0.0.0.0. This
+   confirms the stimulus: the two values the replies must copy are both zero.
+2. The `ciaddr` of the DHCPOFFER is 0.0.0.0 (RFC2131-OFF-6).
+3. The `giaddr` of the DHCPOFFER is 0.0.0.0, the value the DHCPDISCOVER carried
+   (RFC2131-OFF-6).
+4. The `ciaddr` of the DHCPACK is 0.0.0.0, which is both the value the DHCPREQUEST carried and
+   the alternative the table allows (RFC2131-ACK-8).
+5. The `giaddr` of the DHCPACK is 0.0.0.0, the value the DHCPREQUEST carried (RFC2131-ACK-8).
+
+### Notes
+
+- These four observations were part of [Offer contents](#offer-contents) and
+  [Acknowledgement contents](#acknowledgement-contents) and are a check of their own now,
+  because a wrong value in one field would stop those programs before they read the options.
+  The statements and their IDs do not change; only which check carries them.
+- `giaddr` is the one field of a DHCP message whose meaning a reader can easily mistake. It
+  is not "the gateway of the client" and not "the next server"; RFC 2131 table 1 says it is
+  the address of the relay agent that forwarded the message. The router address a client needs
+  travels in option 3, and the next bootstrap server in `siaddr`. A non-zero `giaddr` in a
+  reply tells the client, and any relay agent on the path, that the exchange passed through a
+  relay agent at that address, and RFC2131-NAK-3, RFC2131-NAK-4 and RFC2131-BCAST-2 all branch
+  on the value.
+- A non-zero `ciaddr` in a reply is inert for a conforming client, which reads its address from
+  `yiaddr`. The rule still has a reason: `ciaddr` in a message from a client means "I hold this
+  address and I answer for it", and a reply that echoes an address the client does not hold yet
+  states something that is not true.

@@ -1,0 +1,111 @@
+%description:
+
+RFC 2131 -- one transaction identifier runs through all four messages of the exchange.
+
+Checks RFC2131-XID-3 (description), and covers RFC2131-XID-1, from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange;
+the program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+The value is captured from the first message and not predicted, because RFC2131-XID-1 says
+it is random.
+
+Expected result FAIL, model gap: DhcpClient::sendRequest picks a fresh identifier for every
+DHCPREQUEST it sends -- "generating a new xid for each transmission",
+src/inet/applications/dhcp/DhcpClient.cc:514. RFC 2131 section 4.4.1 says "The DHCPREQUEST
+message contains the same 'xid' as the DHCPOFFER message". Step 2 therefore misses its
+deadline. The assertion stays as the standard states it; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when the frame carries a DHCP message of this type whose transaction identifier is the
+// captured one.
+static bool isDhcpWithXid(const MatchContext& c, DhcpMessageType type)
+{
+    auto dhcp = dhcpOf(c.event.packet);
+    return dhcp != nullptr && dhcp->getOptions().getMessageType() == type
+           && dhcp->getXid() == (uint32_t)c.get("xid").intValue();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_transaction_identifier")
+        // Expected observation 1: a DHCPDISCOVER; record its transaction identifier.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .capture("xid", "DhcpMessage.xid")
+                  .describe("a DHCPDISCOVER from the client, whose transaction identifier is recorded")
+                  .within(1.0))
+        // Expected observation 2: the DHCPOFFER carries the recorded identifier.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPOFFER); })
+                  .describe("a DHCPOFFER with the recorded transaction identifier")
+                  .within(1.0))
+        // Expected observation 3: the DHCPREQUEST carries the recorded identifier (RFC2131-XID-3).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPREQUEST); })
+                  .describe("a DHCPREQUEST with the recorded transaction identifier")
+                  .within(1.0))
+        // Expected observation 4: the DHCPACK carries the recorded identifier.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPACK); })
+                  .describe("a DHCPACK with the recorded transaction identifier")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_transaction_identifier compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_transaction_identifier: PASS

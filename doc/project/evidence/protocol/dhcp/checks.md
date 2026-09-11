@@ -12,11 +12,13 @@ links to.
 
 | Check | File | Statements |
 | --- | --- | --- |
-| [Address allocation exchange](checks/exchange.md#address-allocation-exchange) | `checks/exchange.md` | RFC2131-MSG-1, MSG-3, MSG-5, XID-1, XID-3, OFF-1, ACK-1, ACK-2, RFC2132-TYPE-1 |
+| [Address allocation exchange](checks/exchange.md#address-allocation-exchange) | `checks/exchange.md` | RFC2131-MSG-1, MSG-3, MSG-5, OFF-1, ACK-1, ACK-2, RFC2132-TYPE-1 |
+| [Transaction identifier through the exchange](checks/exchange.md#transaction-identifier-through-the-exchange) | `checks/exchange.md` | RFC2131-XID-3; covers XID-1 |
 | [Discover contents](checks/exchange.md#discover-contents) | `checks/exchange.md` | RFC2131-DISC-1, DISC-2, DISC-3, DISC-5, MSG-9 |
-| [Offer contents](checks/exchange.md#offer-contents) | `checks/exchange.md` | RFC2131-OFF-2, OFF-3, OFF-4, OFF-5, OFF-6, OFF-8, RFC2132-LEASE-1, RFC2132-SRVID-1 |
+| [Offer contents](checks/exchange.md#offer-contents) | `checks/exchange.md` | RFC2131-OFF-2, OFF-3, OFF-4, OFF-5, OFF-6 (in part), OFF-8, RFC2132-LEASE-1, RFC2132-SRVID-1 |
 | [Request contents](checks/exchange.md#request-contents) | `checks/exchange.md` | RFC2131-REQ-1, REQ-2, REQ-3, REQ-4, REQ-8, REQ-9, RFC2132-REQIP-1 |
-| [Acknowledgement contents](checks/exchange.md#acknowledgement-contents) | `checks/exchange.md` | RFC2131-ACK-3, ACK-4, ACK-5, ACK-6, ACK-8 |
+| [Acknowledgement contents](checks/exchange.md#acknowledgement-contents) | `checks/exchange.md` | RFC2131-ACK-3, ACK-4, ACK-5, ACK-6, ACK-8 (in part) |
+| [Address fields of a server reply](checks/exchange.md#address-fields-of-a-server-reply) | `checks/exchange.md` | RFC2131-OFF-6, ACK-8 (the `ciaddr` and `giaddr` half of each) |
 | [Message framing on the wire](checks/message-format.md#message-framing-on-the-wire) | `checks/message-format.md` | RFC2131-MSG-2, MSG-4, MSG-7, MSG-8, MSG-11, RFC2132-FMT-1, FMT-3, FMT-4, END-1 |
 | [Renewal at T1](checks/lease.md#renewal-at-t1) | `checks/lease.md` | RFC2131-LEASE-1, LEASE-4, LEASE-5, REQ-6, BCAST-3, SRVID-3, RFC2132-T1-1 |
 | [Rebinding at T2](checks/lease.md#rebinding-at-t2) | `checks/lease.md` | RFC2131-LEASE-6, REQ-7, LEASE-3, RFC2132-T2-1 |
@@ -34,7 +36,7 @@ links to.
 | [Request repeated when the reply is lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost) | `checks/retransmission.md` | RFC2131-RETX-4 |
 | [Requested parameters returned](checks/parameters.md#requested-parameters-returned) | `checks/parameters.md` | RFC2131-SEL-4, SEL-5, RFC2132-PRL-1, RFC2132-MASK-1, RFC2132-ROUTER-1 |
 
-Twenty-one checks. Eight of them need a fault or a crafted message and are therefore
+Twenty-three checks. Eight of them need a fault or a crafted message and are therefore
 level 3: the three that inject a message ([Negative acknowledgement for a wrong
 subnet](checks/nak.md#negative-acknowledgement-for-a-wrong-subnet), [Silence for an unknown
 client](checks/nak.md#silence-for-an-unknown-client), [Inform answered without a
@@ -66,7 +68,7 @@ here and not forgotten.
 
 ## Common mockups
 
-Six mockups serve the twenty-one checks. Every one of them is one IPv4 subnet, because DHCP
+Six mockups serve the twenty-three checks. Every one of them is one IPv4 subnet, because DHCP
 without a relay agent is a protocol of one subnet.
 
 **The plain mockup.** One server S and one client C on one link. S has a fixed address and a

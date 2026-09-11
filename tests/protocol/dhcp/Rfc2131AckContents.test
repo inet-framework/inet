@@ -1,0 +1,156 @@
+%description:
+
+RFC 2131 -- what a DHCPACK carries: the lease time and the server identifier it must hold, the
+options it must not hold, the fields it copies from the DHCPREQUEST, and parameters that do not
+conflict with the DHCPOFFER.
+
+Checks RFC2131-ACK-3 (must), ACK-4 (must), ACK-5 (must not) and ACK-8 (description, in part),
+and covers ACK-6 (should not), from doc/project/evidence/standard/rfc2131/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/dhcp/checks/exchange.md#acknowledgement-contents; the program
+steps below map onto its expected observations. Mapping of the plain mockup: server S = server,
+client C = hostA.
+
+Two rows of RFC 2131 table 3 are not part of this check. The client identifier row is overridden
+by RFC 6842. The ciaddr and giaddr rows have a check of their own,
+Rfc2131ReplyAddressFields.test.
+
+The xid of the DHCPACK is read against the DHCPREQUEST it answers, which is what table 3 states,
+and not against the DHCPDISCOVER. Whether one identifier runs through the whole exchange is
+Rfc2131TransactionIdentifier.test.
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What the DHCPACK must repeat: the fields of the DHCPREQUEST and the parameters of the
+// DHCPOFFER.
+struct Recorded {
+    uint32_t requestXid = 0;
+    bool requestBroadcast = false;
+    MacAddress requestChaddr;
+    bool haveRequest = false;
+    Ipv4Address offerYiaddr;
+    Ipv4Address offerServerId;
+    simtime_t offerLease;
+    bool haveOffer = false;
+};
+
+static Recorded recorded;
+
+Define_ProtocolTestProgram()
+{
+    recorded = Recorded();
+    return ProtocolTest("rfc2131_ack_contents")
+        // The DHCPOFFER, whose parameters the DHCPACK must not contradict (observation 6).
+        .once(on("server.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPOFFER)
+                          return false;
+                      recorded.offerYiaddr = dhcp->getYiaddr();
+                      recorded.offerServerId = dhcp->getOptions().getServerIdentifier();
+                      recorded.offerLease = dhcp->getOptions().getLeaseTime();
+                      recorded.haveOffer = true;
+                      return true;
+                  })
+                  .describe("the DHCPOFFER, whose yiaddr, server identifier and lease time are recorded")
+                  .within(1.0))
+        // Expected observation 1: the DHCPREQUEST; record the fields the answer must copy.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
+                          return false;
+                      recorded.requestXid = dhcp->getXid();
+                      recorded.requestBroadcast = dhcp->getBroadcast();
+                      recorded.requestChaddr = dhcp->getChaddr();
+                      recorded.haveRequest = true;
+                      return true;
+                  })
+                  .describe("a DHCPREQUEST from the client, whose xid, flags and chaddr are recorded")
+                  .within(1.0))
+        // Expected observations 2 to 6, on the DHCPACK that answers it.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      if (!recorded.haveRequest || !recorded.haveOffer)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      // observation 2: the fields the DHCPACK copies from the DHCPREQUEST
+                      bool fixedPart = dhcp->getXid() == recorded.requestXid
+                              && dhcp->getBroadcast() == recorded.requestBroadcast
+                              && dhcp->getChaddr() == recorded.requestChaddr
+                              && dhcp->getHops() == 0 && dhcp->getSecs() == 0;
+                      // observation 3: a lease time option of 300
+                      bool lease = hasOption(dhcp, LEASE_TIME) && o.getLeaseTime() == SimTime(300, SIMTIME_S);
+                      // observation 4: a server identifier option
+                      bool serverId = hasOption(dhcp, SERVER_ID);
+                      // observation 5: no requested IP address and no parameter request list
+                      bool prohibited = !hasOption(dhcp, REQUESTED_IP) && !hasOption(dhcp, PARAM_LIST);
+                      // observation 6: the three parameters of the DHCPOFFER, unchanged
+                      bool noConflict = dhcp->getYiaddr() == recorded.offerYiaddr
+                              && o.getServerIdentifier() == recorded.offerServerId
+                              && o.getLeaseTime() == recorded.offerLease;
+                      return fixedPart && lease && serverId && prohibited && noConflict;
+                  })
+                  .describe("the DHCPACK: the xid, flags and chaddr of the DHCPREQUEST, hops 0 and secs 0; a lease time of 300; a server identifier option; no requested IP address and no parameter request list; and the yiaddr, server identifier and lease time of the DHCPOFFER")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_ack_contents compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_ack_contents: PASS

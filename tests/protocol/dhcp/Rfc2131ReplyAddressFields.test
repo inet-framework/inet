@@ -1,0 +1,136 @@
+%description:
+
+RFC 2131 -- the ciaddr and giaddr fields of a DHCPOFFER and of a DHCPACK are the values the
+client message carried, which on a subnet with no relay agent and a client with no address are
+both 0.0.0.0.
+
+Checks the ciaddr and giaddr half of RFC2131-OFF-6 and of RFC2131-ACK-8 from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply; the
+program steps below map onto its expected observations. Mapping of the plain mockup:
+server S = server, client C = hostA.
+
+Expected result FAIL, two model gaps.
+
+Gap: in the DHCPOFFER, DhcpServer::sendOffer writes the gateway address into giaddr --
+"offer->setGiaddr(lease->gateway); // next server ip",
+src/inet/applications/dhcp/DhcpServer.cc:422. RFC 2131 table 1 says giaddr is the relay agent IP
+address, and table 3 says the giaddr of a DHCPOFFER is the giaddr of the client DHCPDISCOVER,
+which is 0.0.0.0 here. The comment names the meaning of siaddr, "next server", for a field that
+is not siaddr. The DHCPACK leaves giaddr alone, so the two replies of one exchange disagree.
+
+Gap: in the DHCPACK, DhcpServer::sendAck writes the leased address into ciaddr --
+"ack->setCiaddr(lease->ip); // client IP addr.", src/inet/applications/dhcp/DhcpServer.cc:339.
+RFC 2131 table 3 allows two values there, the ciaddr of the DHCPREQUEST or 0, and the ciaddr of
+this DHCPREQUEST is 0.0.0.0.
+
+Step 1 stops at the DHCPOFFER, so only the first gap reaches a deadline in this run; the second
+is recorded from the trace and from the source. Both belong to one table row of one check, and
+the ledger records both against the two statements. See results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2131_reply_address_fields")
+        // Expected observation 1, first half: the DHCPDISCOVER carries ciaddr 0.0.0.0 and
+        // giaddr 0.0.0.0, so the two values the DHCPOFFER must repeat are both zero.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
+                             && dhcp->getCiaddr().isUnspecified()
+                             && dhcp->getGiaddr().isUnspecified();
+                  })
+                  .describe("a DHCPDISCOVER with ciaddr 0.0.0.0 and giaddr 0.0.0.0")
+                  .within(1.0))
+        // Expected observations 2 and 3: the DHCPOFFER carries both fields as 0.0.0.0.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
+                             && dhcp->getCiaddr().isUnspecified()     // observation 2
+                             && dhcp->getGiaddr().isUnspecified();    // observation 3
+                  })
+                  .describe("the DHCPOFFER with ciaddr 0.0.0.0 and giaddr 0.0.0.0")
+                  .within(1.0))
+        // Expected observation 1, second half: the DHCPREQUEST carries both fields as 0.0.0.0.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && dhcp->getCiaddr().isUnspecified()
+                             && dhcp->getGiaddr().isUnspecified();
+                  })
+                  .describe("a DHCPREQUEST with ciaddr 0.0.0.0 and giaddr 0.0.0.0")
+                  .within(1.0))
+        // Expected observations 4 and 5: the DHCPACK carries both fields as 0.0.0.0.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
+                             && dhcp->getCiaddr().isUnspecified()     // observation 4
+                             && dhcp->getGiaddr().isUnspecified();    // observation 5
+                  })
+                  .describe("the DHCPACK with ciaddr 0.0.0.0 and giaddr 0.0.0.0")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_reply_address_fields compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: one server and one client on one link.
+network Rfc2131PlainNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131PlainNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static address resolution keeps the wire free of request and reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The server holds 192.168.1.1 and gives out addresses from 192.168.1.100, with a lease of
+# 300 seconds.
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_reply_address_fields: PASS
