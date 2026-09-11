@@ -7,9 +7,9 @@ document. This document is the high-level view above it: the capabilities that t
 set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each,
 and the cross reference into the catalog.
 
-The in-scope set holds one document, RFC 9293, so every feature draws on that one source.
-The map still spans documents by design: RFC 5681 and RFC 6298 will add features here
-without a new file when they enter the in-scope set.
+The in-scope set holds three documents: RFC 9293 for the protocol, RFC 6298 for the
+retransmission timer, and RFC 5681 for congestion control. The map spans them in one file,
+as it was designed to: the level 4 pass added ten features here without a new file.
 
 The feature list comes from the standard text only. The support of each feature — what the
 run actually showed — is **not** in this document. It lives in the coverage ledger,
@@ -35,6 +35,16 @@ comparison against the standards that the model claims to implement is
 | [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation) | A reset ends the connection only when its sequence number is in the window. |
 | [TCP-F-WINDOW-ROBUSTNESS](#tcp-f-window-robustness) | A sender survives a peer that moves the right edge of the window backward. |
 | [TCP-F-ICMP-HANDLING](#tcp-f-icmp-handling) | An ICMP error reaches the connection that caused it; a soft error does not end it. |
+| [TCP-F-RTO-ESTIMATOR](#tcp-f-rto-estimator) | The retransmission timeout follows a smoothed estimate of the round-trip time. |
+| [TCP-F-RTO-BOUNDS](#tcp-f-rto-bounds) | The timeout starts at one second and never falls below it. |
+| [TCP-F-RTO-BACKOFF](#tcp-f-rto-backoff) | An expiry retransmits the earliest segment and doubles the timeout. |
+| [TCP-F-RTT-SAMPLING](#tcp-f-rtt-sampling) | A retransmitted segment gives no round-trip sample. |
+| [TCP-F-CONGESTION-WINDOW](#tcp-f-congestion-window) | A congestion window paces the sender, through slow start and congestion avoidance. |
+| [TCP-F-INITIAL-WINDOW](#tcp-f-initial-window) | The congestion window starts at a bounded number of segments. |
+| [TCP-F-LOSS-RESPONSE](#tcp-f-loss-response) | A timeout halves the threshold and drops the window to one segment. |
+| [TCP-F-FAST-RETRANSMIT](#tcp-f-fast-retransmit) | Three duplicate acknowledgments repair a loss without a timeout. |
+| [TCP-F-RESTART-IDLE](#tcp-f-restart-idle) | An idle period reduces the window before transmission starts again. |
+| [TCP-F-DELAYED-ACK](#tcp-f-delayed-ack) | An acknowledgment is delayed, but never beyond 500 ms or a second segment. |
 
 ## Summary table
 
@@ -53,15 +63,33 @@ comparison against the standards that the model claims to implement is
 | [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation) | mandatory | RFC 9293 §3.5.3, §3.10.7.4 | RFC9293-RSTP-1, RFC9293-RSTP-2 |
 | [TCP-F-WINDOW-ROBUSTNESS](#tcp-f-window-robustness) | mandatory | RFC 9293 §3.8.6 | RFC9293-WND-4 |
 | [TCP-F-ICMP-HANDLING](#tcp-f-icmp-handling) | mandatory | RFC 9293 §3.9.2.2 | RFC9293-ICMP-1, RFC9293-ICMP-2, RFC9293-ICMP-3 |
+| [TCP-F-RTO-ESTIMATOR](#tcp-f-rto-estimator) | mandatory (keyword) | RFC 6298 §2.2, §2.3, §4 | RFC6298-FIRST-1, RFC6298-UPD-1, RFC6298-RTO-1 |
+| [TCP-F-RTO-BOUNDS](#tcp-f-rto-bounds) | optional (keyword) | RFC 6298 §2.1, §2.4, §2.5 | RFC6298-INIT-1, RFC6298-MIN-1 |
+| [TCP-F-RTO-BACKOFF](#tcp-f-rto-backoff) | mandatory (keyword) | RFC 6298 §5, §5.5, §5.7 | RFC6298-EARLY-1, RFC6298-BACK-1, RFC6298-EXP-1 |
+| [TCP-F-RTT-SAMPLING](#tcp-f-rtt-sampling) | mandatory (keyword) | RFC 6298 §3 | RFC6298-KARN-1, RFC6298-SAMP-1 |
+| [TCP-F-CONGESTION-WINDOW](#tcp-f-congestion-window) | mandatory (keyword) | RFC 5681 §3.1 | RFC5681-USE-1, RFC5681-SS-2, RFC5681-CA-2 |
+| [TCP-F-INITIAL-WINDOW](#tcp-f-initial-window) | mandatory (keyword) | RFC 5681 §3.1 | RFC5681-IW-1, RFC5681-IW-2, RFC5681-IW-3 |
+| [TCP-F-LOSS-RESPONSE](#tcp-f-loss-response) | mandatory (keyword) | RFC 5681 §3.1 | RFC5681-LOSS-1, RFC5681-LOSS-3 |
+| [TCP-F-FAST-RETRANSMIT](#tcp-f-fast-retransmit) | mandatory (keyword) | RFC 5681 §3.2 | RFC5681-FR-1, RFC5681-FR-2, RFC5681-FR-3, RFC5681-FR-5 |
+| [TCP-F-RESTART-IDLE](#tcp-f-restart-idle) | optional (keyword) | RFC 5681 §4.1 | RFC5681-IDLE-1 |
+| [TCP-F-DELAYED-ACK](#tcp-f-delayed-ack) | mandatory (keyword) | RFC 5681 §4.2 | RFC5681-ACK-1, RFC5681-ACK-2 |
 
-Thirteen features, all mandatory. What a run showed about them is in
+Twenty-three features, twenty-one mandatory and two optional. What a run showed about them is in
 [`coverage.md`](../../model/tcp/coverage.md). The first nine describe one connection from
 open to close, the stream it carries, the window that paces it, the checksum that guards it,
 and the reset that answers a connection that is not there. The four that the level 3 pass
 added describe the same connection under attack or under a fault: a segment that does not
 fit, a reset a third party could have forged, a window that moves backward, and an error
-that the layer below reports. Congestion control, the retransmission timer, and the options
-are other documents' features and later levels.
+that the layer below reports. The ten that the level 4 pass added describe the two control
+loops: four for the retransmission timer of RFC 6298, and six for the congestion window of
+RFC 5681. The options and the selective acknowledgment extensions are still other
+documents' features and a later level.
+
+Two of the ten are `optional`, and both for the same reason: every core statement behind
+them says `should`. RFC 6298 states its initial value and its lower bound as a `should`,
+and RFC 5681 states the restart of an idle connection as a `should`. A model that departs
+from either does not violate its document, so a check of one records a deviation rather
+than a defect.
 
 ## TCP-F-ESTABLISH
 
@@ -263,6 +291,168 @@ and never a reset.**
   abort). Supporting: RFC9293-ICMP-4 (a hard error should abort; the document itself notes
   that many implementations do not).
 
+## TCP-F-RTO-ESTIMATOR
+
+**The retransmission timeout follows a smoothed estimate of the round-trip time.**
+
+- **Sources** — RFC 6298 §2.2, `rfc6298.txt:133-139`; §2.3, `rfc6298.txt:141-155`; §4,
+  `rfc6298.txt:213-215`. RFC 6298 governs; RFC 2988 is obsolete.
+- **Level** — mandatory (reason: keyword). "the host MUST set SRTT <- R" and "a host MUST
+  set RTTVAR <- ..." and "a host MUST update RTO <- SRTT + max (G, K*RTTVAR)".
+- **Description** — the sender keeps a smoothed round-trip time and a variance. The first
+  measurement seeds them, each later measurement updates the variance and then the smoothed
+  value, and the timeout is the smoothed value plus four times the variance.
+- **Checks** — core: RFC6298-FIRST-1 (the seed), RFC6298-UPD-1 (the update and its order),
+  RFC6298-RTO-1 (the formula). Supporting: RFC6298-UPD-2 (the gains, a `should`),
+  RFC6298-GRAN-1 (a zero variance term).
+
+## TCP-F-RTO-BOUNDS
+
+**The timeout starts at one second and never falls below it.**
+
+- **Sources** — RFC 6298 §2.1, `rfc6298.txt:122-125`; §2.4, `rfc6298.txt:157-158`; §2.5,
+  `rfc6298.txt:179-180`.
+- **Level** — optional (reason: keyword). Every core statement is a `should`: "the sender
+  SHOULD set RTO <- 1 second" and "the RTO SHOULD be rounded up to 1 second". The upper
+  bound is a `may`.
+- **Description** — before any measurement the timeout is one second, and a computed
+  timeout below one second is raised to one second. An upper bound is permitted if it is at
+  least sixty seconds.
+- **Checks** — core: RFC6298-INIT-1 (the initial value), RFC6298-MIN-1 (the lower bound).
+  Supporting: RFC6298-MAX-1 (the upper bound).
+- **Note** — the lower bound hides the estimator on a fast link, so a check of
+  TCP-F-RTO-ESTIMATOR needs a delay large enough to lift the result above one second.
+
+## TCP-F-RTO-BACKOFF
+
+**An expiry retransmits the earliest segment and doubles the timeout.**
+
+- **Sources** — RFC 6298 §5, `rfc6298.txt:237-239`; §5.4, `rfc6298.txt:258-259`; §5.5,
+  `rfc6298.txt:261-263`; §5.7, `rfc6298.txt:269-272`.
+- **Level** — mandatory (reason: keyword). "An implementation MUST manage the
+  retransmission timer(s) in such a way that a segment is never retransmitted too early"
+  and "The host MUST set RTO <- RTO * 2".
+- **Description** — when the timer expires the sender retransmits the earliest
+  unacknowledged segment and doubles the timeout, so repeated loss spaces the attempts
+  farther apart. A later clean measurement collapses the timeout again.
+- **Checks** — core: RFC6298-EARLY-1 (never earlier than one timeout), RFC6298-BACK-1 (the
+  doubling), RFC6298-EXP-1 (the earliest segment). Supporting: RFC6298-COLL-1 (the
+  collapse), RFC6298-SYN-1 (three seconds after a lost SYN), RFC6298-TMR-1, RFC6298-TMR-2,
+  RFC6298-TMR-3 (the recommended timer management).
+- **Note** — RFC6298-SYN-1 is the one rule that RFC 6298 introduced over RFC 2988. A model
+  written against the older text is the likely place to find a gap.
+
+## TCP-F-RTT-SAMPLING
+
+**A retransmitted segment gives no round-trip sample.**
+
+- **Sources** — RFC 6298 §3, `rfc6298.txt:184-200`.
+- **Level** — mandatory (reason: keyword). "TCP MUST use Karn's algorithm" and "RTT samples
+  MUST NOT be made using segments that were retransmitted".
+- **Description** — an acknowledgment of a retransmitted segment is ambiguous, because it
+  may answer either transmission, so it yields no measurement. The timestamp option removes
+  the ambiguity and lifts the restriction.
+- **Checks** — core: RFC6298-KARN-1 (no sample from a retransmission). Supporting:
+  RFC6298-SAMP-1 (at least one measurement per round trip).
+
+## TCP-F-CONGESTION-WINDOW
+
+**A congestion window paces the sender, through slow start and congestion avoidance.**
+
+- **Sources** — RFC 5681 §3.1, `rfc5681.txt:209-217`, `rfc5681.txt:287-295`,
+  `rfc5681.txt:312-321`. RFC 5681 governs; RFC 2581 and RFC 2001 are obsolete.
+- **Level** — mandatory (reason: keyword). "The slow start and congestion avoidance
+  algorithms MUST be used by a TCP sender" and "cwnd MUST NOT be increased by more than
+  SMSS bytes per RTT".
+- **Description** — the sender keeps a congestion window beside the window the receiver
+  advertises, and sends no more than the smaller of the two. Below the threshold the window
+  grows by about one segment per acknowledgment; above it, by about one segment per round
+  trip.
+- **Checks** — core: RFC5681-USE-1 (both algorithms are used), RFC5681-SS-2 (the slow start
+  bound), RFC5681-CA-2 (the congestion avoidance bound). Supporting: RFC5681-WIN-1 (the
+  smaller of the two windows), RFC5681-SS-1 (which algorithm runs), RFC5681-CA-1 (the
+  principle), RFC5681-SSTH-1 (the initial threshold).
+
+## TCP-F-INITIAL-WINDOW
+
+**The congestion window starts at a bounded number of segments.**
+
+- **Sources** — RFC 5681 §3.1, `rfc5681.txt:241-255`.
+- **Level** — mandatory (reason: keyword). "IW, the initial value of cwnd, MUST be set
+  using the following guidelines as an upper bound" and two `MUST NOT` statements.
+- **Description** — the initial window is two, three, or four segments, by the segment
+  size. The handshake segments do not enlarge it, and a lost SYN forces it down to one
+  segment.
+- **Checks** — core: RFC5681-IW-1 (the table), RFC5681-IW-2 (the handshake does not count),
+  RFC5681-IW-3 (one segment after a lost SYN).
+- **Note** — the table gives an upper bound. A smaller initial window conforms, so a check
+  must fail only a window that is too large.
+
+## TCP-F-LOSS-RESPONSE
+
+**A timeout halves the threshold and drops the window to one segment.**
+
+- **Sources** — RFC 5681 §3.1, `rfc5681.txt:374-387`, `rfc5681.txt:403-409`.
+- **Level** — mandatory (reason: keyword). "the value of ssthresh MUST be set to no more
+  than the value given in equation (4)" and "cwnd MUST be set to no more than the loss
+  window, LW, which equals 1 full-sized segment".
+- **Description** — on a timeout the threshold falls to half the data in flight, with a
+  floor of two segments, and the window falls to one segment, so the sender re-enters slow
+  start. A repeated timeout on the same segment leaves the threshold alone.
+- **Checks** — core: RFC5681-LOSS-1 (the threshold formula), RFC5681-LOSS-3 (the window
+  falls to one segment). Supporting: RFC5681-LOSS-2 (a repeated timeout holds the
+  threshold).
+- **Note** — the formula uses the data in flight, not the congestion window. RFC 5681 calls
+  the substitution "an easy mistake to make" — `rfc5681.txt:399-401`.
+
+## TCP-F-FAST-RETRANSMIT
+
+**Three duplicate acknowledgments repair a loss without a timeout.**
+
+- **Sources** — RFC 5681 §3.2, `rfc5681.txt:438-444`, `rfc5681.txt:483-496`,
+  `rfc5681.txt:525-527`.
+- **Level** — mandatory (reason: keyword). The algorithm as a whole is a `should`, but its
+  steps are not: "a TCP MUST set ssthresh", "The lost segment ... MUST be retransmitted and
+  cwnd set to ssthresh plus 3*SMSS", and "a TCP MUST set cwnd to ssthresh".
+- **Description** — the third duplicate acknowledgment tells the sender that one segment is
+  gone while later ones arrive. The sender retransmits at once, lowers the threshold,
+  inflates the window by the segments that left the network, and deflates it when the
+  repair is acknowledged.
+- **Checks** — core: RFC5681-FR-1 (the three duplicates), RFC5681-FR-2 (the threshold),
+  RFC5681-FR-3 (the inflation by three segments), RFC5681-FR-5 (the deflation). Supporting:
+  RFC5681-FR-4 (one segment per further duplicate), RFC5681-ACK-2 (the receiver half).
+- **Note** — the five steps are one episode. A single scenario shows them in order, which
+  is why they belong to one feature rather than five.
+
+## TCP-F-RESTART-IDLE
+
+**An idle period reduces the window before transmission starts again.**
+
+- **Sources** — RFC 5681 §4.1, `rfc5681.txt:575`, `rfc5681.txt:585-587`.
+- **Level** — optional (reason: keyword). "a TCP SHOULD set cwnd to no more than RW before
+  beginning transmission".
+- **Description** — a sender that has not sent for longer than the retransmission timeout
+  no longer knows the state of the path, so it returns the window to the smaller of the
+  initial window and the current window.
+- **Checks** — core: RFC5681-IDLE-1.
+
+## TCP-F-DELAYED-ACK
+
+**An acknowledgment is delayed, but never beyond 500 ms or a second segment.**
+
+- **Sources** — RFC 5681 §4.2, `rfc5681.txt:591-596`, `rfc5681.txt:637-640`.
+- **Level** — mandatory (reason: keyword). "an ACK ... MUST be generated within 500 ms of
+  the arrival of the first unacknowledged packet".
+- **Description** — a receiver may hold an acknowledgment back to carry it with data or
+  with a later acknowledgment, but not past a second full-sized segment and not past half a
+  second. A segment above a gap is acknowledged at once, to start the fast retransmit of
+  the sender.
+- **Checks** — core: RFC5681-ACK-1 (the two bounds), RFC5681-ACK-2 (an out-of-order segment
+  is acknowledged at once).
+- **Note** — the 500 ms bound is the one statement of this pass that needs a tolerance. It
+  is the boundary between a check the protocol suite can carry and a check that belongs to
+  the statistical suite.
+
 ## Coverage of the catalog
 
 | Catalog area | Feature |
@@ -283,11 +473,26 @@ and never a reset.**
 | Window shrinking | TCP-F-WINDOW-ROBUSTNESS |
 | ICMP | TCP-F-ICMP-HANDLING |
 
-Every area of the catalog appears in the map, and all 35 entries appear in a feature.
+The two documents of the level 4 pass have their own areas:
 
-Out of scope in the map, because the catalog puts them out of scope: retransmission and its
-timer, congestion control, the options other than MSS, keep-alives, the simultaneous cases,
-silly window avoidance, and the TIME-WAIT duration. Urgent data is a judgment call recorded here: the document
+| Catalog area | Feature |
+| --- | --- |
+| RFC 6298, the estimator | TCP-F-RTO-ESTIMATOR, TCP-F-RTO-BOUNDS |
+| RFC 6298, the timer | TCP-F-RTO-BACKOFF |
+| RFC 6298, taking samples | TCP-F-RTT-SAMPLING |
+| RFC 5681, the two windows | TCP-F-CONGESTION-WINDOW, TCP-F-INITIAL-WINDOW |
+| RFC 5681, slow start and congestion avoidance | TCP-F-CONGESTION-WINDOW |
+| RFC 5681, the response to loss | TCP-F-LOSS-RESPONSE |
+| RFC 5681, fast retransmit and fast recovery | TCP-F-FAST-RETRANSMIT |
+| RFC 5681, further rules | TCP-F-RESTART-IDLE, TCP-F-DELAYED-ACK |
+
+Every area of all three catalogs appears in the map: 35 entries of RFC 9293, 18 of
+RFC 6298 and 21 of RFC 5681, and each one appears in a feature.
+
+Out of scope in the map, because the catalogs put them out of scope: the options other than
+MSS, keep-alives, the simultaneous cases, silly window avoidance, and the TIME-WAIT
+duration. Retransmission and congestion control left this list when RFC 6298 and RFC 5681
+entered the in-scope set. Urgent data is a judgment call recorded here: the document
 requires the mechanism (MUST-30 to MUST-32), and discourages its use; no ordinary transfer
 exercises it, so it is not a normal-path mechanism for level 2 and waits for level 5. Congestion control and the retransmission
 timer need RFC 5681 and RFC 6298 in the in-scope set first; see
