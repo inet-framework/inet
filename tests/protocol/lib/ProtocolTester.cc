@@ -296,9 +296,33 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 
 void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
+    receiveStateValue(source, signalID, (double)value);
+}
+
+void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, uintval_t value, cObject *details)
+{
+    // A window or a counter is unsigned: cwnd, ssthresh and dupAcks all arrive this way.
+    receiveStateValue(source, signalID, (double)value);
+}
+
+void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details)
+{
+    receiveStateValue(source, signalID, value);
+}
+
+void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& value, cObject *details)
+{
+    // A timer value is a time: rto, srtt and rttvar all arrive this way. The event carries
+    // it in seconds, so a bound in a test reads as the standard states it.
+    receiveStateValue(source, signalID, value.dbl());
+}
+
+void ProtocolTester::receiveStateValue(cComponent *source, simsignal_t signalID, double value)
+{
     // State channel: only the scalar signals we explicitly subscribed to (FSM state,
-    // counters, IDs). Everything else is ignored. Normalised into the same PacketEvent the
-    // packet channel uses (no packet, a scalar value) and fed to the same matching engine.
+    // counters, IDs, timers). Everything else is ignored. Normalised into the same
+    // PacketEvent the packet channel uses (no packet, a scalar value) and fed to the same
+    // matching engine.
     if (stateSignalNames.find(signalID) == stateSignalNames.end())
         return;
     PacketEvent event;
@@ -310,7 +334,7 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, int
     auto firstDot = fullPath.find('.');
     event.sourcePath = (firstDot == std::string::npos) ? fullPath : fullPath.substr(firstDot + 1);
     event.hasValue = true;
-    event.value = (long)value;
+    event.value = value;
     event.time = simTime();
     numObserved++;
     if (traceState)

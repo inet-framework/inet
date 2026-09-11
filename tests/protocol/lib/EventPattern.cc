@@ -69,6 +69,10 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
     const PacketEvent& event = context.event;
     if (!scopeMatches(event))
         return false;
+    if (selHasMin && (!event.hasValue || event.value < selMin))       // scalar signal lower bound
+        return false;
+    if (selHasMax && (!event.hasValue || event.value > selMax))       // scalar signal upper bound
+        return false;
     if (selHasValue && (!event.hasValue || event.value != selValue))  // scalar signal value
         return false;
     if (event.packet == nullptr && (!selExpr.empty() || predicate))

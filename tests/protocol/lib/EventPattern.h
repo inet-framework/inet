@@ -58,7 +58,9 @@ class INET_API EventPattern
     std::string selSignal;                                // signal(name): registered signal name ("" = any)
     std::string selProtocol;                              // protocol(name): packet's PacketProtocolTag ("" = any)
     std::string selDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
-    bool selHasValue = false; long selValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
+    bool selHasValue = false; double selValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
+    bool selHasMin = false; double selMin = 0;              // isAtLeast(v): lower bound on a scalar signal
+    bool selHasMax = false; double selMax = 0;              // isAtMost(v): upper bound on a scalar signal
     std::string attributeToPath;                          // attributeTo(path): description-only point of view
     std::string selIface;                                 // "" = any interface
     bool selHasDirection = false; int selDirection = -1;  // 0=IN, 1=OUT
@@ -79,7 +81,12 @@ class INET_API EventPattern
     EventPattern& signal(const char *name) { selSignal = name; return *this; }     // which signal (registered name)
     EventPattern& dispatch(const char *name) { selDispatch = name; return *this; } // DispatchProtocolReq protocol
     EventPattern& packet(const char *expression) { selExpr = expression; return *this; } // PacketFilter content (value is a packet)
-    EventPattern& is(long v) { selHasValue = true; selValue = v; return *this; } // a scalar signal's value (e.g. an FSM state)
+    EventPattern& is(double v) { selHasValue = true; selValue = v; return *this; } // a scalar signal's value (e.g. an FSM state)
+    // A standard usually states a bound rather than a value: "at most 4 segments", "no less
+    // than one second". These express such a bound on a scalar signal.
+    EventPattern& isAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
+    EventPattern& isAtMost(double v) { selHasMax = true; selMax = v; return *this; }
+    EventPattern& isBetween(double lo, double hi) { return isAtLeast(lo).isAtMost(hi); }
     EventPattern& attributeTo(const char *path) { attributeToPath = path; return *this; } // description point of view
 
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").

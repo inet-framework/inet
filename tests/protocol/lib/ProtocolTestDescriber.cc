@@ -164,7 +164,21 @@ static std::string renderNewPattern(const EventPattern& p, const char *modal)
     bool isDropped = p.selSignal.find("Dropped") != std::string::npos;
     bool isSent = p.selSignal.find("Sent") != std::string::npos;
 
-    if (p.selHasValue) {
+    if (p.selHasMin || p.selHasMax) {
+        if (!p.description.empty())
+            os << p.description << " (";
+        if (p.selHasMin && p.selHasMax && p.selMin == p.selMax)
+            os << "value " << p.selMin;
+        else if (p.selHasMin && p.selHasMax)
+            os << "value between " << p.selMin << " and " << p.selMax;
+        else if (p.selHasMin)
+            os << "value at least " << p.selMin;
+        else
+            os << "value at most " << p.selMax;
+        if (!p.description.empty())
+            os << ")";
+    }
+    else if (p.selHasValue) {
         // Scalar / state-signal assertion: "<module>'s <signal> must reach <value>".
         std::string subject = !p.selSource.empty() ? p.selSource
                             : (p.selNode.empty() ? "some module" : p.selNode);

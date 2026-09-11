@@ -62,6 +62,11 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, uintval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& value, cObject *details) override;
+    // One normaliser behind the four overloads above.
+    virtual void receiveStateValue(cComponent *source, simsignal_t signalID, double value);
 
     // observation (packet channel)
     PacketEvent normalize(cComponent *source, EventKind kind, const Packet *packet);

@@ -48,7 +48,7 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
 - [x] Step 3: `standard/rfc6298/catalog.md`, identifiers `RFC6298-*`. 18 entries.
 - [x] Step 4: the feature map gains the retransmission timer features. Four: RTO-ESTIMATOR, RTO-BOUNDS, RTO-BACKOFF, RTT-SAMPLING.
 - [x] Step 5: `protocol/tcp/checks/retransmission-timer.md`. Five checks.
-- [ ] Step 6: the tests.
+- [ ] Step 6: the tests. Not started.
 - [ ] Steps 7 to 9: run, results, conformance, categories.
 
 Candidate checks, all deterministic through a signal:
@@ -70,7 +70,7 @@ Candidate checks, all deterministic through a signal:
 - [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [x] Step 4: the feature map gains the congestion control features. Six: CONGESTION-WINDOW, INITIAL-WINDOW, LOSS-RESPONSE, FAST-RETRANSMIT, RESTART-IDLE, DELAYED-ACK.
 - [x] Step 5: `protocol/tcp/checks/congestion-control.md`. Five checks.
-- [ ] Step 6: the tests.
+- [~] Step 6: the tests. One of five written and passing: `Rfc5681InitialWindow.test`.
 - [ ] Steps 7 to 9: run, results, conformance, categories.
 
 Candidate checks:
@@ -95,3 +95,49 @@ them.
   `results.md`.
 - A failing test stays. It is a finding about the model.
 - The catalogs and the checks come from the RFC text alone. The code enters at step 6.
+
+## What step 6 found about the framework
+
+Level 4 is the first level whose checks read a control variable. Three gaps appeared at
+once, and two are repaired on this branch.
+
+1. **The state channel refused two signal types.** It handled `intval_t` alone, and threw
+   "Unsupported signal data type" for anything else. `cwnd`, `ssthresh` and `dupAcks` are
+   `uintval_t`; `rto`, `srtt` and `rttvar` are times. Repaired: four overloads now feed one
+   normaliser, and the event carries a `double`, with a time in seconds.
+2. **A scalar could be compared for equality only.** `is(v)` was the whole API, and almost
+   every rule of these two documents states a bound: "at most 4 segments", "no less than one
+   second". Repaired: `isAtLeast`, `isAtMost` and `isBetween`.
+3. **A pattern cannot bind the first publication of a signal.** The engine matches the first
+   event that satisfies a pattern, so `once(cwnd isAtMost(B))` passes on a model whose first
+   window is too large and whose second is not. A check of an initial value must therefore
+   forbid a bad value inside a time window, which ties the check to the scenario times.
+   Not repaired. This is the sharpest framework request of the pass.
+
+A fourth finding belongs to the model rather than the framework. The window is published
+only when the algorithm changes it, not when the connection sets it up, so "the initial
+window" is observable as the first publication and not before it.
+
+## What step 6 found about the build
+
+The two wireless tests of the element suite fail in this worktree and pass in `inet-master`,
+from the same commit and the same framework. The cause is neither: the two checkouts have
+different INET **feature sets**. `inet-master` enables all 126 features; a fresh worktree
+disables 10, among them the network emulation group and `TcpLwip`. The different module set
+changes the initialization order, and that order decides whether
+`PacketMultiplexer::mapRegistrationForwardingGates` is reached before the module caches its
+gates.
+
+The feature set turned out not to be the cause either. `.oppfeaturestate` is now copied from
+`inet-master` and the two trees build the same feature set, and the two tests still fail
+here.
+
+The cause is the removed `PacketMultiplexer` change, and one experiment proves it. With the
+change applied in this worktree the two tests pass; with it reverted they crash with
+`Unknown gate ... during network initialization`, which is the exact failure the change
+describes. The source trees, the test files and the framework are identical between the two
+checkouts, so `inet-master` passes for a reason inside its own incremental build and not
+because the model is sound without the change.
+
+**master does not pass its own element suite from a clean build.** The change should go
+back. This pass does not restore it, because a standards pass changes no source file.

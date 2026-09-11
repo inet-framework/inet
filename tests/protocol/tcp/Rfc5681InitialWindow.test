@@ -1,0 +1,123 @@
+%description:
+
+RFC 5681 — the initial congestion window is at most the bound of the segment-size table, and
+the handshake does not enlarge it.
+
+Checks RFC5681-IW-1 (must, as an upper bound) and RFC5681-IW-2 (must not) from
+doc/project/evidence/standard/rfc5681/catalog.md. The English procedure is in
+doc/project/evidence/protocol/tcp/checks/congestion-control.md#initial-window; the program
+steps below map onto its expected observations. Mapping of the plain mockup: host A = host1,
+host B = host2.
+
+This is the first test of the TCP suite that reads a control variable instead of a segment.
+The congestion window never travels on the link: it is a limit the sender keeps. The tester
+observes it through the `cwnd` scalar signal, which the ini names in `stateSignals`.
+
+The segment size here is 536 bytes, the default of the model and the value RFC 1122 gives
+for a host that learns nothing else. 536 falls in the lowest band of the table, so the bound
+is 4 * 536 = 2144 bytes.
+
+One property of the model decides the shape of this test. The window is published only when
+the algorithm changes it, not when the connection sets it up, so the first value the signal
+carries arrives with the first acknowledgment at about t=0.2. "The initial window" is
+therefore observable as the first publication and not before it. The first step closes just
+after that instant, at t=0.2002, and the second step proves that a publication happened at
+all, so that the first step cannot pass on a model that stays silent.
+
+The bound governs the initial window alone. After the transfer starts, slow start grows the
+window past it, which is what the same section of RFC 5681 requires.
+
+What this test cannot establish is worth stating. The framework matches the first event that
+satisfies a pattern, and it cannot say "the first publication of this signal satisfies P".
+The first step therefore forbids an oversized value in a time window rather than at an
+ordinal position, and it depends on the scenario times to place that window. A framework
+that could bind the first publication would state the rule directly. See the pass notes.
+
+Expected result: PASS. The bound is an upper bound, so a smaller window conforms.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// RFC 5681 §3.1, the lowest band of the table: SMSS <= 1095 gives IW <= 4 * SMSS.
+const long SMSS = 536;
+const long IW_BOUND = 4 * SMSS;   // 2144 bytes
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_initial_window")
+        // Observations 1 and 2 together. The window is published for the first time when the
+        // transfer starts, so "the initial window" is the first value the signal carries.
+        // This step forbids a value above the bound up to and including that first
+        // publication, which is what the two statements demand: the table bounds the initial
+        // window, and the handshake does not enlarge it.
+        .never(on("host1.tcp").signal("cwnd")
+                   .isAtLeast(IW_BOUND + 1)
+                   .describe("a congestion window above the bound, up to the first publication")
+                   .within(0.2002))
+        // The signal is alive. Without this step the one above would pass on a model that
+        // never publishes the window at all. The step puts no bound on the value, because
+        // by this point the transfer has started and slow start is growing the window,
+        // which RFC 5681 requires.
+        .once(on("host1.tcp").signal("cwnd")
+                  .describe("a further publication of host A's congestion window")
+                  .within(0.5));
+}
+
+%activity:
+EV << "rfc5681_initial_window compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The plain mockup: host A -- link L -- host B.
+network Rfc5681IwNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc5681IwNet
+sim-time-limit = 2s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The congestion window is not a field of a segment, so the tester must be told to observe
+# the scalar signal that carries it.
+*.protocolTester.stateSignals = "cwnd"
+
+# The segment size of the check. 536 is the lowest band of the table of RFC 5681 §3.1.
+**.tcp.mss = 536
+
+# The scenario constants of checks.md#common-mockups. Host B only receives.
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 20000B
+*.host1.app[0].tClose = 1.5s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST rfc5681_initial_window: PASS
