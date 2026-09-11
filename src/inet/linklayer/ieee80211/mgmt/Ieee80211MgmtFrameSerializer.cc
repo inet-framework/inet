@@ -758,8 +758,9 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
     else if (typeInfo == typeid(Ieee80211BeaconFrame)) {
         auto frame = makeShared<Ieee80211BeaconFrame>();
 
-        simtime_t timetstamp;
-        timetstamp.setRaw(stream.readUint64Le()); // TODO store timestamp
+        // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: unsigned TSF counter in microseconds.
+        // The model does not retain TSF; no conversion to simulation-resolution ticks is needed.
+        stream.readUint64Le();
 
         frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Le() * 1024, SIMTIME_US));
         stream.readUint16Le(); // Capability
@@ -775,8 +776,9 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
     else if (typeInfo == typeid(Ieee80211ProbeResponseFrame)) {
         auto frame = makeShared<Ieee80211ProbeResponseFrame>();
 
-        simtime_t timestamp;
-        timestamp.setRaw(stream.readUint64Le()); // TODO store timestamp
+        // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: unsigned TSF counter in microseconds.
+        // The model does not retain TSF; no conversion to simulation-resolution ticks is needed.
+        stream.readUint64Le();
 
         frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Le() * 1024, SIMTIME_US));
         stream.readUint16Le();
