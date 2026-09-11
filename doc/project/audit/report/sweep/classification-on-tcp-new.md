@@ -10,6 +10,9 @@
 - **Method:** the area, the depth for levels 0 to 3, the renames, the baselines and the body
   lengths come from the diff. The behavior claim, the intent and the group are my reading of the
   commits, which is what the author would state from knowledge.
+- **Since the trial:** depth level 4 was renamed from `structure` to `refactor`, because the word
+  carries the promise that the level makes and `structure` does not. The trailers below use the
+  new name.
 
 ## The verdict first
 
@@ -35,8 +38,8 @@ The depth of the 61 commits, as the trailers below state it:
 | `comment` | 4 | 8, 43, 57, 59 |
 | `format` | 0 | — |
 | `location` | 0 | — |
-| `name` | 0 pure | commit 15 mixes it with `structure` |
-| `structure` | 7 | 13, 15, 54, 55, 56, 58, 60 |
+| `name` | 0 pure | commit 15 mixes it with `refactor` |
+| `refactor` | 7 | 13, 15, 54, 55, 56, 58, 60 |
 | `behavior` | 50 | the rest |
 
 By area: **`src` 56, `tests` 3, `doc` 1, cross-area 1.**
@@ -112,7 +115,7 @@ Change: src.tcp.Rfc6582Recovery | behavior.add | - | tcp-algorithm-split
 
 tcp: move SACK loss recovery into Rfc6675Recovery
 
-Change: src.tcp.Rfc6675Recovery | structure | - | tcp-algorithm-split
+Change: src.tcp.Rfc6675Recovery | refactor | - | tcp-algorithm-split
 
 tcp: add TcpCubic (RFC 9438) with HyStart
 
@@ -120,7 +123,7 @@ Change: src.tcp.TcpCubic | behavior.add | test | tcp-modern-features
 
 tcp: move the classic flavours onto the split architecture                   ⚠
 
-Change: src.tcp.flavours | name+structure | whatsnew migration | tcp-algorithm-split
+Change: src.tcp.flavours | name+refactor | whatsnew migration | tcp-algorithm-split
 ```
 
 ### Phase C — the modern features (16 to 32)
@@ -195,7 +198,7 @@ Change: src.tcp.TcpAlgorithmBase | behavior.change | test | tcp-modern-features
 
 tcp: connection plumbing the modern features share                           ⚠
 
-Change: src.tcp.TcpConnection | structure | - | tcp-modern-features
+Change: src.tcp.TcpConnection | refactor | - | tcp-modern-features
 ```
 
 ### Phase D — expose, default, record, follow (33 to 37)
@@ -291,15 +294,15 @@ Change: src.applications.tcpapp.TcpServerSocketIo | behavior.change.fix | - | tc
 
 tcp: drop the unused PRR entry helper and explain the dupack design it hints at  ⚠
 
-Change: src.tcp.Rfc6937ProportionalRateReduction | structure | - | tcp-review-fixes
+Change: src.tcp.Rfc6937ProportionalRateReduction | refactor | - | tcp-review-fixes
 
 tcp: pick the fast-retransmit ssthresh by virtual, not by concrete-type sniffing
 
-Change: src.tcp.TcpAlgorithmBase | structure | - | tcp-review-fixes
+Change: src.tcp.TcpAlgorithmBase | refactor | - | tcp-review-fixes
 
 tcp: stop rescanning the SACK scoreboard several times per ACK
 
-Change: src.tcp.Rfc6675Recovery | structure | - | tcp-review-fixes
+Change: src.tcp.Rfc6675Recovery | refactor | - | tcp-review-fixes
 ```
 
 ### Phase F — the close (57 to 61)
@@ -319,7 +322,7 @@ Change: src.tcp | comment | -
 
 tcp: fold DcTcp onto the shared ACK path, leaving only what is DCTCP's
 
-Change: src.tcp.DcTcp | structure | - | tcp-algorithm-split
+Change: src.tcp.DcTcp | refactor | - | tcp-algorithm-split
 
 tests: re-record the fingerprints this TCP workstream moves                  ⚠
 
@@ -333,7 +336,7 @@ Five rule breaks, none of which a gate finds today.
 | Break | Where the trailer shows it |
 | --- | --- |
 | **17 commits carry no body at all** ([PR-MSG-BODY](../../../rule/pull-request.md#pr-msg-body)) | commits 16 to 32, every one of them `behavior` with a `test` obligation |
-| **A rename rides inside a content change** ([CR-DEPTH-ONE](../../../rule/classification.md#cr-depth-one), [PR-SPLIT-MECHANICAL](../../../rule/pull-request.md#pr-split-mechanical)) | commit 15, the only `name+structure` in the branch |
+| **A rename rides inside a content change** ([CR-DEPTH-ONE](../../../rule/classification.md#cr-depth-one), [PR-SPLIT-MECHANICAL](../../../rule/pull-request.md#pr-split-mechanical)) | commit 15, the only `name+refactor` in the branch |
 | **Two baselines are detached from their causes** ([PR-SPLIT-BASELINE](../../../rule/pull-request.md#pr-split-baseline)) | commits 34 and 61, the only two trailers whose area is `tests` and whose depth is `behavior` |
 | **Two subjects carry an "and"** ([PR-SPLIT-ONE-CHANGE](../../../rule/pull-request.md#pr-split-one-change)) | commits 33 and 35, the only `behavior.add+change` trailers |
 | **Tests arrive 20 commits after the behavior** ([TR-SHIP-WITH](../../../rule/testing.md#tr-ship-with)) | 17 `test` obligations in phase C, all discharged by commit 35 |
@@ -369,7 +372,7 @@ real and it is small.
 
 **Rule:** [CR-DEPTH-SCALE](../../../rule/classification.md#cr-depth-scale). **Note.**
 
-Four commits are `comment` and three are `structure` with no observable change. **Seven of 61
+Four commits are `comment` and three are `refactor` with no observable change. **Seven of 61
 commits need no behavioral review**, and one word in the trailer says which. Commit 43 alone is 326
 insertions and 105 deletions in `Tcp.ned`, and every changed line is a comment.
 
@@ -442,13 +445,18 @@ to the word "extract" asks the right question.
 
 ## What I would change in classification.md
 
-Three amendments, all small, all produced by this trial. **None is applied.**
+**One change has been applied, and it did not come from this trial.** Depth level 4 is now
+`refactor` and not `structure`: the word already means "no behavior change" to every reader, and
+it is the word INET writes — 71 of master's last 3000 subjects carry it. `location` and `name`
+stay as the two refactors that earn their own level.
+
+Three more amendments, all small, all produced by this trial. **None is applied.**
 
 1. **Narrow `CR-TAG-SUBJECT` to the kind marker** (F-1). The area prefix stays, because
    `git log --oneline` cannot see the trailer.
 2. **Let depth `comment` and `format` list more than one area** in `CR-SCOPE-AREA` (F-5).
-3. **Allow `name+structure` and the other mixed depths to be written**, rather than forcing the
-   author to pick the deeper one. Commit 15 is honest as `name+structure` and misleading as either
+3. **Allow `name+refactor` and the other mixed depths to be written**, rather than forcing the
+   author to pick the deeper one. Commit 15 is honest as `name+refactor` and misleading as either
    half. [CR-DEPTH-ONE](../../../rule/classification.md#cr-depth-one) still calls the mix a
    violation; the trailer should be able to state the violation rather than hide it.
 

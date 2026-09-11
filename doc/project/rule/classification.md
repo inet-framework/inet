@@ -120,9 +120,19 @@ that the levels above it keep.
 | 0 | `comment` | comments and documentation text | every token the compiler reads |
 | 1 | `format` | whitespace, line breaks, brace position | the sequence of tokens |
 | 2 | `location` | which file holds the code | the text of the code |
-| 3 | `name` | identifiers | the structure |
-| 4 | `structure` | how the code is organized | what the artifact does |
+| 3 | `name` | identifiers | the organization of the code |
+| 4 | `refactor` | how the code is organized | what the artifact does |
 | 5 | `behavior` | what the artifact does | — |
+
+**`location` and `name` are the two refactors that earn their own level.** `refactor` is every
+other structural change. The word is broader in ordinary use than the level is — of master's last
+3000 subjects, 71 carry it and **13 of those 71 also say rename, move, hoist or split**. Those 13
+are level 2 or level 3 work. [CR-DEPTH-ONE](#cr-depth-one) resolves the overlap: the level is the
+deepest one the commit *reaches*, and a pure rename does not reach level 4.
+
+The level is named for what a reader recognizes and not for the naming axis of the other five. A
+noun for what changed would be more consistent; `refactor` is the word every author already knows,
+and a field that people type from memory is worth more when it is guessed right the first time.
 
 **Level 5 reads per area.** In `src` it is the behavior of the model. In `tests` it is what the
 test checks. In `doc` it is what the document states. In each area it is the same question: does a
@@ -205,7 +215,7 @@ try to carry both.
 | rename a public class | no | yes |
 | change a private algorithm | yes | no |
 | remove a public parameter | yes | yes |
-| restructure the internals | no | no |
+| refactor the internals | no | no |
 
 The break is **derived, not declared**. The change summary computes it from the removed and renamed
 public members, so the author does not repeat it. It reaches the trailer only through the third
@@ -264,10 +274,19 @@ model produces the same results. A fingerprint or statistical baseline in the sa
 the claim. One of the two is then wrong: the classification, or the split under
 [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline).
 
-The check is cheap and it is currently green. Of master's last 300 commits, **9 claim inertness in
-their subject** with words such as refactor, cleanup, rename, whitespace, unindent and reorder, and
-**all 9 touch no baseline**. The check is a guard against a future defect, not a backlog of present
-ones.
+**The check is cheap and it fires about once in a thousand commits.** Master's last 300 hold 9
+commits that claim inertness in their subject, and none of the 9 touches a baseline. Widen the
+window to 3000 and the contradiction appears: of the 71 subjects that carry the word `refactor`,
+two carry a fingerprint baseline as well.
+
+```
+IPv6: refactor: extension headers to chunk-based architecture
+IPv6: refactor: replace pointer-ordered sets with vectors (deterministic ordering)
+```
+
+Both are honest commits that chose the wrong word. The second one repairs a determinism defect,
+which is a behavior change and not a refactor. That is the whole value of the check: it finds the
+commit whose word and whose diff disagree, and it finds about one per thousand.
 
 The contrary case exists and is legitimate: **12 of the 300 move a baseline and change no source**,
 for example `tests: synchronize stale JSON fingerprints with CSV baselines`. Those are `tests` at
@@ -308,7 +327,7 @@ Where the work has a plan file under `plan/pending/`, **use the stem of that fil
 then agree for free, and a reader who finds one finds the other.
 
 ```
-Change: src.transportlayer.tcp | structure | - | tcp-algorithm-hierarchy
+Change: src.transportlayer.tcp | refactor | - | tcp-algorithm-hierarchy
 ```
 
 A commit that stands alone has no group, and the fourth field is absent. Most commits are of that
@@ -411,7 +430,7 @@ belongs to no group writes three fields.
 | --- | --- |
 | area | `src`, `tests`, `doc`, `examples`, `build` |
 | position | the feature, subsystem, module or class; omitted outside `src` |
-| depth | `comment`, `format`, `location`, `name`, `structure`, `behavior` |
+| depth | `comment`, `format`, `location`, `name`, `refactor`, `behavior` |
 | direction | `add`, `remove`, `change`; more than one joined by `+`; only on `behavior` |
 | intent | `fix`, or omitted for a deliberate change |
 | obligations | any of `fingerprint`, `statistical`, `expected`, `test`, `whatsnew`, `migration`, separated by a space; or `-` for none; or `?` |
@@ -433,7 +452,7 @@ Change: doc | behavior.change | -
 
 Change: src.transportlayer.tcp | location | - | tcp-algorithm-hierarchy
 Change: src.transportlayer.tcp | name | whatsnew migration | tcp-algorithm-hierarchy
-Change: src.transportlayer.tcp | structure | - | tcp-algorithm-hierarchy
+Change: src.transportlayer.tcp | refactor | - | tcp-algorithm-hierarchy
 ```
 
 Read the three together and the group tells its own story: the files move, then the types take
