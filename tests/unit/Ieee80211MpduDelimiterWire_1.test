@@ -1,0 +1,61 @@
+%description:
+IEEE Std 802.11-2024 9.7.1/9.7.2: HT delimiter length, CRC and signature match
+independent golden bytes. Corrupted delimiters are marked incorrect; oversized lengths are rejected.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+// Golden CRCs obtained by polynomial long division by x^8+x^2+x+1 over the
+// B0-first input, with all-one initial remainder, then complement and wire bit ordering.
+const int lengths[] = {0, 1, 255, 256, 0xABC, 4095};
+const std::vector<std::vector<uint8_t>> expected = {
+    {0x00, 0x00, 0x14, 0x4E},
+    {0x10, 0x00, 0x01, 0x4E},
+    {0xF0, 0x0F, 0xAC, 0x4E},
+    {0x00, 0x10, 0x08, 0x4E},
+    {0xC0, 0xAB, 0x4C, 0x4E},
+    {0xF0, 0xFF, 0x18, 0x4E}
+};
+for (size_t i = 0; i < expected.size(); i++) {
+    auto header = makeShared<Ieee80211MpduSubframeHeader>();
+    header->setLength(lengths[i]);
+    Packet output("delimiter", header);
+    ASSERT(output.peekDataAsBytes()->getBytes() == expected[i]);
+    Packet input("golden", makeShared<BytesChunk>(expected[i]));
+    auto parsed = input.popAtFront<Ieee80211MpduSubframeHeader>();
+    ASSERT(parsed->getLength() == lengths[i]);
+    ASSERT(parsed->getChunkLength() == B(4));
+    ASSERT(!parsed->isIncorrect() && !parsed->isIncomplete());
+    ASSERT(input.getDataLength() == B(0));
+}
+for (int byteIndex : {0, 1, 2, 3}) {
+    auto corrupt = expected[4];
+    corrupt[byteIndex] ^= 1;
+    Packet input("corrupt", makeShared<BytesChunk>(corrupt));
+    auto parsed = input.popAtFront<Ieee80211MpduSubframeHeader>(B(4), Chunk::PF_ALLOW_INCORRECT);
+    ASSERT(parsed->isIncorrect());
+}
+for (int length : {-1, 4096}) {
+    auto header = makeShared<Ieee80211MpduSubframeHeader>();
+    header->setLength(length);
+    Packet output("invalid-length", header);
+    bool rejected = false;
+    try {
+        output.peekDataAsBytes();
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+}
+EV << "HT delimiters match IEEE golden octets and reject corrupt representations.\n";
+
+%contains: stdout
+HT delimiters match IEEE golden octets and reject corrupt representations.

@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
 
+#include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {
@@ -68,6 +69,13 @@ uint16_t packBlockAckParameters(bool aMsduSupported, bool blockAckPolicy, uint8_
 {
     // IEEE Std 802.11-2024, 9.4.1.13, Figure 9-151.
     return aMsduSupported | (blockAckPolicy << 1) | ((tid & 0xF) << 2) | ((bufferSize & 0x3FF) << 6);
+}
+
+uint8_t computeMpduDelimiterCrc(uint16_t delimiter)
+{
+    // IEEE Std 802.11-2024, 9.7.2: x^8 + x^2 + x + 1, complemented remainder.
+    const uint8_t bytes[] = {uint8_t(delimiter), uint8_t(delimiter >> 8)};
+    return generic_crc8(bytes, sizeof(bytes), 0x07, 0xFF, true, true, 0xFF);
 }
 
 void writeSequenceControl(MemoryOutputStream& stream, uint8_t fragmentNumber, uint16_t sequenceNumber)
@@ -132,21 +140,25 @@ const Ptr<Chunk> Ieee80211MsduSubframeHeaderSerializer::deserializeFields(Memory
 void Ieee80211MpduSubframeHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto mpduSubframe = dynamicPtrCast<const Ieee80211MpduSubframeHeader>(chunk);
-    stream.writeUint4(0);
-    stream.writeUint4(mpduSubframe->getLength() >> 8);
-    stream.writeUint8(mpduSubframe->getLength() & 0xFF);
-    stream.writeByte(0);
+    // IEEE Std 802.11-2024, 9.7.1, Figures 9-1329/9-1330: HT length occupies B4-B15.
+    int length = mpduSubframe->getLength();
+    if (length < 0 || length > 0xFFF)
+        throw cRuntimeError("HT MPDU delimiter length is outside the 12-bit range: %d", length);
+    uint16_t delimiter = length << 4;
+    stream.writeUint16Le(delimiter);
+    stream.writeByte(computeMpduDelimiterCrc(delimiter));
     stream.writeByte(0x4E);
 }
 
 const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
-    stream.readUint4();
-    mpduSubframe->setLength(stream.readUint4() >> 8);
-    mpduSubframe->setLength(stream.readUint8());
-    stream.readByte();
-    stream.readByte();
+    auto delimiter = stream.readUint16Le();
+    mpduSubframe->setLength(delimiter >> 4);
+    auto crc = stream.readByte();
+    auto signature = stream.readByte();
+    if (crc != computeMpduDelimiterCrc(delimiter) || signature != 0x4E)
+        mpduSubframe->markIncorrect();
     return mpduSubframe;
 }
 
