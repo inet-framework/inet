@@ -345,9 +345,10 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 stream.writeMacAddress(dataHeader->getAddress4());
             if (type == ST_DATA_WITH_QOS) {
-                // IEEE Std 802.11-2024, Table 9-10. Preserve the modeled bit 4
-                // value; its meaning depends on the transmitting STA's role.
-                stream.writeByte((dataHeader->getTid() & 0x0F) | 0x10 |
+                // IEEE Std 802.11-2024, Table 9-10. Modeling simplification:
+                // leave bit 4 clear (no EOSP or Queue Size report); the second
+                // octet remains zero (no TXOP duration request or AP PS buffer state).
+                stream.writeByte((dataHeader->getTid() & 0x0F) |
                         ((dataHeader->getAckPolicy() & 3) << 5) |
                         (dataHeader->getAMsduPresent() ? 0x80 : 0));
                 stream.writeByte(0);

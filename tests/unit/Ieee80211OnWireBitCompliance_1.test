@@ -14,15 +14,16 @@ using namespace inet::physicallayer;
 
 %activity:
 // Independent first-octet oracles from IEEE Std 802.11-2024, Table 9-10.
-for (bool address4 : {false, true}) {
-    const uint8_t expected[] = {0x10, 0x35, 0xDA, 0xFF};
+for (int ds = 0; ds < 4; ds++) {
+    const bool address4 = ds == 3;
+    const uint8_t expected[] = {0x00, 0x25, 0xCA, 0xEF};
     const int tids[] = {0, 5, 10, 15};
     for (int policy = 0; policy < 4; policy++) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->setSequenceNumber(SequenceNumberCyclic(0));
-        header->setToDS(address4);
-        header->setFromDS(address4);
+        header->setToDS(ds & 1);
+        header->setFromDS(ds & 2);
         header->setTid(tids[policy]);
         header->setAckPolicy(static_cast<AckPolicy>(policy));
         header->setAMsduPresent(policy >= 2);
@@ -32,13 +33,15 @@ for (bool address4 : {false, true}) {
         auto bytes = packet.peekDataAsBytes()->getBytes();
         ASSERT(bytes[offset] == expected[policy]);
         ASSERT(bytes[offset + 1] == 0);
-        // Build external bytes independently, including a clear bit 4.
-        bytes[offset] = expected[policy] & ~0x10;
-        Packet external("external-qos", makeShared<BytesChunk>(bytes));
-        auto decoded = external.peekAtFront<Ieee80211DataHeader>();
-        ASSERT(decoded->getTid() == tids[policy]);
-        ASSERT(decoded->getAckPolicy() == policy);
-        ASSERT(decoded->getAMsduPresent() == (policy >= 2));
+        // Both bit-4 values must decode without affecting the modeled fields.
+        for (uint8_t bit4 : {0x00, 0x10}) {
+            bytes[offset] = expected[policy] | bit4;
+            Packet external("external-qos", makeShared<BytesChunk>(bytes));
+            auto decoded = external.peekAtFront<Ieee80211DataHeader>();
+            ASSERT(decoded->getTid() == tids[policy]);
+            ASSERT(decoded->getAckPolicy() == policy);
+            ASSERT(decoded->getAMsduPresent() == (policy >= 2));
+        }
     }
 }
 

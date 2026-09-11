@@ -34,6 +34,20 @@ for (auto invalid : {SIMTIME_ZERO, SimTime(-1, SIMTIME_MS), SimTime(1023, SIMTIM
 }
 
 for (bool probe : {false, true}) {
+    for (auto invalid : {SIMTIME_ZERO, SimTime(-1, SIMTIME_MS), SimTime(1023, SIMTIME_US), SimTime(67107841, SIMTIME_US)}) {
+        Ptr<Ieee80211BeaconFrame> frame = probe ? staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) : makeShared<Ieee80211BeaconFrame>();
+        // Leave zero at its construction default to cover an unset interval.
+        if (invalid != SIMTIME_ZERO)
+            frame->setBeaconInterval(invalid);
+        frame->setChunkLength(B(17));
+        Packet packet("invalid-beacon-interval", frame);
+        bool rejected = false;
+        try { packet.peekDataAsBytes(); }
+        catch (const cRuntimeError& error) {
+            rejected = std::string(error.what()).find("Beacon interval must be between 1 and 65535 TUs") != std::string::npos;
+        }
+        ASSERT(rejected);
+    }
     // Timestamp=0, Interval=97 TU, Capability=0, SSID="", Supported Rate=1 Mbps.
     const std::vector<uint8_t> prefix = {0,0,0,0,0,0,0,0,97,0,0,0,0,0,1,1,2};
     for (int channel : {-1, 1, 14}) {

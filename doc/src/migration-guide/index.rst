@@ -29,6 +29,9 @@ both target scheduling and advertised content. Use ``102400us`` for exactly
 transmissions can be delayed by channel access. Custom producers should put
 the same effective interval in Beacon and Probe Response bodies as they use
 for target scheduling.
+The serializers require an interval between 1 and 65535 TUs for both frame
+types and throw for out-of-range values, including the default zero interval.
+Custom producers must set a valid interval before serialization.
 
 ``RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION`` now has its standard value,
 62. Code using the symbolic name needs only recompilation. Update external
