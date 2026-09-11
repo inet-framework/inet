@@ -1,0 +1,98 @@
+%description:
+
+RFC 5494 -- a packet with an opcode reserved for experiments provokes nothing.
+
+Checks RFC826-RECV-10 from doc/project/evidence/standard/rfc826/catalog.md and
+RFC5494-NUM-3 from doc/project/evidence/standard/rfc5494/catalog.md. The English procedure
+is in
+doc/project/evidence/protocol/arp/checks/input-validation.md#an-experimental-opcode; the
+program steps below map onto its expected observations. Mapping of the shared link mockup:
+host A = hostA, host B = hostB, host C = hostC, switch S = switch.
+
+Every field of the crafted packet is that of a valid request from host A to host B, except
+the opcode, which is 24 -- OP_EXP1 of RFC 5494 section 3. The target protocol address is the
+address of host B on purpose, so that the packet reaches the opcode question, which is the
+last question of the reception algorithm of RFC 826.
+
+Expected result: FAIL. The simulation model stops the run on an opcode it does not know:
+Arp::processArpPacket switches on the opcode and its default branch throws
+"Unsupported opcode %d in received ARP packet"
+(src/inet/networklayer/arp/ipv4/Arp.cc). RFC 826 answers the question in one sentence --
+"Negative conditionals indicate an end of processing and a discarding of the packet" -- and
+a station that stops is the strongest possible way to fail it. Expected observation 3, that
+host B goes on working, is the observation that catches this. The run ends with an error and
+never prints a verdict line, so the assertion on the verdict line does not find it.
+See doc/project/evidence/model/arp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// OP_EXP1, the first opcode that RFC 5494 section 3 reserves for experiments.
+static const int OP_EXP1 = 24;
+
+static Packet *buildExperimentalOpcodePacket(const CaptureStore&)
+{
+    return buildArpPacket("craftedOpcode", "hostB.eth[0]", OP_EXP1,
+            interfaceMacAddress("hostA.eth[0]"), interfaceIpv4Address("hostA.eth[0]"),
+            interfaceMacAddress("hostB.eth[0]"), interfaceIpv4Address("hostB.eth[0]"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5494_experimental_opcode")
+        // Expected observation 1: the crafted packet arrives at host B, opcode 24.
+        .inject(inject("hostB").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("an ARP packet with the experimental opcode 24, addressed to host B")
+                  .packet(buildExperimentalOpcodePacket))
+        // Expected observations 2 and 3: host B puts no ARP packet on the link afterwards,
+        // and host B goes on working to the end of the run (RFC826-RECV-10, RECV-1).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .describe("any ARP packet from host B")
+                  .within(0.4));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5494_experimental_opcode compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# No host sends a datagram: the crafted packet is the only stimulus of the run.
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc5494_experimental_opcode: PASS

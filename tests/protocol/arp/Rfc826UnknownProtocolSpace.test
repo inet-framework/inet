@@ -1,0 +1,106 @@
+%description:
+
+RFC 826 -- a packet for a protocol the receiver does not speak provokes nothing.
+
+Checks RFC826-RECV-3 from doc/project/evidence/standard/rfc826/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/arp/checks/input-validation.md#an-unknown-protocol-space;
+the program steps below map onto its expected observations. Mapping of the shared link
+mockup: host A = hostA, host B = hostB, host C = hostC, switch S = switch.
+
+Every field of the crafted packet is that of a valid request from host A to host B, except
+the protocol space, which is 0x86DD, the Ethertype of IPv6. The hosts run IPv4 and nothing
+else. The protocol length stays 4, so the four address fields keep the widths the packet
+actually has, and the target protocol address is the address of host B, so the only reason
+to discard the packet is the one under test: the second question of the reception algorithm
+of RFC 826, "Do I speak the protocol in ar$pro?".
+
+The protocol space value is a real one and not an invented number. A station may meet it on
+a link where a second protocol runs, and it must then answer for that protocol or stay
+silent, never answer for IPv4.
+
+The packet is built octet by octet and not from field values. The protocol space is not a
+field of the packet class of the simulation model, which carries the value implicitly, so
+only the octets can hold a value other than the one for IPv4.
+
+Expected result: FAIL. The model reads the octets with ArpPacketSerializer, whose
+deserializeFields marks the packet incorrect when the protocol space is not the Ethertype of
+IPv4 (src/inet/networklayer/arp/ipv4/ArpPacketSerializer.cc), and Arp::processArpPacket then
+peeks the packet, which stops the run with
+"Returning an incorrect chunk is not allowed according to the flags: 0".
+RFC 826 asks for a discard and an end of processing, and the run never reaches the end. The
+model reaches the same outcome for a wrong hardware space, which
+Rfc5494ExperimentalHardwareSpace.test records.
+See doc/project/evidence/model/arp/results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Packet *buildUnknownProtocolSpacePacket(const CaptureStore&)
+{
+    return buildRawArpPacket("craftedProtocolSpace", "hostB.eth[0]",
+            1, ETHERTYPE_IPv6, 6, 4, 1,
+            interfaceMacAddress("hostA.eth[0]"), interfaceIpv4Address("hostA.eth[0]"),
+            MacAddress::UNSPECIFIED_ADDRESS, interfaceIpv4Address("hostB.eth[0]"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_unknown_protocol_space")
+        // Expected observation 1: the crafted packet arrives at host B, protocol space
+        // 0x86DD.
+        .inject(inject("hostB").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("an ARP packet with the protocol space of IPv6, addressed to host B")
+                  .packet(buildUnknownProtocolSpacePacket))
+        // Expected observations 2 and 3: host B puts no ARP packet on the link afterwards,
+        // and host B goes on working to the end of the run (RFC826-RECV-3, RECV-1).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .describe("any ARP packet from host B")
+                  .within(0.4));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_unknown_protocol_space compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# No host sends a datagram: the crafted packet is the only stimulus of the run.
+
+%# expected-result: FAIL
+%contains: stdout
+PROTOCOLTEST rfc826_unknown_protocol_space: PASS

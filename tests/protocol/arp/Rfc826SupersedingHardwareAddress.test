@@ -1,0 +1,149 @@
+%description:
+
+RFC 826 -- a newer sender hardware address supersedes the one the table holds.
+
+Checks RFC826-TABLE-1 and RFC826-RECV-4 from
+doc/project/evidence/standard/rfc826/catalog.md. The English procedure is in
+doc/project/evidence/protocol/arp/checks/cache.md#a-newer-hardware-address; the program steps
+below map onto its expected observations. Mapping of the shared link mockup: host A = hostA,
+host B = hostB, host C = hostC, switch S = switch.
+
+The table of a host is inside the host, and two stations on a link cannot see it. What they
+can see is the destination hardware address of the next frame of that host, which is the
+entry made visible. The check therefore reads that address twice: once after the normal
+exchange, and once after a crafted request changed the entry.
+
+The crafted request carries the protocol address of host B in its sender protocol address
+and a second hardware address, 0A-AA-00-00-00-63, in its sender hardware address. Its target
+protocol address is the address of host C, so that host A takes the merge branch of the
+reception algorithm and not the reply branch: the update of an entry that exists happens
+before the target question.
+
+The order of the steps is not the order of the expected observations. The absence watch of
+expected observation 5 has to cover the window between the crafted request at 0.5 s and the
+second datagram at 0.8 s, and a watch consumes its whole window, so it is the fifth program
+step and expected observation 4 is the sixth.
+
+The frame fields are read through the chunk class name, EthernetMacHeader, and not through
+the protocol name. A protocol name resolves to the last chunk of that protocol in the
+packet, which for an Ethernet frame is the frame check sequence.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A hardware address that no station on the link has. Its value carries no meaning; it must
+// only differ from the address of host B and be neither broadcast nor multicast.
+static const char *SECOND_HARDWARE_ADDRESS = "0A-AA-00-00-00-63";
+
+static Packet *buildSupersedingRequest(const CaptureStore&)
+{
+    return buildArpPacket("craftedRequest", "hostA.eth[0]", ARP_REQUEST,
+            MacAddress(SECOND_HARDWARE_ADDRESS), interfaceIpv4Address("hostB.eth[0]"),
+            MacAddress::UNSPECIFIED_ADDRESS, interfaceIpv4Address("hostC.eth[0]"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_superseding_hardware_address")
+        // Expected observation 1: the normal exchange between host A and host B.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .describe("the request from host A")
+                  .within(0.5))
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 2")
+                  .describe("host B's reply")
+                  .within(0.1))
+        // Expected observation 2: the first datagram goes to the real hardware address of
+        // host B.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) {
+                      return macAddressField(c.event.packet, "EthernetMacHeader.dest")
+                             == interfaceMacAddress("hostB.eth[0]").str();
+                  })
+                  .describe("the first datagram, addressed to the real hardware address of host B")
+                  .within(0.5))
+        // Expected observation 3: the crafted request arrives at host A.
+        .inject(inject("hostA").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("an ARP request from the address of host B with a second hardware address, asking for host C")
+                  .packet(buildSupersedingRequest))
+        // Expected observation 5: host A asks for the address of host B no more.
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress")
+                             == interfaceIpv4Address("hostB.eth[0]").str();
+                  })
+                  .describe("a new ARP request from host A for the address of host B")
+                  .within(0.25))
+        // Expected observation 4: the second datagram goes to the second hardware address
+        // (RFC826-TABLE-1, RECV-4).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) {
+                      return macAddressField(c.event.packet, "EthernetMacHeader.dest")
+                             == std::string(SECOND_HARDWARE_ADDRESS);
+                  })
+                  .describe("the second datagram, addressed to the second hardware address")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_superseding_hardware_address compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# The lifetime of a table entry outlasts the run, so nothing expires during it.
+*.hostA.ipv4.arp.cacheTimeout = 100s
+
+# Two datagrams of 100 octets from host A to host B: one at 0.1 s and one at 0.8 s.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 0.7s
+*.hostA.app[0].stopTime = 0.85s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc826_superseding_hardware_address: PASS

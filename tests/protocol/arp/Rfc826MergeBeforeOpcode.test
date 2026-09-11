@@ -1,0 +1,126 @@
+%description:
+
+RFC 826 -- a reply fills the table, because the table step comes before the opcode step.
+
+Checks RFC826-RECV-7 and RFC826-RECV-6 from
+doc/project/evidence/standard/rfc826/catalog.md. The English procedure is in
+doc/project/evidence/protocol/arp/checks/cache.md#a-reply-fills-the-table; the program steps
+below map onto its expected observations. Mapping of the shared link mockup: host A = hostA,
+host B = hostB, host C = hostC, switch S = switch.
+
+Host A has never reached host C, so it holds no entry for it. A crafted reply arrives at
+host A at 0.3 s: its sender protocol address is the address of host C, its sender hardware
+address is 0A-AA-00-00-00-63, which host C does not have, and its target fields hold the
+addresses of host A, so host A is the target and the add step applies. Host A then sends a
+datagram to host C at 0.6 s.
+
+The hardware address of the crafted reply is deliberately not the address of host C. If it
+were, the last observation could not tell a table entry from a fresh resolution that host A
+did quietly.
+
+The datagram never reaches host C, and that is expected: it goes to a hardware address that
+nobody has. The check is about where host A sends it. This is also why the same packet shape
+is a known attack, and why RFC 5227 exists; the standards map files that document at level 4.
+
+The frame fields are read through the chunk class name, EthernetMacHeader, and not through
+the protocol name. A protocol name resolves to the last chunk of that protocol in the
+packet, which for an Ethernet frame is the frame check sequence.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A hardware address that no station on the link has.
+static const char *PHANTOM_HARDWARE_ADDRESS = "0A-AA-00-00-00-63";
+
+static Packet *buildPhantomReply(const CaptureStore&)
+{
+    return buildArpPacket("craftedReply", "hostA.eth[0]", ARP_REPLY,
+            MacAddress(PHANTOM_HARDWARE_ADDRESS), interfaceIpv4Address("hostC.eth[0]"),
+            interfaceMacAddress("hostA.eth[0]"), interfaceIpv4Address("hostA.eth[0]"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_merge_before_opcode")
+        // Expected observation 1: the crafted reply arrives at host A, with the opcode of a
+        // reply and the address of host C in its sender protocol address.
+        .inject(inject("hostA").into("eth[0]", "upperLayerOut").at(0.3)
+                  .describe("an ARP reply from the address of host C with a hardware address host C does not have")
+                  .packet(buildPhantomReply))
+        // Expected observation 2: host A never asks for the address of host C
+        // (RFC826-RECV-7).
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress")
+                             == interfaceIpv4Address("hostC.eth[0]").str();
+                  })
+                  .describe("an ARP request from host A for the address of host C")
+                  .within(0.25))
+        // Expected observation 3: the datagram goes to the hardware address that the crafted
+        // reply carried (RFC826-RECV-6).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000")
+                  .match([](const MatchContext& c) {
+                      return macAddressField(c.event.packet, "EthernetMacHeader.dest")
+                             == std::string(PHANTOM_HARDWARE_ADDRESS);
+                  })
+                  .describe("the datagram of host A, addressed to the hardware address of the crafted reply")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_merge_before_opcode compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# The lifetime of a table entry outlasts the run, so nothing expires during it.
+*.hostA.ipv4.arp.cacheTimeout = 100s
+
+# One datagram of 100 octets from host A to host C, at 0.6 s. Host C runs no program: it is
+# there to own a protocol address on the link.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostC"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.6s
+*.hostA.app[0].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST rfc826_merge_before_opcode: PASS

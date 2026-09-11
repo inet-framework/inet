@@ -1,0 +1,95 @@
+%description:
+
+RFC 826 -- an ARP reply that no request provoked is discarded, and provokes nothing.
+
+Checks RFC826-RECV-10 from doc/project/evidence/standard/rfc826/catalog.md, and covers
+RFC826-RECV-1. The English procedure is in
+doc/project/evidence/protocol/arp/checks/input-validation.md#an-unsolicited-reply; the
+program steps below map onto its expected observations. Mapping of the shared link mockup:
+host A = hostA, host B = hostB, host C = hostC, switch S = switch.
+
+Nothing in the run sends a datagram. A crafted reply reaches host B at 0.5 s, as if from the
+link: its sender fields hold the addresses of host A and its target fields hold the addresses
+of host B. Host B never asked for it. The opcode question of the reception algorithm has one
+positive branch, the request, so a reply takes the negative branch: end of processing.
+
+A reply that answered a real request would prove nothing, because a host that stayed silent
+could be silent out of satisfaction. An unsolicited reply removes that ambiguity, and it is
+also the shape an attacker uses.
+
+No program can produce this packet. The address resolution module builds every ARP packet
+itself, from its own addresses and from the address that routing gave it, so the packet is
+pushed onto the interface of host B instead.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Packet *buildUnsolicitedReply(const CaptureStore&)
+{
+    return buildArpPacket("craftedReply", "hostB.eth[0]", ARP_REPLY,
+            interfaceMacAddress("hostA.eth[0]"), interfaceIpv4Address("hostA.eth[0]"),
+            interfaceMacAddress("hostB.eth[0]"), interfaceIpv4Address("hostB.eth[0]"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_unsolicited_reply")
+        // Expected observation 1: the crafted reply arrives at host B, with the opcode of a
+        // reply.
+        .inject(inject("hostB").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("an unsolicited ARP reply, from host A to host B")
+                  .packet(buildUnsolicitedReply))
+        // Expected observation 2: host B puts no ARP packet on the link afterwards
+        // (RFC826-RECV-10, RECV-1).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .describe("any ARP packet from host B")
+                  .within(0.4));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_unsolicited_reply compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# No host sends a datagram: the crafted reply is the only stimulus of the run.
+
+%contains: stdout
+PROTOCOLTEST rfc826_unsolicited_reply: PASS
+
+%contains: stdout
+injecting craftedReply into ArpSharedNet.hostB.eth[0].upperLayerOut
