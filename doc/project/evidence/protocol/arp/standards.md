@@ -19,7 +19,7 @@ document that updates the number spaces of the two fields a crafted packet plays
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
 | level 2, Core | RFC 826 | the exchange itself: a broadcast request, a direct reply, and the table that both fill |
-| level 3, Edge | RFC 1122 §2.3.2, §2.3.3, §2.4, and RFC 5494 | in scope now. RFC 1122 states what a host must do that RFC 826 leaves open: flush the table, limit the request rate, keep the waiting packet, and report no error. RFC 5494 makes a crafted opcode a defined case and not an accident |
+| level 3, Edge | RFC 1122 §2.3.2, one paragraph of §2.3.3, one of §2.4, and RFC 5494 | in scope now. RFC 1122 states what a host must do that RFC 826 leaves open: flush the table, limit the request rate, keep the waiting packet, and report no error. RFC 5494 makes a crafted opcode a defined case and not an accident |
 | level 4, Dynamics | RFC 5227 | the address conflict detection is a control loop with five timers. The retry timer and the cache timeout of level 3 also need a tolerance at level 4 |
 | level 5, Complete | RFC 1027, RFC 903, RFC 1868 | proxy ARP over a subnet gateway, the reverse protocol, and the UNARP extension |
 
@@ -31,7 +31,7 @@ What the pass actually reached is not recorded here. It is in
 | Document | Title | Date | Status | Relation | Cached |
 | --- | --- | --- | --- | --- | --- |
 | RFC 826 | An Ethernet Address Resolution Protocol | November 1982 | Internet Standard (STD 37) | `base` | [`standard/rfc826/`](../../standard/rfc826/rfc826.txt), 2026-09-11 |
-| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§2.3.2, §2.3.3 and §2.4, the ARP host requirements) | [`standard/rfc1122/`](../../standard/rfc1122/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 and UDP |
+| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§2.3.2, one paragraph of §2.3.3 and one of §2.4: the ARP host requirements) | [`standard/rfc1122/`](../../standard/rfc1122/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 and UDP |
 | RFC 5494 | IANA Allocation Guidelines for the Address Resolution Protocol (ARP) | April 2009 | Proposed Standard | `updates` RFC 826 | [`standard/rfc5494/`](../../standard/rfc5494/rfc5494.txt), 2026-09-11 |
 | RFC 5227 | IPv4 Address Conflict Detection | July 2008 | Proposed Standard | `updates` RFC 826 | no |
 | RFC 903 | A Reverse Address Resolution Protocol | June 1984 | Internet Standard | `companion`; a separate protocol in the same packet format | no |
@@ -47,8 +47,15 @@ Source of the cached texts:
 
 The RFC 1122 catalog is the one that IPv4 and UDP use. IPv4 owns the entries of §3 there,
 UDP owns the entries of §4.1, whose identifiers start with `U`, and this pass added the
-entries of §2.3.2, §2.3.3 and §2.4, whose identifiers start with `A`. The scope statement of
-that catalog names all three protocols.
+entries of §2.3 and §2.4, whose identifiers start with `A`. The scope statement of that
+catalog names all three protocols.
+
+The in-scope set takes three clauses of §2 and not the whole of it, and the boundary is the
+subject and not the size. §2.3.2 is the ARP section, so it is in scope in full. §2.3.3 and
+§2.4 each hold one paragraph that speaks about address translation and several that speak
+about the Ethernet encapsulation and about the interface between IP and the link layer; a
+pass on the Ethernet link layer owns those, and this one names only the two paragraphs it
+takes. The catalog lists the rest as out of scope.
 
 RFC 826 predates RFC 2119 by eleven years. It carries two `must` words in the whole
 document and no other keyword, so nearly every entry of its catalog has the strength
@@ -86,7 +93,7 @@ that is not addressed to the receiver whatever its sender field holds.
 | Document | Version | Catalog file |
 | --- | --- | --- |
 | RFC 826 | November 1982, Internet Standard, no revision of the body since | [`standard/rfc826/catalog.md`](../../standard/rfc826/catalog.md) |
-| RFC 1122 | October 1989, Internet Standard; §2.3.2, §2.3.3 and §2.4 only, the host requirements for ARP | [`standard/rfc1122/catalog.md`](../../standard/rfc1122/catalog.md) |
+| RFC 1122 | October 1989, Internet Standard; §2.3.2 in full, the address-translation paragraph of §2.3.3 (`rfc1122.txt:1429-1431`), and the third paragraph of §2.4 (`rfc1122.txt:1493-1494`) | [`standard/rfc1122/catalog.md`](../../standard/rfc1122/catalog.md) |
 | RFC 5494 | April 2009, Proposed Standard | [`standard/rfc5494/catalog.md`](../../standard/rfc5494/catalog.md) |
 
 Out of scope, with the reason:
@@ -98,4 +105,5 @@ Out of scope, with the reason:
 | RFC 1027 | Level 5. Proxy ARP lets a gateway answer for an address that is not its own, which is the one case where the target test of RFC 826 does not decide alone. RFC 1122 §2.3.2.1 mentions proxy ARP only as a reason for the cache timeout. |
 | RFC 1868 | Experimental, and never a standards-track update of RFC 826. |
 | RFC 5342 | The Ethertype space that `ar$pro` shares. It allocates numbers; it states no behaviour of a host. |
+| RFC 1122, the rest of §2 | §2.1 and §2.2 introduce the layer. The rest of §2.3.3 states the Ethernet and IEEE 802 encapsulation rules, and the first two paragraphs of §2.4 demand a broadcast flag and a TOS field in the interface between IP and the link layer. None of them is about address translation; a pass on the Ethernet link layer owns them. |
 | RFC 1122 §2.3.1 | The trailer encapsulation negotiation uses ARP replies for a second protocol type. The requirements summary of §2.5 puts "Send Trailers by default without negotiation" in the MUST NOT column, `rfc1122.txt:1511`, and the mechanism itself is a level 5 area. |

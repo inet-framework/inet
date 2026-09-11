@@ -4,7 +4,8 @@
 
 This document is the step 3 artifact of the standards test workflow, for one document of
 the in-scope set: RFC 1122. Three protocols share it, and each one pins its own sections.
-§2.3.2, §2.3.3 and §2.4, the host requirements for ARP, come from the ARP standards map
+§2.3.2, one paragraph of §2.3.3 and one of §2.4, the host requirements for ARP, come from
+the ARP standards map
 ([`arp/standards.md`](../../protocol/arp/standards.md#in-scope-set)); the sections of §3
 come from the IPv4 standards map
 ([`ipv4/standards.md`](../../protocol/ipv4/standards.md#in-scope-set)); §4.1, the host
