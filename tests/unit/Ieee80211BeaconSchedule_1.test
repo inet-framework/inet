@@ -1,0 +1,136 @@
+%description:
+Verify real AP initialization, beacon target scheduling, Beacon/Probe Response
+construction, and standard-channel advertisement with 2.4 GHz and 5 GHz radios.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211BeaconSchedule_1 {
+class TestMgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<simtime_t> targets;
+    Ptr<const Ieee80211BeaconFrame> lastBeacon;
+    Ptr<const Ieee80211BeaconFrame> lastProbe;
+
+    void requestProbe()
+    {
+        Enter_Method("requestProbe");
+        auto request = makeShared<Ieee80211ProbeRequestFrame>();
+        request->setSSID("");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        request->setSupportedRates(rates);
+        request->setChunkLength(B(5));
+        auto packet = new Packet("probe", request);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:99"));
+        handleProbeRequestFrame(packet, header);
+    }
+
+  protected:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destination, uint64_t transactionId = 0) override
+    {
+        if (subtype == ST_BEACON) {
+            targets.push_back(simTime());
+            lastBeacon = dynamicPtrCast<const Ieee80211BeaconFrame>(body);
+        }
+        else if (subtype == ST_PROBERESPONSE)
+            lastProbe = dynamicPtrCast<const Ieee80211BeaconFrame>(body);
+        Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, destination, transactionId);
+    }
+};
+Define_Module(TestMgmtAp);
+}
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestMgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(TestMgmtAp);
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap24: AccessPoint;
+        ap5: AccessPoint;
+        apn: AccessPoint;
+        apb: AccessPoint;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+seed-set = 0
+sim-time-limit = 0.36s
+**.wlan[*].mgmt.typename = "TestMgmtAp"
+**.wlan[*].mgmt.ssid = "test"
+*.ap24.wlan[*].opMode = "g(mixed)"
+*.ap24.wlan[*].radio.bandName = "2.4 GHz"
+*.ap24.wlan[*].radio.channelNumber = 0
+*.ap24.wlan[*].mgmt.beaconInterval = 100ms
+*.ap5.wlan[*].opMode = "a"
+*.ap5.wlan[*].radio.bandName = "5 GHz"
+*.ap5.wlan[*].radio.channelNumber = 0
+*.ap5.wlan[*].mgmt.beaconInterval = 102400us
+*.apn.wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.apn.wlan[*].radio.channelNumber = 0
+*.apb.wlan[*].opMode = "b"
+*.apb.wlan[*].radio.channelNumber = 0
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.mobility.initFromDisplayString = false
+
+%activity:
+wait(0.35);
+for (const char *name : {"ap24", "ap5", "apn", "apb"}) {
+    auto path = std::string(name) + ".wlan[0].mgmt";
+    auto ap = check_and_cast<TestMgmtAp *>(cSimulation::getActiveSimulation()->getModuleByPath(path.c_str()));
+    bool band24 = strcmp(name, "ap5") != 0;
+    auto interval = SimTime(band24 ? 99328 : 102400, SIMTIME_US);
+    ASSERT(ap->targets.size() >= 3);
+    for (size_t i = 1; i < ap->targets.size(); i++)
+        ASSERT(ap->targets[i] - ap->targets[i - 1] == interval);
+    wait(0.001); // independent probe requests must not force simultaneous transmissions
+    ap->requestProbe();
+    for (const auto& body : {ap->lastBeacon, ap->lastProbe}) {
+        ASSERT(body != nullptr);
+        ASSERT(body->getBeaconInterval() == interval);
+        ASSERT(body->getChannelNumber() == (band24 ? 1 : -1));
+        if (strcmp(name, "apn") == 0) {
+            ASSERT(body->getHtOperationPresent());
+            ASSERT(body->getHtOperation().primaryChannel == body->getChannelNumber());
+        }
+        Packet packet("body", body);
+        auto bytes = packet.peekDataAsBytes()->getBytes();
+        ASSERT(bytes.size() == body->getChunkLength().get<B>());
+        ASSERT(bytes[8] == (band24 ? 97 : 100) && bytes[9] == 0);
+        bool found = false;
+        for (size_t offset = 12; offset + 1 < bytes.size(); offset += 2 + bytes[offset + 1]) {
+            if (bytes[offset] == 3) {
+                ASSERT(bytes[offset + 1] == 1 && bytes[offset + 2] == 1);
+                found = true;
+            }
+        }
+        ASSERT(found == band24);
+    }
+}
+EV << "AP beacon targets and channel advertisements verified.\n";
+
+%contains: stdout
+AP beacon targets and channel advertisements verified.

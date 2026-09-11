@@ -17,7 +17,9 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
     SequenceControlField seqVal(header->getSequenceNumber().get(), header->getFragmentNumber());
     bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO hack
-    if (isTimePriorityManagementFrame || isManagementFrame) {
+    // IEEE Std 802.11-2024, 10.3.2.14.3, Table 10-6: non-QoS Data
+    // belongs to RC1, not the per-TID QoS Data cache (RC2).
+    if (isTimePriorityManagementFrame || isManagementFrame || header->getType() == ST_DATA) {
         MacAddress transmitterAddr = header->getTransmitterAddress();
         Mac2SeqValMap& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
         auto it = cache.find(transmitterAddr);
@@ -51,4 +53,3 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
 
 } // namespace ieee80211
 } // namespace inet
-

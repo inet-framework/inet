@@ -19,6 +19,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211OfdmSignalField.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -238,9 +239,17 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211Transmitter *>(transmitter);
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
-    auto phyHeader = mode->getHeaderMode()->createHeader();
+    // ERP reuses OFDM's SIGNAL mode objects, whose factory creates a base
+    // OFDM header. Preserve the selected PHY family when constructing the PPDU.
+    auto phyHeader = dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr ?
+            staticPtrCast<Ieee80211PhyHeader>(makeShared<Ieee80211ErpOfdmPhyHeader>()) : mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getDataLength()));
+    if (auto ofdmHeader = dynamicPtrCast<Ieee80211OfdmPhyHeader>(phyHeader)) {
+        auto ofdmMode = check_and_cast<const Ieee80211OfdmMode *>(mode);
+        ofdmHeader->setRate(ofdmMode->getSignalMode()->getRate());
+        ofdmHeader->setParity(computeIeee80211OfdmSignalParity(ofdmHeader->getRate(), false, ofdmHeader->getLengthField().get<B>()));
+    }
     insertFcs(phyHeader);
     packet->insertAtFront(phyHeader);
 
@@ -255,14 +264,14 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         protocol = &Protocol::ieee80211FhssPhy;
     else if (dynamic_cast<Ieee80211IrPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211IrPhy;
-    else if (dynamic_cast<Ieee80211DsssPhyHeader *>(phyHeader.get()))
-        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211HrDsssPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211HrDsssPhy;
-    else if (dynamic_cast<Ieee80211OfdmPhyHeader *>(phyHeader.get()))
-        protocol = &Protocol::ieee80211OfdmPhy;
+    else if (dynamic_cast<Ieee80211DsssPhyHeader *>(phyHeader.get()))
+        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211ErpOfdmPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211ErpOfdmPhy;
+    else if (dynamic_cast<Ieee80211OfdmPhyHeader *>(phyHeader.get()))
+        protocol = &Protocol::ieee80211OfdmPhy;
     else if (dynamic_cast<Ieee80211HtPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211HtPhy;
     else if (dynamic_cast<Ieee80211VhtPhyHeader *>(phyHeader.get()))
@@ -278,6 +287,12 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyFcs(phyHeader))
         packet->setBitError(true);
+    if (auto ofdmHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(phyHeader)) {
+        auto signal = unpackIeee80211OfdmSignalField(packIeee80211OfdmSignalField(ofdmHeader->getRate(),
+                ofdmHeader->getReserved(), ofdmHeader->getLengthField().get<B>(), ofdmHeader->getParity(), ofdmHeader->getTail()));
+        if (!isIeee80211OfdmSignalValid(signal))
+            packet->setBitError(true);
+    }
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
@@ -334,4 +349,3 @@ const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::peekIeee80211PhyHeaderAtFron
 } // namespace physicallayer
 
 } // namespace inet
-

@@ -3,6 +3,7 @@ Validate byte-exact 802.11 MAC and PHY bitfield packing for on-wire fields.
 
 %includes:
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
@@ -12,6 +13,35 @@ using namespace inet::ieee80211;
 using namespace inet::physicallayer;
 
 %activity:
+// Independent first-octet oracles from IEEE Std 802.11-2024, Table 9-10.
+for (bool address4 : {false, true}) {
+    const uint8_t expected[] = {0x10, 0x35, 0xDA, 0xFF};
+    const int tids[] = {0, 5, 10, 15};
+    for (int policy = 0; policy < 4; policy++) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setSequenceNumber(SequenceNumberCyclic(0));
+        header->setToDS(address4);
+        header->setFromDS(address4);
+        header->setTid(tids[policy]);
+        header->setAckPolicy(static_cast<AckPolicy>(policy));
+        header->setAMsduPresent(policy >= 2);
+        const int offset = address4 ? 30 : 24;
+        header->setChunkLength(B(offset + 2));
+        Packet packet("qos", header);
+        auto bytes = packet.peekDataAsBytes()->getBytes();
+        ASSERT(bytes[offset] == expected[policy]);
+        ASSERT(bytes[offset + 1] == 0);
+        // Build external bytes independently, including a clear bit 4.
+        bytes[offset] = expected[policy] & ~0x10;
+        Packet external("external-qos", makeShared<BytesChunk>(bytes));
+        auto decoded = external.peekAtFront<Ieee80211DataHeader>();
+        ASSERT(decoded->getTid() == tids[policy]);
+        ASSERT(decoded->getAckPolicy() == policy);
+        ASSERT(decoded->getAMsduPresent() == (policy >= 2));
+    }
+}
+
 {
     auto header = makeShared<Ieee80211DataHeader>();
     header->setType(ST_DATA);

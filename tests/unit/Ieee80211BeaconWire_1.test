@@ -1,0 +1,74 @@
+%description:
+Check beacon interval bounds and independent Beacon/Probe Response wire bytes,
+DSSS element absence, malformed lengths, duplicates, and mesh reason code 62.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+static Ptr<const Ieee80211BeaconFrame> decode(bool probe, const std::vector<uint8_t>& bytes)
+{
+    Packet packet("external", makeShared<BytesChunk>(bytes));
+    int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE;
+    return probe ? staticPtrCast<const Ieee80211BeaconFrame>(packet.peekAtFront<Ieee80211ProbeResponseFrame>(B(bytes.size()), flags)) :
+            packet.peekAtFront<Ieee80211BeaconFrame>(B(bytes.size()), flags);
+}
+
+%activity:
+ASSERT(normalizeIeee80211BeaconInterval(SimTime(100, SIMTIME_MS)) == SimTime(99328, SIMTIME_US));
+for (int tus : {1, 100, 65535}) {
+    auto aligned = SimTime(int64_t(tus) * 1024, SIMTIME_US);
+    ASSERT(normalizeIeee80211BeaconInterval(aligned) == aligned);
+}
+for (auto invalid : {SIMTIME_ZERO, SimTime(-1, SIMTIME_MS), SimTime(1023, SIMTIME_US), SimTime(67107841, SIMTIME_US)}) {
+    bool rejected = false;
+    try { normalizeIeee80211BeaconInterval(invalid); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+
+for (bool probe : {false, true}) {
+    // Timestamp=0, Interval=97 TU, Capability=0, SSID="", Supported Rate=1 Mbps.
+    const std::vector<uint8_t> prefix = {0,0,0,0,0,0,0,0,97,0,0,0,0,0,1,1,2};
+    for (int channel : {-1, 1, 14}) {
+        Ptr<Ieee80211BeaconFrame> frame = probe ? staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) : makeShared<Ieee80211BeaconFrame>();
+        frame->setSSID("");
+        frame->setBeaconInterval(normalizeIeee80211BeaconInterval(SimTime(100, SIMTIME_MS)));
+        frame->setChannelNumber(channel);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        frame->setSupportedRates(rates);
+        auto expected = prefix;
+        if (channel != -1)
+            expected.insert(expected.end(), {3, 1, static_cast<uint8_t>(channel)});
+        frame->setChunkLength(B(expected.size()));
+        Packet packet("beacon", frame);
+        ASSERT(packet.peekDataAsBytes()->getBytes() == expected);
+        auto decoded = decode(probe, expected);
+        ASSERT(decoded->isCorrect());
+        ASSERT(decoded->getChannelNumber() == channel);
+        ASSERT(decoded->getBeaconInterval() == SimTime(99328, SIMTIME_US));
+    }
+    for (const auto& suffix : std::vector<std::vector<uint8_t>>{{3,0}, {3,2,1,2}, {3,1,0}, {3,1}, {3,1,1,3,1,2}}) {
+        auto bytes = prefix;
+        bytes.insert(bytes.end(), suffix.begin(), suffix.end());
+        ASSERT(decode(probe, bytes)->isIncorrect());
+    }
+}
+ASSERT(RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION == 62);
+auto reason = makeShared<Ieee80211DeauthenticationFrame>();
+reason->setReasonCode(RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION);
+reason->setChunkLength(B(2));
+Packet reasonPacket("reason", reason);
+ASSERT(reasonPacket.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({62, 0}));
+EV << "Beacon interval, DSSS element and mesh reason wire checks passed.\n";
+
+%contains: stdout
+Beacon interval, DSSS element and mesh reason wire checks passed.

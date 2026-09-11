@@ -44,6 +44,27 @@ inline Ieee80211OfdmSignalField unpackIeee80211OfdmSignalField(uint32_t signal)
     return field;
 }
 
+inline bool computeIeee80211OfdmSignalParity(uint8_t rate, bool reserved, uint16_t length)
+{
+    // IEEE Std 802.11-2024, 17.3.4.4: bit 17 gives even parity over bits 0-16.
+    uint32_t protectedBits = packIeee80211OfdmSignalField(rate, reserved, length, false, 0);
+    bool parity = false;
+    while (protectedBits != 0) {
+        parity = !parity;
+        protectedBits &= protectedBits - 1;
+    }
+    return parity;
+}
+
+inline bool isIeee80211OfdmSignalValid(const Ieee80211OfdmSignalField& field)
+{
+    // IEEE Std 802.11-2024, 17.3.4.2 and 17.3.12: all eight defined
+    // RATE codes are odd four-bit values. Reserved is ignored on receive,
+    // but still participates in the parity check (17.3.4.4).
+    return (field.rate & 1) != 0 &&
+            field.parity == computeIeee80211OfdmSignalParity(field.rate, field.reserved, field.length);
+}
+
 inline Ieee80211OfdmSignalField unpackIeee80211OfdmSignalField(uint8_t byte0, uint8_t byte1, uint8_t byte2)
 {
     uint32_t signal = static_cast<uint32_t>(byte0) |

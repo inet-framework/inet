@@ -33,6 +33,7 @@ class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
     cModule *radio = nullptr;
 
     const physicallayer::IIeee80211Band *getHtOperationBand() const;
+    int getDsssParameterSetChannel() const;
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
@@ -45,4 +46,3 @@ class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-

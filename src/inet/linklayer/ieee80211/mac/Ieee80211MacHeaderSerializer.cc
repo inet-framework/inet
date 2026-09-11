@@ -345,10 +345,11 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 stream.writeMacAddress(dataHeader->getAddress4());
             if (type == ST_DATA_WITH_QOS) {
-                stream.writeUint4(dataHeader->getTid());
-                stream.writeBit(true);
-                stream.writeUint2(dataHeader->getAckPolicy());
-                stream.writeBit(dataHeader->getAMsduPresent());
+                // IEEE Std 802.11-2024, Table 9-10. Preserve the modeled bit 4
+                // value; its meaning depends on the transmitting STA's role.
+                stream.writeByte((dataHeader->getTid() & 0x0F) | 0x10 |
+                        ((dataHeader->getAckPolicy() & 3) << 5) |
+                        (dataHeader->getAMsduPresent() ? 0x80 : 0));
                 stream.writeByte(0);
             }
             ASSERT(stream.getLength() - startPos == dataHeader->getChunkLength());
@@ -601,10 +602,10 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 dataHeader->setAddress4(stream.readMacAddress());
             if (type == ST_DATA_WITH_QOS) {
-                dataHeader->setTid(stream.readUint4());
-                stream.readBit();
-                dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
-                dataHeader->setAMsduPresent(stream.readBit());
+                auto qosControl = stream.readByte();
+                dataHeader->setTid(qosControl & 0x0F);
+                dataHeader->setAckPolicy(static_cast<AckPolicy>((qosControl >> 5) & 3));
+                dataHeader->setAMsduPresent((qosControl & 0x80) != 0);
                 stream.readByte();
             }
             return dataHeader;

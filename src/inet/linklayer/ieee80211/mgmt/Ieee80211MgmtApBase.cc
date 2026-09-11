@@ -81,6 +81,24 @@ const physicallayer::IIeee80211Band *Ieee80211MgmtApBase::getHtOperationBand() c
     return channel->getBand();
 }
 
+int Ieee80211MgmtApBase::getDsssParameterSetChannel() const
+{
+    // IEEE Std 802.11-2024, Tables 9-62 and 9-69, 9.4.2.4:
+    // advertise DSSS Current Channel for the modeled 2.4 GHz operation.
+    // Omit it for other bands and generic radios without an IEEE channel.
+    const auto *radioContract = dynamic_cast<const physicallayer::IRadio *>(radio);
+    const auto *transmitter = radioContract == nullptr ? nullptr :
+            dynamic_cast<const physicallayer::Ieee80211Transmitter *>(radioContract->getTransmitter());
+    const auto *channel = transmitter == nullptr ? nullptr : transmitter->getChannel();
+    if (channel == nullptr || channel->getBand() == nullptr)
+        return -1;
+    const auto *band = channel->getBand();
+    auto frequency = band->getCenterFrequency(channel->getChannelNumber());
+    if (frequency < GHz(2.4) || frequency >= GHz(2.5))
+        return -1;
+    return band->getStandardChannelNumber(channel->getChannelNumber());
+}
+
 } // namespace ieee80211
 
 } // namespace inet

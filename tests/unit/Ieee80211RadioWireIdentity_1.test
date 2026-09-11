@@ -1,0 +1,133 @@
+%description:
+Exercise real packet-level and bit-level radio encapsulation/decapsulation,
+derived PHY factories and tags, and independent SIGNAL parity corruption.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmTransmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+class TestRadio : public Ieee80211Radio
+{
+  public:
+    using Ieee80211Radio::encapsulate;
+    using Ieee80211Radio::decapsulate;
+    void configure(const ITransmitter *tx) { transmitter = tx; fcsMode = FCS_DECLARED_CORRECT; }
+};
+
+class TestOfdmRadio : public Ieee80211OfdmRadio
+{
+  public:
+    using Ieee80211OfdmRadio::encapsulate;
+    using Ieee80211OfdmRadio::decapsulate;
+    void configure(const ITransmitter *tx, const IReceiver *rx) { transmitter = tx; receiver = rx; }
+};
+
+class TestOfdmTransmitter : public Ieee80211LayeredOfdmTransmitter
+{
+  public:
+    TestOfdmTransmitter() { isCompliant = true; }
+};
+
+class TestOfdmReceiver : public Ieee80211LayeredOfdmReceiver
+{
+  public:
+    TestOfdmReceiver() { isCompliant = true; }
+};
+
+class TestRx : public inet::ieee80211::Rx
+{
+  public:
+    using Rx::isFcsOk;
+};
+
+%activity:
+Ieee80211Transmitter transmitter;
+TestRadio radio;
+radio.configure(&transmitter);
+const auto *ofdm = &Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20));
+const IIeee80211Mode *modes[] = {
+    &Ieee80211DsssCompliantModes::dsssMode1Mbps,
+    &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble,
+    ofdm,
+    &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps
+};
+const Protocol *protocols[] = {&Protocol::ieee80211DsssPhy, &Protocol::ieee80211HrDsssPhy,
+    &Protocol::ieee80211OfdmPhy, &Protocol::ieee80211ErpOfdmPhy};
+for (int i = 0; i < 4; i++) {
+    Packet packet("radio", makeShared<ByteCountChunk>(B(3)));
+    packet.addTag<Ieee80211ModeReq>()->setMode(modes[i]);
+    radio.encapsulate(&packet);
+    ASSERT(packet.getTag<PacketProtocolTag>()->getProtocol() == protocols[i]);
+    if (i == 3)
+        ASSERT(dynamicPtrCast<const Ieee80211ErpOfdmPhyHeader>(packet.peekAtFront<Ieee80211PhyHeader>()) != nullptr);
+    if (i >= 2) {
+        auto header = packet.peekAtFront<Ieee80211OfdmPhyHeader>();
+        ASSERT(header->getRate() == 13 && header->getParity());
+        auto bytes = packet.peekDataAt<BytesChunk>(b(0), B(5));
+        ASSERT(bytes->getByte(0) == 0x6D && bytes->getByte(1) == 0 && bytes->getByte(2) == 2);
+        auto corruptedBytes = bytes->getBytes();
+        corruptedBytes[2] ^= 2;
+        Packet corrupted("bad-packet-signal", makeShared<BytesChunk>(corruptedBytes));
+        corrupted.insertAtBack(packet.peekDataAt(B(5), packet.getDataLength() - B(5)));
+        corrupted.addTag<PacketProtocolTag>()->setProtocol(protocols[i]);
+        corrupted.addTag<Ieee80211ModeInd>()->setMode(modes[i]);
+        radio.decapsulate(&corrupted);
+        ASSERT(corrupted.hasBitError());
+    }
+    packet.addTag<Ieee80211ModeInd>()->setMode(modes[i]);
+    radio.decapsulate(&packet);
+    ASSERT(!packet.hasBitError());
+    ASSERT(packet.getDataLength() == B(3));
+    ASSERT(packet.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ieee80211Mac);
+}
+
+TestOfdmTransmitter bitTransmitter;
+TestOfdmReceiver bitReceiver;
+TestOfdmRadio bitRadio;
+bitRadio.configure(&bitTransmitter, &bitReceiver);
+for (int length : {1, 3}) {
+    Packet transmitted("signal", makeShared<ByteCountChunk>(B(length)));
+    transmitted.addTag<Ieee80211ModeReq>()->setMode(ofdm);
+    bitRadio.encapsulate(&transmitted);
+    auto headerBytes = transmitted.peekDataAt<BytesChunk>(b(0), B(5))->getBytes();
+    ASSERT(headerBytes[0] == (length == 1 ? 0x2D : 0x6D));
+    ASSERT(headerBytes[1] == 0 && headerBytes[2] == (length == 1 ? 0 : 2));
+    for (int variant = 0; variant < 4; variant++) {
+        auto bytes = headerBytes;
+        if (variant == 1) bytes[2] ^= 2; // parity corruption
+        if (variant == 2) { bytes[0] ^= 0x10; bytes[2] ^= 2; } // reserved, parity still valid
+        if (variant == 3) { bytes[0] ^= 1; bytes[2] ^= 2; } // undefined RATE, parity still valid
+        Packet received("received", makeShared<BytesChunk>(bytes));
+        received.insertAtBack(transmitted.peekDataAt(B(5), transmitted.getDataLength() - B(5)));
+        received.addTag<Ieee80211ModeInd>()->setMode(ofdm);
+        bitRadio.decapsulate(&received);
+        ASSERT(received.hasBitError() == (variant == 1 || variant == 3));
+        if (received.hasBitError()) {
+            TestRx macReceiver;
+            ASSERT(!macReceiver.isFcsOk(&received));
+            ASSERT(!macReceiver.lowerFrameReceived(received.dup()));
+        }
+        if (!received.hasBitError())
+            ASSERT(received.getDataLength() == B(length));
+    }
+}
+EV << "Radio PHY identity and SIGNAL validation verified.\n";
+
+%contains: stdout
+Radio PHY identity and SIGNAL validation verified.

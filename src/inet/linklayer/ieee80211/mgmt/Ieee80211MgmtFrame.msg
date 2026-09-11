@@ -71,7 +71,7 @@ enum Ieee80211ReasonCode
     RC_MESH_INCONSISTENT_PARAMETERS = 59;
     RC_MESH_INVALID_SECURITY_CAPABILITY = 60;
     RC_MESH_PATH_ERROR_NO_PROXY_INFORMATION = 61;
-    RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION = 60;
+    RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION = 62; // IEEE Std 802.11-2024, Table 9-79
     RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE = 63;
     RC_MAC_ADDRESS_ALREADY_EXISTS_IN_MBSS = 64;
     RC_MESH_CHANNEL_SWITCH_REGULATORY_REQUIREMENTS = 65;
@@ -253,7 +253,7 @@ class Ieee80211BeaconFrame extends Ieee80211MgmtFrame
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
     simtime_t beaconInterval;
-    int channelNumber;
+    int channelNumber = -1; // DSSS Parameter Set Current Channel (standard channel number, not an internal index); -1 means absent
     Ieee80211HandoverParameters handoverParameters;     //TODO is it a vendor-specific parameter in serializer?
 }
 
