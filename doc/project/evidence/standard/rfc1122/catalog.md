@@ -1,18 +1,21 @@
 # RFC 1122 (host requirements) — catalog of checkable statements
 
-> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC1122-*` · **Stands on:** [ipv4/standards.md](../../protocol/ipv4/standards.md), [udp/standards.md](../../protocol/udp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
+> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC1122-*` · **Stands on:** [arp/standards.md](../../protocol/arp/standards.md), [ipv4/standards.md](../../protocol/ipv4/standards.md), [udp/standards.md](../../protocol/udp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
 This document is the step 3 artifact of the standards test workflow, for one document of
-the in-scope set: RFC 1122. Two protocols share it, and each one pins its own sections. The
-sections of §3 come from the IPv4 standards map
+the in-scope set: RFC 1122. Three protocols share it, and each one pins its own sections.
+§2.3.2, §2.3.3 and §2.4, the host requirements for ARP, come from the ARP standards map
+([`arp/standards.md`](../../protocol/arp/standards.md#in-scope-set)); the sections of §3
+come from the IPv4 standards map
 ([`ipv4/standards.md`](../../protocol/ipv4/standards.md#in-scope-set)); §4.1, the host
 requirements for UDP, comes from the UDP standards map
 ([`udp/standards.md`](../../protocol/udp/standards.md#in-scope-set)). The catalog comes from
 the RFC text only. It contains no simulation model names and no code references.
 
-The entries of §3 carry the identifiers of the internet layer and the entries of §4.1 carry
-identifiers that start with `U`. One document holds both, because one document owns the
-`RFC1122-*` identifiers; a reader of either protocol reads the same text.
+The entries of §2.3 and §2.4 carry identifiers that start with `A`, the entries of §3 carry
+the identifiers of the internet layer, and the entries of §4.1 carry identifiers that start
+with `U`. One document holds all three, because one document owns the `RFC1122-*`
+identifiers; a reader of any of the three protocols reads the same text.
 
 Source, cached in this folder:
 
@@ -30,6 +33,7 @@ file in this folder.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledgers,
+[`arp/coverage.md`](../../model/arp/coverage.md),
 [`ipv4/coverage.md`](../../model/ipv4/coverage.md) and
 [`udp/coverage.md`](../../model/udp/coverage.md). Keeping it out is deliberate: this
 catalog states what the standard says, so a new test or a new run must never force an edit
@@ -39,6 +43,12 @@ here.
 
 | ID | Statement |
 | --- | --- |
+| [RFC1122-ACACHE-1](#rfc1122-acache-1) | An ARP implementation provides a mechanism to flush out-of-date cache entries. |
+| [RFC1122-ACACHE-2](#rfc1122-acache-2) | A cache timeout value is configurable. |
+| [RFC1122-AFLOOD-1](#rfc1122-aflood-1) | A mechanism to prevent ARP flooding is included; one request per second per destination is the recommended maximum. |
+| [RFC1122-AQUEUE-1](#rfc1122-aqueue-1) | The link layer saves at least the latest packet for an unresolved address and sends it after the resolution. |
+| [RFC1122-AUSE-1](#rfc1122-ause-1) | ARP manages the address translation on Ethernet and IEEE 802 networks. |
+| [RFC1122-ANOERR-1](#rfc1122-anoerr-1) | A missing ARP cache entry alone is not a Destination Unreachable error. |
 | [RFC1122-VER-1](#rfc1122-ver-1) | A datagram whose version is not 4 is silently discarded. |
 | [RFC1122-CKSUM-1](#rfc1122-cksum-1) | A host verifies the header checksum of every received datagram and silently discards a bad one. |
 | [RFC1122-ADDR-1](#rfc1122-addr-1) | The source address of a sent datagram is one of the host's own addresses. |
@@ -95,7 +105,9 @@ here.
 | [RFC1122-UAPI-2](#rfc1122-uapi-2) | UDP may pass the received TOS up to the application. |
 | [RFC1122-UAPI-3](#rfc1122-uapi-3) | The application interface of UDP gives the full service of the IP transport interface. |
 
-The rows above the line hold §3, the internet layer. The rows below hold §4.1, UDP.
+The first six rows hold §2.3 and §2.4, the link layer and its interface to IP. The rows
+from `RFC1122-VER-1` to `RFC1122-ERR-1` hold §3, the internet layer. The rows below them
+hold §4.1, UDP.
 
 ## How to read an entry
 
@@ -113,6 +125,131 @@ The rows above the line hold §3, the internet layer. The rows below hold §4.1,
   `Overridden by` field when the strength changes.
 - **Overridden by** — present only when a later in-scope document changes this statement.
   One entry carries it: RFC 6864 replaces the identification permission of §3.2.1.5.
+
+## ARP cache
+
+### RFC1122-ACACHE-1
+
+**An ARP implementation provides a mechanism to flush out-of-date cache entries.**
+
+> "An implementation of the Address Resolution Protocol (ARP) [LINK:2] MUST provide a
+> mechanism to flush out-of-date cache entries." — §2.3.2.1, `rfc1122.txt:1286-1288`
+
+The requirements summary of §2.5 lists the statement in the MUST column:
+
+> "  Flush out-of-date ARP cache entries             |2.3.2.1|x| | | | |" — §2.5,
+> `rfc1122.txt:1513`
+
+- Strength: must. Class: internal, with a wire consequence.
+- Governs: [RFC826-TABLE-3](../rfc826/catalog.md#rfc826-table-3), which leaves table aging
+  outside the scope of RFC 826. The DISCUSSION of this section names that gap: "The ARP
+  specification [LINK:2] suggests but does not require a timeout mechanism to invalidate
+  cache entries when hosts change their Ethernet addresses", `rfc1122.txt:1308-1310`.
+- Check idea: after a mapping is learned and then left unused for longer than the lifetime
+  of an entry, a new datagram to the same address provokes a new request on the link. The
+  request is the visible half of the flush.
+
+### RFC1122-ACACHE-2
+
+**A cache timeout value is configurable.**
+
+> "If this mechanism involves a timeout, it SHOULD be possible to configure the timeout
+> value." — §2.3.2.1, `rfc1122.txt:1288-1289`
+
+The requirements summary of §2.5 lists the statement in the SHOULD column:
+
+> "  Cache timeout configurable                      |2.3.2.1| |x| | | |" — §2.5,
+> `rfc1122.txt:1515`
+
+- Strength: should. Class: internal, with a wire consequence.
+- Check idea: two runs of one scenario with two timeout values give two different times for
+  the second request. The statement is conditional: a host whose flush mechanism uses no
+  timeout has nothing to configure.
+
+### RFC1122-AFLOOD-1
+
+**A mechanism to prevent ARP flooding is included; one request per second per destination is
+the recommended maximum.**
+
+> "A mechanism to prevent ARP flooding (repeatedly sending an ARP Request for the same IP
+> address, at a high rate) MUST be included. The recommended maximum rate is 1 per second
+> per destination." — §2.3.2.1, `rfc1122.txt:1291-1305`
+
+The requirements summary of §2.5 lists the statement in the MUST column:
+
+> "  Prevent ARP floods                              |2.3.2.1|x| | | | |" — §2.5,
+> `rfc1122.txt:1514`
+
+- Strength: must for the mechanism; the rate itself is a recommendation. Class: wire.
+- Check idea: give a host a stream of datagrams for an address that nobody owns, so that no
+  reply ever arrives, and count the requests on the link over a known time. The count
+  divided by the time is at most one per second.
+
+## ARP packet queue
+
+### RFC1122-AQUEUE-1
+
+**The link layer saves at least the latest packet for an unresolved address and sends it
+after the resolution.**
+
+> "The link layer SHOULD save (rather than discard) at least one (the latest) packet of each
+> set of packets destined to the same unresolved IP address, and transmit the saved packet
+> when the address has been resolved." — §2.3.2.2, `rfc1122.txt:1375-1378`
+
+The requirements summary of §2.5 lists the statement in the SHOULD column:
+
+> "  Save at least one (latest) unresolved pkt       |2.3.2.2| |x| | | |" — §2.5,
+> `rfc1122.txt:1516`
+
+- Strength: should. Class: end-to-end.
+- Governs: [RFC826-REQ-3](../rfc826/catalog.md#rfc826-req-3), which throws the waiting
+  packet away. The DISCUSSION gives the reason for the change: "Failure to follow this
+  recommendation causes the first packet of every exchange to be lost",
+  `rfc1122.txt:1381-1382`.
+- Check idea: the first datagram of an exchange reaches the far host, after the reply and
+  not before it. The two documents predict two different outcomes for that datagram, so one
+  observation tells them apart.
+
+## ARP use
+
+### RFC1122-AUSE-1
+
+**ARP manages the address translation on Ethernet and IEEE 802 networks.**
+
+> "Address translation from Internet addresses to link-layer addresses on Ethernet and IEEE
+> 802 networks MUST be managed by the Address Resolution Protocol (ARP)." — §2.3.3,
+> `rfc1122.txt:1429-1431`
+
+The requirements summary of §2.5 lists the statement in the MUST column:
+
+> "  Use ARP on Ethernet and IEEE 802 nets           |2.3.3  |x| | | | |" — §2.5,
+> `rfc1122.txt:1524`
+
+- Strength: must. Class: wire.
+- Governs: [RFC826-REQ-1](../rfc826/catalog.md#rfc826-req-1), which says the sending layer
+  must consult the address resolution module. RFC 1122 names the protocol and the two link
+  types.
+- Check idea: the first thing a host puts on an Ethernet link for a neighbour it has never
+  reached is an ARP request, and not the datagram.
+
+## Link and internet layer interface
+
+### RFC1122-ANOERR-1
+
+**A missing ARP cache entry alone is not a Destination Unreachable error.**
+
+> "The link layer MUST NOT report a Destination Unreachable error to IP solely because there
+> is no ARP cache entry for a destination." — §2.4, `rfc1122.txt:1493-1494`
+
+The requirements summary of §2.5 lists the statement in the MUST NOT column:
+
+> "No ARP cache entry treated as Dest. Unreach.      |2.4    | | | | |x|" — §2.5,
+> `rfc1122.txt:1527`
+
+- Strength: must not. Class: error-signal (absence).
+- Check idea: let a host send datagrams to an address that nobody owns on its link. The
+  requests go unanswered, the datagrams go nowhere, and no ICMP Destination Unreachable
+  message leaves the host. The absence is the whole check.
 
 ## Version
 
@@ -823,6 +960,15 @@ these values reach the IP layer unchanged.**
   reason.
 
 ## Out of scope in this catalog
+
+Of §2, the link layer, the catalog holds the three ARP sections and one paragraph of the
+layer interface. The rest of §2 is out of scope, and the ARP standards map gives the
+reasons: §2.1 and §2.2 introduce the layer and state nothing checkable; §2.3.1, the trailer
+encapsulation, is a level 5 area whose default the document itself forbids; the rest of
+§2.3.3 states the Ethernet and IEEE 802 encapsulation rules, which belong to a pass on the
+Ethernet link layer and not to ARP; and the first two paragraphs of §2.4 demand a broadcast
+flag and a TOS field in the interface between IP and the link layer, which is an interface
+inside a host and not traffic on a link.
 
 Three statements of the in-scope sections of §3 are left out on purpose: the
 All-Subnets-MTU configuration flag of §3.3.3 (a `may` about a host with several subnets),
