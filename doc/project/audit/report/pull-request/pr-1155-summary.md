@@ -10,7 +10,7 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 ## In one line
 
-**584** added; **80** removed; **14** changed; **2** with a changed signature; **18** renamed.
+**547** added; **49** removed; **14** changed; **2** with a changed signature; **18** renamed; **22** renamed with their class; **5** moved to another class; **4** split across classes.
 
 ## Breaking — check these first
 
@@ -30,7 +30,7 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 - `PppTrailer`
 
-<details><summary><b>15 message fields</b></summary>
+**7 message fields**
 
 - `PppHeader.address`
 - `PppHeader.control`
@@ -38,24 +38,14 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `PppTrailer.chunkLength`
 - `PppTrailer.fcs`
 - `PppTrailer.flag`
-- `TcpBaseAlgStateVariables.firstPartialACK`
-- `TcpBaseAlgStateVariables.numRtos`
-- `TcpBaseAlgStateVariables.rexmit_count`
-- `TcpBaseAlgStateVariables.rtseq`
-- `TcpBaseAlgStateVariables.rttvar`
-- `TcpBaseAlgStateVariables.snd_cwnd`
-- `TcpBaseAlgStateVariables.srtt`
-- `TcpTahoeRenoFamilyStateVariables.ssthresh`
 - `TcpWestwoodStateVariables.regions`
-
-</details>
 
 **2 C++ classes**
 
 - `PppTrailerSerializer`
 - `TcpTahoeRenoFamily`
 
-<details><summary><b>41 C++ public functions</b></summary>
+<details><summary><b>25 C++ public functions</b></summary>
 
 - `DumbTcp::receivedAckForDataNotYetSent(uint32_t)`
 - `DumbTcp::receivedDataAck(uint32_t)`
@@ -64,28 +54,12 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpAlgorithm::receivedDataAck(uint32_t)`
 - `TcpAlgorithm::receivedDuplicateAck()`
 - `TcpBaseAlg::TcpBaseAlg()`
-- `TcpBaseAlg::ackSent()`
-- `TcpBaseAlg::connectionClosed()`
-- `TcpBaseAlg::dataSent(uint32_t)`
-- `TcpBaseAlg::established(bool)`
 - `TcpBaseAlg::initialize()`
-- `TcpBaseAlg::processEcnInEstablished()`
-- `TcpBaseAlg::processTimer(cMessage *, TcpEventCode &)`
-- `TcpBaseAlg::receiveSeqChanged()`
 - `TcpBaseAlg::receivedAckForDataNotYetSent(uint32_t)`
 - `TcpBaseAlg::receivedDataAck(uint32_t)`
 - `TcpBaseAlg::receivedDuplicateAck()`
-- `TcpBaseAlg::receivedOutOfOrderSegment()`
-- `TcpBaseAlg::restartRexmitTimer()`
 - `TcpBaseAlg::segmentRetransmitted(uint32_t, uint32_t)`
-- `TcpBaseAlg::sendCommandInvoked()`
-- `TcpBaseAlg::shouldMarkAck()`
 - `TcpBaseAlg::~TcpBaseAlg()`
-- `TcpConnection::isLost(uint32_t)`
-- `TcpConnection::nextSeg(uint32_t &)`
-- `TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t)`
-- `TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t)`
-- `TcpConnection::setPipe()`
 - `TcpNewReno::receivedDataAck(uint32_t)`
 - `TcpNewReno::receivedDuplicateAck()`
 - `TcpReno::receivedDataAck(uint32_t)`
@@ -101,18 +75,11 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 </details>
 
-<details><summary><b>17 C++ extension points</b></summary>
+**10 C++ extension points**
 
 - `PppTrailerSerializer::deserialize(MemoryInputStream &)`
 - `PppTrailerSerializer::serialize(MemoryOutputStream &, const Ptr<const Chunk> &)`
-- `TcpBaseAlg::processDelayedAckTimer(TcpEventCode &)`
-- `TcpBaseAlg::processKeepAliveTimer(TcpEventCode &)`
-- `TcpBaseAlg::processPersistTimer(TcpEventCode &)`
 - `TcpBaseAlg::processRexmitTimer(TcpEventCode &)`
-- `TcpBaseAlg::rttMeasurementComplete(simtime_t, simtime_t)`
-- `TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32_t)`
-- `TcpBaseAlg::sendData(bool)`
-- `TcpBaseAlg::startRexmitTimer()`
 - `TcpConnection::addSacks(const Ptr<TcpHeader> &)`
 - `TcpConnection::processSACKOption(const Ptr<const TcpHeader> &, const TcpOptionSack &)`
 - `TcpNewReno::processRexmitTimer(TcpEventCode &)`
@@ -120,8 +87,6 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpReno::processRexmitTimer(TcpEventCode &)`
 - `TcpReno::recalculateSlowStartThreshold()`
 - `TcpTahoe::recalculateSlowStartThreshold()`
-
-</details>
 
 ### Changed
 
@@ -212,6 +177,34 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 | `TcpReno::TcpReno()` | `TcpReno::supportsSackRecovery()` | same owner and arguments |
 | `TcpVegas::dataSent(uint32_t)` | `TcpVegas::receivedAckForUnackedData(uint32_t)` | same owner and arguments |
 | `TcpWestwood::dataSent(uint32_t)` | `TcpWestwood::receivedAckForUnackedData(uint32_t)` | same owner and arguments |
+
+### Renamed with their class
+
+The old class owns nothing at the head, so the class itself was renamed and its members moved with it. Counted, not guessed: the member name and its arguments are the key.
+
+| Was | Now | What moved |
+|---|---|---|
+| `TcpBaseAlg` | `TcpAlgorithmBase` | 10 C++ public functions — `ackSent`, `connectionClosed`, `established`, `processEcnInEstablished`, `processTimer`, `receiveSeqChanged` and 4 more<br>7 C++ extension points — `processDelayedAckTimer`, `processKeepAliveTimer`, `processPersistTimer`, `rttMeasurementComplete`, `rttMeasurementCompleteUsingTS`, `sendData` and 1 more |
+| `TcpBaseAlgStateVariables` | `TcpAlgorithmBaseStateVariables` | 5 message fields — `firstPartialACK`, `rexmit_count`, `rtseq`, `rttvar`, `snd_cwnd` |
+
+### Moved to another class
+
+The old class still exists, so these members were extracted from it.
+
+| Was | Now | What moved |
+|---|---|---|
+| `TcpConnection` | `Rfc6675Recovery` | 5 C++ public functions — `isLost`, `nextSeg`, `sendDataDuringLossRecoveryPhase`, `sendSegmentDuringLossRecoveryPhase`, `setPipe` |
+
+### Split across classes
+
+One member left a class and appeared in several. That is a redistribution rather than a rename, and it is usually where an architecture changed shape.
+
+| Member | Was in | Now in |
+|---|---|---|
+| `dataSent` | `TcpBaseAlg` | `ITcpRecovery`, `Rfc6675Recovery`, `TcpAlgorithmBase`, `TcpClassicAlgorithmBase` |
+| `numRtos` | `TcpBaseAlgStateVariables` | `TcpAlgorithmBaseStateVariables`, `TcpStatusInfo` |
+| `srtt` | `TcpBaseAlgStateVariables` | `TcpAlgorithmBaseStateVariables`, `TcpStatusInfo` |
+| `ssthresh` | `TcpTahoeRenoFamilyStateVariables` | `TcpClassicAlgorithmBaseStateVariables`, `TcpStatusInfo` |
 
 ## Added
 
@@ -333,26 +326,18 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 </details>
 
-<details><summary><b>241 message fields</b></summary>
+<details><summary><b>230 message fields</b></summary>
 
 - `DcTcpFamilyStateVariables.dctcp_accEcnOptionSeen`
 - `DcTcpFamilyStateVariables.dctcp_deliveredCeBytesMark`
 - `DcTcpFamilyStateVariables.dctcp_deliveredCePktsMark`
-- `TcpAlgorithmBaseStateVariables.firstPartialACK`
 - `TcpAlgorithmBaseStateVariables.keepalive_enabled`
 - `TcpAlgorithmBaseStateVariables.keepalive_idle_time`
 - `TcpAlgorithmBaseStateVariables.keepalive_interval`
 - `TcpAlgorithmBaseStateVariables.keepalive_max_probes`
 - `TcpAlgorithmBaseStateVariables.keepalive_probes_sent`
-- `TcpAlgorithmBaseStateVariables.numRtos`
-- `TcpAlgorithmBaseStateVariables.rexmit_count`
-- `TcpAlgorithmBaseStateVariables.rtseq`
 - `TcpAlgorithmBaseStateVariables.rtt_measured`
-- `TcpAlgorithmBaseStateVariables.rttvar`
-- `TcpAlgorithmBaseStateVariables.snd_cwnd`
-- `TcpAlgorithmBaseStateVariables.srtt`
 - `TcpAlgorithmBaseStateVariables.zeroWindowProbesSent`
-- `TcpClassicAlgorithmBaseStateVariables.ssthresh`
 - `TcpCommand.halfClose`
 - `TcpCubicStateVariables.cubic_K`
 - `TcpCubicStateVariables.cubic_ack_cnt`
@@ -558,7 +543,6 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpStatusInfo.lastDataRecvTime`
 - `TcpStatusInfo.lost`
 - `TcpStatusInfo.minRtt`
-- `TcpStatusInfo.numRtos`
 - `TcpStatusInfo.probes`
 - `TcpStatusInfo.reordering`
 - `TcpStatusInfo.retrans`
@@ -570,8 +554,6 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpStatusInfo.sndEffMss`
 - `TcpStatusInfo.sndWndScale`
 - `TcpStatusInfo.sndbufLimited`
-- `TcpStatusInfo.srtt`
-- `TcpStatusInfo.ssthresh`
 - `TcpStatusInfo.synDataAccepted`
 - `TcpStatusInfo.tsEnabled`
 - `TcpStatusInfo.wsEnabled`
@@ -598,14 +580,13 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpClassicAlgorithmBase`
 - `TcpCubic`
 
-<details><summary><b>174 C++ public functions</b></summary>
+<details><summary><b>155 C++ public functions</b></summary>
 
 - `DumbTcp::receivedAckForAlreadyAckedData(const TcpHeader *, uint32_t)`
 - `DumbTcp::receivedAckForUnackedData(uint32_t)`
 - `DumbTcp::receivedAckForUnsentData(uint32_t)`
 - `DumbTcp::rttMeasurementComplete(simtime_t, simtime_t)`
 - `ITcpCongestionControl::receivedAckForUnackedData(uint32_t)` — 27 src, 0 tests, 14 overrides
-- `ITcpRecovery::dataSent(uint32_t)` — 14 src, 0 tests, 7 overrides
 - `ITcpRecovery::isDuplicateAck(const TcpHeader *, uint32_t)` — 10 src, 0 tests, 5 overrides
 - `ITcpRecovery::onRexmitTimeout()` — 3 src, 0 tests, 1 override
 - `ITcpRecovery::receivedAckForUnackedData(uint32_t)` — 27 src, 0 tests, 14 overrides
@@ -626,11 +607,8 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `Rfc6675Recovery::Rfc6675Recovery(TcpStateVariables *, TcpConnection *)`
 - `Rfc6675Recovery::addSacks(const Ptr<TcpHeader> &)` — 2 src, 0 tests, **overridden nowhere**
 - `Rfc6675Recovery::checkSackReordering(uint32_t)` — 1 src, 0 tests, **overridden nowhere**
-- `Rfc6675Recovery::dataSent(uint32_t)`
 - `Rfc6675Recovery::isDuplicateAck(const TcpHeader *, uint32_t)`
-- `Rfc6675Recovery::isLost(uint32_t)` — 3 src, 0 tests, **overridden nowhere**
 - `Rfc6675Recovery::mayUndo()` — **uncalled**, **overridden nowhere**
-- `Rfc6675Recovery::nextSeg(uint32_t &)` — **uncalled**, **overridden nowhere**
 - `Rfc6675Recovery::onRexmitTimeout()`
 - `Rfc6675Recovery::packetDelayed()` — **uncalled**, **overridden nowhere**
 - `Rfc6675Recovery::processFrtoEpisode()` — **uncalled**, **overridden nowhere**
@@ -644,9 +622,6 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `Rfc6675Recovery::reoTimeout()`
 - `Rfc6675Recovery::segmentRetransmitted(uint32_t, uint32_t)`
 - `Rfc6675Recovery::segmentsAcked(uint32_t, uint32_t)`
-- `Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t)` — **uncalled**, **overridden nowhere**
-- `Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t)` — **uncalled**, **overridden nowhere**
-- `Rfc6675Recovery::setPipe()` — 1 src, 0 tests, **overridden nowhere**
 - `Rfc6675Recovery::undoCwndReduction()` — **uncalled**, **overridden nowhere**
 - `Rfc6675Recovery::undoInit()` — **uncalled**, **overridden nowhere**
 - `Tcp::clearFastOpenCookieCache()` — **uncalled**, **overridden nowhere**
@@ -674,38 +649,26 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `TcpAlgorithm::segmentsAcked(uint32_t, uint32_t)` — 6 src, 1 tests, 3 overrides
 - `TcpAlgorithm::supportsSackRecovery()` — 4 src, 0 tests, 3 overrides
 - `TcpAlgorithmBase::TcpAlgorithmBase()`
-- `TcpAlgorithmBase::ackSent()`
 - `TcpAlgorithmBase::calculateSsthresh(uint32_t)`
 - `TcpAlgorithmBase::calculateSsthreshForFastRecovery()`
 - `TcpAlgorithmBase::cancelCorkTimer()`
-- `TcpAlgorithmBase::connectionClosed()`
 - `TcpAlgorithmBase::countDuplicateAck(const TcpHeader *, uint32_t)` — 1 src, 0 tests, **overridden nowhere**
 - `TcpAlgorithmBase::dataArrivedAtoUpdate()` — **uncalled**, **overridden nowhere**
-- `TcpAlgorithmBase::dataSent(uint32_t)`
 - `TcpAlgorithmBase::enterQuickackMode(uint32_t)` — **uncalled**, **overridden nowhere**
-- `TcpAlgorithmBase::established(bool)`
 - `TcpAlgorithmBase::getBytesInFlight()`
 - `TcpAlgorithmBase::getSrtt()`
 - `TcpAlgorithmBase::inQuickackMode()` — **uncalled**, **overridden nowhere**
 - `TcpAlgorithmBase::incrQuickack(uint32_t)` — **uncalled**, **overridden nowhere**
 - `TcpAlgorithmBase::initialize()`
 - `TcpAlgorithmBase::isDuplicateAck(const TcpHeader *, uint32_t)` — 9 src, 0 tests, 5 overrides
-- `TcpAlgorithmBase::processEcnInEstablished()`
-- `TcpAlgorithmBase::processTimer(cMessage *, TcpEventCode &)`
-- `TcpAlgorithmBase::receiveSeqChanged()`
 - `TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *, uint32_t)`
 - `TcpAlgorithmBase::receivedAckForUnackedData(uint32_t)`
 - `TcpAlgorithmBase::receivedAckForUnsentData(uint32_t)`
-- `TcpAlgorithmBase::receivedOutOfOrderSegment()`
-- `TcpAlgorithmBase::restartRexmitTimer()`
 - `TcpAlgorithmBase::scheduleCorkTimer()`
 - `TcpAlgorithmBase::scheduleDelayedAck()` — **uncalled**, **overridden nowhere**
 - `TcpAlgorithmBase::segmentRetransmitted(uint32_t, uint32_t)`
-- `TcpAlgorithmBase::sendCommandInvoked()`
-- `TcpAlgorithmBase::shouldMarkAck()`
 - `TcpAlgorithmBase::~TcpAlgorithmBase()`
 - `TcpClassicAlgorithmBase::TcpClassicAlgorithmBase()`
-- `TcpClassicAlgorithmBase::dataSent(uint32_t)`
 - `TcpClassicAlgorithmBase::getBytesInFlight()`
 - `TcpClassicAlgorithmBase::getCongestionControl()` — **uncalled**, **overridden nowhere**
 - `TcpClassicAlgorithmBase::getRecovery()`
@@ -777,7 +740,7 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 </details>
 
-<details><summary><b>54 C++ extension points</b></summary>
+<details><summary><b>47 C++ extension points</b></summary>
 
 - `Rfc5681CongestionControl::congestionAvoidance(uint32_t)` — 1 override
 - `Rfc5681CongestionControl::slowStart(uint32_t)` — 1 override
@@ -787,17 +750,10 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 - `Rfc6675Recovery::stepC()` — **overridden nowhere**
 - `TcpAlgorithmBase::initialWindow()` — **overridden nowhere**
 - `TcpAlgorithmBase::processCorkTimer(TcpEventCode &)` — **overridden nowhere**
-- `TcpAlgorithmBase::processDelayedAckTimer(TcpEventCode &)` — **overridden nowhere**
-- `TcpAlgorithmBase::processKeepAliveTimer(TcpEventCode &)` — **overridden nowhere**
-- `TcpAlgorithmBase::processPersistTimer(TcpEventCode &)` — **overridden nowhere**
 - `TcpAlgorithmBase::processPtoTimer(TcpEventCode &)` — **overridden nowhere**
 - `TcpAlgorithmBase::processRexmitTimer(TcpEventCode &)` — 6 overrides
 - `TcpAlgorithmBase::receivedDuplicateAck()` — 9 overrides
-- `TcpAlgorithmBase::rttMeasurementComplete(simtime_t, simtime_t)`
-- `TcpAlgorithmBase::rttMeasurementCompleteUsingTS(uint32_t)`
 - `TcpAlgorithmBase::schedulePto()` — **overridden nowhere**
-- `TcpAlgorithmBase::sendData(bool)` — 6 overrides
-- `TcpAlgorithmBase::startRexmitTimer()` — **overridden nowhere**
 - `TcpClassicAlgorithmBase::calculateCwndForRto()` — 1 override
 - `TcpClassicAlgorithmBase::calculateSsthreshForRto()` — 1 override
 - `TcpClassicAlgorithmBase::createCongestionControl()` — 2 overrides
@@ -840,17 +796,14 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 Counted by name over `src/` and `tests/`, so *uncalled* is exact and everything else is a hint. An override is not listed: its visibility is fixed by its base, and fulfilling a hook is not a new promise.
 
-**28 new public function(s) that nothing calls** — why public? ([AR-EXT-MINIMAL-SURFACE](../../../rule/architecture.md#ar-ext-minimal-surface))
+**25 new public function(s) that nothing calls** — why public? ([AR-EXT-MINIMAL-SURFACE](../../../rule/architecture.md#ar-ext-minimal-surface))
 
 - `Rfc6675Recovery::mayUndo()`
-- `Rfc6675Recovery::nextSeg(uint32_t &)`
 - `Rfc6675Recovery::packetDelayed()`
 - `Rfc6675Recovery::processFrtoEpisode()`
 - `Rfc6675Recovery::prrCwndReduction(int, int, bool)`
 - `Rfc6675Recovery::prrEndCwndReduction()`
 - `Rfc6675Recovery::prrNewlyDelivered()`
-- `Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t)`
-- `Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t)`
 - `Rfc6675Recovery::undoCwndReduction()`
 - `Rfc6675Recovery::undoInit()`
 - `Tcp::clearFastOpenCookieCache()`
@@ -875,13 +828,11 @@ Counted by name over `src/` and `tests/`, so *uncalled* is exact and everything 
 
 - `TcpSocket::setNotsentLowat(int)`
 
-**95 new virtual(s) that nothing overrides** — what would an override do, and does a comment say so? ([AR-EXT-VIRTUAL-IS-A-PROMISE](../../../rule/architecture.md#ar-ext-virtual-is-a-promise))
+**86 new virtual(s) that nothing overrides** — what would an override do, and does a comment say so? ([AR-EXT-VIRTUAL-IS-A-PROMISE](../../../rule/architecture.md#ar-ext-virtual-is-a-promise))
 
 - `Rfc6675Recovery::addSacks(const Ptr<TcpHeader> &)`
 - `Rfc6675Recovery::checkSackReordering(uint32_t)`
-- `Rfc6675Recovery::isLost(uint32_t)`
 - `Rfc6675Recovery::mayUndo()`
-- `Rfc6675Recovery::nextSeg(uint32_t &)`
 - `Rfc6675Recovery::packetDelayed()`
 - `Rfc6675Recovery::processFrtoEpisode()`
 - `Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader> &, const TcpOptionSack &)`
@@ -889,9 +840,6 @@ Counted by name over `src/` and `tests/`, so *uncalled* is exact and everything 
 - `Rfc6675Recovery::prrEndCwndReduction()`
 - `Rfc6675Recovery::prrNewlyDelivered()`
 - `Rfc6675Recovery::rackDetectAndMarkLost(bool)`
-- `Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t)`
-- `Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t)`
-- `Rfc6675Recovery::setPipe()`
 - `Rfc6675Recovery::undoCwndReduction()`
 - `Rfc6675Recovery::undoInit()`
 - `Tcp::clearFastOpenCookieCache()`
@@ -951,12 +899,8 @@ Counted by name over `src/` and `tests/`, so *uncalled* is exact and everything 
 - `Rfc6675Recovery::stepC()`
 - `TcpAlgorithmBase::initialWindow()`
 - `TcpAlgorithmBase::processCorkTimer(TcpEventCode &)`
-- `TcpAlgorithmBase::processDelayedAckTimer(TcpEventCode &)`
-- `TcpAlgorithmBase::processKeepAliveTimer(TcpEventCode &)`
-- `TcpAlgorithmBase::processPersistTimer(TcpEventCode &)`
 - `TcpAlgorithmBase::processPtoTimer(TcpEventCode &)`
 - `TcpAlgorithmBase::schedulePto()`
-- `TcpAlgorithmBase::startRexmitTimer()`
 - `TcpClassicAlgorithmBase::processTlpAck()`
 - `TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t> &)`
 - `TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader> &, const TcpOptionTcpFastOpenExp &)`
