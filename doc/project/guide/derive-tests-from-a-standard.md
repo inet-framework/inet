@@ -598,6 +598,20 @@ wrong thing on expiry, a branch that exists and is never reached — each one is
 one claims the behavior, so each one fails without a declaration. "Not finished" is not the same
 as "not claimed", and only the second may be declared.
 
+**Not every `TODO` says "not claimed".** Read what the comment actually asserts:
+
+| The comment | What it says | Class |
+| --- | --- | --- |
+| `// TODO implement X` | X is wanted and unfinished | a **claim** — the failure is a defect |
+| `// TODO X, but <reason it cannot be done>` | X is not supported, and why | not a claim — declarable |
+| `// TODO X. However, <reason it is not needed>` | X is left out on purpose | not a claim — declarable |
+
+A bare "to do" is a promise, and a promise is a claim. A comment earns the third row only when it
+gives a reason — a limitation of the framework, or an argument that the behavior is not needed.
+Watch for the giveaway that settles it either way: if the parameter, the field or the function
+argument the behavior needs is **already there** and carries a placeholder value, the mechanism is
+claimed whatever the comment says.
+
 Two shapes to watch for, because both look like one class and are the other:
 
 - A field that is **set to a wrong value** is a defect, not a missing feature. The setter is
