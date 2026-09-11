@@ -21,12 +21,21 @@ header of the two addresses, the TCP header with a zero checksum field, and the 
 TcpMutations.h, expectedTcpChecksum. It is the same computation the model itself performs in
 TcpChecksumInsertionHook::computeChecksum.
 
-Expected result: FAIL. The `checksumMode` parameter of the ~Tcp module
-(src/inet/transportlayer/tcp/Tcp.ned:189) is `default("declared")`. In that mode no checksum
-is computed at all: the field stays zero and the header carries a flag that asserts it
-correct, which `Tcp::checkChecksum` then believes without arithmetic. RFC 9293 says the
-checksum is never optional. Step 2 therefore fails while step 1 passes. See
-doc/project/evidence/model/tcp/results.md.
+This test fails, and the failure is a **defect**, so nothing declares it expected.
+
+The `checksumMode` parameter of the ~Tcp module (src/inet/transportlayer/tcp/Tcp.ned:189) is
+`default("declared")`. In that mode no checksum is computed at all: the field stays zero and
+the header carries a flag that asserts it correct, which `Tcp::checkChecksum` then believes
+without arithmetic. RFC 9293 says the checksum is never optional. Step 2 therefore fails
+while step 1 passes.
+
+The class is defect and not unimplemented feature, because code exists for this behaviour.
+`TcpChecksumInsertionHook::computeChecksum` computes the value RFC 9293 defines, and the
+`computed` mode runs it — step 1 of this test proves that, on host B. The model can generate
+the checksum and its default does not. That is a wrong result from code that exists, which
+the guide classifies as a defect. See
+doc/project/guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected
+and doc/project/evidence/model/tcp/results.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -113,6 +122,5 @@ seed-set = 0
 *.host2.app[0].localPort = 1000
 *.host2.app[0].echoFactor = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc9293_checksum_default: PASS

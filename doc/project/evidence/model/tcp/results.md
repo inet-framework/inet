@@ -5,8 +5,8 @@
 Step 7 artifact of the standards test workflow. This is the first document of the TCP
 workflow that may reference code.
 
-- Date: 2026-09-10 15:18 +0200
-- INET: branch `master`, commit `0868c36c88`, tree clean
+- Date: 2026-09-11 15:39 +0200
+- INET: branch `topic/rfc-tests-tcp-level4`, commit `769e8e920b`, tree clean
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -27,7 +27,7 @@ workflow that may reference code.
 | --- | --- | --- |
 | Rfc9293ConnectionEstablishment.test | RFC9293-EST-1, EST-2, SEQ-1, HDR-1, CKSUM-1; ISS-1, OPT-1 | PASS |
 | Rfc9293DataTransfer.test | RFC9293-DATA-1, SEG-1, ACK-1; ACK-2 | PASS |
-| Rfc9293Push.test | RFC9293-PSH-1 | **FAIL (expected)** — model gap, see below |
+| Rfc9293Push.test | RFC9293-PSH-1 | **FAIL (expected)** — unimplemented feature, gap 1 |
 | Rfc9293ConnectionTermination.test | RFC9293-FIN-1, FIN-2 | PASS |
 | Rfc9293FlowControl.test | RFC9293-WND-1, WND-2; ACKD-1 | PASS |
 | Rfc9293Reset.test | RFC9293-RST-1 | PASS |
@@ -44,9 +44,9 @@ Pass 3, level 3:
 | Rfc9293ShrunkWindow.test | RFC9293-WND-4 | PASS |
 | Rfc9293NoWindowShrink.test | RFC9293-WND-3 | PASS |
 | Rfc9293SoftIcmpError.test | RFC9293-ICMP-3; covers ICMP-1 | PASS |
-| Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL**, model gap 2 |
-| Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **FAIL**, model gap 3 |
-| Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **FAIL**, model gap 4 |
+| Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL (unexpected)** — defect, gap 2 |
+| Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **FAIL (unexpected)** — defect, gap 3 |
+| Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **FAIL (expected)** — unimplemented feature, gap 4 |
 
 Summary after pass 3: 19 tests, 15 PASS, 4 FAIL, each failure declared with
 `%# expected-result: FAIL`. The other four suites of the same tree stay where they were:
@@ -65,11 +65,37 @@ Summary of pass 2: 8 tests, 7 PASS, 1 FAIL (expected), in 2.1 s. The runner's ov
 because the one failure is declared. The SYN's header length was captured as 24 octets: the
 MSS option is present, so the `should` of RFC9293-OPT-1 is met.
 
-## Model gap 1 (pass 2): the PSH bit is never set
+## The class of each failure, reviewed 2026-09-11
+
+The guide's step 7 named one class, `model gap`, when passes 2 and 3 ran. Master replaced it
+with five classes and a decidable line: *does code exist for this specific behaviour?* If it
+exists the model claims the behaviour and the failure is a **defect**, which declares
+nothing; only an absent behaviour is an **unimplemented feature**, which may declare
+`%# expected-result: FAIL`.
+
+All four failures of this suite were reviewed against that line, each against the code and
+not against the earlier wording.
+
+| Test | Does code exist for the behaviour? | Class | Declared? |
+| --- | --- | --- | --- |
+| Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature | yes |
+| Rfc9293SourceQuench | `Icmp::processIcmpMessage` has no branch for type 4; the default throws | unimplemented feature | yes |
+| Rfc9293ChecksumDefault | `TcpChecksumInsertionHook::computeChecksum` computes the value, and the `computed` mode runs it — step 1 of the test proves it on host B | **defect** | **no, removed** |
+| Rfc9293ShrunkWindowNoNewData | `sendData` limits a send by `min(snd_wnd, congestionWindow)`, and the sibling test shows the shrunk advertisement is read | **defect** | **no, removed** |
+
+Two declarations were removed. The suite result moves from 18 TOTAL, 14 PASS, 4 FAIL
+(expected) — reported as PASS — to 18 TOTAL, 14 PASS, 2 FAIL (expected), 2 FAIL (unexpected),
+reported as **FAIL**. That is the intended signal: a defect keeps the suite red until
+somebody fixes it.
+
+Neither defect is a large repair. One is a NED default; the other is one comparison in the
+send decision.
+
+## Gap 1 (pass 2): the PSH bit is never set — unimplemented feature
 
 `Rfc9293Push.test` keeps the faithful assertion — the last segment of a 5000-octet send
-carries PSH — and declares `%# expected-result: FAIL`. The classification is **model gap**,
-on three pieces of evidence:
+carries PSH — and declares `%# expected-result: FAIL`. The class is **unimplemented
+feature**: the model does not claim this behaviour, on three pieces of evidence:
 
 1. No call sets the PSH bit anywhere in the TCP sender. `sendSegment` carries the comment
    at the place where the bit would be set:
@@ -97,7 +123,7 @@ statement in the catalog. The test is separate from the data transfer test on pu
 that its failure cannot block the decisive observation that the whole stream was
 acknowledged.
 
-## Model gap 2 (pass 3): the default mode writes no checksum at all
+## Gap 2 (pass 3): the default mode writes no checksum at all — defect
 
 **Statement.** [RFC9293-CKSUM-1](../../standard/rfc9293/catalog.md#rfc9293-cksum-1), must:
 "The TCP checksum is never optional. The sender MUST generate it (MUST-2)", §3.1,
@@ -124,7 +150,7 @@ RFC 9293 allows no such thing.
 **Not a defect of the module.** Five checks of this pass depend on the computed mode and
 pass. What fails is the choice of default.
 
-## Model gap 3 (pass 3): new data goes past a shrunk window edge
+## Gap 3 (pass 3): new data goes past a shrunk window edge — defect
 
 **Statement.** [RFC9293-WND-5](../../standard/rfc9293/catalog.md#rfc9293-wnd-5), should not:
 "If this happens, the sender SHOULD NOT send new data (SHLD-15)", §3.8.6,
@@ -148,7 +174,7 @@ the connection surviving the negative window and finishing the whole transfer, w
 MUST-34. The two are separate tests on purpose, so that this failure cannot hide that
 verdict.
 
-## Model gap 4 (pass 3): a Source Quench stops the run
+## Gap 4 (pass 3): a Source Quench stops the run — unimplemented feature
 
 **Statement.** [RFC9293-ICMP-2](../../standard/rfc9293/catalog.md#rfc9293-icmp-2), must:
 "TCP implementations MUST silently discard any received ICMP Source Quench messages
@@ -227,12 +253,12 @@ Pass 3 adds:
 
 ## Failure history during authoring
 
-Pass 2: three test errors and one model gap. The errors: a `notBefore` copied from the old
+Pass 2: three test errors and one gap. The errors: a `notBefore` copied from the old
 template onto a step whose anchor had moved; the echo application in the flow-control
 scenario (deviation 2); the unit-bearing capture (deviation 4). The review added the data
-condition of deviation 3. The model gap is the PSH bit, above.
+condition of deviation 3. The gap is the PSH bit, above.
 
-Pass 3: five test errors and three model gaps. Nothing was reverted, skipped or softened;
+Pass 3: five test errors and three gaps. Nothing was reverted, skipped or softened;
 each error was a fault of the test, and each was corrected before the verdict was recorded.
 
 1. **The header chunk lives in its own namespace.** `TcpHeader` is `inet::tcp::TcpHeader`,

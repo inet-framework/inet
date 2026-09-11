@@ -18,7 +18,11 @@ by declaration; that is the simulation form of a rewriter that computes the chec
 Source Quench was deprecated for routers by RFC 6633, and RFC 9293 keeps the receive rule
 for exactly that reason: a host still meets the message and must ignore it.
 
-Expected result: FAIL. The model does not know the message. `Icmp::processIcmpMessage`
+Expected result: FAIL. The class is an **unimplemented feature**, so the declaration below
+stands: the model does not claim this behaviour. `Icmp::processIcmpMessage` has no branch for
+type 4 at all, so there is no code path, no function and no field for it.
+
+The model does not know the message. `Icmp::processIcmpMessage`
 switches on the type, and its default branch throws
 `cRuntimeError("Unknown ICMP type %d")` (src/inet/networklayer/ipv4/Icmp.cc). The run stops
 before TCP is ever offered the message:

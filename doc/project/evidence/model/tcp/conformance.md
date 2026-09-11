@@ -6,13 +6,21 @@ Step 8 artifact of the standards test workflow. The tests tell what the model do
 document adds what the model says it intends to do, and compares the two at the level of
 features, never at the level of a single test.
 
+The word `defect` means two things, and this document uses the first. In the matrix below it
+is a **feature**: a whole mandatory feature that the model claims and does not support. In
+[`results.md`](results.md) it is a **statement**: one behaviour that code exists for and gets
+wrong. A statement-level defect usually sits inside a feature that otherwise works, which the
+matrix then reads as `partial` or as `confirmed with a finding`. That is what happened to
+TCP-F-CHECKSUM and TCP-F-WINDOW-ROBUSTNESS: each holds a statement-level defect, and neither
+is a feature-level one.
+
 - Claim scan: 2026-09-08, source identical to `master`; the scan of the earlier pass was
   repeated and gave the same result.
   The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
   identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-10
-  on `master`, commit `0868c36c88`. Every verdict of that run repeats the verdict of the
-  earlier pass.
+- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-11
+  on `topic/rfc-tests-tcp-level4`, commit `769e8e920b`. The verdicts are those of the earlier
+  pass; what changed is the class of two failures and not their outcome.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalog, the feature map, or the check
@@ -106,12 +114,12 @@ ledger, and the level of the feature, by the table of step 8.
 | TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported; supporting PSH-1 failed | **confirmed**, with finding 3 |
 | TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4 |
+| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect |
 | TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-RESET | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-SEGMENT-ACCEPTANCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported; supporting WND-5 failed | **confirmed**, with finding 5 |
+| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported; supporting WND-5 failed | **confirmed**, with finding 5, a statement-level defect |
 | TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | partial | **partial** — a Source Quench stops the run, finding 6 |
 
 Eleven features `confirmed`, two `partial`. No feature reaches `defect` by the rules of the
@@ -147,7 +155,7 @@ RFC 9293 §3.9.1.2 binds a sender whose SEND call offers no PUSH flag: it MUST s
 last buffered segment (MUST-61). The model's send interface offers no PUSH flag, and the
 model never sets the bit; its own code marks the place `TODO when to set PSH bit?` and the
 SEND processing `FIXME how to support PUSH?` (the exact references are in
-[`results.md`](results.md#model-gap-1-pass-2-the-psh-bit-is-never-set)). `Rfc9293Push.test`
+[`results.md`](results.md#gap-1-pass-2-the-psh-bit-is-never-set--unimplemented-feature)). `Rfc9293Push.test`
 keeps the faithful assertion and declares its failure.
 
 The matrix does not show this as a `defect`, because the push rule is a supporting
