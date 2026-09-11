@@ -88,7 +88,11 @@ while read -r sha; do
   [ -z "$t" ] && continue
   kind=$(awk -F'|' '{gsub(/ /,"");print $2}' <<< "$t")
   want=$(want_kind "$kind")
-  if ! grep -qE "(^|: )${want}: " <<< "$s"; then
+  # A mixed kind carries a '+', which is a quantifier in an extended regular expression,
+  # so 'add+change' would look for 'ad' and one or more 'd'. Escape it: the rule names
+  # 'add+change:' and 'name+refactor:' as subject markers, so the gate has to match them.
+  want_re=$(sed 's/+/\\+/g' <<< "$want")
+  if ! grep -qE "(^|: )${want_re}: " <<< "$s"; then
     flag "${sha:0:9} subject has no '${want}:' — $s"; ok=0
   fi
   # every other prefix must be a run of segments of the scope, or the group
