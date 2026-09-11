@@ -25,8 +25,10 @@ parameters, no signals, and no code references.
 The feature map (step 4) also comes from the standard texts only. It carries no run data
 at all: what a run showed lives in the coverage ledger.
 
-- A look at the code is permitted only for one purpose: to select practical candidates from
-  the catalog.
+- A look at the code is permitted for two purposes, and no other: to select practical
+  candidates from the catalog, and to answer the one question of
+  [the third principle](#principle-a-claimed-feature-gets-a-test) — does the model claim this
+  behavior? Neither answer may be written into an artifact of steps 2 to 5.
 - INET names first appear in the `.test` file (step 6).
 - Code analysis (file and line references) first appears in the run-analysis document
   (step 7).
@@ -49,15 +51,74 @@ flow.
 The changing state therefore lives in one artifact of its own, the **coverage ledger**
 `model/<proto>/coverage.md`:
 
-- which statement a check targets (`selected`, `covered`, `candidate`, `later`);
+- which statement a check targets (`selected`, `covered`, `candidate`, `owed`, `later`, `no check`);
 - which check section and which test file carry it;
 - the verdict of the last run;
 - the support value of every feature;
 - the level each feature reaches, and the level of the protocol as a whole.
 
+`owed` is the status for a statement the model claims and no check reaches yet. It is the
+coverage debt of the pass, it says what a check would need, and it is the one status that a
+later pass is obliged to clear.
+
+A row of `no check` carries the reason, and only two reasons are legal:
+[the third principle](#principle-a-claimed-feature-gets-a-test) allows the status for a statement
+the model does not claim, and step 9 allows it for one whose category is another suite. Anything
+else the tooling cannot reach gets a failing test instead, so the status stays rare and a reader
+can trust it.
+
 Steps 5, 6 and 7 write their outcome there. The catalog states what the standard says. The
 feature map states which capabilities the standards define. Neither one ever mentions a
 test or a verdict.
+
+## Principle: a claimed feature gets a test
+
+**If the model claims a behavior, that behavior gets a test. A test is never skipped because
+the model would fail it.** The claim counts whether it is explicit — the NED documentation, a
+source comment, the release notes — or implicit, which means only this: **there is code for the
+behavior.** Code is an implementation effort, and an effort is a claim.
+
+A failing test is the point of the exercise and not an accident of it. A test that can be
+written and that fails is the **most valuable** result this workflow produces: it is the one
+output that tells somebody what to fix. So it is written, it is kept, and it fails.
+
+Three cases, and they cover everything:
+
+| The state of the model | What to write | The verdict it carries |
+| --- | --- | --- |
+| it claims the behavior, and the test can be written | the faithful test | it fails, and nothing declares the failure expected |
+| it claims the behavior, and the test **cannot** be written because something needed to test against is missing | the test, failing unconditionally, with the missing part named in its description | it fails, and nothing declares the failure expected |
+| it does **not** claim the behavior | the faithful test | it fails, and the failure **is** declared expected |
+
+**The middle row is the one that is easy to get wrong.** When a check cannot be built — the
+stimulus is unreachable, a node type does not exist, a field the check must set has no
+representation — the answer is not to leave the statement without a test. The answer is a test
+that fails and says why, in its own description, in one sentence a reader can act on. A missing
+part is a finding about the model and about the tooling, and a test is where a finding lives. A
+note in a document is not a finding; nothing fails when it goes stale.
+
+The third row is the only licence to declare a failure expected, and "does not claim" is
+narrow. It holds when the model **says** it does not support the behavior — a `TODO`, a stated
+limitation in the release notes, a document it never names — or when it has made **no effort**:
+no code path, no function, no field. It does not hold merely because a mechanism is incomplete.
+A half-written mechanism is a claim.
+
+Claiming a protocol is not claiming every feature of it. A model whose documentation says
+"implements RFC 2131" has not thereby claimed each of the five messages that document defines;
+the code decides, one behavior at a time. Read the question narrowly, about the behavior the
+check tests, and the three rows stay decidable.
+
+### What this principle rules out
+
+- **A statement with no test, where code exists for it.** The escape of step 5 — a statement
+  that no check carries, with the reason recorded — is bounded by this principle. It is for a
+  statement the model does not claim, or one whose category is another suite (step 9). It is
+  never for a statement the model claims and would fail.
+- **A verdict of `untested` on a statement whose test exists and fails.** The test failed; the
+  statement is not established. Say that, and say which observation the failure kept the check
+  from reaching. A reader who sees `untested` reasonably concludes that nobody wrote a test.
+- **A declared expected failure over a defect.** See
+  [the class of a failure](#the-class-of-a-failure-and-when-to-declare-it-expected) in step 7.
 
 ## Levels of depth
 
@@ -81,6 +142,12 @@ Every criterion has two halves: what the catalogs must **hold**, and what must h
 **run**. The first half is the one that matters. Without it a small catalog reaches any
 level, and four features supported out of four declared reads as finished when a fifth
 mechanism was never written down.
+
+**The run half asks that a check exists and ran, not that it passed.** A level is a measure of
+how deeply the pass looked, and a failing check looked. By
+[the third principle](#principle-a-claimed-feature-gets-a-test) a claimed behavior always has a
+check, so a pass that finds many failures can still reach its level; a pass that left claimed
+behaviors without a check cannot, whatever its verdicts say.
 
 Each step up is a different kind of work, not more of the same:
 
@@ -354,6 +421,35 @@ instead of a silent pass for the wrong reason.
 Keep the document free of INET names. Use protocol names (UDP, ICMP, VLAN) and the field
 names of the standard.
 
+### Which statements get a check
+
+Every statement of the in-scope set that the target level demands gets a check, with two
+exceptions and no others:
+
+1. **The model does not claim the behavior.** The third principle defines what a claim is; the
+   one code look it permits answers the question. Record the statement with the reason, in a
+   closing section of `checks.md` that lists every statement no check carries.
+2. **Its category is another suite.** An `encoding` statement belongs to a serializer unit test
+   and a distribution to a statistical test; step 9 records the target category. The statement
+   still gets a test, in the other suite, in a later pass.
+
+**"A check of two nodes on a link cannot observe it" is not a third exception.** It is a
+statement about the tooling, and by
+[the third principle](#principle-a-claimed-feature-gets-a-test) a claimed behavior the tooling
+cannot reach gets a test that fails unconditionally and names what is missing. Write the check
+document for it anyway: the procedure says what would be observed, and the notes say what stops
+it. A later pass that gains the tool then has the procedure ready.
+
+The closing list is therefore short. **It says what a check would need and nothing about the
+model**, because `checks.md` is inside the specification-first zone: whether the absence of a check
+is legal is a judgment about a claim, and that judgment belongs to the ledger. So the list reads
+"this needs a second client in the mockup" and never "the model does not implement this". The
+ledger then gives each statement `owed` or `no check`, and a reader who wants to know which
+compares the two documents.
+
+A list that grows past a handful of statements is a sign that the first exception is being
+stretched to cover the third.
+
 ## Step 6 — write the protocol test (`<Doc><Name>.test`)
 
 Translate the English document into a self-contained `opp_test` file in
@@ -459,18 +555,24 @@ Three documents carry the run record: `results.md`, `coverage.md` and `conforman
 
 ### The class of a failure, and when to declare it expected
 
-Every failure falls in one of four classes, and the class decides what you do about it.
+Every failure falls in one of five classes, and the class decides what you do about it. The
+classes follow from [the third principle](#principle-a-claimed-feature-gets-a-test); this is that
+principle applied to a run.
 
 | Class | What it means | What to do |
 | --- | --- | --- |
 | **test error** | the check is right and the program does not implement it | fix the test |
 | **specification misread** | the check asks for something the standard does not say | fix the catalog and the check document |
-| **unimplemented feature** | the model does not implement the behavior at all | keep the faithful test, declare `%# expected-result: FAIL`, file the gap |
-| **defect** | the model means to implement the behavior and gets it wrong | keep the faithful test, **declare nothing**, file the gap |
+| **defect** | the model claims the behavior and gets it wrong | keep the faithful test, **declare nothing**, file the gap |
+| **untestable claim** | the model claims the behavior and the check cannot be built | keep the test failing, name the missing part in its description, **declare nothing**, file the gap against the tooling as well |
+| **unimplemented feature** | the model does not claim the behavior | keep the faithful test, declare `%# expected-result: FAIL`, file the gap |
 
-The last two are both differences between the standard and the model, and telling them apart is
-the part that is easy to get wrong. An expected-result declaration means one thing only: *this
-feature is known to be unimplemented, so the failure is not a regression*. That is the wording of
+Only the last row declares anything. Three of the five classes end in a failure the run reports,
+and that is the normal, intended outcome of a deep pass against a model that was not written
+against these checks.
+
+An expected-result declaration means one thing only: *this feature is known to be unimplemented,
+so the failure is not a regression*. That is the wording of
 [`AUTHORING.md`](../../../tests/protocol/lib/AUTHORING.md), in its section on declaring an
 expected result, and it is the whole of what the declaration is for.
 
@@ -479,16 +581,22 @@ red until somebody fixes it. Declaring one turns the suite green over a bug and 
 the opposite of what a suite is for, and it is worse than having no test at all: the test now
 states that the wrong behavior is the intended one.
 
-The line between the two is decidable, and this is where to draw it:
+The line is decidable, and this is where to draw it:
 
-> **Does code exist for this specific behavior?** If it exists and produces the wrong result, the
-> failure is a **defect**. If the behavior is absent — no code path, a TODO, a commented-out
-> block, a stated limitation, or a document the model does not claim — it is an **unimplemented
-> feature**.
+> **Does code exist for this specific behavior?** If it exists, the model claims the behavior:
+> the failure is a **defect**, or an **untestable claim** when the check could not be built at
+> all. If the behavior is absent — no code path, no function, no field, or a `TODO` or a stated
+> limitation that says it is absent on purpose — it is an **unimplemented feature**.
 
-Read the question about the *specific* behavior and not about the protocol claim. A model that
-claims a protocol intends, in some sense, all of it, so the other reading would make every
-unimplemented part a defect and nothing would ever be declarable.
+Read the question about the *specific* behavior and not about the protocol claim, for the reason
+[the principle](#principle-a-claimed-feature-gets-a-test) gives: claiming a protocol is not
+claiming every feature of it.
+
+**A half-written mechanism is a claim, and its failures are defects.** This is the trap. A
+function that builds the right message and that nothing calls, a timer that fires and does the
+wrong thing on expiry, a branch that exists and is never reached — each one is an effort, so each
+one claims the behavior, so each one fails without a declaration. "Not finished" is not the same
+as "not claimed", and only the second may be declared.
 
 Two shapes to watch for, because both look like one class and are the other:
 
@@ -497,6 +605,11 @@ Two shapes to watch for, because both look like one class and are the other:
   of the request is the clearest case.
 - A branch that exists but is **unreachable for the case the check tests** is a defect. A server
   that tests two conditions in the wrong order has the code for both and reaches the wrong one.
+- A **complete function that nothing calls** is a defect. The message builder is written, the
+  trigger is not; the model claims the message and never sends it.
+- A **mechanism present with the wrong law** is a defect. A retransmission that repeats at a
+  constant interval, where the standard demands a randomized exponential one, has the code for
+  the delay and the wrong value in it.
 
 The word `defect` also appears in the conformance matrix of step 8, and it means something else
 there: a whole mandatory **feature** that the model claims and does not support. A statement-level
@@ -520,7 +633,19 @@ ledger (`coverage.md`). Do not edit the feature map. The rule, per feature:
 - `partial` — at least one `core` check passed, and at least one `core` check failed as a
   model gap or is not yet tested;
 - `not supported` — every `core` check that ran failed as a model gap;
-- `untested` — no `core` check of the feature ran.
+- `untested` — **no `core` check of the feature exists**.
+
+The last value is narrower than it looks, and it is the one to be careful with. A feature whose
+checks all failed is `not supported`, never `untested`: the run answered the question, and the
+answer was no. `untested` is for a feature nobody has written a check for — which, by
+[the third principle](#principle-a-claimed-feature-gets-a-test), can only be a feature the model
+does not claim, or one whose checks belong to a suite this pass did not write.
+
+The same care applies to a statement row. When a check fails early and never reaches the
+observation that a second statement needs, that second statement is **not** `untested`: its test
+exists and its test failed. Give the row the verdict of its test and say, in the same cell, which
+observation the failure kept the check from reaching. `untested` on a row whose test exists and
+fails tells a reader that nobody wrote a test, which is the opposite of what happened.
 
 Record the run record at the head of the ledger. The support statement is
 bounded by the checks: a `supported` feature is supported as far as the checks reach, not
