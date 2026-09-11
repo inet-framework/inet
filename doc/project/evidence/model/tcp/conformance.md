@@ -58,15 +58,33 @@ and the segment-processing code is organised by the numbered steps of the RFC
 
 ### The claimed set is one standards generation behind
 
-Every document the claim names in the areas of this pass has since been replaced:
+Every document the claim names in the areas of this pass has since been replaced. The
+counts below come from a sweep of `src/inet/transportlayer/tcp/` and
+`src/inet/transportlayer/tcp_common/` on 2026-09-11. Each replacement is taken from the
+header of the replacing text, not from memory: RFC 7323 says `Obsoletes: 1323`, RFC 5681
+says `Obsoletes: 2581`, RFC 2581 says `Obsoletes: 2001`, RFC 6582 says `Obsoletes: 3782`,
+RFC 6298 says `Obsoletes: 2988`, RFC 6675 says `Obsoletes: 3517`, and RFC 8201 says
+`Obsoletes: 1981`.
 
-| Claimed | Replaced by | Since | In the model? |
-| --- | --- | --- | --- |
-| RFC 793, Transmission Control Protocol | **RFC 9293** | August 2022 | **no mention anywhere in `src/`** |
-| RFC 2581, TCP Congestion Control | RFC 5681 | September 2009 | 41 mentions of the old one, 1 of the new |
-| RFC 1323, TCP Extensions for High Performance | RFC 7323 | September 2014 | 27 mentions of the old one, 0 of the new |
-| RFC 2988, Computing TCP's Retransmission Timer | RFC 6298 | June 2011 | 2 mentions of the old one, 0 of the new |
-| RFC 3782, NewReno | RFC 6582 | April 2012 | 0 mentions of the new one |
+| Claimed | Replaced by | Since | Old citations | New citations |
+| --- | --- | --- | --- | --- |
+| RFC 793, Transmission Control Protocol | **RFC 9293** | August 2022 | 38 | **0** |
+| RFC 3517, SACK-based loss recovery | **RFC 6675** | August 2012 | **52** | **0** |
+| RFC 2581, TCP Congestion Control | **RFC 5681** | September 2009 | 48 | 1 |
+| RFC 1323, TCP Extensions for High Performance | **RFC 7323** | September 2014 | 29 | **0** |
+| RFC 3782, NewReno fast recovery | **RFC 6582** | April 2012 | 17 | **0** |
+| RFC 1981, Path MTU Discovery for IPv6 | **RFC 8201** | July 2017 | 9 | **0** |
+| RFC 2988, Computing TCP's Retransmission Timer | **RFC 6298** | June 2011 | 8 | **0** |
+| RFC 2001, TCP Slow Start and congestion avoidance | **RFC 5681**, through RFC 2581 | September 2009 | 5 | 1 |
+
+Two of the rows matter more than the others. RFC 3517 is the most cited document in the
+whole TCP tree, and its replacement appears nowhere. RFC 2001 is two generations old: it
+was replaced in 1999 and again in 2009.
+
+This is a claim finding, not a defect. The code may well follow the current text; nothing
+here says it does not. It says a reader of the model cannot tell which text the code
+answers to, and that a test author who follows the citation reads a document that no longer
+governs.
 
 ### How this pass reads the claim
 
