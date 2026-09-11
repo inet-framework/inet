@@ -57,6 +57,7 @@ make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release
 doc/project/enforcement/check-architecture.sh
 doc/project/enforcement/check-naming.sh --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
+doc/project/enforcement/check-classification.sh origin/master..HEAD   # the Change: trailers
 doc/project/enforcement/check-interfaces.sh                # every I<Stem> class holds no body
 doc/project/enforcement/check-source-seals.sh --base origin/master
 

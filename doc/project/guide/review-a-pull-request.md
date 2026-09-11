@@ -1,10 +1,13 @@
 # Review a pull request
 
-> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/pull-request.md](../rule/pull-request.md), [review-a-code-change.md](review-a-code-change.md), [audit/README.md](../audit/README.md)
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/pull-request.md](../rule/pull-request.md), [rule/classification.md](../rule/classification.md), [review-a-code-change.md](review-a-code-change.md), [audit/README.md](../audit/README.md)
 
-How to audit a branch against the `PR-*` rules and write the report. The rules are
-[rule/pull-request.md](../rule/pull-request.md); three worked examples are in
-[audit/report/pull-request/](../audit/report/pull-request/pr-1144.md).
+How to audit a branch against the `PR-*` and `CR-*` rules and write the two reports. The rules are
+[rule/pull-request.md](../rule/pull-request.md), which says what a *change* must look like, and
+[rule/classification.md](../rule/classification.md), which says what a commit *is*. Worked examples
+are in [audit/report/pull-request/](../audit/report/pull-request/pr-1144.md), and
+[classification-on-tcp-new.md](../audit/report/sweep/classification-on-tcp-new.md) applies the
+classification to a 61-commit branch.
 
 **The commit is the unit of the `PR-*` audit, not the pull request.** Read the series one commit at a
 time so each commit can be judged as one change. Review each commit's code correctness with
@@ -52,7 +55,73 @@ git log --format=%s $MB..refs/pr/<n>
 removes blank lines instead of changing indentation reports nothing. That is a real finding from
 [pr-1144](../audit/report/pull-request/pr-1144.md), and it is the reason the flag is written here.
 
-## 3. Judge what a script cannot
+## 3. Audit the commit messages
+
+```bash
+doc/project/enforcement/check-classification.sh $MB..refs/pr/<n>
+```
+
+It checks the mechanical half of [rule/classification.md](../rule/classification.md) and it prints
+the breakdown that step 4 needs. What each check means:
+
+| Check | What a violation tells you |
+| --- | --- |
+| `CR-TAG-TRAILER` | the commit has no `Change:` line, so it is unclassified |
+| `CR-TAG-FORM` | the trailer has the wrong field count or a word outside the vocabulary |
+| `CR-TAG-SUBJECT` | the subject omits the kind, or a prefix disagrees with the trailer |
+| `CR-SCOPE-AREA` | the claimed area is not among the paths the commit touches |
+| `CR-DEPTH-ONE` | the commit claims two depth levels, so it holds two changes |
+| `CR-OBL-INERT` | the commit claims no behavior change and moves a recorded expectation |
+
+**The last two are the ones that find real defects.** `CR-DEPTH-ONE` is
+[PR-SPLIT-MECHANICAL](../rule/pull-request.md#pr-split-mechanical) seen from the other side, and
+`CR-OBL-INERT` is the only check in the rule set that a test suite can settle.
+
+**A trailer is a claim, and the gate checks only the half that is derivable.** Three things stay
+for you to judge:
+
+- **Is the depth honest?** A commit that says `refactor` and rewrites a loop condition is a
+  behavior change wearing the wrong word. Read the diff of every `refactor`, `name` and `comment`
+  commit — there are few, and the gate has already listed them.
+- **Is the obligation discharged?** A `test` obligation with no test in the same commit breaks
+  [TR-SHIP-WITH](../rule/testing.md#tr-ship-with). A `fingerprint` obligation with no baseline in
+  the same commit breaks [PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline). Both are
+  visible in one pass down the breakdown's obligation column.
+- **Is a `?` still a `?`** A commit that says `?` for its baselines is honest and unfinished. It
+  is a `PARTIAL`, not a `PASS`, and the report says what run would settle it.
+
+**Do not report a missing trailer on a commit that predates the rule.** Check the date of the
+branch against the date `classification.md` entered the tree.
+
+## 4. Read the breakdown
+
+The gate prints it, and `commit_breakdown.py` produces it alone from any commit range:
+
+```bash
+git log --reverse --format='%s%x09%(trailers:key=Change,valueonly)' $MB..refs/pr/<n> \
+  | python3 doc/project/enforcement/commit_breakdown.py
+```
+
+It emits **by depth**, **by direction and intent**, **area against depth** for a series above ten
+commits, **by group**, and **the obligations the series owes**. Read it for the four patterns that
+a diff does not show:
+
+| Pattern | What it means |
+| --- | --- |
+| a large `behavior` count and a small **obligations** count | the series adds behavior and owes tests it has not written |
+| a row in **by group** reading `(none)` | commits with no group in a series where the rest have one — a [PR-SPLIT-DRIVEBY](../rule/pull-request.md#pr-split-driveby) question |
+| a mixed depth such as `name+refactor` | one commit holding two changes |
+| an area in **area against depth** that the topic does not explain | the branch reaches further than its title says |
+
+**The count of commits below `behavior` is the reviewer's budget.** Those commits need no
+behavioral review, so the line tells you how much of the series you can read quickly.
+
+This breakdown belongs in the **summary**, not in the audit report: the summary says what the
+change is, and the audit judges it. Paste the gate's breakdown into
+`audit/report/pull-request/pr-<n>-summary.md` under a heading `## The commits`, above the interface
+sections. `opp_summarize_changes` does not generate it yet.
+
+## 5. Judge what a script cannot
 
 Read each commit against the rules that need judgment:
 
@@ -83,7 +152,7 @@ Read each commit against the rules that need judgment:
   that nothing calls or only a test calls, and every new virtual that nothing overrides. Each is a
   question to the author, not a finding: *who is this for?* and *what would an override do?*
 
-## 4. Review each commit's correctness
+## 6. Review each commit's correctness
 
 For every commit, apply [review-a-code-change.md](review-a-code-change.md) to that exact diff. Name
 the changed contracts, trace their callers and terminal paths, and run the canonical tier-4
@@ -95,7 +164,7 @@ If the branch touches a sealed path, the permission for it must be stated. That 
 evidence; merge authorization comes from the trusted, head-bound decision in
 [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval).
 
-## 5. Review the integrated branch contract
+## 7. Review the integrated branch contract
 
 After the commit-by-commit pass, review the merge-base-to-head change as one integrated code change
 under [review-a-code-change.md](review-a-code-change.md). Recheck interfaces and their final
@@ -103,10 +172,15 @@ implementations, generated inputs and consumers, feature-off and effective confi
 siblings, terminal paths, tests, and baselines in the final tree. This pass catches contracts that
 are locally valid in separate commits but inconsistent when composed.
 
-## 6. Write the report
+## 8. Write the report
 
-`audit/report/pull-request/pr-<n>.md`. One row per rule with a verdict — `PASS`, `FLAG`, `PARTIAL` or
-`not verified` — and evidence for each. Then one numbered finding per problem, with the commit, what
+**Two files.** `audit/report/pull-request/pr-<n>.md` judges the commits; `pr-<n>-summary.md` states
+what the change does and carries the breakdown from step 4.
+
+In the audit, one row per rule with a verdict — `PASS`, `FLAG`, `PARTIAL` or `not verified` — and
+evidence for each. The `CR-*` rows go beside the `PR-*` rows, because the two rule sets check the
+same commits: `CR-DEPTH-ONE` beside `PR-SPLIT-MECHANICAL`, `CR-OBL-INERT` beside
+`PR-SPLIT-BASELINE`, `CR-TAG-SUBJECT` beside `PR-MSG-SUBJECT`. Then one numbered finding per problem, with the commit, what
 it breaks, and what would repair it.
 
 `PARTIAL` is limited to this composite `PR-*` evaluation: use it only when independently checkable

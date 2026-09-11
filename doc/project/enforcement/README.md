@@ -48,7 +48,7 @@ measured.
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
 | the test suites | T2 | GitHub Actions test workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
 | `inet_featuretool` | T3 | the feature workflow | `AR-EXT-FEATURES` |
-| *none yet* | T3 | — | `CR-*`: the shape of the `Change:` trailer, and the comparison of each field with the diff. [classification.md](../rule/classification.md) says which field a gate can derive. The natural home is [check-commits.sh](check-commits.sh). |
+| [check-classification.sh](check-classification.sh) | T3 | by hand; not yet in CI | `CR-TAG-TRAILER`, `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
 
 The pull-request [enforcement-tests workflow](../../../.github/workflows/enforcement-tests.yml) runs
 the checker regressions without privileged credentials. The trusted
