@@ -44,7 +44,7 @@ group is different in kind, why it is optional, and why it comes last.
 | [CR-GROUP-STANDALONE](#cr-group-standalone) | The label does not excuse a partial commit |
 | [CR-TAG-TRAILER](#cr-tag-trailer) | Every commit ends with one `Change:` line |
 | [CR-TAG-FORM](#cr-tag-form) | The trailer has three fields in a fixed order |
-| [CR-TAG-SUBJECT](#cr-tag-subject) | The subject carries only what the author judges important |
+| [CR-TAG-SUBJECT](#cr-tag-subject) | The subject may repeat any part of the classification except the obligations |
 
 ## Scope (CR-SCOPE)
 
@@ -464,26 +464,58 @@ their new names, then the hierarchy changes shape. Each commit holds one depth l
 
 ### CR-TAG-SUBJECT
 
-**The subject carries only what the author judges important.**
+**The subject may repeat any part of the classification except the obligations.**
 
-The trailer holds the whole classification, so the subject does not repeat it. This **relaxes**
-[PR-MSG-SUBJECT](pull-request.md#pr-msg-subject): the area prefix and the kind marker are both
-optional, and the author chooses which parts earn their place on the one line that
-`git log --oneline` shows.
+`git log --oneline` shows the subject and nothing else. **The trailer is invisible in the one view
+the subject exists to serve**, so "the trailer already says it" is no reason to leave a thing out.
+The author decides what a log reader needs, and the rule only bounds the choice.
 
-Keep in the subject what a reader who scans a hundred subjects needs to find this commit. Leave out
-what the trailer already states and what nobody scans for.
+```
+[<scope>: ][<kind>: ]<what the commit does>
+```
 
-| Keep it when | Leave it out when |
-| --- | --- |
-| the area separates this commit from its neighbours in a mixed series | the whole series is in one area, and the subject reads better without it |
-| the subject is unclear without the component name | the subject already names the component in its own words |
-| `fix:` tells a reader of the release branch what they need | the body and the trailer already say `fix` and nobody greps the subject for it |
+Both prefixes are optional and each one is free within its bounds.
 
-**Why the relaxation.** The kind marker is not INET practice: of master's last 1500 subjects, about
-**20 carry a real kind marker, which is 1.3%**. The area prefix is practice: **1354 of 1500, which
-is 90%**. A rule that demands the first would import a convention that the project does not use,
-and it would put the same fact in two places. The trailer is the one place.
+| Prefix | What the author may write | Taken from |
+| --- | --- | --- |
+| scope | one or more **consecutive segments** of the trailer's area and position, joined by a dot, in their order | field 1 |
+| kind | one or more **consecutive segments** of the trailer's depth, direction and intent, joined by a dot, in their order | field 2 |
+| the group | the label, shortened as far as it stays recognizable | field 4 |
+| the obligations | **never** | field 3 |
 
-*Enforced at T3 — the length band of [PR-MSG-SUBJECT](pull-request.md#pr-msg-subject) still holds:
-aim for 72 characters, and a gate fails above 80.*
+Five shapes, each one legal:
+
+```
+EthernetMac: fix: drop the frame when the carrier goes before the preamble ends
+linklayer: refactor: hoist the shared frame-sequence steps into the base
+showcases.tsn: format: unindent the gate-schedule tables
+tcp: behavior.add: Tail Loss Probe (RFC 8985 section 7.2)
+size segments against the space options actually leave
+```
+
+The first writes the class and drops the area, the second writes the subsystem and drops the
+class, the third joins an area and a position, the fourth spells the depth and the direction in
+full, and the fifth writes no prefix at all.
+
+**What the author must not do is disagree with the trailer.** A subject that says `fix:` over a
+trailer with no `.fix`, or `linklayer:` over a trailer that says `src.tcp`, is one commit with two
+classifications. That, and not the choice of prefix, is what a gate checks.
+
+**Why the obligations stay out.** They are a list of what travels *with* the commit, and a subject
+names what the commit *is*. They also move: a rebase or a split changes which commit carries a
+baseline, and a subject that named one goes stale in place. Nobody scans a log for them.
+
+Take care with one look-alike. `tests(fingerprint): update the MIPv6 roaming baseline` is INET
+practice and it is correct: `fingerprint` there is the **scope** — the commit changes
+`tests/fingerprint/` — and not the obligation.
+
+**Why the rule was widened.** An earlier version told the author to leave out what the trailer
+states. Applying it to the 61 commits of `topic/tcp-new` showed the fault
+([classification-on-tcp-new.md](../audit/report/sweep/classification-on-tcp-new.md), F-1): it
+permitted dropping `tcp:` from 47 subjects, and dropping it would have made `git log --oneline`
+worse in every one. A rule that pushes an author toward a worse log is wrong, whatever the trailer
+holds.
+
+*Enforced at T3 — a gate compares each prefix with the trailer and reports a disagreement. The
+length band of [PR-MSG-SUBJECT](pull-request.md#pr-msg-subject) still holds: aim for 72
+characters, and a gate fails above 80.*

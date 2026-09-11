@@ -272,10 +272,12 @@ the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the m
 `ExternalProcess: don't kill the process group when a spawned command fails`, not "update
 ExternalProcess.cc" and not a list of file names or links.
 
-**Both the area and the kind word are optional**, and
-[CR-TAG-SUBJECT](classification.md#cr-tag-subject) says why: the `Change:` trailer states the scope
-and the kind in a controlled form, so the subject repeats them only where a reader who scans the
-log needs them. Keep on the one line what helps a reader find this commit among a hundred.
+**Both the area and the kind word are optional, and both are free within a bound.**
+[CR-TAG-SUBJECT](classification.md#cr-tag-subject) gives the grammar: the author may write any
+consecutive segments of the trailer's scope and any consecutive segments of its depth, direction
+and intent, so `EthernetMac: fix:`, `linklayer: refactor:` and `showcases.tsn: format:` are all
+correct. The one thing a subject must not do is disagree with the trailer. The obligations never
+appear in a subject.
 
 ### PR-MSG-BODY
 

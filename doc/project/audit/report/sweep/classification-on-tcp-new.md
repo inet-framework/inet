@@ -20,7 +20,7 @@
 
 | What the trailer buys | Verdict |
 | --- | --- |
-| The subject shortening of [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) | **Almost worthless here.** See [finding 1](#f-1--the-subject-shortening-buys-almost-nothing-on-this-branch). |
+| The subject shortening of [CR-TAG-SUBJECT](../../../rule/classification.md#cr-tag-subject) | **Almost worthless here — and the rule has since been widened because of it.** See [finding 1](#f-1--the-subject-shortening-buys-almost-nothing-on-this-branch). |
 | The depth field | **The strongest of the four.** 6 of 61 commits need no code review, and the trailer says so in one word. [Finding 2](#f-2--the-depth-field-is-the-strongest-of-the-four). |
 | The obligation field | **Strong, and it exposes a defect the branch already has.** [Finding 3](#f-3--the-obligation-field-exposes-a-defect-the-branch-already-carries). |
 | The group field | **Strong on this branch and weak on a short one.** [Finding 4](#f-4--the-group-is-strong-here-and-would-be-weak-on-a-short-branch). |
@@ -364,9 +364,15 @@ What the relaxation is genuinely for is the **kind marker**, and this branch has
 measurement behind the rule stands — 1.3% of subjects carry a kind marker — but the conclusion was
 larger than the evidence.
 
-**What would close it:** narrow `CR-TAG-SUBJECT` to the kind marker, and say plainly that the area
-prefix stays, because `git log --oneline` cannot see the trailer. The freedom the rule grants is
-real and it is small.
+**Closed on 2026-09-11, and not the way this finding proposed.** The finding asked to narrow the
+rule to the kind marker. `CR-TAG-SUBJECT` was **widened** instead: the author may write any
+consecutive segments of the scope and any consecutive segments of the depth, direction and intent,
+so `EthernetMac: fix:`, `linklayer: refactor:` and `showcases.tsn: format:` are all correct. The
+obligations stay out, and the one thing a gate checks is that the prefix agrees with the trailer.
+
+That is the better repair. Narrowing would have told the author what to leave out, which is the
+fault this finding found. Widening removes the push altogether: nothing in the rule now moves an
+author toward a worse `git log --oneline`.
 
 ### F-2 — The depth field is the strongest of the four
 
@@ -450,10 +456,10 @@ to the word "extract" asks the right question.
 it is the word INET writes — 71 of master's last 3000 subjects carry it. `location` and `name`
 stay as the two refactors that earn their own level.
 
-Three more amendments, all small, all produced by this trial. **None is applied.**
+Three more amendments, all small, all produced by this trial. **One is applied; two are open.**
 
-1. **Narrow `CR-TAG-SUBJECT` to the kind marker** (F-1). The area prefix stays, because
-   `git log --oneline` cannot see the trailer.
+1. ~~**Narrow `CR-TAG-SUBJECT` to the kind marker**~~ (F-1) — **superseded and applied.** The rule
+   was widened rather than narrowed. See the finding.
 2. **Let depth `comment` and `format` list more than one area** in `CR-SCOPE-AREA` (F-5).
 3. **Allow `name+refactor` and the other mixed depths to be written**, rather than forcing the
    author to pick the deeper one. Commit 15 is honest as `name+refactor` and misleading as either
