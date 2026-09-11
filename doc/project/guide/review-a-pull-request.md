@@ -83,10 +83,14 @@ for you to judge:
 - **Is the depth honest?** A commit that says `refactor` and rewrites a loop condition is a
   behavior change wearing the wrong word. Read the diff of every `refactor`, `name` and `comment`
   commit — there are few, and the gate has already listed them.
-- **Is the obligation discharged?** A `test` obligation with no test in the same commit breaks
-  [TR-SHIP-WITH](../rule/testing.md#tr-ship-with). A `fingerprint` obligation with no baseline in
-  the same commit breaks [PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline). Both are
-  visible in one pass down the breakdown's obligation column.
+- **Is the obligation discharged, and where?** The two obligations have **different units**, and
+  reading them the same way produces a false finding.
+  [TR-SHIP-WITH](../rule/testing.md#tr-ship-with) asks for the test in the same *pull request*, so
+  a batch of tests at the end of a series satisfies the letter of it.
+  [PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline) asks for the baseline in the same
+  *commit*, so a batch at the end is a violation. A long gap between behavior and test is still
+  worth a **note**: the rule's own reason is that a test written later is written against the code
+  as it turned out.
 - **Is a `?` still a `?`** A commit that says `?` for its baselines is honest and unfinished. It
   is a `PARTIAL`, not a `PASS`, and the report says what run would settle it.
 

@@ -12,6 +12,77 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 **547** added; **49** removed; **22** changed; **2** with a changed signature; **18** renamed; **22** renamed with their class; **5** moved to another class; **4** split across classes.
 
+
+## The commits
+
+**This section is composed, not generated.** `opp_summarize_changes` does not read the `Change:`
+trailers yet, and this branch carries none — it predates
+[classification.md](../../../rule/classification.md). The trailers are the reconstruction in
+[classification-on-tcp-new.md](../sweep/classification-on-tcp-new.md), and the tables come from
+`doc/project/enforcement/commit_breakdown.py` run over them.
+
+**61 commits.**
+
+**By depth**
+
+| Value | Commits |
+| --- | --- |
+| `comment` | 4 |
+| `name` | 2 |
+| `refactor` | 6 |
+| `behavior` | 48 |
+| `name+refactor` | 1 |
+
+**13 of 61 commits need no behavioral review** — every depth below `behavior`.
+
+**By direction and intent**
+
+| Value | Commits |
+| --- | --- |
+| `add` | 26 |
+| `change` | 24 |
+| `fix` | 14 |
+
+**Area against depth**
+
+| Area | `comment` | `name` | `refactor` | `behavior` | `name+refactor` |
+| --- | --- | --- | --- | --- | --- |
+| `doc examples` | 1 |  |  |  |  |
+| `src` | 3 | 2 | 6 | 45 | 1 |
+| `tests` |  |  |  | 3 |  |
+
+**By group**
+
+| Value | Commits |
+| --- | --- |
+| `(none)` | 7 |
+| `tcp-modern-features` | 24 |
+| `tcp-algorithm-split` | 10 |
+| `tcp-modern-defaults` | 3 |
+| `tcp-review-fixes` | 17 |
+
+**Obligations the series owes**
+
+| Value | Commits |
+| --- | --- |
+| `?` | 2 |
+| `fingerprint` | 9 |
+| `whatsnew` | 14 |
+| `test` | 23 |
+| `migration` | 2 |
+
+Three rows are worth the reader's attention before the interface sections below.
+
+**`test` is owed 23 times and `tcp-modern-features` holds 24 commits.** Seventeen of those features
+arrive with no test; commit 35 writes them all, twenty commits later. That is the shape of a
+[TR-SHIP-WITH](../../../rule/testing.md#tr-ship-with) break, visible in one column.
+
+**Seven commits carry no group.** Four of them — `packet`, `ppp`, `pcap` and a second `ppp` — are
+not TCP work at all.
+
+**`name+refactor` is one commit**, number 15, which renames three types and moves 35 files of
+content in the same change.
+
 ## Breaking — check these first
 
 ### Removed
@@ -931,3 +1002,4 @@ Counted by name over `src/` and `tests/`, so *uncalled* is exact and everything 
 ## Not changed
 
 project features · source folders · NED gates · NED properties · NED types
+
