@@ -10,10 +10,15 @@ hostA, gateway R = router, relay T = tap, host B = hostB. The relay replaces the
 checksum of the datagram with its one's complement and changes nothing else; every node
 computes header checksums (checksumMode = "computed" on the IPv4 modules).
 
-Expected result: FAIL. The model consults the checksum only when the header is already
-structurally wrong (Ipv4::handleIncomingDatagram, `!isCorrect() && !verifyChecksum()`), so
-a well-formed header with a wrong checksum is delivered, and expected observation 3 misses
-its deadline. See doc/project/evidence/model/ipv4/results.md.
+Defect. This test FAILS and the failure is NOT declared expected: the model claims the
+behaviour and gets it wrong.
+
+The claim is code. Ipv4Header::verifyChecksum exists (Ipv4Header.msg:252) and
+Ipv4::handleIncomingDatagram calls it and drops the datagram on failure (Ipv4.cc:282). What is
+wrong is the guard: `!isCorrect() && !verifyChecksum()` short-circuits, so a structurally correct
+header never reaches the checksum test at all. A branch that exists and is unreachable for the
+case under test is a defect, so nothing declares this failure expected. Expected observation 3
+misses its deadline. See doc/project/evidence/model/ipv4/results.md.
 
 Deviation: expected observations 4 and 5 (nothing upward, nothing back) are one absence
 watch over the whole host, because two consecutive watches cannot cover the same window.
@@ -112,6 +117,5 @@ seed-set = 0
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 5000
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc1122_checksum_discard: PASS

@@ -11,7 +11,12 @@ one to one onto its expected observations. Host A fragments a 1500-octet packet 
 its piece overlaps the first by 8 octets. Mapping of the mockup with a relay: host A = hostA,
 router R = router, relay T = tap, host B = hostB.
 
-Expected result: FAIL. The model's reassembly buffer merges overlapping regions
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: the reassembly buffer exists, runs, completes a datagram from the overlapping set, and
+then stops the simulation on the model's own assertion in Ipv6::decapsulate. A mechanism that
+completes with a wrong result and then crashes is a defect twice over.
+
+What the run shows: The model's reassembly buffer merges overlapping regions
 (ChunkBuffer::replace) and completes a 1452-octet datagram instead of discarding the set;
 the completed datagram then stops the simulation with the model's own assertion in
 Ipv6::decapsulate (its header still carries the original payload length of 1460, another
@@ -108,6 +113,5 @@ seed-set = 0
 # Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
 *.hostA.eth[0].mac.mtu = 1280B
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc8200_overlapping_fragments: PASS

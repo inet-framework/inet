@@ -21,7 +21,12 @@ transmitter generated no checksum". A value that covered the old data would be w
 new datagram, and the receiver would then discard it for the checksum and not answer the
 question this check asks. See UdpMutations.h, emptyUdpDatagram.
 
-Expected result: FAIL, and the reason is not the UDP module. The run shows that UDP accepted
+Defect. This test FAILS and the failure is NOT declared expected, and the defect is not in the
+UDP module: UDP handles the smallest datagram RFC 768 allows correctly. The defect is in a
+statistic filter that every standard receiving program switches on, and it stops the simulation.
+A crash in live code is a defect, so nothing declares this failure expected.
+
+What the run shows, and why the reason is not the UDP module. The run shows that UDP accepted
 the 8-octet datagram and handed zero octets to the program: `Sending payload up to socket
 sockId=1`, and `UdpSink: Received packet: ... (0 B) ... 10.0.0.1:4000 --> 10.0.0.6:5000`.
 The run then stopped with a runtime error, before the tester could record the verdict:
@@ -129,6 +134,5 @@ seed-set = 0
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 5000
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc768_empty_datagram: PASS

@@ -20,7 +20,13 @@ The value each step compares against is computed from the datagram on the wire, 
 pseudo header of addresses, the UDP header and the data; see UdpMutations.h,
 expectedUdpChecksum.
 
-Expected result: FAIL. The `checksumMode` parameter of the ~Udp module
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: the checksum computation exists and works. Four other tests of this suite set
+`checksumMode = "computed"` and pass, so what RFC 1122 asks for is implemented; what is wrong is
+which value the parameter defaults to. A setting that exists and holds a value the standard
+forbids is a defect, not a missing feature.
+
+What the run shows. The `checksumMode` parameter of the ~Udp module
 (src/inet/transportlayer/udp/Udp.ned) is `default("declared")`, and that mode writes the
 constant 0xC00D into the checksum field instead of a sum (Udp::insertChecksum,
 Udp.cc:826-827). A receiver that computes cannot validate that value, and
@@ -137,6 +143,5 @@ seed-set = 0
 *.hostB.app[1].typename = "UdpSink"
 *.hostB.app[1].localPort = 5001
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc1122_checksum_default: PASS

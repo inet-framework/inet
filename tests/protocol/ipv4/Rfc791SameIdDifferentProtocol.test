@@ -18,10 +18,15 @@ How tap1 knows the identification of the UDP datagram: the model draws identific
 one counter per network layer, so the echo request carries the UDP datagram's value plus
 one, and tap1 subtracts one. Expected observation 3 confirms the result on the wire.
 
-Expected result: FAIL. The model keys its reassembly buffers on identification, source and
-destination only (Ipv4FragBuf::Key), so the ICMP fragments land in the UDP datagram's buffer,
-neither datagram is reassembled intact, and expected observation 4 misses its deadline. See
-doc/project/evidence/model/ipv4/results.md.
+Defect. This test FAILS and the failure is NOT declared expected: the model claims the
+behaviour and gets it wrong.
+
+The claim is code. Ipv4FragBuf::Key is the reassembly key and it exists
+(Ipv4FragBuf.h:31 to 40); it carries three fields, identification, source and destination, and
+omits the protocol that RFC 791 names as the fourth. A key that exists and is incomplete is a
+defect, not a missing feature, so nothing declares this failure expected. The ICMP fragments land
+in the UDP datagram's buffer, neither datagram is reassembled intact, and expected observation 4
+misses its deadline. See doc/project/evidence/model/ipv4/results.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -136,6 +141,5 @@ seed-set = 0
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 5000
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc791_same_id_different_protocol: PASS

@@ -14,7 +14,13 @@ the opcode, which is 24 -- OP_EXP1 of RFC 5494 section 3. The target protocol ad
 address of host B on purpose, so that the packet reaches the opcode question, which is the
 last question of the reception algorithm of RFC 826.
 
-Expected result: FAIL. The simulation model stops the run on an opcode it does not know:
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: Arp::processArpPacket switches on the opcode and has a `default:` branch for one it does
+not know, so the unknown case is handled. What that branch does is throw
+(Arp.cc:358). A branch that exists and does the wrong thing is a defect, and a station that stops is
+the strongest possible way to fail the rule.
+
+What the run shows. The simulation model stops the run on an opcode it does not know:
 Arp::processArpPacket switches on the opcode and its default branch throws
 "Unsupported opcode %d in received ARP packet"
 (src/inet/networklayer/arp/ipv4/Arp.cc). RFC 826 answers the question in one sentence --
@@ -93,6 +99,5 @@ seed-set = 0
 
 # No host sends a datagram: the crafted packet is the only stimulus of the run.
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc5494_experimental_opcode: PASS

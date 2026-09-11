@@ -11,7 +11,12 @@ to one onto its expected observations. Host A fragments a 1500-octet packet for 
 datagram by the definition of RFC 8200 §4.5. Mapping of the mockup with a relay: host A =
 hostA, router R = router, relay T = tap, host B = hostB.
 
-Expected result: FAIL. The model's fragment buffer stops the simulation with a C++
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: the fragment buffer exists and runs, and what it does on a single-fragment datagram is
+use an iterator it has already erased. This is a defect in the ordinary sense of the word -- a
+memory bug in live code -- and stopping the simulation is the worst way for it to show.
+
+What the run shows: The model's fragment buffer stops the simulation with a C++
 assertion when a single fragment completes a datagram: Ipv6FragBuf::addFragment looks the
 buffer up before it creates it, and on completion erases the stale end iterator
 (Ipv6FragBuf.cc:168). No verdict line is printed, and the runner counts the missing line
@@ -113,6 +118,5 @@ seed-set = 0
 # Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
 *.hostA.eth[0].mac.mtu = 1280B
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc8200_atomic_fragment: PASS

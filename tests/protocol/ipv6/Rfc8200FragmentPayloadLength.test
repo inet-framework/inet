@@ -11,7 +11,12 @@ to link 1 has MTU 1280; the 1500-octet packet splits into pieces of 1232 and 228
 the fragment packets have payload lengths 1240 and 236. Mapping of the mockup: host A =
 hostA, router R = router, host B = hostB.
 
-Expected result: FAIL. The model copies the original header into every fragment and never
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: Ipv6::fragmentAndSend builds every fragment and sets its header, and the payload length
+it writes is the one it copied rather than the one the fragment carries. A field the code sets to a
+wrong value is a defect.
+
+What the run shows: The model copies the original header into every fragment and never
 rewrites its payload length (Ipv6::fragmentAndSend), so both fragments carry 1460, and
 expected observation 2 misses its deadline. The destination still reassembles the packet,
 because the model's reassembly measures the fragment rather than reading the field; see
@@ -102,6 +107,5 @@ seed-set = 0
 # Host A must fragment: its interface to link 1 has the minimum IPv6 link MTU.
 *.hostA.eth[0].mac.mtu = 1280B
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc8200_fragment_payload_length: PASS

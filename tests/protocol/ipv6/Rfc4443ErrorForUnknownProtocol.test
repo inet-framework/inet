@@ -12,7 +12,11 @@ the next header of host A's datagram to 253; host B reports it with Parameter Pr
 1, and the report, which quotes a packet of protocol 253, returns to host A. Mapping of
 the mockup with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB.
 
-Expected result: FAIL. Host A's ICMPv6 selects the upper-layer process from the quoted
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: Icmpv6 does build and send the Parameter Problem report, and the crash is in the path
+that delivers it. A mechanism that exists and stops the simulation is a defect.
+
+What the run shows: Host A's ICMPv6 selects the upper-layer process from the quoted
 protocol number and hands the report to a dispatcher that has no such process, which stops
 the simulation ("Unknown protocol: protocolId = 78, protocolName = nexthopforwarding" in
 the message dispatcher of hostA.ipv6). No verdict line is printed, and the runner counts
@@ -102,6 +106,5 @@ seed-set = 0
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 5000
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc4443_error_for_unknown_protocol: PASS

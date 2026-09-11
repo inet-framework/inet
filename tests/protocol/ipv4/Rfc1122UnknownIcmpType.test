@@ -12,11 +12,15 @@ message. The ICMP checksum stays valid: the model's ICMP runs in its declared ch
 in which the field is correct by declaration, which is the simulation form of a rewriter
 that recomputes it.
 
-Expected result: FAIL. The model stops the simulation with a runtime error on an unknown
-ICMP type (Icmp::processIcmpMessage, the default branch of the type switch), so no verdict
-line is printed at all, and the runner counts the missing line as a failure. "Silently
-discarded" leaves the host running; a stop is a failure of the check. See
-doc/project/evidence/model/ipv4/results.md.
+Defect. This test FAILS and the failure is NOT declared expected: the model claims the
+behaviour and gets it wrong.
+
+The claim is code. Icmp::processIcmpMessage has a `default:` branch for a type it does not
+recognise, so the unknown case is handled -- and what it does is
+`throw cRuntimeError("Unknown ICMP type %d", ...)`. A branch that exists and does the wrong
+thing is a defect. The wrong thing here is the worst kind: the simulation stops, so no verdict
+line is printed at all and the runner counts the missing line as a failure. "Silently discarded"
+leaves the host running. See doc/project/evidence/model/ipv4/results.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -100,6 +104,5 @@ seed-set = 0
 *.hostA.app[0].printPing = false
 *.hostB.numApps = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc1122_unknown_icmp_type: PASS

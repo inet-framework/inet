@@ -9,7 +9,12 @@ request as the vehicle; the relay rewrites its type from 128 to 200, a number th
 message. Mapping of the mockup with a relay: host A = hostA, router R = router, relay T =
 tap, host B = hostB.
 
-Expected result: FAIL. The model stops the simulation with a runtime error on an unknown
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: the type switch has a `default:` branch, so the unknown case is handled -- and what it
+does is throw. A branch that exists and does the wrong thing is a defect, and stopping the
+simulation is the worst wrong thing it could do.
+
+What the run shows: The model stops the simulation with a runtime error on an unknown
 ICMPv6 type (Icmpv6::processICMPv6Message, the default branch of the type switch), so no
 verdict line is printed, and the runner counts the missing line as a failure. "Silently
 discarded" leaves the host running; a stop is a failure of the check. See
@@ -89,6 +94,5 @@ seed-set = 0
 *.hostA.app[0].printPing = false
 *.hostB.numApps = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc4443_unknown_informational_type: PASS

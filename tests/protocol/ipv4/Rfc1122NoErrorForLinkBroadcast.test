@@ -12,9 +12,16 @@ relay rewrites the destination address of the Ethernet frame to ff:ff:ff:ff:ff:f
 destination stays host B's unicast address, and the datagram goes to port 5001, on which no
 program listens, so a report would otherwise be due.
 
-Expected result: FAIL. The model decides about an error report from the IP addresses only
-(Icmp::maySendErrorMessage) and never consults the link-layer destination, so it answers
-with Destination Unreachable and the absence watch of expected observation 3 fires. See
+Defect. This test FAILS and the failure is NOT declared expected: the model claims the
+behaviour and gets it wrong.
+
+The claim is code, and a comment states the intent. Icmp::maySendErrorMessage suppresses an
+error report for four conditions, and its first one says "don't send ICMP error messages in
+response to broadcast or multicast messages" (Icmp.cc). The suppression mechanism is therefore
+present and its stated purpose covers this case; what it does not do is read the link-layer
+destination, so one of the conditions RFC 1122 lists is missing from a list that implements the
+others. An incomplete mechanism is a claim, not an absent feature, so nothing declares this
+failure expected. The absence watch of expected observation 3 fires. See
 doc/project/evidence/model/ipv4/results.md.
 
 %includes:
@@ -109,6 +116,5 @@ seed-set = 0
 *.hostA.app[0].sendInterval = 1s
 *.hostB.numApps = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc1122_no_error_for_link_broadcast: PASS

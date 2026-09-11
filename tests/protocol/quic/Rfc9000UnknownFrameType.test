@@ -14,7 +14,13 @@ else. Table 3 of §12.4 lists the frame types this version of QUIC defines, and 
 means. The connection is established and running when the frame arrives, so the receiver has
 every reason to read it and none to expect it.
 
-Expected result: FAIL. The model stops the simulation:
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: `ConnectionState.cc` dispatches an incoming frame on its type and has a `default:`
+branch for a type it does not know, so the unknown case is handled. What that branch does is throw.
+A branch that exists and does the wrong thing is a defect, and stopping the simulation is the worst
+wrong thing available to it.
+
+What the run shows. The model stops the simulation:
 
     Error: Unknown Frame Header Type -- in module (inet::quic::Quic) QuicTapNet.server.quic
     (id=67), at t=0.10024426s, event #150
@@ -120,6 +126,5 @@ seed-set = 0
 **.server.app[*].localAddress = ""
 **.server.app[*].localPort = 1000
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc9000_unknown_frame_type: PASS

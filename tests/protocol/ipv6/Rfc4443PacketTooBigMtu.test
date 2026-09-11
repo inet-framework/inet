@@ -9,7 +9,16 @@ below map one to one onto its expected observations. Link 2 has MTU 1280 and hos
 1500-octet packet; the message must say 1280. Mapping of the mockup: host A = hostA, router R
 = router, host B = hostB.
 
-Expected result: FAIL. The model sends the message with an MTU field of 0
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: Icmpv6::createPacketTooBigMsg takes an `mtu` parameter (Icmpv6.h:55) and the caller
+hands it a literal 0 (Icmpv6.cc:273). A field with a setter and a wrong value in it is a defect.
+
+The `// TODO implement MTU support.` above that call is not a statement of non-support. A bare
+"to do" says the behaviour is wanted and unfinished, which is a claim; a TODO that says **why** a
+behaviour is not supported would be the other thing. This one gives no reason and the parameter is
+already there.
+
+What the run shows: The model sends the message with an MTU field of 0
 (Icmpv6::sendErrorMessage calls createPacketTooBigMsg(0), marked "TODO implement MTU
 support"), so expected observation 2 misses its deadline. See
 doc/project/evidence/model/ipv6/results.md.
@@ -88,6 +97,5 @@ seed-set = 0
 # Link 2 has the minimum IPv6 link MTU; the router cannot forward the 1500-octet packet.
 *.router.eth[1].mac.mtu = 1280B
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc4443_packet_too_big_mtu: PASS

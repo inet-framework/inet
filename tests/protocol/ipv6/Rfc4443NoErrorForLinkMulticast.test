@@ -10,7 +10,12 @@ multicast address of the link layer, 33:33:00:00:00:01; the IPv6 destination sta
 5001, on which no program listens, so a report would otherwise be due. Mapping of the mockup
 with a relay: host A = hostA, router R = router, relay T = tap, host B = hostB.
 
-Expected result: FAIL. The model decides about an error report from the IPv6 addresses
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: Icmpv6::validateDatagramPromptingError is a suppression mechanism with four conditions,
+one of them citing RFC 4443 section 2.4(e), so the feature is implemented and one of the
+conditions the standard lists is missing from it. An incomplete mechanism is a claim.
+
+What the run shows: The model decides about an error report from the IPv6 addresses
 only (Icmpv6::validateDatagramPromptingError) and never consults the link-layer
 destination, so it answers with Destination Unreachable and the absence watch of expected
 observation 3 fires. See doc/project/evidence/model/ipv6/results.md.
@@ -101,6 +106,5 @@ seed-set = 0
 *.hostA.app[0].sendInterval = 10s
 *.hostB.numApps = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc4443_no_error_for_link_multicast: PASS

@@ -23,7 +23,13 @@ The packet is built octet by octet and not from field values. The protocol space
 field of the packet class of the simulation model, which carries the value implicitly, so
 only the octets can hold a value other than the one for IPv4.
 
-Expected result: FAIL. The model reads the octets with ArpPacketSerializer, whose
+Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
+behaviour: ArpPacketSerializer::deserializeFields tests this very field and calls markIncorrect
+when it does not hold (ArpPacketSerializer.cc:52 to 55). So the model detects the condition RFC 826
+asks it to detect, and what it does next is wrong -- Arp::processArpPacket peeks the packet with no
+flags and the run stops. A mechanism that exists and does the wrong thing is a defect.
+
+What the run shows. The model reads the octets with ArpPacketSerializer, whose
 deserializeFields marks the packet incorrect when the protocol space is not the Ethertype of
 IPv4 (src/inet/networklayer/arp/ipv4/ArpPacketSerializer.cc), and Arp::processArpPacket then
 peeks the packet, which stops the run with
@@ -101,6 +107,5 @@ seed-set = 0
 
 # No host sends a datagram: the crafted packet is the only stimulus of the run.
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc826_unknown_protocol_space: PASS
