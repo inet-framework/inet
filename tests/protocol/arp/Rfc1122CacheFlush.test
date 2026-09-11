@@ -1,0 +1,106 @@
+%description:
+
+RFC 1122 -- an out-of-date table entry is flushed, and the next datagram resolves again.
+
+Checks RFC1122-ACACHE-1 (must) and RFC1122-ACACHE-2 (should) from
+doc/project/evidence/standard/rfc1122/catalog.md. The English procedure is in
+doc/project/evidence/protocol/arp/checks/resolution.md#the-cache-flush; the program steps
+below map onto its expected observations. Mapping of the pair mockup: host A = hostA,
+host B = hostB.
+
+The scenario names the lifetime of a table entry, 2 s, which is the check of
+RFC1122-ACACHE-2: a value a scenario can name is a value that is configurable. Host A sends
+at 0.1 s and at 5 s, a gap of 4.9 s, which is longer than the lifetime. The second request
+is the visible half of the flush; the entry itself is state inside a host, and two stations
+on a link cannot read it.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_cache_flush")
+        // Expected observation 1: the first request, and the reply of host B.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .describe("the first ARP request from host A")
+                  .within(0.5))
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 2")
+                  .describe("host B's reply")
+                  .within(0.1))
+        // Expected observation 2: the first datagram arrives.
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000")
+                  .describe("the first datagram at host B's UDP")
+                  .within(0.5))
+        // Expected observation 3: a second request for the same address, after the lifetime
+        // of the entry has passed (RFC1122-ACACHE-1).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress")
+                             == interfaceIpv4Address("hostB.eth[0]").str();
+                  })
+                  .describe("a second ARP request from host A for the same address")
+                  .notBefore(4.0).within(6.0))
+        // Expected observation 4: the second datagram arrives.
+        .once(on("hostB.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000")
+                  .describe("the second datagram at host B's UDP")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_cache_flush compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 6s
+seed-set = 0
+
+# The lifetime of a table entry, named by the scenario (RFC1122-ACACHE-2).
+*.hostA.ipv4.arp.cacheTimeout = 2s
+
+# Two datagrams of 100 octets: one at 0.1 s and one at 5 s.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 4.9s
+*.hostA.app[0].stopTime = 5.1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_cache_flush: PASS

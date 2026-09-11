@@ -1,0 +1,97 @@
+%description:
+
+RFC 1122 -- the datagram that waits for a resolution is saved and sent after the reply.
+
+Checks RFC1122-AQUEUE-1 (should) from doc/project/evidence/standard/rfc1122/catalog.md, and
+covers RFC826-REQ-3, which it overrides. The English procedure is in
+doc/project/evidence/protocol/arp/checks/queue.md#the-waiting-datagram; the program steps
+below map onto its expected observations. Mapping of the pair mockup: host A = hostA,
+host B = hostB.
+
+Host A sends exactly one datagram, and nothing sends it again. The two documents predict two
+different outcomes for that one datagram: RFC 826 throws it away, so it never arrives, and
+RFC 1122 saves it, so it arrives after the reply. One observation therefore tells the two
+apart, and a program that retransmitted would hide the difference.
+
+The order of the steps is the order of the expected observations, so the step that observes
+the datagram cannot match before the step that observes the reply has matched. "After the
+reply and not before it" is the step order itself.
+
+The last step watches the handoff from UDP to the program, which is where the datagram
+"reaches the program" of the check. The UDP header is already gone at that point, so the
+step reads the length of the data, 100 octets, and only one datagram is in flight.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_arp_packet_queue")
+        // Expected observation 1: the datagram could not go out, and the resolution started.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .describe("the request from host A")
+                  .within(0.5))
+        // Expected observation 2: host B answers.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 2")
+                  .describe("host B's reply")
+                  .within(0.1))
+        // Expected observation 3: the one datagram reaches the program on host B, after the
+        // reply (RFC1122-AQUEUE-1).
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .match([](const MatchContext& c) { return c.event.packet->getDataLength() == B(100); })
+                  .describe("the saved datagram handed up to the program on host B, after the reply")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_arp_packet_queue compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Exactly one datagram of 100 octets, and nothing sends it again.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[0].stopTime = 0.15s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_arp_packet_queue: PASS

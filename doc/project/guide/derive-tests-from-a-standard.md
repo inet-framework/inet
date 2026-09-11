@@ -376,8 +376,11 @@ Translate the English document into a self-contained `opp_test` file in
   two texts must tell the same story.
 - Expression pitfalls (a wrong expression is a silent non-match, and the step times out):
   a unit-bearing field needs a unit literal (`udp.totalLengthField == 1008B`); the
-  protocol prefix is the INET dissector name (`icmpv4`, not `icmp`); an ini key with a
-  wrong path applies nothing. On a deadline miss, run the tester without `testName` first
+  protocol prefix is the INET dissector name (`icmpv4`, not `icmp`); a protocol prefix
+  resolves to the **last** chunk of that protocol in the packet, so read a field of an
+  Ethernet frame through its chunk class name (`EthernetMacHeader.dest`, and not
+  `ethernetmac.dest`, which lands on the frame check sequence); an ini key with a wrong
+  path applies nothing. On a deadline miss, run the tester without `testName` first
   and read the real frames in the trace.
 
 ## Step 7 — run and analyze (`model/<proto>/results.md`)

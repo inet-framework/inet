@@ -356,7 +356,7 @@ after the RTO. Shows fault injection driving a behaviour, then asserting it.
 host1 opens to a phantom IP; the test observes the SYN, injects a crafted SYN+ACK acking
 ISN+1, then observes host1's final ACK — a handshake driven entirely by injection.
 
-### ARP resolution (`ArpResolution`)
+### ARP resolution
 ```cpp
 .once(on("host1.eth[0].mac").signal("packetSentToLower").packet("arp.opcode == 1")
           .describe("an ARP request").within(0.2))

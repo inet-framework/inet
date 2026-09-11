@@ -1,0 +1,104 @@
+%description:
+
+RFC 826 -- a station that is not the target of a broadcast request answers nothing.
+
+Checks RFC826-RECV-5 from doc/project/evidence/standard/rfc826/catalog.md, and covers
+RFC826-RECV-1. The English procedure is in
+doc/project/evidence/protocol/arp/checks/input-validation.md#a-request-for-a-third-station;
+the program steps below map onto its expected observations. Mapping of the shared link
+mockup: host A = hostA, host B = hostB, host C = hostC, switch S = switch.
+
+Host A resolves the address of host C. The request is a broadcast, so host B receives it
+too, and host B takes the negative branch of the target question: end of processing, and the
+packet is discarded. Host B runs no program and sends nothing of its own, so any packet from
+host B would be an answer to this request.
+
+Deviation: expected observation 2, that host C answers the request, is not a program step.
+The absence watch of expected observation 3 has to cover the moment right after host B
+receives the request, which is also the moment host C answers, and a greedy step consumes
+its whole window. The answer of host C is asserted instead on the line that its program
+prints at the end of the run: a datagram that arrived proves that the resolution completed,
+and only a reply from host C could have completed it.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_third_station_request")
+        // Expected observation 1: the request reaches host B, and its target protocol
+        // address is the address of host C and not of host B.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      auto packet = c.event.packet;
+                      return ipv4AddressField(packet, "arp.destIpAddress") == interfaceIpv4Address("hostC.eth[0]").str()
+                             && ipv4AddressField(packet, "arp.destIpAddress") != interfaceIpv4Address("hostB.eth[0]").str();
+                  })
+                  .describe("the request for the address of host C, at host B's interface")
+                  .within(0.5))
+        // Expected observation 3: host B puts no ARP packet on the link (RFC826-RECV-5,
+        // RECV-1).
+        .never(on("hostB")
+                  .match([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .describe("any ARP packet from host B")
+                  .within(0.85));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_third_station_request compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The shared link mockup: three hosts on one Ethernet segment, joined by a switch.
+network ArpSharedNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        switch: EthernetSwitch { @display("p=400,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=250,250"); }
+        hostC: StandardHost { @display("p=550,150"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostC.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpSharedNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One datagram of 100 octets from host A to host C. Host B runs no program.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostC"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostC.numApps = 1
+*.hostC.app[0].typename = "UdpSink"
+*.hostC.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc826_third_station_request: PASS
+
+%contains: stdout
+hostC.app[0]: received 1 packets

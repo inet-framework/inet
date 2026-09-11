@@ -1,0 +1,95 @@
+%description:
+
+RFC 826 -- a mapping the table already holds needs no second request.
+
+Checks RFC826-REQ-2 from doc/project/evidence/standard/rfc826/catalog.md. The English
+procedure is in
+doc/project/evidence/protocol/arp/checks/resolution.md#the-cached-mapping; the program steps
+below map onto its expected observations. Mapping of the pair mockup: host A = hostA,
+host B = hostB.
+
+Host A sends five datagrams, one every 0.1 s. The first one starts a resolution; the other
+four find the mapping in the table and go out with no packet on the link.
+
+Expected observation 1 -- exactly one request in the whole run -- is one greedy step that
+consumes the whole observation window and then checks the count.
+
+Deviation: expected observation 2, that all five datagrams arrive, is not a program step.
+A greedy step consumes its whole window, so a later step would look for the datagrams after
+they had already arrived. The delivery is asserted instead on the line that the receiving
+program prints at the end of the run, which reports the same fact.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_cached_mapping")
+        // Expected observation 1: exactly one request for the address of host B leaves host
+        // A in the whole run (RFC826-REQ-2).
+        .betweenTimes(1, 1, on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress")
+                             == interfaceIpv4Address("hostB.eth[0]").str();
+                  })
+                  .describe("an ARP request from host A for the address of host B")
+                  .within(0.9));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_cached_mapping compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 1s
+seed-set = 0
+
+# The lifetime of a table entry outlasts the run, so no entry can expire during it.
+*.hostA.ipv4.arp.cacheTimeout = 100s
+
+# Five datagrams of 100 octets, one every 0.1 s from 0.1 s.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 0.1s
+*.hostA.app[0].stopTime = 0.55s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc826_cached_mapping: PASS
+
+%contains: stdout
+hostB.app[0]: received 5 packets

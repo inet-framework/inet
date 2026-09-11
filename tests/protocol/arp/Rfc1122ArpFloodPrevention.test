@@ -1,0 +1,100 @@
+%description:
+
+RFC 1122 -- the rate of requests for one unresolved address is limited.
+
+Checks RFC1122-AFLOOD-1 (must) from doc/project/evidence/standard/rfc1122/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/arp/checks/flood-prevention.md#the-request-rate; the program
+step below maps onto its expected observations. Mapping of the absent neighbour mockup:
+host A = hostA, host B = hostB, and 10.0.0.99 is the address that no station owns.
+
+Host A sends a datagram every 0.1 s for 10 s to an address on its own link that nobody has.
+Nothing ever answers, so the question can be asked again and again. A host with no mechanism
+at all would put about 100 requests on the link. The recommended maximum of one per second
+per destination allows 10 over the same window, and the check allows 11, so that a host may
+send its first request at the moment the first datagram arrives.
+
+Expected observations 1 and 3 are one greedy step: at least one request, and at most 11, in
+the whole run.
+
+Deviation: expected observation 2, that no reply for the address ever crosses the link, is
+not a program step, because a greedy step consumes its whole window. It is asserted instead
+on the line that the program of host B prints at the end of the run: host B received nothing,
+so no datagram of host A reached any station, so no resolution succeeded.
+
+Note on the bound: the MUST of RFC 1122 is about the mechanism, and the rate of one per
+second is a recommendation. A host that chose a higher rate would fail this step and could
+still satisfy the requirement. The verdict would then belong to the recommendation.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_arp_flood_prevention")
+        // Expected observations 1 and 3: between 1 and 11 requests for 10.0.0.99 in 10 s.
+        .betweenTimes(1, 11, on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress") == "10.0.0.99";
+                  })
+                  .describe("an ARP request from host A for 10.0.0.99")
+                  .within(9.9));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_arp_flood_prevention compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The absent neighbour mockup: two hosts on one Ethernet link, and a third address on the
+// link that no station owns.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Fixed addresses, so that the address nobody owns is a known one.
+*.configurator.config = xml("<config><interface hosts='hostA' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='hostB' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+
+# A datagram every 0.1 s to 10.0.0.99, which no station owns.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "10.0.0.99"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 0.1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_arp_flood_prevention: PASS
+
+%contains: stdout
+hostB.app[0]: received 0 packets

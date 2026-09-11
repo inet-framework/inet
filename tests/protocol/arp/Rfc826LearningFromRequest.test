@@ -1,0 +1,115 @@
+%description:
+
+RFC 826 -- a host that answered a request needs no request of its own.
+
+Checks RFC826-RECV-6 and RFC826-RECV-7 from
+doc/project/evidence/standard/rfc826/catalog.md. The English procedure is in
+doc/project/evidence/protocol/arp/checks/reply.md#learning-from-a-request; the program steps
+below map onto its expected observations. Mapping of the pair mockup: host A = hostA,
+host B = hostB.
+
+Host A resolves the address of host B at 0.1 s. Host B then sends its own datagram to
+host A at 0.5 s. Host B has never asked for the address of host A, so the only place its
+table entry can have come from is the sender fields of the request of host A -- which the
+reception algorithm reads before it reads the opcode.
+
+The two hosts use two ports, 5000 for the datagrams of host A and 6000 for the datagram of
+host B, so that a step cannot match the wrong datagram.
+
+Deviation: expected observation 2, that the datagram of host B reaches host A, is not a
+program step. The absence watch of expected observation 3 has to cover the moment at 0.5 s
+when host B needs the hardware address of host A, and a greedy step consumes its whole
+window, so a later step would look for the datagram after it had already arrived. The
+delivery is asserted instead on the line that the receiving program prints at the end of the
+run.
+
+The absence watch runs from the reply of host B to the end of the run. The one window it
+does not cover is the start of the run before the reply, and in it host B has nothing to
+send and therefore no address to resolve.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_learning_from_request")
+        // Expected observation 1: the request of host A, and the reply of host B.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .describe("the request from host A")
+                  .within(0.5))
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 2")
+                  .describe("host B's reply")
+                  .within(0.1))
+        // Expected observation 3: host B never asks for the address of host A, although it
+        // sends a datagram to host A at 0.5 s (RFC826-RECV-6, RECV-7).
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .describe("an ARP request from host B")
+                  .within(0.85));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_learning_from_request compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A: one datagram to port 5000 of host B at 0.1 s, and a program on port 6000.
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpSink"
+*.hostA.app[1].localPort = 6000
+
+# Host B: a program on port 5000, and one datagram to port 6000 of host A at 0.5 s.
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].typename = "UdpBasicApp"
+*.hostB.app[1].destAddresses = "hostA"
+*.hostB.app[1].destPort = 6000
+*.hostB.app[1].localPort = 4001
+*.hostB.app[1].messageLength = 100B
+*.hostB.app[1].startTime = 0.5s
+*.hostB.app[1].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST rfc826_learning_from_request: PASS
+
+%contains: stdout
+hostA.app[1]: received 1 packets

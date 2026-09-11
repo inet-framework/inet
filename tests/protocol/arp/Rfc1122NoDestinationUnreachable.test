@@ -1,0 +1,104 @@
+%description:
+
+RFC 1122 -- a missing table entry alone produces no Destination Unreachable report.
+
+Checks RFC1122-ANOERR-1 (must not) from doc/project/evidence/standard/rfc1122/catalog.md.
+The English procedure is in
+doc/project/evidence/protocol/arp/checks/no-error-report.md#no-destination-unreachable; the
+program steps below map onto its expected observations. Mapping of the absent neighbour
+mockup: host A = hostA, host B = hostB, and 10.0.0.99 is the address that no station owns.
+
+The address is on the link, so it is routable and no host can call it unreachable for a
+routing reason. No datagram reaches any station, so no port can be closed either. The
+missing table entry is the only reason for a report that the scenario leaves, and that
+reason is the forbidden one.
+
+The absence watch looks for any ICMP message and not for the Destination Unreachable type
+alone. Nothing in this scenario gives a host a reason to send any ICMP message, so the wider
+watch costs nothing and catches a host that reports the failure as another type.
+
+Deviation: expected observation 2, that no reply for the address ever crosses the link, is
+not a program step, because the absence watch of expected observation 3 consumes the rest of
+the run. It is asserted instead on the line that the program of host B prints at the end of
+the run: host B received nothing, so no resolution succeeded.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc1122_no_destination_unreachable")
+        // Expected observation 1: the resolution really was attempted.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.destIpAddress") == "10.0.0.99";
+                  })
+                  .describe("an ARP request from host A for 10.0.0.99")
+                  .within(0.5))
+        // Expected observation 3: no ICMP message anywhere at host A, for the rest of the
+        // run (RFC1122-ANOERR-1).
+        .never(on("hostA")
+                  .match([](const MatchContext& c) {
+                      return matchesExpression(c.event.packet, "icmpv4.type >= 0");
+                  })
+                  .describe("any ICMP message at host A")
+                  .within(9.4));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc1122_no_destination_unreachable compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The absent neighbour mockup: two hosts on one Ethernet link, and a third address on the
+// link that no station owns.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 10s
+seed-set = 0
+
+# Fixed addresses, so that the address nobody owns is a known one.
+*.configurator.config = xml("<config><interface hosts='hostA' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='hostB' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+
+# A datagram every 0.5 s to 10.0.0.99, which no station owns.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "10.0.0.99"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 0.5s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc1122_no_destination_unreachable: PASS
+
+%contains: stdout
+hostB.app[0]: received 0 packets

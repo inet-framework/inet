@@ -616,9 +616,11 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     Block Ack, and DHCP as a documented pattern.
   - **`protocoltest-base.ini`** (`tests/protocol/lib/`): reusable `[General]` base (seed,
     sim-time-limit, `printDescription`, `GlobalArp`) for new suites to `include`.
-  - **New cookbook tests** added and passing: `arp_resolution` (`ArpResolution` config — ARP
-    request/reply via `arp.opcode`) and `ipv4_fragmentation` (`Fragmentation` config — a
-    4000 B datagram over the 1500 B MTU, asserting `ipv4.moreFragments` / `fragmentOffset`).
+  - **New cookbook tests** added and passing: `arp_resolution` (ARP request/reply via
+    `arp.opcode`) and `ipv4_fragmentation` (a 4000 B datagram over the 1500 B MTU, asserting
+    `ipv4.moreFragments` / `fragmentOffset`). Both files are gone now: the standards suites
+    hold only standards-derived tests, and the ARP one was replaced by
+    `Rfc826AddressResolution.test`.
   - **Self-contained `.test` examples** (`tests/protocol/self/`): `Basic.test` (PASS),
     `ViolationDetected.test` (asserts the framework reports a FAIL on a
     wrong assertion), `InterceptMutate.test` (MITM PASS). Each carries its **program

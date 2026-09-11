@@ -1,0 +1,110 @@
+%description:
+
+RFC 826 -- the octets of an ARP packet on an Ethernet link.
+
+Checks RFC826-FMT-1, RFC826-FMT-2, RFC826-FMT-4, RFC826-FMT-7 and RFC826-RECV-11 (may) from
+doc/project/evidence/standard/rfc826/catalog.md, and RFC5494-NUM-1 and RFC5494-NUM-4 from
+doc/project/evidence/standard/rfc5494/catalog.md. The English procedure is in
+doc/project/evidence/protocol/arp/checks/packet-format.md#packet-layout-on-the-wire; the
+program step below maps onto its expected observations. Mapping of the pair mockup:
+host A = hostA, host B = hostB.
+
+All seven expected observations read the same packet, the request at host A's interface, so
+they are one program step with seven assertions. The check reads octets and not fields: a
+host puts the ARP packet on the link as a field object, so the octets are produced from it
+with the serializer of the protocol, which is what the wire carries.
+
+The offsets come from the arithmetic of the check document: 2 + 2 + 1 + 1 + 2 octets of
+fixed fields, then the four address fields at offsets 8, 14, 18 and 24, and 28 octets in
+total.
+
+Expected observation 4 is the one that needs the addresses: the six octets at offset 8 hold
+the hardware address of host A and the four at offset 14 hold its protocol address, so the
+two length fields agree with the widths the packet actually has. That agreement is also what
+makes the optional consistency check of RFC826-RECV-11 possible.
+
+Expected observation 6, the no-padding rule, is the same reading: the sender protocol
+address starts at offset 14, immediately after the six octets of the sender hardware
+address. Expected observation 7 is the total length, because a 28-octet packet with one
+target protocol address cannot hold a second resolution.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_packet_layout")
+        // All seven expected observations, on the request that host A puts on the link.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      auto octets = arpOctets(c.event.packet);
+                      auto hostAMac = interfaceMacAddress("hostA.eth[0]");
+                      auto hostAIp = interfaceIpv4Address("hostA.eth[0]");
+                      auto hostBIp = interfaceIpv4Address("hostB.eth[0]");
+                      return octets.size() == 28                              // observations 1 and 7
+                             && octetsUint16(octets, 0) == 1                  // observation 2: the Ethernet hardware space
+                             && octetsUint16(octets, 2) == 0x0800             // observation 3: the Ethertype of IPv4
+                             && octets.at(4) == 6 && octets.at(5) == 4        // observation 4: the two lengths
+                             && octetsUint16(octets, 6) == 1                  // observation 5: the opcode of a request
+                             && octetsHoldMacAddress(octets, 8, hostAMac)     // observation 4 and 6: the widths and no padding
+                             && octetsHoldIpv4Address(octets, 14, hostAIp)
+                             && octetsHoldIpv4Address(octets, 24, hostBIp)
+                             && octetsUint16(octets, 0) != 0                  // observation 2 and RFC5494-NUM-1
+                             && octetsUint16(octets, 0) != 0xFFFF
+                             && octetsUint16(octets, 6) != 0
+                             && octetsUint16(octets, 6) != 0xFFFF;
+                  })
+                  .describe("the octets of the request: 28 in all, hardware space 1, protocol space 0x0800, lengths 6 and 4, opcode 1, and the addresses at offsets 8, 14 and 24")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_packet_layout compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One datagram of 100 octets, which starts one exchange.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc826_packet_layout: PASS

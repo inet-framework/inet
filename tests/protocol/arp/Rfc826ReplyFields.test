@@ -1,0 +1,113 @@
+%description:
+
+RFC 826 -- the target of a request answers with the fields swapped, directly to the
+requester.
+
+Checks RFC826-RECV-8 and RFC826-RECV-9 from
+doc/project/evidence/standard/rfc826/catalog.md. It also covers RFC826-FMT-6 and
+RFC826-TABLE-2. The English procedure is in
+doc/project/evidence/protocol/arp/checks/reply.md#reply-field-values; the program steps below
+map onto its expected observations. Mapping of the pair mockup: host A = hostA,
+host B = hostB.
+
+Expected observations 2 to 6 all describe one packet -- the reply at host B's interface --
+so they are one program step with the assertions of all five: the opcode is that of a reply,
+the sender fields hold the addresses of host B, the target fields hold the addresses of
+host A, the frame goes to the hardware address of host A and not to the broadcast address,
+and the ARP data is 28 octets, the same length as the request.
+
+The length assertion is on both packets, one in each step, and not a comparison between
+them: the framework carries a captured field value from step to step, and the length of an
+ARP packet is not a field. The two assertions establish the same thing, because two lengths
+that are both 28 are equal.
+
+The frame fields are read through the chunk class name, EthernetMacHeader, and not through
+the protocol name. A protocol name resolves to the last chunk of that protocol in the
+packet, which for an Ethernet frame is the frame check sequence.
+
+%includes:
+#include "ProtocolTest.h"
+#include "ArpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc826_reply_fields")
+        // Expected observation 1: the request, with host A in the sender fields and the
+        // address of host B in the target protocol address.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1")
+                  .match([](const MatchContext& c) {
+                      auto packet = c.event.packet;
+                      return macAddressField(packet, "arp.srcMacAddress") == interfaceMacAddress("hostA.eth[0]").str()
+                             && ipv4AddressField(packet, "arp.srcIpAddress") == interfaceIpv4Address("hostA.eth[0]").str()
+                             && ipv4AddressField(packet, "arp.destIpAddress") == interfaceIpv4Address("hostB.eth[0]").str()
+                             && arpOctets(packet).size() == 28;
+                  })
+                  .describe("the request from host A, 28 octets")
+                  .within(0.5))
+        // Expected observations 2 to 6: the reply of host B, field by field (RFC826-RECV-8,
+        // RECV-9, FMT-6, TABLE-2).
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 2")
+                  .match([](const MatchContext& c) {
+                      auto packet = c.event.packet;
+                      return macAddressField(packet, "arp.srcMacAddress") == interfaceMacAddress("hostB.eth[0]").str()
+                             && ipv4AddressField(packet, "arp.srcIpAddress") == interfaceIpv4Address("hostB.eth[0]").str()
+                             && macAddressField(packet, "arp.destMacAddress") == interfaceMacAddress("hostA.eth[0]").str()
+                             && ipv4AddressField(packet, "arp.destIpAddress") == interfaceIpv4Address("hostA.eth[0]").str()
+                             && macAddressField(packet, "EthernetMacHeader.dest") == interfaceMacAddress("hostA.eth[0]").str()
+                             && macAddressField(packet, "EthernetMacHeader.dest") != MacAddress::BROADCAST_ADDRESS.str()
+                             && arpOctets(packet).size() == 28;
+                  })
+                  .describe("host B's reply: host B in the sender fields, host A in the target fields, sent to host A's hardware address, 28 octets")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc826_reply_fields compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The pair mockup: two hosts on one Ethernet link.
+network ArpPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=300,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++; // link 1
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ArpPairNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One datagram of 100 octets, which starts one exchange.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc826_reply_fields: PASS
