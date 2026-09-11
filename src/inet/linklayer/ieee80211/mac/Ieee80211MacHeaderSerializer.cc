@@ -137,8 +137,11 @@ const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserializeFields(Memory
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
     stream.readUint4();
-    mpduSubframe->setLength(stream.readUint4() >> 8);
-    mpduSubframe->setLength(stream.readUint8());
+    // IEEE Std 802.11-2024, 9.7.1, Table 9-659 and Figure 9-1330:
+    // in an HT PPDU, MPDU Length Low is 12 bits and MPDU Length High is reserved.
+    int length = stream.readUint4() << 8;
+    length |= stream.readUint8();
+    mpduSubframe->setLength(length);
     stream.readByte();
     stream.readByte();
     return mpduSubframe;
