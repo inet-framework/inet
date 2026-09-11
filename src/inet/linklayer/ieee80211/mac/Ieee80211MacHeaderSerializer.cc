@@ -64,6 +64,12 @@ uint16_t packSequenceControl(uint8_t fragmentNumber, uint16_t sequenceNumber)
     return (fragmentNumber & 0xF) | ((sequenceNumber & 0xFFF) << 4);
 }
 
+uint16_t packBlockAckParameters(bool aMsduSupported, bool blockAckPolicy, uint8_t tid, uint16_t bufferSize)
+{
+    // IEEE Std 802.11-2024, 9.4.1.13, Figure 9-151.
+    return aMsduSupported | (blockAckPolicy << 1) | ((tid & 0xF) << 2) | ((bufferSize & 0x3FF) << 6);
+}
+
 void writeSequenceControl(MemoryOutputStream& stream, uint8_t fragmentNumber, uint16_t sequenceNumber)
 {
     stream.writeUint16Le(packSequenceControl(fragmentNumber, sequenceNumber));
@@ -192,13 +198,11 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
                                 auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(chunk);
                                 stream.writeByte(addbaRequest->getBlockAckAction());
                                 stream.writeByte(addbaRequest->getDialogToken());
-                                stream.writeBit(addbaRequest->getAMsduSupported());
-                                stream.writeBit(addbaRequest->getBlockAckPolicy());
-                                stream.writeUint4(addbaRequest->getTid());
-                                stream.writeNBitsOfUint64Be(addbaRequest->getBufferSize(), 10);
-                                stream.writeUint16Be(addbaRequest->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
-                                stream.writeUint4(addbaRequest->get_fragmentNumber());
-                                stream.writeNBitsOfUint64Be(addbaRequest->getStartingSequenceNumber().get(), 12);
+                                stream.writeUint16Le(packBlockAckParameters(addbaRequest->getAMsduSupported(),
+                                        addbaRequest->getBlockAckPolicy(), addbaRequest->getTid(), addbaRequest->getBufferSize()));
+                                stream.writeUint16Le(addbaRequest->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
+                                // IEEE Std 802.11-2024, 9.6.4.2: Fragment Number is zero.
+                                writeSequenceControl(stream, 0, addbaRequest->getStartingSequenceNumber().get());
                                 ASSERT(stream.getLength() - startPos == addbaRequest->getChunkLength());
                                 break;
                             }
@@ -206,22 +210,20 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
                                 auto addbaResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(chunk);
                                 stream.writeByte(addbaResponse->getBlockAckAction());
                                 stream.writeByte(addbaResponse->getDialogToken());
-                                stream.writeUint16Be(addbaResponse->getStatusCode());
-                                stream.writeBit(addbaResponse->getAMsduSupported());
-                                stream.writeBit(addbaResponse->getBlockAckPolicy());
-                                stream.writeUint4(addbaResponse->getTid());
-                                stream.writeNBitsOfUint64Be(addbaResponse->getBufferSize(), 10);
-                                stream.writeUint16Be(addbaResponse->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
+                                stream.writeUint16Le(addbaResponse->getStatusCode());
+                                stream.writeUint16Le(packBlockAckParameters(addbaResponse->getAMsduSupported(),
+                                        addbaResponse->getBlockAckPolicy(), addbaResponse->getTid(), addbaResponse->getBufferSize()));
+                                stream.writeUint16Le(addbaResponse->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
                                 ASSERT(stream.getLength() - startPos == addbaResponse->getChunkLength());
                                 break;
                             }
                             case 2: {
                                 auto delba = dynamicPtrCast<const Ieee80211Delba>(chunk);
                                 stream.writeByte(delba->getBlockAckAction());
-                                stream.writeNBitsOfUint64Be(delba->getReserved(), 11);
-                                stream.writeBit(delba->getInitiator());
-                                stream.writeUint4(delba->getTid());
-                                stream.writeUint16Be(delba->getReasonCode());
+                                // IEEE Std 802.11-2024, 9.4.1.16, Figure 9-154.
+                                stream.writeUint16Le((delba->getReserved() & 0x7FF) |
+                                        (delba->getInitiator() << 11) | ((delba->getTid() & 0xF) << 12));
+                                stream.writeUint16Le(delba->getReasonCode());
                                 ASSERT(stream.getLength() - startPos == delba->getChunkLength());
                                 break;
                             }
@@ -434,13 +436,15 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                             copyActionFrameFields(addbaRequest, actionFrame);
                             addbaRequest->setBlockAckAction(blockAckAction);
                             addbaRequest->setDialogToken(stream.readByte());
-                            addbaRequest->setAMsduSupported(stream.readBit());
-                            addbaRequest->setBlockAckPolicy(stream.readBit());
-                            addbaRequest->setTid(stream.readUint4());
-                            addbaRequest->setBufferSize(stream.readNBitsToUint64Be(10));
-                            addbaRequest->setBlockAckTimeoutValue(SimTime(stream.readUint16Be() * 1024, SIMTIME_US));
-                            addbaRequest->set_fragmentNumber(stream.readUint4());
-                            addbaRequest->setStartingSequenceNumber(SequenceNumberCyclic(stream.readNBitsToUint64Be(12)));
+                            auto parameters = stream.readUint16Le();
+                            addbaRequest->setAMsduSupported(parameters & 1);
+                            addbaRequest->setBlockAckPolicy(parameters & 2);
+                            addbaRequest->setTid((parameters >> 2) & 0xF);
+                            addbaRequest->setBufferSize(parameters >> 6);
+                            addbaRequest->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
+                            readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                            addbaRequest->set_fragmentNumber(fragmentNumber);
+                            addbaRequest->setStartingSequenceNumber(sequenceNumber);
                             return addbaRequest;
                         }
                         case 1: {
@@ -449,22 +453,25 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                             copyActionFrameFields(addbaResponse, actionFrame);
                             addbaResponse->setBlockAckAction(blockAckAction);
                             addbaResponse->setDialogToken(stream.readByte());
-                            addbaResponse->setStatusCode(stream.readUint16Be());
-                            addbaResponse->setAMsduSupported(stream.readBit());
-                            addbaResponse->setBlockAckPolicy(stream.readBit());
-                            addbaResponse->setTid(stream.readUint4());
-                            addbaResponse->setBufferSize(stream.readNBitsToUint64Be(10));
-                            addbaResponse->setBlockAckTimeoutValue(SimTime(stream.readUint16Be() * 1024, SIMTIME_US));
+                            addbaResponse->setStatusCode(stream.readUint16Le());
+                            auto parameters = stream.readUint16Le();
+                            addbaResponse->setAMsduSupported(parameters & 1);
+                            addbaResponse->setBlockAckPolicy(parameters & 2);
+                            addbaResponse->setTid((parameters >> 2) & 0xF);
+                            addbaResponse->setBufferSize(parameters >> 6);
+                            addbaResponse->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
                             return addbaResponse;
                         }
                         case 2: {
                             auto delba = makeShared<Ieee80211Delba>();
                             copyBasicFields(delba, macHeader);
+                            copyActionFrameFields(delba, actionFrame);
                             delba->setBlockAckAction(blockAckAction);
-                            delba->setReserved(stream.readNBitsToUint64Be(11));
-                            delba->setInitiator(stream.readBit());
-                            delba->setTid(stream.readUint4());
-                            delba->setReasonCode(stream.readUint16Be());
+                            auto parameters = stream.readUint16Le();
+                            delba->setReserved(parameters & 0x7FF);
+                            delba->setInitiator(parameters & 0x800);
+                            delba->setTid(parameters >> 12);
+                            delba->setReasonCode(stream.readUint16Le());
                             return delba;
                         }
                         default:

@@ -1,0 +1,127 @@
+%description:
+IEEE Std 802.11-2024 9.2.2, 9.4.1.13-16 and 9.6.4.2-4: independently encode and
+parse golden ADDBA Request, ADDBA Response and DELBA octets, including common Action fields.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+static std::vector<uint8_t> actionBytes(const std::vector<uint8_t>& body)
+{
+    std::vector<uint8_t> bytes = {
+        0xD0, 0x00, 0x34, 0x12,
+        0x02, 0, 0, 0, 0, 1,
+        0x02, 0, 0, 0, 0, 2,
+        0x02, 0, 0, 0, 0, 3,
+        0x37, 0x12
+    };
+    bytes.insert(bytes.end(), body.begin(), body.end());
+    return bytes;
+}
+
+template<typename T>
+static Ptr<T> makeAction()
+{
+    auto header = makeShared<T>();
+    header->setDurationField(SimTime(0x1234, SIMTIME_US));
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+    header->setAddress3(MacAddress("02:00:00:00:00:03"));
+    header->setFragmentNumber(7);
+    header->setSequenceNumber(SequenceNumberCyclic(0x123));
+    return header;
+}
+
+template<typename T>
+static Ptr<const T> checkAction(const Ptr<T>& header, const std::vector<uint8_t>& body)
+{
+    auto expected = actionBytes(body);
+    Packet encoded("encoded", header);
+    ASSERT(header->getChunkLength() == B(expected.size()));
+    ASSERT(encoded.peekDataAsBytes()->getBytes() == expected);
+
+    // Construct raw bytes independently; do not reuse the encoded packet or its serializer cache.
+    Packet raw("raw", makeShared<BytesChunk>(expected));
+    auto parsed = raw.popAtFront<T>();
+    ASSERT(raw.getDataLength() == B(0));
+    ASSERT(parsed->getChunkLength() == B(expected.size()));
+    ASSERT(parsed->getDurationField() == header->getDurationField());
+    ASSERT(parsed->getReceiverAddress() == header->getReceiverAddress());
+    ASSERT(parsed->getTransmitterAddress() == header->getTransmitterAddress());
+    ASSERT(parsed->getAddress3() == header->getAddress3());
+    ASSERT(parsed->getFragmentNumber() == 7);
+    ASSERT(parsed->getSequenceNumber() == SequenceNumberCyclic(0x123));
+    ASSERT(parsed->getCategory() == 3);
+    ASSERT(parsed->getBlockAckAction() == header->getBlockAckAction());
+    return parsed;
+}
+
+%activity:
+{
+    auto header = makeAction<Ieee80211AddbaRequest>();
+    header->setDialogToken(9);
+    header->setAMsduSupported(true);
+    header->setBlockAckPolicy(true);
+    header->setTid(5);
+    header->setBufferSize(64);
+    header->setBlockAckTimeoutValue(SimTime(0x1234 * 1024, SIMTIME_US));
+    header->setStartingSequenceNumber(SequenceNumberCyclic(0xABC));
+    auto parsed = checkAction(header, {3, 0, 9, 0x17, 0x10, 0x34, 0x12, 0xC0, 0xAB});
+    ASSERT(parsed->getDialogToken() == 9);
+    ASSERT(parsed->getAMsduSupported() && parsed->getBlockAckPolicy());
+    ASSERT(parsed->getTid() == 5 && parsed->getBufferSize() == 64);
+    ASSERT(parsed->getBlockAckTimeoutValue() == header->getBlockAckTimeoutValue());
+    ASSERT(parsed->get_fragmentNumber() == 0);
+    ASSERT(parsed->getStartingSequenceNumber() == SequenceNumberCyclic(0xABC));
+}
+{
+    auto header = makeAction<Ieee80211AddbaResponse>();
+    header->setDialogToken(9);
+    header->setStatusCode(37);
+    header->setAMsduSupported(false);
+    header->setBlockAckPolicy(true);
+    header->setTid(15);
+    header->setBufferSize(1023);
+    header->setBlockAckTimeoutValue(SimTime(65535 * 1024, SIMTIME_US));
+    auto parsed = checkAction(header, {3, 1, 9, 0x25, 0, 0xFE, 0xFF, 0xFF, 0xFF});
+    ASSERT(parsed->getDialogToken() == 9 && parsed->getStatusCode() == 37);
+    ASSERT(!parsed->getAMsduSupported() && parsed->getBlockAckPolicy());
+    ASSERT(parsed->getTid() == 15 && parsed->getBufferSize() == 1023);
+    ASSERT(parsed->getBlockAckTimeoutValue() == header->getBlockAckTimeoutValue());
+}
+{
+    auto header = makeAction<Ieee80211AddbaRequest>();
+    header->setBlockAckPolicy(true);
+    header->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    auto parsed = checkAction(header, {3, 0, 1, 2, 0, 0, 0, 0, 0});
+    ASSERT(!parsed->getAMsduSupported() && parsed->getBlockAckPolicy());
+    ASSERT(parsed->getTid() == 0 && parsed->getBufferSize() == 0);
+    ASSERT(parsed->getBlockAckTimeoutValue() == SIMTIME_ZERO);
+    ASSERT(parsed->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+}
+{
+    auto header = makeAction<Ieee80211Delba>();
+    header->setInitiator(true);
+    header->setTid(5);
+    header->setReasonCode(37);
+    auto parsed = checkAction(header, {3, 2, 0, 0x58, 0x25, 0});
+    ASSERT(parsed->getReserved() == 0 && parsed->getInitiator());
+    ASSERT(parsed->getTid() == 5 && parsed->getReasonCode() == 37);
+}
+{
+    auto header = makeAction<Ieee80211Delba>();
+    header->setTid(15);
+    header->setReasonCode(39);
+    auto parsed = checkAction(header, {3, 2, 0, 0xF0, 0x27, 0});
+    ASSERT(parsed->getReserved() == 0 && !parsed->getInitiator());
+    ASSERT(parsed->getTid() == 15 && parsed->getReasonCode() == 39);
+}
+EV << "Block Ack Action fields match IEEE golden octets.\n";
+
+%contains: stdout
+Block Ack Action fields match IEEE golden octets.
