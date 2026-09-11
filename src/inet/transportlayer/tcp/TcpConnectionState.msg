@@ -249,6 +249,13 @@ struct TcpStateVariables
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
+    bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
+    bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
+    uint32_t deliveredCeBytes = 0; // sender-side resolved CE byte count from option evidence only; stays 0 if the peer never sends the option
+    uint32_t deliveredCePkts = 0; // sender-side resolved count of CE-marked packets the peer has reported via ACE/option
+    bool ecnMarkAll = false; // marks all packets, including pure ACKs, retransmissions, etc. with ECN
+    int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
+    simtime_t time_last_segment_received = 0; // time at which the last segment was received (idle base for keepalive)
 };
 
 cplusplus(TcpStateVariables) {{

@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_TCPTAHOERENOFAMILY_H
-#define __INET_TCPTAHOERENOFAMILY_H
+#ifndef __INET_TCPCLASSICALGORITHMBASE_H
+#define __INET_TCPCLASSICALGORITHMBASE_H
 
 #include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 #include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
@@ -23,11 +23,50 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
   protected:
     TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
+    ITcpCongestionControl *congestionControl = nullptr;
+    ITcpRecovery *recovery = nullptr;
+
+  protected:
+    virtual ITcpRecovery *createRecovery() { return nullptr; }
+    virtual ITcpCongestionControl *createCongestionControl() { return nullptr; }
+
+    virtual TcpStateVariables *createStateVariables() override
+    {
+        return new TcpClassicAlgorithmBaseStateVariables();
+    }
+
+    virtual void established(bool active) override;
+
+    virtual void processRexmitTimer(TcpEventCode& event) override;
+
+    virtual bool processEce();
+
   public:
     /** Ctor */
     TcpClassicAlgorithmBase();
+    virtual ~TcpClassicAlgorithmBase();
 
     virtual void initialize() override;
+
+    virtual ITcpCongestionControl *getCongestionControl() { return congestionControl; }
+    virtual ITcpRecovery *getRecovery() override;
+
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+
+    virtual void receivedDuplicateAck() override;
+
+    /** Forwarded to the recovery strategy (RFC 6937 PRR accounting, loss probes). */
+    virtual void dataSent(uint32_t fromseq) override;
+
+    /** Forwarded to the recovery strategy. */
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
+
+    /** Forwarded to the recovery strategy (pre-discard scoreboard inspection). */
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
+
+    virtual uint32_t getBytesInFlight() const override;
 };
 
 

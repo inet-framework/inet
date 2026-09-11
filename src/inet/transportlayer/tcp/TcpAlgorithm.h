@@ -120,6 +120,11 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receiveSeqChanged() = 0;
 
     /**
+     * Called after we received an ACK for which ackNo <= snd_una.
+     */
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+
+    /**
      * Called after we received an ACK which acked some data (that is,
      * we could advance snd_una). At this point the state variables
      * (snd_una, snd_wnd) have already been updated. The argument firstSeqAcked
@@ -130,12 +135,13 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) = 0;
 
     /**
-     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
-     * no data in segment, segment doesn't carry window update, and also,
-     * we have unacked data). The dupack counter got already updated
-     * when calling this method (i.e. dupacks == 1 on first duplicate ACK.)
+     * Called when snd_una is about to advance, BEFORE the acked range
+     * [fromSeq, toSeq) is discarded from the send/rexmit queues. At this point
+     * the scoreboard data for [fromSeq, toSeq) (transmit counts, SACK state) is
+     * still valid, so an algorithm can inspect it (e.g. to distinguish reordering
+     * from loss). Default-empty; overridden by flavours that need it.
      */
-    virtual void receivedDuplicateAck() = 0;
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
 
     /**
      * Whether this flavour implements SACK-based (RFC 6675) loss recovery.
@@ -181,6 +187,14 @@ class INET_API TcpAlgorithm : public cObject
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) = 0;
+
+    /**
+     * Report a completed RTT measurement (segment sent at tSent, acked at
+     * tAcked) to the algorithm's estimator. Used by the connection for the
+     * handshake (SYN<->SYN-ACK) RTT seed; data-segment measurements are
+     * handled internally by the algorithm.
+     */
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) = 0;
 
     /**
      * Called before sending ACK. Determines whether to set ECE bit.

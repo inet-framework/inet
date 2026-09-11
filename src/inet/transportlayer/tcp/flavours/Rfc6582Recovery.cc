@@ -8,7 +8,6 @@
 
 #include "inet/transportlayer/tcp/flavours/Rfc5681Recovery.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
-#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {
