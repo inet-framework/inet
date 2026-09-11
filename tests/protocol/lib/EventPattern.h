@@ -74,6 +74,28 @@ class INET_API EventPattern
 
     mutable std::shared_ptr<PacketFilter> filter;         // compiled lazily from selExpr
 
+    // --- assertion: what must hold on the event the filter picked ---
+    //
+    // A filter and an assertion are two different things, and a word says which it is. A
+    // filter picks the event: when nothing matches, the step misses its deadline. An
+    // assertion must hold on the picked event: when it does not, the step fails at once and
+    // the engine never looks for a later event. That difference is the whole point of the
+    // split, because a value written as a filter turns a wrong first value into a silent
+    // search for a right later one.
+    struct Assertion {
+        enum Kind { Expr, NotExpr, That, Equal, NotEqual, AtLeast, AtMost } kind = Expr;
+        std::string expr;                                 // Expr / NotExpr
+        MatchPredicate predicate;                         // That
+        double value = 0;                                 // Equal / NotEqual / AtLeast / AtMost
+    };
+    std::vector<Assertion> assertions;
+
+    // Which event of the filtered stream the assertions speak about. 0 means "the engine
+    // decides": the first filtered event when there are assertions, and today's behaviour
+    // (any matching event) when there are none.
+    int fltOccurrence = 0;
+    mutable int fltHits = 0;                              // filtered events seen so far
+
   public:
     EventPattern& iface(const char *name) { selIface = name; return *this; }
     // --- new orthogonal selector vocabulary (pattern-language refactor) ---
@@ -96,6 +118,34 @@ class INET_API EventPattern
     EventPattern& outbound() { selHasDirection = true; selDirection = 1; return *this; }
     EventPattern& match(const char *expression) { selExpr = expression; return *this; }
     EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
+    // --- filter words: they pick the event ---
+    EventPattern& filterExpr(const char *expression) { selExpr = expression; return *this; }
+    EventPattern& filterThat(MatchPredicate p) { predicate = std::move(p); return *this; }
+    EventPattern& filterEqual(double v) { selHasValue = true; selValue = v; return *this; }
+    EventPattern& filterAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
+    EventPattern& filterAtMost(double v) { selHasMax = true; selMax = v; return *this; }
+    EventPattern& filterBetween(double lo, double hi) { return filterAtLeast(lo).filterAtMost(hi); }
+
+    // --- position words: they pick which filtered event, and compare nothing ---
+    EventPattern& nth(int k) { fltOccurrence = k; return *this; }
+    EventPattern& first() { return nth(1); }
+
+    // --- assertion words: they must hold on the picked event ---
+    EventPattern& assertExpr(const char *e) { assertions.push_back({Assertion::Expr, e, nullptr, 0}); return *this; }
+    EventPattern& assertNotExpr(const char *e) { assertions.push_back({Assertion::NotExpr, e, nullptr, 0}); return *this; }
+    EventPattern& assertThat(MatchPredicate p) { assertions.push_back({Assertion::That, "", std::move(p), 0}); return *this; }
+    EventPattern& assertEqual(double v) { assertions.push_back({Assertion::Equal, "", nullptr, v}); return *this; }
+    EventPattern& assertNotEqual(double v) { assertions.push_back({Assertion::NotEqual, "", nullptr, v}); return *this; }
+    EventPattern& assertAtLeast(double v) { assertions.push_back({Assertion::AtLeast, "", nullptr, v}); return *this; }
+    EventPattern& assertAtMost(double v) { assertions.push_back({Assertion::AtMost, "", nullptr, v}); return *this; }
+    EventPattern& assertBetween(double lo, double hi) { return assertAtLeast(lo).assertAtMost(hi); }
+    // There is deliberately no assertNotThat: a lambda negates itself, so it would be
+    // exactly assertThat of the negation. assertNotExpr is not redundant in the same way,
+    // because it differs from assertExpr of a negated expression when the chunk is absent.
+
+    // True when every assertion holds on this event. On a failure, reason says which one.
+    bool assertionsHold(const MatchContext& context, std::string& reason) const;
+
     EventPattern& describe(const char *phrase) { description = phrase; return *this; }
     EventPattern& capture(const char *name, CaptureFn fn) { captures.emplace_back(name, std::move(fn)); return *this; }
     // Declarative capture: remember a "protocol.field" value (e.g. "tcp.sequenceNo").

@@ -73,6 +73,101 @@ bool EventPattern::scopeMatches(const PacketEvent& event) const
     return true;
 }
 
+// Evaluates one content expression against the event's packet, with the same capture
+// substitution and the same "absent protocol is a non-match" rule the filter side uses.
+// An assertion runs once per step, so it compiles fresh rather than caching.
+static bool evaluateAssertionExpression(const std::string& text, const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr)
+        return false;
+    std::string expression = text;
+    for (auto& capture : context.captures) {
+        std::string placeholder = "{" + capture.first + "}";
+        if (expression.find(placeholder) == std::string::npos)
+            continue;
+        std::string value = formatCaptureValue(capture.second);
+        size_t pos;
+        while ((pos = expression.find(placeholder)) != std::string::npos)
+            expression.replace(pos, placeholder.size(), value);
+    }
+    if (expression.find('{') != std::string::npos)
+        return false;
+    try {
+        PacketFilter filter;
+        filter.setExpression(expression.c_str());
+        return filter.matches(packet);
+    }
+    catch (const std::exception&) {
+        return false;
+    }
+}
+
+static std::string describeValue(double v)
+{
+    std::ostringstream os;
+    os << v;
+    return os.str();
+}
+
+bool EventPattern::assertionsHold(const MatchContext& context, std::string& reason) const
+{
+    const PacketEvent& event = context.event;
+    for (auto& assertion : assertions) {
+        switch (assertion.kind) {
+            case Assertion::Expr:
+                if (!evaluateAssertionExpression(assertion.expr, context)) {
+                    reason = "the packet does not satisfy '" + assertion.expr + "'";
+                    return false;
+                }
+                break;
+            case Assertion::NotExpr:
+                if (evaluateAssertionExpression(assertion.expr, context)) {
+                    reason = "the packet satisfies '" + assertion.expr + "', which is forbidden";
+                    return false;
+                }
+                break;
+            case Assertion::That:
+                try {
+                    if (assertion.predicate && !assertion.predicate(context)) {
+                        reason = "the predicate does not hold";
+                        return false;
+                    }
+                }
+                catch (const std::exception& e) {
+                    reason = std::string("the predicate raised: ") + e.what();
+                    return false;
+                }
+                break;
+            case Assertion::Equal:
+            case Assertion::NotEqual:
+            case Assertion::AtLeast:
+            case Assertion::AtMost: {
+                if (!event.hasValue) {
+                    reason = "the event carries no scalar value";
+                    return false;
+                }
+                const char *relation = nullptr;
+                if (assertion.kind == Assertion::Equal && event.value != assertion.value)
+                    relation = "equal to";
+                else if (assertion.kind == Assertion::NotEqual && event.value == assertion.value)
+                    relation = "different from";
+                else if (assertion.kind == Assertion::AtLeast && event.value < assertion.value)
+                    relation = "at least";
+                else if (assertion.kind == Assertion::AtMost && event.value > assertion.value)
+                    relation = "at most";
+                if (relation) {
+                    reason = "the value is " + describeValue(event.value) + ", and it must be "
+                             + relation + " " + describeValue(assertion.value);
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+    return true;
+}
+
 bool EventPattern::selectorMatches(const MatchContext& context) const
 {
     const PacketEvent& event = context.event;

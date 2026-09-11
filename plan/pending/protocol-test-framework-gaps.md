@@ -95,10 +95,13 @@ Semantics, stated exactly:
    when it happens it must hold P" means nothing.
 5. With `exactlyTimes(n, ...)` and its relatives, the assertion must hold on **each** match.
 
-- [ ] Add the seven filter words and the eight assertion words.
-- [ ] Add `first()` and `nth(k)` to a pattern.
+- [x] Add the six filter words and the eight assertion words.
+- [x] Add `first()` and `nth(k)` to a pattern.
 - [ ] Rename the internal fields from `sel*` to `flt*`.
 - [ ] The describer renders an assertion differently from a filter.
+- [x] `tcp/Rfc5681InitialWindow.test` states its rule directly. Verified both ways: with a
+      bound below the real window it fails with "the value is 1072, and it must be at
+      most 100".
 
 ## Item 3 — the non-blocking step
 

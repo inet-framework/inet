@@ -82,7 +82,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     void processMatch(const PacketEvent& event);
     void advance(simtime_t at);    // cancel deadline, set anchor, move to the next step
     void performInjection(const Injection& injection);
-    bool patternMatches(const EventPattern& pattern, const PacketEvent& event) const; // selector + earliest gate
+    bool patternMatches(const EventPattern& pattern, const PacketEvent& event); // selector + earliest gate
     void runCaptures(const EventPattern& pattern, const PacketEvent& event);
     void armDeadline(simtime_t window);
     void cancelDeadline();

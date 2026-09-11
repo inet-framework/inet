@@ -503,12 +503,32 @@ void ProtocolTester::enterStep()
     }
 }
 
-bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event) const
+bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event)
 {
     if (pattern.selHasNotBefore && event.time < anchorTime + pattern.selNotBefore)
         return false;
     MatchContext context{event, captureStore};
-    return pattern.selectorMatches(context);
+    if (!pattern.selectorMatches(context))
+        return false;
+
+    // The filter picked this event. A position word and an assertion decide what that
+    // means. With neither, the behaviour is what it always was: the first event the filter
+    // matches is the match.
+    pattern.fltHits++;
+    int wanted = pattern.fltOccurrence != 0 ? pattern.fltOccurrence
+                                            : (pattern.assertions.empty() ? 0 : 1);
+    if (wanted != 0 && pattern.fltHits != wanted)
+        return false;
+
+    std::string reason;
+    if (!pattern.assertionsHold(context, reason)) {
+        // An assertion speaks about the event the filter picked, so a failure ends the step
+        // here. The engine does not look for a later event that would satisfy it.
+        decide(false, "assertion failed for step " + std::to_string(currentStep) + " ["
+                      + pattern.str() + "]: " + reason);
+        return false;
+    }
+    return true;
 }
 
 void ProtocolTester::runCaptures(const EventPattern& pattern, const PacketEvent& event)

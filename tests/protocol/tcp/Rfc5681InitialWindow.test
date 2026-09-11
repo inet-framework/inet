@@ -17,21 +17,18 @@ The segment size here is 536 bytes, the default of the model and the value RFC 1
 for a host that learns nothing else. 536 falls in the lowest band of the table, so the bound
 is 4 * 536 = 2144 bytes.
 
-One property of the model decides the shape of this test. The window is published only when
-the algorithm changes it, not when the connection sets it up, so the first value the signal
-carries arrives with the first acknowledgment at about t=0.2. "The initial window" is
-therefore observable as the first publication and not before it. The first step closes just
-after that instant, at t=0.2002, and the second step proves that a publication happened at
-all, so that the first step cannot pass on a model that stays silent.
+One property of the model decides what "the initial window" means here. The window is
+published only when the algorithm changes it, not when the connection sets it up, so the
+first value the signal carries arrives with the first acknowledgment at about t=0.2.
+
+The step says the rule directly: `first()` picks the first publication, and `assertAtMost`
+is the bound the table gives. The two halves are separate on purpose. A bound written as a
+filter would pick the first publication that is small enough and pass over one that is not,
+which is the shape of a check that cannot fail.
 
 The bound governs the initial window alone. After the transfer starts, slow start grows the
-window past it, which is what the same section of RFC 5681 requires.
-
-What this test cannot establish is worth stating. The framework matches the first event that
-satisfies a pattern, and it cannot say "the first publication of this signal satisfies P".
-The first step therefore forbids an oversized value in a time window rather than at an
-ordinal position, and it depends on the scenario times to place that window. A framework
-that could bind the first publication would state the rule directly. See the pass notes.
+window past it, which is what the same section of RFC 5681 requires, and no step here
+forbids that.
 
 Expected result: PASS. The bound is an upper bound, so a smaller window conforms.
 
@@ -50,21 +47,12 @@ const long IW_BOUND = 4 * SMSS;   // 2144 bytes
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc5681_initial_window")
-        // Observations 1 and 2 together. The window is published for the first time when the
-        // transfer starts, so "the initial window" is the first value the signal carries.
-        // This step forbids a value above the bound up to and including that first
-        // publication, which is what the two statements demand: the table bounds the initial
-        // window, and the handshake does not enlarge it.
-        .never(on("host1.tcp").signal("cwnd")
-                   .isAtLeast(IW_BOUND + 1)
-                   .describe("a congestion window above the bound, up to the first publication")
-                   .within(0.2002))
-        // The signal is alive. Without this step the one above would pass on a model that
-        // never publishes the window at all. The step puts no bound on the value, because
-        // by this point the transfer has started and slow start is growing the window,
-        // which RFC 5681 requires.
-        .once(on("host1.tcp").signal("cwnd")
-                  .describe("a further publication of host A's congestion window")
+        // Observations 1 and 2 together, in one step. The filter picks the first publication
+        // of the window; the assertion is the rule. A model whose first window is too large
+        // fails here and the engine does not look for a smaller later one.
+        .once(on("host1.tcp").signal("cwnd").first()
+                  .assertAtMost(IW_BOUND)
+                  .describe("host A's initial congestion window")
                   .within(0.5));
 }
 
