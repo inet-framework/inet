@@ -1,0 +1,138 @@
+%description:
+
+RFC 2131 -- with the DHCPACK removed from the path, a client repeats its DHCPREQUEST rather than
+starting a new exchange.
+
+Checks RFC2131-RETX-4 (description) from doc/project/evidence/standard/rfc2131/catalog.md. The
+English procedure is in
+doc/project/evidence/protocol/dhcp/checks/retransmission.md#request-repeated-when-the-reply-is-lost;
+the program steps below map onto its expected observations. Mapping of the mockup with a relay:
+server S = server, relay T = tap, client C = hostA.
+
+Level 3: the relay drops every DHCPACK the server sends. A DHCPACK always arrives on a working
+link, so the state the statement describes cannot be reached by observation alone.
+
+Expected result FAIL, model gap: DhcpClient does not retransmit a DHCPREQUEST. When the wait for
+an answer runs out it calls initClient(), which starts the whole process again from INIT --
+"else if (category == WAIT_ACK) { ... Restarting. ... initClient(); }",
+src/inet/applications/dhcp/DhcpClient.cc:225 to 228. RFC 2131 section 3.1 asks for the
+retransmission first and the restart only after the retransmissions: "The client times out and
+retransmits the DHCPREQUEST message if the client receives neither a DHCPACK or a DHCPNAK
+message. ... If the client receives neither ... after employing the retransmission algorithm, the
+client reverts to INIT state". So a new DHCPDISCOVER appears where a repeated DHCPREQUEST should
+be, and step 4 forbids exactly that. The assertion stays as the standard states it; see
+results.md.
+
+Observation 5, the absence of a DHCPDISCOVER between the two DHCPREQUEST messages, is what makes
+this a check of retransmission and not of restart. A restart also produces a DHCPREQUEST, and it
+also asks for the same address, because the server offers the same address again. What it cannot
+do without is a new DHCPDISCOVER first.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Ipv4Address firstRequestedAddress;
+
+Define_ProtocolTestProgram()
+{
+    firstRequestedAddress = Ipv4Address();
+    return ProtocolTest("rfc2131_request_retransmission")
+        // The relay drops every DHCPACK, so the client never leaves REQUESTING by an answer.
+        .intercept(intercept("tap").match("DhcpMessage.options.messageType == 5").nth(0).drop()
+                     .describe("every DHCPACK the server sends"))
+        // Expected observation 1: the first DHCPREQUEST; record the address it asks for.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
+                          return false;
+                      firstRequestedAddress = dhcp->getOptions().getRequestedIp();
+                      return !firstRequestedAddress.isUnspecified();
+                  })
+                  .describe("the first DHCPREQUEST from the client, whose requested address is recorded")
+                  .within(5.0))
+        // Expected observation 2: the server answers it, and the answer does not reach the client.
+        .once(on("server.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .describe("the DHCPACK the server sends in answer")
+                  .within(1.0))
+        // Expected observations 3 and 5 as one absence: no DHCPACK and no DHCPNAK reaches the
+        // client, and no DHCPDISCOVER leaves it, until the repeated DHCPREQUEST comes.
+        .never(on("hostA")
+                  .match([](const MatchContext& c) {
+                      if (c.event.kind == EventKind::ReceivedFromLower)
+                          if (isDhcp(c.event.packet, DHCPACK) || isDhcp(c.event.packet, DHCPNAK))
+                              return true;                          // observation 3
+                      return c.event.kind == EventKind::SentToLower
+                             && isDhcp(c.event.packet, DHCPDISCOVER); // observation 5
+                  })
+                  .describe("a DHCPACK or a DHCPNAK reaching the client, or a DHCPDISCOVER leaving it")
+                  .within(90.0))
+        // Expected observations 4 and 6: a second DHCPREQUEST, asking for the same address.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
+                             && dhcp->getOptions().getRequestedIp() == firstRequestedAddress;
+                  })
+                  .describe("a second DHCPREQUEST asking for the same address as the first one")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_request_retransmission compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay on the path: server -- relay -- client.
+network Rfc2131TapNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        server: StandardHost { @display("p=250,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostA: StandardHost { @display("p=500,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131TapNet
+sim-time-limit = 200s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_request_retransmission: PASS

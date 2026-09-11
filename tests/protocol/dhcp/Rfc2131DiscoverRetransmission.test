@@ -1,0 +1,138 @@
+%description:
+
+RFC 2131 -- with nothing to answer it, a client repeats its DHCPDISCOVER, and the interval
+between the repetitions grows.
+
+Checks RFC2131-RETX-1 (must) and RETX-3 (description) from
+doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server;
+the program steps below map onto its expected observations. Mapping of the mockup with no server:
+client C = hostA, host E = hostE.
+
+Expected result FAIL, model gap: DhcpClient waits a constant time for an answer. The value is a
+fixed 60 seconds -- "responseTimeout = 60; // response timeout in seconds RFC 2131, 4.4.3",
+src/inet/applications/dhcp/DhcpClient.cc:45 -- and scheduleTimerTO reschedules that same value
+every time, at :674. So the intervals between the repetitions are 60 seconds each and never grow.
+RFC 2131 section 4.1 makes the growth a MUST: "The client MUST adopt a retransmission strategy
+that incorporates a randomized exponential backoff algorithm to determine the delay between
+retransmissions." Steps 0 to 2 match and step 3 fails. The assertion stays as the standard states
+it; see results.md.
+
+The 60 seconds the model uses is the figure RFC 2131 section 4.4.3 names for how long a client
+should wait in total before it tells the user, which is a different quantity from the delay
+between two retransmissions that section 4.1 is about.
+
+The check states no bound on the instants of the repetitions, on purpose. Any bound would be a
+bound on a distribution, and a run that drew an unlucky value would then fail for the wrong
+reason. The one thing a single run can say is that the second interval is longer than the first.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A rolling record of the DHCPDISCOVER messages seen so far: the instant of the last one and
+// the interval that preceded it. The growth test compares two **consecutive** intervals, so the
+// record must advance on every message the predicate sees and not only on the one that matches.
+// A record that advanced only on a match would compare the newest interval against a stale one,
+// and a constant stream of repetitions would then look like a growing one.
+static simtime_t lastAt;
+static simtime_t lastInterval;
+
+Define_ProtocolTestProgram()
+{
+    lastAt = -1;
+    lastInterval = -1;
+    return ProtocolTest("rfc2131_discover_retransmission")
+        // Expected observation 1: the first DHCPDISCOVER; record its instant.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      if (!isDhcp(c.event.packet, DHCPDISCOVER))
+                          return false;
+                      lastAt = c.event.time;
+                      return true;
+                  })
+                  .describe("the first DHCPDISCOVER from the client")
+                  .within(5.0))
+        // Expected observation 2: nothing answers it. The absence covers the window up to the
+        // first repetition; a DHCPOFFER cannot arrive at all, because no node of the mockup sends
+        // one.
+        .never(on("hostA.udp").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPOFFER); })
+                  .describe("a DHCPOFFER reaching the client")
+                  .within(59.0))
+        // Expected observation 3: a second DHCPDISCOVER; record its instant.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      if (!isDhcp(c.event.packet, DHCPDISCOVER))
+                          return false;
+                      lastInterval = c.event.time - lastAt;
+                      lastAt = c.event.time;
+                      return true;
+                  })
+                  .describe("a second DHCPDISCOVER from the client, which fixes the first interval")
+                  .within(120.0))
+        // Expected observations 4 and 5: a third DHCPDISCOVER, and the second interval is longer
+        // than the first.
+        .once(on("hostA.udp").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      if (!isDhcp(c.event.packet, DHCPDISCOVER))
+                          return false;
+                      simtime_t interval = c.event.time - lastAt;
+                      bool grew = lastInterval >= 0 && interval > lastInterval;
+                      lastInterval = interval;
+                      lastAt = c.event.time;
+                      return grew;
+                  })
+                  .describe("a later DHCPDISCOVER whose interval from the one before it is longer than the interval that preceded that one")
+                  .within(240.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_discover_retransmission compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with no server: a client and a far end that runs no DHCP.
+network Rfc2131NoServerNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='hostE' address='192.168.1.9' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostE: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostE.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131NoServerNet
+sim-time-limit = 400s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+# hostE is the far end of the link. It runs no DHCP, so nothing can answer the client.
+*.hostE.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2131_discover_retransmission: PASS

@@ -1,0 +1,142 @@
+%description:
+
+RFC 2131 -- a client that shuts down gracefully while it holds a lease unicasts a DHCPRELEASE to
+the server.
+
+Checks RFC2131-REL-1 (may), REL-3 (description) and REL-5 (must and must not), and covers REL-2,
+from doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is in
+doc/project/evidence/protocol/dhcp/checks/release.md#release-on-shutdown; the program steps below
+map onto its expected observations. Mapping of the plain mockup: server S = server,
+client C = hostA. The scenario shuts the client's DHCP application down at 60 seconds, well inside
+the lease of 300 seconds and well before T1 at 150 seconds, so that no renewal can be mistaken for
+a release.
+
+Expected result FAIL, model gap: DhcpClient sends no DHCPRELEASE. The place where it would is
+marked as not done -- "TODO Client should send DHCPRELEASE to the server. However, the correct
+operation of DHCP does not depend on the transmission of DHCPRELEASE messages.",
+src/inet/applications/dhcp/DhcpClient.cc:724. The comment quotes RFC 2131 section 4.4.6 correctly,
+and the statement this check targets is a MAY, so the conformance matrix reads the failure as a
+declined behaviour and not as a defect. What the model loses is the server's chance to free the
+address before the lease runs out. The assertion stays as the standard states it; see results.md.
+
+Observations 4 to 7, the field rules of the message, cannot be read when no message is sent. They
+stay untested rather than failed, and the ledger records that.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What the DHCPRELEASE must name.
+static Ipv4Address leasedAddress;
+static Ipv4Address serverIdentifier;
+static MacAddress clientIdentifier;
+
+Define_ProtocolTestProgram()
+{
+    leasedAddress = Ipv4Address();
+    serverIdentifier = Ipv4Address();
+    clientIdentifier = MacAddress();
+    return ProtocolTest("rfc2131_release_on_shutdown")
+        // Expected observation 1: the client holds an address. Record what the release must name.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      leasedAddress = dhcp->getYiaddr();
+                      serverIdentifier = dhcp->getOptions().getServerIdentifier();
+                      return !leasedAddress.isUnspecified() && !serverIdentifier.isUnspecified();
+                  })
+                  .capture("clientId", "DhcpMessage.chaddr")
+                  .describe("a DHCPACK reaching the client, whose yiaddr and server identifier are recorded")
+                  .within(5.0))
+        // Expected observation 2 is the shutdown at 60 seconds, which the scenario file drives.
+        // Expected observations 3 to 7: a unicast DHCPRELEASE naming the address and the server,
+        // with ciaddr set and neither a requested IP address nor a lease time option.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPRELEASE)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      // observation 4: a unicast to the server identifier
+                      bool unicast = ipv4Destination(c.event.packet) == quad(serverIdentifier)
+                              && !isLinkBroadcast(c.event.packet);
+                      // observation 5: ciaddr holds the leased address
+                      bool ciaddrSet = dhcp->getCiaddr() == leasedAddress;
+                      // observation 6: the server identifier is there and the two others are not
+                      bool options = hasOption(dhcp, SERVER_ID)
+                              && !hasOption(dhcp, REQUESTED_IP) && !hasOption(dhcp, LEASE_TIME);
+                      // observation 7: the client identifier of the exchange
+                      bool identifier = hasOption(dhcp, CLIENT_ID);
+                      return unicast && ciaddrSet && options && identifier;
+                  })
+                  .describe("a DHCPRELEASE unicast to the server, with ciaddr holding the leased address, a server identifier and a client identifier option, and neither a requested IP address nor a lease time option")
+                  .notBefore(59.0).within(90.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_release_on_shutdown compiled\n";
+
+%file: scenario.xml
+
+<scenario>
+    <at t="60">
+        <shutdown module="hostA.app[0]"/>
+    </at>
+</scenario>
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+
+// The plain mockup, plus a scenario manager that shuts the client's DHCP application down.
+network Rfc2131ReleaseNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+            @display("p=100,50");
+        }
+        scenarioManager: ScenarioManager { @display("p=100,150"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> hostA.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131ReleaseNet
+sim-time-limit = 160s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc2131_release_on_shutdown: PASS

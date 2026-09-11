@@ -1,0 +1,176 @@
+%description:
+
+RFC 2131 -- a client that finds the address of the DHCPACK already in use sends a DHCPDECLINE and
+starts again.
+
+Checks RFC2131-DECL-1 (should), DECL-2 (must), DECL-5 (description), DECL-6 (must and must not)
+and DECL-7 (must) from doc/project/evidence/standard/rfc2131/catalog.md. The English procedure is
+in doc/project/evidence/protocol/dhcp/checks/decline.md#duplicate-address-declined; the program
+steps below map onto its expected observations. Mapping of the mockup with an occupant:
+server S = server, client C = hostA, host O = hostO.
+
+hostO holds 192.168.1.100 from the start, which is the first address the server gives out, and it
+answers an address resolution request for it. The client's own interface carries no address before
+DHCP runs, so the scenario does not configure it: DhcpClient refuses to start on an interface that
+already has one. This is the one test of the suite that resolves
+addresses by traffic on the link and not without it, because the address resolution request is the
+stimulus.
+
+Expected result FAIL, model gap: DhcpClient never probes the address of the DHCPACK. handleDhcpAck
+records the lease and binds the address, and nothing in it sends an address resolution request or
+waits for an answer to one (src/inet/applications/dhcp/DhcpClient.cc, handleDhcpAck and
+bindLease). RFC 2131 section 4.4.1 makes the probe a SHOULD: "The client SHOULD perform a check on
+the suggested address to ensure that the address is not already in use." So the client cannot
+learn of the conflict, step 1 misses its deadline, and the whole of the DHCPDECLINE mechanism stays
+unreached.
+
+The failure does not tell whether the client would obey RFC2131-DECL-2 if it ever found a
+conflict; it tells that it cannot find one. DhcpClient does have a sendDecline function, at :635,
+and nothing calls it. The results record both halves; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "DhcpChecks.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Ipv4Address grantedAddress;
+
+// True when the frame is an address resolution request for this address, with the sender
+// protocol address 0.0.0.0 as RFC 2131 section 4.4.1 demands.
+static bool isProbeFor(const Packet *frame, const Ipv4Address& address)
+{
+    auto arp = findChunk<ArpPacket>(frame);
+    return arp != nullptr && arp->getOpcode() == ARP_REQUEST
+           && arp->getDestIpAddress() == address
+           && arp->getSrcIpAddress().isUnspecified();
+}
+
+Define_ProtocolTestProgram()
+{
+    grantedAddress = Ipv4Address();
+    return ProtocolTest("rfc2131_duplicate_address_declined")
+        // Expected observation 1: the client gets a DHCPACK for the address hostO holds.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
+                          return false;
+                      grantedAddress = dhcp->getYiaddr();
+                      return quad(grantedAddress) == "192.168.1.100";
+                  })
+                  .describe("a DHCPACK reaching the client whose yiaddr is 192.168.1.100, the address the occupant holds")
+                  .within(5.0))
+        // Expected observations 2 and 3: the client probes that address, with sender protocol
+        // address 0.0.0.0 and its own hardware address.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isProbeFor(c.event.packet, grantedAddress); })
+                  .describe("an address resolution request for 192.168.1.100 from the client, with sender protocol address 0.0.0.0")
+                  .within(5.0))
+        // Expected observation 4: the occupant answers, which tells the client the address is used.
+        .once(on("hostO.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto arp = findChunk<ArpPacket>(c.event.packet);
+                      return arp != nullptr && arp->getOpcode() == ARP_REPLY
+                             && arp->getSrcIpAddress() == grantedAddress;
+                  })
+                  .describe("the occupant's address resolution reply for 192.168.1.100")
+                  .within(1.0))
+        // Expected observations 5 to 7: a broadcast DHCPDECLINE naming the address and the server,
+        // with no lease time, no parameter request list and ciaddr zero.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      auto dhcp = dhcpOf(c.event.packet);
+                      if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDECLINE)
+                          return false;
+                      const DhcpOptions& o = dhcp->getOptions();
+                      bool broadcast = ipv4Destination(c.event.packet) == "255.255.255.255";  // observation 6
+                      bool required = hasOption(dhcp, REQUESTED_IP)
+                              && o.getRequestedIp() == grantedAddress
+                              && hasOption(dhcp, SERVER_ID);                                  // observation 7
+                      bool prohibited = !hasOption(dhcp, LEASE_TIME) && !hasOption(dhcp, PARAM_LIST)
+                              && dhcp->getCiaddr().isUnspecified();                           // observation 7
+                      return broadcast && required && prohibited;
+                  })
+                  .describe("a broadcast DHCPDECLINE naming 192.168.1.100 and the server, with no lease time, no parameter request list and ciaddr 0.0.0.0")
+                  .within(5.0))
+        // Expected observation 8: the client starts again.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .describe("a DHCPDISCOVER after the DHCPDECLINE, which shows that the client started again")
+                  .within(25.0))
+        // Expected observation 9: the client never uses the address it refused.
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return ipv4Source(c.event.packet) == quad(grantedAddress);
+                  })
+                  .describe("a frame from the client carrying the refused address as its IP source address")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2131_duplicate_address_declined compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup with an occupant: a server, a client, and a host that already holds the address the
+// server will offer first.
+network Rfc2131OccupantNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                "<interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/>" +
+                "<interface hosts='hostO' address='192.168.1.100' netmask='255.255.255.0'/>" +
+                "</config>");
+            @display("p=100,50");
+        }
+        switch: EthernetSwitch { @display("p=350,180"); }
+        server: StandardHost { @display("p=250,100"); }
+        hostA: StandardHost { @display("p=450,100"); }
+        hostO: StandardHost { @display("p=450,260"); }
+    connections:
+        server.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostA.ethg++ <--> Eth100M <--> switch.ethg++;
+        hostO.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc2131OccupantNet
+sim-time-limit = 60s
+seed-set = 0
+
+# Real address resolution here, and only here: the request the client sends for its new address is
+# the stimulus of the check, so it must appear on the link.
+
+*.server.numApps = 1
+*.server.app[0].typename = "DhcpServer"
+*.server.app[0].interface = "eth0"
+*.server.app[0].numReservedAddresses = 100
+*.server.app[0].maxNumClients = 100
+*.server.app[0].leaseTime = 300s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "DhcpClient"
+*.hostA.app[0].interface = "eth0"
+
+# The occupant runs no DHCP. It holds 192.168.1.100 and answers for it.
+*.hostO.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2131_duplicate_address_declined: PASS
