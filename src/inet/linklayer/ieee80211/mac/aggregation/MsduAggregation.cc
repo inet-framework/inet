@@ -84,9 +84,24 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setFromDS(fromDS);
     amsduHeader->setAMsduPresent(true);
     amsduHeader->setReceiverAddress(ra);
+    // IEEE Std 802.11-2024, 9.3.2.2.1: aggregation preserves the common RA and TA.
+    amsduHeader->setTransmitterAddress(firstHeader->getTransmitterAddress());
     amsduHeader->setTid(tid);
     amsduHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
-    // TODO set addr3 and addr4 according to fromDS and toDS.
+    // IEEE Std 802.11-2024, 9.3.2.1.1, Figure 9-119.
+    if (toDS && fromDS)
+        amsduHeader->addChunkLength(B(6));
+    // IEEE Std 802.11-2024, 9.3.2.1.2, Table 9-60: Basic A-MSDUs carry the
+    // BSSID in Address3 and, when present, Address4. In the AP-to-AP case,
+    // the BSSID is the address of the transmitting AP.
+    if (fromDS)
+        amsduHeader->setAddress3(firstHeader->getTransmitterAddress());
+    else if (toDS)
+        amsduHeader->setAddress3(ra);
+    else
+        amsduHeader->setAddress3(firstHeader->getAddress3());
+    if (toDS && fromDS)
+        amsduHeader->setAddress4(firstHeader->getTransmitterAddress());
     aggregatedFrame->insertAtFront(amsduHeader);
     aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
     aggregatedFrame->setName(aggregatedName.c_str());
