@@ -5,12 +5,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_TCPBASEALG_H
-#define __INET_TCPBASEALG_H
+#ifndef __INET_TCPALGORITHMBASE_H
+#define __INET_TCPALGORITHMBASE_H
 
-#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
-#include "inet/transportlayer/tcp/TcpSimsignals.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
 namespace tcp {
@@ -23,7 +22,7 @@ namespace tcp {
  * Implements:
  *   - delayed ACK algorithm (RFC 1122)
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
- *   - Nagle's algorithm (RFC 896) to prevent silly window syndrome
+ *   - Nagle's algorithm (RFC 1122) to prevent silly window syndrome
  *   - Increased Initial Window (RFC 3390)
  *   - PERSIST timer
  *
@@ -64,11 +63,20 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void startRexmitTimer();
 
     /**
+     * Re-establish the TCP RTO invariant (Linux tcp_rearm_rto): if any
+     * unacknowledged data is outstanding but no retransmission timer is
+     * running, arm it. Call after ACK processing has finished sending, to
+     * cover data transmitted by RFC 6675 recovery (stepC) or SWS-blocked
+     * sends that would otherwise leave outstanding data with no timer.
+     */
+    void ensureRexmitTimerArmed();
+
+    /**
      * Update state vars with new measured RTT value. Passing two simtime_t's
      * will allow rttMeasurementComplete() to do calculations in double or
      * in 200ms/500ms ticks, as needed)
      */
-    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) override;
 
     /**
      * Converting uint32_t echoedTS to simtime_t and calling rttMeasurementComplete()
@@ -80,6 +88,16 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      * Send data, observing Nagle's algorithm and congestion window
      */
     virtual bool sendData(bool sendCommandInvoked);
+
+    virtual void receivedDuplicateAck();
+
+    /**
+     * Returns the configured initial congestion window in bytes according to
+     * state->init_cwnd_mode (RFC 2001 / RFC 3390 / RFC 6928 IW10). Used both for
+     * the initial cwnd and for the restart window after an idle period.
+     */
+    virtual uint32_t initialWindow() const;
+
 
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
@@ -115,9 +133,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedDuplicateAck() override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedAckForUnsentData(uint32_t seq) override;
 
@@ -132,8 +150,11 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
-    virtual uint32_t getBytesInFlight() const override;
     virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
+
+    virtual uint32_t getBytesInFlight() const override;
+
+    virtual uint32_t calculateSsthreshForFastRecovery() override;
 };
 
 

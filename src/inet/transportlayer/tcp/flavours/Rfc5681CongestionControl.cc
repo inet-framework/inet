@@ -5,7 +5,6 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
-#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {

@@ -83,15 +83,15 @@ void DumbTcp::receiveSeqChanged()
     conn->sendAck();
 }
 
+void DumbTcp::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    // TODO
+}
+
 void DumbTcp::receivedAckForUnackedData(uint32_t)
 {
     // ack may have freed up some room in the window, try sending.
     conn->sendData(65535);
-}
-
-void DumbTcp::receivedDuplicateAck()
-{
-    EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
 void DumbTcp::receivedAckForUnsentData(uint32_t seq)

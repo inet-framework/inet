@@ -5,6 +5,7 @@
 //
 
 import inet.transportlayer.tcp.TcpConnectionState;
+import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 cplusplus {{
     #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -29,7 +30,9 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     //@{
     unsigned int persist_factor = 0; ///< factor needed for simplified PERSIST timer calculation
     simtime_t persist_timeout = 5.0; ///< current persist timeout
+    uint32_t zeroWindowProbesSent = 0; ///< cumulative zero-window (persist) probes sent; surfaced as TcpStatusInfo::probes
     //@}
+
 
     /// congestion window
     //@{
@@ -45,7 +48,7 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     /// round-trip time estimation (Jacobson's algorithm)
     //@{
     simtime_t srtt = 0; ///< smoothed round-trip time
-    simtime_t rttvar = 3.0 / 4.0; ///< variance of round-trip time
+    simtime_t rttvar = 0; ///< variance of round-trip time (RFC 6298: seeded to R/2 on the first sample)
     bool rttMeasured = false; ///< whether a round-trip time has been measured yet (RFC 6298 2.2 vs 2.3)
     //@}
 
@@ -54,10 +57,15 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     uint32_t numRtos = 0; ///< total number of RTOs
     //@}
 
-    /// RFC 3782 variables
+    /// RFC 6582 variables
     //@{
-    uint32_t recover = iss; ///< recover (RFC 3782)
-    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 3782)
+    uint32_t recover = iss; ///< recover (RFC 6582)
+    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 6582)
+    //@}
+
+    /// per-segment transmit times, shared by all flavours (RTT sampling, RACK/Eifel input)
+    //@{
+    TcpSegmentTransmitInfoList sentInfo;
     //@}
 };
 

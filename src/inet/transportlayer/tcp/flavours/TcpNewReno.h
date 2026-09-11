@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2009 Thomas Reschka
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -13,39 +13,17 @@ namespace inet {
 namespace tcp {
 
 /**
- * State variables for TcpNewReno.
- */
-typedef TcpClassicAlgorithmBaseStateVariables TcpNewRenoStateVariables;
-
-/**
- * Implements TCP NewReno.
+ * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
 class INET_API TcpNewReno : public TcpClassicAlgorithmBase
 {
   protected:
-    TcpNewRenoStateVariables *& state; // alias to TcpAlgorithm's 'state'
-
-    /** Create and return a TcpNewRenoStateVariables object. */
-    virtual TcpStateVariables *createStateVariables() override
-    {
-        return new TcpNewRenoStateVariables();
-    }
-
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
-
-    /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TcpEventCode& event) override;
+    virtual ITcpRecovery *createRecovery() override;
+    virtual ITcpCongestionControl *createCongestionControl() override;
 
   public:
-    /** Ctor */
-    TcpNewReno();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
-
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
+    /** TcpNewReno selects RFC 6675 SACK recovery when the connection negotiated SACK. */
+    virtual bool supportsSackRecovery() const override { return true; }
 };
 
 } // namespace tcp
