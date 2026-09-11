@@ -28,6 +28,9 @@ class INET_API IRateControl
 
     // Returns the rate to use for a unicast frame addressed to the given receiver.
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) = 0;
+    // Selects a mode for this borrowed packet. Repeated queries before attempt
+    // feedback must preserve its selection (e.g. when computing protection time).
+    virtual const physicallayer::IIeee80211Mode *getRateForFrame(Packet *frame) = 0;
     // Legacy data/management attempt feedback. retryCount is the packet's data
     // recovery count; successful first data attempts report zero even after RTS failures.
     // Packets in all feedback methods are borrowed for the duration of the call.

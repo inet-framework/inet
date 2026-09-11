@@ -148,7 +148,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet 
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
 
-const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
@@ -199,7 +199,7 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // TODO Supported Rates element, Extended Supported Rates element
         // TODO OperationalRateSet or the HTOperationalMCSset
         if (dataOrMgmtRateControl)
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
+            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRateForFrame(packet));
         else
             return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
     }
@@ -265,7 +265,7 @@ const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const 
 const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
 {
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
-        return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
+        return computeDataOrMgmtFrameMode(packet, dataOrMgmtHeader);
     else
         return getPeerCompatibleMode(header->getReceiverAddress(), computeControlFrameMode(header, txopProcedure));
 }

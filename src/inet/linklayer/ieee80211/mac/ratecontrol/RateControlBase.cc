@@ -22,6 +22,11 @@ void RateControlBase::initialize(int stage)
     ModeSetListener::initialize(stage);
 }
 
+const IIeee80211Mode *RateControlBase::getRateForFrame(Packet *frame)
+{
+    return getRate(getReceiverAddress(frame));
+}
+
 void RateControlBase::frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp)
 {
     frameTransmitted(frame, retryCount, isSuccessful, isGivenUp);

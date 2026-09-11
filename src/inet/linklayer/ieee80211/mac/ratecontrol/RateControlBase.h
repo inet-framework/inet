@@ -21,6 +21,8 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     static simsignal_t datarateChangedSignal;
     using IRateControl::frameTransmitted;
 
+    virtual const physicallayer::IIeee80211Mode *getRateForFrame(Packet *frame) override;
+
     // Preserve legacy data-attempt semantics for controllers such as AARF.
     // Controllers that use whole-packet outcomes override these extended hooks.
     virtual void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp) override;
