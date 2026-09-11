@@ -89,12 +89,38 @@ Which algorithm each check runs against matters. `TcpReno` and `TcpNewReno` answ
 RFC 5681. `TcpTahoe`, `TcpVegas` and `TcpWestwood` have no RFC, so this pass does not judge
 them.
 
+One finding is already known from the code, and it is a **defect** by the new rule. With
+`increasedIWEnabled` the model computes the initial window by the RFC 3390 formula,
+`min(4*SMSS, max(2*SMSS, 4380))`. RFC 5681 replaced that formula with a table. The two agree
+at SMSS 536 and at 1460, and the formula exceeds the table for every SMSS from 1096 to 1459:
+at 1096 it gives 4380 bytes, four segments, where the table allows 3288 bytes and three
+segments. Code exists and produces the wrong value, so the test carries no declaration.
+
 ## Rules this pass follows
 
-- No source file changes. A gap becomes a `%# expected-result: FAIL` test and a row in
-  `results.md`.
-- A failing test stays. It is a finding about the model.
+Master rewrote these rules on 2026-09-11, after this branch started. The guide now carries a
+third principle, *a claimed feature gets a test*, and five failure classes instead of three.
+This pass follows the new rules.
+
+- No source file changes.
 - The catalogs and the checks come from the RFC text alone. The code enters at step 6.
+- A failing test stays. It is a finding about the model, and the most valuable output of the
+  workflow.
+- **A failure is declared expected only when the model does not claim the behaviour.** The
+  test is: does code exist for this specific behaviour? If it exists, the failure is a
+  **defect** and nothing is declared. Only an absent behaviour — no code path, no function,
+  a TODO, a stated limitation — may be declared.
+- A statement whose check cannot be built is an **untestable claim**: the test is written, it
+  fails unconditionally, and its description names the missing part. It is not an omission.
+
+This changes what this pass expects to find. Both control loops are written in the model, so
+almost every difference the checks find will be a **defect**, and almost nothing will carry a
+declaration. The initial-window finding below is the clearest case: the code computes a value
+and computes the wrong one.
+
+It also changes how the third framework gap is recorded. A check that cannot bind the first
+publication of a signal is an untestable claim, so it becomes a failing test that names the
+missing part, and not a `later` row in the ledger.
 
 ## What step 6 found about the framework
 
