@@ -98,6 +98,30 @@ Work in a dedicated worktree, on a copy of the branch, so the original stays rea
 
 **1a. Split `ed2c8df034` (F-4).** Two commits: a rename-only commit, then the content rewrite.
 
+**Six files move, not three.** The audit's first two passes counted the three renames git detects;
+preparing this step found three more that git does not, and whose history has therefore already
+ended at this commit:
+
+| From | To | git sees it |
+| --- | --- | --- |
+| `TcpBaseAlg.h` | `TcpAlgorithmBase.h` | `R056` |
+| `TcpBaseAlgState.msg` | `TcpAlgorithmBaseState.msg` | `R053` |
+| `TcpTahoeRenoFamilyState.msg` | `TcpClassicAlgorithmBaseState.msg` | `R064` |
+| `TcpBaseAlg.cc` | `TcpAlgorithmBase.cc` | **no** — 39 %, under the 50 % default |
+| `TcpTahoeRenoFamily.h` | `TcpClassicAlgorithmBase.h` | **no** — not at `-M10%` either |
+| `TcpTahoeRenoFamily.cc` | `TcpClassicAlgorithmBase.cc` | **no** |
+
+`Changes-20051129.txt` is deleted and is not a rename; it stays in the content commit.
+
+**A `git mv` alone will not build, and that is the point of the split's shape.** Renaming
+`TcpBaseAlg.h` while it still declares `class TcpBaseAlg` breaks every file that includes it, so a
+literally content-free move commit fails
+[PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds). **The rename commit
+moves the files and renames the two types in the same change** — `TcpBaseAlg` →
+`TcpAlgorithmBase`, `TcpTahoeRenoFamily` → `TcpClassicAlgorithmBase`, everywhere. That is one
+mechanical sweep, it builds, and because only identifiers change, git's similarity for the six
+files stays near 100 % instead of 39 %.
+
 ```
 tcp: name: rename TcpBaseAlg and TcpTahoeRenoFamily for the split architecture
     Change: src.tcp.flavours | name | whatsnew migration | tcp-algorithm-split
@@ -105,9 +129,15 @@ tcp: refactor: move the classic flavours onto the split architecture
     Change: src.tcp.flavours | refactor | - | tcp-algorithm-split
 ```
 
-The rename commit uses `git mv` and nothing else, so the similarity is 100 %.
-**Done when** `git show --name-status -M` on the first commit shows only `R100` lines, and
-`check-commits.sh` no longer flags `PR-SPLIT-MOVE`.
+**This exposes a gap in [PR-SPLIT-MOVE](../../doc/project/rule/pull-request.md#pr-split-move).** It
+says to move files "in a commit that does not change their content", which is right for a file
+move and impossible for a *type* rename, where the file name and the type name must travel
+together or nothing compiles. The rule needs a clause for that case; it is recorded in §8 as
+project work, not branch work.
+
+**Done when** `git show --name-status -M` on the first commit shows six `R09x` or `R100` lines and
+no `A`/`D` pair, the tree builds in both modes, and `check-commits.sh` no longer flags
+`PR-SPLIT-MOVE`.
 
 **1b. Add the deprecation alias (F-2, part).** In the rename commit, one line per renamed type:
 
@@ -421,6 +451,10 @@ immediately. Step 5 is the clock: eleven fingerprint runs and eleven explanation
 
 ## 8. Out of scope
 
+- **A clause in `PR-SPLIT-MOVE` for a type rename.** The rule asks for a move commit that changes
+  no content, which cannot build when the moved file declares the type being renamed. Step 1a
+  shows the working shape — move the files and rename the type in one mechanical commit — and the
+  rule should say so. Project work, not branch work.
 - **The `T3` release-note check** that F-2's five occurrences argue for. It is a project change, not
   a branch change, and it needs its own plan.
 - **`AR-EXT-MINIMAL-SURFACE` and `AR-EXT-VIRTUAL-IS-A-PROMISE`** — 28 uncalled and 95 unoverridden
