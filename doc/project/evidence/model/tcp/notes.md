@@ -65,7 +65,7 @@ small window**, which does not need the window to close. A closing window needs 
 
 ### The initial congestion window is one segment
 
-[TcpBaseAlg.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L149).
+[TcpAlgorithmBase.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L149).
 This is what lets a 300-octet receiver window be the binding limit in the flow-control
 check: it is smaller than a segment and smaller than the congestion window, so neither of
 the other two limits can be mistaken for it.

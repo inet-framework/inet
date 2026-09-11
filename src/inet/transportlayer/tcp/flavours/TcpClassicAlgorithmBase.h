@@ -8,27 +8,34 @@
 #ifndef __INET_TCPTAHOERENOFAMILY_H
 #define __INET_TCPTAHOERENOFAMILY_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
 
 /**
  * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
- * (TcpVegas should inherit from TcpBaseAlg instead of this one.)
+ * (TcpVegas should inherit from TcpAlgorithmBase instead of this one.)
  */
-class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
+class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
   public:
     /** Ctor */
-    TcpTahoeRenoFamily();
+    TcpClassicAlgorithmBase();
 
     virtual void initialize() override;
 };
+
+
+// Deprecated: TcpTahoeRenoFamily was renamed to TcpClassicAlgorithmBase in INET 4.6, because the old name said
+// what the class inherits rather than what it is -- it is the base of the classic loss-based algorithms.
+// The alias keeps code outside this repository compiling for one release; it goes
+// away in the release after that.
+using TcpTahoeRenoFamily = TcpClassicAlgorithmBase;
 
 } // namespace tcp
 } // namespace inet

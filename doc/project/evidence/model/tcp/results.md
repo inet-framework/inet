@@ -104,7 +104,7 @@ RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed
 becomes R and the variance becomes R/2. The model has no such case.
 `TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every
 measurement, the first one included
-([TcpBaseAlg.cc:327-341](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L327-L341)).
+([TcpAlgorithmBase.cc:327-341](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L327-L341)).
 The run states it in one line:
 
     Measured RTT=400.05104ms, updated SRTT=50.00638ms, new RTO=2875.0319ms
@@ -344,7 +344,7 @@ the ICMP module closes both.
   conformant configuration.
 - `*.host2.tcp.advertisedWindow = 300` and `*.host2.tcp.delayedAcksEnabled = true` in the
   flow-control test. The delay is the fixed constant
-  [TcpBaseAlg.cc:32](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L32),
+  [TcpAlgorithmBase.cc:32](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L32),
   0.2 s, which is what the check document assumes and within MUST-40.
 - `sendBytes = 5000B` (data transfer, push) and `3000B` (flow control); `connectPort = 7000`
   with `*.host2.numApps = 0` (reset).
@@ -425,7 +425,7 @@ evidence is how that goes unnoticed.
   `min(snd_wnd, cwnd) - (snd_nxt - snd_una)`,
   [TcpConnectionUtil.cc:1075-1078](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1075-L1078).
   The initial congestion window is one segment,
-  [TcpBaseAlg.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L149),
+  [TcpAlgorithmBase.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L149),
   so a 300-octet receiver window is the binding limit. Observed: a 300-octet first segment,
   silence for 0.15 s, the delayed acknowledgment at 0.2 s, and the resume at the edge.
 - **Advertised window (WND-1):** `updateRcvWnd`,

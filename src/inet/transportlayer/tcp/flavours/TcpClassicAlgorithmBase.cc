@@ -5,14 +5,14 @@
 //
 
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
 namespace tcp {
 
-void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit)
+void TcpClassicAlgorithmBaseStateVariables::setSendQueueLimit(uint32_t newLimit)
 {
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
@@ -20,32 +20,32 @@ void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit)
     ssthresh = sendQueueLimit;
 }
 
-std::string TcpTahoeRenoFamilyStateVariables::str() const
+std::string TcpClassicAlgorithmBaseStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::str();
+    out << TcpAlgorithmBaseStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
 
-std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
+std::string TcpClassicAlgorithmBaseStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::detailedInfo();
+    out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh=" << ssthresh << "\n";
     return out.str();
 }
 
 // ---
 
-TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpBaseAlg(),
-    state((TcpTahoeRenoFamilyStateVariables *&)TcpAlgorithm::state)
+TcpClassicAlgorithmBase::TcpClassicAlgorithmBase() : TcpAlgorithmBase(),
+    state((TcpClassicAlgorithmBaseStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TcpTahoeRenoFamily::initialize()
+void TcpClassicAlgorithmBase::initialize()
 {
-    TcpBaseAlg::initialize();
+    TcpAlgorithmBase::initialize();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 
