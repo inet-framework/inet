@@ -10,7 +10,7 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 ## In one line
 
-**547** added; **49** removed; **14** changed; **2** with a changed signature; **18** renamed; **22** renamed with their class; **5** moved to another class; **4** split across classes.
+**547** added; **49** removed; **22** changed; **2** with a changed signature; **18** renamed; **22** renamed with their class; **5** moved to another class; **4** split across classes.
 
 ## Breaking — check these first
 
@@ -90,11 +90,22 @@ Extracted 2026-09-11 from the sources in 1.4 seconds; no build was needed. NED a
 
 ### Changed
 
-**1 NED parameter**
+**9 NED parameters**
 
 | What | Attribute | Change |
 |---|---|---|
-| `inet.transportlayer.tcp.Tcp.tcpAlgorithmClass` | default | `TcpVegas TcpWestwood DcTcp TcpNewReno TcpReno TcpTahoe TcpNoCongestionControl` → `TcpCubic TcpVegas TcpWestwood DcTcp TcpNewReno TcpReno TcpTahoe TcpNoCongestionControl` |
+| `inet.transportlayer.tcp.Tcp.advertisedWindow` | default | `14 * this.mss` → `65535` |
+| `inet.transportlayer.tcp.Tcp.advertisedWindow` | properties | **+** `mutable` |
+| `inet.transportlayer.tcp.Tcp.delayedAcksEnabled` | default | `false` → `true` |
+| `inet.transportlayer.tcp.Tcp.limitedTransmitEnabled` | default | `false` → `true` |
+| `inet.transportlayer.tcp.Tcp.mss` | default | `536` → `-1` |
+| `inet.transportlayer.tcp.Tcp.sackSupport` | default | `false` → `true` |
+| `inet.transportlayer.tcp.Tcp.tcpAlgorithmClass` | default | `"TcpReno"` → `"TcpCubic"` |
+| `inet.transportlayer.tcp.Tcp.tcpAlgorithmClass` | properties | `examples`: **+** `TcpCubic` |
+| `inet.transportlayer.tcp.Tcp.timestampSupport` | default | `false` → `true` |
+| `inet.transportlayer.tcp.Tcp.timestampSupport` | properties | **+** `mutable` |
+| `inet.transportlayer.tcp.Tcp.windowScalingFactor` | properties | **+** `mutable` |
+| `inet.transportlayer.tcp.Tcp.windowScalingSupport` | default | `false` → `true` |
 
 **3 message types**
 
