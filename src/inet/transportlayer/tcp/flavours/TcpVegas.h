@@ -7,13 +7,13 @@
 #ifndef __INET_TCPVEGAS_H
 #define __INET_TCPVEGAS_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 #include "inet/transportlayer/tcp/flavours/TcpVegasState_m.h"
 
 namespace inet {
 namespace tcp {
 
-class INET_API TcpVegas : public TcpBaseAlg
+class INET_API TcpVegas : public TcpAlgorithmBase
 {
   protected:
     TcpVegasStateVariables *& state; // alias to TcpAlgorithm's 'state'

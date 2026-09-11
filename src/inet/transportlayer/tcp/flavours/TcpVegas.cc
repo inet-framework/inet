@@ -20,7 +20,7 @@ Register_Class(TcpVegas);
 std::string TcpVegasStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::str();
+    out << TcpAlgorithmBaseStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
@@ -28,14 +28,14 @@ std::string TcpVegasStateVariables::str() const
 std::string TcpVegasStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::detailedInfo();
+    out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "baseRTT = " << v_baseRTT << "\n";
     return out.str();
 }
 
 TcpVegas::TcpVegas()
-    : TcpBaseAlg(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
+    : TcpAlgorithmBase(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
 {
 }
 
@@ -63,7 +63,7 @@ void TcpVegas::recalculateSlowStartThreshold()
 // Process rexmit timer
 void TcpVegas::processRexmitTimer(TcpEventCode& event)
 {
-    TcpBaseAlg::processRexmitTimer(event);
+    TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -85,7 +85,7 @@ void TcpVegas::processRexmitTimer(TcpEventCode& event)
 
 void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpBaseAlg::receivedAckForUnackedData(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     if (found) {
@@ -260,7 +260,7 @@ void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
 void TcpVegas::receivedDuplicateAck()
 {
-    TcpBaseAlg::receivedDuplicateAck();
+    TcpAlgorithmBase::receivedDuplicateAck();
 
     simtime_t currentTime = simTime();
     simtime_t tSent = 0;
@@ -324,7 +324,7 @@ void TcpVegas::receivedDuplicateAck()
 
 void TcpVegas::dataSent(uint32_t fromseq)
 {
-    TcpBaseAlg::dataSent(fromseq);
+    TcpAlgorithmBase::dataSent(fromseq);
 
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
@@ -338,7 +338,7 @@ void TcpVegas::dataSent(uint32_t fromseq)
 
 void TcpVegas::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
-    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
+    TcpAlgorithmBase::segmentRetransmitted(fromseq, toseq);
 
     state->regions.set(fromseq, toseq, simTime());
 }
