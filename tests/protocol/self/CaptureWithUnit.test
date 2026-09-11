@@ -1,0 +1,99 @@
+%description:
+
+Protocol Test Framework self test -- a capture that carries a unit.
+
+A captured field may carry a unit. `tcp.headerLength` of a SYN is `24B`, not `24`. Two
+things used to break on such a capture, and this test holds both of them.
+
+First, the substitution pushed every stored capture through `intValue()`, which throws on a
+value with a unit: "Attempt to use the value '24B' as a dimensionless number". The capture
+now keeps its quantity form, and the expression engine compares it.
+
+Second, the substitution ran over **every** stored capture, whether or not the step's
+expression named it. So a capture taken for one step broke a later step that never mentioned
+it. A capture is now converted only where it is named. Step 3 below is that case: it names
+no capture at all, and it used to fail because step 1 had stored one.
+
+The TCP and the IPv6 passes both lost a debugging cycle to this and both worked around it
+with a lambda that returns a plain number.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("capture_with_unit")
+        // Step 1: capture a field that carries a unit. The SYN's header length is 24B,
+        // because the segment carries the maximum-segment-size option.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("synHeaderLength", "tcp.headerLength")
+                  .describe("host A's SYN, whose header length is captured with its unit")
+                  .within(0.3))
+        // Step 2: use the captured quantity in an expression. The final ACK carries no
+        // option, so its header is 20B, which is the captured value less four octets.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.synBit == false && tcp.headerLength == {synHeaderLength} - 4B")
+                  .describe("host A's final ACK, four octets shorter than the SYN")
+                  .within(0.5))
+        // Step 3: a step that names no capture. Before the repair this step raised the
+        // dimensionless-number error, because the substitution converted the stored
+        // capture of step 1 although nothing here refers to it.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.destPort == 1000 && tcp.synBit == false")
+                  .describe("a later segment, in a step that names no capture")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "capture_with_unit compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Two hosts on one link -- note: NO tester (attached at runtime).
+network CaptureUnitNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CaptureUnitNet
+sim-time-limit = 2s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 2000B
+*.host1.app[0].tClose = 1.5s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST capture_with_unit: PASS

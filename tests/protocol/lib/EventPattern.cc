@@ -15,10 +15,19 @@ namespace protocoltest {
 
 static std::string formatCaptureValue(const cValue& value)
 {
+    // A value that carries a unit keeps it. intValue() and doubleValue() throw on such a
+    // value -- "Attempt to use the value '24B' as a dimensionless number" -- and the
+    // expression engine reads the quantity form, so 24B substitutes and compares correctly.
+    const char *unit = value.getUnit();
+    bool hasUnit = unit != nullptr && *unit != '\0';
     switch (value.getType()) {
-        case cValue::INT: return std::to_string(value.intValue());
+        case cValue::INT: return hasUnit ? value.str() : std::to_string(value.intValue());
         case cValue::BOOL: return value.boolValue() ? "true" : "false";
-        case cValue::DOUBLE: { std::ostringstream os; os << value.doubleValue(); return os.str(); }
+        case cValue::DOUBLE: {
+            if (hasUnit)
+                return value.str();
+            std::ostringstream os; os << value.doubleValue(); return os.str();
+        }
         default: return value.str();
     }
 }
@@ -118,6 +127,10 @@ bool EventPattern::matchesExpression(const MatchContext& context) const
     std::string expression = selExpr;
     for (auto& capture : context.captures) {
         std::string placeholder = "{" + capture.first + "}";
+        // Only convert a capture this expression names. Converting every stored capture
+        // made one step fail on a capture that belonged to another step.
+        if (expression.find(placeholder) == std::string::npos)
+            continue;
         std::string value = formatCaptureValue(capture.second);
         size_t pos;
         while ((pos = expression.find(placeholder)) != std::string::npos)
