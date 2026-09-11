@@ -47,7 +47,7 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
 - [x] Step 2: RFC 6298 enters the in-scope set; the override table gains the RFC 2988 row.
 - [x] Step 3: `standard/rfc6298/catalog.md`, identifiers `RFC6298-*`. 18 entries.
 - [x] Step 4: the feature map gains the retransmission timer features. Four: RTO-ESTIMATOR, RTO-BOUNDS, RTO-BACKOFF, RTT-SAMPLING.
-- [ ] Step 5: `protocol/tcp/checks/retransmission-timer.md`.
+- [x] Step 5: `protocol/tcp/checks/retransmission-timer.md`. Five checks.
 - [ ] Step 6: the tests.
 - [ ] Steps 7 to 9: run, results, conformance, categories.
 
@@ -69,7 +69,7 @@ Candidate checks, all deterministic through a signal:
 - [x] Step 2: RFC 5681 enters the in-scope set; the override table gains the RFC 2581 row.
 - [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [x] Step 4: the feature map gains the congestion control features. Six: CONGESTION-WINDOW, INITIAL-WINDOW, LOSS-RESPONSE, FAST-RETRANSMIT, RESTART-IDLE, DELAYED-ACK.
-- [ ] Step 5: `protocol/tcp/checks/congestion-control.md`.
+- [x] Step 5: `protocol/tcp/checks/congestion-control.md`. Five checks.
 - [ ] Step 6: the tests.
 - [ ] Steps 7 to 9: run, results, conformance, categories.
 

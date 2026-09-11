@@ -33,8 +33,21 @@ The governing document is RFC 9293, not RFC 793. The reason is in
 | [No window shrink](checks/window.md#no-window-shrink) | `checks/window.md` | RFC9293-WND-3 |
 | [Soft ICMP error](checks/icmp.md#soft-icmp-error) | `checks/icmp.md` | RFC9293-ICMP-3; covers ICMP-1 |
 | [Source Quench](checks/icmp.md#source-quench) | `checks/icmp.md` | RFC9293-ICMP-2 |
+| [Initial timeout](checks/retransmission-timer.md#initial-timeout) | `checks/retransmission-timer.md` | RFC6298-INIT-1 |
+| [First measurement](checks/retransmission-timer.md#first-measurement) | `checks/retransmission-timer.md` | RFC6298-FIRST-1, RTO-1; covers MIN-1 |
+| [Backoff doubling](checks/retransmission-timer.md#backoff-doubling) | `checks/retransmission-timer.md` | RFC6298-BACK-1, EARLY-1 |
+| [Karn's rule](checks/retransmission-timer.md#karns-rule) | `checks/retransmission-timer.md` | RFC6298-KARN-1 |
+| [Timeout after a lost SYN](checks/retransmission-timer.md#timeout-after-a-lost-syn) | `checks/retransmission-timer.md` | RFC6298-SYN-1 |
+| [Initial window](checks/congestion-control.md#initial-window) | `checks/congestion-control.md` | RFC5681-IW-1, IW-2 |
+| [Slow start growth](checks/congestion-control.md#slow-start-growth) | `checks/congestion-control.md` | RFC5681-SS-2; covers SS-1, SSTH-1 |
+| [Timeout response](checks/congestion-control.md#timeout-response) | `checks/congestion-control.md` | RFC5681-LOSS-1, LOSS-3 |
+| [Fast retransmit and fast recovery](checks/congestion-control.md#fast-retransmit-and-fast-recovery) | `checks/congestion-control.md` | RFC5681-FR-1, FR-2, FR-3, FR-5; covers ACK-2 |
+| [Window after a lost SYN](checks/congestion-control.md#window-after-a-lost-syn) | `checks/congestion-control.md` | RFC5681-IW-3 |
 
-Seventeen checks: six from the level 2 pass, eleven added at level 3.
+Twenty-seven checks: six from the level 2 pass, eleven added at level 3, ten added at
+level 4. The ten of level 4 differ in kind from the seventeen before them: eight of them
+read a control variable of the sender rather than a field of a segment, because the
+retransmission timeout and the congestion window never travel on the link.
 
 ## Statements that no check carries
 
