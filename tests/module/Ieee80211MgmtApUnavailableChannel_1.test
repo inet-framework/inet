@@ -1,7 +1,7 @@
 %description:
 An HT-capable AP must not serialize a management frame before its radio has
 published a valid primary channel.  A radio channel of -1 suppresses the
-initial channel signal, so the first beacon deterministically reports the
+initial channel signal when the transmitter is also unconfigured, so initialization reports the
 missing MIB-owned channel instead of serializing an invalid value.
 
 %file: test.ned
@@ -27,7 +27,7 @@ record-vector-results = false
 record-scalar-results = false
 
 *.ap.wlan[0].radio.channelNumber = -1
-*.ap.wlan[0].mgmt.beaconInterval = 1us
+*.ap.wlan[0].mgmt.beaconInterval = 1024us
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.wlan[0].bitrate = 65Mbps
 **.wlan[0].radio.bandName = "2.4 GHz"

@@ -16,9 +16,8 @@
 #endif // ifdef INET_WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 
 namespace inet {
 
@@ -58,27 +57,24 @@ void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID
 
     if (source == radio && signalID == ieee80211RadioChannelChangedSignal) {
         EV << "Updating AP primary channel to " << value << ".\n";
-        if (mib->isHtOperationSupported())
-            mib->setPrimaryChannel(value, getHtOperationBand());
+        const auto *channelDetails = dynamic_cast<const physicallayer::Ieee80211RadioChannelChangedDetails *>(details);
+        const auto *band = channelDetails == nullptr ? nullptr : channelDetails->getBand();
+        if (mib->isHtOperationSupported()) {
+            if (band == nullptr)
+                throw cRuntimeError("HT Operation channel conversion requires radioChannelChanged with IEEE 802.11 band details");
+            mib->setPrimaryChannel(value, band);
+        }
         else
             mib->setPrimaryChannel(value);
+        radioBand = band;
     }
 }
 
 const physicallayer::IIeee80211Band *Ieee80211MgmtApBase::getHtOperationBand() const
 {
-    if (radio == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires a configured radioModule");
-    const auto *radioContract = dynamic_cast<const physicallayer::IRadio *>(radio);
-    if (radioContract == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires radioModule to reference a radio, got %s", radio->getClassName());
-    const auto *transmitter = dynamic_cast<const physicallayer::Ieee80211Transmitter *>(radioContract->getTransmitter());
-    if (transmitter == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires radioModule's transmitter to provide an IEEE 802.11 channel");
-    const auto *channel = transmitter->getChannel();
-    if (channel == nullptr || channel->getBand() == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires radioModule's IEEE 802.11 transmitter to have a configured channel and band");
-    return channel->getBand();
+    if (radioBand == nullptr)
+        throw cRuntimeError("HT Operation channel conversion requires radioChannelChanged with IEEE 802.11 band details");
+    return radioBand;
 }
 
 int Ieee80211MgmtApBase::getDsssParameterSetChannel() const
@@ -86,17 +82,13 @@ int Ieee80211MgmtApBase::getDsssParameterSetChannel() const
     // IEEE Std 802.11-2024, Tables 9-62 and 9-69, 9.4.2.4:
     // advertise DSSS Current Channel for the modeled 2.4 GHz operation.
     // Omit it for other bands and generic radios without an IEEE channel.
-    const auto *radioContract = dynamic_cast<const physicallayer::IRadio *>(radio);
-    const auto *transmitter = radioContract == nullptr ? nullptr :
-            dynamic_cast<const physicallayer::Ieee80211Transmitter *>(radioContract->getTransmitter());
-    const auto *channel = transmitter == nullptr ? nullptr : transmitter->getChannel();
-    if (channel == nullptr || channel->getBand() == nullptr)
+    if (radioBand == nullptr || !mib->hasPrimaryChannel())
         return -1;
-    const auto *band = channel->getBand();
-    auto frequency = band->getCenterFrequency(channel->getChannelNumber());
+    int channelIndex = mib->requirePrimaryChannel();
+    auto frequency = radioBand->getCenterFrequency(channelIndex);
     if (frequency < GHz(2.4) || frequency >= GHz(2.5))
         return -1;
-    return band->getStandardChannelNumber(channel->getChannelNumber());
+    return radioBand->getStandardChannelNumber(channelIndex);
 }
 
 } // namespace ieee80211

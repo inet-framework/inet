@@ -21,6 +21,7 @@ peer state consistent throughout.
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
@@ -272,7 +273,8 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         // Both signal-driven notifications and direct MIB calls must validate against active band.
         bool threwSignalInvalidChannel = false;
         try {
-            radio->emit(physicallayer::Ieee80211Radio::radioChannelChangedSignal, 99);
+            physicallayer::Ieee80211RadioChannelChangedDetails details(mgmt->getHtOperationBand());
+            radio->emit(physicallayer::Ieee80211Radio::radioChannelChangedSignal, 99, &details);
         }
         catch (const cRuntimeError& e) {
             threwSignalInvalidChannel = true;
