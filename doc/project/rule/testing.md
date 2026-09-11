@@ -160,7 +160,18 @@ new trajectory is the correct one — a standard clause, a repaired defect, a de
 Two years later this line is the only thing that can tell a bisecting developer whether the change
 was intended.
 
-*Enforced at T4 — agent review of the message against the diff.*
+**Account for every row that moves.** Not the set as a whole: each row, traced from the change to
+the behavior that row records. A row that moves and cannot be explained from the diff is the
+finding — **an unexplained row is an unintended change until somebody shows otherwise.** A
+fingerprint says only that the trajectory differs; it cannot say which of the two is right, so the
+explanation is the only thing standing between a deliberate change and a regression that rode along
+with it.
+
+Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry
+TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is
+one explanation for 31 rows and it is complete. What is not complete is a count.
+
+*Enforced at T4 — agent review of the message against the diff, row group by row group.*
 
 ### TR-BASELINE-COMMIT
 
