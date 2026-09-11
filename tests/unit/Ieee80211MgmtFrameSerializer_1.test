@@ -455,6 +455,23 @@ ASSERT(unsupportedTypeRejected);
 
 wait(SimTime(0x12345678, SIMTIME_US) - simTime());
 
+// IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1. TSF is an unsigned microsecond
+// counter, not a simulation tick count. Since TSF is not retained, even values
+// beyond SimTime's range must be consumed without disturbing subsequent fields.
+for (const auto& timestampBytes : std::vector<std::vector<uint8_t>>{
+        {0x40, 0x42, 0x0F, 0, 0, 0, 0, 0},
+        {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}}) {
+    auto body = timestampBytes;
+    const std::vector<uint8_t> fields = {0x34, 0x12, 0, 0, 0, 3, 'a', 'b', 'c', 1, 1, 0x0C};
+    body.insert(body.end(), fields.begin(), fields.end());
+    auto decodedBeacon = deserializeBody<Ieee80211BeaconFrame>(body);
+    auto decodedProbe = deserializeBody<Ieee80211ProbeResponseFrame>(body);
+    ASSERT(decodedBeacon->getBeaconInterval() == SimTime(0x1234 * 1024, SIMTIME_US));
+    ASSERT(decodedProbe->getBeaconInterval() == decodedBeacon->getBeaconInterval());
+    ASSERT(std::string(decodedBeacon->getSSID()) == "abc");
+    ASSERT(std::string(decodedProbe->getSSID()) == "abc");
+}
+
 auto beacon = makeShared<Ieee80211BeaconFrame>();
 beacon->setSSID("abc");
 beacon->setBeaconInterval(SimTime(0x1234 * 1024, SIMTIME_US));
