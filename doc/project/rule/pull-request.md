@@ -53,6 +53,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
+| [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
 | [PR-MSG-GENERIC](#pr-msg-generic) | A shared-component commit explains itself in generic terms |
 | [PR-MSG-STANDALONE](#pr-msg-standalone) | The message carries its own context |
@@ -271,6 +272,41 @@ the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the m
 `ExternalProcess: don't kill the process group when a spawned command fails`, not "update
 ExternalProcess.cc" and not a list of file names or links.
 
+### PR-MSG-BODY
+
+**A commit whose subject cannot carry its reason has a body**
+
+A subject says what the commit does. Where that is the whole story, the commit is finished. Where it
+is not, the body carries the rest, and [PR-MSG-WHY](#pr-msg-why) says what the rest is.
+
+**A body is required when the change is substantial, and whenever it repairs a defect, changes
+behavior, or implements a standard** — the last three at any size, because each has a reason that no
+subject has room for. A one-line fix for a null dereference still owes the reader the crash.
+
+**A body is not required when the subject is the whole story.** A rename, an include ordering, a
+whitespace commit, a mechanical sweep whose rule fits the subject. Nor when the change *is* its own
+explanation: a plan or documentation commit, a regenerated file, a `WHATSNEW` entry. In each of
+those the reader's next step is to read the file, not the message.
+
+**Where the line falls.** The gate fails an empty body above **50 changed lines**, and that number
+is measured rather than chosen: across master's last 300 commits the share with no body is flat at
+3 to 4 % for every threshold from 50 upward, so 50 is where the project already draws the line
+itself. Of the nine commits above it that carry no body, six are the exempt kinds above.
+
+**On what a body is for**, since it is the usual question:
+
+| | Where it belongs |
+| --- | --- |
+| **what** the commit does | the subject names it; the diff shows it. The body must not restate it. |
+| **how** it does it | the diff shows it. *Which* mechanism, and *why that one and not the obvious alternative*, is part of the reason and belongs in the body. |
+| **why** it was done | the body, and nothing else carries it. The symptom, the cause, the alternative rejected, and what the change deliberately leaves unrepaired. |
+
+A body that restates the subject in longer words is worse than no body, because it costs a reader
+the time to discover that it says nothing.
+
+*Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) fails an empty body above 50
+changed lines, outside the exempt kinds; T4 for whether the body gives a reason at all.*
+
 ### PR-MSG-WHY
 
 **The body gives the reason, not the content**
@@ -379,5 +415,6 @@ argue about.
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |
+| PR-MSG-BODY | T3+T4 | commit-message lint: an empty body above 50 changed lines, outside the exempt kinds; agent review for a body that restates the subject |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |

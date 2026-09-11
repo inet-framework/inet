@@ -49,6 +49,14 @@ outcome distinction declared by its contract, including a default argument whose
 with the caller's static type. *Not a violation:* a contract that deliberately combines outcome
 categories and whose implementations and callers preserve that declared meaning.
 
+**[PR-MSG-BODY / PR-MSG-WHY] Does a substantial commit explain itself?**
+FLAG a commit that repairs a defect, changes behavior, or implements a standard and carries no body —
+the gate catches the empty ones above 50 lines, you catch the small ones. FLAG a body that restates
+the subject in longer words, or that lists the files and methods the diff already shows. Ask of each
+body: does it give the symptom, the cause, and why this solution rather than the obvious one?
+*Not a violation:* a bare subject on a rename, an include ordering, a whitespace commit, a plan or
+documentation commit, a regenerated file, or a `WHATSNEW` entry.
+
 **[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
 FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
 C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves

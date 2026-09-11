@@ -70,6 +70,11 @@ Read each commit against the rules that need judgment:
   new values are right. A baseline commit that stands alone after a source commit is one change
   divided in two: ask for a squash. A baseline commit that no source commit causes — a compiler or
   solver version change — is correct as it stands, and its own message carries the reason.
+- **[PR-MSG-BODY](../rule/pull-request.md#pr-msg-body)** — run the gate, then read the bodies the
+  gate cannot judge. Count them: a series where most commits explain themselves and a few do not is
+  a different thing from one where the habit is absent. `git log --format='%h %s' --no-walk
+  $(git log --format=%H $MB..HEAD | while read c; do [ -z "$(git log -1 --format=%b $c | grep -v '^$')" ] && echo $c; done)`
+  lists every commit with no body at all.
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
 - **[AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface)** and
