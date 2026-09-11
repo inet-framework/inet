@@ -55,6 +55,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
+| [PR-MSG-REPRODUCE](#pr-msg-reproduce) | A fix says how to reproduce the defect |
 | [PR-MSG-GENERIC](#pr-msg-generic) | A shared-component commit explains itself in generic terms |
 | [PR-MSG-STANDALONE](#pr-msg-standalone) | The message carries its own context |
 | [PR-MSG-FACTS](#pr-msg-facts) | The message contains only facts about the change |
@@ -324,6 +325,39 @@ solution and not an obvious alternative, and what the change deliberately does n
 For a bug fix, write the symptom in the words a future reader will search for — the error
 message, the wrong packet, the failed assertion. For a behavior change, name the standard
 clause or the reference that makes the new behavior the correct one.
+
+### PR-MSG-REPRODUCE
+
+**A fix says how to reproduce the defect**
+
+A commit that repairs a defect carries, in its body, the way to see the defect happen. Two forms
+are acceptable and the choice is the author's:
+
+1. **Steps.** The configuration, the scenario, and what goes wrong — *"run
+   `examples/inet/tcpwindowscale` with `sackSupport=true`; the sender stalls at t=2.4 s because
+   `nextSeg` rule (2) underflows"*. A few lines, and it is enough for most defects.
+2. **A standalone regression test**, committed beside the repair.
+
+**The test is justified only when the defect is serious enough and likely to bite again.** Most
+are not. A defect earns a regression test when it sits on a path many things cross, when a future
+refactor could reintroduce it without noticing, or when it came from a misreading of a standard
+that the next reader could repeat. A one-off typo in a log message earns steps and nothing more.
+
+**Why the steps are required even when the test is not.** A fix is not new behavior, so
+[TR-SHIP-WITH](testing.md#tr-ship-with) does not reach it, and nothing else in the rule set asks a
+fix for evidence. Without the steps a reviewer must take the defect on trust, and a later reader
+who suspects a regression in the same area has no way to tell whether it is the old defect
+returning.
+
+Write the symptom in the words a future reader will search for: the error message, the wrong
+packet, the failed assertion. That is [PR-MSG-WHY](#pr-msg-why) applied to a fix, and this rule
+says the searchable symptom is not optional.
+
+A fix is exactly the commit whose trailer carries `.fix` under
+[CR-DEPTH-FIX](classification.md#cr-depth-fix), so the two rules select the same commits from
+opposite directions: one asks the author to declare the intent, the other asks for the evidence.
+
+*Enforced at T4 — agent review; T3 can check that a `.fix` commit has a body, not what is in it.*
 
 ### PR-MSG-GENERIC
 
