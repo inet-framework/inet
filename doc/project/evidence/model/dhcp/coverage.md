@@ -32,6 +32,13 @@ ran, its verdict is recorded against the statement that failed, and this stateme
 to be read on because the model's behavior removed the stimulus. Twelve rows are in that state,
 and every one of them names the gap that caused it.
 
+A FAIL on a row says nothing about whether the test that found it is **declared** to fail. That is
+a separate question, and [`results.md`](results.md#the-class-of-every-failure) answers it: six of
+the fourteen failing statements are defects in code that means to be right, and their five tests
+carry no declaration and fail the run; the other eight are features the model does not implement,
+and their tests declare the failure expected. The suite reports 13 PASS, 8 FAIL (expected) and
+5 FAIL (unexpected), and therefore FAIL overall.
+
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
 | [RFC2131-MSG-1](../../standard/rfc2131/catalog.md#rfc2131-msg-1) | selected | [address-allocation-exchange](../../protocol/dhcp/checks/exchange.md#address-allocation-exchange) | `Rfc2131AddressAllocation.test` | PASS |
@@ -185,7 +192,8 @@ is untested for its `must not` half. Four of the fourteen failing rows likewise 
 half and fail for another, which is what the table's verdict column says row by row.
 
 The 14 failing rows are the 14 model gaps of [`results.md`](results.md#the-model-gaps), spread
-over 13 tests. The 12 `later` rows split into 5 that need a statistical check with a stated
+over 13 tests: 6 defects in 5 tests that fail the run, and 8 unimplemented features in 8 tests
+that declare their failure. The 12 `later` rows split into 5 that need a statistical check with a stated
 tolerance, which is level 4, and 7 that belong to a serializer unit test. The 26 `no check` rows
 are grouped by reason in
 [`checks.md`](../../protocol/dhcp/checks.md#statements-that-no-check-carries).
@@ -279,7 +287,8 @@ they are different in kind:
 
 1. **Twelve statements whose check a model gap disarmed.** These are the ones to fix first, and
    the fix is in the model and not in the tests. Close gap 9, gap 10 or gap 11 and twelve rows
-   change from `untested` to a verdict without a line of test code changing.
+   change from `untested` to a verdict without a line of test code changing. Gap 10 is a defect and
+   is already failing the run, so it is the cheapest of the three.
 2. **Twelve statements that need a second client, a second exchange or a second interface in the
    mockup.** The address selection rules, the server's half of the decline and the release, the
    server's use of the client identifier as a key, the uniqueness rules, and the multi-homing
@@ -307,7 +316,7 @@ the opposite of the UDP pass, where the toolset was the bound.
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-11 | **3, partial** | The first pass for this protocol, and it covers levels 1 to 3 in one go, because DHCP had no earlier pass. In-scope set RFC 2131, RFC 2132 and RFC 6842; 132 catalog entries; 24 features; 26 checks; 26 tests | 26 tests: 13 PASS, 13 declared FAIL naming 14 model gaps; 10 features supported, 7 partial, 3 not supported, 4 untested; 12 statements untested because a gap disarmed their check; 26 carry `no check` and 12 `later`, each with a reason; see [`results.md`](results.md) |
+| 1 | 2026-09-11 | **3, partial** | The first pass for this protocol, and it covers levels 1 to 3 in one go, because DHCP had no earlier pass. In-scope set RFC 2131, RFC 2132 and RFC 6842; 132 catalog entries; 24 features; 26 checks; 26 tests | 26 tests: 13 PASS, 8 FAIL (expected), 5 FAIL (unexpected), so the suite reports FAIL. 14 model gaps: 6 defects and 8 unimplemented features. 10 features supported, 7 partial, 3 not supported, 4 untested; 12 statements untested because a gap disarmed their check; 26 carry `no check` and 12 `later`, each with a reason; see [`results.md`](results.md) |
 
 Six checks of this pass were **split** out of a check the plan named, every one of them for the
 same reason: a wrong field would otherwise have taken the verdict of its neighbours with it.

@@ -10,16 +10,16 @@ doc/project/evidence/protocol/dhcp/checks/exchange.md#address-fields-of-a-server
 program steps below map onto its expected observations. Mapping of the plain mockup:
 server S = server, client C = hostA.
 
-Expected result FAIL, two model gaps.
+Two defects.
 
-Gap: in the DHCPOFFER, DhcpServer::sendOffer writes the gateway address into giaddr --
+Defect: in the DHCPOFFER, DhcpServer::sendOffer writes the gateway address into giaddr --
 "offer->setGiaddr(lease->gateway); // next server ip",
 src/inet/applications/dhcp/DhcpServer.cc:422. RFC 2131 table 1 says giaddr is the relay agent IP
 address, and table 3 says the giaddr of a DHCPOFFER is the giaddr of the client DHCPDISCOVER,
 which is 0.0.0.0 here. The comment names the meaning of siaddr, "next server", for a field that
 is not siaddr. The DHCPACK leaves giaddr alone, so the two replies of one exchange disagree.
 
-Gap: in the DHCPACK, DhcpServer::sendAck writes the leased address into ciaddr --
+Defect: in the DHCPACK, DhcpServer::sendAck writes the leased address into ciaddr --
 "ack->setCiaddr(lease->ip); // client IP addr.", src/inet/applications/dhcp/DhcpServer.cc:339.
 RFC 2131 table 3 allows two values there, the ciaddr of the DHCPREQUEST or 0, and the ciaddr of
 this DHCPREQUEST is 0.0.0.0.
@@ -28,7 +28,12 @@ Step 1 stops at the DHCPOFFER, so only the first gap reaches a deadline in this 
 is recorded from the trace and from the source. Both belong to one table row of one check, and
 the ledger records both against the two statements. See results.md.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model means to do
+this -- it calls the setter, or it has the branch -- so the failure is a defect in code that
+intends to be right, and not a feature somebody left out. An expected-result declaration says
+"this feature is known to be unimplemented, so the failure is not a regression"; saying that
+about a defect would turn the suite green over a bug. So the run reports this as an unexpected
+failure, and it stays that way until the defect is fixed. See results.md.
 
 %includes:
 #include "ProtocolTest.h"

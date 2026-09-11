@@ -457,14 +457,58 @@ configuration option, a patched source file, or a container image.
 Three documents carry the run record: `results.md`, `coverage.md` and `conformance.md`.
 `categories.md` records decisions, not run data, so it does not need one.
 
+### The class of a failure, and when to declare it expected
+
+Every failure falls in one of four classes, and the class decides what you do about it.
+
+| Class | What it means | What to do |
+| --- | --- | --- |
+| **test error** | the check is right and the program does not implement it | fix the test |
+| **specification misread** | the check asks for something the standard does not say | fix the catalog and the check document |
+| **unimplemented feature** | the model does not implement the behavior at all | keep the faithful test, declare `%# expected-result: FAIL`, file the gap |
+| **defect** | the model means to implement the behavior and gets it wrong | keep the faithful test, **declare nothing**, file the gap |
+
+The last two are both differences between the standard and the model, and telling them apart is
+the part that is easy to get wrong. An expected-result declaration means one thing only: *this
+feature is known to be unimplemented, so the failure is not a regression*. That is the wording of
+[`AUTHORING.md`](../../../tests/protocol/lib/AUTHORING.md), in its section on declaring an
+expected result, and it is the whole of what the declaration is for.
+
+**Never declare a defect as an expected failure.** A defect must make the suite red and keep it
+red until somebody fixes it. Declaring one turns the suite green over a bug and hides it, which is
+the opposite of what a suite is for, and it is worse than having no test at all: the test now
+states that the wrong behavior is the intended one.
+
+The line between the two is decidable, and this is where to draw it:
+
+> **Does code exist for this specific behavior?** If it exists and produces the wrong result, the
+> failure is a **defect**. If the behavior is absent — no code path, a TODO, a commented-out
+> block, a stated limitation, or a document the model does not claim — it is an **unimplemented
+> feature**.
+
+Read the question about the *specific* behavior and not about the protocol claim. A model that
+claims a protocol intends, in some sense, all of it, so the other reading would make every
+unimplemented part a defect and nothing would ever be declarable.
+
+Two shapes to watch for, because both look like one class and are the other:
+
+- A field that is **set to a wrong value** is a defect, not a missing feature. The setter is
+  there; the value is wrong. A reply that carries a constant where the standard asks for a copy
+  of the request is the clearest case.
+- A branch that exists but is **unreachable for the case the check tests** is a defect. A server
+  that tests two conditions in the wrong order has the code for both and reaches the wrong one.
+
+The word `defect` also appears in the conformance matrix of step 8, and it means something else
+there: a whole mandatory **feature** that the model claims and does not support. A statement-level
+defect usually sits inside a feature that otherwise works, which the matrix then reads as
+`partial`. Say which of the two you mean wherever both could be read.
+
 ### What results.md holds
 
 Record in `results.md`:
 
 - the run record, and the verdict of every test;
-- for each failure, its class: **test error** (fix the test), **model gap** (keep the
-  faithful test, mark `%# expected-result: FAIL`, file the gap), or **specification
-  misread** (fix the catalog and the check document);
+- for each failure, its class, from the four of [the section above](#the-class-of-a-failure-and-when-to-declare-it-expected);
 - the simulation model analysis: where the model implements the checked behavior, with
   file and line references. This is the first artifact that may reference code;
 - sharpening candidates for the next pass.

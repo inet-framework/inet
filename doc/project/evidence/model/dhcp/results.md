@@ -23,57 +23,126 @@ built from this commit. The worktree holds no uncommitted change.
 
 ## Verdicts
 
-26 tests. 13 PASS and 13 declared FAIL. No unexpected verdict, so the suite as a whole
-reports PASS.
+26 tests: **13 PASS, 8 FAIL (expected), 5 FAIL (unexpected)**. The suite as a whole reports
+**FAIL**, and that is the intended signal: five of the thirteen failures are defects in code that
+means to be right, and a defect must keep the suite red until somebody fixes it.
+
+The `FAIL (expected)` and `FAIL (unexpected)` split is the subject of the next section. It is not
+a statement about how serious a failure is; it is a statement about whether the failure is a
+regression.
 
 | Test | Verdict | Check |
 | --- | --- | --- |
 | `Rfc2131AddressAllocation.test` | PASS | [address-allocation-exchange](../../protocol/dhcp/checks/exchange.md#address-allocation-exchange) |
-| `Rfc2131TransactionIdentifier.test` | **FAIL**, gap 1 | [transaction-identifier-through-the-exchange](../../protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange) |
+| `Rfc2131TransactionIdentifier.test` | **FAIL (unexpected)**, gap 1, a defect | [transaction-identifier-through-the-exchange](../../protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange) |
 | `Rfc2131DiscoverContents.test` | PASS | [discover-contents](../../protocol/dhcp/checks/exchange.md#discover-contents) |
 | `Rfc2131OfferContents.test` | PASS | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) |
 | `Rfc2131RequestContents.test` | PASS | [request-contents](../../protocol/dhcp/checks/exchange.md#request-contents) |
 | `Rfc2131AckContents.test` | PASS | [acknowledgement-contents](../../protocol/dhcp/checks/exchange.md#acknowledgement-contents) |
-| `Rfc2131ReplyAddressFields.test` | **FAIL**, gaps 2 and 3 | [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply) |
+| `Rfc2131ReplyAddressFields.test` | **FAIL (unexpected)**, gaps 2 and 3, both defects | [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply) |
 | `Rfc2131MessageFraming.test` | PASS | [message-framing-on-the-wire](../../protocol/dhcp/checks/message-format.md#message-framing-on-the-wire) |
 | `Rfc2131RenewAtT1.test` | PASS | [renewal-at-t1](../../protocol/dhcp/checks/lease.md#renewal-at-t1) |
 | `Rfc2131RebindAtT2.test` | PASS | [rebinding-at-t2](../../protocol/dhcp/checks/lease.md#rebinding-at-t2) |
 | `Rfc2131LeaseExpiry.test` | PASS | [lease-expiry](../../protocol/dhcp/checks/lease.md#lease-expiry) |
-| `Rfc2131NakWrongSubnet.test` | **FAIL**, gap 10 | [negative-acknowledgement-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) |
+| `Rfc2131NakWrongSubnet.test` | **FAIL (unexpected)**, gap 10, a defect | [negative-acknowledgement-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) |
 | `Rfc2131SilentUnknownClient.test` | PASS | [silence-for-an-unknown-client](../../protocol/dhcp/checks/nak.md#silence-for-an-unknown-client) |
-| `Rfc6842ClientIdentifierEchoed.test` | **FAIL**, gap 5 | [client-identifier-echoed](../../protocol/dhcp/checks/client-identity.md#client-identifier-echoed) |
-| `Rfc6842ForeignClientIdentifier.test` | **FAIL**, gap 6 | [foreign-client-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-client-identifier-discarded) |
+| `Rfc6842ClientIdentifierEchoed.test` | FAIL (expected), gap 5 | [client-identifier-echoed](../../protocol/dhcp/checks/client-identity.md#client-identifier-echoed) |
+| `Rfc6842ForeignClientIdentifier.test` | FAIL (expected), gap 6 | [foreign-client-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-client-identifier-discarded) |
 | `Rfc2131ForeignTransactionId.test` | PASS | [foreign-transaction-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-transaction-identifier-discarded) |
-| `Rfc2131DuplicateAddressDeclined.test` | **FAIL**, gap 11 | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) |
-| `Rfc2131InformWithoutLease.test` | **FAIL**, gap 9 | [inform-answered-without-a-lease](../../protocol/dhcp/checks/inform.md#inform-answered-without-a-lease) |
-| `Rfc2131ReleaseOnShutdown.test` | **FAIL**, gap 12 | [release-on-shutdown](../../protocol/dhcp/checks/release.md#release-on-shutdown) |
-| `Rfc2131BroadcastBitClear.test` | **FAIL**, gap 7 | [reply-to-a-client-that-clears-the-broadcast-bit](../../protocol/dhcp/checks/reply-delivery.md#reply-to-a-client-that-clears-the-broadcast-bit) |
+| `Rfc2131DuplicateAddressDeclined.test` | FAIL (expected), gap 11 | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) |
+| `Rfc2131InformWithoutLease.test` | FAIL (expected), gap 9 | [inform-answered-without-a-lease](../../protocol/dhcp/checks/inform.md#inform-answered-without-a-lease) |
+| `Rfc2131ReleaseOnShutdown.test` | FAIL (expected), gap 12 | [release-on-shutdown](../../protocol/dhcp/checks/release.md#release-on-shutdown) |
+| `Rfc2131BroadcastBitClear.test` | FAIL (expected), gap 7 | [reply-to-a-client-that-clears-the-broadcast-bit](../../protocol/dhcp/checks/reply-delivery.md#reply-to-a-client-that-clears-the-broadcast-bit) |
 | `Rfc2131BroadcastBitSet.test` | PASS | [reply-to-a-client-that-sets-the-broadcast-bit](../../protocol/dhcp/checks/reply-delivery.md#reply-to-a-client-that-sets-the-broadcast-bit) |
-| `Rfc2131ReplyFlagsField.test` | **FAIL**, gap 8 | [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) |
-| `Rfc2131DiscoverRetransmission.test` | **FAIL**, gap 13 | [discover-repeated-without-a-server](../../protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server) |
-| `Rfc2131RequestRetransmission.test` | **FAIL**, gap 14 | [request-repeated-when-the-reply-is-lost](../../protocol/dhcp/checks/retransmission.md#request-repeated-when-the-reply-is-lost) |
+| `Rfc2131ReplyFlagsField.test` | **FAIL (unexpected)**, gap 8, a defect | [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) |
+| `Rfc2131DiscoverRetransmission.test` | FAIL (expected), gap 13 | [discover-repeated-without-a-server](../../protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server) |
+| `Rfc2131RequestRetransmission.test` | FAIL (expected), gap 14 | [request-repeated-when-the-reply-is-lost](../../protocol/dhcp/checks/retransmission.md#request-repeated-when-the-reply-is-lost) |
 | `Rfc2131RequestedParameters.test` | PASS | [requested-parameters-returned](../../protocol/dhcp/checks/parameters.md#requested-parameters-returned) |
-| `Rfc2131ParameterWithoutValue.test` | **FAIL**, gap 4 | [a-parameter-the-server-has-no-value-for](../../protocol/dhcp/checks/parameters.md#a-parameter-the-server-has-no-value-for) |
+| `Rfc2131ParameterWithoutValue.test` | **FAIL (unexpected)**, gap 4, a defect | [a-parameter-the-server-has-no-value-for](../../protocol/dhcp/checks/parameters.md#a-parameter-the-server-has-no-value-for) |
 
 ## The class of every failure
 
-All thirteen failures are **model gaps**. Not one is a test error and not one is a
-specification misread. Every failing test keeps the assertion the standard states and
-declares `%# expected-result: FAIL`; no assertion is inverted and no expectation is weakened.
+None of the thirteen failures is a **test error** and none is a **specification misread**. Every
+failing test keeps the assertion the standard states; no assertion is inverted and no expectation
+is weakened.
 
-That every failure falls in one class is worth a sentence, because it is not the usual
-outcome of a first deep pass. The reason is that step 6 was written against the check
-documents and every mismatch was traced into the source before the test was declared. Four
-of the thirteen were found the other way round — the test was written, it failed, and the
-source then showed why — and in each of those four the check was **split** so that the
-failing statement did not take the verdict of its neighbours with it. Those four splits are
-named in the pass log of the ledger.
+All thirteen are differences between the standard and the model, and they divide into two classes
+that must be declared differently.
+
+### The line between a defect and an unimplemented feature
+
+An expected-result declaration means one thing and one thing only: *this feature is known to be
+unimplemented, so the failure is not a regression*. That is the wording of
+[`AUTHORING.md`](../../../../../tests/protocol/lib/AUTHORING.md), in its section on declaring an expected result, and it
+is the whole of what the declaration is for.
+
+A **defect** is not that. When the model means to support a behavior and gets it wrong, the test
+must simply fail, and the suite must go red and stay red until somebody fixes it. Declaring a
+defect as an expected failure turns the suite green over a bug and hides it — which is the exact
+opposite of what a test suite is for.
+
+The line between the two is decidable, and this pass draws it here:
+
+> **Does code exist for this specific behavior?** If it exists and produces the wrong result, the
+> failure is a **defect** and the test carries no declaration. If the behavior is absent — no code
+> path, a TODO, a commented-out block, a stated limitation, or a document the model does not claim
+> — the failure is an **unimplemented feature** and the test declares its failure expected.
+
+The test is on the *specific* behavior and not on the protocol claim. Reading it the other way
+would make the distinction useless: the model claims RFC 2131, so every unimplemented part of
+RFC 2131 would become a defect and nothing would ever be declarable.
+
+### The two classes, per finding
+
+| Finding | Class | Why | Test verdict |
+| --- | --- | --- | --- |
+| [Gap 1](#gap-1-defect--the-client-changes-the-transaction-identifier-between-the-offer-and-the-request) | **defect** | `sendRequest` sets the `xid`; it sets the wrong one | FAIL (unexpected) |
+| [Gap 2](#gap-2-defect--the-server-writes-the-gateway-address-into-giaddr-of-a-dhcpoffer) | **defect** | `sendOffer` calls `setGiaddr`; it passes the wrong value | FAIL (unexpected) |
+| [Gap 3](#gap-3-defect--the-server-writes-the-leased-address-into-ciaddr-of-a-dhcpack) | **defect** | `sendAck` calls `setCiaddr`; it passes a value the table does not allow | FAIL (unexpected) |
+| [Gap 4](#gap-4-defect--the-server-returns-a-domain-name-server-option-it-has-no-value-for) | **defect** | both replies write a domain name server option from a field nothing assigns | FAIL (unexpected) |
+| [Gap 8](#gap-8-defect--the-server-writes-a-constant-into-the-flags-field-of-a-reply) | **defect** | `sendOffer` and `sendAck` call `setBroadcast`; they pass a constant. `sendNak` passes the right value, so the three disagree | FAIL (unexpected) |
+| [Gap 10](#gap-10-defect--the-server-is-silent-where-it-should-answer-with-a-dhcpnak) | **defect** | the branch that sends the DHCPNAK for a wrong subnet exists; two tests run in the wrong order, so it is unreachable for that case | FAIL (unexpected) |
+| [Gap 5](#gap-5-unimplemented--the-server-never-returns-the-client-identifier-option) | unimplemented | no code writes the option, and the governing document is one the model does not claim | FAIL (expected) |
+| [Gap 6](#gap-6-unimplemented--the-client-never-compares-the-client-identifier-of-a-reply) | unimplemented | no code reads the option of a reply; same document | FAIL (expected) |
+| [Gap 7](#gap-7-unimplemented--the-server-broadcasts-a-reply-when-the-broadcast-bit-is-clear) | unimplemented | the branch is present and carries a TODO with a stated reason: the application cannot set a destination hardware address | FAIL (expected) |
+| [Gap 9](#gap-9-unimplemented--the-server-handles-two-message-types-and-drops-the-other-three) | unimplemented | there is no code path for DHCPINFORM at all | FAIL (expected) |
+| [Gap 11](#gap-11-unimplemented--the-client-never-probes-the-address-it-was-given) | unimplemented | the probe is a commented-out block | FAIL (expected) |
+| [Gap 12](#gap-12-unimplemented--the-client-sends-no-dhcprelease) | unimplemented | an explicit TODO, and the statement is a `MAY` | FAIL (expected) |
+| [Gap 13](#gap-13-unimplemented--the-clients-retransmission-delay-is-a-constant) | unimplemented | there is no backoff code; one constant timeout serves every wait | FAIL (expected) |
+| [Gap 14](#gap-14-unimplemented--the-client-does-not-retransmit-a-dhcprequest-at-all) | unimplemented | there is no retransmission code; the client restarts instead | FAIL (expected) |
+
+Six defects and eight unimplemented features. The six defects are all one shape — a field set to a
+wrong value, or two tests in the wrong order — and every one of them is a few lines to fix. The
+[follow-up list of `notes.md`](notes.md#follow-ups-in-the-order-i-would-do-them) puts them first
+for that reason.
+
+### Two findings that a reader could reasonably reclassify
+
+Gap 13 and gap 14 are the borderline pair, and this document does not hide that. Both come from
+one design decision: a single 60-second `responseTimeout` serves every wait the client has. Read
+as "the retransmission mechanism is absent", both are unimplemented features, and that is how this
+pass declares them. Read as "the author believed one timeout satisfied §4.1", both are misreadings
+of the standard by the code, which is a defect.
+
+This pass chose the first reading because no backoff code exists to be wrong. A reader who
+disagrees should move both tests to an undeclared failure; nothing else in the pass changes, and
+the ledger rows keep their verdicts either way.
+
+### One thing the split changed about the pass
+
+Five of the thirteen failing tests were **first written with an expected-result declaration and
+then corrected**, because the declaration was applied to the class of finding it does not belong
+to. That was a real error in the first version of this pass, and it had a real consequence: the
+suite reported PASS while six defects sat in the model. The guide's step 7 named one class, "model
+gap", where two were needed, and the wording of the guide is corrected in the same change as this
+document.
 
 ## The model gaps
 
-Fourteen gaps in thirteen tests; `Rfc2131ReplyAddressFields.test` carries two.
+Fourteen gaps in thirteen tests; `Rfc2131ReplyAddressFields.test` carries two. Each heading names
+the class the section above assigned to it.
 
-### Gap 1 — the client changes the transaction identifier between the offer and the request
+### Gap 1 (defect) — the client changes the transaction identifier between the offer and the request
 
 `DhcpClient::sendRequest` starts by drawing a new value:
 
@@ -98,7 +167,7 @@ receives. What breaks is the purpose of the field: the servers that were not cho
 connect the DHCPREQUEST to the offer they made, and a client with two transactions open
 cannot tell two answers apart.
 
-### Gap 2 — the server writes the gateway address into `giaddr` of a DHCPOFFER
+### Gap 2 (defect) — the server writes the gateway address into `giaddr` of a DHCPOFFER
 
 ```cpp
     offer->setGiaddr(lease->gateway); // next server ip
@@ -127,7 +196,7 @@ a relay agent at the server's own address.
 `DhcpServer::sendAck` does not set the field at all, so the DHCPACK carries 0.0.0.0 and the
 two replies of one exchange disagree with each other.
 
-### Gap 3 — the server writes the leased address into `ciaddr` of a DHCPACK
+### Gap 3 (defect) — the server writes the leased address into `ciaddr` of a DHCPACK
 
 ```cpp
     ack->setCiaddr(lease->ip); // client IP addr.
@@ -147,7 +216,7 @@ the meaning of the field: `ciaddr` in a message from a client says "I hold this 
 answer for it", and a reply that echoes an address the client does not hold yet states
 something that is not true.
 
-### Gap 4 — the server returns a domain name server option it has no value for
+### Gap 4 (defect) — the server returns a domain name server option it has no value for
 
 ```cpp
     ack->getOptionsForUpdate().setDnsArraySize(1);
@@ -174,7 +243,7 @@ observation 2 passes; it returns option 6, so observation 3 fails. The server al
 parameter for a name server in its NED file, so there is no configuration that could fix
 this: the option is unconditional.
 
-### Gap 5 — the server never returns the client identifier option
+### Gap 5 (unimplemented) — the server never returns the client identifier option
 
 `DhcpServer::sendOffer` and `DhcpServer::sendAck` write six options — subnet mask, the two
 lease timers, the lease time, the router, the domain name server — and the server identifier
@@ -197,7 +266,7 @@ either, `rfc6842.txt:128-139`.
 The model's client always sends option 61 (`DhcpClient.cc:534` and `:608`), so the condition
 of the `MUST` holds in every exchange of every test.
 
-### Gap 6 — the client never compares the client identifier of a reply
+### Gap 6 (unimplemented) — the client never compares the client identifier of a reply
 
 `DhcpClient::handleDhcpMessage` tests two things about an arriving reply, the opcode and the
 transaction identifier:
@@ -226,7 +295,7 @@ subnet where two clients share a hardware address would take another client's le
 
 This gap and gap 5 are the two halves of RFC 6842, and neither one is implemented.
 
-### Gap 7 — the server broadcasts a reply when the broadcast bit is clear
+### Gap 7 (unimplemented) — the server broadcasts a reply when the broadcast bit is clear
 
 The fourth branch of the delivery rule in both `sendOffer` and `sendAck`:
 
@@ -258,7 +327,7 @@ have reported one verdict and hidden that.
 The reply still reaches the client, so nothing stops working. What the rule buys, and what is
 lost, is that a message addressed to one client does not reach every host of the subnet.
 
-### Gap 8 — the server writes a constant into the `flags` field of a reply
+### Gap 8 (defect) — the server writes a constant into the `flags` field of a reply
 
 ```cpp
     offer->setBroadcast(false); // unicast
@@ -293,7 +362,7 @@ forwards a reply to a client should examine the bit of the message it forwards,
 client that asked for a broadcast. With no relay agent in the mockup there is no observable
 consequence.
 
-### Gap 9 — the server handles two message types and drops the other three
+### Gap 9 (unimplemented) — the server handles two message types and drops the other three
 
 `DhcpServer::processDhcpMessage` (`DhcpServer.cc:157`) branches on the message type, handles
 DHCPDISCOVER and DHCPREQUEST, and ends with:
@@ -324,7 +393,7 @@ one. Both are `internal` statements whose consequence needs a second exchange to
 the ledger records them as `no check`. This analysis is what tells a reader that neither one
 is implemented, which the ledger could not say from a run.
 
-### Gap 10 — the server is silent where it should answer with a DHCPNAK
+### Gap 10 (defect) — the server is silent where it should answer with a DHCPNAK
 
 The INIT-REBOOT branch asks its two questions in the wrong order:
 
@@ -356,7 +425,7 @@ not as a defect. What makes it worth recording is the pair of checks:
 they say the model is silent in both cases where the standard asks for silence in one of them
 only. Neither check alone could establish that.
 
-### Gap 11 — the client never probes the address it was given
+### Gap 11 (unimplemented) — the client never probes the address it was given
 
 `DhcpClient::handleDhcpAck` (`DhcpClient.cc:665`) records the lease and calls `bindLease`
 (`:306`), which configures the interface. Neither one sends an address resolution request for
@@ -397,7 +466,7 @@ So the message is written and unreachable, the probe that would trigger it is a 
 the four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are untested
 rather than failed. The ledger records that difference.
 
-### Gap 12 — the client sends no DHCPRELEASE
+### Gap 12 (unimplemented) — the client sends no DHCPRELEASE
 
 ```cpp
     // TODO Client should send DHCPRELEASE to the server. However, the correct operation
@@ -419,7 +488,7 @@ What the model loses is the server's chance to free the address early; the lease
 instead. The four field rules of the message — REL-2, REL-3 and REL-5 — have nothing to be
 read on and are untested rather than failed.
 
-### Gap 13 — the client's retransmission delay is a constant
+### Gap 13 (unimplemented) — the client's retransmission delay is a constant
 
 ```cpp
         responseTimeout = 60; // response timeout in seconds RFC 2131, 4.4.3
@@ -460,7 +529,7 @@ predicate now advances its record on every DHCPDISCOVER it sees, and the test fa
 should. A check whose own bookkeeping is wrong reports a pass that means nothing, and this one
 did until it was corrected.
 
-### Gap 14 — the client does not retransmit a DHCPREQUEST at all
+### Gap 14 (unimplemented) — the client does not retransmit a DHCPREQUEST at all
 
 ```cpp
         else if (category == WAIT_ACK) {

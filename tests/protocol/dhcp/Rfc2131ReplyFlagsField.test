@@ -13,17 +13,22 @@ Level 3: the request is crafted, and the bit must be set for the check to say an
 every client of the mockup clears the bit, a server that always writes zero into the field passes
 by accident, which is why Rfc2131OfferContents.test can cover the field only for the value zero.
 
-Expected result FAIL, model gap: DhcpServer::sendOffer writes a constant into the field --
+Defect: DhcpServer::sendOffer writes a constant into the field --
 "offer->setBroadcast(false); // unicast", src/inet/applications/dhcp/DhcpServer.cc:419 -- and
 DhcpServer::sendAck does the same at :338. RFC 2131 table 3 says the flags of a DHCPOFFER are the
 flags of the client DHCPDISCOVER and the flags of a DHCPACK are those of the client DHCPREQUEST.
 Only DhcpServer::sendNak copies the value, at :300, so the three replies of one server do not
-agree. The assertion stays as the standard states it; see results.md.
+agree. The assertion stays as the standard states it.
 
 The field matters to a relay agent and not to the client, and there is no relay agent in this
 mockup, so the consequence is invisible here. The rule is still a field rule.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model means to do
+this -- it calls the setter, or it has the branch -- so the failure is a defect in code that
+intends to be right, and not a feature somebody left out. An expected-result declaration says
+"this feature is known to be unimplemented, so the failure is not a regression"; saying that
+about a defect would turn the suite green over a bug. So the run reports this as an unexpected
+failure, and it stays that way until the defect is fixed. See results.md.
 
 %includes:
 #include "ProtocolTest.h"

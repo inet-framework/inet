@@ -11,13 +11,18 @@ server S = server, client C = hostA.
 The value is captured from the first message and not predicted, because RFC2131-XID-1 says
 it is random.
 
-Expected result FAIL, model gap: DhcpClient::sendRequest picks a fresh identifier for every
+Defect: DhcpClient::sendRequest picks a fresh identifier for every
 DHCPREQUEST it sends -- "generating a new xid for each transmission",
 src/inet/applications/dhcp/DhcpClient.cc:514. RFC 2131 section 4.4.1 says "The DHCPREQUEST
 message contains the same 'xid' as the DHCPOFFER message". Step 2 therefore misses its
-deadline. The assertion stays as the standard states it; see results.md.
+deadline. The assertion stays as the standard states it.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model means to do
+this -- it calls the setter, or it has the branch -- so the failure is a defect in code that
+intends to be right, and not a feature somebody left out. An expected-result declaration says
+"this feature is known to be unimplemented, so the failure is not a regression"; saying that
+about a defect would turn the suite green over a bug. So the run reports this as an unexpected
+failure, and it stays that way until the defect is fixed. See results.md.
 
 %includes:
 #include "ProtocolTest.h"

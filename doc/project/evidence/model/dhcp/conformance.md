@@ -18,6 +18,9 @@ The ledger state this matrix comes from:
 - Command: `inet_run_protocol_tests -p inet -w dhcp`
 - Ledger: [`coverage.md`](coverage.md), achieved level 3 partial, 10 features supported, 7
   partial, 3 not supported, 4 untested.
+- Suite: 26 tests, 13 PASS, 8 FAIL (expected), 5 FAIL (unexpected). The five undeclared failures
+  are the six defects of [`results.md`](results.md#the-class-of-every-failure); the eight declared
+  ones are features the model does not implement.
 
 ## Part 1 — what the model claims
 
@@ -141,8 +144,13 @@ Twenty-four features: **10 confirmed, 6 partial, 3 declined, 4 unverified, 1 out
 
 ### How to read the four groups
 
-**Not one `defect`.** That is the headline, and it is a real result and not a rounding. A
-`defect` is a mandatory feature that the model claims and does not support, and there is none:
+**Not one `defect` verdict in this matrix.** The word means one thing here and a different thing
+in [`results.md`](results.md#the-class-of-every-failure), and the two must not be confused. In this
+matrix a `defect` is a **whole mandatory feature** that the model claims and does not support, and
+there is none: six of the fourteen findings are defects at the level of a *statement*, and every
+one of them sits inside a feature that otherwise works, which is why those features read `partial`
+and not `defect`. That distinction is the point of a matrix that works on features and not on
+tests:
 every mandatory feature is either confirmed or partial, except the two that a model gap left
 unverified and the one whose governing document the model does not claim. The model does what it
 says it does, in the large.

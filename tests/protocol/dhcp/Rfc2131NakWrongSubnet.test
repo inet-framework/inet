@@ -12,7 +12,7 @@ injector: server S = server, client C = hostA.
 Level 3: the message is crafted, because no client of the mockup can ask for an address of a
 subnet it is not on.
 
-Expected result FAIL, model gap: DhcpServer::processDhcpMessage asks the two questions of
+Defect: DhcpServer::processDhcpMessage asks the two questions of
 RFC 2131 section 4.3.2 in the wrong order. It looks the requested address up in its table of
 leases first, and only for an address it finds does it then test the subnet
 (src/inet/applications/dhcp/DhcpServer.cc, the init-reboot branch). An address of a foreign
@@ -22,14 +22,19 @@ on the correct network is done by examining the contents of 'giaddr', the 'reque
 option, and a database lookup. If the DHCP server detects that the client is on the wrong net
 ... then the server SHOULD send a DHCPNAK message to the client". The silence rule applies to a
 client the server has no record of **on the correct network**, and 10.0.0.7 is not on it. Step 1
-therefore misses its deadline. The assertion stays as the standard states it; see results.md.
+therefore misses its deadline. The assertion stays as the standard states it.
 
 The statement is a SHOULD, so the conformance matrix reads the failure as a declined behaviour
 and not as a defect. What makes it worth recording anyway is that the same code path passes
 Rfc2131SilentUnknownClient.test: the model is silent in both cases, and the standard asks for
 silence in one of them only.
 
-%# expected-result: FAIL
+This test FAILS, and the failure is deliberately NOT declared expected. The model means to do
+this -- it calls the setter, or it has the branch -- so the failure is a defect in code that
+intends to be right, and not a feature somebody left out. An expected-result declaration says
+"this feature is known to be unimplemented, so the failure is not a regression"; saying that
+about a defect would turn the suite green over a bug. So the run reports this as an unexpected
+failure, and it stays that way until the defect is fixed. See results.md.
 
 %includes:
 #include "ProtocolTest.h"
