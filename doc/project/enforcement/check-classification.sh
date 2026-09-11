@@ -30,7 +30,7 @@ note() { echo "  note: $1"; }
 DEPTHS="comment format location name refactor behavior"
 DIRS="add change remove"
 OBLS="fingerprint statistical expected test whatsnew migration"
-AREAS="src tests doc examples build"
+AREAS="src tests doc examples build plan"
 
 COMMITS=$(git log --format=%H --reverse "$RANGE")
 echo "== the series: $RANGE =="
@@ -124,6 +124,7 @@ while read -r sha; do
   grep -qE '^(doc/|WHATSNEW)'           <<< "$files" && seen="$seen doc"
   grep -qE '^(examples|showcases|tutorials)/' <<< "$files" && seen="$seen examples"
   grep -qE '^(python/|\.github/|Makefile|configure)' <<< "$files" && seen="$seen build"
+  grep -q '^plan/'                      <<< "$files" && seen="$seen plan"
   case " $seen " in *" $claimed "*) ;; *) flag "${sha:0:9} claims area '$claimed' and touches:$seen"; ok=0 ;; esac
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"

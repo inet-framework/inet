@@ -61,10 +61,17 @@ The area is the top level of the scope. There are five, and the whole repository
 | `doc` | `doc/`, and `WHATSNEW` |
 | `examples` | `examples/`, `showcases/`, `tutorials/` |
 | `build` | Makefiles, `python/`, `.github/`, the scripts |
+| `plan` | `plan/pending/` and `plan/done/` — the working material of a change, not its record |
 
 The area matters because it is most of the corpus. A mechanical pass over master's last 300
 commits puts **111 in `src`, 88 in `tests`, 89 in `doc` and 4 in `build`**. A taxonomy that can
 name only source changes cannot classify two thirds of the history.
+
+**`plan` was the sixth area and it was missing.** It was added on 2026-09-11, after
+[check-classification.sh](../enforcement/check-classification.sh) refused the first plan commit
+written under this rule: the commit claimed `doc` and touched no path that `doc` covers. A plan is
+working material, so it owes nothing — no test, no baseline, no release note — which is exactly why
+it needs an area of its own rather than a place inside `doc`.
 
 *Enforced at T3 — the area is derivable from the paths in the diff, so a gate can compare the claim
 with the diff.*
@@ -234,6 +241,7 @@ almost all of it.
 
 | Scope and depth | What must move |
 | --- | --- |
+| `plan`, any level | nothing — a plan records intent, and intent owes no evidence |
 | any area, levels 0 to 2 | nothing |
 | `src`, level 3, a public name | `whatsnew`, `migration` |
 | `src`, level 3, a private name | nothing |
