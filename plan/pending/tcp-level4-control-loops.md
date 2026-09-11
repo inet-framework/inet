@@ -35,17 +35,17 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
 | RFC 3517 | RFC 6675 | obsoletes |
 | RFC 1981 | RFC 8201 | obsoletes |
 
-- [ ] Confirm each relation from the RFC-editor metadata, not from memory.
-- [ ] Record every citation with its file, in the document list of `standards.md`.
-- [ ] Add the finding to part 1 of `conformance.md`, beside the RFC 793 finding.
-- [ ] Do not change a source file. A citation is a model claim, and this pass measures
+- [x] Confirm each relation from the RFC-editor metadata, not from memory.
+- [x] Record every citation with its file, in the document list of `standards.md`.
+- [x] Add the finding to part 1 of `conformance.md`, beside the RFC 793 finding.
+- [x] Do not change a source file. A citation is a model claim, and this pass measures
       the model as it is.
 
 ## Task 2 — RFC 6298, the retransmission timer
 
 - [x] Step 1: cache `standard/rfc6298/rfc6298.txt`.
-- [ ] Step 2: RFC 6298 enters the in-scope set; the override table gains the RFC 2988 row.
-- [ ] Step 3: `standard/rfc6298/catalog.md`, identifiers `RFC6298-*`.
+- [x] Step 2: RFC 6298 enters the in-scope set; the override table gains the RFC 2988 row.
+- [x] Step 3: `standard/rfc6298/catalog.md`, identifiers `RFC6298-*`. 18 entries.
 - [ ] Step 4: the feature map gains the retransmission timer features.
 - [ ] Step 5: `protocol/tcp/checks/retransmission-timer.md`.
 - [ ] Step 6: the tests.
@@ -66,8 +66,8 @@ Candidate checks, all deterministic through a signal:
 ## Task 3 — RFC 5681, congestion control
 
 - [x] Step 1: cache `standard/rfc5681/rfc5681.txt`.
-- [ ] Step 2: RFC 5681 enters the in-scope set; the override table gains the RFC 2581 row.
-- [ ] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`.
+- [x] Step 2: RFC 5681 enters the in-scope set; the override table gains the RFC 2581 row.
+- [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [ ] Step 4: the feature map gains the congestion control features.
 - [ ] Step 5: `protocol/tcp/checks/congestion-control.md`.
 - [ ] Step 6: the tests.
