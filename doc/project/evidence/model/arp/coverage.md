@@ -70,7 +70,7 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC5494-PROC-1](../../standard/rfc5494/catalog.md#rfc5494-proc-1) | no check | — | — | the statement binds IANA; no behaviour of a host follows from it |
 
 39 entries: 28 from RFC 826, 6 from the ARP part of RFC 1122, and 5 from RFC 5494. 35
-reached a test: 32 with a PASS and 3 with a declared FAIL that names a model gap. Four carry
+reached a test: 32 with a PASS and 3 with an undeclared FAIL that names a defect. Four carry
 `no check`, each with its reason, and none of the four is mandatory: one is a `may` about a
 field the standard calls meaningless, one is overridden, one is a `should` about hardware
 that the in-scope set does not have, and one binds IANA.
@@ -135,7 +135,7 @@ set are six: the one `must` of RFC 826 that binds a sender (RFC826-REQ-1), the t
 RFC 1122 (ACACHE-1, AFLOOD-1, AUSE-1), and its one MUST NOT (ANOERR-1); RFC 5494 has none.
 Every one of the six has a check that ran, and all six passed.
 
-**Run** — 16 tests, 13 PASS and 3 declared FAIL. The three failures are model gaps against
+**Run** — 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reports FAIL. The three failures are defects against
 statements whose strength is `description`, which is the strength of nearly every sentence
 of RFC 826. They do not hold the level back: the criterion asks that each mandatory statement
 have a check, and each one does. They are the findings of the pass.
@@ -155,7 +155,7 @@ measures the reach of the catalogs and of the checks; the gaps measure the model
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-11 | **3, reached** | The first ARP pass, and it did levels 1, 2 and 3 together. RFC 826, three clauses of RFC 1122 and RFC 5494 in scope; two new catalogs with 33 entries and 6 entries added to the shared RFC 1122 catalog; 9 features; 16 checks; 16 tests, one of which replaced a demo test that named no catalog entry | 16 tests: 13 PASS and 3 declared FAIL naming two model gaps in three tests; 7 features supported, 1 partial, 1 untested; 4 statements carry `no check` with a reason; see [`results.md`](results.md) |
+| 1 | 2026-09-11 | **3, reached** | The first ARP pass, and it did levels 1, 2 and 3 together. RFC 826, three clauses of RFC 1122 and RFC 5494 in scope; two new catalogs with 33 entries and 6 entries added to the shared RFC 1122 catalog; 9 features; 16 checks; 16 tests, one of which replaced a demo test that named no catalog entry | 16 tests: 13 PASS and 3 undeclared FAIL naming two defects in three tests, so the suite reports FAIL; 7 features supported, 1 partial, 1 untested; 4 statements carry `no check` with a reason; see [`results.md`](results.md) |
 
 ## Out of scope
 

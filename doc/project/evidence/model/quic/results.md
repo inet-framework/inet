@@ -42,14 +42,26 @@ Pass 2, level 3, with the two level 2 blockers closed first:
 | --- | --- | --- |
 | Rfc9000ReorderedDelivery.test | RFC9000-STR-2, at its edge | PASS |
 | Rfc9000AntiAmplification.test | RFC9000-AMP-1 | PASS |
-| Rfc9000ServerInitialSize.test | RFC9000-SIZE-1, the server half | **FAIL**, model gap 1 |
-| Rfc9000VersionNegotiation.test | RFC9000-VER-1 | **FAIL**, model gap 2 |
-| Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **FAIL**, model gap 3 |
+| Rfc9000ServerInitialSize.test | RFC9000-SIZE-1, the server half | **FAIL (unexpected)**, gap 1, a defect |
+| Rfc9000VersionNegotiation.test | RFC9000-VER-1 | FAIL (expected), gap 2, unimplemented |
+| Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **FAIL (unexpected)**, gap 3, a defect |
 
-Summary after pass 2: 11 tests, 8 PASS, 3 FAIL, each failure declared with
-`%# expected-result: FAIL`. The other four suites of the same tree stay where they were:
-IPv4 23 (17 PASS, 6 expected FAIL), UDP 13 (10 PASS, 3 expected FAIL), TCP 19 (15 PASS, 4
-expected FAIL), IPv6 29 (21 PASS, 8 expected FAIL).
+Summary after pass 2: 11 tests, 8 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite
+reports FAIL. The tallies of the other suites are not repeated here: a document that quotes another
+suite's numbers goes stale on that suite's next run.
+
+## Which failures are declared, and which are not
+
+Reviewed against
+[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
+a failure is declared expected only where the model does **not** claim the behavior, and a claim is
+code.
+
+| Test | Class | The claim, in the model |
+| --- | --- | --- |
+| `Rfc9000ServerInitialSize.test` | **defect** | `PacketBuilder::buildClientInitialPacket` pads to exactly the size the requirement names, `createPaddingFrame(1200 - packet->getSize())` (PacketBuilder.cc:476). The padding mechanism is implemented and applied to one of the two sides RFC 9000 names. |
+| `Rfc9000UnknownFrameType.test` | **defect** | `ConnectionState.cc` dispatches a frame on its type and has a `default:` branch for one it does not know; that branch throws. |
+| `Rfc9000VersionNegotiation.test` | unimplemented | Nothing reads the version of a received packet and nothing builds a Version Negotiation packet. `VersionNegotiationPacketHeader` is declared in `packet/PacketHeader.msg:45`, and a search of the hand-written sources finds no use of it: a declared message type with no builder and no sender is a modelled packet format, not an implemented behavior. |
 
 Two of the passes are worth as much as the failures. The reordering check puts the buffering
 half of RFC9000-STR-2 under load for the first time, and the model keeps the data that

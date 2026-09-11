@@ -169,7 +169,7 @@ static const int restoreDefaultAbortHandler = (signal(SIGABRT, SIG_DFL), 0);
 ```
 
 The suite went from 9 minutes 4 seconds to 2.4 seconds, with the same 29 tests and the same
-21 PASS and 8 expected FAIL. The assertion message still reaches `test.err`, so the diagnosis
+19 PASS and 8 undeclared failures, every one a defect. The assertion message still reaches `test.err`, so the diagnosis
 is unchanged; only the frames are gone, and removing the line brings them back while somebody
 works on the gap.
 

@@ -103,7 +103,7 @@ which is not a failure.
 | [RFC6864-ID-7](../../standard/rfc6864/catalog.md#rfc6864-id-7) | selected | [atomic-identification](../../protocol/ipv4/checks/identification.md#atomic-identification) | Rfc6864AtomicIdentification.test | PASS |
 
 67 entries: 23 of RFC 791 and RFC 792, 37 of RFC 1122, 7 of RFC 6864. 50 have a verdict
-from a check that ran: 41 PASS, 6 FAIL as a model gap, 2 with one PASS and one FAIL
+from a check that ran: 41 PASS, 6 FAIL -- 4 of them a defect and 2 an unimplemented behavior -- 2 with one PASS and one FAIL
 (RFC791-REASM-1 and REASM-3, each with two checks), 1 declined should. 17 have none:
 7 need a module test (an interface or a handoff inside the host), 2 wait for level 4 (the
 reassembly timer), 1 needs a TCP retransmission, 1 needs a standing negative rule in the
@@ -209,7 +209,7 @@ verification check ran and failed, which is exactly what the level exists to fin
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-02 | 2, partial | RFC 791 + RFC 792 error signals; 17 catalog entries; 3 checks; 3 tests | 4 PASS; two mandatory features untested |
 | 2 | 2026-09-08 | **2, reached** | Level 2 pass: 23 catalog entries (6 new), 10 features (2 new), 7 checks (4 new), 7 tests (4 new, 1 extended). | 8 PASS; 9 features supported, 1 partial; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
-| 3 | 2026-09-09 | **3, partial** | Level 3 pass: RFC 1122 and RFC 6864 enter the in-scope set (44 new catalog entries, 5 override cross references), 13 features (3 new, 2 levels changed by the new documents), 22 checks (15 new, split into one file per feature), 23 tests (15 new, 1 extended); the relay, two-gateway and one-link mockups. | 17 PASS, 6 FAIL (expected) as model gaps; 8 features supported, 4 partial, 1 untested; 14 mandatory statements without a check; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
+| 3 | 2026-09-09 | **3, partial** | Level 3 pass: RFC 1122 and RFC 6864 enter the in-scope set (44 new catalog entries, 5 override cross references), 13 features (3 new, 2 levels changed by the new documents), 22 checks (15 new, split into one file per feature), 23 tests (15 new, 1 extended); the relay, two-gateway and one-link mockups. | 16 PASS, 6 FAIL: 2 declared expected and 4 undeclared defects, so the suite reports FAIL; 8 features supported, 4 partial, 1 untested; 14 mandatory statements without a check; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
 
 ## Out of scope
 

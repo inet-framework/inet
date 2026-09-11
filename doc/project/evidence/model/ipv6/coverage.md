@@ -198,7 +198,7 @@ MTU field check ran and failed, which is exactly what the level exists to find.
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-09 | **2, reached** | RFC 8200 + RFC 4443 error signals: 34 catalog entries, 9 features, 9 checks, 9 tests | 7 PASS, 2 FAIL (expected) as model gaps; 6 features supported, 3 partial |
-| 2 | 2026-09-09 | **3, partial** | Level 3 pass: RFC 8504 enters the in-scope set and the two level 2 documents enter in full (33 new catalog entries, 4 override cross references), 12 features (3 new), 27 checks (18 new, split into one file per feature), 27 tests (18 new); the relay and the one-link mockups. | 19 PASS, 8 FAIL (expected) as model gaps, 4 of them stops of the simulation; 5 features supported, 6 partial, 1 untested; 10 mandatory statements without a check; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
+| 2 | 2026-09-09 | **3, partial** | Level 3 pass: RFC 8504 enters the in-scope set and the two level 2 documents enter in full (33 new catalog entries, 4 override cross references), 12 features (3 new), 27 checks (18 new, split into one file per feature), 27 tests (18 new); the relay and the one-link mockups. | 19 PASS, 8 FAIL, all eight undeclared defects so the suite reports FAIL, 4 of them stops of the simulation; 5 features supported, 6 partial, 1 untested; 10 mandatory statements without a check; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
 
 ## Out of scope
 

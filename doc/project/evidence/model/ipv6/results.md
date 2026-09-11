@@ -41,30 +41,56 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200HopLimitOneAtDestination.test | RFC8200-HL-3; covers HL-1 | PASS |
 | Rfc8200HopLimitZeroAtDestination.test | RFC8200-HL-3, the exact case | PASS |
 | Rfc8200SourceFragmentation.test | RFC8200-FRAG-3, FRAG-4, FRAG-5 (structure), FRAG-6, EXT-1, REASM-1, REASM-2, MTU-4; covers HDR-3, RFC8504-NR-2, NR-3, NR-4, NR-8 (the sender halves) | PASS |
-| Rfc8200FragmentPayloadLength.test | RFC8200-FRAG-4, FRAG-5 (payload length), HDR-2 | **FAIL (expected)** — model gap |
+| Rfc8200FragmentPayloadLength.test | RFC8200-FRAG-4, FRAG-5 (payload length), HDR-2 | **FAIL (unexpected)** — defect |
 | Rfc8200FragmentIdentification.test | RFC8200-FRAG-2; notes RFC8504-NR-5 | PASS |
-| Rfc8200AtomicFragment.test | RFC8504-NR-4 (receiver; governs RFC8200-REASM-6) | **FAIL (expected)** — model gap, a C++ assertion |
-| Rfc8200OverlappingFragments.test | RFC8504-NR-3 (receiver; governs RFC8200-REASM-5) | **FAIL (expected)** — model gap, a runtime assertion |
+| Rfc8200AtomicFragment.test | RFC8504-NR-4 (receiver; governs RFC8200-REASM-6) | **FAIL (unexpected)** — defect, a C++ assertion |
+| Rfc8200OverlappingFragments.test | RFC8504-NR-3 (receiver; governs RFC8200-REASM-5) | **FAIL (unexpected)** — defect, a runtime assertion |
 | Rfc8200ShortFragment.test | RFC8200-REASM-4 | PASS |
 | Rfc8200OversizedFragmentOffset.test | RFC8200-REASM-8 | PASS |
 | Rfc4443PacketTooBig.test | RFC8200-FRAG-1, RFC4443-PTB-1, RFC4443-ERR-2; covers RFC8504-NR-11 | PASS |
-| Rfc4443PacketTooBigMtu.test | RFC4443-PTB-2 | **FAIL (expected)** — model gap |
+| Rfc4443PacketTooBigMtu.test | RFC4443-PTB-2 | **FAIL (unexpected)** — defect |
 | Rfc8200LinkMtuPacket.test | RFC8200-MTU-2 | PASS |
 | Rfc4443HostErrorReport.test | RFC4443-DU-4, ERR-1, ERR-2, SRC-1 | PASS |
 | Rfc4443ReportSourceAddress.test | RFC4443-SRC-2 | PASS |
 | Rfc4443NoErrorAboutError.test | RFC4443-MPR-4 | PASS |
 | Rfc4443NoErrorForMulticast.test | RFC4443-MPR-6 | PASS |
-| Rfc4443NoErrorForLinkMulticast.test | RFC4443-MPR-7 | **FAIL (expected)** — model gap |
-| Rfc4443NoErrorForLinkBroadcast.test | RFC4443-MPR-8 | **FAIL (expected)** — model gap |
+| Rfc4443NoErrorForLinkMulticast.test | RFC4443-MPR-7 | **FAIL (unexpected)** — defect |
+| Rfc4443NoErrorForLinkBroadcast.test | RFC4443-MPR-8 | **FAIL (unexpected)** — defect |
 | Rfc4443NoErrorForUnspecifiedSource.test | RFC4443-MPR-9 | PASS |
-| Rfc4443ErrorForUnknownProtocol.test | RFC4443-MPR-3, MPR-4 | **FAIL (expected)** — model gap, a runtime error |
+| Rfc4443ErrorForUnknownProtocol.test | RFC4443-MPR-3, MPR-4 | **FAIL (unexpected)** — defect, a runtime error |
 | Rfc8200ZeroUdpChecksum.test | RFC8200-CKSUM-1 (the discard) | PASS |
 | Rfc8200UnrecognizedNextHeader.test | RFC8504-NR-6 (governs RFC8200-EXT-3) | PASS |
 | Rfc8200UnassignedNextHeader.test | RFC8504-NR-6, for an unassigned value | PASS |
 | Rfc4443UnknownErrorType.test | RFC4443-MPR-4 (the silence); notes MPR-1 | PASS |
-| Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **FAIL (expected)** — model gap, a runtime error |
+| Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **FAIL (unexpected)** — defect, a runtime error |
 
-Summary: 29 tests in the suite, 21 PASS, 8 FAIL (expected), 0 unexpected. Every FAIL is a
+Summary: 27 tests in the suite, 19 PASS, **0 FAIL (expected), 8 FAIL (unexpected)**, so the suite
+reports FAIL.
+
+## Which failures are declared, and which are not
+
+Reviewed against
+[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
+a failure is declared expected only where the model does **not** claim the behavior, and a claim is
+code. **All eight failures of this suite are defects, so none is declared.** IPv6 in this tree has
+real fragmentation, reassembly and ICMPv6 code, and every one of these eight is that code doing the
+wrong thing.
+
+| Test | The claim, in the model |
+| --- | --- |
+| `Rfc4443NoErrorForLinkBroadcast.test`, `…LinkMulticast.test` | `Icmpv6::validateDatagramPromptingError` suppresses for four conditions, one citing RFC 4443 §2.4(e). The mechanism is there and the link-layer condition is missing from it. |
+| `Rfc4443UnknownInformationalType.test` | The type switch has a `default:` branch for a type it does not know, and that branch throws. |
+| `Rfc4443ErrorForUnknownProtocol.test` | The report is built and sent; the crash is in the path that delivers it. |
+| `Rfc4443PacketTooBigMtu.test` | `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter (Icmpv6.h:55) and the caller hands it a literal 0 (Icmpv6.cc:273). The `// TODO implement MTU support.` above it is a bare "to do", which says the behavior is wanted and unfinished — a claim — and not a reason why it is unsupported. |
+| `Rfc8200FragmentPayloadLength.test` | `Ipv6::fragmentAndSend` builds every fragment and sets its header; the payload length it writes is the copied one. |
+| `Rfc8200AtomicFragment.test` | The fragment buffer runs and uses an iterator it has already erased. A memory bug in live code. |
+| `Rfc8200OverlappingFragments.test` | The reassembly buffer runs, completes a datagram from the overlapping set, and then trips the model's own assertion in `Ipv6::decapsulate`. |
+
+**Four of the eight stop the simulation**, and that is the loudest finding of this suite: a
+crafted but lawful input meets a `default:` branch, an erased iterator or an assertion, and the
+run ends. A stop is never a declarable failure.
+
+Every FAIL is a
 model gap declared with `%# expected-result: FAIL`; each test keeps the faithful assertion
 and fails at the step, or in the way, its description predicts. Four of the eight failures
 stop the simulation: the model's answer to three crafted inputs and to one report is an

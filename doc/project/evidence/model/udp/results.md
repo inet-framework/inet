@@ -42,14 +42,27 @@ Pass 2, level 3:
 | Rfc1122ValidSourceAddress.test | RFC1122-UADDR-2 | PASS |
 | Rfc1122ApplicationTtlAndTos.test | RFC1122-UAPI-1 | PASS |
 | Rfc1122ApplicationSourceAddress.test | RFC1122-UMH-2 | PASS |
-| Rfc1122ChecksumDefault.test | RFC1122-UCK-3 | **FAIL**, model gap 1 |
-| Rfc1122MulticastSourceAddress.test | RFC1122-UADDR-1 | **FAIL**, model gap 2 |
-| Rfc768EmptyDatagram.test | RFC768-HDR-3, the minimum | **FAIL**, model gap 3 |
+| Rfc1122ChecksumDefault.test | RFC1122-UCK-3 | **FAIL (unexpected)**, gap 1, a defect |
+| Rfc1122MulticastSourceAddress.test | RFC1122-UADDR-1 | FAIL (expected), gap 2, unimplemented |
+| Rfc768EmptyDatagram.test | RFC768-HDR-3, the minimum | **FAIL (unexpected)**, gap 3, a defect |
 
-Summary: 13 tests, 10 PASS, 3 FAIL, each failure declared with
-`%# expected-result: FAIL` and analysed below. The three suites of the same tree stay where
-they were: IPv4 23 (17 PASS, 6 expected FAIL), TCP 8 (7 PASS, 1 expected FAIL), IPv6 29
-(21 PASS, 8 expected FAIL).
+Summary: 13 tests, 10 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite reports FAIL.
+Each failure is analysed below. The tallies of the other suites are not repeated here: a document
+that quotes another suite's numbers goes stale on that suite's next run, and each suite's own
+`results.md` holds its own.
+
+## Which failures are declared, and which are not
+
+Reviewed against
+[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
+a failure is declared expected only where the model does **not** claim the behavior, and a claim is
+code.
+
+| Test | Class | The claim, in the model |
+| --- | --- | --- |
+| `Rfc1122ChecksumDefault.test` | **defect** | The checksum computation exists and works: four tests of this suite set `checksumMode = "computed"` and pass. What is wrong is the value the parameter defaults to, and a setting that exists and holds a value the standard forbids is a defect. |
+| `Rfc768EmptyDatagram.test` | **defect** | UDP handles the smallest datagram RFC 768 allows correctly. The defect is in `DataAgeFilter`, a statistic filter every standard receiving program switches on, which calls `peekData()` on a zero-length packet and stops the run. A crash in live code is a defect wherever it sits. |
+| `Rfc1122MulticastSourceAddress.test` | unimplemented | Nothing validates the source address of a received datagram, at either layer. The one source test in the IPv4 receive path only warns about an unspecified address and discards nothing. |
 
 The seven new passes are worth as much as the three failures. Four of them use the level 3
 toolset to establish what level 2 could only describe: the checksum really covers the data

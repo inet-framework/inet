@@ -43,7 +43,7 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC9000-AMP-1](../../standard/rfc9000/catalog.md#rfc9000-amp-1) | selected | [anti-amplification-limit](../../protocol/quic/checks/address-validation.md#anti-amplification-limit) | Rfc9000AntiAmplification.test | PASS |
 | [RFC9000-ERR-1](../../standard/rfc9000/catalog.md#rfc9000-err-1) | selected | [unknown-frame-type](../../protocol/quic/checks/frame-validation.md#unknown-frame-type) | Rfc9000UnknownFrameType.test | **FAIL**, gap 3 |
 
-14 entries. 11 reached a test: 8 with a PASS and 3 with a declared FAIL that names a model
+14 entries. 11 reached a test: 8 with a PASS and 3 with a FAIL -- 2 of them a defect and 1 an unimplemented behavior -- that names a model
 gap. RFC9000-STR-1 carries `no check`, with a proof rather than a suspicion behind it; and
 RFC9000-VER-2 is a candidate the relay could now reach.
 
@@ -141,7 +141,7 @@ every check of this suite shorter and plainer.
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-08 | **2, partial** | RFC 9000 in scope; 10 catalog entries; 6 features; 7 checks; 6 tests | 6 PASS; 4 features supported, 2 partial; the framework cannot dissect QUIC, so every check reads chunk types; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
-| 2 | 2026-09-09 | **2 reached, 3 partial** | The two level 2 blockers closed with two probes; 4 catalog entries, 3 features, 5 checks, 5 tests added | 11 tests: 8 PASS, 3 declared FAIL naming three model gaps; 5 features supported, 2 partial, 2 not supported; see [`results.md`](results.md) |
+| 2 | 2026-09-09 | **2 reached, 3 partial** | The two level 2 blockers closed with two probes; 4 catalog entries, 3 features, 5 checks, 5 tests added | 11 tests: 8 PASS, 3 FAIL -- 1 declared expected and 2 undeclared defects, so the suite reports FAIL -- naming three model gaps; 5 features supported, 2 partial, 2 not supported; see [`results.md`](results.md) |
 
 ## Out of scope
 

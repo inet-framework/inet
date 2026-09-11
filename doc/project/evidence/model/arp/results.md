@@ -17,8 +17,7 @@ workflow that may reference code.
   cd tests/protocol/lib && MODE=debug ./build.sh
   inet_run_protocol_tests -p inet -w arp
   ```
-- Suite result: 16 TOTAL, 13 PASS, 3 FAIL (expected). Every other protocol suite of the
-  same run is unchanged: 10 suites, 250 tests, all PASS at the suite level.
+- Suite result: 16 TOTAL, 13 PASS, **3 FAIL (unexpected)**, so the suite reports FAIL.
 
 This is the first ARP pass. It targets level 3, so it did the work of levels 1, 2 and 3
 together, and there is no earlier verdict to repeat.
@@ -53,9 +52,18 @@ Level 3, a crafted packet:
 
 ## The failures
 
-All three failures are **model gaps**. No test error and no specification misread came out
-of this pass. Each of the three tests keeps its faithful assertion and declares
-`%# expected-result: FAIL`.
+All three failures are **defects**, and none is declared expected. No test error and no
+specification misread came out of this pass; each test keeps its faithful assertion.
+
+Reviewed against
+[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test),
+a failure is declarable only where the model does not claim the behavior, and a claim is code. All
+three of these are code that exists and does the wrong thing:
+`ArpPacketSerializer::deserializeFields` tests the hardware space and the protocol space and calls
+`markIncorrect` when either fails (ArpPacketSerializer.cc:52 to 55), so the model **detects** both
+conditions RFC 826 asks it to detect; and `Arp::processArpPacket` has a `default:` branch for an
+opcode it does not know (Arp.cc:358). The detection and the branch are there, and what happens next
+is a stop.
 
 The three failures share one shape: RFC 826 asks for a silent discard, and the model stops
 the run instead. The reception algorithm of RFC 826 states the rule once, at its head:
