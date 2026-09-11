@@ -1,6 +1,6 @@
 # Resolve the audit findings of PR #1155
 
-Status: **pending** — no step started.
+Status: **ready** — both decisions made 2026-09-11, no step started.
 Audit: [doc/project/audit/report/pull-request/pr-1155.md](../../doc/project/audit/report/pull-request/pr-1155.md), third pass, 2026-09-11.
 Branch: `topic/tcp-new`, head `33e8b0d073`, merge base `434658d729`, 61 commits, 183 files, +15840 / −3685.
 
@@ -20,54 +20,54 @@ the audit tooling rather than for the branch.
 | F-7 | 17 commits have no body, 12 of them above 50 lines | the author writes 12 bodies |
 | F-8 | the summary tool fails silently without its parsers | `opp_repl`, not this repository |
 
-## 2. Two decisions come before any work
+Two rules written on 2026-09-11 also apply to this branch, and neither was in the audit because
+neither existed when it was written:
 
-**Neither is the branch author's to make, and both block a step.**
+| Rule | What it asks of this branch |
+| --- | --- |
+| [PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce) | the 14 `fix` commits say how to see the defect — step 1f |
+| [PR-MSG-PLAN](../../doc/project/rule/pull-request.md#pr-msg-plan) | every commit this plan touches names this plan — step 1g |
 
-### D-1 — Decide the `common/packet/` seal (blocks F-1)
+[TR-BASELINE-PROVENANCE](../../doc/project/rule/testing.md#tr-baseline-provenance) was strengthened
+the same day, and that is D-2 below.
 
-`common/packet/` is sealed over `AV-ORG-01` and `AV-ORG-02`, both still `Open (decide)`, which
-[SR-AUDIT-FIRST](../../doc/project/rule/sealing.md#sr-audit-first) forbids. The branch needs three
-lines in that tree. Three outcomes, and any of them unblocks:
+## 2. The two decisions, both now made
 
-1. **Sanction the two clusters** as `AS-ORG-*`, and the seal stands. The branch then states the
-   permission under [SR-PR-APPROVAL](../../doc/project/rule/sealing.md#sr-pr-approval).
-2. **Repair the two clusters**, then the seal stands on its own.
-3. **Lift the seal** until the clusters are decided.
+### D-1 — `common/packet/`: unseal, edit, reseal — **decided 2026-09-11**
 
-Blocking a three-line chunk repair behind a seal the project's own ledger calls invalid is the
-worst of the three, and it is where things stand today.
+The seal owner validated the three edits and allows the path to be unsealed for them and resealed
+after. That unblocks F-1 and it does not resolve the underlying question: `AV-ORG-01` and
+`AV-ORG-02` remain `Open (decide)`, and the reseal puts the seal back over two clusters the ledger
+still calls invalid. **The reseal is on the same footing it had before; this decision is about the
+branch, not about the seal.**
 
-### D-2 — Decide how far the baseline attribution goes (sizes F-3)
+The three files are `chunk/BitCountChunk.cc`, `chunk/ByteCountChunk.cc` and
+`recorder/PcapRecorder.cc`. Step 4 carries out the unseal and the reseal.
 
-**This decision dominates the cost of the whole plan.** The reconstruction in
-[classification-on-tcp-new.md](../../doc/project/audit/report/sweep/classification-on-tcp-new.md)
-says **9 commits owe a `fingerprint`** and 2 more owe a `?`, while the branch discharges all of
-them in **2 bulk commits**.
+### D-2 — Attribute every moved row — **decided 2026-09-11, the hard way**
 
-| Option | What it costs | What it buys |
-| --- | --- | --- |
-| **A. Squash each bulk commit into the one before it** — the audit's own wording | two rebase edits | the letter of [PR-SPLIT-BASELINE](../../doc/project/rule/pull-request.md#pr-split-baseline) for `9f40ee337e`, whose cause really is the commit before it |
-| **B. Attribute every row to the commit that moves it** | a fingerprint run at each of 9 to 11 commits | [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds): every commit passes its own tests, and `git bisect` over the suite works |
+Every commit that moves a fingerprint carries the new values, and **every moved row is analyzed and
+explained** from the change that causes it and from what that fingerprint records.
 
-**Option A is not sufficient for the second commit.** `33e8b0d073` says it re-records "the
-fingerprints this TCP workstream moves" — a span, not the commit before it — so squashing it into
-`f121cec387` records a cause that is false. Under option A that commit must keep its own message
-and stay where it is, and the report keeps F-3 open as a stated exception.
+This is the rule, not a preference for this branch:
+[TR-BASELINE-PROVENANCE](../../doc/project/rule/testing.md#tr-baseline-provenance) was strengthened
+on 2026-09-11 to say it. **A row that moves and cannot be explained from the diff is the finding**
+— an unexplained row is an unintended change until somebody shows otherwise, because a fingerprint
+says only that the trajectory differs and never which of the two is right. Rows that share one
+explanation are named together; a count is not an explanation.
 
-**Recommendation: B for the nine, A for nothing.** The branch already proves the author can run the
-suite in a separate workspace and describe what moved; option B is that work done nine times
-instead of twice. If the effort is refused, take A and say so in the pull request description, so
-the exception is a decision and not an omission.
+Step 5 is therefore the long step, and the plan says so rather than hiding it.
 
 ## 3. The order, and why
 
 ```
-  step 1  rewrite history   (F-4, F-5, F-7, the F-2 alias, the trailers)
+  step 1  rewrite history   (F-4, F-5, F-7, the F-2 alias, the trailers,
+                             9 of the 14 reproductions, the Plan: lines)
   step 2  rebase onto master (F-6)
   step 3  the release note   (F-2)
-  step 4  state the seal     (F-1, needs D-1)
-  step 5  the baselines      (F-3, needs D-2)   <- the expensive step
+  step 4  unseal, edit, reseal (F-1)
+  step 5  the baselines, every row explained (F-3)   <- the long step
+  step 5b the five reproductions that step 5 supplies (F-3 -> PR-MSG-REPRODUCE)
   step 6  verify
 ```
 
@@ -85,6 +85,10 @@ before the rebase is stale.
 
 **One history pass, not three.** F-4, F-5 and F-7 all edit the same series. Doing them together
 costs one rebase; doing them apart costs three, and each one risks the rename detection again.
+
+**Five reproductions wait for step 5.** Commits 44, 45, 49, 50 and 51 each move fingerprint rows,
+and the row analysis step 5 must do anyway *is* the reproduction those commits owe. Writing them
+before step 5 means writing them twice.
 
 ## 4. The steps
 
@@ -167,6 +171,59 @@ claims no behavior change and carries a baseline row fails the gate. Without the
 mechanical check at all.
 **Done when** `check-classification.sh` passes over the series.
 
+**1f. Add the reproduction to fourteen fix commits
+([PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce)).**
+
+The rule is new, written 2026-09-11. Fourteen commits in this series carry `.fix`, **all fourteen
+already have a body, and the bodies are among the best in the project** — `f2b5fd13b7` traces an
+unsigned subtraction wrapping to ~4G through to a stalled recovery, and names what it deliberately
+leaves for a follow-up. **None of them says how to see the defect happen.** They explain why the
+code was wrong from reading the code, not which configuration shows it.
+
+| # | Commit | What must be added |
+| --- | --- | --- |
+| 1 | `ed742203a8` | which chunk split loses the fill byte, and what the receiver then sees |
+| 3 | `21d34de9e8` | which tool reads the trace wrongly under `LINKTYPE_PPP_WITH_DIR` |
+| 7 | `747ec0f435` | the scenario that disconnects mid-transmission, and the assertion that fires |
+| 38 | `06853ca06f` | what the oracle ran, and what each of the three defects looked like |
+| 39 | `c0ec1b6a94` | the option form and the pre-ACK window case that fail |
+| 40 | `e04d92d9c3` | the RTT profile where the old detector exits slow start at the wrong point |
+| 44 | `4190b1977e` | the loss pattern that splits a SACK region **— see step 5** |
+| 45 | `f2b5fd13b7` | the window and pipe values that wrap **— see step 5** |
+| 46 | `429e8cc9be` | the option layout that aborted the simulation, and the error text |
+| 48 | `8af4179c43` | the parameter combination that compared against the wrong default |
+| 49 | `37d121af2e` | the ECN scenario that got no reaction **— see step 5** |
+| 50 | `5d94c07e75` | the flavour and loss pattern whose duplicate ACKs went uncounted **— see step 5** |
+| 51 | `7d52875f17` | the loss episode after which cwnd stayed high **— see step 5** |
+| 53 | `0776e1591c` | the half-close sequence that dropped the connection |
+
+**Five of the fourteen get their reproduction from step 5 for free.** Commits 44, 45, 49, 50 and 51
+each move fingerprint rows, and a row that moves *is* a scenario where the defect showed. Step 5
+has to identify and explain those rows anyway, so run step 1f for those five **after** step 5 and
+lift the configuration from the row analysis.
+
+**None of the fourteen needs a standalone regression test on its face**, and the rule says the test
+is justified only where the defect sits on a crossed path, could return under a refactor, or came
+from a misread standard. Two are worth a second look against that test: `f2b5fd13b7` is an unsigned
+underflow in RFC 6675 `nextSeg`, which a future edit to `setPipe` could reintroduce; and
+`7d52875f17` is a missing `state->lossRecovery` that any rework of the recovery split could drop
+again. **The author decides; the plan only marks them.**
+
+**Done when** each of the fourteen bodies names a configuration and an observable.
+
+**1g. Name this plan in every commit
+([PR-MSG-PLAN](../../doc/project/rule/pull-request.md#pr-msg-plan)).**
+
+Every commit this plan produces or rewrites carries, above its `Change:` trailer:
+
+```
+Plan: plan/pending/pr-1155-resolve-audit-findings.md
+```
+
+That is what lets a later reader find out why commit 15 became two commits, why the baselines are
+spread across eleven commits instead of two, and who decided the seal. None of that fits in a
+commit body and all of it is here.
+
 ### Step 2 — Rebase onto master (F-6)
 
 Three conflicting paths, and each has a different shape:
@@ -209,43 +266,85 @@ requests from two authors. Five occurrences say the obligation is not visible wh
 and the change summary already computes the exact list a `T3` check would need. That check is out
 of scope here and belongs in its own plan.
 
-### Step 4 — State the seal permission (F-1)
+### Step 4 — Unseal, then reseal (F-1)
 
-Needs **D-1**. Once the seal is decided, the pull request description names the three files —
-`chunk/BitCountChunk.cc`, `chunk/ByteCountChunk.cc`, `recorder/PcapRecorder.cc` — and the
-permission that covers them.
-**Done when** `check-source-seals.sh --base origin/master` passes, or the stated permission covers
-what it reports.
+**D-1 is decided**, so this step is mechanical.
 
-### Step 5 — The baselines (F-3)
+1. Unseal `common/packet/` in
+   [audit/seal-list.md](../../doc/project/audit/seal-list.md), with the reason: the three edits
+   were validated by the seal owner on 2026-09-11.
+2. The three edits ride in their own commits, where they already are — `ed742203a8` and
+   `21d34de9e8`.
+3. Reseal the path, against the same audit it rested on before.
+4. The pull request description names the three files and the validation, under
+   [SR-PR-APPROVAL](../../doc/project/rule/sealing.md#sr-pr-approval).
 
-Needs **D-2**, and it is the step that decides how long this plan takes.
+**Say what the reseal does not fix.** `AV-ORG-01` and `AV-ORG-02` are still `Open (decide)`, so the
+reseal restores a seal the ledger calls invalid. That is the state this branch found and the state
+it leaves; the branch is not the place to repair it.
 
-Under **option B**: run the fingerprint suite at each of the nine commits that own a `fingerprint`
-obligation, and put the rows each one moves into that commit.
+**Done when** `check-source-seals.sh --base origin/master` passes and the seal list records both
+the unseal and the reseal.
 
-| # | Commit | Scope |
-| --- | --- | --- |
-| 2 | `a705db8a75` | `ppp` — RFC 1661 |
-| 33 | `e24da2c9d4` | the modernized defaults — the large one |
-| 40 | `e04d92d9c3` | CUBIC HyStart |
-| 44 | `4190b1977e` | the SACK queue lost mark |
-| 45 | `f2b5fd13b7` | RFC 6675 nextSeg rule (2) |
-| 49 | `37d121af2e` | classic RFC 3168 ECN |
-| 50 | `5d94c07e75` | duplicate ACK counting |
-| 51 | `7d52875f17` | non-SACK Reno cwnd deflate |
-| 52 | `fea41a027a` | `TcpCubic` on `TcpClassicAlgorithmBase` |
+### Step 5 — The baselines, every row explained (F-3)
 
-Commits 1 and 7 carry a `?` and must be settled too: run them and replace the `?` with `-` or with
-the rows.
+**D-2 is decided: the hard way.** Every commit that moves a fingerprint carries the new values, and
+every moved row is explained.
 
-**Keep the message of `33e8b0d073`.** It is the best baseline provenance this audit has seen: the
-tip built in a separate workspace, the full suite run there, 53 rows named by family, and a record
-of what it deliberately did not touch. Whatever option D-2 picks, that text is reused rather than
-rewritten.
+Eleven commits are in scope — nine that own a `fingerprint` and two that own a `?` and must be
+settled either way:
 
-**Done when** every commit that moves a recorded expectation carries it, and
-`check-commits.sh` reports no `PR-SPLIT-BASELINE` violation.
+| # | Commit | What it changes | Expect |
+| --- | --- | --- | --- |
+| 1 | `ed742203a8` | the fill byte of a split count chunk | `?` — settle it |
+| 2 | `a705db8a75` | PPP for RFC 1661, `PppTrailer` removed | every row with a PPP link |
+| 7 | `747ec0f435` | byte-align a truncated packet | `?` — settle it |
+| 33 | `e24da2c9d4` | the modernized defaults | **the large one** — most of the 53 |
+| 40 | `e04d92d9c3` | the CUBIC HyStart delay detector | rows that run CUBIC |
+| 44 | `4190b1977e` | the lost mark across a SACK queue split | rows with SACK loss |
+| 45 | `f2b5fd13b7` | the RFC 6675 `nextSeg` rule (2) underflow | rows with SACK loss |
+| 49 | `37d121af2e` | the classic RFC 3168 ECN reaction | rows with ECN |
+| 50 | `5d94c07e75` | duplicate ACK counting for every flavour | rows with loss |
+| 51 | `7d52875f17` | non-SACK Reno cwnd deflate | rows with non-SACK Reno |
+| 52 | `fea41a027a` | `TcpCubic` on `TcpClassicAlgorithmBase` | rows that run CUBIC |
+
+**The method, per commit**, once the branch sits on the new master:
+
+1. Run the fingerprint suite at that commit.
+2. Take the rows that move, and only those. A row that moves here and was already moved by an
+   earlier commit in the series belongs to the earlier one.
+3. **Explain each row from the diff.** Which behavior in this commit changes the trajectory this
+   row records. Group the rows that share an explanation — *"the 31 rows under `examples/inet/`
+   all carry TCP traffic with the default algorithm, which this commit changes from `TcpReno` to
+   `TcpCubic`"* is one explanation for 31 rows and it is complete.
+4. **A row you cannot explain stops the step.** It is an unintended change until shown otherwise,
+   and finding one is this step earning its cost.
+5. Put the rows and the explanation in that commit.
+
+**The expectation column above is a prediction, not a result.** A row that moves where the column
+says it should not is the interesting case, and it is the reason to run all eleven rather than
+assume the defaults commit owns everything.
+
+**Reuse the text of `33e8b0d073`.** It is the best baseline provenance this audit has seen — the
+tip built in a separate workspace, the suite run there, 53 rows named by family, and a record of
+what it deliberately did not touch. That text becomes the explanation of commit 33 and the source
+of the per-commit wording for the rest.
+
+**Done when** every commit that moves a recorded expectation carries it with a row-level
+explanation, `check-commits.sh` reports no `PR-SPLIT-BASELINE` violation, and
+`check-classification.sh` reports no `CR-OBL-INERT` violation.
+
+### Step 5b — The five reproductions that step 5 supplies
+
+Commits 44, 45, 49, 50 and 51 owe a reproduction under
+[PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce) and each moves
+fingerprint rows. Step 5 identifies and explains those rows, and a row that moves is a scenario in
+which the defect showed. Lift the configuration from the row analysis into the body.
+
+**This is the one place where two obligations pay for each other**, and it is why the plan
+separates these five from the nine in step 1f.
+
+**Done when** each of the five names the configuration its own moved rows identify.
 
 ### Step 6 — Verify
 
@@ -260,7 +359,18 @@ git merge-tree --write-tree HEAD origin/master
 opp_summarize_changes --repo . --pr 1155 --usage -o pr-1155-summary.md
 ```
 
-Then a fourth audit pass, which should turn F-1 to F-7 into `PASS`.
+By hand, because no gate reaches them:
+
+- every `.fix` commit names a configuration and an observable
+  ([PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce));
+- every moved fingerprint row has an explanation, grouped where the explanation is shared
+  ([TR-BASELINE-PROVENANCE](../../doc/project/rule/testing.md#tr-baseline-provenance));
+- every commit carries `Plan: plan/pending/pr-1155-resolve-audit-findings.md`
+  ([PR-MSG-PLAN](../../doc/project/rule/pull-request.md#pr-msg-plan)).
+
+Then a fourth audit pass, which should turn F-1 to F-7 into `PASS`. **Move this file to
+`plan/done/` when it does**, and the `Plan:` lines still resolve, because the path in a commit
+message is read against the tree at that commit.
 
 ## 5. F-8 is separate, and it is not in this repository
 
@@ -286,13 +396,16 @@ does and as
 | 1a, 1b, 1c | small | mechanical, an hour each at most |
 | 1d | medium | **the author's knowledge**, not typing; nobody else can write these twelve |
 | 1e | small | the trailers already exist in the trial report |
+| 1f | medium | nine reproductions now, five after step 5; the bodies exist and none names a configuration |
+| 1g | small | one line per commit, added in the same pass |
 | 2 | medium | two real source conflicts in `PppHeaderSerializer`, plus a build in both modes |
 | 3 | medium | the generated *Breaking* list makes it writing rather than discovery |
-| 4 | **blocked** | needs D-1, and D-1 is not this branch's to decide |
-| 5 | **large under option B** | nine fingerprint runs, and the suite is the clock |
+| 4 | small | **unblocked** — the seal owner validated the three edits |
+| 5 | **large** | eleven fingerprint runs, and then a row-level explanation for each; the suite is the clock and the analysis is the work |
 | F-8 | small | two changes in `opp_repl` |
 
-**Two things gate everything else: D-1 and D-2.** Steps 1, 2 and 3 can start today.
+**Nothing gates the start any more.** Both decisions are made, and steps 1, 2 and 3 can begin
+immediately. Step 5 is the clock: eleven fingerprint runs and eleven explanations.
 
 ## 7. Risks
 
@@ -301,7 +414,9 @@ does and as
 | the rebase loses the rename detection | the `git blame` history of three central TCP files ends at this branch | step 1a, done before step 2 |
 | master advances again while this runs | step 2 and step 5 both go stale | do steps 2 to 5 in one stretch; the branch has already waited 99 commits |
 | the twelve bodies get written as restatements | F-7 closes on paper and the history stays uninformative | the question table in step 1d; a body that answers none of it has not closed anything |
-| step 5 is skipped under option A | `git bisect` over the fingerprint suite still lands on a bulk commit | if A is taken, say so in the description as a decision |
+| a moved row gets explained by assertion | *"the defaults changed"* covers 53 rows and proves nothing; an unintended change rides through | step 5 point 4 — a row you cannot trace from the diff **stops the step** |
+| the eleven runs find rows nobody predicted | step 5 grows, and the branch may hold a defect | that is the step working; the expectation column is a prediction and a miss is the finding |
+| the reproductions get written from the code | a body that re-derives the bug from the diff is the body that is already there; the rule asks for a configuration and an observable | step 1f names what is missing per commit; five come from step 5's rows, which are evidence and not argument |
 | the summary is regenerated without the parsers | the report states 210 where the truth is 547 | the `PATH` export in step 6, until F-8 lands |
 
 ## 8. Out of scope
@@ -311,5 +426,6 @@ does and as
 - **`AR-EXT-MINIMAL-SURFACE` and `AR-EXT-VIRTUAL-IS-A-PROMISE`** — 28 uncalled and 95 unoverridden
   at the head. The audit records these as *questions to the author*, not findings, and answering
   them is review conversation rather than plan work.
-- **The two unsanctioned `AV-ORG` clusters themselves.** D-1 decides what this branch does about
-  them; repairing them is the seal owner's work.
+- **The two unsanctioned `AV-ORG` clusters themselves.** D-1 settles what this branch does — unseal,
+  edit, reseal — and leaves the clusters `Open (decide)`. Repairing them is the seal owner's work
+  and it needs its own plan.
