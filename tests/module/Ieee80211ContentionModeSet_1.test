@@ -1,0 +1,155 @@
+%description:
+Runtime radio mode-set changes refresh active DCF/EDCA contention, retaining
+whole remaining slots without another random draw. Cover IFS, backoff, DEFER,
+EIFS and unchanged timing, and observe the actual channel grant time.
+
+%file: ContentionModeSet.cc
+#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
+#include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class TimingProbeContention : public Contention
+{
+  public:
+    int slots() const { return backoffSlots; }
+    State state() const { return static_cast<State>(fsm.getState()); }
+    simtime_t slot() const { return slotTime; }
+    simtime_t interframe() const { return ifs; }
+    simtime_t extendedInterframe() const { return eifs; }
+    simtime_t grantTime() const { return startTxEvent->getArrivalTime(); }
+};
+Define_Module(TimingProbeContention);
+
+class ContentionModeSetTest : public cSimpleModule, public IChannelAccess::ICallback, public cListener
+{
+    TimingProbeContention *contention = nullptr;
+    IChannelAccess *access = nullptr;
+    Ieee80211Radio *radio = nullptr;
+    simtime_t expectedGrant;
+    simtime_t previousGrant;
+    int initialSlots = 0;
+    int draws = 0;
+    bool switched = false;
+    std::string phase;
+
+  protected:
+    virtual void initialize() override { scheduleAt(SimTime(1, SIMTIME_US), new cMessage("start")); }
+    virtual void receiveSignal(cComponent *, simsignal_t, intval_t, cObject *) override { draws++; }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        if (contention == nullptr) {
+            phase = par("phase").stdstringValue();
+            auto nic = getParentModule()->getSubmodule("ap")->getSubmodule("wlan", 0);
+            radio = check_and_cast<Ieee80211Radio *>(nic->getSubmodule("radio"));
+            auto accessModule = nic->getSubmodule("mac")->getModuleByPath(par("qos").boolValue() ? ".hcf.edca.edcaf[1]" : ".dcf.channelAccess");
+            access = check_and_cast<IChannelAccess *>(accessModule);
+            contention = check_and_cast<TimingProbeContention *>(accessModule->getSubmodule("contention"));
+            contention->subscribe(IContention::backoffPeriodGeneratedSignal, this);
+            contention->mediumStateChanged(phase != "defer");
+            access->requestChannel(this);
+            initialSlots = contention->slots();
+            ASSERT(initialSlots >= 2);
+            ASSERT(draws == 1);
+            if (phase == "eifs")
+                contention->corruptedFrameReceived();
+            previousGrant = contention->grantTime();
+            simtime_t delay = SimTime(1, SIMTIME_US);
+            if (phase == "backoff")
+                delay = contention->interframe() + contention->slot() * 1.5;
+            scheduleAfter(delay, new cMessage("switch"));
+        }
+        else {
+            ASSERT(!switched);
+            ASSERT(contention->state() == (phase == "defer" ? Contention::DEFER : Contention::IFS_AND_BACKOFF));
+            const auto *target = Ieee80211ModeSet::getModeSet(phase == "unchanged" ? "g(mixed)" : "g(erp)");
+            radio->setModeSetAndMode(target, target->getMode(Mbps(24)));
+            ASSERT(contention->slot() == target->getSlotTime());
+            ASSERT(contention->interframe() == target->getSifsTime() + (par("qos").boolValue() ? 3 : 2) * target->getSlotTime());
+            ASSERT(contention->slots() == initialSlots - (phase == "backoff" ? 1 : 0));
+            ASSERT(draws == 1);
+            if (phase == "defer")
+                contention->mediumStateChanged(true);
+            auto interval = phase == "eifs" ? contention->extendedInterframe() : contention->interframe();
+            expectedGrant = phase == "unchanged" ? previousGrant : simTime() + interval + contention->slots() * target->getSlotTime();
+            ASSERT(contention->grantTime() == expectedGrant);
+            switched = true;
+        }
+    }
+    virtual void channelGranted(IChannelAccess *channelAccess) override
+    {
+        Enter_Method_Silent();
+        ASSERT(switched);
+        ASSERT(channelAccess == access);
+        ASSERT(simTime() == expectedGrant);
+        ASSERT(draws == 1);
+        access->releaseChannel(this);
+        contention->unsubscribe(IContention::backoffPeriodGeneratedSignal, this);
+        std::cout << "Verified contention phase=" << phase << " qos=" << par("qos").boolValue() << "\n";
+        endSimulation();
+    }
+};
+Define_Module(ContentionModeSetTest);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.contention.Contention;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple TimingProbeContention extends Contention
+{
+    @class(::TimingProbeContention);
+}
+simple ContentionModeSetTest
+{
+    parameters:
+        string phase;
+        bool qos;
+        @class(::ContentionModeSetTest);
+}
+network ContentionModeSetNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        test: ContentionModeSetTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ContentionModeSetNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.test.phase = ${"ifs","backoff","defer","eifs","unchanged"}
+*.test.qos = ${qos=false,true}
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].mac.qosStation = ${qos}
+**.mgmt.ssid = "contention"
+**.mgmt.beaconInterval = 1s
+**.contention.typename = "TimingProbeContention"
+**.contention.backoffOptimization = false
+**.cwMin = 31
+**.cwMax = 1023
+
+%file: check_results.py
+from pathlib import Path
+text = Path("test.out").read_text()
+for phase in ("ifs", "backoff", "defer", "eifs", "unchanged"):
+    for qos in (0, 1):
+        assert text.count(f"Verified contention phase={phase} qos={qos}") == 1, (phase, qos)
+
+%postrun-command: python3 check_results.py

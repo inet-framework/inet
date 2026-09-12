@@ -46,6 +46,10 @@ class INET_API IContention
     virtual ~IContention() {}
 
     virtual void startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_t slotTime, ICallback *callback) = 0;
+    // Runtime timing change: retain completed whole backoff slots and restart the
+    // applicable IFS with the new timing. An unchanged tuple preserves the schedule.
+    // Does not draw a new backoff or emit notifications while a mode set is applied.
+    virtual void updateTimingParameters(simtime_t ifs, simtime_t eifs, simtime_t slotTime) = 0;
     virtual bool isContentionInProgress() = 0;
 
     // notifications

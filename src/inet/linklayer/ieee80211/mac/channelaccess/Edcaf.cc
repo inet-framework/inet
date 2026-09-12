@@ -198,6 +198,8 @@ void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
     Enter_Method_Silent();
     modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
     calculateTimingParameters();
+    if (contention != nullptr)
+        contention->updateTimingParameters(ifs, eifs, slotTime);
 }
 
 } // namespace ieee80211

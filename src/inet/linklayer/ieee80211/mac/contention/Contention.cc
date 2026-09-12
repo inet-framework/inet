@@ -85,6 +85,36 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
     handleWithFSM(START);
 }
 
+void Contention::updateTimingParameters(simtime_t ifs, simtime_t eifs, simtime_t slotTime)
+{
+    Enter_Method_Silent();
+    ASSERT(ifs >= 0 && eifs >= 0 && slotTime >= 0);
+    if (this->ifs == ifs && this->eifs == eifs && this->slotTime == slotTime)
+        return;
+    bool activeBackoff = fsm.getState() == IFS_AND_BACKOFF;
+    bool pendingEifs = endEifsTime > simTime();
+    if (activeBackoff && this->slotTime > SIMTIME_ZERO)
+        computeRemainingBackoffSlots();
+    this->ifs = ifs;
+    this->eifs = eifs;
+    this->slotTime = slotTime;
+    // Modeling policy for runtime reconfiguration: restart the applicable IFS
+    // and any unfinished slot, retaining the remaining integer backoff count.
+    if (pendingEifs)
+        endEifsTime = simTime() + eifs;
+    if (activeBackoff) {
+        backoffOptimizationDelta = SIMTIME_ZERO;
+        scheduledTransmissionTime = simTime() + (pendingEifs ? std::max(ifs, eifs) : ifs) + backoffSlots * slotTime;
+        cancelEvent(startTxEvent);
+        scheduleAt(scheduledTransmissionTime, startTxEvent);
+        // Keep EDCA's collision arbitration aligned without publishing an
+        // intermediate mode-set state or announcing a new random backoff.
+        callback->expectedChannelAccess(scheduledTransmissionTime);
+        if (hasGUI())
+            updateDisplayString(scheduledTransmissionTime);
+    }
+}
+
 void Contention::handleWithFSM(EventType event)
 {
     emit(stateChangedSignal, fsm.getState());
