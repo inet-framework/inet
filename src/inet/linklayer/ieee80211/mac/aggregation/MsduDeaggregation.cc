@@ -64,6 +64,9 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         header->addChunkLength(QOSCONTROL_PART_LENGTH);
         header->setToDS(amsduHeader->getToDS());
         header->setFromDS(amsduHeader->getFromDS());
+        // IEEE Std 802.11-2024, 9.3.2.1.1, Figure 9-119: Address4 adds six octets.
+        if (header->getToDS() && header->getFromDS())
+            header->addChunkLength(B(6));
         header->setTid(tid);
         header->setSequenceNumber(SequenceNumberCyclic(0));
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
