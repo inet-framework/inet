@@ -87,7 +87,7 @@ class TestRateSelectionAccessor : public ieee80211::RateSelection
     static const IIeee80211Mode *getFastestMandatoryMode(const ieee80211::RateSelection *rs) { return static_cast<const TestRateSelectionAccessor *>(rs)->fastestMandatoryMode; }
     static const Ieee80211ModeSet *readModeSet(const ieee80211::RateSelection *rs) { return static_cast<const TestRateSelectionAccessor *>(rs)->modeSet; }
     static void notifyModeSet(ieee80211::RateSelection *rs, const Ieee80211ModeSet *ms) {
-        static_cast<TestRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+        rs->applyModeSet(ms);
     }
 };
 
@@ -99,7 +99,7 @@ class TestQosRateSelectionAccessor : public ieee80211::QosRateSelection
     static const IIeee80211Mode *getFastestMandatoryMode(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->fastestMandatoryMode; }
     static const Ieee80211ModeSet *readModeSet(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->modeSet; }
     static void notifyModeSet(ieee80211::QosRateSelection *rs, const Ieee80211ModeSet *ms) {
-        static_cast<TestQosRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+        rs->applyModeSet(ms);
     }
 };
 
@@ -122,7 +122,7 @@ class TestIeee80211Mgmt : public ieee80211::Ieee80211MgmtBase
   public:
     void notifyModeSet(const Ieee80211ModeSet *modeSet)
     {
-        receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet), nullptr);
+        applyModeSet(modeSet);
     }
 
     const ieee80211::Ieee80211SupportedRatesElement& getSupportedRates() const { return supportedRates; }

@@ -249,8 +249,7 @@ const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<co
 void QosRateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void QosRateSelection::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)

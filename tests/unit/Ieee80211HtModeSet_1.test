@@ -38,6 +38,15 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
     return nullptr;
 }
 
+// Synthetic data rates isolate exact tuple matching from public lookup tolerance.
+class CustomBitrateDataMode : public Ieee80211HtDataMode
+{
+    bps bitrate;
+  public:
+    CustomBitrateDataMode(const Ieee80211HtDataMode& base, bps bitrate) : Ieee80211HtDataMode(base), bitrate(bitrate) {}
+    virtual bps getNetBitrate() const override { return bitrate; }
+};
+
 %activity:
 
 const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
@@ -69,6 +78,18 @@ for (int mcsIndex = 0; mcsIndex < 32; mcsIndex++) {
         }
     }
 }
+// No preamble is needed: these synthetic modes exercise only tuple lookup.
+const auto *baseData = check_and_cast<const Ieee80211HtDataMode *>(
+        findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)->getDataMode());
+Ieee80211HtMode source("source", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
+Ieee80211HtMode nearby("nearby", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6.04)), Ieee80211HtMode::BAND_2_4GHZ);
+Ieee80211HtMode equal("equal", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
+SparseModeSet nearbySet({{true, &nearby}, {true, htModeSet->getMode(Mbps(1)), true}}, &nearby, false);
+ASSERT(nearbySet.findCompatibleMode(&source) == nullptr);
+ASSERT(nearbySet.findMode(Mbps(6), MHz(20), 1, 800e-9) == &nearby);
+SparseModeSet equalSet({{true, &nearby}, {true, &equal}, {true, htModeSet->getMode(Mbps(1)), true}}, &equal, false);
+ASSERT(equalSet.findCompatibleMode(&source) == &equal);
+ASSERT(equalSet.findCompatibleMode(nullptr) == nullptr);
 ASSERT(htModeSet->getHtSupportedChannelWidths().size() == 2);
 ASSERT(htModeSet->isHtShortGuardIntervalSupported(MHz(20)));
 ASSERT(htModeSet->isHtShortGuardIntervalSupported(MHz(40)));

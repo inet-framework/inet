@@ -15,8 +15,9 @@ namespace physicallayer {
 class Ieee80211ModeSet;
 
 /**
- * Behavioral consumer of a radio's mode-set changes. The radio applies all
- * consumers before publishing modesetChanged, so observers see consistent state.
+ * Explicitly registered consumer of an interface's mode-set changes. The
+ * coordinator applies consumers before publishing modesetChanged. Implementing
+ * this contract or subscribing to that signal does not register a consumer.
  * Applying a change must not notify observers. Failures are fatal simulation
  * errors; partially applied changes are not rolled back.
  */

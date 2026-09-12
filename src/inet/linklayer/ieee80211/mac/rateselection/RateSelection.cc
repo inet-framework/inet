@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
@@ -28,7 +29,7 @@ void RateSelection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         mib.reference(this, "mibModule", true);
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
+        check_and_cast<physicallayer::IIeee80211ModeSetCoordinator *>(getContainingNicModule(this))->registerModeSetConsumer(this, physicallayer::IIeee80211ModeSetCoordinator::DERIVED_STATE);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
@@ -197,8 +198,7 @@ const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const
 void RateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void RateSelection::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)

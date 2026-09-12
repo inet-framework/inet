@@ -20,8 +20,10 @@ class ModeSetFailure : public cSimpleModule, public cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override
     {
         Enter_Method_Silent();
+        if (par("failure").stdstringValue() == "detach")
+            check_and_cast<IIeee80211ModeSetCoordinator *>(source)->unregisterModeSetConsumer(check_and_cast<cModule *>(source)->getSubmodule("mac"));
         if (par("failure").stdstringValue() == "reentrant")
-            check_and_cast<Ieee80211Radio *>(source)->setModeSet(check_and_cast<Ieee80211ModeSet *>(value));
+            check_and_cast<Ieee80211Radio *>(check_and_cast<cModule *>(source)->getSubmodule("radio"))->setModeSet(check_and_cast<Ieee80211ModeSet *>(value));
         throw cRuntimeError("test observer rejects mode set");
     }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override
@@ -37,8 +39,8 @@ class ModeSetFailure : public cSimpleModule, public cListener
         auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
         radio->setMode(ht->getMode(Mbps(24)));
         auto failure = par("failure").stdstringValue();
-        if (failure == "modeset" || failure == "reentrant")
-            radio->subscribe(modesetChangedSignal, this);
+        if (failure == "modeset" || failure == "reentrant" || failure == "detach")
+            radio->getParentModule()->subscribe(modesetChangedSignal, this);
         else if (failure == "listening")
             radio->subscribe(IRadio::listeningChangedSignal, this);
         std::cout << "Attempting " << failure << " explicit=" << par("explicitMode").boolValue() << "\n";
@@ -84,7 +86,7 @@ cmdenv-express-mode = false
 cmdenv-stop-batch-on-error = false
 record-vector-results = false
 record-scalar-results = false
-*.test.failure = ${failure="dcf","hcf","modeset","listening","reentrant","band"}
+*.test.failure = ${failure="dcf","hcf","modeset","listening","reentrant","band","detach"}
 *.test.explicitMode = ${false,true}
 **.mobility.initFromDisplayString = false
 **.mobility.initialX = 10m
@@ -108,16 +110,17 @@ record-scalar-results = false
 %file: check_errors.py
 from pathlib import Path
 text = Path("test.out").read_text() + Path("test.err").read_text()
-for failure in ("dcf", "hcf", "modeset", "listening", "reentrant", "band"):
+for failure in ("dcf", "hcf", "modeset", "listening", "reentrant", "band", "detach"):
     for explicit in (0, 1):
         assert text.count(f"Attempting {failure} explicit={explicit}") == 1
 errors = [line for line in text.splitlines() if "<!> Error:" in line]
-assert len(errors) == 12, errors
+assert len(errors) == 14, errors
 assert sum("Unknown mode for bitrate" in line for line in errors) == 4, errors
 assert sum("test observer rejects mode set" in line for line in errors) == 2, errors
 assert sum("test observer rejects listening change" in line for line in errors) == 2, errors
 assert sum("Reentrant radio mode-set change" in line for line in errors) == 2, errors
 assert sum("Invalid primary channel" in line for line in errors) == 2, errors
+assert sum("Cannot detach a mode-set consumer during a transition" in line for line in errors) == 2, errors
 assert "UNEXPECTED successful" not in text
 
 %postrun-command: python3 check_errors.py

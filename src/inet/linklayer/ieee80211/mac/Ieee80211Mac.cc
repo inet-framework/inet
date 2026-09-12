@@ -11,6 +11,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -28,9 +29,8 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -59,6 +59,8 @@ void Ieee80211Mac::initialize(int stage)
         fcsMode = parseFcsMode(par("fcsMode"));
         mib.reference(this, "mibModule", true);
         mib->qos = par("qosStation");
+        radio = check_and_cast<IRadio *>(gate("lowerLayerOut")->getNextGate()->getOwnerModule());
+        check_and_cast<physicallayer::IIeee80211ModeSetCoordinator *>(getContainingNicModule(this))->registerModeSetConsumer(this, physicallayer::IIeee80211ModeSetCoordinator::MAC_STATE);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
@@ -68,13 +70,10 @@ void Ieee80211Mac::initialize(int stage)
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        updateLocalHtCapabilities();
-        emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -93,20 +92,18 @@ void Ieee80211Mac::updateLocalHtCapabilities()
     std::set<Hz> operationalChannelWidths;
     const IIeee80211Band *operationBand = nullptr;
     if (modeSet->isHtOperationSupported()) {
-        const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
-        const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
-        if (transmitter == nullptr || receiver == nullptr)
-            throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
-        if (getSimulation()->getContextType() != CTX_INITIALIZE &&
-                mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
-            const auto *channel = transmitter->getChannel();
+        const auto *phy = dynamic_cast<const IIeee80211Radio *>(radio.get());
+        if (phy == nullptr)
+            throw cRuntimeError("HT operation requires the IIeee80211Radio capability contract");
+        if (mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+            mib->requirePrimaryChannel();
+            const auto *channel = phy->getChannel();
             if (channel == nullptr || channel->getBand() == nullptr)
                 throw cRuntimeError("HT operation requires a configured channel and band");
             operationBand = channel->getBand();
         }
         for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
-            if (transmitter->isHtChannelWidthSupported(channelWidth) &&
-                    receiver->isHtChannelWidthSupported(channelWidth))
+            if (phy->isHtChannelWidthSupported(channelWidth))
                 operationalChannelWidths.insert(channelWidth);
     }
     mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit, operationBand);
@@ -364,8 +361,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void Ieee80211Mac::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)

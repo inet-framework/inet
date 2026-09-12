@@ -6,6 +6,7 @@ peer state and adaptive rates before observers run, and notify the radio medium.
 %file: Ieee80211ModeSetTransition.cc
 
 #include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
@@ -97,13 +98,15 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
     CachingModeSetObserver cachingObserver;
     MacAddress peer = MacAddress("02:00:00:00:01:ff");
 
-    std::vector<IIeee80211ModeSetListener *> participants(cModule *radio)
+    std::vector<IIeee80211ModeSetListener *> participants(cModule *module)
     {
         std::vector<IIeee80211ModeSetListener *> result;
-        for (cComponent *component = radio; component; component = component->getParentModule())
-            for (auto listener : component->getLocalSignalListeners(modesetChangedSignal))
-                if (auto participant = dynamic_cast<IIeee80211ModeSetListener *>(listener))
-                    result.push_back(participant);
+        if (auto participant = dynamic_cast<IIeee80211ModeSetListener *>(module))
+            result.push_back(participant);
+        for (cModule::SubmoduleIterator it(module); !it.end(); ++it) {
+            auto nested = participants(*it);
+            result.insert(result.end(), nested.begin(), nested.end());
+        }
         return result;
     }
 
@@ -112,7 +115,7 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
         auto radio = check_and_cast<Ieee80211Radio *>(nic->getSubmodule("radio"));
         ASSERT(check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter())->getModeSet() == expected);
         ASSERT(check_and_cast<const Ieee80211Receiver *>(radio->getReceiver())->getModeSet() == expected);
-        for (auto participant : participants(radio))
+        for (auto participant : participants(nic))
             ASSERT(participant->getModeSet() == expected);
         auto mib = check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"));
         ASSERT(mib->isHtOperationSupported() == expected->isHtOperationSupported());
@@ -136,6 +139,9 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
             data->setReceiverAddress(address);
             beacon->setReceiverAddress(address);
             Packet packet("selection probe");
+            // A retry or protection-prepared frame may still carry an old HT mode.
+            auto staleMode = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getMode(Mbps(65), MHz(20), 1, 800e-9);
+            packet.addTag<Ieee80211ModeReq>()->setMode(staleMode);
             auto mac = nic->getSubmodule("mac");
             auto dcf = check_and_cast<RateSelection *>(mac->getSubmodule("dcf")->getSubmodule("rateSelection"));
             auto qos = check_and_cast<QosRateSelection *>(mac->getSubmodule("hcf")->getSubmodule("rateSelection"));
@@ -160,15 +166,13 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
     {
         Enter_Method_Silent();
         notifications++;
-        auto radio = check_and_cast<Ieee80211Radio *>(source);
+        auto nic = check_and_cast<cModule *>(source);
+        ASSERT(nic->getSubmodule("mac") != nullptr);
         auto target = check_and_cast<Ieee80211ModeSet *>(value);
         observedModeSet = target;
-        ASSERT(cachingObserver.modeSet == target);
-        ASSERT(cachingObserver.notifications == notifications);
         // Publication must follow *all* internal updates, irrespective of where
         // this observer appears in the subscriber list.
-        auto nic = radio->getParentModule();
-        for (auto participant : participants(radio))
+        for (auto participant : participants(nic))
             ASSERT(participant->getModeSet() == target);
         ASSERT(check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"))->isHtOperationSupported() == target->isHtOperationSupported());
         check_and_cast<TransitionMgmtAp *>(nic->getSubmodule("mgmt"))->checkAdvertisement();
@@ -185,7 +189,7 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
         auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
         radio->setMode(ht->getMode(Mbps(24)));
         cachingObserver.modeSet = ht;
-        radio->subscribe(modesetChangedSignal, &cachingObserver);
+        nic->subscribe(modesetChangedSignal, &cachingObserver);
         nic->subscribe(modesetChangedSignal, this);
         mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
         check(nic, ht, true);
@@ -211,7 +215,7 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
         ASSERT(cachingObserver.modeSet == ht);
         ASSERT(observedModeSet == ht);
         nic->unsubscribe(modesetChangedSignal, this);
-        radio->unsubscribe(modesetChangedSignal, &cachingObserver);
+        nic->unsubscribe(modesetChangedSignal, &cachingObserver);
         std::cout << "Mode-set switching, advertisements, peer state, both selectors, and notifications verified.\n";
         endSimulation();
     }

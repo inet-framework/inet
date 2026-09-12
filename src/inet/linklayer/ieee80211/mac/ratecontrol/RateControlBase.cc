@@ -64,8 +64,7 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void RateControlBase::applyModeSet(const Ieee80211ModeSet *newModeSet)

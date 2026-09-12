@@ -29,7 +29,7 @@ Edcaf::~Edcaf()
 void Edcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
+        ModeSetListener::initialize(stage);
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
@@ -74,7 +74,8 @@ void Edcaf::calculateTimingParameters()
         cwMin = getCwMin(ac, modeSet->getCwMin());
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
-    cw = cwMin;
+    // Model reconfiguration preserves retry backoff within the new bounds.
+    cw = std::min(cwMax, std::max(cwMin, cw));
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
@@ -189,8 +190,7 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 void Edcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)

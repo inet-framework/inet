@@ -674,8 +674,6 @@ const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode 
     const auto sourceBitrate = sourceDataMode->getNetBitrate();
     const auto sourceBandwidth = sourceDataMode->getBandwidth();
     const auto sourceGuardInterval = sourceDataMode->getGuardInterval();
-    const auto minBitrate = sourceBitrate - Mbps(0.05);
-    const auto maxBitrate = sourceBitrate + Mbps(0.05);
     for (const auto& entry : entries) {
         const auto candidateDataMode = entry.mode->getDataMode();
         const auto candidateBandwidth = candidateDataMode->getBandwidth();
@@ -685,7 +683,7 @@ const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode 
         // Absence is part of the source tuple, not findMode()'s wildcard.
         const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO && candidateGuardInterval < SIMTIME_ZERO) ||
                 (sourceGuardInterval >= SIMTIME_ZERO && candidateGuardInterval == sourceGuardInterval);
-        if (minBitrate <= candidateDataMode->getNetBitrate() && candidateDataMode->getNetBitrate() <= maxBitrate &&
+        if (candidateDataMode->getNetBitrate() == sourceBitrate &&
             bandwidthMatches && candidateDataMode->getNumberOfSpatialStreams() == sourceDataMode->getNumberOfSpatialStreams() &&
             guardIntervalMatches)
             return entry.mode;

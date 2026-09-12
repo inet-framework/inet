@@ -9,6 +9,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -34,7 +35,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
+        check_and_cast<physicallayer::IIeee80211ModeSetCoordinator *>(getContainingNicModule(this))->registerModeSetConsumer(this, physicallayer::IIeee80211ModeSetCoordinator::DERIVED_STATE);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
@@ -43,8 +44,7 @@ void Ieee80211MgmtBase::initialize(int stage)
 void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-    if (signalID == modesetChangedSignal && obj != modeSet)
-        applyModeSet(check_and_cast<physicallayer::Ieee80211ModeSet *>(obj));
+    // Mode-set application uses the coordinator contract, not notifications.
 }
 
 void Ieee80211MgmtBase::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)

@@ -8,6 +8,7 @@
 package inet.physicallayer.wireless.ieee80211.packetlevel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.ieee80211.contract.packetlevel.IIeee80211Radio;
 
 //
 // This radio model is part of the IEEE 802.11 physical layer model. It supports
@@ -22,9 +23,11 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 // @see ~Ieee80211ScalarRadio, ~Ieee80211DimensionalRadio.
 //
 //# TODO check this Table 18-14—Receiver performance requirements
-module Ieee80211Radio extends FlatRadioBase
+module Ieee80211Radio extends FlatRadioBase like IIeee80211Radio
 {
     parameters:
+        string modeSetCoordinatorModule = default(""); // Optional interface transaction owner; empty for standalone PHY use
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet); // Standalone radio only
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)"); // Operation mode
         string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // Band name
         int channelNumber = default(0);                                 // Initial channel number within the band (TODO this is offset by 1)

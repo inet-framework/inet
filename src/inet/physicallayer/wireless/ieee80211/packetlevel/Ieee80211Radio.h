@@ -9,6 +9,9 @@
 #define __INET_IEEE80211RADIO_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -18,7 +21,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public FlatRadioBase
+class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio
 {
   public:
     /**
@@ -30,6 +33,7 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     static const Ptr<const Ieee80211PhyHeader> peekIeee80211PhyHeaderAtFront(const Packet *packet, b length = b(-1), int flags = 0);
 
   protected:
+    ModuleRefByPar<IIeee80211ModeSetCoordinator> modeSetCoordinator;
     bool changingModeSet = false;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
 
@@ -52,6 +56,8 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     // Update behavioral consumers before publishing the new mode set.
     // Failures are fatal simulation errors; these setters do not roll back.
     // Behavioral consumers implement IIeee80211ModeSetListener.
+    virtual const Ieee80211Channel *getChannel() const override;
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
