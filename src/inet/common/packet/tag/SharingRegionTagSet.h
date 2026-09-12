@@ -137,6 +137,7 @@ class INET_API SharingRegionTagSet : public cObject
     int getTagIndex(const std::type_info& typeInfo, b offset, b length) const;
     template<typename T> int getTagIndex(b offset, b length) const;
 
+    void clearTags(const std::type_info& typeInfo, b offset, b length);
     void ensureTagsVectorAllocated();
     void prepareTagsVectorForUpdate();
     inline void sortTagsVector();
@@ -493,7 +494,7 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::remov
 {
     SELFDOC_FUNCTION_T;
     auto result = getAllTags<T>(offset, length);
-    clearTags(offset, length);
+    clearTags(typeid(T), offset, length);
     return result;
 }
 

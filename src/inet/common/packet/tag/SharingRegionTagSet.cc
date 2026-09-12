@@ -331,5 +331,62 @@ void SharingRegionTagSet::prepareTagsVectorForUpdate()
     }
 }
 
+void SharingRegionTagSet::clearTags(const std::type_info& typeInfo, b offset, b length)
+{
+    if (regionTags != nullptr) {
+        bool changed = false;
+        b clearStartOffset = offset;
+        b clearEndOffset = offset + length;
+        for (size_t i = 0; i < regionTags->size(); i++) {
+            auto& regionTag = (*regionTags)[i];
+            auto tagObject = regionTag.getTag().get();
+            if (typeInfo != typeid(*tagObject))
+                // wrong type, leave it alone
+                continue;
+            else if (clearEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= clearStartOffset)
+                // no intersection
+                continue;
+            else if (clearStartOffset <= regionTag.getStartOffset() && regionTag.getEndOffset() <= clearEndOffset) {
+                // clear totally covers region
+                prepareTagsVectorForUpdate();
+                regionTags->erase(regionTags->begin() + i--);
+                changed = true;
+            }
+            else if (regionTag.getStartOffset() < clearStartOffset && clearEndOffset < regionTag.getEndOffset()) {
+                // clear splits region into two parts
+                prepareTagsVectorForUpdate();
+                auto& regionTag = (*regionTags)[i];
+                auto startOffset = regionTag.getStartOffset();
+                regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
+                regionTag.setOffset(clearEndOffset);
+                RegionTag<TagBase> previousRegionTag(regionTag);
+                previousRegionTag.setOffset(startOffset);
+                previousRegionTag.setLength(clearStartOffset - startOffset);
+                regionTags->insert(regionTags->begin() + i++, previousRegionTag);
+                changed = true;
+            }
+            else if (regionTag.getEndOffset() <= clearEndOffset) {
+                // clear cuts end of region
+                prepareTagsVectorForUpdate();
+                auto& regionTag = (*regionTags)[i];
+                regionTag.setLength(clearStartOffset - regionTag.getStartOffset());
+                changed = true;
+            }
+            else if (clearStartOffset <= regionTag.getStartOffset()) {
+                // clear cuts beginning of region
+                prepareTagsVectorForUpdate();
+                auto& regionTag = (*regionTags)[i];
+                regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
+                regionTag.setOffset(clearEndOffset);
+                changed = true;
+            }
+            else
+                ASSERT(false);
+        }
+        if (changed)
+            sortTagsVector();
+    }
+}
+
 } // namespace
 
