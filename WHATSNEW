@@ -29,6 +29,25 @@ Notable backward incompatible changes are the following:
    adaptive rate control, either where a station transmits to several peers or
    where it sends group-addressed traffic.
 
+2. IEEE 802.11 wire and reception corrections
+
+   QoS Control fields now use the standard bit positions. Non-QoS Data no
+   longer aliases the QoS TID-0 duplicate cache. OFDM radios generate and check
+   SIGNAL parity and reject undefined RATE codes; HR/DSSS and ERP transmissions
+   carry their specific PHY protocol identities.
+
+   AP beacon intervals are rounded down to whole 1024-us TUs for both target
+   scheduling and advertisement (100ms becomes 99.328ms). Configured intervals
+   must be between 1 and 65535 TUs. Beacon and Probe Response frames now encode
+   the DSSS Current Channel for 2.4 GHz operation. Their channelNumber field is
+   a standard channel number, with -1 for an absent element, rather than an
+   internal channel index. Radio channel parameters and scan results remain
+   internal indices. Custom frame producers should follow the migration guide.
+
+   The mesh no-forwarding-information reason code is corrected from 60 to 62.
+   These corrections change affected packet bytes and may change Wi-Fi
+   simulation trajectories and fingerprints.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

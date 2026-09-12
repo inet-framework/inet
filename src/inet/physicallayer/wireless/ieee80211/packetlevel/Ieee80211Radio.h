@@ -22,8 +22,10 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 {
   public:
     /**
-     * This signal is emitted every time the radio channel changes.
-     * The signal value is the new radio channel.
+     * This signal is emitted during physical-layer initialization when a channel
+     * is configured, and every time the radio channel or band changes. The value
+     * is the band-local channel index; Ieee80211RadioChannelChangedDetails carries
+     * the immutable band reference.
      */
     static simsignal_t radioChannelChangedSignal;
     static const Ptr<const Ieee80211PhyHeader> popIeee80211PhyHeaderAtFront(Packet *packet, b length = b(-1), int flags = 0);
@@ -57,4 +59,3 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 } // namespace inet
 
 #endif
-
