@@ -1,11 +1,13 @@
 %description:
 Invalid fixed rates in either selector and exceptions in either radio notification
 terminate the simulation. Both radio setters are exercised in independent runs;
-no run catches an error or continues using partially updated state. Reentrant
+no run catches an error or continues using partially updated state. A band
+without standard channel mapping also fails through the real radio setter. Reentrant
 mode-set changes are rejected while the new state is being published.
 
 %file: ModeSetFailure.cc
 #include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 using namespace inet;
@@ -40,6 +42,10 @@ class ModeSetFailure : public cSimpleModule, public cListener
         else if (failure == "listening")
             radio->subscribe(IRadio::listeningChangedSignal, this);
         std::cout << "Attempting " << failure << " explicit=" << par("explicitMode").boolValue() << "\n";
+        if (failure == "band") {
+            radio->setBand(&Ieee80211CompliantBands::band5GHz);
+            throw cRuntimeError("UNEXPECTED successful band change");
+        }
         if (par("explicitMode"))
             radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
         else
@@ -78,7 +84,7 @@ cmdenv-express-mode = false
 cmdenv-stop-batch-on-error = false
 record-vector-results = false
 record-scalar-results = false
-*.test.failure = ${failure="dcf","hcf","modeset","listening","reentrant"}
+*.test.failure = ${failure="dcf","hcf","modeset","listening","reentrant","band"}
 *.test.explicitMode = ${false,true}
 **.mobility.initFromDisplayString = false
 **.mobility.initialX = 10m
@@ -102,15 +108,16 @@ record-scalar-results = false
 %file: check_errors.py
 from pathlib import Path
 text = Path("test.out").read_text() + Path("test.err").read_text()
-for failure in ("dcf", "hcf", "modeset", "listening", "reentrant"):
+for failure in ("dcf", "hcf", "modeset", "listening", "reentrant", "band"):
     for explicit in (0, 1):
         assert text.count(f"Attempting {failure} explicit={explicit}") == 1
 errors = [line for line in text.splitlines() if "<!> Error:" in line]
-assert len(errors) == 10, errors
+assert len(errors) == 12, errors
 assert sum("Unknown mode for bitrate" in line for line in errors) == 4, errors
 assert sum("test observer rejects mode set" in line for line in errors) == 2, errors
 assert sum("test observer rejects listening change" in line for line in errors) == 2, errors
 assert sum("Reentrant radio mode-set change" in line for line in errors) == 2, errors
+assert sum("Invalid primary channel" in line for line in errors) == 2, errors
 assert "UNEXPECTED successful" not in text
 
 %postrun-command: python3 check_errors.py
