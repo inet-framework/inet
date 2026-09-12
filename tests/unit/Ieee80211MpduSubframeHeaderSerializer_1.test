@@ -1,0 +1,42 @@
+%description:
+The MPDU subframe header decoder preserves all 12 length bits emitted by the encoder.
+Check decoded fields through the registered serializer using fresh byte-backed packets,
+so cached serialized bytes cannot hide an incorrect decoded length.
+
+%includes:
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static void checkDecodedLength(const std::vector<uint8_t>& bytes, int expectedLength)
+{
+    Packet input("input", makeShared<BytesChunk>(bytes));
+    auto header = input.popAtFront<Ieee80211MpduSubframeHeader>(B(4));
+    ASSERT(header->getLength() == expectedLength);
+    ASSERT(header->getChunkLength() == B(4));
+    ASSERT(input.getDataLength() == B(0));
+}
+
+%activity:
+for (int length : {0, 255, 256, 0xABC, 4095}) {
+    auto header = makeShared<Ieee80211MpduSubframeHeader>();
+    header->setLength(length);
+    Packet output("output", header);
+    auto bytes = output.peekAllAsBytes()->getBytes();
+    ASSERT(bytes.size() == 4);
+    checkDecodedLength(bytes, length);
+}
+
+// Fixed input in the existing encoder's format, independent of the round trip.
+checkDecodedLength({0x0A, 0xBC, 0x00, 0x4E}, 0xABC);
+
+EV << "MPDU subframe lengths preserved across the 8-bit boundary.\n";
+
+%contains: stdout
+MPDU subframe lengths preserved across the 8-bit boundary.
