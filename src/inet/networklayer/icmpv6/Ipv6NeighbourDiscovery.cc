@@ -37,6 +37,7 @@ namespace inet {
 #define MK_RD_TIMEOUT                  5
 #define MK_NUD_TIMEOUT                 6
 #define MK_AR_TIMEOUT                  7
+#define MK_ADDRESS_PROBE_TIMEOUT       8
 
 Define_Module(Ipv6NeighbourDiscovery);
 
@@ -57,6 +58,11 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
         cancelAndDelete(msg);
 
     for (auto *entry : dadList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
+    }
+
+    for (auto *entry : addressProbeList) {
         cancelAndDelete(entry->timeoutMsg);
         delete entry;
     }
@@ -158,6 +164,10 @@ void Ipv6NeighbourDiscovery::handleMessageWhenUp(cMessage *msg)
         else if (msg->getKind() == MK_DAD_TIMEOUT) {
             EV_INFO << "DAD Timeout message received\n";
             processDadTimeout(msg);
+        }
+        else if (msg->getKind() == MK_ADDRESS_PROBE_TIMEOUT) {
+            EV_INFO << "Address probe timeout message received\n";
+            processAddressProbeTimeout(msg);
         }
         else if (msg->getKind() == MK_RD_TIMEOUT) {
             EV_INFO << "Router Discovery message received\n";
@@ -999,6 +1009,136 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
     emit(dadFailedSignal, 1);
+}
+
+Ipv6NeighbourDiscovery::AddressProbeEntry *Ipv6NeighbourDiscovery::findAddressProbe(
+        const Ipv6Address& addr, int interfaceId)
+{
+    for (auto *entry : addressProbeList)
+        if (entry->interfaceId == interfaceId && entry->address == addr)
+            return entry;
+
+    return nullptr;
+}
+
+void Ipv6NeighbourDiscovery::startAddressProbe(const Ipv6Address& addr, NetworkInterface *ie,
+        IAddressProbeHandler *handler)
+{
+    Enter_Method("startAddressProbe");
+
+    ASSERT(handler != nullptr);
+
+    if (findAddressProbe(addr, ie->getInterfaceId()) != nullptr)
+        throw cRuntimeError("A probe of %s on %s is already running",
+                addr.str().c_str(), ie->getInterfaceName());
+
+    // If this node holds the address itself -- as a home agent proxying it does, RFC 6275
+    // Section 10.4.1 -- then it is in use on this link, which is what the probe asks. Answer
+    // that rather than aborting; hasAddress() covers tentative addresses too.
+    if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(addr)) {
+        EV_INFO << addr << " is already held on " << ie->getInterfaceName()
+                << ", reporting it in use without probing\n";
+        handler->addressProbeCompleted(addr, ie, false);
+        return;
+    }
+
+    // RFC 4862 Section 5.4: a DupAddrDetectTransmits of zero turns Duplicate Address Detection
+    // off on this interface, so there is nothing to send -- report the address unique.
+    if (ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits() == 0) {
+        EV_INFO << "Duplicate Address Detection is disabled on " << ie->getInterfaceName()
+                << ", reporting " << addr << " unique without probing\n";
+        handler->addressProbeCompleted(addr, ie, true);
+        return;
+    }
+
+    EV_INFO << "Probing " << addr << " on " << ie->getInterfaceName() << "\n";
+
+    // the entry is fully built before it is published, so that findAddressProbe() can never
+    // hand out one whose timeout message is not set yet
+    AddressProbeEntry *entry = new AddressProbeEntry();
+    entry->interfaceId = ie->getInterfaceId();
+    entry->address = addr;
+    entry->handler = handler;
+    entry->timeoutMsg = new cMessage("addressProbeTimeout", MK_ADDRESS_PROBE_TIMEOUT);
+    entry->timeoutMsg->setContextPointer(entry);
+    addressProbeList.push_back(entry);
+
+    /*RFC 4862 Section 5.4.2
+       Before sending a Neighbor Solicitation, an interface MUST join the all-nodes multicast
+       address and the solicited-node multicast address of the tentative address.*/
+    /*If the Neighbor Solicitation is going to be the first message sent from an interface
+       after interface (re)initialization, the node SHOULD delay joining the solicited-node
+       multicast address by a random delay between 0 and MAX_RTR_SOLICITATION_DELAY.*/
+    // The join has to precede the solicitation, so delaying the join delays the solicitation
+    // with it. processAddressProbeTimeout() sends this first solicitation and every later
+    // one, each separated by RetransTimer. initiateDad() adds this term to the timeout
+    // instead, which is issue #1179.
+    scheduleAfter(uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), entry->timeoutMsg);
+}
+
+bool Ipv6NeighbourDiscovery::isAddressProbeRunning(const Ipv6Address& addr, NetworkInterface *ie)
+{
+    Enter_Method("isAddressProbeRunning");
+    return findAddressProbe(addr, ie->getInterfaceId()) != nullptr;
+}
+
+void Ipv6NeighbourDiscovery::processAddressProbeTimeout(cMessage *msg)
+{
+    AddressProbeEntry *entry = (AddressProbeEntry *)msg->getContextPointer();
+    NetworkInterface *ie = ift->getInterfaceById(entry->interfaceId);
+
+    if (entry->numNSSent < ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits()) {
+        /*RFC 4862 Section 5.4.2: the solicitation's Target Address is set to the address being
+           checked, the IP source is set to the unspecified address and the IP destination is
+           set to the solicited-node multicast address of the target address.*/
+        EV_DETAIL << "Sending probe solicitation " << entry->numNSSent + 1 << " for "
+                  << entry->address << "\n";
+        createAndSendNsPacket(entry->address, entry->address.formSolicitedNodeMulticastAddress(),
+                Ipv6Address::UNSPECIFIED_ADDRESS, ie);
+        entry->numNSSent++;
+        // reuse the received msg
+        scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
+        return;
+    }
+
+    EV_INFO << "No node answered for " << entry->address << " on " << ie->getInterfaceName()
+            << ", address is unique\n";
+
+    Ipv6Address addr = entry->address;
+    IAddressProbeHandler *handler = entry->handler;
+    addressProbeList.erase(std::find(addressProbeList.begin(), addressProbeList.end(), entry));
+    delete entry;
+    delete msg;
+
+    handler->addressProbeCompleted(addr, ie, true);
+}
+
+void Ipv6NeighbourDiscovery::addressProbeHasFailed(const Ipv6Address& addr, NetworkInterface *ie)
+{
+    AddressProbeEntry *entry = findAddressProbe(addr, ie->getInterfaceId());
+    ASSERT(entry != nullptr);
+
+    EV_WARN << "Another node defended " << addr << " on " << ie->getInterfaceName()
+            << ", the address is already in use on this link\n";
+
+    IAddressProbeHandler *handler = entry->handler;
+    cancelAndDelete(entry->timeoutMsg);
+    addressProbeList.erase(std::find(addressProbeList.begin(), addressProbeList.end(), entry));
+    delete entry;
+
+    handler->addressProbeCompleted(addr, ie, false);
+}
+
+void Ipv6NeighbourDiscovery::cancelAddressProbe(const Ipv6Address& addr, NetworkInterface *ie)
+{
+    Enter_Method("cancelAddressProbe");
+
+    if (AddressProbeEntry *entry = findAddressProbe(addr, ie->getInterfaceId())) {
+        EV_INFO << "Abandoning the probe of " << addr << " on " << ie->getInterfaceName() << "\n";
+        cancelAndDelete(entry->timeoutMsg);
+        addressProbeList.erase(std::find(addressProbeList.begin(), addressProbeList.end(), entry));
+        delete entry;
+    }
 }
 
 void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
@@ -2158,6 +2298,18 @@ void Ipv6NeighbourDiscovery::processNaPacket(Packet *packet, const Ipv6Neighbour
         delete packet;
         return;
     }
+
+    // A node defending an address we are probing on someone else's behalf ends that probe:
+    // the address is in use on this link (RFC 6275 Section 10.3.1, home agent side). Only a
+    // defending advertisement can end a probe this way -- see startAddressProbe() on why a
+    // competing solicitation never arrives.
+    if (findAddressProbe(naTargetAddr, ie->getInterfaceId()) != nullptr) {
+        EV_WARN << "Received NA for probed address " << naTargetAddr << " - address is in use\n";
+        addressProbeHasFailed(naTargetAddr, ie);
+        delete packet;
+        return;
+    }
+
     // Logic as defined in Section 7.2.5
     Neighbour *neighbourEntry = neighbourCache.lookup(naTargetAddr, ie->getInterfaceId());
 
@@ -2682,6 +2834,13 @@ void Ipv6NeighbourDiscovery::stop()
         delete entry;
     }
     dadList.clear();
+
+    // cancel and delete all address probe entries
+    for (auto *entry : addressProbeList) {
+        cancelAndDelete(entry->timeoutMsg);
+        delete entry;
+    }
+    addressProbeList.clear();
 
     // cancel and delete all RD entries
     for (auto *entry : rdList) {
