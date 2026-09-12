@@ -1821,6 +1821,16 @@ static void testRegionTagSet()
     ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(1500) && regionTagSet.getRegionTag(1).getLength() == b(500));
     }
 
+    { // 11b. removeTagsWherePresent only removes tags of the specified type
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet.addTag<PropagationTimeTag>(b(0), b(1000));
+    const auto& removed = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(removed.size() == 1);
+    ASSERT(regionTagSet.getNumTags() == 1);
+    ASSERT(regionTagSet.findTag<PropagationTimeTag>(b(0), b(1000)) != nullptr);
+    }
+
     { // 12. copyTags
     SharingRegionTagSet regionTagSet1;
     SharingRegionTagSet regionTagSet2;
