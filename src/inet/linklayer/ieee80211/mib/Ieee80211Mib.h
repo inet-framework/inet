@@ -101,7 +101,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     void releaseAssociationId(const MacAddress& address);
     void clearAssociationIds();
     void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
-            const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit);
+            const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit,
+            const physicallayer::IIeee80211Band *operationBand = nullptr);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
     bool hasPrimaryChannel() const { return primaryChannelAvailable; }
     int requirePrimaryChannel() const;

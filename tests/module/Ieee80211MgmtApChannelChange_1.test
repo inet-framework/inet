@@ -239,6 +239,19 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         ASSERT(selectedMode->getDataMode()->getBandwidth() == MHz(20));
         std::cout << "Dynamic channel change to 11 downgraded to 20 MHz and updated peer state.\n";
 
+        // Reapplying HT must not undo the band-derived fallback, including in
+        // existing peer state. Exercise the real coordinated radio setter.
+        auto generation = peerState->generation;
+        radio->setModeSetAndMode(modeSet, modeSet->getMode(Mbps(24)));
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState->generation == generation + 1);
+        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(20));
+        mgmt->emitBeaconNow();
+        ASSERT(!mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        std::cout << "HT mode refresh preserves edge-channel fallback and peer state.\n";
+
         // 4. Dynamic runtime channel change back to channel index 0 (std channel 1)
         radio->setChannelNumber(0);
 
@@ -337,6 +350,21 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
 
         std::cout << "Dynamic band change revalidated against new active band.\n";
 
+        // Legacy-to-HT on an edge channel must also apply the configured
+        // secondary-channel policy before advertising HT operation again.
+        auto legacy = physicallayer::Ieee80211ModeSet::getModeSet("g(mixed)");
+        radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+        radio->setChannelNumber(2); // last channel in the three-channel test band
+        radio->setModeSetAndMode(modeSet, modeSet->getMode(Mbps(24)));
+        ASSERT(mib->getHtOperation().primaryChannel == 2);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        mgmt->emitBeaconNow();
+        ASSERT(mgmt->sentBeacons.back()->getHtOperation().primaryChannel == 44);
+        ASSERT(!mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        radio->setChannelNumber(0);
+        std::cout << "Legacy-to-HT switch validates the active band before advertising.\n";
+
         // 7. Band notifications may arrive during initialization before the MAC
         // publishes whether HT operation is supported. A legacy/non-HT AP must
         // retain the radio's channel without applying HT-only band validation.
@@ -424,7 +452,7 @@ record-scalar-results = false
 *.ap.wlan[0].radio.transmitter.typename = "TestHt40Transmitter"
 *.ap.wlan[0].radio.receiver.typename = "TestHt40Receiver"
 **.wlan[*].opMode = "n(mixed-2.4Ghz)"
-**.wlan[*].bitrate = 65Mbps
+**.wlan[*].bitrate = 24Mbps
 **.wlan[*].radio.bandName = "2.4 GHz"
 **.wlan[*].radio.centerFrequency = 2.4GHz
 **.mobility.initFromDisplayString = false
@@ -457,3 +485,9 @@ Dynamic band change revalidated against new active band.
 
 %contains: stdout
 Non-HT band notification deferred HT-only validation.
+
+%contains: stdout
+HT mode refresh preserves edge-channel fallback and peer state.
+
+%contains: stdout
+Legacy-to-HT switch validates the active band before advertising.

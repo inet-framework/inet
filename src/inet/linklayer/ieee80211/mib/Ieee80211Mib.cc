@@ -112,7 +112,8 @@ const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
 }
 
 void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
-        const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit)
+        const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit,
+        const physicallayer::IIeee80211Band *operationBand)
 {
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
@@ -181,6 +182,12 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (protectionMode < 0 || protectionMode > 3)
         throw cRuntimeError("htProtectionMode must be between 0 and 3");
     htOperation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protectionMode);
+    if (operationBand != nullptr) {
+        // Validate/fallback before peers see the rebuilt operation. This also
+        // renegotiates peers once, against the final channel width and offset.
+        setPrimaryChannel(requirePrimaryChannel(), operationBand);
+        return;
+    }
     for (auto& entry : peerHtStates) {
         if (entry.second.valid) {
             entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,

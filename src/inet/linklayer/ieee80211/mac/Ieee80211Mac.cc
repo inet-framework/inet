@@ -26,6 +26,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -90,17 +91,25 @@ void Ieee80211Mac::updateLocalHtCapabilities()
     int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
             modeSet->getMaximumNumberOfSpatialStreams());
     std::set<Hz> operationalChannelWidths;
+    const IIeee80211Band *operationBand = nullptr;
     if (modeSet->isHtOperationSupported()) {
         const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
         const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
         if (transmitter == nullptr || receiver == nullptr)
             throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
+        if (getSimulation()->getContextType() != CTX_INITIALIZE &&
+                mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+            const auto *channel = transmitter->getChannel();
+            if (channel == nullptr || channel->getBand() == nullptr)
+                throw cRuntimeError("HT operation requires a configured channel and band");
+            operationBand = channel->getBand();
+        }
         for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
             if (transmitter->isHtChannelWidthSupported(channelWidth) &&
                     receiver->isHtChannelWidthSupported(channelWidth))
                 operationalChannelWidths.insert(channelWidth);
     }
-    mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
+    mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit, operationBand);
 }
 
 void Ieee80211Mac::initializeRadioMode()
