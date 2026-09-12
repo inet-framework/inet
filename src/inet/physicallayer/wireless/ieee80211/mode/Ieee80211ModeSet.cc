@@ -682,9 +682,8 @@ const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode 
         const auto candidateGuardInterval = candidateDataMode->getGuardInterval();
         const bool bandwidthMatches = (std::isnan(sourceBandwidth.get()) && std::isnan(candidateBandwidth.get())) ||
                 (!std::isnan(sourceBandwidth.get()) && !std::isnan(candidateBandwidth.get()) && sourceBandwidth == candidateBandwidth);
-        // GI = -1 indicates unconstrained guard interval (e.g., non-OFDM modes).
-        // Treat GI = -1 as matching any candidate GI, and require exact match when both are >= 0.
-        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO) || (candidateGuardInterval < SIMTIME_ZERO) ||
+        // Absence is part of the source tuple, not findMode()'s wildcard.
+        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO && candidateGuardInterval < SIMTIME_ZERO) ||
                 (sourceGuardInterval >= SIMTIME_ZERO && candidateGuardInterval == sourceGuardInterval);
         if (minBitrate <= candidateDataMode->getNetBitrate() && candidateDataMode->getNetBitrate() <= maxBitrate &&
             bandwidthMatches && candidateDataMode->getNumberOfSpatialStreams() == sourceDataMode->getNumberOfSpatialStreams() &&

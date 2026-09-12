@@ -21,6 +21,22 @@ Validate complete IEEE 802.11 HT long/short guard-interval catalog, lookup, and 
 using namespace inet;
 using namespace inet::physicallayer;
 
+// Same OFDM tuple except for an absent GI, to isolate compatibility semantics.
+class AbsentGiDataMode : public Ieee80211OfdmDataMode
+{
+  public:
+    AbsentGiDataMode(const Ieee80211OfdmDataMode& source) : Ieee80211OfdmDataMode(source) {}
+    virtual const simtime_t getGuardInterval() const override { return -1; }
+};
+
+class AbsentGiMode : public Ieee80211OfdmMode
+{
+    AbsentGiDataMode data;
+  public:
+    AbsentGiMode(const Ieee80211OfdmMode& source) : Ieee80211OfdmMode(source), data(*source.getDataMode()) {}
+    virtual const Ieee80211OfdmDataMode *getDataMode() const override { return &data; }
+};
+
 class TestIeee80211Transmitter : public Ieee80211Transmitter
 {
   public:
@@ -295,6 +311,14 @@ const auto pModeSet = Ieee80211ModeSet::getModeSet("p");
 const auto aMode = legacyOfdmModeSet->getMode(Mbps(6), MHz(20), 1, SimTime(800, SIMTIME_NS));
 const auto erpMode = erpModeSet->findCompatibleMode(aMode);
 ASSERT(erpMode != nullptr);
+AbsentGiMode absentGiMode(*check_and_cast<const Ieee80211OfdmMode *>(aMode));
+Ieee80211ModeSet absentGiSet("absent GI", {{true, &absentGiMode, true}}, &absentGiMode, legacyOfdmModeSet->getPhyType());
+ASSERT(legacyOfdmModeSet->findCompatibleMode(&absentGiMode) == nullptr);
+ASSERT(absentGiSet.findCompatibleMode(aMode) == nullptr);
+ASSERT(absentGiSet.findCompatibleMode(&absentGiMode) == &absentGiMode);
+// Public lookup retains its unspecified-GI wildcard.
+ASSERT(legacyOfdmModeSet->findMode(Mbps(6), MHz(20), 1, -1) == aMode);
+
 ASSERT(erpMode->getDataMode()->getNetBitrate() == aMode->getDataMode()->getNetBitrate());
 ASSERT(erpMode->getDataMode()->getBandwidth() == aMode->getDataMode()->getBandwidth());
 ASSERT(erpMode->getDataMode()->getGuardInterval() == aMode->getDataMode()->getGuardInterval());
