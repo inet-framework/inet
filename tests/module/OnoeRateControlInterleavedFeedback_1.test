@@ -1,0 +1,169 @@
+%description:
+Real HCF feedback from two access categories sharing one receiver. A background
+frame fails once; its failure triggers a voice frame, which wins access before
+the background retry. Onoe must sample the clean voice completion without the
+unfinished background retry, then include that retry with its own completion.
+Reference: MadWifi ath_rate_tx_complete, a7531fd223a1f454d3fd74a975b4581cde5411bb.
+
+%file: InterleavedFeedback.cc
+#include "inet/common/ModuleAccess.h"
+#include "inet/applications/udpapp/UdpBasicApp.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+namespace inet {
+class PriorityApp : public UdpBasicApp
+{
+  protected:
+    void sendPacket() override { sendPriorityPacket(1); }
+
+  public:
+    void sendPriorityPacket(int priority)
+    {
+        Enter_Method("sendPriorityPacket");
+        auto packet = new Packet("priority");
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(par("messageLength"))));
+        packet->addTag<UserPriorityReq>()->setUserPriority(priority);
+        socket.sendTo(packet, chooseDestAddr(), destPort);
+        numSent++;
+    }
+};
+Define_Module(PriorityApp);
+
+namespace ieee80211 {
+class InterleavedControl : public OnoeRateControl
+{
+  protected:
+    using cListener::finish;
+    int feedbackCount = 0;
+
+    void finish() override
+    {
+        ASSERT(feedbackCount == 3);
+        std::cout << "HCF interleaved completion feedback verified.\n";
+    }
+
+  public:
+    void frameTransmitted(Packet *frame, int retryCount, bool successful, bool givenUp) override
+    {
+        auto header = frame->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(!givenUp);
+        feedbackCount++;
+        OnoeRateControl::frameTransmitted(frame, retryCount, successful, givenUp);
+        const auto& state = stations.at(header->getReceiverAddress());
+        ASSERT(state.credit == 0);
+        ASSERT(state.numOfGivenUpTransmissions == 0);
+        if (feedbackCount == 1) {
+            ASSERT(header->getTid() == 1 && !successful && retryCount == 1);
+            ASSERT(state.numOfSuccTransmissions == 0 && state.numOfRetries == 0);
+            auto app = check_and_cast<PriorityApp *>(getContainingNode(this)->getSubmodule("app", 0));
+            app->sendPriorityPacket(6);
+        }
+        else if (feedbackCount == 2) {
+            ASSERT(header->getTid() == 6 && successful && retryCount == 0);
+            ASSERT(state.numOfSuccTransmissions == 1 && state.numOfRetries == 0);
+        }
+        else {
+            ASSERT(feedbackCount == 3);
+            ASSERT(header->getTid() == 1 && successful && retryCount == 1);
+            ASSERT(state.numOfSuccTransmissions == 2 && state.numOfRetries == 1);
+        }
+        std::cout << "feedback " << feedbackCount << ": tid=" << int(header->getTid())
+                  << " retries=" << retryCount << " success=" << successful << "\n";
+    }
+};
+Define_Module(InterleavedControl);
+} // namespace ieee80211
+
+namespace physicallayer {
+class BackgroundErrorModel : public Ieee80211NistErrorModel
+{
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override
+    {
+        auto packet = snir->getReception()->getTransmission()->getPacket();
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header = dynamicPtrCast<const ieee80211::Ieee80211DataHeader>(
+            packet->peekAt<ieee80211::Ieee80211MacHeader>(phyHeader->getChunkLength()));
+        return header && header->getTid() == 1 && !header->getRetry() ? 1 : 0;
+    }
+};
+Define_Module(BackgroundErrorModel);
+} // namespace physicallayer
+} // namespace inet
+
+%file: test.ned
+import inet.applications.udpapp.UdpBasicApp;
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple PriorityApp extends UdpBasicApp
+{
+    parameters:
+        @class(::inet::PriorityApp);
+}
+simple InterleavedControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::InterleavedControl);
+}
+module BackgroundErrorModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        @class(::inet::physicallayer::BackgroundErrorModel);
+}
+network InterleavedNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source: AdhocHost;
+        sink: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = InterleavedNetwork
+sim-time-limit = 20ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+*.source.mobility.initialX = 0m
+*.sink.mobility.initialX = 1m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.*.ipv4.arp.typename = "GlobalArp"
+*.source.wlan[0].mac.qosStation = true
+*.sink.wlan[0].mac.qosStation = true
+*.source.wlan[0].mac.hcf.rateControl.typename = "InterleavedControl"
+*.source.wlan[0].mac.hcf.rateControl.initialRate = 24Mbps
+*.source.wlan[0].mac.hcf.rateControl.interval = 1us
+*.source.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = -1bps
+*.source.wlan[0].mac.hcf.edca.edcaf[0].aifsn = 15
+*.source.wlan[0].mac.hcf.edca.edcaf[3].aifsn = 1
+*.source.wlan[0].mac.hcf.edca.edcaf[3].cwMin = 0
+*.source.wlan[0].mac.hcf.edca.edcaf[3].cwMax = 0
+*.sink.wlan[0].radio.receiver.errorModel.typename = "BackgroundErrorModel"
+*.source.numApps = 1
+*.source.app[0].typename = "PriorityApp"
+*.source.app[0].destAddresses = "sink"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 100B
+*.source.app[0].startTime = 1ms
+*.source.app[0].sendInterval = 1s
+*.sink.numApps = 1
+*.sink.app[0].typename = "UdpSink"
+*.sink.app[0].localPort = 5000
+
+%contains: stdout
+HCF interleaved completion feedback verified.

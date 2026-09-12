@@ -117,8 +117,7 @@ void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, 
 
     printSignalBanner(signalID, obj, details);
 
-    if (signalID == l2BeaconLostSignal) {
-        // TODO should check details if it's about this NIC
+    if (signalID == l2BeaconLostSignal && obj == getContainingNicModule(this)) {
         EV << "beacon lost, starting scanning again\n";
         getContainingNode(this)->bubble("Beacon lost!");
 //        sendDisassociateRequest();

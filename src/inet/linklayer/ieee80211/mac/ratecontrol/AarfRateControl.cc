@@ -5,6 +5,9 @@
 //
 
 
+#include <cmath>
+#include <limits>
+
 #include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
 
 namespace inet {
@@ -19,16 +22,18 @@ void AarfRateControl::initialize(int stage)
     RateControlBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         factor = par("increaseThresholdFactor");
+        initialIncreaseThreshold = par("increaseThreshold");
         maxIncreaseThreshold = par("maxIncreaseThreshold");
         decreaseThreshold = par("decreaseThreshold");
-        interval = par("interval");
+        minTimerThreshold = par("minTimerThreshold");
+        timerThresholdFactor = par("timerThresholdFactor");
+        if (initialIncreaseThreshold < 1 || maxIncreaseThreshold < initialIncreaseThreshold ||
+            decreaseThreshold < 1 || minTimerThreshold < 1 ||
+            !std::isfinite(factor) || factor < 1 ||
+            !std::isfinite(timerThresholdFactor) || timerThresholdFactor < 1 ||
+            timerThresholdFactor * maxIncreaseThreshold > std::numeric_limits<int>::max())
+            throw cRuntimeError("Invalid AARF thresholds or factors");
         WATCH_EXPR("numStations", (int)stations.size());
-        WATCH(factor);
-        WATCH(maxIncreaseThreshold);
-        WATCH(decreaseThreshold);
-        WATCH(interval);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
     }
 }
 
@@ -44,8 +49,8 @@ AarfRateControl::State& AarfRateControl::getState(const MacAddress& receiverAddr
         State state;
         state.address = receiverAddress;
         state.mode = getInitialMode();
-        state.increaseThreshold = par("increaseThreshold");
-        state.timer = simTime(); // the interval starts when the station is first seen, not at t=0
+        state.increaseThreshold = initialIncreaseThreshold;
+        state.timerThreshold = minTimerThreshold;
         it = stations.insert({receiverAddress, state}).first;
         emitDatarateChangedSignal(state.address, state.mode);
     }
@@ -54,63 +59,58 @@ AarfRateControl::State& AarfRateControl::getState(const MacAddress& receiverAddr
 
 void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
+    Enter_Method("frameTransmitted");
     State& state = getState(getReceiverAddress(frame));
-    increaseRateIfTimerIsExpired(state);
+    auto previousMode = state.mode;
 
-    if (!isSuccessful && state.probing) { // probing packet failed
-        state.numberOfConsSuccTransmissions = 0;
-        state.mode = decreaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.address, state.mode);
-        EV_DETAIL << "Decreased rate to " << *state.mode << endl;
-        multiplyIncreaseThreshold(state, factor);
-        resetTimer(state);
+    // Lacage et al., INRIA RR-5208, Appendix A, pp. 22-24.
+    // Retry counts belong to the packet's MAC recovery procedure, whereas the
+    // adaptive thresholds and recovery phase persist for this receiver.
+    if (isSuccessful) {
+        if (state.numberOfConsSuccTransmissions < state.increaseThreshold)
+            state.numberOfConsSuccTransmissions++;
+        auto fasterMode = increaseRateIfPossible(state.mode);
+        if ((state.numberOfConsSuccTransmissions >= state.increaseThreshold || state.timer >= state.timerThreshold) &&
+            fasterMode != state.mode) {
+            state.mode = fasterMode;
+            state.timer = 0;
+            state.numberOfConsSuccTransmissions = 0;
+            state.probing = true;
+        }
+        else {
+            if (state.timer < state.timerThreshold)
+                state.timer++;
+            state.probing = false;
+        }
     }
-    else if (!isSuccessful && retryCount >= decreaseThreshold - 1) { // decreaseThreshold consecutive failed transmissions
+    else {
+        ASSERT(retryCount >= 1);
+        if (state.timer < state.timerThreshold)
+            state.timer++;
         state.numberOfConsSuccTransmissions = 0;
-        state.mode = decreaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.address, state.mode);
-        EV_DETAIL << "Decreased rate to " << *state.mode << endl;
-        resetIncreaseThreshdold(state);
-        resetTimer(state);
+        if (state.probing) {
+            state.timer = 0;
+            if (retryCount == 1) {
+                state.increaseThreshold = std::min(state.increaseThreshold * factor, double(maxIncreaseThreshold));
+                state.timerThreshold = std::max(int(timerThresholdFactor * state.increaseThreshold), minTimerThreshold);
+                state.mode = decreaseRateIfPossible(state.mode);
+            }
+        }
+        else {
+            // Generalize the appendix's retries 2, 4, 6, 8, 10 to the configured
+            // spacing and MAC retry limit, without owning a second retry counter.
+            if (retryCount % decreaseThreshold == 0) {
+                state.increaseThreshold = initialIncreaseThreshold;
+                state.timerThreshold = minTimerThreshold;
+                state.mode = decreaseRateIfPossible(state.mode);
+            }
+            if (retryCount >= decreaseThreshold)
+                state.timer = 0;
+        }
     }
-    else if (isSuccessful && retryCount == 0)
-        state.numberOfConsSuccTransmissions++;
-
-    if (state.numberOfConsSuccTransmissions == state.increaseThreshold) {
-        state.numberOfConsSuccTransmissions = 0;
-        state.mode = increaseRateIfPossible(state.mode);
+    if (state.mode != previousMode) {
         emitDatarateChangedSignal(state.address, state.mode);
-        EV_DETAIL << "Increased rate to " << *state.mode << endl;
-        resetTimer(state);
-        state.probing = true;
-    }
-    else
-        state.probing = false;
-}
-
-void AarfRateControl::multiplyIncreaseThreshold(State& state, double factor)
-{
-    if (state.increaseThreshold * factor <= maxIncreaseThreshold)
-        state.increaseThreshold *= factor;
-}
-
-void AarfRateControl::resetIncreaseThreshdold(State& state)
-{
-    state.increaseThreshold = par("increaseThreshold");
-}
-
-void AarfRateControl::resetTimer(State& state)
-{
-    state.timer = simTime();
-}
-
-void AarfRateControl::increaseRateIfTimerIsExpired(State& state)
-{
-    if (simTime() - state.timer >= interval) {
-        state.mode = increaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.address, state.mode);
-        EV_DETAIL << "Increased rate to " << *state.mode << endl;
-        resetTimer(state);
+        EV_DETAIL << "Changed rate to " << *state.mode << endl;
     }
 }
 
@@ -122,7 +122,6 @@ const IIeee80211Mode *AarfRateControl::getRate(const MacAddress& receiverAddress
 {
     Enter_Method("getRate");
     State& state = getState(receiverAddress);
-    increaseRateIfTimerIsExpired(state);
     EV_INFO << "The current mode is " << state.mode << " the net bitrate is " << state.mode->getDataMode()->getNetBitrate() << std::endl;
     return state.mode;
 }

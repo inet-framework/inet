@@ -1,0 +1,83 @@
+%description:
+At the maximum rate, reaching the success threshold must not arm a failed probe.
+Ordinary failure-threshold fallback still applies.
+
+%file: FeedbackTest.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class FeedbackTest : public cSimpleModule
+{
+  public:
+    FeedbackTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto control = check_and_cast<AarfRateControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
+        const MacAddress receiver("02:00:00:00:00:01");
+        const MacAddress otherReceiver("02:00:00:00:00:02");
+        auto frame = new Packet("feedback");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(receiver);
+        frame->insertAtFront(header);
+        auto rate = [&]() { return control->getRate(receiver)->getDataMode()->getNetBitrate().get(); };
+        ASSERT(rate() == 54e6);
+        // Cross both success and timer thresholds at the maximum rate.
+        for (int i = 0; i < 30; i++)
+            control->frameTransmitted(frame, 0, true, false);
+        ASSERT(rate() == 54e6);
+        control->frameTransmitted(frame, 1, false, false);
+        wait(SimTime(60, SIMTIME_MS));
+        ASSERT(rate() == 54e6);
+        control->frameTransmitted(frame, 2, false, true);
+        ASSERT(rate() == 48e6);
+        delete frame;
+        std::cout << "AarfRateControlMaximumRate verified.\n";
+    }
+};
+Define_Module(FeedbackTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple FeedbackTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::FeedbackTest);
+}
+network FeedbackNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: FeedbackTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FeedbackNetwork
+sim-time-limit = 200ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta.wlan[0].mac.dcf.rateControl.typename = "AarfRateControl"
+*.sta.wlan[0].mac.dcf.rateControl.initialRate = 54Mbps
+*.sta.wlan[0].mac.dcf.rateControl.minTimerThreshold = 15
+*.sta.wlan[0].mac.dcf.rateControl.decreaseThreshold = 2
+
+%contains: stdout
+AarfRateControlMaximumRate verified.

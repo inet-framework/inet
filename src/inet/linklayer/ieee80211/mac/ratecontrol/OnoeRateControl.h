@@ -14,21 +14,20 @@ namespace inet {
 namespace ieee80211 {
 
 /**
- * Implements the Onoe rate control algorithms.
+ * Implements Onoe's completed-sample rate adaptation rules.
  */
 class INET_API OnoeRateControl : public RateControlBase
 {
   protected:
-    // Per-receiver adaptive state (formerly single-instance module members).
+    // Completed-sample statistics and adaptation state belong to each receiver.
     struct State {
         MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
         const physicallayer::IIeee80211Mode *mode = nullptr;
         simtime_t timer = SIMTIME_ZERO;
-        int numOfRetries = 0;
-        int numOfSuccTransmissions = 0;
-        int numOfGivenUpTransmissions = 0;
-        double avgRetriesPerFrame = 0;
-        int credit = 0;
+        int64_t numOfRetries = 0; // recovery counts of completed frames, including internal collisions
+        int64_t numOfSuccTransmissions = 0;
+        int64_t numOfGivenUpTransmissions = 0;
+        int credit = 0; // 0 through 9 after each evaluation
     };
     std::map<MacAddress, State> stations;
 
@@ -41,6 +40,7 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void handleMessage(cMessage *msg) override;
 
     virtual State& getState(const MacAddress& receiverAddress);
+    virtual const physicallayer::IIeee80211Mode *getInitialMode() override;
     virtual void resetRateControl() override { stations.clear(); }
 
     virtual void computeMode(State& state);
@@ -50,6 +50,9 @@ class INET_API OnoeRateControl : public RateControlBase
   public:
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
+    virtual void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp) override;
+    virtual void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp) override;
+    virtual void frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount) override;
     virtual void frameReceived(Packet *frame) override;
 };
 
@@ -57,4 +60,3 @@ class INET_API OnoeRateControl : public RateControlBase
 } /* namespace inet */
 
 #endif
-
