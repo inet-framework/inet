@@ -19,19 +19,22 @@ namespace ieee80211 {
 class INET_API AarfRateControl : public RateControlBase
 {
   protected:
-    // Per-receiver adaptive state (formerly single-instance module members).
+    // Per-receiver state from RR-5208, Appendix A.
     struct State {
         MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
         const physicallayer::IIeee80211Mode *mode = nullptr;
-        simtime_t timer = SIMTIME_ZERO;
-        bool probing = false;
+        int timer = 0;
+        int timerThreshold = -1;
+        bool probing = false; // recovery persists through failures until a successful transmission
         int increaseThreshold = -1;
         int numberOfConsSuccTransmissions = 0;
     };
     std::map<MacAddress, State> stations;
 
     // configuration, shared across stations
-    simtime_t interval = SIMTIME_ZERO;
+    int initialIncreaseThreshold = -1;
+    int minTimerThreshold = -1;
+    double timerThresholdFactor = -1;
     int maxIncreaseThreshold = -1;
     int decreaseThreshold = -1;
     double factor = -1;
@@ -44,12 +47,8 @@ class INET_API AarfRateControl : public RateControlBase
     virtual State& getState(const MacAddress& receiverAddress);
     virtual void resetRateControl() override { stations.clear(); }
 
-    virtual void multiplyIncreaseThreshold(State& state, double factor);
-    virtual void resetIncreaseThreshdold(State& state);
-    virtual void resetTimer(State& state);
-    virtual void increaseRateIfTimerIsExpired(State& state);
-
   public:
+    using RateControlBase::frameTransmitted;
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;
@@ -59,4 +58,3 @@ class INET_API AarfRateControl : public RateControlBase
 } /* namespace inet */
 
 #endif
-

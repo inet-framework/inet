@@ -1,0 +1,217 @@
+%description:
+Exercise completion deadlines, retained samples, rate limits, peer/TID isolation,
+and mode-set signal reset. Expected sampling/credit transitions follow MadWifi
+ath_rate_ctl and ath_rate_tx_complete, a7531fd223a1f454d3fd74a975b4581cde5411bb.
+The first-seen deadline and mode-set lifecycle are INET integration conventions.
+
+%file: SamplingTest.cc
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+class SamplingControl : public OnoeRateControl
+{
+  public:
+    void check(const MacAddress& receiver, int credit, int64_t successes, int64_t errors,
+               int64_t retries, simtime_t timer) const
+    {
+        const auto& state = stations.at(receiver);
+        ASSERT(state.credit == credit);
+        ASSERT(state.numOfSuccTransmissions == successes);
+        ASSERT(state.numOfGivenUpTransmissions == errors);
+        ASSERT(state.numOfRetries == retries);
+        ASSERT(state.timer == timer);
+    }
+
+    void changeModeSet()
+    {
+        Enter_Method("changeModeSet");
+        auto replacement = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("a"));
+        getContainingNicModule(this)->emit(modesetChangedSignal, replacement);
+        ASSERT(modeSet == replacement);
+        ASSERT(stations.empty());
+    }
+};
+Define_Module(SamplingControl);
+
+class RateListener : public cListener
+{
+  public:
+    int changes = 0;
+    void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override
+    {
+        changes++;
+    }
+};
+
+class SamplingTest : public cSimpleModule
+{
+  public:
+    SamplingTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto control = check_and_cast<SamplingControl *>(getModuleByPath("^.sta[0].wlan[0].mac.dcf.rateControl"));
+        auto floor = check_and_cast<SamplingControl *>(getModuleByPath("^.sta[1].wlan[0].mac.dcf.rateControl"));
+        auto ceiling = check_and_cast<SamplingControl *>(getModuleByPath("^.sta[2].wlan[0].mac.dcf.rateControl"));
+        const MacAddress receiver("02:00:00:00:00:01");
+        const MacAddress other("02:00:00:00:00:02");
+        auto makeFrame = [&](const MacAddress& address, int tid) {
+            auto packet = new Packet("feedback");
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setReceiverAddress(address);
+            header->setTid(tid);
+            packet->insertAtFront(header);
+            return packet;
+        };
+        auto frame = makeFrame(receiver, 0);
+        auto unfinished = makeFrame(receiver, 6);
+        auto otherFrame = makeFrame(other, 0);
+        auto rate = [&](SamplingControl *target) { return target->getRate(receiver)->getDataMode()->getNetBitrate().get(); };
+        const SimTime second(1, SIMTIME_S);
+        const SimTime epsilon(1, SIMTIME_US);
+        ASSERT(rate(control) == 24e6);
+        ASSERT(control->getRate(other)->getDataMode()->getNetBitrate().get() == 24e6);
+        for (int i = 0; i < 9; i++)
+            control->frameTransmitted(frame, 0, true, false);
+        for (int i = 1; i <= 5; i++)
+            control->frameTransmitted(unfinished, i, false, false);
+        wait(second - epsilon);
+        control->frameTransmitted(frame, 0, true, false);
+        control->check(receiver, 0, 10, 0, 0, SIMTIME_ZERO);
+        wait(epsilon);
+        ASSERT(rate(control) == 24e6); // query at equality cannot consume the deadline
+        control->frameTransmitted(unfinished, 6, false, false);
+        control->check(receiver, 0, 10, 0, 0, SIMTIME_ZERO);
+        control->frameTransmitted(frame, 0, true, false);
+        control->check(receiver, 1, 0, 0, 0, simTime());
+        control->check(other, 0, 0, 0, 0, SIMTIME_ZERO);
+        wait(second + epsilon);
+        control->frameTransmitted(unfinished, 6, true, false);
+        simtime_t lastEvaluation = simTime();
+        control->check(receiver, 1, 1, 0, 6, lastEvaluation);
+        for (int i = 0; i < 10; i++) {
+            wait(second);
+            ASSERT(rate(control) == 24e6);
+            control->check(receiver, 1, 1, 0, 6, lastEvaluation);
+        }
+        // The idle peer's first completion consumes only one deadline, retaining
+        // its small sample instead of catching up ten empty intervals.
+        control->frameTransmitted(frame, 1, false, true);
+        control->check(receiver, 1, 1, 1, 7, simTime());
+
+        // Three completions per interval accumulate to twelve before one credit.
+        for (int period = 1; period <= 4; period++) {
+            control->frameTransmitted(otherFrame, 0, true, false);
+            control->frameTransmitted(otherFrame, 0, true, false);
+            wait(second);
+            control->frameTransmitted(otherFrame, 0, true, false);
+            control->check(other, period == 4 ? 1 : 0, period == 4 ? 0 : period * 3, 0, 0, simTime());
+        }
+
+        auto cleanSample = [&](SamplingControl *target) {
+            for (int i = 0; i < 9; i++)
+                target->frameTransmitted(frame, 0, true, false);
+            wait(second);
+            target->frameTransmitted(frame, 0, true, false);
+        };
+        ASSERT(rate(floor) == 6e6);
+        cleanSample(floor);
+        floor->check(receiver, 1, 0, 0, 0, simTime());
+        RateListener floorListener;
+        floor->subscribe("datarateChanged", &floorListener);
+        wait(second);
+        floor->frameTransmitted(frame, 1, false, true);
+        floor->check(receiver, 0, 0, 1, 1, simTime());
+        for (int i = 0; i < 8; i++)
+            floor->frameTransmitted(frame, 1, false, true);
+        wait(second);
+        floor->frameTransmitted(frame, 1, false, true);
+        floor->check(receiver, 0, 0, 0, 0, simTime());
+        ASSERT(rate(floor) == 6e6);
+        ASSERT(floorListener.changes == 0);
+        floor->unsubscribe("datarateChanged", &floorListener);
+
+        ASSERT(rate(ceiling) == 54e6);
+        RateListener ceilingListener;
+        ceiling->subscribe("datarateChanged", &ceilingListener);
+        for (int i = 1; i <= 10; i++) {
+            cleanSample(ceiling);
+            ceiling->check(receiver, i % 10, 0, 0, 0, simTime());
+        }
+        ASSERT(rate(ceiling) == 54e6);
+        ASSERT(ceilingListener.changes == 0);
+        ceiling->unsubscribe("datarateChanged", &ceilingListener);
+
+        // A real mode-set signal clears both peers, including retained samples
+        // and credit. New state starts its first interval at the reset-time query.
+        control->changeModeSet();
+        ASSERT(rate(control) == 24e6);
+        control->check(receiver, 0, 0, 0, 0, simTime());
+        ASSERT(control->getRate(other)->getDataMode()->getNetBitrate().get() == 24e6);
+        control->check(other, 0, 0, 0, 0, simTime());
+        control->frameTransmitted(frame, 1, false, true);
+        ASSERT(rate(control) == 24e6);
+        wait(second);
+        control->frameTransmitted(frame, 1, false, true);
+        ASSERT(rate(control) == 18e6);
+        control->check(receiver, 0, 0, 0, 0, simTime());
+        delete frame;
+        delete unfinished;
+        delete otherFrame;
+        std::cout << "OnoeRateControlSampling verified.\n";
+    }
+};
+Define_Module(SamplingTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple SamplingControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::SamplingControl);
+}
+simple SamplingTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::SamplingTest);
+}
+network SamplingNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta[3]: AdhocHost;
+        test: SamplingTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = SamplingNetwork
+sim-time-limit = 50s
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta[*].wlan[0].mac.dcf.rateControl.typename = "SamplingControl"
+*.sta[0].wlan[0].mac.dcf.rateControl.initialRate = 24Mbps
+*.sta[1].wlan[0].mac.dcf.rateControl.initialRate = 6Mbps
+*.sta[2].wlan[0].mac.dcf.rateControl.initialRate = 54Mbps
+*.sta[*].wlan[0].mac.dcf.rateControl.interval = 1s
+
+%contains: stdout
+OnoeRateControlSampling verified.

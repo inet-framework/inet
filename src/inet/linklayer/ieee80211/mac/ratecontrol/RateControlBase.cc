@@ -22,6 +22,26 @@ void RateControlBase::initialize(int stage)
     ModeSetListener::initialize(stage);
 }
 
+const IIeee80211Mode *RateControlBase::getRateForFrame(Packet *frame)
+{
+    return getRate(getReceiverAddress(frame));
+}
+
+void RateControlBase::frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool isSuccessful, bool isGivenUp)
+{
+    frameTransmitted(frame, retryCount, isSuccessful, isGivenUp);
+}
+
+void RateControlBase::rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool isGivenUp)
+{
+    // RTS failures do not describe an attempt at the controller's selected data rate.
+}
+
+void RateControlBase::frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount)
+{
+    // An internal collision does not attempt transmission at the selected data rate.
+}
+
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
 {
     const IIeee80211Mode *newMode = modeSet->getFasterMode(currentMode);
@@ -72,4 +92,3 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

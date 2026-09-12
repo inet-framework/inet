@@ -1,0 +1,348 @@
+%description:
+Real DCF/HCF normal-ACK exchanges cover clean RTS/CTS, two lost CTS responses,
+RTS exhaustion, and mixed RTS/data failures ending in success, data exhaustion,
+or RTS exhaustion. Repeat each scenario with AARF to verify its legacy data-only
+feedback. Onoe receives the total once on completion (MadWifi ath_rate_tx_complete,
+ath_rate/onoe/onoe.c revision a7531fd223a1f454d3fd74a975b4581cde5411bb).
+
+%file: RtsFeedback.cc
+#include <type_traits>
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+namespace inet {
+namespace ieee80211 {
+template<typename Base>
+class RtsFeedbackControl : public Base
+{
+  protected:
+    using cListener::finish;
+    int rtsFailures = 0;
+    int dataFailures = 0;
+    int completions = 0;
+    MacAddress receiver;
+
+    int scenario() const { return (getContainingNode(this)->getIndex() % 12) / 2; }
+
+    void checkCompletion(bool successful, int total)
+    {
+        completions++;
+        int test = scenario();
+        const int totals[] = {0, 2, 3, 2, 3, 4};
+        ASSERT(total == totals[test]);
+        ASSERT(successful == (test == 0 || test == 1 || test == 3));
+        if constexpr (std::is_same_v<Base, OnoeRateControl>) {
+            const auto& state = this->stations.at(receiver);
+            ASSERT(state.credit == 0);
+            ASSERT(state.numOfSuccTransmissions == (successful ? 1 : 0));
+            ASSERT(state.numOfGivenUpTransmissions == 0);
+            ASSERT(state.numOfRetries == (successful ? total : 0));
+            ASSERT(this->getRate(receiver)->getDataMode()->getNetBitrate().get() == (successful ? 24e6 : 18e6));
+        }
+    }
+
+    void finish() override
+    {
+        const int expectedRtsFailures[] = {0, 2, 3, 1, 1, 3};
+        const int expectedDataFailures[] = {0, 0, 0, 1, 2, 1};
+        ASSERT(rtsFailures == expectedRtsFailures[scenario()]);
+        ASSERT(dataFailures == expectedDataFailures[scenario()]);
+        ASSERT(completions == 1);
+        if constexpr (std::is_same_v<Base, AarfRateControl>)
+            ASSERT(this->getRate(receiver)->getDataMode()->getNetBitrate().get() == (scenario() == 4 ? 18e6 : 24e6));
+        std::cout << this->getFullPath() << ": RTS feedback verified.\n";
+    }
+
+  public:
+    using Base::frameTransmitted;
+    void frameTransmitted(Packet *frame, int retryCount, int totalRetryCount, bool successful, bool givenUp) override
+    {
+        receiver = this->getReceiverAddress(frame);
+        if (!successful)
+            dataFailures++;
+        ASSERT(retryCount == dataFailures);
+        ASSERT(totalRetryCount == rtsFailures + dataFailures);
+        if (scenario() == 1) {
+            ASSERT(successful && retryCount == 0 && totalRetryCount == 2);
+            ASSERT(!frame->peekAtFront<Ieee80211MacHeader>()->getRetry());
+        }
+        Base::frameTransmitted(frame, retryCount, totalRetryCount, successful, givenUp);
+        if (successful || givenUp)
+            checkCompletion(successful, totalRetryCount);
+        std::cout << this->getFullPath() << ": data retry=" << retryCount
+                  << " total=" << totalRetryCount << " success=" << successful
+                  << " givenUp=" << givenUp << "\n";
+    }
+
+    void rtsFrameTransmissionFailed(Packet *frame, int totalRetryCount, bool givenUp) override
+    {
+        receiver = this->getReceiverAddress(frame);
+        ASSERT(dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(frame->peekAtFront<Ieee80211MacHeader>()));
+        rtsFailures++;
+        ASSERT(totalRetryCount == rtsFailures + dataFailures);
+        Base::rtsFrameTransmissionFailed(frame, totalRetryCount, givenUp);
+        if (givenUp)
+            checkCompletion(false, totalRetryCount);
+        else if constexpr (std::is_same_v<Base, OnoeRateControl>) {
+            const auto& state = this->stations.at(receiver);
+            ASSERT(state.numOfSuccTransmissions == 0 && state.numOfGivenUpTransmissions == 0 && state.numOfRetries == 0);
+        }
+        std::cout << this->getFullPath() << ": RTS total=" << totalRetryCount << " givenUp=" << givenUp << "\n";
+    }
+};
+class RtsOnoeControl : public RtsFeedbackControl<OnoeRateControl> {};
+class RtsAarfControl : public RtsFeedbackControl<AarfRateControl> {};
+Define_Module(RtsOnoeControl);
+Define_Module(RtsAarfControl);
+} // namespace ieee80211
+
+namespace physicallayer {
+class RtsFeedbackErrorModel : public Ieee80211NistErrorModel
+{
+  protected:
+    mutable std::map<std::pair<int, int>, int> attempts;
+    mutable std::map<int, double> errors;
+
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override
+    {
+        auto reception = snir->getReception();
+        auto transmission = reception->getTransmission();
+        auto packet = transmission->getPacket();
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header = packet->peekAt<ieee80211::Ieee80211MacHeader>(phyHeader->getChunkLength());
+        auto receiverModule = check_and_cast<const cModule *>(reception->getReceiverRadio());
+        if (header->getReceiverAddress() != getContainingNicModule(receiverModule)->getMacAddress())
+            return 0;
+        auto found = errors.find(transmission->getId());
+        if (found != errors.end())
+            return found->second;
+        auto receiverNode = getContainingNode(receiverModule);
+        int type = header->getType();
+        int source = -1;
+        bool error = false;
+        if (type == ieee80211::ST_CTS) {
+            source = receiverNode->getIndex();
+            int attempt = ++attempts[{source, type}];
+            error = (source % 12) / 2 == 1 && attempt <= 2;
+        }
+        else if (strcmp(receiverNode->getName(), "sink") == 0) {
+            source = getContainingNode(check_and_cast<const cModule *>(transmission->getTransmitterRadio()))->getIndex();
+            int test = (source % 12) / 2;
+            int attempt = ++attempts[{source, type}];
+            if (type == ieee80211::ST_RTS)
+                error = test == 2 || ((test == 3 || test == 4) && attempt == 1) || (test == 5 && attempt > 1);
+            else if (dynamicPtrCast<const ieee80211::Ieee80211DataHeader>(header))
+                error = (test == 3 && attempt == 1) || test == 4 || (test == 5 && attempt == 1);
+        }
+        errors[transmission->getId()] = error ? 1 : 0;
+        return error ? 1 : 0;
+    }
+};
+Define_Module(RtsFeedbackErrorModel);
+} // namespace physicallayer
+} // namespace inet
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple RtsOnoeControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::RtsOnoeControl);
+}
+simple RtsAarfControl extends AarfRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::RtsAarfControl);
+}
+module RtsFeedbackErrorModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        @class(::inet::physicallayer::RtsFeedbackErrorModel);
+}
+network RtsFeedbackNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source[24]: AdhocHost;
+        sink: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RtsFeedbackNetwork
+sim-time-limit = 2500ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+*.source[*].mobility.initialX = 0m
+*.sink.mobility.initialX = 1m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.*.ipv4.arp.typename = "GlobalArp"
+*.sink.wlan[0].mac.qosStation = true
+*.source[*].wlan[0].mac.*.rateControl.initialRate = 24Mbps
+*.source[0..11].wlan[0].mac.*.rateControl.interval = 1us
+*.source[12..23].wlan[0].mac.*.rateControl.minTimerThreshold = 100000
+*.source[*].wlan[0].mac.*.rateSelection.dataFrameBitrate = -1bps
+*.source[*].wlan[0].mac.*.rtsPolicy.rtsThreshold = 0B
+*.source[*].wlan[0].mac.**.shortRetryLimit = 3
+*.source[*].wlan[0].mac.**.longRetryLimit = 2
+*.*.wlan[0].radio.receiver.errorModel.typename = "RtsFeedbackErrorModel"
+*.source[*].numApps = 1
+*.source[*].app[0].typename = "UdpBasicApp"
+*.source[*].app[0].destAddresses = "sink"
+*.source[*].app[0].destPort = 5000
+*.source[*].app[0].messageLength = 100B
+*.source[*].app[0].sendInterval = 10s
+*.sink.numApps = 1
+*.sink.app[0].typename = "UdpSink"
+*.sink.app[0].localPort = 5000
+*.source[0].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[0].app[0].startTime = 1ms
+*.source[1].wlan[0].mac.qosStation = true
+*.source[1].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[1].app[0].startTime = 101ms
+*.source[2].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[2].app[0].startTime = 201ms
+*.source[3].wlan[0].mac.qosStation = true
+*.source[3].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[3].app[0].startTime = 301ms
+*.source[4].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[4].app[0].startTime = 401ms
+*.source[5].wlan[0].mac.qosStation = true
+*.source[5].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[5].app[0].startTime = 501ms
+*.source[6].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[6].app[0].startTime = 601ms
+*.source[7].wlan[0].mac.qosStation = true
+*.source[7].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[7].app[0].startTime = 701ms
+*.source[8].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[8].app[0].startTime = 801ms
+*.source[9].wlan[0].mac.qosStation = true
+*.source[9].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[9].app[0].startTime = 901ms
+*.source[10].wlan[0].mac.dcf.rateControl.typename = "RtsOnoeControl"
+*.source[10].app[0].startTime = 1001ms
+*.source[11].wlan[0].mac.qosStation = true
+*.source[11].wlan[0].mac.hcf.rateControl.typename = "RtsOnoeControl"
+*.source[11].app[0].startTime = 1101ms
+*.source[12].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[12].app[0].startTime = 1201ms
+*.source[13].wlan[0].mac.qosStation = true
+*.source[13].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[13].app[0].startTime = 1301ms
+*.source[14].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[14].app[0].startTime = 1401ms
+*.source[15].wlan[0].mac.qosStation = true
+*.source[15].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[15].app[0].startTime = 1501ms
+*.source[16].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[16].app[0].startTime = 1601ms
+*.source[17].wlan[0].mac.qosStation = true
+*.source[17].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[17].app[0].startTime = 1701ms
+*.source[18].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[18].app[0].startTime = 1801ms
+*.source[19].wlan[0].mac.qosStation = true
+*.source[19].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[19].app[0].startTime = 1901ms
+*.source[20].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[20].app[0].startTime = 2001ms
+*.source[21].wlan[0].mac.qosStation = true
+*.source[21].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[21].app[0].startTime = 2101ms
+*.source[22].wlan[0].mac.dcf.rateControl.typename = "RtsAarfControl"
+*.source[22].app[0].startTime = 2201ms
+*.source[23].wlan[0].mac.qosStation = true
+*.source[23].wlan[0].mac.hcf.rateControl.typename = "RtsAarfControl"
+*.source[23].app[0].startTime = 2301ms
+
+%contains: stdout
+source[0].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[1].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[2].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[3].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[4].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[5].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[6].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[7].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[8].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[9].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[10].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[11].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[12].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[13].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[14].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[15].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[16].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[17].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[18].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[19].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[20].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[21].wlan[0].mac.hcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[22].wlan[0].mac.dcf.rateControl: RTS feedback verified.
+
+%contains: stdout
+source[23].wlan[0].mac.hcf.rateControl: RTS feedback verified.
