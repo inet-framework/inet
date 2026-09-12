@@ -16,6 +16,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/icmpv6/IAddressProbeHandler.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
@@ -83,6 +84,43 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      */
     virtual void reachabilityConfirmed(const Ipv6Address& neighbour, int interfaceId);
 
+    /**
+     * Runs Duplicate Address Detection (RFC 4862 Section 5.4) on the given interface for an
+     * address this node does NOT own, and reports the outcome to the handler.
+     *
+     * A home agent needs exactly this. RFC 6275 Section 10.3.1 requires it to run Duplicate
+     * Address Detection for the mobile node's home address on the home link before it returns
+     * a Binding Acknowledgement, but it must not take the address for itself. initiateDad()
+     * cannot serve: it assigns the probed address to the interface -- and hasAddress() answers
+     * true for a tentative address too, so the node would start accepting packets sent to it --
+     * and makes the address permanent once the probe succeeds.
+     *
+     * A duplicate is reported when another node defends the address with a Neighbor
+     * Advertisement, which arrives because a defending advertisement is sent to the all-nodes
+     * multicast address. The competing case, another node running Duplicate Address Detection
+     * for the same address at the same time, is not reported. That Neighbor Solicitation goes
+     * to the solicited-node multicast address of the probed address, and two gates stop it:
+     * Ipv6::routeMulticastPacket() delivers it locally only if the node holds the address or
+     * has joined the group (a multicast-forwarding router delivers all ICMPv6 regardless, so
+     * this gate alone is not enough), and processNsPacket() then discards any solicitation
+     * whose target this node does not hold. A home agent that proxies the address passes both,
+     * so this case belongs with the proxy Neighbor Discovery work.
+     */
+    virtual void startAddressProbe(const Ipv6Address& addr, NetworkInterface *ie, IAddressProbeHandler *handler);
+
+    /**
+     * Abandons a probe started with startAddressProbe() without calling the handler.
+     * Does nothing when no such probe is running.
+     */
+    virtual void cancelAddressProbe(const Ipv6Address& addr, NetworkInterface *ie);
+
+    /**
+     * Returns true while a probe started with startAddressProbe() is still running for the
+     * given address on the given interface. A caller that holds state for the duration of a
+     * probe can use this to notice a probe that was dropped without a callback.
+     */
+    virtual bool isAddressProbeRunning(const Ipv6Address& addr, NetworkInterface *ie);
+
   protected:
 
     // Packets awaiting Address Resolution or Next-Hop Determination.
@@ -112,6 +150,18 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     };
     typedef std::vector<DadEntry *> DadList;
 
+    // stores information about a pending probe of an address this node does not own
+    // (RFC 6275 Section 10.3.1: a home agent verifying a mobile node's home address on
+    // the home link before it accepts a home registration)
+    struct AddressProbeEntry {
+        int interfaceId = -1; // interface the probe runs on
+        Ipv6Address address; // address probed; never assigned to the interface
+        int numNSSent = 0; // number of probe solicitations sent so far
+        cMessage *timeoutMsg = nullptr; // the message to cancel when the probe ends
+        IAddressProbeHandler *handler = nullptr; // notified when the probe ends
+    };
+    typedef std::vector<AddressProbeEntry *> AddressProbeList;
+
     // stores information about Router Discovery for an interface
     struct RdEntry {
         int interfaceId; // interface on which Router Discovery is performed
@@ -138,6 +188,9 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
 
     // List of pending Duplicate Address Detections
     DadList dadList;
+
+    // List of pending probes of addresses this node does not own
+    AddressProbeList addressProbeList;
 
     // List of pending Router & Prefix Discoveries
     RdList rdList;
@@ -276,6 +329,22 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      * and emits a dadFailed signal.
      */
     virtual void dadHasFailed(const Ipv6Address& duplicateAddr, NetworkInterface *ie);
+
+    /**
+     * Returns the running probe of the given address on the given interface, or nullptr.
+     */
+    virtual AddressProbeEntry *findAddressProbe(const Ipv6Address& addr, int interfaceId);
+
+    /**
+     * Sends the next probe solicitation, or ends the probe and reports the address unique
+     * once dupAddrDetectTransmits solicitations have gone unanswered.
+     */
+    virtual void processAddressProbeTimeout(cMessage *msg);
+
+    /**
+     * Ends a running probe and reports the probed address as a duplicate.
+     */
+    virtual void addressProbeHasFailed(const Ipv6Address& addr, NetworkInterface *ie);
 
     /************Address Autoconfiguration Stuff***************************/
     /**
