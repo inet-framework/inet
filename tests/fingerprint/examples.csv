@@ -377,8 +377,8 @@
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            20s,             6299-3bf9/tplx;3617-890d/~tNl;2653-aa28/tyf, PASS,  wireless adhoc
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0,         20s,             732c-c576/tplx;03c2-f3ec/~tNl;fb81-3dac/tyf, PASS,  wireless adhoc
 
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             a83a-1ece/tplx;f1d9-19c4/~tNl, PASS,  wireless adhoc Ipv4
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             c2bd-7372/tplx;fc98-08d6/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
 
 /examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             17ac-0898/tplx;8bbc-d083/~tNl;fdb7-4ab1/~tND;44ef-1a45/tyf, PASS, wireless EthernetMac
 /examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,             19e2-a165/tplx;d96c-5e41/~tNl;ee03-5334/~tND;ed3e-17fa/tyf, PASS, wireless EthernetMac
@@ -596,7 +596,7 @@
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,          3785-bc39/tplx;18be-f36c/~tNl;c76d-5483/~tND, PASS, wireless Ipv4
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR, wireless # [Config Ping2] # __interactive__
 
-/examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         bb14-f903/tplx;538b-6566/~tNl, PASS, Ipv4
+/examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         8180-0d11/tplx;a5d5-2820/~tNl, PASS, Ipv4
 # /examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,   # [Config Ping2] # __interactive__
 
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      88dd-4b30/tplx;6264-75f5/~tNl;77ce-e367/~tND;7a22-c289/tyf, PASS, wireless Ipv4

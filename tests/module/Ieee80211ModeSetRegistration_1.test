@@ -1,0 +1,232 @@
+%description:
+Explicit mode-set registration is independent of observer subscriptions and registration
+order. The interface publishes once after initialization and after each runtime change,
+with MAC state already applied. Cover interface isolation, duplicate registration,
+unregistration/deletion, and rejection of late and cross-interface registration.
+
+%file: Registration.cc
+#include "inet/physicallayer/wireless/generic/GenericRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+// A capability provider with generic PHY roles proves that MAC/management use
+// the radio contract, not concrete IEEE transmitter/receiver implementations.
+class CapabilityRadio : public GenericRadio, public IIeee80211Radio
+{
+    Ieee80211Channel channel{&Ieee80211CompliantBands::band2_4GHz, 10};
+  public:
+    virtual bool isHtChannelWidthSupported(Hz width) const override { return width == MHz(20) || width == MHz(40); }
+    virtual const Ieee80211Channel *getChannel() const override { return &channel; }
+  protected:
+    virtual void initialize(int stage) override
+    {
+        GenericRadio::initialize(stage);
+        if (stage == INITSTAGE_PHYSICAL_LAYER)
+            emit(cComponent::registerSignal("radioChannelChanged"), 10L);
+    }
+};
+Define_Module(CapabilityRadio);
+
+class RegisteredConsumer : public cSimpleModule, public IIeee80211ModeSetListener
+{
+    const Ieee80211ModeSet *modeSet = nullptr;
+  public:
+    int applications = 0;
+    virtual const Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const Ieee80211ModeSet *value) override
+    {
+        Enter_Method_Silent();
+        auto nic = getContainingNicModule(this);
+        ASSERT(check_and_cast<IIeee80211ModeSetListener *>(nic->getSubmodule("mac"))->getModeSet() == value);
+        ASSERT(check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"))->isHtOperationSupported() == value->isHtOperationSupported());
+        modeSet = value;
+        applications++;
+    }
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override
+    {
+        bool late = (getIndex() == 0) == par("reverse").boolValue();
+        if (stage == (late ? INITSTAGE_PHYSICAL_LAYER : INITSTAGE_LOCAL)) {
+            auto coordinator = check_and_cast<IIeee80211ModeSetCoordinator *>(getContainingNicModule(this));
+            bool rejected = false;
+            try { coordinator->registerModeSetConsumer(this, static_cast<IIeee80211ModeSetCoordinator::Phase>(99)); }
+            catch (const cRuntimeError&) { rejected = true; }
+            ASSERT(rejected);
+            coordinator->registerModeSetConsumer(this, IIeee80211ModeSetCoordinator::DERIVED_STATE);
+            coordinator->registerModeSetConsumer(this, IIeee80211ModeSetCoordinator::DERIVED_STATE);
+        }
+    }
+};
+Define_Module(RegisteredConsumer);
+
+// Merely implementing the consumer interface and subscribing must never enlist it.
+class UnregisteredObserver : public cListener, public IIeee80211ModeSetListener
+{
+  public:
+    int notifications = 0;
+    virtual const Ieee80211ModeSet *getModeSet() const override { return nullptr; }
+    virtual void applyModeSet(const Ieee80211ModeSet *) override { throw cRuntimeError("Observer enlisted as participant"); }
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { notifications++; }
+};
+
+class RegistrationTest : public cSimpleModule, public cListener
+{
+    UnregisteredObserver observer;
+    int notifications = 0;
+    RegisteredConsumer *probe(cModule *nic, int index) { return check_and_cast<RegisteredConsumer *>(nic->getSubmodule("probe", index)); }
+    cModule *nic(int index) { return getParentModule()->getSubmodule("ap", index)->getSubmodule("wlan", 0); }
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            getParentModule()->subscribe(modesetChangedSignal, this);
+            getParentModule()->subscribe(modesetChangedSignal, &observer);
+        }
+        else if (stage == INITSTAGE_LAST)
+            scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("change"));
+    }
+    virtual void receiveSignal(cComponent *source, simsignal_t, cObject *value, cObject *) override
+    {
+        Enter_Method_Silent();
+        ASSERT(source == nic(0) || source == nic(1));
+        auto module = check_and_cast<cModule *>(source);
+        auto target = check_and_cast<Ieee80211ModeSet *>(value);
+        ASSERT(probe(module, 0)->getModeSet() == target);
+        ASSERT(probe(module, 1)->getModeSet() == target);
+        if (module == nic(1)) {
+            auto mib = check_and_cast<Ieee80211Mib *>(module->getSubmodule("mib"));
+            ASSERT(mib->localHtCapabilities.supportedChannelWidths.count(MHz(40)) == 1);
+            ASSERT(mib->requirePrimaryChannel() == 10);
+            ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+            ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        }
+        notifications++;
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        ASSERT(notifications == 2 && observer.notifications == 2);
+        auto first = nic(0);
+        auto second = nic(1);
+        auto radio = check_and_cast<Ieee80211Radio *>(first->getSubmodule("radio"));
+        auto coordinator = check_and_cast<IIeee80211ModeSetCoordinator *>(first);
+        auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
+        auto ht = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+        ASSERT(notifications == 3 && observer.notifications == 3);
+        ASSERT(probe(first, 0)->applications == 2 && probe(first, 1)->applications == 2);
+        ASSERT(probe(second, 0)->applications == 1 && probe(second, 1)->applications == 1);
+        getParentModule()->unsubscribe(modesetChangedSignal, this);
+        getParentModule()->unsubscribe(modesetChangedSignal, &observer);
+        radio->setModeSet(ht);
+        ASSERT(probe(first, 0)->applications == 3 && probe(first, 1)->applications == 3);
+        ASSERT(notifications == 3 && observer.notifications == 3);
+        bool rejected = false;
+        try { coordinator->registerModeSetConsumer(probe(first, 0), IIeee80211ModeSetCoordinator::DERIVED_STATE); }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        rejected = false;
+        try { coordinator->unregisterModeSetConsumer(probe(second, 0)); }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        coordinator->unregisterModeSetConsumer(probe(first, 1));
+        probe(first, 1)->deleteModule();
+        radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+        ASSERT(probe(first, 0)->applications == 4);
+        ASSERT(probe(second, 0)->applications == 1);
+        if (par("deleteRegistered").boolValue())
+            probe(first, 0)->deleteModule(); // Deliberately omit unregistering.
+        else
+            coordinator->unregisterModeSetConsumer(first->getSubmodule("mgmt"));
+        rejected = false;
+        try { radio->setModeSetAndMode(ht, ht->getMode(Mbps(24))); }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        // Missing membership is rejected before the PHY is mutated.
+        ASSERT(check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter())->getModeSet() == legacy);
+        std::cout << "Explicit registration, publication, observer neutrality, isolation and teardown verified.\n";
+        endSimulation();
+    }
+};
+Define_Module(RegistrationTest);
+
+%file: test.ned
+import inet.node.wireless.AccessPoint;
+import inet.linklayer.ieee80211.Ieee80211Interface;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.generic.GenericUnitDiskRadio;
+import inet.physicallayer.wireless.ieee80211.contract.packetlevel.IIeee80211Radio;
+module CapabilityRadio extends GenericUnitDiskRadio like IIeee80211Radio
+{
+    parameters:
+        @class(::CapabilityRadio);
+}
+simple RegisteredConsumer
+{
+    parameters:
+        bool reverse;
+        @class(::RegisteredConsumer);
+}
+module RegisteredInterface extends Ieee80211Interface
+{
+    submodules:
+        probe[2]: RegisteredConsumer;
+}
+simple RegistrationTest
+{
+    parameters:
+        bool deleteRegistered;
+    @class(::RegistrationTest);
+}
+network RegistrationNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        test: RegistrationTest;
+        ap[2]: AccessPoint;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RegistrationNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.ap[*].wlan[*].typename = "RegisteredInterface"
+**.probe[*].reverse = ${false,true}
+*.test.deleteRegistered = ${false,true}
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+*.ap[0].wlan[*].radio.typename = "Ieee80211UnitDiskRadio"
+*.ap[1].wlan[*].radio.typename = "CapabilityRadio"
+*.ap[1].wlan[*].mib.htSecondaryChannelOffset = 1
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.transmitter.power = 100mW
+**.radio.transmitter.analogModel.communicationRange = 100m
+**.radio.transmitter.analogModel.interferenceRange = 100m
+**.radio.transmitter.analogModel.detectionRange = 100m
+**.mgmt.ssid = "registration"
+**.mgmt.beaconInterval = 1s
+
+%contains: stdout
+Explicit registration, publication, observer neutrality, isolation and teardown verified.

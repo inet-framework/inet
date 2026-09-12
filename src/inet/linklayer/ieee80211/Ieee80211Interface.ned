@@ -15,6 +15,7 @@ import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.ieee80211.contract.packetlevel.IIeee80211ModeSetCoordinator;
 
 //
 // Implements an IEEE 802.11 network interface. It implements
@@ -58,9 +59,11 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // Despite its appearance, Ieee80211Interface is not a plain compound module.
 // It has an underlying custom C++ class that inherits from `cModule`.
 //
-module Ieee80211Interface extends NetworkInterface like IWirelessInterface
+module Ieee80211Interface extends NetworkInterface like IWirelessInterface, IIeee80211ModeSetCoordinator
 {
     parameters:
+        @class(Ieee80211Interface);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
         string interfaceTableModule;
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
@@ -73,6 +76,7 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         **.bitrate = this.bitrate;
         mac.modeSet = default(this.opMode);
         mac.*.rateSelection.dataFrameBitrate = default(this.bitrate);
+        radio.modeSetCoordinatorModule = default(absPath("."));
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));

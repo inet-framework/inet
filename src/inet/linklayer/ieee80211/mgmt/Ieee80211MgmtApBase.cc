@@ -17,7 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 
 namespace inet {
@@ -69,13 +69,10 @@ const physicallayer::IIeee80211Band *Ieee80211MgmtApBase::getHtOperationBand() c
 {
     if (radio == nullptr)
         throw cRuntimeError("HT Operation channel conversion requires a configured radioModule");
-    const auto *radioContract = dynamic_cast<const physicallayer::IRadio *>(radio);
-    if (radioContract == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires radioModule to reference a radio, got %s", radio->getClassName());
-    const auto *transmitter = dynamic_cast<const physicallayer::Ieee80211Transmitter *>(radioContract->getTransmitter());
-    if (transmitter == nullptr)
-        throw cRuntimeError("HT Operation channel conversion requires radioModule's transmitter to provide an IEEE 802.11 channel");
-    const auto *channel = transmitter->getChannel();
+    const auto *phy = dynamic_cast<const physicallayer::IIeee80211Radio *>(radio);
+    if (phy == nullptr)
+        throw cRuntimeError("HT Operation channel conversion requires the IIeee80211Radio capability contract");
+    const auto *channel = phy->getChannel();
     if (channel == nullptr || channel->getBand() == nullptr)
         throw cRuntimeError("HT Operation channel conversion requires radioModule's IEEE 802.11 transmitter to have a configured channel and band");
     return channel->getBand();

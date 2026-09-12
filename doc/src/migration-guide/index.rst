@@ -4,6 +4,59 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Migrating IEEE 802.11 PHY Modes
+------------------------------
+
+External implementations of ``IIeee80211DataMode`` must now implement the pure
+virtual guard-interval query:
+
+.. code-block:: c++
+
+   const simtime_t getGuardInterval() const override;
+
+Return the modeled guard interval in simulation time units. For a PHY without a
+guard interval, use an explicit override returning ``-1``. FHSS, DSSS, HR-DSSS,
+and IR use this value; OFDM, HT, and VHT return their modeled interval.
+
+The bitrate-based ``Ieee80211ModeSet::getMode()`` and ``findMode()`` overloads
+now take a trailing ``simtime_t guardInterval = -1`` argument. Existing ordinary
+calls can omit it. Update member-function pointer declarations to include this
+argument and supply it when invoking through a pointer. Rebuild external code
+against the changed interface.
+
+``Ieee80211Interface`` now implements ``IIeee80211ModeSetCoordinator``.
+``Ieee80211Mac``, ``Ieee80211MgmtBase``, ``RateSelection``, and
+``ModeSetListener`` register their ``IIeee80211ModeSetListener`` contract during
+initialization. External subclasses must preserve base initialization and place
+mode-set state updates in ``applyModeSet()``, not ``receiveSignal()``. Custom
+interface compositions must provide the coordinator contract and register their
+consumers explicitly. Register the MAC in ``MAC_STATE`` and independent derived
+consumers in ``DERIVED_STATE``. Duplicate registration in the same phase is
+idempotent; registration after initial application is rejected. Detach a consumer
+before deleting it; membership cannot change during a transition.
+
+Observe ``modesetChanged`` at the interface. It is published once after initial
+link-layer setup, and once after every successful runtime application, including
+reapplication of the same catalog. The interface is the source; the MAC and the
+attached radio no longer publish this signal. The borrowed mode-set payload is
+immutable. Observers do not participate in the transaction. Standalone radios
+without ``modeSetCoordinatorModule`` continue to publish their own notification.
+Participant and observer failures remain fatal simulation errors; partial changes
+are not rolled back and continuation is unsupported.
+
+HT-capable radio implementations must provide ``IIeee80211Radio`` in addition to
+``IRadio``. Its ``isHtChannelWidthSupported()`` query covers both PHY directions,
+and ``getChannel()`` returns the borrowed configured channel or null. Generic
+legacy radios do not need this contract. AP channel/band validation now precedes
+the initial mode-set notification as well as runtime publication.
+
+External ``IContention`` implementations must implement the new pure virtual
+``updateTimingParameters(ifs, eifs, slotTime)`` method. On a runtime timing change,
+retain completed whole backoff slots and the remaining random draw, restart the
+applicable IFS and any unfinished slot, and update the expected grant time.
+Unchanged timing preserves the existing schedule. This application must not emit
+an intermediate mode-set notification or generate a new random backoff.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

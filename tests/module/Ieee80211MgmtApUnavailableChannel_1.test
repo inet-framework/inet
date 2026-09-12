@@ -1,8 +1,8 @@
 %description:
 An HT-capable AP must not serialize a management frame before its radio has
 published a valid primary channel.  A radio channel of -1 suppresses the
-initial channel signal, so the first beacon deterministically reports the
-missing MIB-owned channel instead of serializing an invalid value.
+initial channel signal, so initial mode-set application reports the missing
+MIB-owned channel before a notification or Beacon can expose invalid state.
 
 %file: test.ned
 

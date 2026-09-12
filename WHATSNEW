@@ -29,6 +29,15 @@ Notable backward incompatible changes are the following:
    adaptive rate control, either where a station transmits to several peers or
    where it sends group-addressed traffic.
 
+2. IEEE 802.11 PHY mode API
+
+   External implementations of IIeee80211DataMode must implement the new pure
+   virtual getGuardInterval() query. Return the modeled guard interval as a
+   simtime_t, or -1 when the PHY has no guard interval. The bitrate-based
+   Ieee80211ModeSet getMode() and findMode() overloads also take a trailing,
+   defaulted guardInterval argument. Ordinary existing calls still compile;
+   member-function pointers must use the new signature. See the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -66,6 +75,30 @@ Notable backward compatible changes are the following:
    still work: they are no longer pure virtual, and the new hooks call them by
    default. Serializers written against an earlier INET version need no source
    change. See the migration guide for the new signatures.
+
+5. IEEE 802.11 HT/VHT guard intervals and timing
+
+   HT MCS 32, 73, and 76 definitions are corrected. HT/VHT signal fields use
+   long-GI symbol timing independently of the data GI. Mixed-format HT and VHT
+   short-GI data airtimes are rounded to 4 us boundaries; HT greenfield retains
+   its unrounded short-GI airtime. Results and fingerprints may change for
+   simulations using the affected modes and frame formats.
+
+   RateSelection and QosRateSelection now accept dataFrameGuardInterval to
+   qualify a configured dataFrameBitrate. The default, -1s, leaves the GI
+   unspecified; an explicit value must match the selected mode's modeled GI.
+   The interface now coordinates explicitly registered mode-set consumers,
+   updating MAC, management, rate selection, and active contention before
+   publishing modesetChanged. Subscribe at the interface; the attached radio
+   and MAC no longer publish this event. Failures remain fatal. External PHY
+   and contention implementations have new contracts described in the
+   migration guide.
+
+   Group-addressed frames use a legacy basic rate when that set is nonempty.
+   Eligible configured basic rates are preserved; other configured rates fall
+   back to the fastest legacy basic rate. For example, a configured 54 Mbps
+   group rate becomes 24 Mbps in the default mixed legacy catalog. This changes
+   airtime and fingerprints in affected existing scenarios.
 
 
 INET-4.7 (July 2026) — feature release

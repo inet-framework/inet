@@ -74,6 +74,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
   public:
     Ieee80211HrDsssDataMode(bps bitrate);
 
+    virtual const simtime_t getGuardInterval() const override { return -1; }
     virtual Hz getBandwidth() const override { return MHz(22); }
     virtual bps getNetBitrate() const override { return bitrate; }
     virtual bps getGrossBitrate() const override { return bitrate; }

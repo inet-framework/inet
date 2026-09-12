@@ -1,0 +1,126 @@
+%description:
+Invalid fixed rates in either selector and exceptions in either radio notification
+terminate the simulation. Both radio setters are exercised in independent runs;
+no run catches an error or continues using partially updated state. A band
+without standard channel mapping also fails through the real radio setter. Reentrant
+mode-set changes are rejected while the new state is being published.
+
+%file: ModeSetFailure.cc
+#include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+class ModeSetFailure : public cSimpleModule, public cListener
+{
+  protected:
+    virtual void initialize() override { scheduleAt(SimTime(1, SIMTIME_US), new cMessage("switch")); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        if (par("failure").stdstringValue() == "detach")
+            check_and_cast<IIeee80211ModeSetCoordinator *>(source)->unregisterModeSetConsumer(check_and_cast<cModule *>(source)->getSubmodule("mac"));
+        if (par("failure").stdstringValue() == "reentrant")
+            check_and_cast<Ieee80211Radio *>(check_and_cast<cModule *>(source)->getSubmodule("radio"))->setModeSet(check_and_cast<Ieee80211ModeSet *>(value));
+        throw cRuntimeError("test observer rejects mode set");
+    }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        throw cRuntimeError("test observer rejects listening change");
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        auto radio = check_and_cast<Ieee80211Radio *>(getParentModule()->getSubmodule("ap")->getSubmodule("wlan", 0)->getSubmodule("radio"));
+        auto ht = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
+        radio->setMode(ht->getMode(Mbps(24)));
+        auto failure = par("failure").stdstringValue();
+        if (failure == "modeset" || failure == "reentrant" || failure == "detach")
+            radio->getParentModule()->subscribe(modesetChangedSignal, this);
+        else if (failure == "listening")
+            radio->subscribe(IRadio::listeningChangedSignal, this);
+        std::cout << "Attempting " << failure << " explicit=" << par("explicitMode").boolValue() << "\n";
+        if (failure == "band") {
+            radio->setBand(&Ieee80211CompliantBands::band5GHz);
+            throw cRuntimeError("UNEXPECTED successful band change");
+        }
+        if (par("explicitMode"))
+            radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+        else
+            radio->setModeSet(legacy);
+        throw cRuntimeError("UNEXPECTED successful mode-set change");
+    }
+};
+Define_Module(ModeSetFailure);
+
+%file: test.ned
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple ModeSetFailure
+{
+    parameters:
+        @class(::ModeSetFailure);
+        string failure;
+        bool explicitMode;
+}
+network ModeSetFailureNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        test: ModeSetFailure;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ModeSetFailureNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+seed-set = 0
+cmdenv-express-mode = false
+cmdenv-stop-batch-on-error = false
+record-vector-results = false
+record-scalar-results = false
+*.test.failure = ${failure="dcf","hcf","modeset","listening","reentrant","band","detach"}
+*.test.explicitMode = ${false,true}
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 6
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].mac.qosStation = true
+**.mgmt.ssid = "failure"
+**.mgmt.beaconInterval = 1s
+**.mac.dcf.rateSelection.dataFrameBitrate = ${failure} == "dcf" ? 65Mbps : -1bps
+**.mac.hcf.rateSelection.dataFrameBitrate = ${failure} == "hcf" ? 65Mbps : -1bps
+**.rateSelection.dataFrameBandwidth = 20MHz
+**.rateSelection.dataFrameNumSpatialStreams = 1
+**.rateSelection.dataFrameGuardInterval = 800ns
+
+%exitcode: 1
+
+%file: check_errors.py
+from pathlib import Path
+text = Path("test.out").read_text() + Path("test.err").read_text()
+for failure in ("dcf", "hcf", "modeset", "listening", "reentrant", "band", "detach"):
+    for explicit in (0, 1):
+        assert text.count(f"Attempting {failure} explicit={explicit}") == 1
+errors = [line for line in text.splitlines() if "<!> Error:" in line]
+assert len(errors) == 14, errors
+assert sum("Unknown mode for bitrate" in line for line in errors) == 4, errors
+assert sum("test observer rejects mode set" in line for line in errors) == 2, errors
+assert sum("test observer rejects listening change" in line for line in errors) == 2, errors
+assert sum("Reentrant radio mode-set change" in line for line in errors) == 2, errors
+assert sum("Invalid primary channel" in line for line in errors) == 2, errors
+assert sum("Cannot detach a mode-set consumer during a transition" in line for line in errors) == 2, errors
+assert "UNEXPECTED successful" not in text
+
+%postrun-command: python3 check_errors.py
