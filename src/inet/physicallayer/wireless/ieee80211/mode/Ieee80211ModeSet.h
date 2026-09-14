@@ -34,6 +34,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         bool isMandatory;
         const IIeee80211Mode *mode;
         bool isLegacyOperational = false;
+        // Prefer historical catalog entries when no GI qualifier is supplied.
+        bool isPreferredForUnqualifiedLookup = true;
     };
 
     struct EntryNetBitrateComparator {

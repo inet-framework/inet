@@ -95,9 +95,19 @@ retain completed whole backoff slots and the remaining random draw, restart the
 applicable IFS and any unfinished slot, and update the expected grant time.
 Unchanged timing preserves the existing schedule. This application must not emit
 an intermediate mode-set notification or generate a new random backoff.
-Migrating VHT Catalogs and Peer Rate Selection
-----------------------------------------------
 
+Migrating VHT Catalogs
+---------------------
+
+The ``ac`` catalog provides both 800 ns and 400 ns GI for 310 legal VHT tuples
+at 20/40/80/160 MHz and one through eight spatial streams. IEEE 802.11-2024,
+21.5, Tables 21-29 through 21-60 exclude: 20 MHz MCS 9 except NSS 3 and 6;
+80 MHz MCS 6 at NSS 3 and 7; 80 MHz MCS 9 at NSS 6; and 160 MHz MCS 9 at NSS 3.
+The band/preamble envelope remains 5 GHz, mixed format. New variants are optional
+catalog entries; historical mandatory/basic flags, reference/default modes, and
+previously accepted unspecified-GI lookups are preserved. Explicit GI queries
+can select either variant. This catalog does not establish operational support
+for bonded primary/secondary channels.
 External ``IIeee80211Mode`` implementations must implement ``getVhtMcsIndex()``:
 return the VHT MCS index (0 through 9), or -1 for other PHY families.
 ``Ieee80211ModeBase`` supplies the non-VHT default. VHT selection is independent
