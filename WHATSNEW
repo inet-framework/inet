@@ -31,22 +31,25 @@ Notable backward incompatible changes are the following:
 
 2. IEEE 802.11 wire and reception corrections
 
-   QoS Control fields now use the standard bit positions.
-
-   Non-QoS Data no longer aliases the QoS TID-0 duplicate cache.
-
-   OFDM radios generate and check SIGNAL parity and reject undefined RATE codes in compliant mode.
-   Noncompliant layered reception uses its configured mode and still checks parity.
-
-   HR/DSSS and ERP transmissions carry their specific PHY protocol identities.
+   QoS Control fields now use the standard bit positions. Non-QoS Data no
+   longer aliases the QoS TID-0 duplicate cache. OFDM radios generate and check
+   SIGNAL parity and reject undefined RATE codes; HR/DSSS and ERP transmissions
+   carry their specific PHY protocol identities.
 
    AP beacon intervals are rounded down to whole 1024-us TUs for both target
    scheduling and advertisement (100ms becomes 99.328ms). Configured intervals
-   must be between 1 and 65535 TUs.
+   must be between 1 and 65535 TUs. Beacon and Probe Response frames now encode
+   the DSSS Current Channel for 2.4 GHz operation. Their channelNumber field is
+   a standard channel number, with -1 for an absent element, rather than an
+   internal channel index. Radio channel parameters and scan results remain
+   internal indices. Custom frame producers should follow the migration guide.
 
    The mesh no-forwarding-information reason code is corrected from 60 to 62.
    These corrections change affected packet bytes and may change Wi-Fi
    simulation trajectories and fingerprints.
+
+   Noncompliant layered OFDM retains its configured mode and RATE-0 placeholder;
+   SIGNAL parity is checked in both compliant and noncompliant operation.
 
 Notable backward compatible changes are the following:
 

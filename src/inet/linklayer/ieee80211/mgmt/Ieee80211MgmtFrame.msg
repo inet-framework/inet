@@ -253,7 +253,7 @@ class Ieee80211BeaconFrame extends Ieee80211MgmtFrame
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
     simtime_t beaconInterval;
-    int channelNumber;
+    int channelNumber = -1; // DSSS Parameter Set Current Channel (standard channel number, not an internal index); -1 means absent
     Ieee80211HandoverParameters handoverParameters;     //TODO is it a vendor-specific parameter in serializer?
 }
 

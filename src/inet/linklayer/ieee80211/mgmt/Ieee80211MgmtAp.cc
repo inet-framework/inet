@@ -210,17 +210,15 @@ void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
 void Ieee80211MgmtAp::sendBeacon()
 {
     EV << "Sending beacon\n";
-    // Generic radios may not publish an IEEE channel; retain the legacy unknown value.
-    int primaryChannel = mib->hasPrimaryChannel() ? mib->requirePrimaryChannel() : -1;
     const auto& body = makeShared<Ieee80211BeaconFrame>();
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
-    body->setChannelNumber(primaryChannel);
+    body->setChannelNumber(getDsssParameterSetChannel());
     addHtCapabilities(body);
     if (mib->isHtOperationSupported())
         setHtOperation(body, getHtOperationBand(), mib->getHtOperation());
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (body->getChannelNumber() != -1 ? 3 : 0)) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("Beacon", body, ST_BEACON, MacAddress::BROADCAST_ADDRESS);
 }
 
@@ -526,17 +524,15 @@ void Ieee80211MgmtAp::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
-    // Generic radios may not publish an IEEE channel; retain the legacy unknown value.
-    int primaryChannel = mib->hasPrimaryChannel() ? mib->requirePrimaryChannel() : -1;
     const auto& body = makeShared<Ieee80211ProbeResponseFrame>();
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
-    body->setChannelNumber(primaryChannel);
+    body->setChannelNumber(getDsssParameterSetChannel());
     addHtCapabilities(body);
     if (mib->isHtOperationSupported())
         setHtOperation(body, getHtOperationBand(), mib->getHtOperation());
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (body->getChannelNumber() != -1 ? 3 : 0)) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 
