@@ -422,6 +422,11 @@ Notable backward incompatible changes are the following:
    acknowledgment/recovery paths before teardown proceeds, including when callbacks
    replace agreement state.
 
+12. Incomplete Data Released by a Block Ack Request
+
+   When a BAR releases data fragments that do not reassemble into a packet, recipient
+   processing skips data dispatch instead of dereferencing a null result.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

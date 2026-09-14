@@ -266,7 +266,9 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         if (basicReassembly) { // FIXME defragmentation
             for (auto it : frames) {
                 auto fragments = it.second;
-                defragmentedFrames.push_back(defragment(fragments));
+                auto frame = defragment(fragments);
+                if (frame != nullptr)
+                    defragmentedFrames.push_back(frame);
             }
         }
         else {
