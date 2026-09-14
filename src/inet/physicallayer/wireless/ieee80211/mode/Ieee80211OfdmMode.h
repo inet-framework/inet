@@ -265,4 +265,3 @@ class INET_API Ieee80211OfdmCompliantModes
 } // namespace inet
 
 #endif
-
