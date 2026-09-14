@@ -146,8 +146,8 @@ static std::string contentNoun(const EventPattern& p)
 {
     if (!p.description.empty()) return p.description;
     std::string noun;
-    if (!p.selExpr.empty() && translateExpr(p.selExpr, noun)) return noun;
-    if (!p.selExpr.empty()) return "a packet matching \"" + p.selExpr + "\"";
+    if (!p.fltExpr.empty() && translateExpr(p.fltExpr, noun)) return noun;
+    if (!p.fltExpr.empty()) return "a packet matching \"" + p.fltExpr + "\"";
     if (p.predicate) return "a packet matching a custom predicate";
     return "a packet";
 }
@@ -158,87 +158,87 @@ static std::string contentNoun(const EventPattern& p)
 static std::string renderNewPattern(const EventPattern& p, const char *modal)
 {
     std::ostringstream os;
-    if (p.selHasWithin)
-        os << "within " << formatTime(p.selWithin) << ", ";
+    if (p.fltHasWithin)
+        os << "within " << formatTime(p.fltWithin) << ", ";
 
-    bool isDropped = p.selSignal.find("Dropped") != std::string::npos;
-    bool isSent = p.selSignal.find("Sent") != std::string::npos;
+    bool isDropped = p.fltSignal.find("Dropped") != std::string::npos;
+    bool isSent = p.fltSignal.find("Sent") != std::string::npos;
 
-    if (p.selHasMin || p.selHasMax) {
+    if (p.fltHasMin || p.fltHasMax) {
         if (!p.description.empty())
             os << p.description << " (";
-        if (p.selHasMin && p.selHasMax && p.selMin == p.selMax)
-            os << "value " << p.selMin;
-        else if (p.selHasMin && p.selHasMax)
-            os << "value between " << p.selMin << " and " << p.selMax;
-        else if (p.selHasMin)
-            os << "value at least " << p.selMin;
+        if (p.fltHasMin && p.fltHasMax && p.fltMin == p.fltMax)
+            os << "value " << p.fltMin;
+        else if (p.fltHasMin && p.fltHasMax)
+            os << "value between " << p.fltMin << " and " << p.fltMax;
+        else if (p.fltHasMin)
+            os << "value at least " << p.fltMin;
         else
-            os << "value at most " << p.selMax;
+            os << "value at most " << p.fltMax;
         if (!p.description.empty())
             os << ")";
     }
-    else if (p.selHasValue) {
+    else if (p.fltHasValue) {
         // Scalar / state-signal assertion: "<module>'s <signal> must reach <value>".
-        std::string subject = !p.selSource.empty() ? p.selSource
-                            : (p.selNode.empty() ? "some module" : p.selNode);
-        os << subject << "'s " << p.selSignal << " " << modal << " reach ";
+        std::string subject = !p.fltSource.empty() ? p.fltSource
+                            : (p.fltNode.empty() ? "some module" : p.fltNode);
+        os << subject << "'s " << p.fltSignal << " " << modal << " reach ";
         if (!p.description.empty())
-            os << p.description << " (value " << p.selValue << ")";
+            os << p.description << " (value " << p.fltValue << ")";
         else
-            os << "value " << p.selValue;
+            os << "value " << p.fltValue;
     }
     else if (!p.attributeToPath.empty()) {
         // Narrate from the attributed (up/down counterpart) module: it does the opposite of
         // the emitting layer (a packet the layer "received from upper" was *sent* by the module
         // above it).
         std::string node = firstComponent(p.attributeToPath);
-        std::string name = !p.selProtocol.empty() ? protocolHumanName(p.selProtocol) : lastComponent(p.attributeToPath);
+        std::string name = !p.fltProtocol.empty() ? protocolHumanName(p.fltProtocol) : lastComponent(p.attributeToPath);
         const char *verb = isDropped ? "drop" : (isSent ? "receive" : "send");
         os << node << "'s " << name << " " << modal << " " << verb << " " << contentNoun(p);
     }
     else {
         // Honest source point of view.
-        std::string subject = !p.selSource.empty() ? p.selSource
-                            : (p.selNode.empty() ? "some module" : p.selNode);
+        std::string subject = !p.fltSource.empty() ? p.fltSource
+                            : (p.fltNode.empty() ? "some module" : p.fltNode);
         os << subject << " " << modal << " ";
         if (isDropped)
             os << "drop " << contentNoun(p);
         else {
-            bool isUpper = p.selSignal.find("Upper") != std::string::npos;
+            bool isUpper = p.fltSignal.find("Upper") != std::string::npos;
             os << (isSent ? "send " : "receive ") << contentNoun(p)
                << (isSent ? " to the " : " from the ") << (isUpper ? "upper" : "lower") << " layer";
         }
     }
 
-    if (!p.selIface.empty())
-        os << " on interface " << p.selIface;
+    if (!p.fltIface.empty())
+        os << " on interface " << p.fltIface;
     if (!p.captures.empty()) {
         os << ", remembering ";
         for (size_t i = 0; i < p.captures.size(); i++)
             os << (i ? ", " : "") << p.captures[i].first;
     }
-    if (p.selHasNotBefore)
-        os << " (but not before " << formatTime(p.selNotBefore) << " after the previous step)";
+    if (p.fltHasNotBefore)
+        os << " (but not before " << formatTime(p.fltNotBefore) << " after the previous step)";
     return capitalize(os.str()) + ".";
 }
 
 static std::string renderPattern(const EventPattern& p, const char *modal)
 {
-    if (!p.selSignal.empty())   // new orthogonal vocabulary (signal()-based)
+    if (!p.fltSignal.empty())   // new orthogonal vocabulary (signal()-based)
         return renderNewPattern(p, modal);
 
     std::ostringstream os;
-    if (p.selHasWithin)
-        os << "within " << formatTime(p.selWithin) << ", ";
-    os << (p.selNode.empty() ? "some node" : p.selNode) << " " << modal << " " << kindPhrase(p);
-    if (!p.selIface.empty())
-        os << " on interface " << p.selIface;
+    if (p.fltHasWithin)
+        os << "within " << formatTime(p.fltWithin) << ", ";
+    os << (p.fltNode.empty() ? "some node" : p.fltNode) << " " << modal << " " << kindPhrase(p);
+    if (!p.fltIface.empty())
+        os << " on interface " << p.fltIface;
 
     if (!p.description.empty())
         os << " -- " << p.description;
-    else if (!p.selExpr.empty())
-        os << " matching \"" << p.selExpr << "\"";
+    else if (!p.fltExpr.empty())
+        os << " matching \"" << p.fltExpr << "\"";
     else if (p.predicate)
         os << " matching a custom predicate";
 
@@ -247,8 +247,8 @@ static std::string renderPattern(const EventPattern& p, const char *modal)
         for (size_t i = 0; i < p.captures.size(); i++)
             os << (i ? ", " : "") << p.captures[i].first;
     }
-    if (p.selHasNotBefore)
-        os << " (but not before " << formatTime(p.selNotBefore) << " after the previous step)";
+    if (p.fltHasNotBefore)
+        os << " (but not before " << formatTime(p.fltNotBefore) << " after the previous step)";
 
     return capitalize(os.str()) + ".";
 }
@@ -303,16 +303,16 @@ static std::string renderCount(const EventPattern& p, int lo, int hi)
 static std::string contentPhrase(const EventPattern& p)
 {
     if (!p.description.empty()) return p.description;
-    if (!p.selExpr.empty()) return "a packet matching \"" + p.selExpr + "\"";
+    if (!p.fltExpr.empty()) return "a packet matching \"" + p.fltExpr + "\"";
     return "a packet";
 }
 
 static std::string renderDelivery(const EventPattern& from, const EventPattern& to)
 {
     std::ostringstream os;
-    os << "Within " << (to.selHasWithin ? formatTime(to.selWithin) : std::string("the window")) << ", "
-       << contentPhrase(from) << " sent by " << (from.selNode.empty() ? "some node" : from.selNode)
-       << " is received by " << (to.selNode.empty() ? "some node" : to.selNode) << " (same packet).";
+    os << "Within " << (to.fltHasWithin ? formatTime(to.fltWithin) : std::string("the window")) << ", "
+       << contentPhrase(from) << " sent by " << (from.fltNode.empty() ? "some node" : from.fltNode)
+       << " is received by " << (to.fltNode.empty() ? "some node" : to.fltNode) << " (same packet).";
     return os.str();
 }
 

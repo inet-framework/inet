@@ -53,26 +53,26 @@ class INET_API EventPattern
 {
   public:
     // selector
-    std::string selNode;                                  // on(path): subscribe/source-subtree (matched as a path prefix on the emitter)
-    std::string selSource;                                // source(path): emitting-module filter (path prefix)
-    std::string selSignal;                                // signal(name): registered signal name ("" = any)
-    std::string selProtocol;                              // protocol(name): packet's PacketProtocolTag ("" = any)
-    std::string selDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
-    bool selHasValue = false; double selValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
-    bool selHasMin = false; double selMin = 0;              // isAtLeast(v): lower bound on a scalar signal
-    bool selHasMax = false; double selMax = 0;              // isAtMost(v): upper bound on a scalar signal
+    std::string fltNode;                                  // on(path): subscribe/source-subtree (matched as a path prefix on the emitter)
+    std::string fltSource;                                // source(path): emitting-module filter (path prefix)
+    std::string fltSignal;                                // signal(name): registered signal name ("" = any)
+    std::string fltProtocol;                              // protocol(name): packet's PacketProtocolTag ("" = any)
+    std::string fltDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
+    bool fltHasValue = false; double fltValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
+    bool fltHasMin = false; double fltMin = 0;              // isAtLeast(v): lower bound on a scalar signal
+    bool fltHasMax = false; double fltMax = 0;              // isAtMost(v): upper bound on a scalar signal
     std::string attributeToPath;                          // attributeTo(path): description-only point of view
-    std::string selIface;                                 // "" = any interface
-    bool selHasDirection = false; int selDirection = -1;  // 0=IN, 1=OUT
-    std::string selExpr;                                  // "" = no content expression
+    std::string fltIface;                                 // "" = any interface
+    bool fltHasDirection = false; int fltDirection = -1;  // 0=IN, 1=OUT
+    std::string fltExpr;                                  // "" = no content expression
     MatchPredicate predicate;                             // optional typed lambda predicate
     std::string description;                              // optional human phrase for the content (esp. a lambda)
     std::vector<std::pair<std::string, CaptureFn>> captures; // values to bind when this step matches
     // timing (relative to the step anchor)
-    bool selHasWithin = false; simtime_t selWithin = 0;       // deadline
-    bool selHasNotBefore = false; simtime_t selNotBefore = 0; // earliest
+    bool fltHasWithin = false; simtime_t fltWithin = 0;       // deadline
+    bool fltHasNotBefore = false; simtime_t fltNotBefore = 0; // earliest
 
-    mutable std::shared_ptr<PacketFilter> filter;         // compiled lazily from selExpr
+    mutable std::shared_ptr<PacketFilter> filter;         // compiled lazily from fltExpr
 
     // --- assertion: what must hold on the event the filter picked ---
     //
@@ -97,26 +97,26 @@ class INET_API EventPattern
     mutable int fltHits = 0;                              // filtered events seen so far
 
   public:
-    EventPattern& iface(const char *name) { selIface = name; return *this; }
+    EventPattern& iface(const char *name) { fltIface = name; return *this; }
     // --- new orthogonal selector vocabulary (pattern-language refactor) ---
-    EventPattern& source(const char *path) { selSource = path; return *this; }     // emitting-module filter
-    EventPattern& signal(const char *name) { selSignal = name; return *this; }     // which signal (registered name)
-    EventPattern& dispatch(const char *name) { selDispatch = name; return *this; } // DispatchProtocolReq protocol
+    EventPattern& source(const char *path) { fltSource = path; return *this; }     // emitting-module filter
+    EventPattern& signal(const char *name) { fltSignal = name; return *this; }     // which signal (registered name)
+    EventPattern& dispatch(const char *name) { fltDispatch = name; return *this; } // DispatchProtocolReq protocol
     // A standard usually states a bound rather than a value: "at most 4 segments", "no less
     // than one second". These express such a bound on a scalar signal.
     EventPattern& attributeTo(const char *path) { attributeToPath = path; return *this; } // description point of view
 
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").
-    EventPattern& protocol(const char *name) { selProtocol = name; return *this; }
+    EventPattern& protocol(const char *name) { fltProtocol = name; return *this; }
 
-    EventPattern& inbound() { selHasDirection = true; selDirection = 0; return *this; }
-    EventPattern& outbound() { selHasDirection = true; selDirection = 1; return *this; }
+    EventPattern& inbound() { fltHasDirection = true; fltDirection = 0; return *this; }
+    EventPattern& outbound() { fltHasDirection = true; fltDirection = 1; return *this; }
     // --- filter words: they pick the event ---
-    EventPattern& filterPacket(const char *expression) { selExpr = expression; return *this; }
+    EventPattern& filterPacket(const char *expression) { fltExpr = expression; return *this; }
     EventPattern& filterEvent(MatchPredicate p) { predicate = std::move(p); return *this; }
-    EventPattern& filterValue(double v) { selHasValue = true; selValue = v; return *this; }
-    EventPattern& filterValueAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
-    EventPattern& filterValueAtMost(double v) { selHasMax = true; selMax = v; return *this; }
+    EventPattern& filterValue(double v) { fltHasValue = true; fltValue = v; return *this; }
+    EventPattern& filterValueAtLeast(double v) { fltHasMin = true; fltMin = v; return *this; }
+    EventPattern& filterValueAtMost(double v) { fltHasMax = true; fltMax = v; return *this; }
     EventPattern& filterValueBetween(double lo, double hi) { return filterValueAtLeast(lo).filterValueAtMost(hi); }
 
     // --- position words: they pick which filtered event, and compare nothing ---
@@ -148,9 +148,9 @@ class INET_API EventPattern
         captures.emplace_back(name, [path](const PacketEvent& e) { return evalPacketField(e.packet, path); });
         return *this;
     }
-    EventPattern& within(double t) { selHasWithin = true; selWithin = t; return *this; }
-    EventPattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
-    EventPattern& notBefore(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
+    EventPattern& within(double t) { fltHasWithin = true; fltWithin = t; return *this; }
+    EventPattern& after(double t) { fltHasNotBefore = true; fltNotBefore = t; return *this; }
+    EventPattern& notBefore(double t) { fltHasNotBefore = true; fltNotBefore = t; return *this; }
 
     // True if the selector scope (node / kind / direction / layer / interface) matches,
     // ignoring the content expression/predicate. Used by strict mode.

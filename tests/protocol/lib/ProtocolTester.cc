@@ -128,8 +128,8 @@ void ProtocolTester::subscribeStateSignals()
         "packetPulled", "packetPulledIn", "packetPulledOut"
     };
     auto collect = [&](const EventPattern& p) {
-        if (!p.selSignal.empty() && packetSignals.find(p.selSignal) == packetSignals.end())
-            names.insert(p.selSignal);
+        if (!p.fltSignal.empty() && packetSignals.find(p.fltSignal) == packetSignals.end())
+            names.insert(p.fltSignal);
     };
     if (matchingMode)
         for (const auto& step : program->steps) {
@@ -485,7 +485,7 @@ void ProtocolTester::enterStep()
         case StepType::Never:
             // Wait for a matching event (see processMatch); the deadline resolves the
             // step if it expires (fail / skip / pass, depending on the kind).
-            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
+            armDeadline(step.pattern.fltHasWithin ? step.pattern.fltWithin : simtime_t(0));
             break;
         case StepType::Unordered:
         case StepType::AnyOf: {
@@ -493,8 +493,8 @@ void ProtocolTester::enterStep()
             groupRemaining = (int)step.group.size();
             simtime_t window = 0;
             for (auto& pattern : step.group)
-                if (pattern.selHasWithin && pattern.selWithin > window)
-                    window = pattern.selWithin;
+                if (pattern.fltHasWithin && pattern.fltWithin > window)
+                    window = pattern.fltWithin;
             armDeadline(window);
             if (step.type == StepType::Unordered && groupRemaining == 0)
                 advance(simTime());
@@ -502,7 +502,7 @@ void ProtocolTester::enterStep()
         }
         case StepType::ExactlyTimes:
             repeatRemaining = step.count;
-            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
+            armDeadline(step.pattern.fltHasWithin ? step.pattern.fltWithin : simtime_t(0));
             if (repeatRemaining <= 0)
                 advance(simTime());
             break;
@@ -510,7 +510,7 @@ void ProtocolTester::enterStep()
             // Greedy: accumulate matches for the whole window, then resolve at the
             // deadline (see handleMessage). An overflow past cardMax fails earlier.
             cardCount = 0;
-            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
+            armDeadline(step.pattern.fltHasWithin ? step.pattern.fltWithin : simtime_t(0));
             break;
         case StepType::Delivery:
             // Wait (unbounded) for the send; the window applies to send->receive and is
@@ -534,7 +534,7 @@ void ProtocolTester::enterStep()
 bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event, simtime_t anchor)
 {
     simtime_t base = anchor >= SIMTIME_ZERO ? anchor : anchorTime;
-    if (pattern.selHasNotBefore && event.time < base + pattern.selNotBefore)
+    if (pattern.fltHasNotBefore && event.time < base + pattern.fltNotBefore)
         return false;
     MatchContext context{event, captureStore};
     if (!pattern.selectorMatches(context))
@@ -603,7 +603,7 @@ void ProtocolTester::processMatch(const PacketEvent& event)
             }
             // strict (closed-world): an in-scope packet that isn't the expected one fails.
             else if (program->strictMode && step.type == StepType::Once
-                     && !(step.pattern.selHasNotBefore && event.time < anchorTime + step.pattern.selNotBefore)
+                     && !(step.pattern.fltHasNotBefore && event.time < anchorTime + step.pattern.fltNotBefore)
                      && step.pattern.scopeMatches(event)) {
                 decide(false, "strict: unexpected in-scope packet at t=" + event.time.str() +
                               " (" + event.module->getFullPath() + ") for step " +
@@ -644,7 +644,7 @@ void ProtocolTester::processMatch(const PacketEvent& event)
                     runCaptures(step.pattern, event);
                     deliveryStage = 1;
                     anchorTime = event.time;   // the receive window starts at the send
-                    armDeadline(step.pattern2.selHasWithin ? step.pattern2.selWithin : simtime_t(0));
+                    armDeadline(step.pattern2.fltHasWithin ? step.pattern2.fltWithin : simtime_t(0));
                 }
             }
             else if (event.treeId == deliveryTreeId && patternMatches(step.pattern2, event)) {
@@ -711,10 +711,10 @@ void ProtocolTester::startGuard(size_t stepIndex)
     Guard guard;
     guard.stepIndex = stepIndex;
     guard.startTime = simTime();
-    if (step.pattern.selHasWithin && step.pattern.selWithin > SIMTIME_ZERO) {
+    if (step.pattern.fltHasWithin && step.pattern.fltWithin > SIMTIME_ZERO) {
         guard.timer = new cMessage("guard");
         guard.timer->setContextPointer(reinterpret_cast<void *>(static_cast<uintptr_t>(stepIndex)));
-        scheduleAt(guard.startTime + step.pattern.selWithin, guard.timer);
+        scheduleAt(guard.startTime + step.pattern.fltWithin, guard.timer);
     }
     guards.push_back(guard);
     EV_INFO << "PROTOCOLTEST guard started for step " << stepIndex << " [" << step.pattern.str() << "]" << endl;

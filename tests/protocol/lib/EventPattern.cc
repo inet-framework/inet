@@ -37,7 +37,7 @@ EventPattern on(const char *path)
     // A module path (the subscribe/source subtree): "MN[0]", "MN[0].wlan[0]",
     // "MN[0].ipv6.ipv6". Matched as a component-aligned prefix of the emitting module.
     EventPattern pattern;
-    pattern.selNode = path;
+    pattern.fltNode = path;
     return pattern;
 }
 
@@ -56,19 +56,19 @@ static bool pathMatches(const std::string& pattern, const std::string& path)
 
 bool EventPattern::scopeMatches(const PacketEvent& event) const
 {
-    if (!pathMatches(selNode, event.sourcePath))    // on(path): emitter subtree
+    if (!pathMatches(fltNode, event.sourcePath))    // on(path): emitter subtree
         return false;
-    if (!pathMatches(selSource, event.sourcePath))  // source(path): emitter filter
+    if (!pathMatches(fltSource, event.sourcePath))  // source(path): emitter filter
         return false;
-    if (!selSignal.empty() && selSignal != event.signalName)
+    if (!fltSignal.empty() && fltSignal != event.signalName)
         return false;
-    if (!selProtocol.empty() && selProtocol != event.protocolName)
+    if (!fltProtocol.empty() && fltProtocol != event.protocolName)
         return false;
-    if (!selDispatch.empty() && selDispatch != event.dispatchName)
+    if (!fltDispatch.empty() && fltDispatch != event.dispatchName)
         return false;
-    if (selHasDirection && event.direction != selDirection)
+    if (fltHasDirection && event.direction != fltDirection)
         return false;
-    if (!selIface.empty() && selIface != event.interfaceName)
+    if (!fltIface.empty() && fltIface != event.interfaceName)
         return false;
     return true;
 }
@@ -173,11 +173,11 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
     const PacketEvent& event = context.event;
     if (!scopeMatches(event))
         return false;
-    if (selHasMin && (!event.hasValue || event.value < selMin))       // scalar signal lower bound
+    if (fltHasMin && (!event.hasValue || event.value < fltMin))       // scalar signal lower bound
         return false;
-    if (selHasMax && (!event.hasValue || event.value > selMax))       // scalar signal upper bound
+    if (fltHasMax && (!event.hasValue || event.value > fltMax))       // scalar signal upper bound
         return false;
-    if (selHasValue && (!event.hasValue || event.value != selValue))  // scalar signal value
+    if (fltHasValue && (!event.hasValue || event.value != fltValue))  // scalar signal value
         return false;
     // A packet-field expression needs a packet. A predicate does not: it receives the whole
     // context, so it can judge a scalar signal's value, the time, or a capture. Refusing it
@@ -185,9 +185,9 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
     // matched, so a guard over a scalar held over nothing and the check could not fail.
     // The QUIC pass reported this from the other side, when a running total could not be
     // accumulated on the signal side.
-    if (event.packet == nullptr && !selExpr.empty())
+    if (event.packet == nullptr && !fltExpr.empty())
         return false;
-    if (!selExpr.empty() && !matchesExpression(context))
+    if (!fltExpr.empty() && !matchesExpression(context))
         return false;
     if (predicate) {
         // Same robustness: a predicate that peeks a chunk absent from this packet
@@ -208,10 +208,10 @@ bool EventPattern::matchesExpression(const MatchContext& context) const
     const Packet *packet = context.event.packet;
 
     // Static expression (no {capture} placeholders): compile once and cache.
-    if (selExpr.find('{') == std::string::npos) {
+    if (fltExpr.find('{') == std::string::npos) {
         if (!filter) {
             filter = std::make_shared<PacketFilter>();
-            filter->setExpression(selExpr.c_str()); // throws on a malformed expression
+            filter->setExpression(fltExpr.c_str()); // throws on a malformed expression
         }
         // A content expression referencing a protocol absent from this packet (e.g.
         // `udp.*` on an ARP frame) throws during evaluation; that is simply a non-match.
@@ -225,7 +225,7 @@ bool EventPattern::matchesExpression(const MatchContext& context) const
     }
 
     // Dynamic expression: substitute {name} with captured values, then compile fresh.
-    std::string expression = selExpr;
+    std::string expression = fltExpr;
     for (auto& capture : context.captures) {
         std::string placeholder = "{" + capture.first + "}";
         // Only convert a capture this expression names. Converting every stored capture
@@ -252,22 +252,22 @@ bool EventPattern::matchesExpression(const MatchContext& context) const
 std::string EventPattern::str() const
 {
     std::ostringstream os;
-    os << "on " << (selNode.empty() ? "*" : selNode);
-    if (!selSource.empty()) os << " source=" << selSource;
-    if (!selSignal.empty()) os << " signal=" << selSignal;
-    if (!selProtocol.empty()) os << " protocol=" << selProtocol;
-    if (!selDispatch.empty()) os << " dispatch=" << selDispatch;
-    if (selHasDirection) os << " dir=" << (selDirection == 0 ? "IN" : "OUT");
-    if (!selIface.empty()) os << " iface=" << selIface;
-    if (!selExpr.empty()) os << " expr='" << selExpr << "'";
+    os << "on " << (fltNode.empty() ? "*" : fltNode);
+    if (!fltSource.empty()) os << " source=" << fltSource;
+    if (!fltSignal.empty()) os << " signal=" << fltSignal;
+    if (!fltProtocol.empty()) os << " protocol=" << fltProtocol;
+    if (!fltDispatch.empty()) os << " dispatch=" << fltDispatch;
+    if (fltHasDirection) os << " dir=" << (fltDirection == 0 ? "IN" : "OUT");
+    if (!fltIface.empty()) os << " iface=" << fltIface;
+    if (!fltExpr.empty()) os << " expr='" << fltExpr << "'";
     if (predicate) os << " predicate";
-    if (selHasValue) os << " value=" << selValue;
-    if (selHasMin) os << " value>=" << selMin;
-    if (selHasMax) os << " value<=" << selMax;
+    if (fltHasValue) os << " value=" << fltValue;
+    if (fltHasMin) os << " value>=" << fltMin;
+    if (fltHasMax) os << " value<=" << fltMax;
     if (fltOccurrence == 1) os << " first";
     else if (fltOccurrence > 1) os << " nth=" << fltOccurrence;
-    if (selHasNotBefore) os << " notBefore=" << selNotBefore;
-    if (selHasWithin) os << " within=" << selWithin;
+    if (fltHasNotBefore) os << " notBefore=" << fltNotBefore;
+    if (fltHasWithin) os << " within=" << fltWithin;
     // The assertion half is rendered apart from the filter half, because the two say
     // different things: everything before the arrow picked the event, everything after it
     // had to hold on the event that was picked.

@@ -29,10 +29,10 @@ Implementation notes:
   framework outright -- confirmed empirically: "Unsupported signal data type uintval_t for
   signal totalRcvAppData_cid=0", because ProtocolTester::receiveSignal only implements the
   intval_t overload and totalReceivedDataBytes is unsigned long, not long. (Also,
-  EventPattern::selectorMatches used to refuse a predicate on any scalar (non-packet)
-  event -- `if (event.packet == nullptr && (!selExpr.empty() || predicate)) return false;` --
-  so even a type-safe cumulative signal could only ever be matched by exact value via .filterValue(),
-  never accumulated in a lambda.) The nearest faithful, actually-observable proxy is therefore
+  EventPattern used to refuse a predicate on any scalar (non-packet) event, so even a
+  type-safe cumulative signal could only ever be matched by exact value via .filterValue(),
+  never accumulated in a lambda. It does not any more: a predicate needs no packet, and only
+  a packet-field expression does.) The nearest faithful, actually-observable proxy is therefore
   the transport-level delivery this application-level number is derived from: the STREAM data
   arriving at host B's UDP layer. Because the mockup path has no loss or reordering, the
   frames arrive in send order, so the one whose offset+length reaches exactly 4000 is the
