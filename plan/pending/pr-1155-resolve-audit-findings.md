@@ -274,9 +274,27 @@ implementations `TcpBaseAlg` and `DumbTcp` owe it.
 
 `check-series-builds.sh` then measured the rest. Commits 10 and 11 build; 12 fails on
 `TcpSackRexmitQueue::markHeadLost`, 13 on `TcpAlgorithm::calculateSsthreshForFastRecovery` and
-`TcpSackRexmitQueue::updateLost`, and 14 onward cascade. **Every one is the same move: a method to
-its first user.** The work is convergent and it is long, and each step now has a build to confirm
-it.
+`TcpSackRexmitQueue::updateLost`, and 14 onward cascade.
+
+**Continuing the same move failed, and the failure is the answer.** Moving those three methods to
+their first users was tried on 2026-09-14 and reverted. It did not converge:
+
+- `markHeadLost` and `updateLost` are **`protected` at the commit that declares them** and public
+  later, so moving the declaration text also moves its access, and commit 12 traded *"no member
+  named `markHeadLost`"* for *"`markHeadLost` is a protected member"*.
+- `markHeadLost`'s body reads `Region::lost`, a struct field added later still, so the method
+  drags a field, which drags whatever the field's users need.
+- Commit 13 then wanted `getRegion` as well, and commit 17 revealed `override` markers on three
+  methods that are not yet virtual.
+
+**A method does not move alone.** Its dependency closure at commit 12 reaches well into commits 13
+to 34, so each move opens two more. That is not a patch that is merely long; it is the re-cut
+wearing a disguise, and doing it one symbol at a time hides the design decisions inside mechanical
+edits.
+
+**So the loop stops here, at commits 10 and 11 building.** The rest belongs to step 1i, where the
+unit of work is a feature rather than a symbol, and where somebody decides what `TcpSackRexmitQueue`
+should expose and when — which is the question `markHeadLost` being protected was really asking.
 
 This is the same defect one layer deeper, and it is the point at which patching stops paying.
 Each shape repaired reveals the next, because they are all the one fault: **phase B was written
