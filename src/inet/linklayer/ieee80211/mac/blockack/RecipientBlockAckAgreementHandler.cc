@@ -41,8 +41,8 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
     if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO + Implicit Block Ack
         Tid tid = qosHeader->getTid();
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
-        auto agreement = getAgreement(tid, originatorAddr);
-        if (agreement && !agreement->isInactivityExpired()) {
+        auto agreement = getActiveAgreement(tid, originatorAddr);
+        if (agreement != nullptr) {
             agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
         }
@@ -53,20 +53,21 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
 // also resets the recipient inactivity timer.
 void RecipientBlockAckAgreementHandler::blockAckReqReceived(const Ptr<const Ieee80211BasicBlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback)
 {
-    auto agreement = getAgreement(blockAckReq->getTidInfo(), blockAckReq->getTransmitterAddress());
-    if (agreement != nullptr && !agreement->isInactivityExpired()) {
+    auto agreement = getActiveAgreement(blockAckReq->getTidInfo(), blockAckReq->getTransmitterAddress());
+    if (agreement != nullptr) {
         agreement->calculateExpirationTime();
         scheduleInactivityTimer(callback);
     }
 }
 
-void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
+bool RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
 {
     // When a timeout of BlockAckTimeout is detected, the STA shall send a DELBA frame to the
     // peer STA with the Reason Code field set to TIMEOUT and shall issue a MLME-DELBA.indication
     // primitive with the ReasonCode parameter having a value of TIMEOUT.
     // The procedure is illustrated in IEEE 802.11-2024, Figure 11-34.
     simtime_t now = simTime();
+    bool expired = false;
     // Queue callbacks can erase the current agreement, a sibling, or replace
     // either generation. Keep only value identities across outward calls.
     std::vector<std::pair<std::pair<MacAddress, Tid>, uint64_t>> expiredAgreements;
@@ -84,12 +85,14 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
             agreement->isInactivityExpired() || agreement->getExpirationTime() > now)
             continue;
         agreement->markInactivityExpired();
+        expired = true;
         const auto& delba = buildDelba(receiverAddr, tid, 39);
         auto delbaPacket = new Packet("Delba", delba);
         delbaPacket->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(generationId);
         procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT
     }
     scheduleInactivityTimer(agreementHandlerCallback);
+    return expired;
 }
 
 //
@@ -150,6 +153,12 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid 
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
     return it != blockAckAgreements.end() ? it->second : nullptr;
+}
+
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getActiveAgreement(Tid tid, MacAddress originatorAddr)
+{
+    auto agreement = getAgreement(tid, originatorAddr);
+    return agreement != nullptr && !agreement->isInactivityExpired() ? agreement : nullptr;
 }
 
 RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)

@@ -128,6 +128,20 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     take(dataPacket);
     expireReceiveLifetime();
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
+    RecipientBlockAckAgreement *agreement = nullptr;
+    if (dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) {
+        if (blockAckAgreementHandler != nullptr)
+            agreement = blockAckAgreementHandler->getActiveAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress());
+        if (agreement == nullptr) {
+            EV_INFO << "Dropping Block Ack policy data without an active Block Ack agreement.\n";
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, dataPacket, &details);
+            delete dataPacket;
+            scheduleReceiveLifetimeTimer();
+            return std::vector<Packet *>();
+        }
+    }
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
         EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
         PacketDropDetails details;
@@ -142,7 +156,8 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     if (blockAckReordering && blockAckAgreementHandler) {
         Tid tid = dataHeader->getTid();
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();
-        RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
+        if (agreement == nullptr)
+            agreement = blockAckAgreementHandler->getActiveAgreement(tid, originatorAddr);
         if (agreement) {
             auto processingResult = blockAckReordering->processReceivedQoSFrameWithResult(agreement, dataPacket, dataHeader);
             frames = processingResult.frames;
@@ -239,7 +254,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         if (blockAckReordering) {
             Tid tid = blockAckReq->getTidInfo();
             MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
-            RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
+            RecipientBlockAckAgreement *agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(tid, originatorAddr);
             if (agreement)
                 frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReq);
             else {

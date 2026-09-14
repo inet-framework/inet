@@ -38,6 +38,11 @@ class ExpiryCallback : public IProcedureCallback, public IBlockAckAgreementHandl
     virtual void scheduleAddbaResponseTimer(simtime_t) override {}
     virtual void cancelAddbaTransaction(uint64_t, Packet *) override {}
     virtual void cancelBlockAckTeardown(bool, MacAddress, Tid, uint64_t, Packet *) override {}
+    virtual bool releaseBlockAckAgreementFrames(MacAddress address, Tid tid) override {
+        if (action == 3 && tid == 0)
+            handler->install(address, tid, 100, SimTime(10, SIMTIME_MS));
+        return false;
+    }
     virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
         auto delba = dynamicPtrCast<const Ieee80211Delba>(header);
         ASSERT(delba != nullptr);
@@ -72,18 +77,16 @@ for (int action = 0; action < 3; action++) {
     handler.install(callback.peer, 2, 3, SimTime(20, SIMTIME_MS));
     handler.install(callback.peer, 3, 4, 0);
     wait(SimTime(2, SIMTIME_MS));
-    handler.blockAckAgreementExpired(&callback, &callback);
+    ASSERT(handler.blockAckAgreementExpired(&callback, &callback));
     ASSERT(callback.sent == (action == 0 ? 2 : 1));
     ASSERT(handler.contains(callback.peer, 0) == (action >= 2));
     ASSERT(handler.contains(callback.peer, 1) == (action == 2));
     ASSERT(handler.contains(callback.peer, 2));
     ASSERT(handler.contains(callback.peer, 3));
     ASSERT(callback.deadline == start + SimTime(action >= 2 ? 12 : 20, SIMTIME_MS));
-    handler.blockAckAgreementExpired(&callback, &callback);
-    ASSERT(callback.sent == (action == 0 ? 2 : 1));
+    ASSERT(!handler.blockAckAgreementExpired(&callback, &callback));
     for (int tid = 0; tid < 4; tid++)
         handler.erase(callback.peer, tid);
-    handler.blockAckAgreementExpired(&callback, &callback);
-    ASSERT(callback.sent == (action == 0 ? 2 : 1));
+    ASSERT(!handler.blockAckAgreementExpired(&callback, &callback));
     ASSERT(callback.deadline == SIMTIME_MAX);
 }
