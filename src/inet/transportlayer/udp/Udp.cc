@@ -926,7 +926,6 @@ void Udp::destroySocket(int sockId)
 void Udp::processUDPPacket(Packet *udpPacket)
 {
     ASSERT(udpPacket->getControlInfo() == nullptr);
-    emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
     udpPacket->removeTag<PacketProtocolTag>();

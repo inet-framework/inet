@@ -51,6 +51,19 @@ Notable backward incompatible changes are the following:
    Noncompliant layered OFDM retains its configured mode and RATE-0 placeholder;
    SIGNAL parity is checked in both compliant and noncompliant operation.
 
+3. UDP no longer reports a received datagram twice
+
+   The Udp module emitted packetReceivedFromLower a second time for every datagram
+   it received from the network layer. Its base class, LayeredProtocolBase, already
+   emits the signal before it calls handleLowerPacket, and Udp emitted it again in
+   processUDPPacket. Every other protocol module emits it once.
+
+   No statistic changes, because Udp.ned declares the signal and sources no
+   statistic from it. Code that subscribes to the signal on a UDP module is
+   affected: it now runs once per datagram instead of twice, so a listener that
+   counted arrivals or summed bytes reported twice the true value and now reports
+   the true one.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

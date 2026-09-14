@@ -1,0 +1,84 @@
+%description:
+
+Protocol Test Framework self test -- a cardinality at a receiving module.
+
+Every other count self test measures at the sender. This one measures at the receiver,
+because the two sides used to disagree. `host1` sends five datagrams and `host2` receives
+five, so `exactlyTimes(5, ...)` on `host2.udp` must hold.
+
+It did not. `Udp` raised `packetReceivedFromLower` twice for one datagram: its base class
+`LayeredProtocolBase::handleLowerMessage` emitted the signal and then called
+`handleLowerPacket`, which reached `processUDPPacket`, which emitted it again. Five
+datagrams counted as ten, so this check failed with "more than 5 occurrence(s)" and
+`exactlyTimes(10, ...)` passed. No statistic doubled, because nothing in `Udp.ned` sources
+that signal, so only a listener saw it. The duplicate emit is gone from `Udp.cc`, and this
+test is what holds it gone.
+
+A count is the only step that sees the difference. A `never` fails on one match or on two,
+and an open-world `once` resolves on the first and ignores the rest, which is why the whole
+suite passed over the fault.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("count_at_receiver")
+        .exactlyTimes(5, on("host2.udp").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("a datagram arriving at host2's UDP")
+                  .within(0.95));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "count_at_receiver compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Two hosts on one link -- note: NO tester (attached at runtime).
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+# Five datagrams: 0.1s, 0.3s, 0.5s, 0.7s, 0.9s.
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].localPort = 4000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST count_at_receiver: PASS
