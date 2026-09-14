@@ -48,6 +48,31 @@ matches the discard by size instead. Any observer that filters UDP drops by fiel
 affected, not only this test. IPv4's drop paths keep the tag, which is why the IPv4 checks
 could filter their discards by field.
 
+### A received datagram raises the same signal twice
+
+`Udp` inherits `LayeredProtocolBase::handleLowerMessage`, which emits
+`packetReceivedFromLower` and then calls `handleLowerPacket`
+([LayeredProtocolBase.cc:35-43](../../../../../src/inet/common/LayeredProtocolBase.cc#L35-L43)).
+`Udp::handleLowerPacket` calls `processUDPPacket`, which emits the same signal again on the
+same packet ([Udp.cc:929](../../../../../src/inet/transportlayer/udp/Udp.cc#L929)). Every
+datagram that arrives from the network layer therefore raises `packetReceivedFromLower`
+twice, at the same simulation time, with the same packet id. The duplicate is old: the base
+class gained its emit in 2017 and the one in `Udp` predates the 2019 commit that moved it.
+
+No recorded result doubles. `Udp.ned` declares the signal but sources no `@statistic` from
+it, so only a listener sees the double. A count of arrivals at a UDP module reports twice
+the true number. That is a check which reads wrong, not a check which cannot fail, but it is
+just as misleading.
+
+UDP is alone in this. `Ipv4` and `Ipv6` override `handleMessageWhenUp`, so the base class
+never runs for them and their own emit is the only one. `Tcp` does not emit the signal
+itself and gets exactly one from the base.
+
+To count arrivals, observe the receiver's network layer instead. `packetSentToUpper` at
+`<host>.ipv4.ip` still carries the UDP header, so `udp.destPort` filters on it, and it is
+emitted one time per delivered datagram. A probe of five datagrams counts five there, and
+both four and six fail.
+
 ### The model works from RFC 768 and never names it
 
 `Udp.ned` says "as defined by the RFC" twice and never gives a number, while
