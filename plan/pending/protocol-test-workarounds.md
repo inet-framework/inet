@@ -86,9 +86,20 @@ tests use it.
 
 Split into two named guards, a failure names the rule that broke, which today it cannot.
 
-- [ ] Four IPv4 tests and five UDP tests.
-- [ ] Two guards each, with a describe that names the rule.
-- [ ] `silenceBroken` goes from both helper headers once nothing calls it.
+- [x] Four IPv4 tests and four UDP tests, seven of them split in two and one in three.
+- [x] Each guard names its own rule, so a failure says which one broke.
+- [x] `silenceBroken` is gone from both helper headers.
+- [x] The engine had to learn to wait for an outstanding guard. See below.
+
+### The engine had to learn to wait
+
+Writing this group found a gap in `meanwhile` itself. When the ordered steps ran out, the
+engine decided PASS at once, **even with a guard still open**. Every test of this group ends
+with its guards, so each would have passed without the guard looking at anything: the exact
+shape of a check that cannot fail, in the feature built to prevent them.
+
+`enterStep` now waits while a guard is outstanding, and the last guard to resolve ends the
+program. Without that, group 3 would have turned nine honest checks into nine vacuous ones.
 
 ## Not in this plan
 

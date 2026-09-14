@@ -200,6 +200,10 @@ void ProtocolTester::handleMessage(cMessage *msg)
             resolveGuard(guard);
             guard.count = -1; // resolved
             delete msg;
+            // The ordered steps may have finished while this guard was still open. When it
+            // was the last one, the program is done now.
+            if (!decided && currentStep >= program->steps.size() && !guardsOutstanding())
+                decide(true, "all steps matched");
             return;
         }
     }
@@ -457,6 +461,12 @@ void ProtocolTester::logEvent(const PacketEvent& event)
 void ProtocolTester::enterStep()
 {
     if (currentStep >= program->steps.size()) {
+        // A guard started by meanwhile(...) may still have a window to serve. Deciding here
+        // would end the run before it, so a program whose last step is a guard would always
+        // pass without the guard ever looking at anything. Wait; the guard's own timer
+        // decides when nothing is left.
+        if (guardsOutstanding())
+            return;
         decide(true, "all steps matched");
         return;
     }
@@ -733,6 +743,14 @@ void ProtocolTester::offerToGuards(const PacketEvent& event)
             return;
         }
     }
+}
+
+bool ProtocolTester::guardsOutstanding() const
+{
+    for (auto& guard : guards)
+        if (guard.timer != nullptr)
+            return true;
+    return false;
 }
 
 void ProtocolTester::resolveGuard(Guard& guard)

@@ -44,14 +44,19 @@ Define_ProtocolTestProgram()
                   .within(0.1))
         // Expected observations 3 and 4: nothing goes up to UDP, and neither a forwarded copy nor
         // an ICMP message leaves host B.
-        .never(on("hostB")
-                  .filterEvent([](const MatchContext& c) {
-                      return silenceBroken(c.event, "hostB", "udp.destPort == 5000")
-                          || (c.event.kind == EventKind::SentToLower && c.event.sourcePath == "hostB.eth[0].mac"
-                              && matchesExpression(c.event.packet, ("ipv4.identification == " + std::to_string(c.get("id").intValue())).c_str()));
-                  })
-                  .describe("the datagram at host B's UDP, a forwarded copy of it, or any ICMP message from host B")
-                  .within(0.2));
+        // Three rules, each its own guard, so a failure names the one that broke.
+        .meanwhile(never(on("hostB.udp").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("the datagram reaching host B's UDP")
+                  .within(0.2)))
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("ipv4.identification == {id}")
+                  .describe("a forwarded copy of the datagram leaving host B")
+                  .within(0.2)))
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("icmpv4.type >= 0")
+                  .describe("any ICMP message from host B")
+                  .within(0.2)));
 }
 
 %activity:

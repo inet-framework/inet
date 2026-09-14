@@ -226,22 +226,6 @@ inline bool matchesExpression(const Packet *packet, const char *expression)
     }
 }
 
-// The two halves of a silent discard at a host, as one predicate for a single absence watch
-// over the whole node: the datagram reaches the host's UDP (kind ReceivedFromLower at
-// <node>.udp, content matching udpExpression), or an ICMP message leaves the host (kind
-// SentToLower at the host's interface, content matching icmpv4). One watch covers both,
-// because two consecutive watches cannot cover the same window.
-inline bool silenceBroken(const PacketEvent& e, const char *node, const char *udpExpression, EventKind udpKind = EventKind::ReceivedFromLower)
-{
-    std::string udpPath = std::string(node) + ".udp";
-    std::string macPath = std::string(node) + ".eth[0].mac";
-    if (e.kind == udpKind && e.sourcePath == udpPath)
-        return udpExpression == nullptr || matchesExpression(e.packet, udpExpression);
-    if (e.kind == EventKind::SentToLower && e.sourcePath == macPath)
-        return matchesExpression(e.packet, "icmpv4.type >= 0");
-    return false;
-}
-
 // The addresses of every IPv4 interface of a network node, as text. The rule that a host
 // sends only its own address needs the list of its own addresses, and only the node knows it.
 inline std::vector<std::string> ipv4AddressesOf(cModule *node)

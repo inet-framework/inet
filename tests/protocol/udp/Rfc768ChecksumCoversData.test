@@ -59,10 +59,13 @@ Define_ProtocolTestProgram()
                   .describe("host B's UDP discards the datagram whose data no longer matches the checksum")
                   .within(0.1))
         // Expected observation 4: nothing goes up to the program and no message leaves host B.
-        .never(on("hostB")
-                  .filterEvent([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
-                  .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
-                  .within(0.2));
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("data handed up from host B's UDP toward the program")
+                  .within(0.2)))
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("icmpv4.type >= 0")
+                  .describe("any ICMP message from host B")
+                  .within(0.2)));
 }
 
 %activity:

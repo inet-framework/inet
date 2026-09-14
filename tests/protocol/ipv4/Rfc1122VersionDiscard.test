@@ -44,11 +44,16 @@ Define_ProtocolTestProgram()
                   .filterPacket("ipv4.identification == {id}")
                   .describe("host B's discard of the version-5 datagram")
                   .within(0.1))
-        // Expected observations 3 and 4: nothing goes up to UDP and no ICMP message leaves host B.
-        .never(on("hostB")
-                  .filterEvent([](const MatchContext& c) { return silenceBroken(c.event, "hostB", "udp.destPort == 5000"); })
-                  .describe("the datagram at host B's UDP, or any ICMP message from host B")
-                  .within(0.2));
+        // Expected observation 3: nothing goes up to UDP.
+        .meanwhile(never(on("hostB.udp").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("the datagram reaching host B's UDP")
+                  .within(0.2)))
+        // Expected observation 4: no ICMP message leaves host B.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("icmpv4.type >= 0")
+                  .describe("any ICMP message from host B")
+                  .within(0.2)));
 }
 
 %activity:

@@ -98,6 +98,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     void startGuard(size_t stepIndex);             // begin a meanwhile(...) step
     void offerToGuards(const PacketEvent& event);  // every running guard sees the event
     void resolveGuard(Guard& guard);               // its window closed: judge it
+    bool guardsOutstanding() const;                // a meanwhile(...) step is still running
     void armDeadline(simtime_t window);
     void cancelDeadline();
     void decide(bool pass, const std::string& reason);
