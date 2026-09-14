@@ -50,14 +50,14 @@ StatisticVisualizerBase::StatisticVisualization *StatisticOsgVisualizer::createS
     return new StatisticOsgVisualization(networkNodeVisualization, geode, source->getId(), signal, getUnit(source));
 }
 
-void StatisticOsgVisualizer::addStatisticVisualization(const StatisticVisualization *statisticVisualization)
+void StatisticOsgVisualizer::addStatisticVisualization(StatisticVisualization *statisticVisualization)
 {
     StatisticVisualizerBase::addStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);
     statisticOsgVisualization->networkNodeVisualization->addAnnotation(statisticOsgVisualization->node, osg::Vec3d(100, 18, 0), 1.0);
 }
 
-void StatisticOsgVisualizer::removeStatisticVisualization(const StatisticVisualization *statisticVisualization)
+void StatisticOsgVisualizer::removeStatisticVisualization(StatisticVisualization *statisticVisualization)
 {
     StatisticVisualizerBase::removeStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);
@@ -65,7 +65,7 @@ void StatisticOsgVisualizer::removeStatisticVisualization(const StatisticVisuali
         statisticOsgVisualization->networkNodeVisualization->removeAnnotation(statisticOsgVisualization->node);
 }
 
-void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)
+void StatisticOsgVisualizer::refreshStatisticVisualization(StatisticVisualization *statisticVisualization)
 {
     StatisticVisualizerBase::refreshStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);

@@ -38,9 +38,9 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
     virtual void initialize(int stage) override;
 
     virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override;
-    virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
-    virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
-    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization) override;
 };
 
 } // namespace visualizer

@@ -1,0 +1,78 @@
+%description:
+Tests that grouping several statistics onto a figure that can only display one value
+is rejected, rather than silently showing one of them.
+
+The scenario is the one of StatisticVisualizerItems_1 -- three sink applications
+whose packet counts are grouped onto one figure of the receiver node -- but the
+configured figure is a gauge, which has a single unlabelled item. The visualizer must
+stop with an error as soon as the second item appears.
+
+This also proves that the visualizer really runs under Cmdenv's fake GUI: without the
+GUI the whole visualizer is inactive, and this run would pass silently.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
+network StatisticVisualizerItemsTest
+{
+    submodules:
+        visualizer: IntegratedCanvasVisualizer;
+        configurator: Ipv4NetworkConfigurator;
+        server: StandardHost;
+        switch_: EthernetSwitch;
+        receiver: StandardHost;
+    connections:
+        server.ethg++ <--> Eth100M <--> switch_.ethg++;
+        switch_.ethg++ <--> Eth100M <--> receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = StatisticVisualizerItemsTest
+ned-path = .;../../../../src
+sim-time-limit = 3s
+cmdenv-express-mode = true
+**.vector-recording = false
+
+# the visualizer is inactive without a GUI; the fake GUI also drives refreshDisplay()
+cmdenv-fake-gui = true
+cmdenv-fake-gui-before-event-probability = 0.1
+cmdenv-fake-gui-after-event-probability = 0.1
+
+*.server.numApps = 3
+*.server.app[*].typename = "UdpBasicApp"
+*.server.app[*].destAddresses = "receiver"
+*.server.app[*].messageLength = 1000B
+*.server.app[0].destPort = 1000
+*.server.app[1].destPort = 1001
+*.server.app[2].destPort = 1002
+*.server.app[0].sendInterval = 10ms
+*.server.app[1].sendInterval = 25ms
+*.server.app[2].sendInterval = 60ms
+
+*.receiver.numApps = 3
+*.receiver.app[*].typename = "UdpSink"
+*.receiver.app[0].localPort = 1000
+*.receiver.app[1].localPort = 1001
+*.receiver.app[2].localPort = 1002
+
+*.visualizer.statisticVisualizer.displayStatistics = true
+*.visualizer.statisticVisualizer.groupBy = "networkNode"
+*.visualizer.statisticVisualizer.signalName = "packetReceived"
+*.visualizer.statisticVisualizer.sourceFilter = "*.receiver.app[*]"
+*.visualizer.statisticVisualizer.statisticExpression = "count"
+*.visualizer.statisticVisualizer.figure = {type: "gauge", minValue: 0, maxValue: 1000}
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+because only a bar chart displays a changing set of labelled items

@@ -18,8 +18,12 @@ import inet.visualizer.contract.IStatisticVisualizer;
 // filled white rectangle.
 //
 // The statistic value is displayed with a label by default. Alternatively, any
-// indicator figure can be used by configuring the property parameters and
-// providing a figure template along the module path of the statistic visualizer.
+// indicator figure can display it, either configured in the `figure` parameter,
+// or by providing a figure template along the module path of the statistic
+// visualizer and referring to it with the property parameters. Displaying
+// several values at once, as configured by the `splitBy` and `groupBy` parameters
+// of the base module, needs a bar chart: it is the only figure so far that displays
+// a changing set of labelled items.
 //
 // @see ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //
@@ -27,7 +31,16 @@ simple StatisticCanvasVisualizer extends StatisticVisualizerBase like IStatistic
 {
     parameters:
         double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
-        string propertyName = default(""); // Optional property name of a figure template along the module path of the visualizer
+
+        // The figure that displays the value(s), given as the attributes of a figure the
+        // same way as in an @figure property, e.g. {type: "gauge", minValue: 0, maxValue:
+        // 100, tickSize: 20}. The type selects the figure class registered with
+        // Register_Figure(), the other attributes are the parameters of that particular
+        // figure. Empty means a text label, or a bar chart ({type: "barChart"}) if
+        // `groupBy` is not "none".
+        object figure = default({});
+
+        string propertyName = default(""); // Optional property name of a figure template along the module path of the visualizer, an alternative to the figure parameter, taking precedence over it
         string propertyIndex = default(""); // Optional property index of a figure template along the module path of the visualizer
         @class(StatisticCanvasVisualizer);
 }

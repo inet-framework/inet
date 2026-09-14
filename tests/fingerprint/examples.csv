@@ -542,6 +542,10 @@
 
 /examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             164c-e87d/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;7af0-949a/tyf, PASS, Ipv4
 
+/examples/visualizer/statisticbars/, -f omnetpp.ini -c Packets -r 0,               10s,             adc0-d762/tplx;fb6f-4f84/~tNl;bb53-de23/~tND;6e17-9a3c/tyf, PASS, EthernetMac Ipv4
+/examples/visualizer/statisticbars/, -f omnetpp.ini -c Flow -r 0,                  10s,             c8a5-c66d/tplx;fcf4-b191/~tNl;d443-d671/~tND;1d81-6e55/tyf, PASS, EthernetMac Ipv4
+/examples/visualizer/statisticbars/, -f omnetpp.ini -c Gauge -r 0,                 10s,             adc0-d762/tplx;fb6f-4f84/~tNl;bb53-de23/~tND;a7b4-3e59/tyf, PASS, EthernetMac Ipv4
+
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            ca5a-018c/tplx;8bed-195e/~tNl;7ec2-f44e/tyf, PASS, Ipv4
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2641-c26d/tplx;be78-aee4/~tNl;c458-d925/tyf, PASS, Ipv4
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            aa4d-f551/tplx;2ba1-3f1a/~tNl;ff77-ad0f/tyf, PASS, Ipv4
