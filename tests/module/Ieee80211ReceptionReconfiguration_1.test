@@ -1,0 +1,223 @@
+%description:
+Reconfigure during a real HT reception through each IEEE 802.11 radio setter.
+The radio immediately stops reporting decoding, retains arrival timers until
+normal cleanup, drops the interrupted packet and receives the next packet.
+Exercise whole-signal and separate-part reception with seed 0.
+
+%file: ReceptionReconfiguration.cc
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+class ReconfigurationRadio : public Ieee80211Radio
+{
+  public:
+    bool hasActiveReception() const { return receptionTimer != nullptr; }
+    size_t getArrivalTimerCount() const { return allReceptionTimers.size(); }
+    void reconfigure(int operation)
+    {
+        Enter_Method_Silent();
+        const auto *legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
+        switch (operation) {
+            case 0: setModeSet(legacy); break;
+            case 1: setModeSetAndMode(legacy, legacy->getMode(Mbps(6))); break;
+            case 2: setMode(legacy->getMode(Mbps(6))); break;
+            case 3: setBand(getChannel()->getBand()); break;
+            case 4: {
+                setChannel(new Ieee80211Channel(getChannel()->getBand(), 11));
+                break;
+            }
+            case 5: setChannelNumber(11); break;
+            default: throw cRuntimeError("Unknown operation");
+        }
+    }
+    void prepareNextReception()
+    {
+        Enter_Method_Silent();
+        // Reusing the radio-owned channel must also preserve distinct PHY owners.
+        setChannel(getChannel());
+        setModeSet(Ieee80211ModeSet::getModeSet("g(mixed)"));
+        setChannelNumber(6);
+    }
+};
+Define_Module(ReconfigurationRadio);
+
+class ReceptionReconfigurationTest : public cSimpleModule, public cListener
+{
+    int delivered = 0;
+    int stateNotifications = 0;
+    int partNotifications = 0;
+    int configurationNotifications = 0;
+    bool switching = false;
+
+    ReconfigurationRadio *receiverRadio() const
+    {
+        return check_and_cast<ReconfigurationRadio *>(getParentModule()->getSubmodule("rx"));
+    }
+    void checkAborted() const
+    {
+        auto radio = receiverRadio();
+        ASSERT(!radio->hasActiveReception());
+        ASSERT(radio->getReceptionState() != IRadio::RECEPTION_STATE_RECEIVING);
+        ASSERT(radio->getReceivedSignalPart() == IRadioSignal::SIGNAL_PART_NONE);
+        ASSERT(radio->getArrivalTimerCount() == 1);
+    }
+    void transmit(bool first)
+    {
+        auto packet = new Packet(first ? "interrupted" : "subsequent");
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(1500)));
+        const auto *catalog = Ieee80211ModeSet::getModeSet(first ? "n(mixed-2.4Ghz)" : "g(mixed)");
+        const auto *mode = first ? catalog->getMode(Mbps(6.5), MHz(20), 1, 800e-9) : catalog->getMode(Mbps(6));
+        packet->addTag<Ieee80211ModeReq>()->setMode(mode);
+        send(packet, "out");
+    }
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("first", 0));
+        scheduleAt(SimTime(1100, SIMTIME_US), new cMessage("change", 1));
+        scheduleAt(SimTime(4, SIMTIME_MS), new cMessage("second", 2));
+        scheduleAt(SimTime(7, SIMTIME_MS), new cMessage("check", 3));
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t signal, intval_t, cObject *) override
+    {
+        if (!switching)
+            return;
+        if (signal == IRadio::receptionStateChangedSignal)
+            stateNotifications++;
+        else if (signal == IRadio::receivedSignalPartChangedSignal)
+            partNotifications++;
+        else {
+            checkAborted();
+            configurationNotifications++;
+        }
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override
+    {
+        if (switching) {
+            checkAborted();
+            configurationNotifications++;
+        }
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (!message->isSelfMessage()) {
+            auto packet = check_and_cast<Packet *>(message);
+            ASSERT(!strcmp(packet->getName(), "subsequent"));
+            ASSERT(!packet->hasBitError());
+            delivered++;
+            delete packet;
+            return;
+        }
+        int phase = message->getKind();
+        delete message;
+        auto radio = receiverRadio();
+        if (phase == 0) {
+            check_and_cast<Ieee80211Radio *>(getParentModule()->getSubmodule("tx"))->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            for (auto signal : {IRadio::receptionStateChangedSignal, IRadio::receivedSignalPartChangedSignal,
+                    IRadio::listeningChangedSignal, Ieee80211Radio::radioChannelChangedSignal, modesetChangedSignal})
+                radio->subscribe(signal, this);
+            transmit(true);
+        }
+        else if (phase == 1) {
+            ASSERT(radio->hasActiveReception());
+            ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING);
+            ASSERT(radio->getReceivedSignalPart() == (radio->par("separateReceptionParts").boolValue() ?
+                    IRadioSignal::SIGNAL_PART_DATA : IRadioSignal::SIGNAL_PART_WHOLE));
+            switching = true;
+            radio->reconfigure(par("operation"));
+            switching = false;
+            checkAborted();
+            ASSERT(stateNotifications == 1);
+            ASSERT(partNotifications == 1);
+            ASSERT(configurationNotifications >= 1);
+        }
+        else if (phase == 2) {
+            ASSERT(radio->getArrivalTimerCount() == 0);
+            ASSERT(delivered == 0);
+            radio->prepareNextReception();
+            transmit(false);
+        }
+        else {
+            ASSERT(delivered == 1);
+            ASSERT(!radio->hasActiveReception());
+            ASSERT(radio->getArrivalTimerCount() == 0);
+            ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
+            for (auto signal : {IRadio::receptionStateChangedSignal, IRadio::receivedSignalPartChangedSignal,
+                    IRadio::listeningChangedSignal, Ieee80211Radio::radioChannelChangedSignal, modesetChangedSignal})
+                radio->unsubscribe(signal, this);
+            std::cout << "Reception abort, timer cleanup and subsequent delivery verified.\n";
+            endSimulation();
+        }
+    }
+};
+Define_Module(ReceptionReconfigurationTest);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module ReconfigurationRadio extends Ieee80211ScalarRadio
+{
+    parameters:
+        @class(::ReconfigurationRadio);
+}
+
+simple ReceptionReconfigurationTest extends SimpleModule
+{
+    parameters:
+        int operation;
+        @class(::ReceptionReconfigurationTest);
+    gates:
+        input in;
+        output out;
+}
+
+network ReceptionNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        tx: Ieee80211ScalarRadio;
+        rx: ReconfigurationRadio;
+        test: ReceptionReconfigurationTest;
+    connections allowunconnected:
+        test.out --> tx.upperLayerIn;
+        rx.upperLayerOut --> test.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ReceptionNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 8ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.test.operation = ${operation=0,1,2,3,4,5}
+*.rx.separateReceptionParts = ${parts=false,true}
+*.tx.separateTransmissionParts = ${parts}
+*.tx.initialRadioMode = "off"
+*.rx.initialRadioMode = "off"
+*.radioMedium.listeningFilter = true
+*.tx.opMode = "n(mixed-2.4Ghz)"
+*.rx.opMode = "n(mixed-2.4Ghz)"
+**.channelNumber = 6
+**.bandName = "2.4 GHz"
+**.transmitter.bitrate = 6Mbps
+**.transmitter.power = 100mW
+**.antenna.mobilityModule = ""
+**.antenna.mobility.typename = "StationaryMobility"
+**.antenna.mobility.initFromDisplayString = false
+**.antenna.mobility.initialX = 10m
+**.antenna.mobility.initialY = 10m
+**.antenna.mobility.initialZ = 0m
+
+%contains: stdout
+Reception abort, timer cleanup and subsequent delivery verified.

@@ -130,7 +130,8 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     else
         transmitter->setModeSet(modeSet);
     receiver->setModeSet(modeSet);
-    receptionTimer = nullptr;
+    if (receptionTimer != nullptr)
+        abortReception(receptionTimer);
     if (modeSetCoordinator != nullptr)
         modeSetCoordinator->completeModeSetChange(modeSet);
     else if (modeSet != nullptr)
@@ -156,7 +157,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
-    receptionTimer = nullptr;
+    if (receptionTimer != nullptr)
+        abortReception(receptionTimer);
     emit(listeningChangedSignal, 0);
 }
 
@@ -167,7 +169,8 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
     ieee80211Transmitter->setBand(band);
     ieee80211Receiver->setBand(band);
     EV << "Changing radio band to " << band << endl;
-    receptionTimer = nullptr;
+    if (receptionTimer != nullptr)
+        abortReception(receptionTimer);
     const auto *channel = ieee80211Transmitter->getChannel();
     if (channel != nullptr) {
         Ieee80211RadioChannelChangedDetails details(channel->getBand());
@@ -185,7 +188,8 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
     ieee80211Transmitter->setChannel(channel);
     ieee80211Receiver->setChannel(new Ieee80211Channel(channel->getBand(), channel->getChannelNumber()));
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
-    receptionTimer = nullptr;
+    if (receptionTimer != nullptr)
+        abortReception(receptionTimer);
     Ieee80211RadioChannelChangedDetails details(channel->getBand());
     emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
     emit(listeningChangedSignal, 0);
@@ -198,7 +202,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     ieee80211Transmitter->setChannelNumber(newChannelNumber);
     ieee80211Receiver->setChannelNumber(newChannelNumber);
     EV << "Changing radio channel to " << newChannelNumber << ".\n";
-    receptionTimer = nullptr;
+    if (receptionTimer != nullptr)
+        abortReception(receptionTimer);
     Ieee80211RadioChannelChangedDetails details(ieee80211Transmitter->getChannel()->getBand());
     emit(radioChannelChangedSignal, newChannelNumber, &details);
     emit(listeningChangedSignal, 0);
