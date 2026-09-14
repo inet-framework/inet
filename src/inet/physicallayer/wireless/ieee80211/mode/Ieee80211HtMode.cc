@@ -161,6 +161,16 @@ unsigned int Ieee80211HtPreambleMode::computeNumberOfHTLongTrainings(unsigned in
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211HtPreambleMode::getDurationBeforeHeader() const
+{
+    if (preambleFormat == HT_PREAMBLE_MIXED)
+        return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration();
+    else if (preambleFormat == HT_PREAMBLE_GREENFIELD)
+        return getHTGreenfieldShortTrainingFieldDuration() + getFirstHTLongTrainingFieldDuration();
+    else
+        throw cRuntimeError("Unknown preamble format");
+}
+
 const simtime_t Ieee80211HtPreambleMode::getDuration() const
 {
     // 20.3.7 Mathematical description of signals
@@ -178,12 +188,8 @@ const simtime_t Ieee80211HtPreambleMode::getDuration() const
 bps Ieee80211HtSignalMode::computeGrossBitrate() const
 {
     unsigned int numberOfCodedBitsPerSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
-    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
-    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
-    else
-        throw cRuntimeError("Unknown guard interval type");
+    // IEEE Std 802.11-2024, 19.3.11.11.6: the short GI applies only to the Data field.
+    return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
 }
 
 bps Ieee80211HtSignalMode::computeNetBitrate() const
@@ -293,6 +299,22 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
     unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
     int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get<b>() / dataBitsPerSymbol)); // TODO getBitLength(dataLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
+}
+
+const simtime_t Ieee80211HtMode::getDuration(b dataLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataLength);
+    if (preambleMode->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
+        dataMode->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)
+    {
+        // IEEE Std 802.11-2024, 19.4.3, Eq. (19-90): mixed-format short-GI
+        // Data airtime is rounded up to a 4 us boundary. Eq. (19-92) leaves
+        // greenfield short-GI Data airtime at its raw 3.6 us symbol duration.
+        auto longGiSymbolInterval = dataMode->getDFTPeriod() + dataMode->getGIDuration();
+        auto numberOfLongGiSymbols = (dataDuration.raw() + longGiSymbolInterval.raw() - 1) / longGiSymbolInterval.raw();
+        dataDuration = SimTime::fromRaw(numberOfLongGiSymbols * longGiSymbolInterval.raw());
+    }
+    return preambleMode->getDuration() + dataDuration;
 }
 
 const simtime_t Ieee80211HtMode::getSlotTime() const
