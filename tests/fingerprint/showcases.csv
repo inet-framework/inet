@@ -6,7 +6,7 @@
 
 # /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 
-/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         40e0-9ac8/tplx;96d0-d13f/~tNl;4893-f8fa/~tND;588a-7dd9/tyf, PASS,    wireless EthernetMac Ipv4
+/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         a1b9-ff80/tplx;cb8f-443a/~tNl;cb45-7a00/~tND;588a-7dd9/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/measurement/datarate/,         -f omnetpp.ini -c General -r 0,           1s,           7af9-93b4/tplx;2d48-cf54/~tNl;ce00-3055/~tND;c848-3d2a/tyf, PASS, Ipv4
 /showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;1479-9b89/tyf, PASS, Ipv4
@@ -127,8 +127,8 @@
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            7fb8-49dc/tplx;2f60-762d/~tNl;0437-f151/~tND;07bb-3973/tyf, PASS,    wireless
 /showcases/visualizer/canvas/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         51ec-d359/tplx;cec5-d464/~tNl;a0c6-b121/~tND;c099-e5c5/tyf, PASS, Ipv4
 
-/showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;b145-6576/tyf, PASS,   wireless Ipv4 # VisualizingSubmoduleInformation extended
-/showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;4677-fc97/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            e700-27fb/tplx;f16c-28a3/~tNl;57f0-e9ab/~tND;b145-6576/tyf, PASS,   wireless Ipv4 # VisualizingSubmoduleInformation extended
+/showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            e700-27fb/tplx;f16c-28a3/~tNl;57f0-e9ab/~tND;4677-fc97/tyf, PASS,    wireless Ipv4
 
 /showcases/visualizer/canvas/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              6622-adb9/tplx;28ca-9f8c/~tNl;85f0-a9c3/~tND;4266-0d42/tyf, PASS,    wireless Ipv4
 
@@ -177,7 +177,7 @@
 /showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c PowerDensityMap -r 0,                       1s,            2622-bc42/tplx;6db5-38b6/~tNl;df7a-beae/~tND;88d9-8b3f/tyf, PASS,	wireless Ipv4
 
 /showcases/visualizer/canvas/statistic/,    -f omnetpp.ini -c PingRtt -r 0,                                            500s,            1479-6398/tplx;9b09-5004/~tNl;87e2-d13d/~tND;71d6-de16/tyf, PASS,    wireless Ipv4
-/showcases/visualizer/canvas/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            eb0f-ff32/tplx;025d-a600/~tNl;0a60-f71c/~tND;0b84-e1e1/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            78cf-be58/tplx;a1d6-4bb6/~tNl;d600-2b73/~tND;0b84-e1e1/tyf, PASS,    wireless Ipv4
 
 /showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         cb1d-a154/tplx;a565-1a98/~tNl;ee1b-5f7a/~tND;7b44-2fb8/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         cb1d-a154/tplx;a565-1a98/~tNl;ee1b-5f7a/~tND;5e90-6a92/tyf, PASS,    wireless Ipv4
@@ -196,7 +196,7 @@
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1dbe-6672/tplx;a253-dbe3/~tNl;3bb2-9797/~tND;bd88-5ba6/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         56b0-3510/tplx;baeb-0d2c/~tNl;3d4b-65fc/~tND;00a2-e4ee/tyf, PASS,    wireless Ipv4
-/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;7b7c-2bfb/~tND;5575-fd8f/tyf, PASS,    wireless Ipv4
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         98d8-d5d1/tplx;ebe5-7cf5/~tNl;9e70-fbb5/~tND;5575-fd8f/tyf, PASS,    wireless Ipv4
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;e167-9c84/~tNl;d680-b8ad/~tND;0d1f-df73/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            5b0b-f055/tplx;8511-cc76/~tNl;3402-f804/~tND, PASS,    wireless Ipv4
@@ -311,10 +311,10 @@
 
 /showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         171a-e6eb/tplx;3466-822d/~tNl;5909-6e87/~tND;929d-03d5/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            498f-b665/tplx;6f50-5caf/~tNl;1403-6fb2/~tND, PASS,    wireless Ipv4
+/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            21cb-ec85/tplx;30b0-ee3e/~tNl;ae94-6216/~tND, PASS,    wireless Ipv4
 
-/showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            26be-ff05/tplx;9c39-00a3/~tNl;03a9-2f02/~tND;093e-1ca4/tyf, PASS,    wireless Ipv4
-/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            8d7c-5091/tplx;84a6-b893/~tNl;cb18-5b4d/~tND;bda9-15d1/tyf, PASS,    wireless Ipv4
+/showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            7a6b-0096/tplx;cd89-6ad5/~tNl;3d32-d9e4/~tND;093e-1ca4/tyf, PASS,    wireless Ipv4
+/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            904d-389e/tplx;21aa-5c22/~tNl;6b58-22a3/~tND;bda9-15d1/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoRateControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;ec30-e32d/~tND;dad3-7f89/tyf, PASS,    wireless Ipv4
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c AarfRateControl -r 0,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;de90-6575/~tND;7539-d32d/tyf, PASS,    wireless Ipv4
