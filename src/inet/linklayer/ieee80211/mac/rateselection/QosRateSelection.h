@@ -32,11 +32,13 @@ namespace ieee80211 {
  */
 class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListener
 {
+  public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
 
-    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
     // originator frame modes
@@ -59,6 +61,7 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void updateModes();
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module

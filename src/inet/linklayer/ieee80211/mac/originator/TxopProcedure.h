@@ -33,6 +33,7 @@ class INET_API TxopProcedure : public ModeSetListener
 
   protected:
     simtime_t start = -1;
+    simtime_t configuredLimit = -1;
     simtime_t limit = -1;
     ProtectionMechanism protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
 
