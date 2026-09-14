@@ -511,9 +511,9 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(dcfSparseMode->getHtMcsIndex() == 0);
         ASSERT(dcfSparseMode->getDataMode()->getBandwidth() == MHz(20));
 
-        // The invalid/absent negotiated state is a legacy-only unicast
-        // condition, while group-addressed traffic keeps its existing HT
-        // selection policy.
+        // Invalid/absent negotiated state forces legacy unicast. Group traffic
+        // independently uses the nonempty basic legacy set (IEEE Std
+        // 802.11-2024, 10.6.5.4), regardless of this peer's negotiated state.
         staMib->removePeerHtCapabilities(address);
         const auto *dcfLegacyMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
         const auto *qosLegacyMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
@@ -543,8 +543,10 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         multicastHeader->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
         const auto *dcfMulticastMode = dcfRateSelection->computeMode(&ratePacket, multicastHeader);
         const auto *qosMulticastMode = qosRateSelection->computeMode(&ratePacket, multicastHeader, nullptr);
-        ASSERT(dcfMulticastMode->getHtMcsIndex() >= 0);
-        ASSERT(qosMulticastMode->getHtMcsIndex() >= 0);
+        ASSERT(dcfMulticastMode == modeSet->getMode(Mbps(24)));
+        ASSERT(qosMulticastMode == dcfMulticastMode);
+        ASSERT(dcfMulticastMode->getHtMcsIndex() < 0);
+        ASSERT(modeSet->getIsMandatory(dcfMulticastMode));
         staMib->setPeerHtCapabilities(address, staMib->getLocalHtCapabilities());
         ASSERT(dcfRateSelection->computeMode(&ratePacket, dataHeader)->getHtMcsIndex() >= 0);
         ASSERT(qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr)->getHtMcsIndex() >= 0);
