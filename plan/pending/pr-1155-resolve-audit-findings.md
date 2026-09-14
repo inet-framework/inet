@@ -34,16 +34,21 @@ the same day, and that is D-2 below.
 
 ## 2. The two decisions, both now made
 
-### D-1 — `common/packet/`: unseal, edit, reseal — **decided 2026-09-11**
+### D-1 — `common/packet/`: the three edits are permitted — **decided 2026-09-11**
 
-The seal owner validated the three edits and allows the path to be unsealed for them and resealed
-after. That unblocks F-1 and it does not resolve the underlying question: `AV-ORG-01` and
-`AV-ORG-02` remain `Open (decide)`, and the reseal puts the seal back over two clusters the ledger
-still calls invalid. **The reseal is on the same footing it had before; this decision is about the
-branch, not about the seal.**
+The seal owner validated the three edits — `chunk/BitCountChunk.cc`, `chunk/ByteCountChunk.cc` and
+`recorder/PcapRecorder.cc` — and allowed them, in the words "unseal for the edit and reseal after".
 
-The three files are `chunk/BitCountChunk.cc`, `chunk/ByteCountChunk.cc` and
-`recorder/PcapRecorder.cc`. Step 4 carries out the unseal and the reseal.
+**Reading the rule showed that no unsealing is wanted, and step 4 was reworked because of it.**
+[SR-PR-APPROVAL](../../doc/project/rule/sealing.md#sr-pr-approval) treats a
+current-conversation permission as authority to *prepare* the change, which is exactly what was
+given; the registry is not touched, and merge authorization is a separate, protected, human
+decision bound to the head. Physically removing the row would leave the path unprotected for
+everybody in the meantime and record nothing.
+
+The decision unblocks F-1 and does not resolve the underlying question: `AV-ORG-01` and
+`AV-ORG-02` remain `Open (decide)`, so the seal still rests on two clusters the ledger calls
+invalid. **This decision is about the branch, not about the seal.**
 
 ### D-2 — Attribute every moved row — **decided 2026-09-11, the hard way**
 
@@ -434,25 +439,51 @@ requests from two authors. Five occurrences say the obligation is not visible wh
 and the change summary already computes the exact list a `T3` check would need. That check is out
 of scope here and belongs in its own plan.
 
-### Step 4 — Unseal, then reseal (F-1)
+### Step 4 — Record the permission (F-1) — reworked and drafted 2026-09-14
 
-**D-1 is decided**, so this step is mechanical.
+**The plan said "unseal, edit, reseal". That is not the mechanism the rules define, and doing it
+would be worse than doing nothing.** Removing the row from
+[seal-list.md](../../doc/project/audit/seal-list.md) leaves `common/packet/` unprotected for
+everybody until it goes back, and the registry ends where it started having recorded nothing.
 
-1. Unseal `common/packet/` in
-   [audit/seal-list.md](../../doc/project/audit/seal-list.md), with the reason: the three edits
-   were validated by the seal owner on 2026-09-11.
-2. The three edits ride in their own commits, where they already are — `ed742203a8` and
-   `21d34de9e8`.
-3. Reseal the path, against the same audit it rested on before.
-4. The pull request description names the three files and the validation, under
-   [SR-PR-APPROVAL](../../doc/project/rule/sealing.md#sr-pr-approval).
+[SR-PR-APPROVAL](../../doc/project/rule/sealing.md#sr-pr-approval) says what actually happens, in
+three parts:
 
-**Say what the reseal does not fix.** `AV-ORG-01` and `AV-ORG-02` are still `Open (decide)`, so the
-reseal restores a seal the ledger calls invalid. That is the state this branch found and the state
-it leaves; the branch is not the place to repair it.
+1. **The current-conversation permission** authorises an AI to *prepare* the named change. The seal
+   owner gave it on 2026-09-11, and it is already spent — the two commits exist.
+2. **The pull request description records that permission for review.** This is the part the branch
+   owes, and the text is below.
+3. **Merge authorization** comes from the protected base-branch workflow, whose required reviewer
+   sees the sealed paths and the immutable head. It is bound to that head, so any new commit needs
+   a new decision, and it is a person's action — **not one this plan can carry out**.
 
-**Done when** `check-source-seals.sh --base origin/master` passes and the seal list records both
-the unseal and the reseal.
+The rule is explicit that 3 does not replace 1, and that content controlled by the branch cannot
+authorize itself. So the seal row stays exactly as it is.
+
+**The text for the pull request description:**
+
+> **Sealed path.** This branch changes three files under `src/inet/common/packet/`, which
+> [seal-list.md](doc/project/audit/seal-list.md) seals recursively:
+>
+> | Commit | File |
+> | --- | --- |
+> | `b085fbae1e` packet: keep the fill byte when splitting a BitCountChunk or ByteCountChunk | `chunk/BitCountChunk.cc`, `chunk/ByteCountChunk.cc` |
+> | `645dffe466` pcap: record PPP traces as LINKTYPE_PPP rather than LINKTYPE_PPP_WITH_DIR | `recorder/PcapRecorder.cc` |
+>
+> The seal owner reviewed and validated these three edits on 2026-09-11. Merge still needs the
+> protected approval bound to this head, per
+> [SR-PR-APPROVAL](doc/project/rule/sealing.md#sr-pr-approval).
+>
+> **The seal itself is unchanged and still rests on two open violations.** `AV-ORG-01` and
+> `AV-ORG-02` are `Open (decide)` in
+> [architecture-exceptions.md](doc/project/audit/architecture-exceptions.md), which
+> [SR-AUDIT-FIRST](doc/project/rule/sealing.md#sr-audit-first) forbids. That is the state this
+> branch found and the state it leaves; deciding those two is the seal owner's work and needs its
+> own change.
+
+**Done when** the description carries that text and
+`check-source-seals.sh --base origin/master` either passes or reports only the three files the
+description names.
 
 ### Step 5 — The baselines, every row explained (F-3)
 
