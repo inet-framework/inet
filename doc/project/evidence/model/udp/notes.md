@@ -48,30 +48,45 @@ matches the discard by size instead. Any observer that filters UDP drops by fiel
 affected, not only this test. IPv4's drop paths keep the tag, which is why the IPv4 checks
 could filter their discards by field.
 
-### A received datagram raises the same signal twice
+### A received datagram raised the same signal twice — fixed
 
 `Udp` inherits `LayeredProtocolBase::handleLowerMessage`, which emits
 `packetReceivedFromLower` and then calls `handleLowerPacket`
 ([LayeredProtocolBase.cc:35-43](../../../../../src/inet/common/LayeredProtocolBase.cc#L35-L43)).
-`Udp::handleLowerPacket` calls `processUDPPacket`, which emits the same signal again on the
-same packet ([Udp.cc:929](../../../../../src/inet/transportlayer/udp/Udp.cc#L929)). Every
-datagram that arrives from the network layer therefore raises `packetReceivedFromLower`
-twice, at the same simulation time, with the same packet id. The duplicate is old: the base
-class gained its emit in 2017 and the one in `Udp` predates the 2019 commit that moved it.
+`Udp::handleLowerPacket` calls `processUDPPacket`, which emitted the same signal again on the
+same packet. Every datagram from the network layer therefore raised
+`packetReceivedFromLower` twice, at one simulation time, with one packet id. The duplicate
+was old: the base class gained its emit in 2017 and the one in `Udp` predates the 2019 commit
+that moved it.
 
-No recorded result doubles. `Udp.ned` declares the signal but sources no `@statistic` from
-it, so only a listener sees the double. A count of arrivals at a UDP module reports twice
-the true number. That is a check which reads wrong, not a check which cannot fail, but it is
-just as misleading.
+No recorded result doubled. `Udp.ned` declares the signal and sources no `@statistic` from
+it, so only a listener saw the double. A count of arrivals at a UDP module reported twice the
+true number.
 
-UDP is alone in this. `Ipv4` and `Ipv6` override `handleMessageWhenUp`, so the base class
-never runs for them and their own emit is the only one. `Tcp` does not emit the signal
-itself and gets exactly one from the base.
+UDP was alone in this. `Ipv4` and `Ipv6` override `handleMessageWhenUp`, so the base class
+never runs for them, and `Tcp` emits nothing of its own.
 
-To count arrivals, observe the receiver's network layer instead. `packetSentToUpper` at
-`<host>.ipv4.ip` still carries the UDP header, so `udp.destPort` filters on it, and it is
-emitted one time per delivered datagram. A probe of five datagrams counts five there, and
-both four and six fail.
+The emit is gone from `Udp.cc`, and `tests/protocol/self/CountAtReceiver.test` holds it gone:
+five datagrams counted at a receiving UDP module must be five, and four, six and ten all
+fail. No test verdict moved when the emit was removed, except one that had been passing for
+the wrong reason. See the QUIC note below.
+
+### A test can pass because two faults cancel
+
+`quic/Rfc9000AntiAmplification.test` keeps a running sum of the bytes a server received and
+sent, and it fails at the first moment the sent sum passes three times the received sum. Its
+watch was an ordered step, so it began only **after** the arrival that opens the window, and
+its received sum started at zero. The check should have failed at the server's first byte.
+It passed, because the duplicate emit above handed it a second copy of that arrival.
+
+Removing one fault exposed the other. The watch is a guard now, so it counts the opening
+arrival itself. The model is well inside the limit: a budget of one times the received bytes
+passes too, and a budget of zero fails at the first send, which is how the guard was shown to
+look at anything.
+
+The lesson is about the shape and not about UDP. A step that both opens a window and primes a
+counter cannot do the second job, because the engine gives the event to one step. A guard sees
+every event, including the one an ordered step consumes.
 
 ### The model works from RFC 768 and never names it
 

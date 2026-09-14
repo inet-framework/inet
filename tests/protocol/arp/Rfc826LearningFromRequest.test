@@ -26,10 +26,6 @@ The absence watch now runs from the start of the run and not from the reply of h
 B has nothing to send before 0.5 s and therefore no address to resolve, so the wider window
 holds the same claim over more of the run.
 
-The delivery is counted where IPv4 hands the datagram up, not at host A's UDP. A UDP module
-raises `packetReceivedFromLower` twice for one datagram, because `Udp` and its base class
-both emit it; see doc/project/evidence/model/udp/notes.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "ArpMutations.h"
@@ -49,9 +45,9 @@ Define_ProtocolTestProgram()
                   .describe("an ARP request from host B")
                   .within(0.9)))
         // Expected observation 2: the datagram of host B reaches host A, exactly once.
-        .meanwhile(exactlyTimes(1, on("hostA.ipv4.ip").signal("packetSentToUpper")
+        .meanwhile(exactlyTimes(1, on("hostA.udp").signal("packetReceivedFromLower")
                   .filterPacket("udp.destPort == 6000")
-                  .describe("host B's datagram delivered up at host A")
+                  .describe("host B's datagram arriving at host A's UDP")
                   .within(0.9)))
         // Expected observation 1: the request of host A, and the reply of host B.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")

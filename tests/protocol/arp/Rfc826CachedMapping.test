@@ -17,10 +17,6 @@ window and left nothing for a second observation, so the delivery was asserted o
 that the receiving program prints at the end of the run. That line reported the same fact
 but could not say when a datagram arrived.
 
-The delivery is counted where IPv4 hands the datagram up, not at host B's UDP. A UDP module
-raises `packetReceivedFromLower` twice for one datagram, because `Udp` and its base class
-both emit it; see doc/project/evidence/model/udp/notes.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "ArpMutations.h"
@@ -45,9 +41,9 @@ Define_ProtocolTestProgram()
                   .describe("an ARP request from host A for the address of host B")
                   .within(0.9)))
         // Expected observation 2: all five datagrams arrive at host B.
-        .exactlyTimes(5, on("hostB.ipv4.ip").signal("packetSentToUpper")
+        .exactlyTimes(5, on("hostB.udp").signal("packetReceivedFromLower")
                   .filterPacket("udp.destPort == 5000")
-                  .describe("a datagram of host A delivered up at host B")
+                  .describe("a datagram of host A arriving at host B's UDP")
                   .within(0.9));
 }
 
