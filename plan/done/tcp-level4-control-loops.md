@@ -1,6 +1,7 @@
 # TCP level 4 — the two control loops, and the obsolete-citation sweep
 
-**Status:** in progress. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`.
+**Status:** done. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`, finished
+2026-09-14 on `master`.
 
 Three tasks, from the answer to "how can we extend the TCP tests":
 
@@ -66,7 +67,9 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
         RFC 6298 permits as a value above the recommended one second. The timeout is not
         published as a signal before the first measurement, so the check reads it
         behaviourally, from the interval to the first retransmission.
-- [ ] Steps 7 to 9: run, results, conformance, categories.
+- [x] Steps 7 to 9: run, results, conformance, categories. Done on 2026-09-14 in commit
+      5df12238a5. All ten level 4 tests are in `model/tcp/results.md`, the rules are in
+      `conformance.md`, and `categories.md` and `coverage.md` carry the two control loops.
 
 Candidate checks, all deterministic through a signal:
 
@@ -103,7 +106,9 @@ Candidate checks, all deterministic through a signal:
       - `Rfc5681SlowStartGrowth.test` passes. Writing it found a framework fault: a
         predicate was refused on a scalar event, so the guard held over nothing and the
         check could not fail. Fixed, and the check is decisive now.
-- [ ] Steps 7 to 9: run, results, conformance, categories.
+- [x] Steps 7 to 9: run, results, conformance, categories. Done on 2026-09-14 in commit
+      5df12238a5. All ten level 4 tests are in `model/tcp/results.md`, the rules are in
+      `conformance.md`, and `categories.md` and `coverage.md` carry the two control loops.
 
 Candidate checks:
 
