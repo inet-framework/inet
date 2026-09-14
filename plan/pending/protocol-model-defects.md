@@ -3,10 +3,13 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
-**Where it stands:** group A is done. 6 of the 30 tests pass, from three repairs, and a
-seventh that had declared an expected failure passes too. The suite is 257 tests, 188 PASS,
-44 FAIL (expected), 25 FAIL (unexpected), from 182 / 45 / 30. No input in the protocol suite
-stops a simulation any more.
+**Where it stands:** groups A, B and C are done. 11 of the 30 tests pass, from six repairs,
+and a twelfth that had declared an expected failure passes too. The suite is 257 tests, 193
+PASS, 44 FAIL (expected), 20 FAIL (unexpected), from 182 / 45 / 30.
+
+No input in the protocol suite stops a simulation any more, and **the IPv6 suite is complete:
+all 27 tests pass**, from 19 PASS and 8 unexpected failures. IPv4 has 2 left, and groups D
+and E hold the rest.
 
 Seven standards passes measured the model and did not repair it, because a pass measures.
 Thirty tests fail for recorded reasons. This plan repairs the model so that they pass.
@@ -54,20 +57,20 @@ least arguable.
       That repair reaches every IPv6 reassembly: an ordinary two-fragment datagram was
       being truncated silently to the first fragment's length.
 
-### Group B — a condition missing from a mechanism that exists (3 tests)
+### Group B — a condition missing from a mechanism that exists (3 tests) — DONE 2026-09-14
 
-- [ ] `ipv4/Rfc1122NoErrorForLinkBroadcast`
-- [ ] `ipv6/Rfc4443NoErrorForLinkBroadcast`
-- [ ] `ipv6/Rfc4443NoErrorForLinkMulticast`
+- [x] `ipv4/Rfc1122NoErrorForLinkBroadcast`
+- [x] `ipv6/Rfc4443NoErrorForLinkBroadcast`
+- [x] `ipv6/Rfc4443NoErrorForLinkMulticast`
 
-### Group C — a value that is never filled in (2 tests)
+### Group C — a value that is never filled in (2 tests) — DONE 2026-09-14
 
 One of the two, the fragment payload length, turned out to be the same defect Group A
 repaired, but on the receive side. `ipv6/Rfc8200FragmentPayloadLength` is about the send
 side and still fails.
 
-- [ ] `ipv6/Rfc4443PacketTooBigMtu` — the caller hands `createPacketTooBigMsg` a literal 0.
-- [ ] `ipv6/Rfc8200FragmentPayloadLength` — every fragment carries the copied length.
+- [x] `ipv6/Rfc4443PacketTooBigMtu` — done. `sendErrorMessage` takes an MTU now.
+- [x] `ipv6/Rfc8200FragmentPayloadLength` — done. Each fragment carries its own length.
 
 ### Group D — an incomplete key, field or check (12 tests)
 
