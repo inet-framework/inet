@@ -71,18 +71,28 @@ The printed line, for all its faults, asserts a total after the run has finished
 step of the current engine can do. So the workaround is better judged than it looked, and
 this group needs the two points above settled first.
 
-- [ ] Decide whether a step may observe without ending the run, or whether the tester should
-      run to the end of the window before it reports.
+- [x] A step may observe without ending the run, since 2026-09-14. Group 3's engine fix
+      answers this one: `enterStep` waits while a guard is outstanding, and the last guard
+      to resolve ends the program. So a count carried by `meanwhile` runs its window out
+      after the ordered steps are done, and the run no longer stops at the last arrival.
+      The six rewrites below are the proof.
 - [x] `exactlyTimes` means what its name says, since 2026-09-14. It was the smaller of the
       two blockers and it is gone.
-- [ ] **A receiving UDP module reports each datagram twice.** This is the blocker now, and
-      it is new. At `hostB.udp` with `packetReceivedFromLower`, five datagrams produce ten
-      matching events: `exactlyTimes(10)` passes where `exactlyTimes(5)` fails with "more
-      than 5 occurrence(s)", and the event log shows five arrivals. The sending side does
-      not double: `self/Repeat.test` counts three sends at `host1.udp` as three. Until this
-      is understood, no cardinality at a receiving UDP module can be trusted, and that is
-      the observation group 2 needs. Find out whether the model emits the signal twice or
-      the tester records one emission twice.
+- [x] **A receiving UDP module reports each datagram twice. The model emits it twice.**
+      Answered on 2026-09-14, and the tester is not at fault.
+      `LayeredProtocolBase::handleLowerMessage` emits `packetReceivedFromLower` and then
+      calls `handleLowerPacket`; `Udp::handleLowerPacket` calls `processUDPPacket`, which
+      emits the same signal again. A temporary print in the tester's `receiveSignal` showed
+      two callbacks for one packet id, at one simulation time, from one module context. UDP
+      is alone in this: IPv4 and IPv6 override `handleMessageWhenUp`, so the base class
+      never runs for them, and TCP emits nothing of its own. No recorded statistic doubles,
+      because no `@statistic` in `Udp.ned` sources the signal. The defect is written up in
+      `doc/project/evidence/model/udp/notes.md`. No source file is changed here.
+
+      The observation moves instead of the model: `packetSentToUpper` at `<host>.ipv4.ip`
+      still carries the UDP header, so `udp.destPort` filters on it, and it is emitted once
+      per delivered datagram. A probe of five datagrams counts five there, and both four and
+      six fail.
 - [ ] Then the six ARP tests.
 
 ## Group 3 — nine tests that carry a combined guard
