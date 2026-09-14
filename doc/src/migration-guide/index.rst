@@ -114,6 +114,22 @@ response must not establish the agreement again or reset its receive window. Use
 returned ownership-bearing teardown result when publishing a deleted-agreement
 notification.
 
+Fragment Reassembly and Receive Lifetime
+----------------------------------------
+
+``RecipientMacDataService`` and ``RecipientQosMacDataService`` now expose
+``maxReceiveLifetime``, defaulting to ``524288us`` (512 TUs). Incomplete bodies are
+discarded when that receive lifetime expires. Models that relied on arbitrarily late
+completion will deliver fewer packets; select a deliberate lifetime for the study rather
+than treating the previous unbounded retention as a guarantee.
+
+Custom recipient services returning ``ManagementFrameReceptionResult`` must supply
+``completeHeader`` only when a complete management body is available. A duplicate
+fragment can be acknowledged without dispatching ADDBA or DELBA. Preserve local action
+context across fragmented transmission, reconstruct the complete action body, and
+dispatch its subtype only after reassembly. Fragmented on-air management headers do not
+carry a complete action body in every fragment.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

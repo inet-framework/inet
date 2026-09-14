@@ -24,10 +24,38 @@ Define_Module(RecipientQosMacDataService);
 void RecipientQosMacDataService::initialize()
 {
     duplicateRemoval = new QoSDuplicateRemoval();
-    basicReassembly = new BasicReassembly();
+    basicReassembly = new BasicReassembly(par("maxReceiveLifetime"));
     aMsduDeaggregation = new MsduDeaggregation();
     aMpduDeaggregation = new MpduDeaggregation();
     blockAckReordering = new BlockAckReordering();
+    reassemblyTimer = new cMessage("reassemblyTimer");
+}
+
+void RecipientQosMacDataService::handleMessage(cMessage *message)
+{
+    if (message != reassemblyTimer)
+        throw cRuntimeError("Unknown message");
+    expireReassemblyFragments();
+    scheduleReassemblyTimer();
+}
+
+void RecipientQosMacDataService::expireReassemblyFragments()
+{
+    for (auto packet : basicReassembly->removeExpiredFragments(simTime())) {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
+}
+
+void RecipientQosMacDataService::scheduleReassemblyTimer()
+{
+    if (reassemblyTimer->isScheduled())
+        cancelEvent(reassemblyTimer);
+    auto nextExpirationTime = basicReassembly->getNextExpirationTime();
+    if (nextExpirationTime != SIMTIME_MAX)
+        scheduleAt(nextExpirationTime, reassemblyTimer);
 }
 
 void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress originatorAddr)
@@ -47,19 +75,26 @@ void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress ori
 
 Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFragments)
 {
+    expireReassemblyFragments();
+    Packet *defragmentedPacket = nullptr;
     for (auto fragment : completeFragments) {
         auto packet = basicReassembly->addFragment(fragment);
         if (packet != nullptr) {
-            emit(packetDefragmentedSignal, packet);
-            return packet;
+            defragmentedPacket = packet;
+            break;
         }
     }
-    return nullptr;
+    scheduleReassemblyTimer();
+    if (defragmentedPacket != nullptr)
+        emit(packetDefragmentedSignal, defragmentedPacket);
+    return defragmentedPacket;
 }
 
 Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
 {
+    expireReassemblyFragments();
     auto packet = basicReassembly->addFragment(mgmtFragment);
+    scheduleReassemblyTimer();
     if (packet && packet->hasAtFront<Ieee80211DataOrMgmtHeader>()) {
         emit(packetDefragmentedSignal, packet);
         return packet;
@@ -134,18 +169,27 @@ IRecipientQosMacDataService::ManagementFrameReceptionResult RecipientQosMacDataS
     // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader)) {
         delete mgmtPacket;
-        return { {}, true };
+        // A duplicate fragment is acknowledged by HCF but is not a complete
+        // MMPDU. Preserve the existing subtype-specific handling only for an
+        // unfragmented duplicate management frame.
+        if (mgmtHeader->getFragmentNumber() == 0 && !mgmtHeader->getMoreFragments())
+            return { {}, mgmtHeader, true };
+        else
+            return { {}, nullptr, true };
     }
     if (basicReassembly) { // FIXME defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
+    if (mgmtPacket == nullptr)
+        return {};
+    const auto& completeHeader = mgmtPacket->peekAtFront<Ieee80211MgmtHeader>();
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
-    if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
+    if (dynamicPtrCast<const Ieee80211ActionFrame>(completeHeader)) {
         delete mgmtPacket;
-        return { {}, false };
+        return { {}, completeHeader, false };
     }
     else
-        return { { mgmtPacket }, false };
+        return { { mgmtPacket }, completeHeader, false };
 }
 
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
@@ -202,6 +246,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
 
 RecipientQosMacDataService::~RecipientQosMacDataService()
 {
+    cancelAndDelete(reassemblyTimer);
     delete duplicateRemoval;
     delete basicReassembly;
     delete aMsduDeaggregation;
