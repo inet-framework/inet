@@ -179,6 +179,10 @@ easy to get wrong in the other direction.
 
 ### Two consecutive `once` steps cannot read one event
 
+**Fixed on 2026-09-14.** One event now reaches every running step. A message can also be
+read by one step against many rules with `assertExpr`, which judges the event the filter
+picked rather than looking for another one.
+
 The engine offers each event to one step. Several checks of this pass read one message against
 many rules — a stimulus confirmation and then five field rules — and the pattern that works is
 to observe the **stimulus at one module** and the **fields at another**: the message leaving

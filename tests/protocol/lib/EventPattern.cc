@@ -253,9 +253,35 @@ std::string EventPattern::str() const
     if (!selDispatch.empty()) os << " dispatch=" << selDispatch;
     if (selHasDirection) os << " dir=" << (selDirection == 0 ? "IN" : "OUT");
     if (!selIface.empty()) os << " iface=" << selIface;
-    if (!selExpr.empty()) os << " match='" << selExpr << "'";
+    if (!selExpr.empty()) os << " expr='" << selExpr << "'";
+    if (predicate) os << " predicate";
+    if (selHasValue) os << " value=" << selValue;
+    if (selHasMin) os << " value>=" << selMin;
+    if (selHasMax) os << " value<=" << selMax;
+    if (fltOccurrence == 1) os << " first";
+    else if (fltOccurrence > 1) os << " nth=" << fltOccurrence;
     if (selHasNotBefore) os << " notBefore=" << selNotBefore;
     if (selHasWithin) os << " within=" << selWithin;
+    // The assertion half is rendered apart from the filter half, because the two say
+    // different things: everything before the arrow picked the event, everything after it
+    // had to hold on the event that was picked.
+    if (!assertions.empty()) {
+        os << " -> asserts";
+        const char *separator = " ";
+        for (auto& assertion : assertions) {
+            os << separator;
+            separator = ", ";
+            switch (assertion.kind) {
+                case Assertion::Expr: os << "'" << assertion.expr << "'"; break;
+                case Assertion::NotExpr: os << "not '" << assertion.expr << "'"; break;
+                case Assertion::That: os << "a predicate"; break;
+                case Assertion::Equal: os << "value == " << assertion.value; break;
+                case Assertion::NotEqual: os << "value != " << assertion.value; break;
+                case Assertion::AtLeast: os << "value >= " << assertion.value; break;
+                case Assertion::AtMost: os << "value <= " << assertion.value; break;
+            }
+        }
+    }
     return os.str();
 }
 

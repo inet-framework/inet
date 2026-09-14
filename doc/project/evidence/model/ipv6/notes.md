@@ -120,6 +120,10 @@ message.
 
 ### Capture arithmetic works; a captured unit does not
 
+**Fixed on 2026-09-14.** A capture keeps its quantity form, so `{payload} - 8B` works, and a
+capture is converted only where an expression names it. The lambda workaround below is no
+longer needed.
+
 `ipv6.hopLimit == {hl} - 1` is a valid expression. A capture of a unit-bearing field
 (`ipv6.payloadLength`, "108B") breaks the next step with "Attempt to use the value '108B'
 as a dimensionless number", as the TCP pass found; capture such a field with a lambda that
@@ -145,6 +149,10 @@ filter turns the exception into a non-match. Read the base header by type
 that waits for that signal never fires; anchor on the arrival at the interface instead.
 
 ### Two relay rules need two taps, and a relay can hide a crash
+
+**Half fixed on 2026-09-14.** A relay now holds a list of rules, so two rules on one tap
+work and the two-taps-in-series workaround is no longer needed. The second half of this note,
+that a relay can hide a crash, still holds.
 
 One tap carries one rule. When the node under test behaves and the *other* node crashes on
 the reply, a second tap that drops the reply lets the first verdict stand, and the crash

@@ -124,6 +124,10 @@ the same anchor: the node's own record of the event.
 
 ### Two consecutive `never` steps cannot cover one window
 
+**Fixed on 2026-09-14.** `meanwhile(never(...))` starts a guard without waiting for it, and
+one event now reaches every running step, so two guards cover one window and an ordered step
+runs inside both. The combined predicate below is no longer needed.
+
 The second opens when the first closes. "Nothing upward and nothing back" therefore has to
 be one `never` over the whole host with a predicate for both halves
 (`silenceBroken()` in `Ipv4Mutations.h`), not two steps.

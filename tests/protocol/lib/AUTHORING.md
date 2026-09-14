@@ -96,7 +96,44 @@ frame, or a greedy step will swallow it.
 
 ## 4. Content matching & captures
 
-`.packet("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
+### A filter picks the event, an assertion judges it
+
+Every word that compares says which of the two it is. **A filter picks the event**: when
+nothing matches, the step waits and finally misses its deadline. **An assertion must hold on
+the event the filter picked**: when it does not, the step fails at once and the engine never
+looks for a later event.
+
+| | Filter — picks | Assertion — must hold |
+| --- | --- | --- |
+| expression over the packet | `filterExpr(e)` | `assertExpr(e)`, `assertNotExpr(e)` |
+| predicate over the event | `filterThat(f)` | `assertThat(f)` |
+| scalar equality | `filterEqual(v)` | `assertEqual(v)`, `assertNotEqual(v)` |
+| scalar bound | `filterAtLeast(v)`, `filterAtMost(v)` | `assertAtLeast(v)`, `assertAtMost(v)` |
+| scalar range | `filterBetween(lo, hi)` | `assertBetween(lo, hi)` |
+
+Position words compare nothing and stay bare: `first()`, and `nth(k)`. `first()` is `nth(1)`.
+
+**Write a rule as an assertion, not as a filter.** This is the difference between a check
+that can fail and one that cannot:
+
+```cpp
+// wrong: picks the first window that is small enough, and passes over one that is not
+.once(on("host1.tcp").signal("cwnd").filterAtMost(IW_BOUND).within(0.5))
+
+// right: the first publication is the subject, and the bound is the verdict
+.once(on("host1.tcp").signal("cwnd").first().assertAtMost(IW_BOUND).within(0.5))
+```
+
+There is deliberately no `assertNotThat`: a lambda negates itself. `assertNotExpr` is not
+redundant in the same way, because it differs from `assertExpr` of a negated expression when
+the chunk is **absent**.
+
+`assertAtLeast` does not collide with `atLeastTimes`: the cardinality family carries the
+`Times` suffix.
+
+### The expression engine
+
+`filterExpr("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
 (it asserts the signal value is a packet; for a scalar signal use `.is(value)` instead).
 Protocol names are lowercase (`tcp`, `udp`, `ipv4`, `arp`, `ieee80211mac`), chunk class
 names are as declared (`BindingUpdate`, `Ieee80211DataHeader`). Examples:
@@ -126,6 +163,11 @@ non-match, never an error.
 For predicates the engine can't introspect, use a lambda plus `.describe("...")` so the
 English rendering stays readable.
 
+A captured field may carry a unit — the SYN's header length is `24B`, not `24`. That works:
+the capture keeps its quantity form and the expression engine compares it, so
+`tcp.headerLength == {synHeaderLength} - 4B` is a valid step. A capture is converted only
+where an expression names it, so a capture taken for one step cannot break another.
+
 ---
 
 ## 5. Combinators
@@ -136,6 +178,26 @@ English rendering stays readable.
 | `anyOf({a, b, ...})` | the first alternative to match wins |
 | `delivery(from, to, window)` | a sent packet is received as the **same packet** (correlated by `treeId`) within `window` |
 | `strict()` | closed-world: a packet matching a step's selector *scope* but not its content fails that step |
+| `meanwhile(step)` | start a step and do **not** wait for it; it runs beside the steps after it |
+
+### A guard that does not block
+
+Every step above holds the cursor for its whole window. So a `never` cannot cover the same
+window as another `never`, and nothing can be observed while either is open.
+`meanwhile(...)` starts a step and moves on in the same instant, and one event reaches every
+running step rather than only the first:
+
+```cpp
+.meanwhile(never(on("host1.ipv4").signal("packetSentToUpper").within(0.5)))
+.meanwhile(never(on("host1.eth[0].mac").signal("packetSentToLower")
+                     .filterExpr("icmpv4.type == 3").within(0.5)))
+.once(on("router.ipv4.ip").signal("packetDropped")
+          .filterExpr("ipv4.identification == {id}").within(0.2))
+```
+
+`never`, `atMostTimes` and `atLeastTimes` exist as free builders for this, and they return a
+step rather than adding one. A guard carries its own window and its own anchor, so a
+`notBefore` inside it is measured from when the guard started.
 
 ---
 
@@ -160,16 +222,27 @@ Inject steps are ordered like any other step.
 
 ## 7. Interception (MITM) — drop / delay / mutate
 
-A `PacketTap` module spliced onto a link can drop/delay/mutate frames in flight. Drive it
-from the program with `intercept("tapModuleName")`:
+A `PacketTap` module spliced onto a link can drop/delay/mutate frames in flight. `tap(...)`
+builds the clause and `.intercept(...)` adds it, so the two roles read differently:
 
 ```cpp
-.intercept(intercept("tap")
-             .match("tcp.destPort == 1000 && tcp.synBit == false")
+.intercept(tap("relay")
+             .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
              .minBytes(100)        // only the data-bearing segment
              .nth(1)               // the first match (1-based; 0 = every)
              .drop()               // or .delay(0.05) or .mutate([](Packet *p){ ... })
              .describe("the first data segment"))
+```
+
+**A relay holds a list of rules.** Each clause adds one; a frame is offered to the rules in
+order and the first that matches applies; a frame that matches none passes. Each rule counts
+its own occurrences. `pass()` is an explicit no-op, and it earns its place here: it shadows a
+later rule for the frames it names, so an exception is a clause of its own rather than a
+condition inside the other rule's expression.
+
+```cpp
+.intercept(tap("relay").filterExpr("tcp.synBit == true").pass().describe("never touch a SYN"))
+.intercept(tap("relay").filterExpr("tcp.destPort == 1000").drop().describe("drop the data"))
 ```
 
 Interceptions are **standing** rules (armed for the whole run, not ordered steps). The

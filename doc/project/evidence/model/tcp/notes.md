@@ -80,6 +80,9 @@ dropped: 3000 octets through a 300-octet window at one round per 0.2 s take abou
 
 ### A unit-bearing capture breaks the next step
 
+**Fixed on 2026-09-14.** See `self/CaptureWithUnit.test`, which holds both halves of the
+fault and fails without the repair.
+
 Capturing a field that carries a unit — the SYN's header length, `24B` — makes the tester's
 capture substitution fail on the **next** step with `Attempt to use the value '24B' as a
 dimensionless number`. The cause is in `tests/protocol/lib/EventPattern.cc`,
@@ -88,6 +91,8 @@ the step's expression uses it. The workaround is to capture the number without i
 through a lambda. A fix in the framework would remove the trap.
 
 ### A relay holds one rule at a time
+
+**Fixed on 2026-09-14.** A relay holds a list of rules; see `self/TwoRulesOneRelay.test`.
 
 `ProtocolTester` calls `configure` on the tap once per intercept clause, and each call
 replaces the last. Two clauses on the same tap therefore leave only the second, and the tap
@@ -153,5 +158,5 @@ follows is the list as pass 3 leaves it.
    deliberately keeps older behavior, would make it exemplary.
 7. **RFC9293-SEQ-2** on the existing mockup — a pure ACK occupies no sequence space — and
    **RFC9293-ISS-2** split into its MUST-8 and SHLD-1 halves.
-8. **Fix the capture substitution** in the test framework so a unit-bearing field can be
-   captured directly.
+8. ~~**Fix the capture substitution** in the test framework so a unit-bearing field can be
+   captured directly.~~ **Done on 2026-09-14.**

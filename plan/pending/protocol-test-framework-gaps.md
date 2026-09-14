@@ -1,6 +1,8 @@
 # Protocol test framework — the gaps the standards passes found
 
-**Status:** in progress. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`.
+**Status:** phase 1 complete. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`.
+Every item below is implemented and covered by a self test. Phase 2, which removes the old
+words, is still to do.
 
 Seven protocols now have a standards pass, and nearly every one left a `notes.md` with a
 "tooling quirks" section. This plan collects what those sections ask for, adds what the TCP
@@ -49,7 +51,7 @@ value '24B' as a dimensionless number".
 
 - [x] Convert a capture when the expression names it, not before.
 - [x] Keep a unit-bearing value in its text form.
-- [ ] The TCP and IPv6 notes both record the workaround; remove it from their follow-up lists.
+- [x] The TCP and IPv6 notes record the workaround; both now say it is fixed.
 - [x] `self/CaptureWithUnit.test` holds both halves. It fails without the repair with the
       reported error, and passes with it.
 
@@ -98,7 +100,8 @@ Semantics, stated exactly:
 - [x] Add the six filter words and the eight assertion words.
 - [x] Add `first()` and `nth(k)` to a pattern.
 - [ ] Rename the internal fields from `sel*` to `flt*`.
-- [ ] The describer renders an assertion differently from a filter.
+- [x] The describer renders an assertion differently from a filter, after an arrow, and
+      `str()` now shows the scalar filters and the position word it used to omit.
 - [x] `tcp/Rfc5681InitialWindow.test` states its rule directly. Verified both ways: with a
       bound below the real window it fails with "the value is 1072, and it must be at
       most 100".
@@ -188,4 +191,6 @@ review rather than by script.
 3. Item 5, the builder words. Cheap, and it goes with item 2.
 4. Item 4, the relay rules. Four of the nine remaining TCP tests drop a segment.
 5. Item 3, the non-blocking step. The deepest change, and it removes four workarounds.
-6. `AUTHORING.md` documents the new vocabulary, and the notes lose the quirks that are gone.
+6. ~~`AUTHORING.md` documents the new vocabulary, and the notes lose the quirks that are
+   gone.~~ Done. Seven quirks across five notes now say which ones are fixed, and two
+   follow-up items are closed.

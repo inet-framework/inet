@@ -186,9 +186,12 @@ the list as pass 2 leaves it.
 4. **A protocol dissector for QUIC.** Not a gate any more: pass 2 read and changed QUIC
    chunks without one. It would make every check of this suite shorter, and it would let the
    relay's own filter select on QUIC fields instead of on size.
-5. **Fix the tester's scalar-signal overload** so `totalRcvAppData` can be observed instead
-   of aborting the run, and so an application's own byte counters become usable. This is
-   what keeps every "the application received" observation a proxy at the transport layer.
+5. ~~**Fix the tester's scalar-signal overload** so `totalRcvAppData` can be observed instead
+   of aborting the run.~~ **Done on 2026-09-14**: the state channel accepts an unsigned
+   integer, a double and a time. An application's own byte counters are usable now, so the
+   "the application received" observations no longer have to be a proxy at the transport
+   layer. A scalar can also carry a bound and an assertion, which the flow-control check
+   wanted; only a *predicate* on a scalar is still refused.
 6. **Level 3, what remains**: the stateless reset, address validation with Retry and tokens,
    path validation and migration, stream reset, and a packet that cannot be decrypted. Also
    RFC9000-VER-2, which the relay can now reach.

@@ -140,6 +140,10 @@ program to have it, watch the handoff and not the count.
 
 ### A greedy step consumes its whole window
 
+**Fixed on 2026-09-14.** `meanwhile(atMostTimes(...))` runs the count beside the steps that
+follow, so an observation inside the window is no longer hidden. The three tests below can
+read their observation directly rather than from a line the program prints.
+
 `betweenTimes`, `atLeastTimes`, `atMostTimes`, `anyNumberOfTimes` and `never` all wait out
 their `within` window before they advance, so a positive observation that happens inside that
 window cannot be a later step. Three tests of this suite hit it and moved the observation to
