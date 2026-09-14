@@ -75,6 +75,34 @@ deletes it.
 size, or provide collection-capable inputs. Predicate extraction similarly requires an
 extraction-capable provider only when that operation is used.
 
+Originator ADDBA Transactions and Eligible Frames
+-------------------------------------------------
+
+Custom ``IOriginatorBlockAckAgreementPolicy`` implementations must replace
+``computeAddbaFailureTimeout()`` with ``getAddbaResponseTimeout()`` and implement
+``computeAddbaRetryBackoff()``. Configure ``addbaResponseTimeout`` and
+``addbaRetryBackoff`` on the originator agreement policy. The response interval begins
+when the request is actually transmitted, so rejecting an unsent request must not arm
+it.
+
+Custom originator data services must implement ``setFrameEligibilityFunction()``,
+``isFrameEligible()`` and ``hasEligibleFrame()``. Keep availability queries free of
+dequeue side effects. A-MSDU policies now receive the provider-selected anchor and
+eligibility predicate; retain that anchor first and select only available, unique,
+eligible members in valid flow order. Dequeue those members through the provider,
+including scheduler accounting. Successful A-MSDU service therefore increments queue
+dequeue counters instead of administrative-removal counters.
+
+Custom originator agreement handlers must explicitly implement ``isDelbaPending()``.
+Adapt ADDBA response callers to the typed outcome and DELBA callers to ownership
+transfer through ``unique_ptr`` where declared by the interface. Do not keep an
+agreement pointer across a callback that may replace or remove it.
+
+Custom ADDBA request producers must assign a nonzero Dialog Token and preserve the local
+transaction tag through retries and fragments. Recipient responses must echo the request
+token. An originator accepts only a matching live response; a response using the old
+default token zero no longer completes a transaction.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

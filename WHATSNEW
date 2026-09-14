@@ -328,6 +328,19 @@ Notable backward incompatible changes are the following:
    nested compound queues exactly once. PacketBuffer rejects packets owned by a
    cPacketQueue whose owner cannot participate in the buffer callback contract.
 
+5. Block Ack DELBA agreement ownership
+
+   Custom originator agreement handlers must explicitly implement
+   isDelbaPending().
+
+6. Originator ADDBA Transactions and Eligible Frames
+
+   ADDBA response deadlines now begin at actual request transmission. Frames for a
+   pending peer/TID wait for a matching successful response or terminal failure, then
+   channel access resumes for eligible traffic. This changes affected Block Ack
+   trajectories. A-MSDU service now appears as dequeued traffic in queue counters and
+   graphical fingerprints, instead of administrative removal.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
