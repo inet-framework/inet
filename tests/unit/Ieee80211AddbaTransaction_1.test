@@ -2545,6 +2545,112 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     reassembleOrderedFragments(barFragments, { 0x50, 0x51, 0x52, 0x53 });
 }
 
+// A complete fragmented MPDU released by a BAR at the exact sequence-space
+// half boundary must be consumed safely when BasicReassembly rejects its
+// ambiguous generation. The production QoS data service must not expose the
+// resulting null packet to deaggregation or retain the released fragments.
+{
+    auto serviceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("halfSpaceBarDataService", this);
+    serviceModule->callInitialize();
+    auto service = check_and_cast<RecipientQosMacDataService *>(serviceModule);
+    RecipientBlockAckAgreementHandler agreementHandler;
+    TestRecipientPolicy policy;
+    TestCallback callback;
+
+    // Establish the BasicReassembly sequence-space high watermark at zero
+    // before the Block Ack receive buffer is created.
+    auto seedHeader = makeQosHeader(peer2, 6, SequenceNumberCyclic(0));
+    seedHeader->setTransmitterAddress(peer1);
+    seedHeader->setAckPolicy(NORMAL_ACK);
+    seedHeader->setAMsduPresent(false);
+    auto seedPacket = new Packet("halfSpaceReassemblySeed", seedHeader);
+    auto seedFrames = service->dataFrameReceived(seedPacket, seedHeader, &agreementHandler);
+    ASSERT(seedFrames.size() == 1);
+    ASSERT(seedFrames.front() == seedPacket);
+    for (auto frame : seedFrames) {
+        take(frame);
+        drop(frame);
+        delete frame;
+    }
+
+    auto request = makeRequest(peer1, 6, 94, SequenceNumberCyclic(2047), 64);
+    request->setReceiverAddress(peer2);
+    auto agreement = agreementHandler.processReceivedAddbaRequest(request, &policy, &callback, &callback);
+    ASSERT(agreement != nullptr);
+    ASSERT(agreement->getStartingSequenceNumber() == SequenceNumberCyclic(2047));
+
+    auto makeFragment = [&](const char *name, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto header = makeQosHeader(peer2, 6, SequenceNumberCyclic(2048));
+        header->setTransmitterAddress(peer1);
+        header->setFragmentNumber(fragmentNumber);
+        header->setMoreFragments(moreFragments);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setAMsduPresent(false);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+
+    auto firstFragment = makeFragment("halfSpaceBarFragment0", 0, true, 0x81);
+    auto secondFragment = makeFragment("halfSpaceBarFragment1", 1, false, 0x82);
+    ASSERT(service->dataFrameReceived(firstFragment, firstFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    ASSERT(service->dataFrameReceived(secondFragment, secondFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2048), 0));
+    ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2048), 1));
+
+    TestSignalListener defragmentedListener;
+    TestSignalListener deaggregatedListener;
+    TestPacketDropSignalListener resetDropListener;
+    service->subscribe(IRecipientQosMacDataService::packetDefragmentedSignal, &defragmentedListener);
+    service->subscribe(IRecipientQosMacDataService::packetDeaggregatedSignal, &deaggregatedListener);
+    service->subscribe(packetDroppedSignal, &resetDropListener);
+
+    auto barHeader = makeShared<Ieee80211BasicBlockAckReq>();
+    barHeader->setTransmitterAddress(peer1);
+    barHeader->setReceiverAddress(peer2);
+    barHeader->setTidInfo(6);
+    barHeader->setStartingSequenceNumber(SequenceNumberCyclic(2048));
+    auto barPacket = new Packet("halfSpaceBar", barHeader);
+    auto releasedFrames = service->controlFrameReceived(barPacket, barHeader, &agreementHandler);
+    ASSERT(releasedFrames.empty());
+    ASSERT(defragmentedListener.numSignals == 0);
+    ASSERT(deaggregatedListener.numSignals == 0);
+    delete barPacket;
+
+    // getAckState() intentionally reports older or absent sequence controls
+    // as acknowledged, so it cannot expose removal of sequence 2048. A
+    // complete next sequence released immediately proves that the BAR did
+    // advance the reorder window and the new Block Ack state is recorded.
+    auto nextHeader = makeQosHeader(peer2, 6, SequenceNumberCyclic(2049));
+    nextHeader->setTransmitterAddress(peer1);
+    nextHeader->setAckPolicy(BLOCK_ACK);
+    nextHeader->setAMsduPresent(false);
+    auto nextPacket = new Packet("halfSpaceBarFollowingFrame", nextHeader);
+    auto nextFrames = service->dataFrameReceived(nextPacket, nextHeader, &agreementHandler);
+    ASSERT(nextFrames.size() == 1);
+    ASSERT(nextFrames.front() == nextPacket);
+    ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2049), 0));
+    ASSERT(defragmentedListener.numSignals == 1);
+    ASSERT(deaggregatedListener.numSignals == 0);
+    for (auto frame : nextFrames) {
+        take(frame);
+        drop(frame);
+        delete frame;
+    }
+
+    // resetBlockAckReordering is a public owner-side observation: no drops
+    // prove that the BAR already removed the complete MPDU from the reorder
+    // buffer before BasicReassembly consumed its rejected fragments.
+    service->resetBlockAckReordering(6, peer1);
+    ASSERT(resetDropListener.numSignals == 0);
+    service->unsubscribe(packetDroppedSignal, &resetDropListener);
+    service->unsubscribe(IRecipientQosMacDataService::packetDeaggregatedSignal, &deaggregatedListener);
+    service->unsubscribe(IRecipientQosMacDataService::packetDefragmentedSignal, &defragmentedListener);
+    serviceModule->callFinish();
+    serviceModule->deleteModule();
+}
+
 // Receive-buffer lifetime starts when the first fragment of an incomplete
 // fragmented MPDU is retained. Later fragments do not refresh that deadline;
 // complete MPDUs held only for ordering remain available until normal window
