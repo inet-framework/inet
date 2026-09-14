@@ -193,6 +193,15 @@ void ProtocolTester::handleMessage(cMessage *msg)
         advance(simTime());
         return;
     }
+    for (auto& guard : guards) {
+        if (msg == guard.timer) {
+            guard.timer = nullptr;
+            resolveGuard(guard);
+            guard.count = -1; // resolved
+            delete msg;
+            return;
+        }
+    }
     if (msg == deadlineMsg) {
         // Deadline expiry means different things per step kind.
         Step& step = program->steps[currentStep];
@@ -451,6 +460,14 @@ void ProtocolTester::enterStep()
         return;
     }
     Step& step = program->steps[currentStep];
+    if (step.concurrent) {
+        // meanwhile(...): start it and do not wait. The cursor moves to the next step in
+        // the same instant, so the guard and everything after it run together.
+        startGuard(currentStep);
+        currentStep++;
+        enterStep();
+        return;
+    }
     switch (step.type) {
         case StepType::Once:
         case StepType::AtMostOnce:
@@ -503,9 +520,10 @@ void ProtocolTester::enterStep()
     }
 }
 
-bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event)
+bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event, simtime_t anchor)
 {
-    if (pattern.selHasNotBefore && event.time < anchorTime + pattern.selNotBefore)
+    simtime_t base = anchor >= SIMTIME_ZERO ? anchor : anchorTime;
+    if (pattern.selHasNotBefore && event.time < base + pattern.selNotBefore)
         return false;
     MatchContext context{event, captureStore};
     if (!pattern.selectorMatches(context))
@@ -551,6 +569,13 @@ void ProtocolTester::processMatch(const PacketEvent& event)
     // engine's scheduleAt()/cancelEvent() and self-message ownership are valid.
     Enter_Method_Silent("processMatch");
 
+    // Every running guard sees the event, and then the ordered step does. One event
+    // reaching more than one step is the second half of what meanwhile(...) needs; without
+    // it a guard would swallow the event the next step is waiting for.
+    offerToGuards(event);
+
+    if (decided)
+        return;
     if (currentStep >= program->steps.size())
         return;
     Step& step = program->steps[currentStep];
@@ -667,6 +692,58 @@ void ProtocolTester::performInjection(const Injection& injection)
             << " at t=" << simTime() << endl;
     // pushPacket() does its own Enter_Method; the interface adds InterfaceInd etc.
     sink->pushPacket(packet, gate);
+}
+
+void ProtocolTester::startGuard(size_t stepIndex)
+{
+    Step& step = program->steps[stepIndex];
+    Guard guard;
+    guard.stepIndex = stepIndex;
+    guard.startTime = simTime();
+    if (step.pattern.selHasWithin && step.pattern.selWithin > SIMTIME_ZERO) {
+        guard.timer = new cMessage("guard");
+        guard.timer->setContextPointer(reinterpret_cast<void *>(static_cast<uintptr_t>(stepIndex)));
+        scheduleAt(guard.startTime + step.pattern.selWithin, guard.timer);
+    }
+    guards.push_back(guard);
+    EV_INFO << "PROTOCOLTEST guard started for step " << stepIndex << " [" << step.pattern.str() << "]" << endl;
+}
+
+void ProtocolTester::offerToGuards(const PacketEvent& event)
+{
+    for (auto& guard : guards) {
+        if (decided)
+            return;
+        if (guard.timer == nullptr && guard.count < 0)
+            continue; // already resolved
+        Step& step = program->steps[guard.stepIndex];
+        if (!patternMatches(step.pattern, event, guard.startTime))
+            continue;
+        guard.count++;
+        if (step.type == StepType::Never) {
+            decide(false, "forbidden event occurred at t=" + event.time.str() + " for the guard of step "
+                          + std::to_string(guard.stepIndex) + " [" + step.pattern.str() + "]");
+            return;
+        }
+        if (step.type == StepType::Count && step.cardMax >= 0 && guard.count > step.cardMax) {
+            decide(false, "the guard of step " + std::to_string(guard.stepIndex) + " allows at most "
+                          + std::to_string(step.cardMax) + " occurrences, and saw " + std::to_string(guard.count)
+                          + " [" + step.pattern.str() + "]");
+            return;
+        }
+    }
+}
+
+void ProtocolTester::resolveGuard(Guard& guard)
+{
+    Step& step = program->steps[guard.stepIndex];
+    if (step.type == StepType::Count && guard.count < step.cardMin) {
+        decide(false, "the guard of step " + std::to_string(guard.stepIndex) + " needs at least "
+                      + std::to_string(step.cardMin) + " occurrences, and saw " + std::to_string(guard.count)
+                      + " [" + step.pattern.str() + "]");
+        return;
+    }
+    EV_INFO << "PROTOCOLTEST guard of step " << guard.stepIndex << " held" << endl;
 }
 
 void ProtocolTester::armDeadline(simtime_t window)

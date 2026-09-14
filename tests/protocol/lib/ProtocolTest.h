@@ -103,7 +103,15 @@ struct Step {
     EventPattern pattern2;             // Delivery "to" (holds the delivery window in its within)
     int count = 0;                     // ExactlyTimes
     int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
+    bool concurrent = false;           // meanwhile(...): runs beside the steps after it
 };
+
+// Free builders that make a step without a program to hold it. They exist so that a guard
+// can be handed to meanwhile(...), which is the only way to write one that does not block.
+// The methods of the same name on ProtocolTest are unchanged and still add a blocking step.
+Step never(EventPattern pattern);
+Step atMostTimes(int n, EventPattern pattern);
+Step atLeastTimes(int n, EventPattern pattern);
 
 // Entry points of the fluent injection and interception chains.
 //
@@ -186,6 +194,24 @@ class INET_API ProtocolTest
 
     // All patterns must match, in any order, before advancing. The group window is
     // the longest within() among its patterns.
+    // Start a step and do not wait for it. The engine keeps the step running beside the
+    // steps that follow, and an event reaches every running step rather than only the first.
+    //
+    //     .meanwhile(never(on("host1.ipv4").signal("packetSentToUpper").within(0.5)))
+    //     .meanwhile(never(on("host1.eth[0].mac").signal("packetSentToLower")
+    //                          .filterExpr("icmpv4.type == 3").within(0.5)))
+    //     .once(on("router.ipv4.ip").signal("packetDropped").within(0.2))
+    //
+    // Without this, a guard holds the cursor for its whole window, so two guards cannot
+    // cover one window and nothing can be observed inside either of them. Four standards
+    // passes worked around that, each in its own way.
+    ProtocolTest& meanwhile(Step step)
+    {
+        step.concurrent = true;
+        steps.push_back(std::move(step));
+        return *this;
+    }
+
     ProtocolTest& unordered(std::vector<EventPattern> patterns)
     {
         steps.push_back(Step{StepType::Unordered, {}, {}, std::move(patterns)});

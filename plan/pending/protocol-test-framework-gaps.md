@@ -19,7 +19,7 @@ and [`dhcp/notes.md`](../../doc/project/evidence/model/dhcp/notes.md#scenario-qu
 | Gap | Passes | State |
 | --- | --- | --- |
 | One relay carries one rule | ipv4, ipv6, tcp, dhcp | **done**, item 4 below |
-| The engine is a strictly sequential consumer | ipv4, arp, dhcp, tcp level 4 | item 3 below |
+| The engine is a strictly sequential consumer | ipv4, arp, dhcp, tcp level 4 | **done**, item 3 below |
 | A unit-bearing capture breaks the next step | tcp, ipv6 | **done**, item 1 below |
 | An address field cannot be compared in an expression | arp, dhcp | not in this plan |
 | A scalar signal refuses a predicate | quic | item 2 below |
@@ -126,10 +126,15 @@ Two rules remove all four:
 - **(b) One event reaches every active step, not the first one only.** Rule (b) alone fixes
   the DHCP case.
 
-- [ ] Make the cardinality words free builders that return a step.
-- [ ] Add `meanwhile(step)`.
-- [ ] Offer an event to every active step.
-- [ ] A concurrent step decides on its own window and reports at the end of the run.
+- [x] Make the cardinality words free builders that return a step: `never`, `atMostTimes`,
+      `atLeastTimes`.
+- [x] Add `meanwhile(step)`.
+- [x] Offer an event to every active step.
+- [x] A concurrent step carries its own window, its own anchor and its own count.
+- [x] `self/TwoGuardsOneWindow.test` needs both halves at once: two guards open together,
+      an ordered observation inside them, and one event that a guard and the ordered step
+      both read. Verified: a guard that should fire reports
+      "forbidden event occurred at t=0.1 for the guard of step 0".
 
 ## Item 4 — the relay holds one rule
 

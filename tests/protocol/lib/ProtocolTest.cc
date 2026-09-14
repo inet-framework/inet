@@ -85,5 +85,33 @@ ProtocolTest ProtocolTestRegistry::buildDefault()
     return defaultBuilder()();
 }
 
+Step never(EventPattern pattern)
+{
+    Step step;
+    step.type = StepType::Never;
+    step.pattern = std::move(pattern);
+    return step;
+}
+
+Step atMostTimes(int n, EventPattern pattern)
+{
+    Step step;
+    step.type = StepType::Count;
+    step.cardMin = 0;
+    step.cardMax = n;
+    step.pattern = std::move(pattern);
+    return step;
+}
+
+Step atLeastTimes(int n, EventPattern pattern)
+{
+    Step step;
+    step.type = StepType::Count;
+    step.cardMin = n;
+    step.cardMax = -1;
+    step.pattern = std::move(pattern);
+    return step;
+}
+
 } // namespace protocoltest
 } // namespace inet

@@ -1,0 +1,105 @@
+%description:
+
+Protocol Test Framework self test -- two guards over one window, and an observation inside
+them.
+
+The engine kept one cursor. A step held it for its whole window, so a guard could not run
+beside anything: two `never` steps could not cover one window, because the second opened
+only when the first closed, and nothing could be observed while either was open. Four
+standards passes worked around that. The IPv4 pass wrote one `never` with a combined
+predicate, `silenceBroken()`, because it needed two rules over the same window and could
+only have one step.
+
+`meanwhile(...)` starts a step and does not wait for it, and an event now reaches every
+running step rather than only the first. This test needs both halves at once:
+
+- two guards, open together, over the same window;
+- an ordered observation inside that window, which a blocking guard would have hidden;
+- one event that both a guard and the ordered step must see.
+
+The scenario is a UDP flow from host A to host B on port 5000. Nothing in it ever sends to
+port 9999, and host A never receives a datagram on port 5000, so both guards hold. The
+datagram host A sends is the event the ordered step reads, and the first guard sees the same
+event and lets it pass, because that guard forbids a different port.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("two_guards_one_window")
+        // Guard 1: nothing leaves host A for port 9999, for the whole run.
+        .meanwhile(never(on("host1.udp").signal("packetSentToLower")
+                             .filterExpr("udp.destPort == 9999")
+                             .describe("any datagram to port 9999")
+                             .within(2.0)))
+        // Guard 2: host A never receives a datagram on the port it sends to. It opens in the
+        // same instant as guard 1 and covers the same window, which two ordered steps could
+        // not do.
+        .meanwhile(never(on("host1.udp").signal("packetReceivedFromLower")
+                             .filterExpr("udp.destPort == 5000")
+                             .describe("a datagram arriving at host A on port 5000")
+                             .within(2.0)))
+        // The ordered observation happens inside both guards' windows. With a blocking
+        // guard this step could not run until the guard's window had closed.
+        .once(on("host1.udp").signal("packetSentToLower")
+                  .filterExpr("udp.destPort == 5000")
+                  .describe("host A's datagram to port 5000")
+                  .within(1.0))
+        // And it is delivered, still inside the guards' windows.
+        .once(on("host2.udp").signal("packetReceivedFromLower")
+                  .filterExpr("udp.destPort == 5000")
+                  .describe("the datagram at host B")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "two_guards_one_window compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Two hosts on one link -- note: NO tester (attached at runtime).
+network TwoGuardsNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TwoGuardsNet
+sim-time-limit = 3s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST two_guards_one_window: PASS
