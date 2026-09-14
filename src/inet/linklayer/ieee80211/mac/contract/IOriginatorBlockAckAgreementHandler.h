@@ -32,6 +32,14 @@ struct INET_API OriginatorBlockAckAgreementResponse
     uint64_t teardownTransactionId = 0;
 };
 
+struct INET_API OriginatorBlockAckAgreementAbortResult
+{
+    bool handled = false;
+    std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement;
+
+    explicit operator bool() const { return handled; }
+};
+
 class INET_API IOriginatorBlockAckAgreementHandler
 {
   public:
@@ -49,7 +57,7 @@ class INET_API IOriginatorBlockAckAgreementHandler
     // Returns true when the packet completed or aborted its tagged teardown
     // transaction and sibling packets were cancelled through the callback.
     virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
-    virtual bool processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual OriginatorBlockAckAgreementAbortResult processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
 

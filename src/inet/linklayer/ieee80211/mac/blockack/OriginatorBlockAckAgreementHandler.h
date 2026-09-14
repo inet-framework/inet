@@ -53,7 +53,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual bool processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual OriginatorBlockAckAgreementAbortResult processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
 

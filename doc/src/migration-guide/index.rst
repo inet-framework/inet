@@ -156,6 +156,16 @@ generation metadata remains available. Keep teardown pending until its final fra
 acknowledged or the exchange terminates; do not retire a replacement generation from a
 stale completion.
 
+Block Ack Inactivity Timer Callbacks
+------------------------------------
+
+Schedule the shared Block Ack inactivity timer for the earliest enabled absolute
+agreement deadline and cancel it when no enabled deadline remains. Expiry callbacks can
+synchronously remove or replace the current agreement or a sibling. Keep
+peer/TID/generation values as the work list and relookup the live state before using it
+after a callback; incrementing a map iterator before calling out does not protect a
+removed sibling.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
