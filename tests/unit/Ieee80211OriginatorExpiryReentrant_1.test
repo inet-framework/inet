@@ -1,0 +1,91 @@
+%description:
+Exercise originator agreement expiry while synchronous callbacks erase current
+and sibling agreements or install replacements. Check future and disabled deadlines.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class ExpiryHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    void install(MacAddress peer, Tid tid, uint64_t generation, simtime_t timeout) {
+        auto key = std::make_pair(peer, tid);
+        delete blockAckAgreements[key];
+        auto agreement = new OriginatorBlockAckAgreement(peer, tid, SequenceNumberCyclic(0), 64, true, false, 1, generation);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(timeout);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[key] = agreement;
+    }
+    void erase(MacAddress peer, Tid tid) { delete removeAgreement(peer, tid); }
+    bool contains(MacAddress peer, Tid tid) { return getAgreement(peer, tid) != nullptr; }
+};
+
+class ExpiryCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    ExpiryHandler *handler = nullptr;
+    MacAddress peer;
+    int action = 0;
+    int sent = 0;
+    simtime_t deadline = 0;
+    virtual void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { throw cRuntimeError("Unexpected response"); }
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole, simtime_t value) override { deadline = value; }
+    virtual void scheduleAddbaResponseTimer(simtime_t) override {}
+    virtual void cancelAddbaTransaction(uint64_t, Packet *) override {}
+    virtual void cancelBlockAckTeardown(bool, MacAddress, Tid, uint64_t, Packet *) override {}
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(header);
+        ASSERT(delba != nullptr);
+        auto tid = delba->getTid();
+        ASSERT(packet->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId() == uint64_t(tid + 1));
+        sent++;
+        auto result = handler->processAbortedDelba(packet, this);
+        ASSERT(result.handled);
+        ASSERT(result.terminatedAgreement != nullptr);
+        if (tid == 0) {
+            if (action == 1)
+                handler->erase(peer, 1);
+            if (action == 2) {
+                handler->install(peer, 0, 100, SimTime(10, SIMTIME_MS));
+                handler->install(peer, 1, 101, SimTime(10, SIMTIME_MS));
+            }
+        }
+        delete packet;
+    }
+};
+
+%activity:
+for (int action = 0; action < 3; action++) {
+    ExpiryHandler handler;
+    ExpiryCallback callback;
+    callback.handler = &handler;
+    callback.peer = MacAddress("02:00:00:00:00:01");
+    callback.action = action;
+    auto start = simTime();
+    for (int tid = 0; tid < 2; tid++)
+        handler.install(callback.peer, tid, tid + 1, SimTime(1, SIMTIME_MS));
+    handler.install(callback.peer, 2, 3, SimTime(20, SIMTIME_MS));
+    handler.install(callback.peer, 3, 4, 0);
+    wait(SimTime(2, SIMTIME_MS));
+    handler.blockAckAgreementExpired(&callback, &callback);
+    ASSERT(callback.sent == (action == 0 ? 2 : 1));
+    ASSERT(handler.contains(callback.peer, 0) == (action >= 2));
+    ASSERT(handler.contains(callback.peer, 1) == (action == 2));
+    ASSERT(handler.contains(callback.peer, 2));
+    ASSERT(handler.contains(callback.peer, 3));
+    ASSERT(callback.deadline == start + SimTime(action >= 2 ? 12 : 20, SIMTIME_MS));
+    handler.blockAckAgreementExpired(&callback, &callback);
+    ASSERT(callback.sent == (action == 0 ? 2 : 1));
+    for (int tid = 0; tid < 4; tid++)
+        handler.erase(callback.peer, tid);
+    handler.blockAckAgreementExpired(&callback, &callback);
+    ASSERT(callback.sent == (action == 0 ? 2 : 1));
+    ASSERT(callback.deadline == SIMTIME_MAX);
+}
