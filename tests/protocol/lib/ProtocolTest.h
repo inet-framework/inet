@@ -117,6 +117,7 @@ struct Step {
 Step never(EventPattern pattern);
 Step atMostTimes(int n, EventPattern pattern);
 Step atLeastTimes(int n, EventPattern pattern);
+Step exactlyTimes(int n, EventPattern pattern);
 
 // Entry points of the fluent injection and interception chains.
 //

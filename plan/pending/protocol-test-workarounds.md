@@ -73,7 +73,16 @@ this group needs the two points above settled first.
 
 - [ ] Decide whether a step may observe without ending the run, or whether the tester should
       run to the end of the window before it reports.
-- [ ] Decide whether `exactlyTimes` should mean what its name says.
+- [x] `exactlyTimes` means what its name says, since 2026-09-14. It was the smaller of the
+      two blockers and it is gone.
+- [ ] **A receiving UDP module reports each datagram twice.** This is the blocker now, and
+      it is new. At `hostB.udp` with `packetReceivedFromLower`, five datagrams produce ten
+      matching events: `exactlyTimes(10)` passes where `exactlyTimes(5)` fails with "more
+      than 5 occurrence(s)", and the event log shows five arrivals. The sending side does
+      not double: `self/Repeat.test` counts three sends at `host1.udp` as three. Until this
+      is understood, no cardinality at a receiving UDP module can be trusted, and that is
+      the observation group 2 needs. Find out whether the model emits the signal twice or
+      the tester records one emission twice.
 - [ ] Then the six ARP tests.
 
 ## Group 3 — nine tests that carry a combined guard

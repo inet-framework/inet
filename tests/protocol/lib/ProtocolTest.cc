@@ -93,6 +93,16 @@ Step atMostTimes(int n, EventPattern pattern)
     return step;
 }
 
+Step exactlyTimes(int n, EventPattern pattern)
+{
+    Step step;
+    step.type = StepType::Count;
+    step.cardMin = n;
+    step.cardMax = n;
+    step.pattern = std::move(pattern);
+    return step;
+}
+
 Step atLeastTimes(int n, EventPattern pattern)
 {
     Step step;
