@@ -31,6 +31,8 @@ Notable backward incompatible changes are the following:
 
 2. IEEE 802.11 wire and reception corrections
 
+   QoS Control fields now use the standard bit positions.
+
    Non-QoS Data no longer aliases the QoS TID-0 duplicate cache.
 
    The mesh no-forwarding-information reason code is corrected from 60 to 62.
