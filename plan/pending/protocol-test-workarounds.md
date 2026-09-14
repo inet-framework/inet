@@ -38,18 +38,20 @@ longer has to end before the next observation begins.
 - [x] The note keeps the one limit that still holds and says the other two are gone.
 - [x] `quic/notes.md` item 6 corrected; it contradicted the same file's follow-up list.
 
-## Group 2 — six ARP tests that read a printed line
+## Group 2 — five ARP tests that read a printed line
 
-**These establish less than they could.**
+**These established less than they could. Done on 2026-09-14.**
 
-A greedy step consumed its whole window, so six ARP tests moved their observation to a line
-the receiving program prints at the end of the run. That reads the application's summary
-rather than the protocol exchange, and it cannot say when the packet arrived.
+A greedy step consumed its whole window, so five ARP tests moved their observation to a line
+the receiving program prints at the end of the run. That read the application's summary
+rather than the protocol exchange, and it could not say when the packet arrived. The plan
+said six; the suite held five, and no printed-line assertion is left anywhere in
+`tests/protocol`.
 
-With `meanwhile` the count runs beside the steps that follow, so the observation returns to
+With `meanwhile` the count runs beside the steps that follow, so the observation is back on
 the wire.
 
-**Attempted on 2026-09-14 and stopped. `meanwhile` is necessary and not sufficient.**
+**Attempted first on 2026-09-14 and stopped. `meanwhile` was necessary and not sufficient.**
 
 `Rfc826CachedMapping` was rewritten so that the count runs beside the steps and the five
 datagrams are observed on the wire. It passed, and it was **not decisive**: demanding six
@@ -93,7 +95,25 @@ this group needs the two points above settled first.
       still carries the UDP header, so `udp.destPort` filters on it, and it is emitted once
       per delivered datagram. A probe of five datagrams counts five there, and both four and
       six fail.
-- [ ] Then the six ARP tests.
+- [x] The five ARP tests, on 2026-09-14. Each one keeps its verdict and gains an
+      observation on the link:
+
+      | Test | The fact that left the printed line |
+      | --- | --- |
+      | `Rfc826CachedMapping` | five datagrams delivered up at host B, counted at `hostB.ipv4.ip` |
+      | `Rfc1122NoDestinationUnreachable` | no ARP reply for 10.0.0.99 reaches host A |
+      | `Rfc1122ArpFloodPrevention` | no ARP reply for 10.0.0.99 reaches host A |
+      | `Rfc826ThirdStationRequest` | host C's reply on the link, exactly once |
+      | `Rfc826LearningFromRequest` | host B's datagram delivered up at host A, exactly once |
+
+      Two of them also widen an absence watch to the whole run, because the guard no longer
+      has to start after an ordered step.
+
+      **Every new check was made to fail.** Each count was run at one below and one above
+      its true number, and both failed. Each new `never` was retargeted at an event that
+      does occur, and failed. Full run after the group: the self suite is 19 PASS, and the
+      ARP suite is 13 PASS with the 3 failures that `arp/results.md` already records as
+      gaps 1 and 2. No other suite has a changed file, so no other verdict moved.
 
 ## Group 3 — nine tests that carry a combined guard
 
