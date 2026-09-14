@@ -33,11 +33,11 @@ Define_ProtocolTestProgram()
     leasedAddress = Ipv4Address();
     return ProtocolTest("rfc2131_rebind_at_t2")
         // The relay drops the DHCPACK that answers the renewal: the second of the run.
-        .intercept(intercept("tap").match("DhcpMessage.options.messageType == 5").nth(2).drop()
+        .intercept(tap("tap").filterPacket("DhcpMessage.options.messageType == 5").nth(2).drop()
                      .describe("the second DHCPACK, which answers the renewal at T1"))
         // Expected observation 1, first half: the client gets a lease of 120 seconds.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;
@@ -50,7 +50,7 @@ Define_ProtocolTestProgram()
                   .within(5.0))
         // Expected observation 1, second half: the renewal leaves at T1, 60 seconds later.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
                              && dhcp->getCiaddr() == leasedAddress
@@ -60,18 +60,18 @@ Define_ProtocolTestProgram()
                   .notBefore(59.0).within(61.0))
         // Expected observation 2, first half: the server answers it.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
                   .describe("the DHCPACK the server sends in answer to the renewal")
                   .within(1.0))
         // Expected observation 2, second half: it does not reach the client. The window closes
         // just before T2, so the absence covers the whole time the client waits.
         .never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
                   .describe("a DHCPACK reaching the client between the renewal and T2")
                   .within(44.0))
         // Expected observations 3 to 6: the rebinding at T2.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
                           return false;

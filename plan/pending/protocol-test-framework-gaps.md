@@ -1,8 +1,8 @@
 # Protocol test framework — the gaps the standards passes found
 
 **Status:** phase 1 complete. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`.
-Every item below is implemented and covered by a self test. Phase 2, which removes the old
-words, is still to do.
+Every item below is implemented and covered by a self test. Phase 2, which removed the old
+words, is done.
 
 Seven protocols now have a standards pass, and nearly every one left a `notes.md` with a
 "tooling quirks" section. This plan collects what those sections ask for, adds what the TCP
@@ -179,10 +179,20 @@ accident, because the adder is `once`.
 **Phase 1 is additive and nothing breaks.** Every new word arrives beside the old one, and
 the roughly 1700 existing call sites keep working.
 
-**Phase 2 removes the old words**, in a separate change: `.packet(` 729 sites, `.match(` 638,
-`.is(` 30, `intercept(` 223, `inject(` 85. All mechanical except `.match(`, which needs a
-judgment per site — `filterPacket` or `filterEvent` by the argument type — and is worth doing in
-review rather than by script.
+**Phase 2 is done**, on 2026-09-14. 871 call sites changed and the old words are gone from
+the API. Splitting `.match(` by its argument was mechanical after all, and all seven cases
+the split could not decide turned out to be prose.
+
+Three things a blanket rename got wrong. None was caught by the compiler alone; the suites
+found every one.
+
+- `Injection::packet(builder)` is **not** a filter. It supplies the packet to inject, and its
+  argument is a function, not an expression. 26 call sites were renamed wrongly and restored.
+- The **step adders** `ProtocolTest::inject` and `ProtocolTest::intercept` keep their verbs.
+  A rename of the free builders that does not exclude a declaration renames them too, and
+  then every test that adds a step fails to compile.
+- Six mentions were prose, and two of those described a limitation that had since been
+  fixed, so they were wrong twice over.
 
 ## Order of work
 

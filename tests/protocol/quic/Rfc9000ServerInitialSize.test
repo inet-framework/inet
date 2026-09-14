@@ -55,13 +55,13 @@ Define_ProtocolTestProgram()
         // Observation 1: the server sends a datagram that carries an ack-eliciting Initial
         // packet. This confirms that the case the requirement names occurs in this run.
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return ackElicitingInitial(c.event.packet); })
+                  .filterEvent([](const MatchContext& c) { return ackElicitingInitial(c.event.packet); })
                   .describe("the server's datagram carrying an ack-eliciting Initial packet")
                   .within(1.0))
         // Observation 2: that datagram is at least 1200 octets (RFC9000-SIZE-1, the server
         // half).
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return ackElicitingInitial(c.event.packet) && c.event.packet->getByteLength() >= 1200;
                   })
                   .describe("that datagram expanded to at least 1200 octets")

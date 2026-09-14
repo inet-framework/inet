@@ -36,8 +36,8 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc1122_no_destination_unreachable")
         // Expected observation 1: the resolution really was attempted.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress") == "10.0.0.99";
                   })
                   .describe("an ARP request from host A for 10.0.0.99")
@@ -45,7 +45,7 @@ Define_ProtocolTestProgram()
         // Expected observation 3: no ICMP message anywhere at host A, for the rest of the
         // run (RFC1122-ANOERR-1).
         .never(on("hostA")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return matchesExpression(c.event.packet, "icmpv4.type >= 0");
                   })
                   .describe("any ICMP message at host A")

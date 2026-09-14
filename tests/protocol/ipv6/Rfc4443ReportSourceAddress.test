@@ -23,14 +23,14 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc4443_report_source_address")
         // Expected observation 1: the packet on link 1 with hop limit 1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 1")
+                  .filterPacket("udp.destPort == 5000 && ipv6.hopLimit == 1")
                   .describe("the packet on link 1 with hop limit 1")
                   .within(6.0))
         // Expected observation 2: the Time Exceeded at host A comes from the router's own address
         // on link 1 (RFC4443-SRC-2).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 3")
-                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.srcAddress") == nodeIpv6Address("router%eth0"); })
+                  .filterPacket("icmpv6.type == 3")
+                  .filterEvent([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.srcAddress") == nodeIpv6Address("router%eth0"); })
                   .describe("the Time Exceeded message at host A with the router's link 1 address as source")
                   .within(0.5));
 }

@@ -35,24 +35,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_unknown_icmp_type")
         // The relay rewrites the ICMP type of the echo request to 42.
-        .intercept(intercept("tap").match("icmpv4.type == 8").nth(1)
+        .intercept(tap("tap").filterPacket("icmpv4.type == 8").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<IcmpHeader>(frame, [](IcmpHeader& h) { h.setType(static_cast<IcmpType>(42)); }); })
                      .describe("the echo request (set its ICMP type to 42)"))
         // Expected observation 1: at host B's interface an ICMP message of type 42 arrives.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv4.type == 42")
+                  .filterPacket("icmpv4.type == 42")
                   .describe("an ICMP message of the unknown type 42 at host B's interface")
                   .within(0.5))
         // Expected observation 2: host B discards it (RFC1122-ICMP-1); the record may sit at any
         // module of the host.
         .once(on("hostB").signal("packetDropped")
-                  .packet("icmpv4.type == 42")
+                  .filterPacket("icmpv4.type == 42")
                   .describe("host B's discard of the unknown ICMP message")
                   .within(0.1))
         // Expected observation 3: from then on, no ICMP message leaves host B: neither an echo
         // reply nor an error report.
         .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv4.type >= 0")
+                  .filterPacket("icmpv4.type >= 0")
                   .describe("any ICMP message from host B")
                   .within(0.2));
 }

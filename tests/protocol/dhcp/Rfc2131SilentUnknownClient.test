@@ -42,12 +42,12 @@ static Packet *buildInitRebootRequest(const CaptureStore&)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc2131_silent_unknown_client")
-        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+        .inject(at("server").into("eth[0]", "upperLayerOut").at(1.0)
                   .describe("a crafted DHCPREQUEST from INIT-REBOOT asking for 192.168.1.200, from a hardware address the server never served")
                   .packet(buildInitRebootRequest))
         // Expected observation 1: the crafted message reaches the server's transport module.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
                              && hasOption(dhcp, REQUESTED_IP)
@@ -59,7 +59,7 @@ Define_ProtocolTestProgram()
                   .within(0.1))
         // Expected observation 2: from that instant on, the server sends no DHCP message at all.
         .never(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isAnyDhcp(c.event.packet); })
+                  .filterEvent([](const MatchContext& c) { return isAnyDhcp(c.event.packet); })
                   .describe("any DHCP message from the server")
                   .within(1.0));
 }

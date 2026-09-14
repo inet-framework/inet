@@ -15,7 +15,7 @@ Define_ProtocolTest(pe_padding)
 {
     return ProtocolTest("pe_padding")
         .once(on("padding").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() >= B(64);
                   })
                   .describe("the padded packet, at least 64 bytes").within(1.5))

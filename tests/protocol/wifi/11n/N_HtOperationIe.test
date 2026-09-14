@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_11n_ht_operation_ie)
 {
     return ProtocolTest("wifi_11n_ht_operation_ie")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 8 && Ieee80211HtOperation.length >= 0")
+                  .filterPacket("ieee80211mac.type == 8 && Ieee80211HtOperation.length >= 0")
                   .describe("a Beacon frame containing HT Operation IE").within(2.5));
 }
 

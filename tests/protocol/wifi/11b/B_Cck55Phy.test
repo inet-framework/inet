@@ -15,8 +15,8 @@ Define_ProtocolTest(wifi_11b_cck55_phy)
 {
     return ProtocolTest("wifi_11b_cck55_phy")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) { return isHrDsss(c.event); })
+                  .filterPacket("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) { return isHrDsss(c.event); })
                   .describe("a data frame in HR/DSSS-CCK 5.5 Mbps mode").within(2.5));
 }
 

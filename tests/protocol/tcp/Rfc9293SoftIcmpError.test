@@ -33,28 +33,28 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_soft_icmp_error")
         // The relay sets the time to live of the first data segment to 1.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setTimeToLive(1); }); })
                      .describe("the first data segment (set its time to live to 1)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the gateway reports the expiry to host A with an ICMP Time Exceeded,
         // type 11 code 0, which RFC 9293 counts as a soft error.
         .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv4.type == 11")
+                  .filterPacket("icmpv4.type == 11")
                   .describe("the ICMP Time Exceeded from the gateway at host A")
                   .within(1.0))
         // Observation 3: host A does not end the connection. No reset leaves it.
         .never(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.rstBit == true")
+                  .filterPacket("tcp.rstBit == true")
                   .describe("a reset from host A")
                   .within(0.5))
         // Observation 4: the connection carries on and the whole stream is acknowledged.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

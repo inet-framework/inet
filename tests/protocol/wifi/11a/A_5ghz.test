@@ -20,8 +20,8 @@ Define_ProtocolTest(wifi_11a_5ghz)
 {
     return ProtocolTest("wifi_11a_5ghz")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) {
                       if (!isOfdm(c.event))
                           return false;
                       auto m = dynamic_cast<const Ieee80211OfdmMode *>(txMode(c.event));

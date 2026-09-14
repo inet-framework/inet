@@ -72,13 +72,13 @@ Define_ProtocolTestProgram()
         // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
         // stimulus.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: host A receives host B's SYN-ACK with a window field of 300
         // (RFC9293-WND-1). Record it as W.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1 && tcp.window == 300")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1 && tcp.window == 300")
                   .capture("w", "tcp.window")
                   .describe("host B's SYN-ACK advertising a 300-octet window").within(0.5))
         // Observation 3: after the send time, host A sends a segment with sequence number
@@ -90,8 +90,8 @@ Define_ProtocolTestProgram()
         // step's anchor is observation 2's SYN-ACK receipt, itself only ~0.1s in -- would
         // wrongly exclude the real 0.2s send time; confirmed empirically).
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.sequenceNo == {issA} + 1")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 300; })
+                  .filterPacket("tcp.sequenceNo == {issA} + 1")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 300; })
                   .describe("host A's first data segment, bounded to the 300-octet window, not the 536-octet segment size")
                   .within(1.0))
         // Observation 4: for 0.15 s after that segment, host A sends no segment that
@@ -99,20 +99,20 @@ Define_ProtocolTestProgram()
         // open the window is still 0.05 s away (the 0.2 s delayed-ack timer started when
         // observation 3's segment arrived at host B).
         .never(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.sequenceNo > {issA} + 300")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .filterPacket("tcp.sequenceNo > {issA} + 300")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
                   .describe("any new data beyond the window edge, ISS_A + 300")
                   .within(0.15))
         // Observation 5: host A receives an acknowledgment of ISS_A + W + 1 with a window
         // field of at least W: the receiver accepted the octets and reopened the window.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackNo == {issA} + 301 && tcp.window >= 300")
+                  .filterPacket("tcp.ackNo == {issA} + 301 && tcp.window >= 300")
                   .describe("host B's delayed acknowledgment of ISS_A + 301, reopening the window").within(0.5))
         // Observation 6: host A sends a segment with sequence number ISS_A + W + 1 that
         // carries data: the sender resumed exactly at the edge.
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.sequenceNo == {issA} + 301")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .filterPacket("tcp.sequenceNo == {issA} + 301")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
                   .describe("host A resuming exactly at the window edge, ISS_A + 301")
                   .within(0.5));
 }

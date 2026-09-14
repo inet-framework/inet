@@ -14,7 +14,7 @@ generator never signals "finished" -- an app-triggered close right after handing
 the socket would race full delivery).
 
 Implementation notes:
-- As in Rfc9000ConnectionEstablishment.test, .packet("quic....")/evalPacketField() cannot see
+- As in Rfc9000ConnectionEstablishment.test, .filterPacket("quic....")/evalPacketField() cannot see
   inside a QUIC packet (no protocol dissector registered for it -- confirmed empirically by
   the Task 0 probe); this test walks the chunk tree directly via QuicChunks.h's
   findQuicChunk<T>().
@@ -22,16 +22,16 @@ Implementation notes:
   the application. QuicDiscardServer's own "bytesReceived" signal is observable (its emit()
   call casts to (long), matching ProtocolTester's intval_t receiveSignal overload -- confirmed
   by an authoring-time stateSignals dump), but it fires once per received chunk (1454, 546,
-  1453, 1, 546 in this scenario: never a running total), and .signal(name).is(v) can only match
+  1453, 1, 546 in this scenario: never a running total), and .signal(name).filterValue(v) can only match
   one exact scalar value, so it cannot express "reaches 4000 in total". Quic's own
   "totalRcvAppData" statistic *is* a running total (Connection.cc, processReceivedData(): a
   file-static unsigned long accumulator, emitted every time), but emitting it crashes this
   framework outright -- confirmed empirically: "Unsupported signal data type uintval_t for
   signal totalRcvAppData_cid=0", because ProtocolTester::receiveSignal only implements the
   intval_t overload and totalReceivedDataBytes is unsigned long, not long. (Also,
-  EventPattern::selectorMatches hard-blocks .match()/.packet() on any scalar (non-packet)
+  EventPattern::selectorMatches used to refuse a predicate on any scalar (non-packet)
   event -- `if (event.packet == nullptr && (!selExpr.empty() || predicate)) return false;` --
-  so even a type-safe cumulative signal could only ever be matched by exact value via .is(),
+  so even a type-safe cumulative signal could only ever be matched by exact value via .filterValue(),
   never accumulated in a lambda.) The nearest faithful, actually-observable proxy is therefore
   the transport-level delivery this application-level number is derived from: the STREAM data
   arriving at host B's UDP layer. Because the mockup path has no loss or reordering, the
@@ -55,7 +55,7 @@ Define_ProtocolTestProgram()
         // STREAM frame (RFC9000-STR-3). Confirms the stimulus: the application data
         // entered a stream. Capture its packet number for observation 2.
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
                   })
                   .capture("pn1", [](const PacketEvent& e) {
@@ -68,7 +68,7 @@ Define_ProtocolTestProgram()
         // number space (RFC9000-PKT-3) -- the 4000-octet block needs several packets at
         // this MTU, so a second one necessarily follows.
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
                       if (sf == nullptr)
                           return false;
@@ -81,7 +81,7 @@ Define_ProtocolTestProgram()
         // (RFC9000-STR-2). See the %description deviation note: observed as the
         // transport-level delivery of the completing STREAM frame at host B's UDP layer.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
                       return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
                   })

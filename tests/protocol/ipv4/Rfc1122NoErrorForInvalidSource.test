@@ -24,28 +24,28 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_no_error_for_invalid_source")
         // The relay rewrites the source address and keeps the checksum valid.
-        .intercept(intercept("tap").match("udp.destPort == 5001").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5001").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setSrcAddress(Ipv4Address::ALLONES_ADDRESS); }); })
                      .describe("the datagram (set its source to 255.255.255.255)"))
         // Expected observation 1: at host B's interface the datagram carries the broadcast source.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5001")
-                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == "255.255.255.255"; })
+                  .filterPacket("udp.destPort == 5001")
+                  .filterEvent([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == "255.255.255.255"; })
                   .capture("id", "ipv4.identification")
                   .describe("the datagram at host B's interface with source 255.255.255.255, to the closed port 5001")
                   .within(0.5))
         // Expected observation 2: host B records a discard, at the network layer or at UDP.
         .anyOf({ on("hostB.ipv4.ip").signal("packetDropped")
-                     .packet("ipv4.identification == {id}")
+                     .filterPacket("ipv4.identification == {id}")
                      .describe("host B's network layer discards the datagram")
                      .within(0.1),
                  on("hostB.udp").signal("packetDropped")
-                     .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; }) // the drop record carries no protocol tag; read the header
+                     .filterEvent([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; }) // the drop record carries no protocol tag; read the header
                      .describe("host B's UDP discards the datagram for want of a port")
                      .within(0.1) })
         // Expected observation 3: from then on, host B sends no ICMP message (RFC1122-ICMP-9).
         .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv4.type >= 0")
+                  .filterPacket("icmpv4.type >= 0")
                   .describe("any ICMP message from host B")
                   .within(0.2));
 }

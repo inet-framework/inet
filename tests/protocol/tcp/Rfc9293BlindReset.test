@@ -33,24 +33,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_blind_reset")
         // The relay turns the first data segment into a reset far outside the window.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { makeReset(frame, tcpSequenceNumberOf(frame) + 100000); })
                      .describe("the first data segment (turn it into a reset 100000 above the window)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the crafted reset reaches host B, outside the window. This confirms
         // the stimulus.
         .once(on("host2.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.rstBit == true && tcp.sequenceNo == {issA} + 100001")
+                  .filterPacket("tcp.rstBit == true && tcp.sequenceNo == {issA} + 100001")
                   .describe("the out-of-window reset at host B's TCP")
                   .within(1.0))
         // Observation 3: host B does not act on it. The connection is still there, and the
         // transfer finishes after host A retransmits what the reset replaced.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

@@ -17,7 +17,7 @@ Define_ProtocolTest(wifi_dfs_channel_switch)
 {
     return ProtocolTest("wifi_dfs_channel_switch")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211ChannelSwitchAnnouncementActionFrame.channelSwitchCount >= 0")
+                  .filterPacket("Ieee80211ChannelSwitchAnnouncementActionFrame.channelSwitchCount >= 0")
                   .describe("a Channel Switch Announcement action frame from AP").within(2.0));
 }
 

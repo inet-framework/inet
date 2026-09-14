@@ -20,10 +20,10 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("tcp_handshake_bad")
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo").within(0.2))
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
                   .within(0.5));
 }
 

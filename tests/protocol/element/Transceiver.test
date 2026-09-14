@@ -16,7 +16,7 @@ Define_ProtocolTest(pe_transceiver)
 {
     return ProtocolTest("pe_transceiver")
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() == B(100);
                   })
                   .describe("the received 100-byte packet at the sink").within(0.01));

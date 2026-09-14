@@ -19,8 +19,8 @@ Define_ProtocolTest(wifi_11n_compressed_ba)
 {
     return ProtocolTest("wifi_11n_compressed_ba")
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 25")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 25")
+                  .filterEvent([](const MatchContext& c) {
                       if (!c.event.packet) return false;
                       auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
                       if (!ba) return false;

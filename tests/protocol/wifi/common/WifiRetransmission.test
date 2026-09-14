@@ -26,7 +26,7 @@ Define_ProtocolTest(wifi_retransmission)
 {
     return ProtocolTest("wifi_retransmission")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("(ieee80211mac.type == 32 || ieee80211mac.type == 40) && ieee80211mac.retry == true")
+                  .filterPacket("(ieee80211mac.type == 32 || ieee80211mac.type == 40) && ieee80211mac.retry == true")
                   .describe("a retransmitted data frame with Retry bit set").within(2.5));
 }
 

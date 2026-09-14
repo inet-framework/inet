@@ -59,14 +59,14 @@ Define_ProtocolTestProgram()
         // wire is the one the document defines. This step establishes that the arithmetic
         // below is right, so that step 2 speaks about the model and not about the test.
         .once(on("host2.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.srcPort == 1000")
-                  .match([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
+                  .filterPacket("tcp.srcPort == 1000")
+                  .filterEvent([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
                   .describe("host B's segment, whose checksum is the value RFC 9293 defines")
                   .within(1.0))
         // Observation 1: host A's segment carries that same value, with nothing configured.
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.destPort == 1000")
-                  .match([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
+                  .filterPacket("tcp.destPort == 1000")
+                  .filterEvent([](const MatchContext& c) { return carriesTheRfc9293Checksum(c.event.packet); })
                   .describe("host A's checksum is the value RFC 9293 defines, with nothing configured")
                   .within(1.0));
 }

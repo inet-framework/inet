@@ -49,7 +49,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_ack_contents")
         // The DHCPOFFER, whose parameters the DHCPACK must not contradict (observation 6).
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPOFFER)
                           return false;
@@ -63,7 +63,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 1: the DHCPREQUEST; record the fields the answer must copy.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
                           return false;
@@ -77,7 +77,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 2 to 6, on the DHCPACK that answers it.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;

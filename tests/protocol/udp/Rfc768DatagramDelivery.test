@@ -21,7 +21,7 @@ faithful, actually-observable proxy is again Udp::sendUp()'s packetSentToUpperSi
 that signal fires after the UDP header has already been popped off the packet
 (Udp::processUDPPacket() calls popAtFront<UdpHeader> before dispatching), no udp.* field
 survives to be filtered on it; the two sends are told apart the same way checks.md's own
-Notes do it -- by size (100 / 200 octets) -- via a typed .match(lambda) on
+Notes do it -- by size (100 / 200 octets) -- via a typed filterEvent on
 packet->getByteLength().
 
 Deviation on observation 4's "and not to the program on port 5000": checks.md's Notes section
@@ -60,13 +60,13 @@ Define_ProtocolTestProgram()
         // the stimulus and covers RFC768-HDR-1 (a meaningful source port), RFC768-HDR-3 and
         // RFC768-PROTO-1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.srcPort == 4000 && udp.destPort == 5000 && udp.totalLengthField == 108B && ipv4.protocolId == 17")
+                  .filterPacket("udp.srcPort == 4000 && udp.destPort == 5000 && udp.totalLengthField == 108B && ipv4.protocolId == 17")
                   .describe("P1's datagram on link 1, port 4000 to port 5000, UDP length 108")
                   .within(0.5))
         // Expected observation 2: host B's UDP hands P1's 100 octets of data upward, to the
         // program on port 5000 (RFC768-HDR-2, RFC768-UI-1).
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 100;
                   })
                   .describe("the 100 octets of P1's data handed up from host B's UDP toward the program on port 5000")
@@ -74,7 +74,7 @@ Define_ProtocolTestProgram()
         // Expected observation 3: link 1 shows P2's datagram, port 4001 to port 5001, UDP
         // length 208 octets (8-octet header + 200 octets of data).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.srcPort == 4001 && udp.destPort == 5001 && udp.totalLengthField == 208B")
+                  .filterPacket("udp.srcPort == 4001 && udp.destPort == 5001 && udp.totalLengthField == 208B")
                   .describe("P2's datagram on link 1, port 4001 to port 5001, UDP length 208")
                   .within(0.2))
         // Expected observation 4: host B's UDP hands P2's 200 octets of data upward, to the
@@ -82,7 +82,7 @@ Define_ProtocolTestProgram()
         // receiver (RFC768-HDR-2). The 200-octet size cannot be P1's 100-octet datagram, so
         // the size alone is the "not to port 5000" evidence (see checks.md Notes).
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 200;
                   })
                   .describe("the 200 octets of P2's data handed up from host B's UDP toward the program on port 5001")

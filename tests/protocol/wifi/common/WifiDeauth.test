@@ -19,7 +19,7 @@ Define_ProtocolTest(wifi_deauth)
 {
     return ProtocolTest("wifi_deauth")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 12")
+                  .filterPacket("ieee80211mac.type == 12")
                   .describe("a Deauthentication frame from the AP").within(2.5));
 }
 

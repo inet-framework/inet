@@ -55,26 +55,26 @@ Define_ProtocolTestProgram()
         // wire is the one RFC 768 defines. This step establishes that the arithmetic below is
         // right, so that step 2 speaks about the model and not about the test.
         .once(on("hostC.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5001 && udp.checksum != 0")
-                  .match([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
+                  .filterPacket("udp.destPort == 5001 && udp.checksum != 0")
+                  .filterEvent([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
                   .describe("host C's datagram, whose checksum is the value RFC 768 defines")
                   .within(0.5))
         // Expected observation 1: host A's datagram carries a checksum that is not zero. A zero
         // would mean that the sender generated none, which is the state that must not be the
         // default.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && udp.checksum != 0")
+                  .filterPacket("udp.destPort == 5000 && udp.checksum != 0")
                   .describe("host A's datagram, sent with no configuration, with a non-zero checksum")
                   .within(0.5))
         // Expected observation 2: that value is the one RFC 768 defines (RFC1122-UCK-3).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
-                  .match([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
+                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) { return carriesTheRfc768Checksum(c.event.packet); })
                   .describe("host A's checksum is the value RFC 768 defines, with nothing configured")
                   .within(0.5))
         // Expected observation 3: host B hands host A's 100 octets upward.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
                   .describe("host A's 100 octets handed up from host B's UDP")
                   .within(0.5));
 }

@@ -38,7 +38,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_renew_at_t1")
         // Expected observation 1: the client gets a lease of 300 seconds and an address.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;
@@ -55,7 +55,7 @@ Define_ProtocolTestProgram()
                   .within(5.0))
         // Expected observations 2 to 5: the renewal at T1, 150 seconds later.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
                           return false;
@@ -74,7 +74,7 @@ Define_ProtocolTestProgram()
                   .notBefore(149.0).within(151.0))
         // Expected observation 6: the answer is a unicast to the ciaddr of the renewal.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return isDhcp(c.event.packet, DHCPACK)
                              && ipv4Destination(c.event.packet) == quad(leaseRecord.address)
                              && !isLinkBroadcast(c.event.packet);

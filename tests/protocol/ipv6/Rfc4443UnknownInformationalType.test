@@ -35,17 +35,17 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc4443_unknown_informational_type")
         // The relay rewrites the type of the echo request to 200.
-        .intercept(intercept("tap").match("icmpv6.type == 128").nth(1)
+        .intercept(tap("tap").filterPacket("icmpv6.type == 128").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Icmpv6Header>(frame, [](Icmpv6Header& h) { h.setType(static_cast<Icmpv6Type>(200)); }); })
                      .describe("the echo request (set its type to 200)"))
         // Expected observation 1: at host B's interface an ICMPv6 message of type 200 arrives.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 200")
+                  .filterPacket("icmpv6.type == 200")
                   .describe("an ICMPv6 message of the unknown informational type 200 at host B's interface")
                   .within(6.0))
         // Expected observation 2: from then on, host B sends no reply and no error (RFC4443-MPR-2).
         .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv6.type < 128 || icmpv6.type == 129")
+                  .filterPacket("icmpv6.type < 128 || icmpv6.type == 129")
                   .describe("an echo reply or any ICMPv6 error message from host B")
                   .within(0.5));
 }

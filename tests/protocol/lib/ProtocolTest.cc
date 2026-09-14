@@ -18,21 +18,11 @@ Injection at(const char *nodeName)
     return injection;
 }
 
-Injection inject(const char *nodeName)
-{
-    return at(nodeName);
-}
-
 Interception tap(const char *tapName)
 {
     Interception interception;
     interception.tapName = tapName;
     return interception;
-}
-
-Interception intercept(const char *tapName)
-{
-    return tap(tapName);
 }
 
 std::map<std::string, ProtocolTestBuilderFn>& ProtocolTestRegistry::all()

@@ -17,7 +17,7 @@ Define_ProtocolTest(wifi_11n_smps)
 {
     return ProtocolTest("wifi_11n_smps")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211SmPowerSaveActionFrame.smPowerSaveMode >= 0")
+                  .filterPacket("Ieee80211SmPowerSaveActionFrame.smPowerSaveMode >= 0")
                   .describe("an SM Power Save action frame from sta1").within(2.0));
 }
 

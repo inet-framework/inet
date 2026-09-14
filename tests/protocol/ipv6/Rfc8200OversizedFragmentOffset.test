@@ -24,22 +24,22 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc8200_oversized_fragment_offset")
         // The relay rewrites the offset of the second fragment to 65528.
-        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
+        .intercept(tap("tap").filterPacket("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Ipv6FragmentHeader>(frame, [](Ipv6FragmentHeader& fh) { fh.setFragmentOffset(65528); }); })
                      .describe("the second fragment (set its offset to 65528)"))
         // Expected observation 1: at host B's interface a fragment with offset 65528.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("Ipv6FragmentHeader.fragmentOffset == 65528 && Ipv6FragmentHeader.moreFragments == false")
+                  .filterPacket("Ipv6FragmentHeader.fragmentOffset == 65528 && Ipv6FragmentHeader.moreFragments == false")
                   .describe("a fragment at host B's interface with offset 65528")
                   .within(6.0))
         // Expected observation 2: host A receives Parameter Problem, type 4 code 0.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0")
+                  .filterPacket("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0")
                   .describe("the Parameter Problem message, code 0, at host A")
                   .within(0.5))
         // Expected observation 3: nothing of the datagram reaches UDP at host B (RFC8200-REASM-8).
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000"); })
+                  .filterEvent([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000"); })
                   .describe("the datagram at host B's UDP")
                   .within(0.5));
 }

@@ -49,7 +49,7 @@ Define_ProtocolTestProgram()
         // The DHCPDISCOVER, whose secs, parameter request list and client identifier the
         // DHCPREQUEST must repeat.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -64,7 +64,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1: a DHCPOFFER reaches the client, so that there is an offer to
         // select. Record the two values the DHCPREQUEST must name.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPOFFER)
                           return false;
@@ -77,7 +77,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 2 to 7, on the DHCPREQUEST that follows.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
                           return false;

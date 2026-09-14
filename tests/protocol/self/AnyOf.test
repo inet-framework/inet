@@ -18,9 +18,9 @@ Define_ProtocolTestProgram()
     return ProtocolTest("udp_anyof")
         .anyOf({
             on("host1.udp").signal("packetSentToLower")
-              .packet("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0),
+              .filterPacket("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0),
             on("host1.udp").signal("packetSentToLower")
-              .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0)
+              .filterPacket("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0)
         });
 }
 

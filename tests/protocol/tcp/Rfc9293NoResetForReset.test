@@ -29,13 +29,13 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_no_reset_for_reset")
         // The relay turns host A's first SYN into a reset.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && tcp.synBit == true").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && tcp.synBit == true").nth(1)
                      .mutate([](Packet *frame) { makeReset(frame, tcpSequenceNumberOf(frame)); })
                      .describe("host A's first SYN (turn it into a reset)"))
         // Observation 1: the reset reaches host B, where no connection exists. This confirms
         // the stimulus.
         .once(on("host2.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.rstBit == true && tcp.destPort == 1000")
+                  .filterPacket("tcp.rstBit == true && tcp.destPort == 1000")
                   .describe("the reset at host B's TCP, for a connection that does not exist")
                   .within(1.0))
         // Observation 2: nothing comes back. Host B answers a reset with silence.

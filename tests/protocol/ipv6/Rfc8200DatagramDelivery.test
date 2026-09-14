@@ -32,8 +32,8 @@ Define_ProtocolTestProgram()
         // hop limit 64, host A as source, host B as destination, a non-zero UDP checksum
         // (RFC8200-HDR-1, HDR-2, HDR-3, HDR-4, CKSUM-1). Record the addresses and the hop limit.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.version == 6 && ipv6.payloadLength == 108B && ipv6.protocolId == 17 && ipv6.hopLimit == 64 && udp.checksum != 0")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5000 && ipv6.version == 6 && ipv6.payloadLength == 108B && ipv6.protocolId == 17 && ipv6.hopLimit == 64 && udp.checksum != 0")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv6Address(c.event.packet, "ipv6.srcAddress") == nodeIpv6Address("hostA")
                           && ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostB");
                   })
@@ -45,8 +45,8 @@ Define_ProtocolTestProgram()
         // Expected observation 2: link 2 shows the same addresses and payload length, and hop
         // limit 63 (RFC8200-HDR-4, RFC8200-HL-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.payloadLength == 108B && ipv6.hopLimit == 63 && ipv6.hopLimit == {hl} - 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5000 && ipv6.payloadLength == 108B && ipv6.hopLimit == 63 && ipv6.hopLimit == {hl} - 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv6Address(c.event.packet, "ipv6.srcAddress") == c.get("src").stdstringValue()
                           && ipv6Address(c.event.packet, "ipv6.destAddress") == c.get("dst").stdstringValue();
                   })
@@ -54,12 +54,12 @@ Define_ProtocolTestProgram()
                   .within(0.5))
         // Expected observation 3: host B's UDP receives the 108-octet datagram (RFC8200-DLV-1).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B")
                   .describe("the datagram at host B's UDP with 100 octets of data")
                   .within(0.5))
         // Expected observation 4: the program on host B receives the 100 octets.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
                   .describe("the 100 octets of data handed up from host B's UDP toward the program")
                   .within(0.1));
 }

@@ -41,38 +41,38 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc791_same_id_different_protocol")
         // tap1 rewrites the identification of every ICMP fragment to that of the UDP datagram.
-        .intercept(intercept("tap1").match("ipv4.protocolId == 1")
+        .intercept(tap("tap1").filterPacket("ipv4.protocolId == 1")
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setIdentification(h.getIdentification() - 1); }); })
                      .describe("every fragment of the echo request (set its identification to that of the UDP datagram)"))
         // tap2 holds the last UDP fragment for 1 ms, so the ICMP fragments overtake it.
-        .intercept(intercept("tap2").match("ipv4.fragmentOffset == 552 && ipv4.moreFragments == false").nth(1)
+        .intercept(tap("tap2").filterPacket("ipv4.fragmentOffset == 552 && ipv4.moreFragments == false").nth(1)
                      .delay(0.001)
                      .describe("the last fragment of the UDP datagram (hold it for 1 ms)"))
         // Expected observation 1: the first UDP fragment on link 2; record ID1.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.protocolId == 17 && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true") // a fragment is not dissected beyond IP; the protocol number selects it
+                  .filterPacket("ipv4.protocolId == 17 && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true") // a fragment is not dissected beyond IP; the protocol number selects it
                   .capture("id1", "ipv4.identification")
                   .describe("the first fragment of the UDP datagram on link 2")
                   .within(0.5))
         // Expected observation 2: the first ICMP fragment on link 2 with another identification.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification != {id1}")
+                  .filterPacket("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification != {id1}")
                   .describe("the first fragment of the echo request on link 2, with its own identification")
                   .within(0.1))
         // Expected observation 3: at host B's interface the ICMP fragment carries ID1 -- the
         // rewrite took effect.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification == {id1}")
+                  .filterPacket("ipv4.protocolId == 1 && ipv4.fragmentOffset == 0 && ipv4.identification == {id1}")
                   .describe("the first fragment of the echo request at host B with the identification of the UDP datagram")
                   .within(0.1))
         // Expected observations 4 and 5, in either order: host B's UDP receives the UDP datagram
         // whole, and host B answers the echo request (RFC791-REASM-1, RFC791-REASM-3).
         .unordered({ on("hostB.udp").signal("packetReceivedFromLower")
-                         .packet("udp.destPort == 5000 && udp.totalLengthField == 1008B")
+                         .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 1008B")
                          .describe("the reassembled UDP datagram at host B's UDP")
                          .within(0.1),
                      on("hostB.eth[0].mac").signal("packetSentToLower")
-                         .packet("icmpv4.type == 0")
+                         .filterPacket("icmpv4.type == 0")
                          .describe("host B's echo reply, proof that the echo request was reassembled from its own fragments")
                          .within(0.1) });
 }

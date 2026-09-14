@@ -29,7 +29,7 @@ static Packet *makeAttemptPacket(const char *name, int attempt)
 Define_ProtocolTest(pe_backoff)
 {
     return ProtocolTest("pe_backoff")
-        .inject(inject("backoff").into("", "in").at(0.1)
+        .inject(at("backoff").into("", "in").at(0.1)
                   .describe("a packet on transmission attempt 1")
                   .packet([](const CaptureStore&) { return makeAttemptPacket("p", 1); }))
         // window CW = 1 slot = 1s, so the packet is delayed by at most 1s and always arrives here

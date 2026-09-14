@@ -36,30 +36,30 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_checksum_discard")
         // The relay replaces the UDP checksum with a wrong, non-zero value.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { corruptUdpChecksum(frame); })
                      .describe("the datagram (replace its UDP checksum with a wrong, non-zero value)"))
         // Expected observation 1: the datagram on link 2, before the relay; record its checksum.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .capture("ck", "udp.checksum")
                   .describe("the datagram on link 2 before the relay")
                   .within(0.5))
         // Expected observation 2: at host B's interface the checksum differs and is not zero --
         // the change took effect, and it stayed inside the discard rule.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.checksum != {ck} && udp.checksum != 0")
+                  .filterPacket("udp.destPort == 5000 && udp.checksum != {ck} && udp.checksum != 0")
                   .describe("the datagram at host B's interface with a changed, non-zero checksum")
                   .within(0.1))
         // Expected observation 3: host B's UDP discards the datagram (RFC1122-UCK-4).
         .once(on("hostB.udp").signal("packetDropped")
-                  .match([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
+                  .filterEvent([](const MatchContext& c) { return droppedDatagramWithData(c.event.packet, B(100)); }) // a drop record carries no protocol tag, and the header may already be popped; the data length identifies the datagram
                   .describe("host B's UDP discards the datagram with the wrong checksum")
                   .within(0.1))
         // Expected observations 4 and 5: nothing goes up to the program and no message leaves
         // host B.
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
+                  .filterEvent([](const MatchContext& c) { return silenceBroken(c.event, "hostB", nullptr, EventKind::SentToUpper); })
                   .describe("data handed up from host B's UDP toward the program, or any ICMP message from host B")
                   .within(0.2));
 }

@@ -17,7 +17,7 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("multi_flow_bad")
         .never(on("host1.udp").signal("packetSentToLower")
-                    .packet("udp.destPort == 5000").describe("any datagram to port 5000").within(0.3));
+                    .filterPacket("udp.destPort == 5000").describe("any datagram to port 5000").within(0.3));
 }
 
 %activity:

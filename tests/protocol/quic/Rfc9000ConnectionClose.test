@@ -15,7 +15,7 @@ then unconditionally calls `socket->close()` in the same handler, with no ini pa
 close is sent essentially back-to-back with the data, not after a delay: consistent with checks.md's
 own description of the mechanism ("an endpoint terminates the connection immediately").
 
-Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.filterPacket("quic....")
 cannot see inside a QUIC packet; this test finds the CONNECTION_CLOSE and STREAM frames directly
 on the packet's own chunk tree via QuicChunks.h's findQuicChunk<T>(). ConnectionCloseFrameHeader
 is the one C++ class for both CONNECTION_CLOSE variants (QUIC-layer error, frameType 0x1c, and
@@ -47,7 +47,7 @@ Define_ProtocolTestProgram()
         // CONNECTION_CLOSE frame. Confirms the stimulus: the close really started
         // (RFC9000-CLOSE-1).
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<ConnectionCloseFrameHeader>(c.event.packet) != nullptr;
                   })
                   .describe("host A's datagram carrying a CONNECTION_CLOSE frame")
@@ -56,7 +56,7 @@ Define_ProtocolTestProgram()
         // travels from host A -- the stream is closed. See the %description for why the
         // server->client half is not separately asserted.
         .never(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
                   })
                   .describe("a further STREAM frame from host A")

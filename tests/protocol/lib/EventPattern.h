@@ -102,13 +102,8 @@ class INET_API EventPattern
     EventPattern& source(const char *path) { selSource = path; return *this; }     // emitting-module filter
     EventPattern& signal(const char *name) { selSignal = name; return *this; }     // which signal (registered name)
     EventPattern& dispatch(const char *name) { selDispatch = name; return *this; } // DispatchProtocolReq protocol
-    EventPattern& packet(const char *expression) { selExpr = expression; return *this; } // PacketFilter content (value is a packet)
-    EventPattern& is(double v) { selHasValue = true; selValue = v; return *this; } // a scalar signal's value (e.g. an FSM state)
     // A standard usually states a bound rather than a value: "at most 4 segments", "no less
     // than one second". These express such a bound on a scalar signal.
-    EventPattern& isAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
-    EventPattern& isAtMost(double v) { selHasMax = true; selMax = v; return *this; }
-    EventPattern& isBetween(double lo, double hi) { return isAtLeast(lo).isAtMost(hi); }
     EventPattern& attributeTo(const char *path) { attributeToPath = path; return *this; } // description point of view
 
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").
@@ -116,8 +111,6 @@ class INET_API EventPattern
 
     EventPattern& inbound() { selHasDirection = true; selDirection = 0; return *this; }
     EventPattern& outbound() { selHasDirection = true; selDirection = 1; return *this; }
-    EventPattern& match(const char *expression) { selExpr = expression; return *this; }
-    EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
     // --- filter words: they pick the event ---
     EventPattern& filterPacket(const char *expression) { selExpr = expression; return *this; }
     EventPattern& filterEvent(MatchPredicate p) { predicate = std::move(p); return *this; }

@@ -13,10 +13,10 @@ Define_ProtocolTest(wifi_legacy_data_ack)
 {
     return ProtocolTest("wifi_legacy_data_ack")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .filterPacket("ieee80211mac.type == 32 || ieee80211mac.type == 40")
                   .describe("a data frame").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 29").describe("the ACK").within(0.02));
+                  .filterPacket("ieee80211mac.type == 29").describe("the ACK").within(0.02));
 }
 
 } // namespace protocoltest

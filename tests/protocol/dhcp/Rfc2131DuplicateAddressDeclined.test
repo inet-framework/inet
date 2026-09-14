@@ -71,7 +71,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_duplicate_address_declined")
         // Expected observation 1: the client gets a DHCPACK for the address hostO holds.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;
@@ -83,12 +83,12 @@ Define_ProtocolTestProgram()
         // Expected observations 2 and 3: the client probes that address, with sender protocol
         // address 0.0.0.0 and its own hardware address.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isProbeFor(c.event.packet, grantedAddress); })
+                  .filterEvent([](const MatchContext& c) { return isProbeFor(c.event.packet, grantedAddress); })
                   .describe("an address resolution request for 192.168.1.100 from the client, with sender protocol address 0.0.0.0")
                   .within(5.0))
         // Expected observation 4: the occupant answers, which tells the client the address is used.
         .once(on("hostO.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto arp = findChunk<ArpPacket>(c.event.packet);
                       return arp != nullptr && arp->getOpcode() == ARP_REPLY
                              && arp->getSrcIpAddress() == grantedAddress;
@@ -98,7 +98,7 @@ Define_ProtocolTestProgram()
         // Expected observations 5 to 7: a broadcast DHCPDECLINE naming the address and the server,
         // with no lease time, no parameter request list and ciaddr zero.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDECLINE)
                           return false;
@@ -115,12 +115,12 @@ Define_ProtocolTestProgram()
                   .within(5.0))
         // Expected observation 8: the client starts again.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
                   .describe("a DHCPDISCOVER after the DHCPDECLINE, which shows that the client started again")
                   .within(25.0))
         // Expected observation 9: the client never uses the address it refused.
         .never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4Source(c.event.packet) == quad(grantedAddress);
                   })
                   .describe("a frame from the client carrying the refused address as its IP source address")

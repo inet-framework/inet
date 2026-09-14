@@ -16,7 +16,7 @@ equality operator compares pointer identity, not the addressed bytes (see
 src/inet/common/packet/PacketFilter.cc and the POINTER case of CompareNode::compare() in
 omnetpp's src/common/exprnodes.cc) -- a captured address could never equal a later one, even
 when the two are the same dotted-decimal address. That step therefore uses a typed C++
-predicate (.match(lambda), AUTHORING.md section 4) that reads both addresses with
+predicate (filterEvent, AUTHORING.md section 4) that reads both addresses with
 evalPacketField() and compares their str() forms as ordinary strings.
 
 Deviation on observation 4 ("the program on host B receives the 100 octets"): the tester can
@@ -59,9 +59,9 @@ Define_ProtocolTestProgram()
         // half of PROTO-1, and RFC1122-ADDR-1.
         // Record the source and destination addresses for the observation-2 comparison.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.version == 4 && ipv4.headerLength == 20B && ipv4.totalLengthField == 128B && ipv4.protocolId == 17")
+                  .filterPacket("udp.destPort == 5000 && ipv4.version == 4 && ipv4.headerLength == 20B && ipv4.totalLengthField == 128B && ipv4.protocolId == 17")
                   // the source address is one of host A's own addresses (RFC1122-ADDR-1)
-                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == L3AddressResolver().resolve("hostA").str(); })
+                  .filterEvent([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.srcAddress") == L3AddressResolver().resolve("hostA").str(); })
                   .capture("srcAddr", [](const PacketEvent& e) {
                       return evalPacketField(e.packet, "ipv4.srcAddress").pointerValue().get<Ipv4Address>()->str();
                   })
@@ -73,8 +73,8 @@ Define_ProtocolTestProgram()
         // Expected observation 2: link 2 shows the same source and destination addresses --
         // the gateway forwarded it and did not rewrite them (RFC791-FWD-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) {
                       return evalPacketField(c.event.packet, "ipv4.srcAddress").pointerValue().get<Ipv4Address>()->str() == c.get("srcAddr").stdstringValue()
                           && evalPacketField(c.event.packet, "ipv4.destAddress").pointerValue().get<Ipv4Address>()->str() == c.get("dstAddr").stdstringValue();
                   })
@@ -84,7 +84,7 @@ Define_ProtocolTestProgram()
         // data -- the internet module handed the data to the protocol the header named
         // (RFC791-PROTO-1).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B") // 8-octet UDP header + 100 octets of data
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B") // 8-octet UDP header + 100 octets of data
                   .describe("the datagram at host B's UDP with 100 octets of data")
                   .within(0.1))
         // Expected observation 4: the program on host B receives the 100 octets
@@ -92,7 +92,7 @@ Define_ProtocolTestProgram()
         // observe (see the %description deviation note), so this uses UDP's handoff to the
         // socket instead -- the last recognizable signal before the data reaches the program.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 100;
                   })
                   .describe("the 100 octets of data handed up from host B's UDP toward the program")

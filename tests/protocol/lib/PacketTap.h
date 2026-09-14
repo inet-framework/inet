@@ -32,7 +32,7 @@ namespace protocoltest {
 //
 // It can be configured two ways: from its NED/ini parameters (self-contained), or
 // programmatically via configure() -- which the ProtocolTester uses to install an
-// intercept(...) rule from the test program (this is how the "mutate" action, whose
+// tap(...) rule from the test program (this is how the "mutate" action, whose
 // mutator is a C++ lambda, is supplied).
 //
 class INET_API PacketTap : public SimpleModule
@@ -90,7 +90,7 @@ class INET_API PacketTap : public SimpleModule
     virtual ~PacketTap();
 
     // Install an interception rule programmatically (used by the ProtocolTester to apply a
-    // test program's intercept(...) clause). Wins over the NED/ini parameters regardless of
+    // test program's tap(...) clause). Wins over the NED/ini parameters regardless of
     // module initialization order.
     void configure(const std::string& matchExpr, long minBytes, int occ, int fromOcc, const std::string& act,
                    simtime_t delay, std::function<void(Packet *)> mut);

@@ -26,7 +26,7 @@ Define_ProtocolTest(pe_forwarding)
     return ProtocolTest("pe_forwarding")
         // the forwarded packet reaches the downstream sink carrying the routing decision as tags
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       const auto& nextHopReq = c.event.packet->findTag<NextHopAddressReq>();
                       const auto& interfaceReq = c.event.packet->findTag<InterfaceReq>();
                       const auto& dispatchReq = c.event.packet->findTag<DispatchProtocolReq>();

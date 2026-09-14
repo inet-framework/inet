@@ -35,18 +35,18 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc1122_arp_packet_queue")
         // Expected observation 1: the datagram could not go out, and the resolution started.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
+                  .filterPacket("arp.opcode == 1")
                   .describe("the request from host A")
                   .within(0.5))
         // Expected observation 2: host B answers.
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 2")
+                  .filterPacket("arp.opcode == 2")
                   .describe("host B's reply")
                   .within(0.1))
         // Expected observation 3: the one datagram reaches the program on host B, after the
         // reply (RFC1122-AQUEUE-1).
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getDataLength() == B(100); })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getDataLength() == B(100); })
                   .describe("the saved datagram handed up to the program on host B, after the reply")
                   .within(0.5));
 }

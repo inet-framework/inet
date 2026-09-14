@@ -62,17 +62,17 @@ Define_ProtocolTestProgram()
         // The client's own DHCPDISCOVER; its transaction identifier goes into the crafted reply,
         // so that the identifier is the only thing wrong with it.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
                   .capture("xid", "DhcpMessage.xid")
                   .describe("a DHCPDISCOVER from the client, whose transaction identifier is recorded")
                   .within(1.0))
-        .inject(inject("hostA").into("eth[0]", "upperLayerOut").after(0.05)
+        .inject(at("hostA").into("eth[0]", "upperLayerOut").after(0.05)
                   .describe("a crafted DHCPOFFER with the client's own transaction identifier and another client's identifier")
                   .packet(buildOfferWithForeignIdentifier))
         // Expected observation 1: the crafted reply reaches the client, with the right
         // transaction identifier and a foreign client identifier.
         .once(on("hostA.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
                              && dhcp->getXid() == (uint32_t)c.get("xid").intValue()
@@ -85,7 +85,7 @@ Define_ProtocolTestProgram()
         // offer nor uses the address it carries. Three watches cannot cover one window, so one
         // predicate covers all three.
         .never(on("hostA")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST) {
                           const DhcpOptions& o = dhcp->getOptions();

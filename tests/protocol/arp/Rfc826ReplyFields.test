@@ -40,8 +40,8 @@ Define_ProtocolTestProgram()
         // Expected observation 1: the request, with host A in the sender fields and the
         // address of host B in the target protocol address.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       auto packet = c.event.packet;
                       return macAddressField(packet, "arp.srcMacAddress") == interfaceMacAddress("hostA.eth[0]").str()
                              && ipv4AddressField(packet, "arp.srcIpAddress") == interfaceIpv4Address("hostA.eth[0]").str()
@@ -53,8 +53,8 @@ Define_ProtocolTestProgram()
         // Expected observations 2 to 6: the reply of host B, field by field (RFC826-RECV-8,
         // RECV-9, FMT-6, TABLE-2).
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 2")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 2")
+                  .filterEvent([](const MatchContext& c) {
                       auto packet = c.event.packet;
                       return macAddressField(packet, "arp.srcMacAddress") == interfaceMacAddress("hostB.eth[0]").str()
                              && ipv4AddressField(packet, "arp.srcIpAddress") == interfaceIpv4Address("hostB.eth[0]").str()

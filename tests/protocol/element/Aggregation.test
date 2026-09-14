@@ -17,7 +17,7 @@ Define_ProtocolTest(pe_aggregation)
 {
     return ProtocolTest("pe_aggregation")
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() >= B(300);
                   })
                   .describe("an aggregated packet of at least 300 bytes at the sink").within(3.5));

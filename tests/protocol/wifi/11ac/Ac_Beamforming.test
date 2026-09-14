@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_11ac_beamforming)
 {
     return ProtocolTest("wifi_11ac_beamforming")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211NdpAnnouncementActionFrame.soundingDialogToken >= 0")
+                  .filterPacket("Ieee80211NdpAnnouncementActionFrame.soundingDialogToken >= 0")
                   .describe("a VHT NDP Announcement action frame from sta1").within(2.5));
 }
 

@@ -50,7 +50,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_parameter_without_value")
         // Expected observation 1: the client asks for both parameters.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -66,14 +66,14 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 4: the DHCPOFFER carries neither option.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return isDhcp(c.event.packet, DHCPOFFER) && carriesNeither(c.event.packet);
                   })
                   .describe("a DHCPOFFER that carries no option 6 and no option 42")
                   .within(1.0))
         // Expected observations 2 and 3: the DHCPACK carries neither option.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return isDhcp(c.event.packet, DHCPACK) && carriesNeither(c.event.packet);
                   })
                   .describe("a DHCPACK that carries no option 6 and no option 42")

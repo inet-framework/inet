@@ -28,17 +28,17 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc4443_unknown_error_type")
         // The relay rewrites the type of host B's report to 100.
-        .intercept(intercept("tap").match("icmpv6.type == 1").nth(1)
+        .intercept(tap("tap").filterPacket("icmpv6.type == 1").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Icmpv6Header>(frame, [](Icmpv6Header& h) { h.setType(static_cast<Icmpv6Type>(100)); }); })
                      .describe("host B's Destination Unreachable (set its type to 100)"))
         // Expected observation 1: at host A's interface an ICMPv6 message of type 100 arrives.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 100")
+                  .filterPacket("icmpv6.type == 100")
                   .describe("an ICMPv6 message of the unknown error type 100 at host A's interface")
                   .within(6.0))
         // Expected observation 2: from then on, host A sends no ICMPv6 error message (RFC4443-MPR-4).
         .never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv6.type < 128")
+                  .filterPacket("icmpv6.type < 128")
                   .describe("any ICMPv6 error message from host A")
                   .within(0.5));
 }

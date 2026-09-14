@@ -39,7 +39,7 @@ checks.md states it (not weakened or inverted, per this suite's hard rule); it h
 only because 0 is what the reference client app happens to hardcode as its first stream ID, not
 because the model enforces or even represents RFC9000-STR-1's encoding.
 
-Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.filterPacket("quic....")
 cannot see inside a QUIC packet (no protocol dissector is registered for it -- see
 QuicChunks.h and Rfc9000ConnectionEstablishment.test's %description for the empirical evidence);
 this test reads the STREAM frame's streamId directly off the packet's own chunk tree via
@@ -64,7 +64,7 @@ Define_ProtocolTestProgram()
         // (0) and why it passes only by coincidence, not by the model enforcing the
         // encoding.
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
                       if (sf == nullptr)
                           return false;

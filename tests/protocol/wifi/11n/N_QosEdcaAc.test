@@ -16,7 +16,7 @@ Define_ProtocolTest(wifi_qos_edca_ac)
 {
     return ProtocolTest("wifi_qos_edca_ac")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40")
+                  .filterPacket("ieee80211mac.type == 40")
                   .describe("a QoS data frame (type 40) produced by EDCA").within(2.5));
 }
 

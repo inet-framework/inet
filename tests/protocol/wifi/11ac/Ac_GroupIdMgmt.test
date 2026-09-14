@@ -17,7 +17,7 @@ Define_ProtocolTest(wifi_11ac_group_id_mgmt)
 {
     return ProtocolTest("wifi_11ac_group_id_mgmt")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211VhtGroupIdManagementActionFrame.membershipStatusArray >= 0")
+                  .filterPacket("Ieee80211VhtGroupIdManagementActionFrame.membershipStatusArray >= 0")
                   .describe("a VHT Group ID Management action frame from AP").within(2.0));
 }
 

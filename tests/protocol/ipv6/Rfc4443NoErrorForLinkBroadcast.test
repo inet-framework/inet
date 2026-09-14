@@ -33,13 +33,13 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc4443_no_error_for_link_broadcast")
         // The relay rewrites the link-layer destination of the frame.
-        .intercept(intercept("tap").match("udp.destPort == 5001").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5001").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<EthernetMacHeader>(frame, [](EthernetMacHeader& h) { h.setDest(MacAddress::BROADCAST_ADDRESS); }); })
                      .describe("the datagram's frame (set its link-layer destination to the broadcast address)"))
         // Expected observation 1: at host B's interface the datagram arrives in a broadcast frame.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5001")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5001")
+                  .filterEvent([](const MatchContext& c) {
                       const auto& macInd = c.event.packet->findTag<MacAddressInd>();
                       if (macInd != nullptr)
                           return macInd->getDestAddress().isBroadcast();
@@ -49,12 +49,12 @@ Define_ProtocolTestProgram()
                   .within(6.0))
         // Expected observation 2: host B's UDP finds no program for port 5001.
         .once(on("hostB.udp").signal("packetDropped")
-                  .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; })
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; })
                   .describe("host B's UDP discards the datagram for want of a port")
                   .within(0.5))
         // Expected observation 3: from then on, host B sends no ICMPv6 error message (RFC4443-MPR-8).
         .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv6.type < 128")
+                  .filterPacket("icmpv6.type < 128")
                   .describe("any ICMPv6 error message from host B")
                   .within(0.5));
 }

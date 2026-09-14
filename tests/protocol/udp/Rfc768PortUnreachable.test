@@ -24,7 +24,7 @@ ICMP_DESTINATION_UNREACHABLE, code 3 / ICMP_DU_PORT_UNREACHABLE) and dispatches 
 StandardHost's IPv4 stack instantiates an `icmp: Icmp` submodule unconditionally
 (Ipv4NetworkLayer.ned), so host A's own stack is not what is under test here -- host B is.
 
-Deviation on observation 2's filter: a plain .packet("udp.destPort == 6000") does not match
+Deviation on observation 2's filter: a plain .filterPacket("udp.destPort == 6000") does not match
 here, even though the UDP header is genuinely still present on the packet at that point (the
 front offset is restored before the emit, in processUDPPacket(), so peekAtFront<UdpHeader>()
 in processUndeliverablePacket() succeeds). The reason is upstream of the header itself:
@@ -34,7 +34,7 @@ first action, for every packet it receives, before it even pops the header. The 
 looks up that same PacketProtocolTag to pick which protocol's dissector to start with
 (PacketDissector.cc); with the tag gone, it falls back to DefaultProtocolDissector (registered
 for protocol == nullptr), which does not attribute the UDP header chunk to protocol "udp" --
-confirmed with a temporary diagnostic .match(lambda) that both a protocol-name lookup
+confirmed with a temporary diagnostic filterEvent that both a protocol-name lookup
 (evalPacketField(..., "udp.destPort")) and a chunk-class lookup
 (evalPacketField(..., "UdpHeader.destPort")) throw "protocol '...' not present in packet" for
 this exact event, even though the event itself does arrive (byteLength 108, confirmed by the
@@ -65,7 +65,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1: link 1 shows the datagram to port 6000 from port 4000 --
         // confirms the stimulus.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.srcPort == 4000 && udp.destPort == 6000")
+                  .filterPacket("udp.srcPort == 4000 && udp.destPort == 6000")
                   .describe("the datagram on link 1 to port 6000 from port 4000")
                   .within(0.5))
         // Expected observation 2: host B's UDP discards the datagram -- a discard for a port
@@ -73,7 +73,7 @@ Define_ProtocolTestProgram()
         // is in time, before the ICMP report is built, so it does not anchor too late. Filtered
         // by size, not by a re-dissected udp.destPort -- see the %description deviation note.
         .once(on("hostB.udp").signal("packetDropped")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 108; // 8-octet UDP header + 100 octets of data
                   })
                   .describe("host B's UDP discard of the 108-octet datagram to the closed port 6000")
@@ -81,7 +81,7 @@ Define_ProtocolTestProgram()
         // Expected observation 3: host A receives an ICMP destination unreachable message,
         // type 3, code 3 (RFC792-DU-3).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv4.type == 3 && icmpv4.code == 3") // the dissector protocol name is icmpv4
+                  .filterPacket("icmpv4.type == 3 && icmpv4.code == 3") // the dissector protocol name is icmpv4
                   .describe("the ICMP destination unreachable (port) message received at host A")
                   .within(0.1))
         // Expected observation 4: from then on, host B's UDP hands nothing upward -- no

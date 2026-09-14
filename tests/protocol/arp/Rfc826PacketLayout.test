@@ -42,8 +42,8 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc826_packet_layout")
         // All seven expected observations, on the request that host A puts on the link.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       auto octets = arpOctets(c.event.packet);
                       auto hostAMac = interfaceMacAddress("hostA.eth[0]");
                       auto hostAIp = interfaceIpv4Address("hostA.eth[0]");

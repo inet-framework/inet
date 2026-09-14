@@ -36,7 +36,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1: link 1 shows the sender value (RFC791-TTL-3). Record the
         // TTL and the header checksum for the observation-4 comparison below.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 32")
+                  .filterPacket("udp.destPort == 5000 && ipv4.timeToLive == 32")
                   .capture("ttl", "ipv4.timeToLive")
                   .capture("cksum1", "ipv4.checksum")
                   .describe("the datagram on link 1 with the sender TTL")
@@ -45,12 +45,12 @@ Define_ProtocolTestProgram()
         // (RFC791-TTL-1), and a header checksum that differs from the one recorded on
         // link 1, because the TTL change forced a recomputation (RFC791-CKSUM-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1 && ipv4.checksum != {cksum1}")
+                  .filterPacket("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1 && ipv4.checksum != {cksum1}")
                   .describe("the same datagram on link 2 with the TTL decreased by one and a different header checksum")
                   .within(0.1))
         // Expected observation 3: host B receives it with the decreased TTL.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
+                  .filterPacket("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
                   .describe("the datagram at host B with the TTL decreased by one")
                   .within(0.1));
 }

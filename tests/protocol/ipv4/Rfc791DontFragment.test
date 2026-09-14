@@ -26,7 +26,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc791_dont_fragment")
         // Expected observation 1: the DF datagram on link 1 confirms the stimulus.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.dontFragment == true")
+                  .filterPacket("udp.destPort == 5000 && ipv4.dontFragment == true")
                   .capture("id", "ipv4.identification")
                   .describe("the DF datagram on link 1")
                   .within(0.5))
@@ -34,19 +34,19 @@ Define_ProtocolTestProgram()
         // discard is recorded at the moment of the decision, before the report crosses
         // link 1, so this step is in time where a watch on link 2 would open too late.
         .once(on("router.ipv4.ip").signal("packetDropped")
-                  .packet("ipv4.identification == {id}")
+                  .filterPacket("ipv4.identification == {id}")
                   .describe("the gateway's discard of the DF datagram")
                   .within(0.1))
         // Expected observation 3: ICMP destination unreachable, code 4, toward host A
         // (RFC792-DU-4).
         .once(on("router.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv4.type == 3 && icmpv4.code == 4") // the dissector protocol name is icmpv4
+                  .filterPacket("icmpv4.type == 3 && icmpv4.code == 4") // the dissector protocol name is icmpv4
                   .describe("ICMP 'fragmentation needed and DF set' toward host A")
                   .within(0.1))
         // Expected observation 4: from then on, nothing of the datagram on link 2
         // (RFC791-FRAG-5, the wire form of observation 2).
         .never(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.identification == {id}")
+                  .filterPacket("ipv4.identification == {id}")
                   .describe("any part of the DF datagram on link 2")
                   .within(0.3));
 }

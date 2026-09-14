@@ -54,12 +54,12 @@ static Packet *buildInform(const CaptureStore&)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc2131_inform_without_lease")
-        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+        .inject(at("server").into("eth[0]", "upperLayerOut").at(1.0)
                   .describe("a crafted DHCPINFORM from 192.168.1.50, with no requested IP address and no lease time option")
                   .packet(buildInform))
         // Expected observations 2 to 7: the DHCPACK that answers it.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;
@@ -81,7 +81,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 8: no DHCPOFFER and no DHCPNAK answers the crafted message.
         .never(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return isDhcp(c.event.packet, DHCPOFFER) || isDhcp(c.event.packet, DHCPNAK);
                   })
                   .describe("a DHCPOFFER or a DHCPNAK from the server")

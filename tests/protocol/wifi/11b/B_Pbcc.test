@@ -22,8 +22,8 @@ Define_ProtocolTest(wifi_11b_pbcc)
 {
     return ProtocolTest("wifi_11b_pbcc")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) {
                       auto m = dynamic_cast<const Ieee80211HrDsssMode *>(txMode(c.event));
                       if (!m) return false;
                       // PBCC data modes have "Pbcc" in the class name (no direct API);

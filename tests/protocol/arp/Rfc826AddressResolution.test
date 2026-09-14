@@ -39,8 +39,8 @@ Define_ProtocolTestProgram()
         // its field values and its broadcast frame (RFC826-REQ-1, REQ-4, REQ-6, FMT-3,
         // FMT-5, TABLE-2, RFC1122-AUSE-1).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1 && EthernetMacHeader.typeOrLength == 2054")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1 && EthernetMacHeader.typeOrLength == 2054")
+                  .filterEvent([](const MatchContext& c) {
                       auto packet = c.event.packet;
                       return macAddressField(packet, "arp.srcMacAddress") == interfaceMacAddress("hostA.eth[0]").str()
                              && ipv4AddressField(packet, "arp.srcIpAddress") == interfaceIpv4Address("hostA.eth[0]").str()
@@ -51,16 +51,16 @@ Define_ProtocolTestProgram()
                   .within(0.5))
         // Expected observation 4: the request reaches host B.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("arp.opcode == 1")
+                  .filterPacket("arp.opcode == 1")
                   .describe("the request at host B's interface")
                   .within(0.1))
         // Expected observation 5: host B answers, and the datagram of host A then arrives.
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 2")
+                  .filterPacket("arp.opcode == 2")
                   .describe("host B's reply")
                   .within(0.1))
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("the datagram of host A at host B's UDP")
                   .within(0.5));
 }

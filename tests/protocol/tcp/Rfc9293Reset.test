@@ -35,19 +35,19 @@ Define_ProtocolTestProgram()
         // Observation 1: host A sends a SYN to port 7000. Record ISS_A. Confirms the
         // stimulus.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.destPort == 7000")
+                  .filterPacket("tcp.synBit == true && tcp.destPort == 7000")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN to port 7000, carrying ISS_A").within(0.5))
         // Observation 2: host A receives a segment from port 7000 with RST set and ACK
         // set, sequence number 0, and acknowledgment field ISS_A + 1 (RFC9293-RST-1: the
         // SYN occupies one octet of sequence space, so SEG.SEQ + SEG.LEN is ISS_A + 1).
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.rstBit == true && tcp.ackBit == true && tcp.sequenceNo == 0 && tcp.ackNo == {issA} + 1")
+                  .filterPacket("tcp.rstBit == true && tcp.ackBit == true && tcp.sequenceNo == 0 && tcp.ackNo == {issA} + 1")
                   .describe("host B's RST, ACK answering the SYN, sequence number 0, acknowledging ISS_A + 1").within(0.5))
         // Observation 3: for 0.3 s after the reset, host A sends nothing more to port
         // 7000 -- the attempt is abandoned, and no acknowledgment or data follows.
         .never(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.destPort == 7000")
+                  .filterPacket("tcp.destPort == 7000")
                   .describe("anything more from host A to port 7000")
                   .within(0.3));
 }

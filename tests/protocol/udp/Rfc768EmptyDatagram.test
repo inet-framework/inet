@@ -58,25 +58,25 @@ Define_ProtocolTestProgram()
 {
     // The relay removes the data and leaves the 8-octet header.
     return ProtocolTest("rfc768_empty_datagram")
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { emptyUdpDatagram(frame); })
                      .describe("the datagram (remove its data, leaving the 8-octet header)"))
         // Expected observation 1: the datagram on link 2 before the relay carries 100 octets of
         // data, so the change below is visible against it.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B")
                   .describe("the datagram on link 2 before the relay, 108 octets long")
                   .within(0.5))
         // Expected observation 2: at host B's interface the length field is eight, the minimum
         // (RFC768-HDR-3).
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 8B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 8B")
                   .describe("the datagram at host B's interface with a length field of eight")
                   .within(0.1))
         // Expected observation 3: host B's UDP hands zero octets upward -- it accepted the
         // smallest datagram the format allows.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getDataLength() == B(0); })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getDataLength() == B(0); })
                   .describe("zero octets handed up from host B's UDP toward the program")
                   .within(0.1));
 }

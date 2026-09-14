@@ -22,7 +22,7 @@ Define_ProtocolTest(pe_acknowledge_retransmit)
                   .describe("any delivery before the acknowledgement timeout").within(0.09))
         // after the timeout, Resending retransmits and the packet finally reaches the sink
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() == B(100);
                   })
                   .describe("the retransmitted packet delivered after the timeout").within(0.5));

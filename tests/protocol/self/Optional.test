@@ -17,9 +17,9 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("optional_skip")
         .atMostOnce(on("host1.udp").signal("packetSentToLower")
-                    .packet("udp.destPort == 9999").describe("a datagram to port 9999").within(0.3))
+                    .filterPacket("udp.destPort == 9999").describe("a datagram to port 9999").within(0.3))
         .once(on("host1.udp").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
+                  .filterPacket("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
 }
 
 %activity:

@@ -37,13 +37,13 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc4443_packet_too_big_mtu")
         // Expected observation 1: the packet on link 1, whole, payload length 1460.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
+                  .filterPacket("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
                   .describe("the 1500-octet packet on link 1, whole")
                   .within(6.0))
         // Expected observation 2: host A receives Packet Too Big, type 2 code 0, with MTU 1280
         // (RFC4443-PTB-2).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 2 && Icmpv6PacketTooBigMsg.code == 0 && Icmpv6PacketTooBigMsg.MTU == 1280")
+                  .filterPacket("icmpv6.type == 2 && Icmpv6PacketTooBigMsg.code == 0 && Icmpv6PacketTooBigMsg.MTU == 1280")
                   .describe("the Packet Too Big message at host A with the next-hop MTU 1280")
                   .within(0.5));
 }

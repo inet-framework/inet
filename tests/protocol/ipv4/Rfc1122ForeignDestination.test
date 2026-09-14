@@ -27,25 +27,25 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_foreign_destination")
         // The relay rewrites the destination address and keeps the checksum valid.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setDestAddress(Ipv4Address("192.168.99.99")); }); })
                      .describe("the datagram (set its destination to 192.168.99.99)"))
         // Expected observation 1: at host B's interface the datagram carries the foreign destination.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000")
-                  .match([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.destAddress") == "192.168.99.99"; })
+                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) { return ipv4Address(c.event.packet, "ipv4.destAddress") == "192.168.99.99"; })
                   .capture("id", "ipv4.identification")
                   .describe("the datagram at host B's interface addressed to 192.168.99.99")
                   .within(0.5))
         // Expected observation 2: host B discards it (RFC1122-ADDR-2).
         .once(on("hostB.ipv4.ip").signal("packetDropped")
-                  .packet("ipv4.identification == {id}")
+                  .filterPacket("ipv4.identification == {id}")
                   .describe("host B's discard of the datagram that is not destined for it")
                   .within(0.1))
         // Expected observations 3 and 4: nothing goes up to UDP, and neither a forwarded copy nor
         // an ICMP message leaves host B.
         .never(on("hostB")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return silenceBroken(c.event, "hostB", "udp.destPort == 5000")
                           || (c.event.kind == EventKind::SentToLower && c.event.sourcePath == "hostB.eth[0].mac"
                               && matchesExpression(c.event.packet, ("ipv4.identification == " + std::to_string(c.get("id").intValue())).c_str()));

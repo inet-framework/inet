@@ -49,15 +49,15 @@ Define_ProtocolTestProgram()
         // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
         // stimulus.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: host A sends the last segment of the stream -- the one whose last
         // data octet is ISS_A + 5000 -- with PSH set (RFC9293-PSH-1: no more queued data).
         // The segment is identified by its end, not by a fixed sequence number.
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.pshBit == true")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("tcp.pshBit == true")
+                  .filterEvent([](const MatchContext& c) {
                       double seq = evalPacketField(c.event.packet, "tcp.sequenceNo").doubleValue();
                       double len = tcpSegmentDataLength(c.event.packet);
                       return len > 0 && seq + len == c.get("issA").doubleValue() + 5001;

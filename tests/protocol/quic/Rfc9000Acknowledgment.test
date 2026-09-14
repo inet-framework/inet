@@ -13,7 +13,7 @@ Rfc9000ConnectionEstablishment.test (see that file's %description for why QuicCl
 here: this check's own scenario constants in checks.md carry no special limit, unlike
 Rfc9000FlowControl.test's.
 
-Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.packet("quic....")
+Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.filterPacket("quic....")
 cannot see inside a QUIC packet; this test reads the STREAM and ACK frames' fields directly off the
 packet's own chunk tree via QuicChunks.h's findQuicChunk<T>(). The packet number is read off the
 ShortPacketHeader wrapping the STREAM frame -- QUIC's ApplicationData packet number space, the same
@@ -36,7 +36,7 @@ Define_ProtocolTestProgram()
         // STREAM frame, which is ack-eliciting. Confirms the stimulus. Record its packet
         // number (ApplicationData packet number space).
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
                   })
                   .capture("streamPn", [](const PacketEvent& e) {
@@ -48,7 +48,7 @@ Define_ProtocolTestProgram()
         // ACK frame whose largest acknowledged number is at least the recorded one
         // (RFC9000-ACK-1).
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto ack = findQuicChunk<AckFrameHeader>(c.event.packet);
                       return ack != nullptr && ack->getLargestAck() >= (uint64_t)c.get("streamPn").intValue();
                   })

@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_rsn_4way)
 {
     return ProtocolTest("wifi_rsn_4way")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211EapolFrame.version >= 0")
+                  .filterPacket("Ieee80211EapolFrame.version >= 0")
                   .describe("an EAPOL frame from STA (RSN 4-way handshake)").within(2.0));
 }
 

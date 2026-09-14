@@ -18,7 +18,7 @@ Define_ProtocolTest(pe_hoplimit)
     return ProtocolTest("pe_hoplimit")
         // the inserter output carries a hop-limit header with value 5
         .once(on("inserter").signal("packetPushedOut").protocol("hopLimit")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<HopLimitHeader>();
                       return h != nullptr && h->getHopLimit() == 5;
                   })

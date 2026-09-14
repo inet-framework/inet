@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_reassociation)
 {
     return ProtocolTest("wifi_reassociation")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 2")
+                  .filterPacket("ieee80211mac.type == 2")
                   .describe("a Reassociation Request from sta1").within(2.5));
 }
 

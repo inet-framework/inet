@@ -12,10 +12,10 @@ Define_ProtocolTest(wifi_auth_open)
 {
     return ProtocolTest("wifi_auth_open")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 11")
+                  .filterPacket("ieee80211mac.type == 11")
                   .describe("an Authentication request from STA").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 11")
+                  .filterPacket("ieee80211mac.type == 11")
                   .describe("an Authentication response from AP").within(2.0));
 }
 

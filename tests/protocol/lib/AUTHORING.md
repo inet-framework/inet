@@ -20,9 +20,9 @@ Define_ProtocolTest(udp_basic_pass)
 {
     return ProtocolTest("udp_basic_pass")
         .once(on("host1.udp").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000").within(0.2))
+                  .filterPacket("udp.destPort == 5000").within(0.2))
         .once(on("host2.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000").within(0.1));
+                  .filterPacket("udp.destPort == 5000").within(0.1));
 }
 ```
 
@@ -51,8 +51,8 @@ functional per concern**:
 | `.protocol("mobileipv6")` | packet protocol | the packet's `PacketProtocolTag` |
 | `.dispatch("ipv4")` | dispatch protocol | the packet's `DispatchProtocolReq` (where it's headed) |
 | `.iface("eth0")` | interface | restrict to an interface |
-| `.packet("expr")` | packet content | content predicate over the packet (PacketFilter, §4) |
-| `.match([](const MatchContext& c){ ... })` | content (lambda) | typed content predicate |
+| `.filterPacket("expr")` | packet content | content predicate over the packet (PacketFilter, §4) |
+| `.filterEvent([](const MatchContext& c){ ... })` | content (lambda) | typed content predicate |
 | `filterValue(v)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
 | `.attributeTo("host1.ipv6.mipv6")` | narration POV | description point of view only — never affects matching (§8b) |
 | `.describe("phrase")` | narration | human phrase (rarely needed — `packet()` auto-translates) |
@@ -155,10 +155,10 @@ non-match, never an error.
 
 ```cpp
 .once(on("host1.tcp").signal("packetSentToLower")
-          .packet("tcp.synBit == true")
+          .filterPacket("tcp.synBit == true")
           .capture("isn", "tcp.sequenceNo"))           // remember the ISN
 .once(on("host1.tcp").signal("packetReceivedFromLower")
-          .packet("tcp.ackNo == {isn} + 1"))           // refer back to it
+          .filterPacket("tcp.ackNo == {isn} + 1"))           // refer back to it
 ```
 
 For predicates the engine can't introspect, use a lambda plus `.describe("...")` so the
@@ -207,14 +207,14 @@ step rather than adding one. A guard carries its own window and its own anchor, 
 Inject a packet built in C++ into a module's gate, scheduled or reactively:
 
 ```cpp
-.inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
+.inject(at("host2").into("eth[0]", "upperLayerOut").at(0.5)
           .describe("a UDP datagram to port 5000")
-          .packet(buildInjectedUdpDatagram))      // a Packet *(const CaptureStore&) builder
+          .filterPacket(buildInjectedUdpDatagram))      // a Packet *(const CaptureStore&) builder
 ```
 
 - `.into(module, gate)` — the sink under the node to `pushPacket()` into.
 - `.at(t)` absolute, or `.after(d)` relative to the previous step's match (reactive).
-- `.packet(fn)` — the builder; it may read captures, so the injected packet can depend on an
+- `.filterPacket(fn)` — the builder; it may read captures, so the injected packet can depend on an
   observed one (stimulus/response). The builder owns construction — any chunk/tag is possible.
 
 Inject steps are ordered like any other step.
@@ -280,10 +280,10 @@ A scalar signal is just another `signal()` — selected the same way as a packet
 
 ```cpp
 .once(on("node[0].eth[0].plca").signal("controlStateChanged")   // module path, then the signal
-          .is(EthernetPlca::CS_COMMIT)                           // the value (a public enum)
+          .filterValue(EthernetPlca::CS_COMMIT)                           // the value (a public enum)
           .within(0.001))
 .never(on("node[0].eth[0].plca").signal("controlStateChanged")
-          .is(EthernetPlca::CS_ABORT).within(0.001))             // negative: must not enter this state
+          .filterValue(EthernetPlca::CS_ABORT).within(0.001))             // negative: must not enter this state
 ```
 
 | Clause | Meaning |
@@ -406,20 +406,20 @@ Observe SYN / SYN+ACK / ACK at the initiator, asserting the ack numbers follow s
 captures.
 ```cpp
 .once(on("host1.tcp").signal("packetSentToLower")
-          .packet("tcp.synBit == true && tcp.ackBit == false")
+          .filterPacket("tcp.synBit == true && tcp.ackBit == false")
           .capture("isn", "tcp.sequenceNo").within(0.2))
 .once(on("host1.tcp").signal("packetReceivedFromLower")
-          .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
+          .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
           .capture("peerIsn", "tcp.sequenceNo").within(0.5))
 .once(on("host1.tcp").signal("packetSentToLower")
-          .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1").within(0.5));
+          .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1").within(0.5));
 ```
 
 ### TCP retransmission via a dropped segment (`MitmRetransmit`)
 A tap drops the first data segment; the test asserts host1 re-sends the same sequence number
 after the RTO. Shows fault injection driving a behaviour, then asserting it.
 ```cpp
-.intercept(intercept("tap").match("tcp.destPort == 1000 && tcp.synBit == false")
+.intercept(tap("tap").filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
              .minBytes(100).nth(1).drop().describe("the first data segment"))
 .once(... capture "dataSeq" = tcp.sequenceNo ...)
 .once(... match "tcp.sequenceNo == {dataSeq} && tcp.synBit == false" .notBefore(0.3).within(5.0));
@@ -432,18 +432,18 @@ ISN+1, then observes host1's final ACK — a handshake driven entirely by inject
 
 ### ARP resolution
 ```cpp
-.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("arp.opcode == 1")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").filterPacket("arp.opcode == 1")
           .describe("an ARP request").within(0.2))
-.once(on("host1.eth[0].mac").signal("packetReceivedFromLower").packet("arp.opcode == 2")
+.once(on("host1.eth[0].mac").signal("packetReceivedFromLower").filterPacket("arp.opcode == 2")
           .describe("host2's ARP reply").within(0.2));
 ```
 
 ### IPv4 fragmentation (`Fragmentation`)
 A 4000-byte datagram over a 1500-byte MTU yields several fragments.
 ```cpp
-.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("ipv4.moreFragments == true")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").filterPacket("ipv4.moreFragments == true")
           .describe("a fragment with the more-fragments flag set").within(0.2))
-.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("ipv4.fragmentOffset > 0")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").filterPacket("ipv4.fragmentOffset > 0")
           .describe("a later fragment at a non-zero offset").within(0.2));
 ```
 
@@ -466,12 +466,12 @@ trace, so this asserts the FSM signals (§8) instead. On a controller + 2-node m
 opportunity rotates to node[0] (`curID == 1`), node[0] COMMITs and its data FSM transmits,
 and the controller receives the frame — while the control FSM must never `CS_ABORT`.
 ```cpp
-.once(on("controller.eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_SEND_BEACON).within(0.001))
-.once(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_SYNCING).within(0.001))
-.once(on("node[0].eth[0].plca").signal("curID").is(1).within(0.001))
-.once(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_COMMIT).within(0.001))
-.once(on("node[0].eth[0].plca").signal("dataStateChanged").is(EthernetPlca::DS_TRANSMIT).within(0.001))
-.never(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_ABORT).within(0.001));
+.once(on("controller.eth[0].plca").signal("controlStateChanged").filterValue(EthernetPlca::CS_SEND_BEACON).within(0.001))
+.once(on("node[0].eth[0].plca").signal("controlStateChanged").filterValue(EthernetPlca::CS_SYNCING).within(0.001))
+.once(on("node[0].eth[0].plca").signal("curID").filterValue(1).within(0.001))
+.once(on("node[0].eth[0].plca").signal("controlStateChanged").filterValue(EthernetPlca::CS_COMMIT).within(0.001))
+.once(on("node[0].eth[0].plca").signal("dataStateChanged").filterValue(EthernetPlca::DS_TRANSMIT).within(0.001))
+.never(on("node[0].eth[0].plca").signal("controlStateChanged").filterValue(EthernetPlca::CS_ABORT).within(0.001));
 ```
 Author it by first setting `stateSignals = "controlStateChanged dataStateChanged
 curID rxCmd txCmd"` on the tester to read the real sequence. See

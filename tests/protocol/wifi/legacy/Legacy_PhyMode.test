@@ -13,8 +13,8 @@ Define_ProtocolTest(wifi_legacy_dsss_phy)
 {
     return ProtocolTest("wifi_legacy_dsss_phy")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) { return isDsss(c.event); })
+                  .filterPacket("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) { return isDsss(c.event); })
                   .describe("a data frame transmitted in DSSS mode").within(2.5));
 }
 

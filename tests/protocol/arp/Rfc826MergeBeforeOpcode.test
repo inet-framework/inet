@@ -50,14 +50,14 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc826_merge_before_opcode")
         // Expected observation 1: the crafted reply arrives at host A, with the opcode of a
         // reply and the address of host C in its sender protocol address.
-        .inject(inject("hostA").into("eth[0]", "upperLayerOut").at(0.3)
+        .inject(at("hostA").into("eth[0]", "upperLayerOut").at(0.3)
                   .describe("an ARP reply from the address of host C with a hardware address host C does not have")
                   .packet(buildPhantomReply))
         // Expected observation 2: host A never asks for the address of host C
         // (RFC826-RECV-7).
         .never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress")
                              == interfaceIpv4Address("hostC.eth[0]").str();
                   })
@@ -66,8 +66,8 @@ Define_ProtocolTestProgram()
         // Expected observation 3: the datagram goes to the hardware address that the crafted
         // reply carried (RFC826-RECV-6).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) {
                       return macAddressField(c.event.packet, "EthernetMacHeader.dest")
                              == std::string(PHANTOM_HARDWARE_ADDRESS);
                   })

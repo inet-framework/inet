@@ -35,10 +35,10 @@ Define_ProtocolTest(pe_reordering)
 {
     return ProtocolTest("pe_reordering")
         // inject sequence numbers 2 then 1 (sequence number 0 never arrives -> a gap remains)
-        .inject(inject("reordering").into("", "in").at(0.1)
+        .inject(at("reordering").into("", "in").at(0.1)
                   .describe("a packet with sequence number 2")
                   .packet([](const CaptureStore&) { return makeSeqPacket("p2", 2); }))
-        .inject(inject("reordering").into("", "in").at(0.2)
+        .inject(at("reordering").into("", "in").at(0.2)
                   .describe("a packet with sequence number 1")
                   .packet([](const CaptureStore&) { return makeSeqPacket("p1", 1); }))
         // with the sequence-0 gap unfilled, nothing may be delivered to the sink

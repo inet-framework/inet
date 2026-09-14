@@ -25,23 +25,23 @@ Define_ProtocolTestProgram()
         // Expected observation 1: link 1 shows the datagram with TTL = 2 -- confirms the
         // stimulus and the sender's control of the field (RFC1122-TTL-3).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 2")
+                  .filterPacket("udp.destPort == 5000 && ipv4.timeToLive == 2")
                   .capture("id", "ipv4.identification")
                   .describe("the datagram on link 1 with TTL 2")
                   .within(0.5))
         // Expected observation 2: link 2 shows the same datagram with TTL = 1 (RFC791-TTL-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.identification == {id} && ipv4.timeToLive == 1")
+                  .filterPacket("ipv4.identification == {id} && ipv4.timeToLive == 1")
                   .describe("the same datagram on link 2 with TTL 1")
                   .within(0.1))
         // Expected observation 3: host B's UDP receives the datagram (RFC1122-TTL-2).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B")
                   .describe("the datagram at host B's UDP, delivered although it arrived with TTL 1")
                   .within(0.1))
         // Expected observation 4: host A receives no Time Exceeded message.
         .never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv4.type == 11")
+                  .filterPacket("icmpv4.type == 11")
                   .describe("a Time Exceeded message at host A")
                   .within(0.2));
 }

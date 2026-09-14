@@ -20,7 +20,7 @@ Define_ProtocolTest(wifi_11n_ht_capabilities_ie)
 {
     return ProtocolTest("wifi_11n_ht_capabilities_ie")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 0 && Ieee80211HtCapabilities.length >= 0")
+                  .filterPacket("ieee80211mac.type == 0 && Ieee80211HtCapabilities.length >= 0")
                   .describe("an Association Request containing HT Capabilities IE").within(2.5));
 }
 

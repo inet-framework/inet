@@ -17,7 +17,7 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("udp_count_overflow")
         .atMostTimes(2, on("host1.udp").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
+                  .filterPacket("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
 }
 
 %activity:

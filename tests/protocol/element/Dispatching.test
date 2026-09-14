@@ -20,7 +20,7 @@ Define_ProtocolTest(pe_dispatching)
     return ProtocolTest("pe_dispatching")
         // the sender encodes the sequenceNumber protocol id into a ProtocolHeader
         .once(on("sender").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<ProtocolHeader>();
                       return h != nullptr && h->getProtocolId() == AccessoryProtocol::sequenceNumber.getId();
                   })

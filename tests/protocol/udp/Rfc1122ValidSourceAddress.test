@@ -30,8 +30,8 @@ Define_ProtocolTestProgram()
         // Expected observation 1: on link 1, the source address of the datagram is one of the
         // two addresses of host A (RFC1122-UADDR-2).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) {
                       return isOwnIpv4Address(c.event.node, ipv4Address(c.event.packet, "ipv4.srcAddress"));
                   })
                   .describe("host A's datagram, whose source address is one of host A's own")
@@ -39,7 +39,7 @@ Define_ProtocolTestProgram()
         // Expected observation 2: host B's UDP hands the 100 octets upward, so the datagram was
         // a normal one and not a discarded one.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
                   .describe("the 100 octets handed up from host B's UDP toward the program")
                   .within(0.5));
 }

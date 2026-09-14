@@ -18,7 +18,7 @@ Define_ProtocolTest(pe_sendtoport)
         // (SendToPort inserts the header but does not set a PacketProtocolTag, so match on the
         // header contents directly rather than on .protocol(...))
         .once(on("sender").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<DestinationPortHeader>();
                       return h != nullptr && h->getDestinationPort() == 1000;
                   })

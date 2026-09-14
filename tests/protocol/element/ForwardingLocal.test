@@ -25,7 +25,7 @@ Define_ProtocolTest(pe_forwarding_local)
     return ProtocolTest("pe_forwarding_local")
         // delivered up as a local packet: dispatched to destinationL3Address, header still intact
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       const auto& dispatchReq = c.event.packet->findTag<DispatchProtocolReq>();
                       auto header = c.event.packet->peekAtFront<DestinationL3AddressHeader>();
                       return dispatchReq != nullptr && dispatchReq->getProtocol() == &AccessoryProtocol::destinationL3Address

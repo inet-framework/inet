@@ -23,25 +23,25 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc1122_no_error_about_error")
         // Expected observation 1: the datagram to the closed port on link 1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5001")
+                  .filterPacket("udp.destPort == 5001")
                   .describe("the datagram to the closed port 5001 on link 1")
                   .within(0.5))
         // Expected observation 2: host B's Destination Unreachable with TTL 1 on link 2 --
         // an error message about to expire. Record the identification of its datagram.
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv4.type == 3 && icmpv4.code == 3 && ipv4.timeToLive == 1")
+                  .filterPacket("icmpv4.type == 3 && icmpv4.code == 3 && ipv4.timeToLive == 1")
                   .capture("rid", "ipv4.identification")
                   .describe("host B's Destination Unreachable message with TTL 1 on link 2")
                   .within(0.1))
         // Expected observation 3: the gateway discards the expired error message.
         .once(on("router.ipv4.ip").signal("packetDropped")
-                  .packet("icmpv4.type == 3 && ipv4.identification == {rid}")
+                  .filterPacket("icmpv4.type == 3 && ipv4.identification == {rid}")
                   .describe("the gateway's discard of the expired error message")
                   .within(0.1))
         // Expected observation 4: from then on, the gateway sends no Time Exceeded toward
         // host B (RFC1122-ICMP-5).
         .never(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("icmpv4.type == 11")
+                  .filterPacket("icmpv4.type == 11")
                   .describe("a Time Exceeded message from the gateway toward host B")
                   .within(0.2));
 }

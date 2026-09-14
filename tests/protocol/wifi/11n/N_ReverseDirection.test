@@ -19,7 +19,7 @@ Define_ProtocolTest(wifi_11n_reverse_direction)
 {
     return ProtocolTest("wifi_11n_reverse_direction")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40 && Ieee80211HtControl.length >= 0")
+                  .filterPacket("ieee80211mac.type == 40 && Ieee80211HtControl.length >= 0")
                   .describe("QoS data frame with HT Control RD Grant bit").within(2.5));
 }
 

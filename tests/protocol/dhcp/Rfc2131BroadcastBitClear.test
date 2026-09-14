@@ -38,7 +38,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_broadcast_bit_clear")
         // Expected observation 1: the client clears the bit, with ciaddr and giaddr zero.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
                              && !dhcp->getBroadcast()
@@ -49,7 +49,7 @@ Define_ProtocolTestProgram()
         // Expected observations 2 and 4: the DHCPOFFER is a unicast at both layers, to the yiaddr
         // and the chaddr it carries, and its own bit is clear.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
                              && !dhcp->getBroadcast()                                        // observation 4
@@ -61,7 +61,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 3 and 4: the DHCPACK is a unicast in the same way.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
                              && !dhcp->getBroadcast()

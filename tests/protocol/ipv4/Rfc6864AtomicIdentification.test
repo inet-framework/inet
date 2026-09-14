@@ -32,12 +32,12 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc6864_atomic_identification")
         // The relay rewrites the identification of datagram 2 to that of datagram 1.
-        .intercept(intercept("tap").match("udp.destPort == 5001").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5001").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setIdentification(h.getIdentification() - 1); }); })
                      .describe("datagram 2 (set its identification to that of datagram 1)"))
         // Expected observation 1: datagram 1 on link 1 is atomic: DF = 1, MF = 0, offset 0. Record ID1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
+                  .filterPacket("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
                   .capture("id1", "ipv4.identification")
                   .describe("the atomic datagram 1 on link 1")
                   .within(0.5))
@@ -45,28 +45,28 @@ Define_ProtocolTestProgram()
         // (RFC6864-ID-7, RFC6864-ID-6). The gateway forwards it before host A has finished
         // sending datagram 2, so this step comes before the next one.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false")
+                  .filterPacket("udp.destPort == 5000 && ipv4.dontFragment == true && ipv4.moreFragments == false")
                   .describe("datagram 1 on link 2 with DF still set and no fragmentation")
                   .within(0.1))
         // Expected observation 3: datagram 2 on link 1, DF = 1, with another identification.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5001 && ipv4.dontFragment == true && ipv4.identification != {id1}")
+                  .filterPacket("udp.destPort == 5001 && ipv4.dontFragment == true && ipv4.identification != {id1}")
                   .describe("the atomic datagram 2 on link 1 with a different identification")
                   .within(0.1))
         // Expected observation 4: host B's UDP receives datagram 1.
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B")
                   .describe("datagram 1 at host B's UDP")
                   .within(0.1))
         // Expected observation 5: datagram 2 arrives at host B's interface with identification ID1
         // and DF = 1 -- the rewrite took effect.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5001 && ipv4.identification == {id1} && ipv4.dontFragment == true")
+                  .filterPacket("udp.destPort == 5001 && ipv4.identification == {id1} && ipv4.dontFragment == true")
                   .describe("datagram 2 at host B's interface with the identification of datagram 1")
                   .within(0.1))
         // Expected observation 6: host B's UDP receives datagram 2 (RFC6864-ID-3).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5001 && udp.totalLengthField == 108B")
+                  .filterPacket("udp.destPort == 5001 && udp.totalLengthField == 108B")
                   .describe("datagram 2 at host B's UDP, despite the repeated identification")
                   .within(0.1));
 }

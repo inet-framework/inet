@@ -18,7 +18,7 @@ Define_ProtocolTest(pe_fragmentation)
     return ProtocolTest("pe_fragmentation")
         // at least two small (<= 30 B) fragments arrive -- i.e. the packet really was fragmented
         .atLeastTimes(2, on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() <= B(30);
                   })
                   .describe("a small fragment at the sink").within(0.9));

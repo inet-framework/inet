@@ -52,33 +52,33 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc9293_source_quench")
         // The relay sets the time to live of the first data segment to 1, so that the gateway
         // produces a real report about this connection.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setTimeToLive(1); }); })
                      .describe("the first data segment (set its time to live to 1)"))
         // The relay then rewrites that report into a Source Quench on its way to host A.
-        .intercept(intercept("tap2").match("icmpv4.type == 11").nth(1)
+        .intercept(tap("tap2").filterPacket("icmpv4.type == 11").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<IcmpHeader>(frame, [](IcmpHeader& h) { h.setType(ICMP_SOURCEQUENCH); }); })
                      .describe("the gateway's report (rewrite its type to 4, Source Quench)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the Source Quench reaches host A's interface. This confirms the
         // stimulus.
         .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv4.type == 4")
+                  .filterPacket("icmpv4.type == 4")
                   .describe("the Source Quench at host A's interface")
                   .within(1.0))
         // Observation 3: host A ends nothing. No reset leaves it (RFC9293-ICMP-2: the message
         // is discarded, and a discard changes nothing).
         .never(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.rstBit == true")
+                  .filterPacket("tcp.rstBit == true")
                   .describe("a reset from host A")
                   .within(0.5))
         // Observation 4: the connection carries on and the whole stream is acknowledged.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

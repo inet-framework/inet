@@ -14,7 +14,7 @@ Define_ProtocolTest(wifi_legacy_nav)
 {
     return ProtocolTest("wifi_legacy_nav")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 && ieee80211mac.durationField > 0")
+                  .filterPacket("ieee80211mac.type == 32 && ieee80211mac.durationField > 0")
                   .describe("a data frame with non-zero NAV (durationField > 0)").within(2.5));
 }
 

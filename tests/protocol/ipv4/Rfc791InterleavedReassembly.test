@@ -25,52 +25,52 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc791_interleaved_reassembly")
         // The relay holds the first fragment with offset 0 -- the first fragment of datagram 1 --
         // for 2 ms.
-        .intercept(intercept("tap")
-                     .match("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true").nth(1)
+        .intercept(tap("tap")
+                     .filterPacket("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true").nth(1)
                      .delay(0.002)
                      .describe("the first fragment of datagram 1 (hold it for 2 ms)"))
         // Expected observation 1: the first fragment of datagram 1 on link 2; record ID1.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
+                  .filterPacket("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
                   .capture("id1", "ipv4.identification")
                   .describe("the first fragment of datagram 1 on link 2")
                   .within(0.5))
         // Expected observation 2: the last fragment of datagram 1 on link 2.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 552 && ipv4.moreFragments == false")
+                  .filterPacket("ipv4.identification == {id1} && ipv4.fragmentOffset == 552 && ipv4.moreFragments == false")
                   .describe("the last fragment of datagram 1 on link 2")
                   .within(0.1))
         // Expected observation 3: the first frame at host B's interface is the last fragment of
         // datagram 1 -- the held fragment is not in front of it.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 552")
+                  .filterPacket("ipv4.identification == {id1} && ipv4.fragmentOffset == 552")
                   .describe("the last fragment of datagram 1 at host B, ahead of the held first fragment")
                   .within(0.1))
         // Expected observation 4: a first fragment with another identification -- datagram 2.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true && ipv4.identification != {id1}")
+                  .filterPacket("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true && ipv4.identification != {id1}")
                   .capture("id2", "ipv4.identification")
                   .describe("the first fragment of datagram 2 at host B")
                   .within(0.1))
         // Expected observation 5: the last fragment of datagram 2.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("ipv4.identification == {id2} && ipv4.fragmentOffset == 552")
+                  .filterPacket("ipv4.identification == {id2} && ipv4.fragmentOffset == 552")
                   .describe("the last fragment of datagram 2 at host B")
                   .within(0.1))
         // Expected observation 6: host B's UDP receives datagram 2 whole, before the held
         // fragment arrives (RFC1122-REASM-1, RFC791-REASM-3).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5001 && udp.totalLengthField == 1008B")
+                  .filterPacket("udp.destPort == 5001 && udp.totalLengthField == 1008B")
                   .describe("the reassembled datagram 2 at host B's UDP")
                   .within(0.1))
         // Expected observation 7: the held first fragment of datagram 1 arrives.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("ipv4.identification == {id1} && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
+                  .filterPacket("ipv4.identification == {id1} && ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
                   .describe("the held first fragment of datagram 1 at host B")
                   .within(0.1))
         // Expected observation 8: host B's UDP receives datagram 1 whole (RFC791-REASM-1).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 1008B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 1008B")
                   .describe("the reassembled datagram 1 at host B's UDP")
                   .within(0.1));
 }

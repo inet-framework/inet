@@ -47,23 +47,23 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_transaction_identifier")
         // Expected observation 1: a DHCPDISCOVER; record its transaction identifier.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
                   .capture("xid", "DhcpMessage.xid")
                   .describe("a DHCPDISCOVER from the client, whose transaction identifier is recorded")
                   .within(1.0))
         // Expected observation 2: the DHCPOFFER carries the recorded identifier.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPOFFER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcpWithXid(c, DHCPOFFER); })
                   .describe("a DHCPOFFER with the recorded transaction identifier")
                   .within(1.0))
         // Expected observation 3: the DHCPREQUEST carries the recorded identifier (RFC2131-XID-3).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPREQUEST); })
+                  .filterEvent([](const MatchContext& c) { return isDhcpWithXid(c, DHCPREQUEST); })
                   .describe("a DHCPREQUEST with the recorded transaction identifier")
                   .within(1.0))
         // Expected observation 4: the DHCPACK carries the recorded identifier.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcpWithXid(c, DHCPACK); })
+                  .filterEvent([](const MatchContext& c) { return isDhcpWithXid(c, DHCPACK); })
                   .describe("a DHCPACK with the recorded transaction identifier")
                   .within(1.0));
 }

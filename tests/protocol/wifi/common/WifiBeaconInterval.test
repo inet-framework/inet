@@ -13,7 +13,7 @@ Define_ProtocolTest(wifi_beacon_interval)
     return ProtocolTest("wifi_beacon_interval")
         .atLeastTimes(3,
             on("ap.wlan[0].mac").signal("packetSentToLower")
-                .packet("ieee80211mac.type == 8")
+                .filterPacket("ieee80211mac.type == 8")
                 .describe("Beacon frames from the AP").within(0.5));
 }
 

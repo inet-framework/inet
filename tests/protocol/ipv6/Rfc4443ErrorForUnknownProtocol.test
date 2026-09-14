@@ -35,24 +35,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc4443_error_for_unknown_protocol")
         // The relay rewrites the next header to 253.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setProtocolId(static_cast<IpProtocolId>(253)); }); })
                      .describe("the packet (set its next header to 253)"))
         // Expected observation 1: at host B's interface the packet carries next header 253.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return ipv6NextHeader(c.event.packet) == 253; })
+                  .filterEvent([](const MatchContext& c) { return ipv6NextHeader(c.event.packet) == 253; })
                   .describe("the packet at host B's interface with next header 253")
                   .within(6.0))
         // Expected observation 2: host A receives host B's Parameter Problem, type 4 code 1, which
         // quotes a packet of protocol 253 -- the stimulus for host A.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 1")
+                  .filterPacket("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 1")
                   .describe("the Parameter Problem message about the protocol-253 packet at host A")
                   .within(0.5))
         // Expected observation 3: from then on, host A sends no ICMPv6 error message and keeps
         // running (RFC4443-MPR-3, RFC4443-MPR-4).
         .never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("icmpv6.type < 128")
+                  .filterPacket("icmpv6.type < 128")
                   .describe("any ICMPv6 error message from host A")
                   .within(0.5));
 }

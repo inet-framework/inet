@@ -29,25 +29,25 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc4443_packet_too_big")
         // Expected observation 1: the packet on link 1, whole: next header 17, payload length 1460.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
+                  .filterPacket("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
                   .describe("the 1500-octet packet on link 1, whole")
                   .within(6.0))
         // Expected observation 2: the router originates Packet Too Big, type 2, at the moment of
         // the discard (RFC4443-PTB-1).
         .once(on("router.ipv6.ipv6").signal("packetReceivedFromUpper")
-                  .packet("icmpv6.type == 2")
+                  .filterPacket("icmpv6.type == 2")
                   .describe("the router's Packet Too Big message at the moment of the discard")
                   .within(0.5))
         // Expected observation 3: host A receives it, addressed to host A (RFC4443-ERR-2).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 2")
-                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .filterPacket("icmpv6.type == 2")
+                  .filterEvent([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
                   .describe("the Packet Too Big message at host A, addressed to host A")
                   .within(0.5))
         // Expected observation 4: from then on, neither a fragment nor the packet itself appears
         // on link 2 (RFC8200-FRAG-1).
         .never(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv6.protocolId == 17 || ipv6.protocolId == 44")
+                  .filterPacket("ipv6.protocolId == 17 || ipv6.protocolId == 44")
                   .describe("a fragment or the packet itself on link 2")
                   .within(0.5));
 }

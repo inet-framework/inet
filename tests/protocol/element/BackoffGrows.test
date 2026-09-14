@@ -32,7 +32,7 @@ static Packet *makeAttemptPacket(const char *name, int attempt)
 Define_ProtocolTest(pe_backoff_grows)
 {
     return ProtocolTest("pe_backoff_grows")
-        .inject(inject("backoff").into("", "in").at(0.1)
+        .inject(at("backoff").into("", "in").at(0.1)
                   .describe("a packet on transmission attempt 8")
                   .packet([](const CaptureStore&) { return makeAttemptPacket("p", 8); }))
         // the grown window (CW = 255 slots) delays the packet well beyond attempt 1's 1s window ...

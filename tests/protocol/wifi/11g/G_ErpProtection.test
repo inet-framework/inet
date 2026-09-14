@@ -19,7 +19,7 @@ Define_ProtocolTest(wifi_11g_erp_protection)
 {
     return ProtocolTest("wifi_11g_erp_protection")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 28 || ieee80211mac.type == 27")
+                  .filterPacket("ieee80211mac.type == 28 || ieee80211mac.type == 27")
                   .describe("CTS-to-self or RTS for ERP protection before a data frame")
                   .within(2.5));
 }

@@ -26,7 +26,7 @@ That makes the check decisive in both directions:
 
 It also uses the two builder words that replace the ones which collided with their step.
 `tap("relay")` builds the clause and `.intercept(...)` adds it, so the line no longer reads
-`intercept(intercept(...))`.
+`tap(tap(...))`.
 
 Expected result: PASS.
 

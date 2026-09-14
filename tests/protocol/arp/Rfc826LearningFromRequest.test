@@ -41,17 +41,17 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc826_learning_from_request")
         // Expected observation 1: the request of host A, and the reply of host B.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
+                  .filterPacket("arp.opcode == 1")
                   .describe("the request from host A")
                   .within(0.5))
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 2")
+                  .filterPacket("arp.opcode == 2")
                   .describe("host B's reply")
                   .within(0.1))
         // Expected observation 3: host B never asks for the address of host A, although it
         // sends a datagram to host A at 0.5 s (RFC826-RECV-6, RECV-7).
         .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
+                  .filterPacket("arp.opcode == 1")
                   .describe("an ARP request from host B")
                   .within(0.85));
 }

@@ -19,7 +19,7 @@ Define_ProtocolTest(pe_checksum)
     return ProtocolTest("pe_checksum")
         // the inserter emits a packet carrying a 2-byte checksum header, tagged "checksum"
         .once(on("inserter").signal("packetPushedOut").protocol("checksum")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<ChecksumHeader>();
                       return h != nullptr && h->getChunkLength() == B(2);
                   })

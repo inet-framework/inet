@@ -50,11 +50,11 @@ Define_ProtocolTestProgram()
     firstRequestedAddress = Ipv4Address();
     return ProtocolTest("rfc2131_request_retransmission")
         // The relay drops every DHCPACK, so the client never leaves REQUESTING by an answer.
-        .intercept(intercept("tap").match("DhcpMessage.options.messageType == 5").nth(0).drop()
+        .intercept(tap("tap").filterPacket("DhcpMessage.options.messageType == 5").nth(0).drop()
                      .describe("every DHCPACK the server sends"))
         // Expected observation 1: the first DHCPREQUEST; record the address it asks for.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPREQUEST)
                           return false;
@@ -65,13 +65,13 @@ Define_ProtocolTestProgram()
                   .within(5.0))
         // Expected observation 2: the server answers it, and the answer does not reach the client.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
                   .describe("the DHCPACK the server sends in answer")
                   .within(1.0))
         // Expected observations 3 and 5 as one absence: no DHCPACK and no DHCPNAK reaches the
         // client, and no DHCPDISCOVER leaves it, until the repeated DHCPREQUEST comes.
         .never(on("hostA")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (c.event.kind == EventKind::ReceivedFromLower)
                           if (isDhcp(c.event.packet, DHCPACK) || isDhcp(c.event.packet, DHCPNAK))
                               return true;                          // observation 3
@@ -82,7 +82,7 @@ Define_ProtocolTestProgram()
                   .within(90.0))
         // Expected observations 4 and 6: a second DHCPREQUEST, asking for the same address.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
                              && dhcp->getOptions().getRequestedIp() == firstRequestedAddress;

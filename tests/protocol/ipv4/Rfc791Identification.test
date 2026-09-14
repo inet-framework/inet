@@ -23,7 +23,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1: the first datagram appears on link 1 -- confirms the
         // stimulus. Record its identification as ID1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .capture("id1", "ipv4.identification")
                   .describe("the first datagram on link 1")
                   .within(0.5))
@@ -31,7 +31,7 @@ Define_ProtocolTestProgram()
         // identification that differs from ID1 (RFC791-ID-1). notBefore keeps this step
         // from ever being satisfied by the first datagram's own send event.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.identification != {id1}")
+                  .filterPacket("udp.destPort == 5000 && ipv4.identification != {id1}")
                   .describe("the second datagram on link 1 with a different identification")
                   .notBefore(0.05)
                   .within(0.2));

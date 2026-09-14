@@ -46,7 +46,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_release_on_shutdown")
         // Expected observation 1: the client holds an address. Record what the release must name.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;
@@ -61,7 +61,7 @@ Define_ProtocolTestProgram()
         // Expected observations 3 to 7: a unicast DHCPRELEASE naming the address and the server,
         // with ciaddr set and neither a requested IP address nor a lease time option.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPRELEASE)
                           return false;

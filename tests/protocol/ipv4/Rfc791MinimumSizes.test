@@ -37,31 +37,31 @@ Define_ProtocolTestProgram()
         // Expected observation 1: link 1 shows datagram 1 with total length 68 -- confirms
         // the stimulus.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 68B")
+                  .filterPacket("udp.destPort == 5000 && ipv4.totalLengthField == 68B")
                   .describe("datagram 1 on link 1 with total length 68")
                   .within(0.5))
         // Expected observation 2: link 2 shows datagram 1 whole -- total length 68,
         // more-fragments 0, fragment offset 0 (RFC791-FRAG-6).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 68B && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
+                  .filterPacket("udp.destPort == 5000 && ipv4.totalLengthField == 68B && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
                   .describe("datagram 1 on link 2, whole and unfragmented")
                   .within(0.1))
         // Expected observation 3: link 1 shows datagram 2 with total length 576.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.totalLengthField == 576B")
+                  .filterPacket("udp.destPort == 5000 && ipv4.totalLengthField == 576B")
                   .describe("datagram 2 on link 1 with total length 576")
                   .within(0.3))
         // Expected observation 4: link 2 shows a fragment of datagram 2 with the
         // more-fragments flag set -- the gateway fragmented it (datagram 1 never carries
         // this flag, so it alone identifies a datagram-2 fragment).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("ipv4.moreFragments == true")
+                  .filterPacket("ipv4.moreFragments == true")
                   .describe("a fragment of datagram 2 on link 2 with the more-fragments flag set")
                   .within(0.1))
         // Expected observation 5: host B's UDP receives datagram 2 whole, 556 octets of UDP
         // datagram, that is 548 octets of data (RFC791-REASM-2).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 556B") // 8-octet UDP header + 548 octets of data
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 556B") // 8-octet UDP header + 548 octets of data
                   .describe("the reassembled 556-octet UDP datagram at host B")
                   .within(0.3));
 }

@@ -19,14 +19,14 @@ Define_ProtocolTest(pe_source_port)
     return ProtocolTest("pe_source_port")
         // the sender stamps its port into the source port header
         .once(on("sender").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<SourcePortHeader>();
                       return h != nullptr && h->getSourcePort() == 1234;
                   })
                   .describe("the packet carrying source port 1234").within(1.5))
         // the receiver records the sender's port as an L4PortInd on the delivered packet
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       const auto& ind = c.event.packet->findTag<L4PortInd>();
                       return ind != nullptr && ind->getSrcPort() == 1234;
                   })

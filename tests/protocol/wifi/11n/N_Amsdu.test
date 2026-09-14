@@ -14,7 +14,7 @@ Define_ProtocolTest(wifi_11n_amsdu)
 {
     return ProtocolTest("wifi_11n_amsdu")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40 && ieee80211mac.aMsduPresent == true")
+                  .filterPacket("ieee80211mac.type == 40 && ieee80211mac.aMsduPresent == true")
                   .describe("a QoS data frame with A-MSDU Present bit set").within(2.0));
 }
 

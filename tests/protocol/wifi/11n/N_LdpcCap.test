@@ -24,8 +24,8 @@ Define_ProtocolTest(wifi_11n_ldpc_cap)
 {
     return ProtocolTest("wifi_11n_ldpc_cap")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) {
                       // There is no IIeee80211Mode method for LDPC; assert false to
                       // represent a feature that is structurally absent in INET.
                       return false;

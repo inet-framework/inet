@@ -26,12 +26,12 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc8200_zero_udp_checksum")
         // The relay rewrites the UDP checksum to 0.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<UdpHeader>(frame, [](UdpHeader& h) { h.setChecksum(0); }); })
                      .describe("the datagram (set its UDP checksum to 0)"))
         // Expected observation 1: at host B's interface the datagram carries a zero UDP checksum.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.checksum == 0")
+                  .filterPacket("udp.destPort == 5000 && udp.checksum == 0")
                   .describe("the datagram at host B's interface with a zero UDP checksum")
                   .within(6.0))
         // Expected observation 2: host B's UDP discards it (RFC8200-CKSUM-1).

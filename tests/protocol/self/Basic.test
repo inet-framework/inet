@@ -18,9 +18,9 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("udp_basic_pass")
         .once(on("host1.udp").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000").within(0.2))
+                  .filterPacket("udp.destPort == 5000").within(0.2))
         .once(on("host2.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000").within(0.1));
+                  .filterPacket("udp.destPort == 5000").within(0.1));
 }
 
 %activity:

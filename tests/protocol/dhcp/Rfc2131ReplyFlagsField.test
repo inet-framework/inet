@@ -55,12 +55,12 @@ static Packet *buildDiscoverWithBroadcastBit(const CaptureStore&)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc2131_reply_flags_field")
-        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+        .inject(at("server").into("eth[0]", "upperLayerOut").at(1.0)
                   .describe("a crafted DHCPDISCOVER with the BROADCAST bit set")
                   .packet(buildDiscoverWithBroadcastBit))
         // Expected observation 1: the crafted request reaches the server with the bit set.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
                              && dhcp->getBroadcast();
@@ -69,7 +69,7 @@ Define_ProtocolTestProgram()
                   .within(0.1))
         // Expected observation 2: the DHCPOFFER carries the same value back.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
                              && dhcp->getXid() == 0x5A5A0005

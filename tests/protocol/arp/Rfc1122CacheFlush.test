@@ -28,23 +28,23 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc1122_cache_flush")
         // Expected observation 1: the first request, and the reply of host B.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
+                  .filterPacket("arp.opcode == 1")
                   .describe("the first ARP request from host A")
                   .within(0.5))
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 2")
+                  .filterPacket("arp.opcode == 2")
                   .describe("host B's reply")
                   .within(0.1))
         // Expected observation 2: the first datagram arrives.
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("the first datagram at host B's UDP")
                   .within(0.5))
         // Expected observation 3: a second request for the same address, after the lifetime
         // of the entry has passed (RFC1122-ACACHE-1).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress")
                              == interfaceIpv4Address("hostB.eth[0]").str();
                   })
@@ -52,7 +52,7 @@ Define_ProtocolTestProgram()
                   .notBefore(4.0).within(6.0))
         // Expected observation 4: the second datagram arrives.
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("the second datagram at host B's UDP")
                   .within(1.0));
 }

@@ -20,7 +20,7 @@ Define_ProtocolTest(pe_acknowledge)
     return ProtocolTest("pe_acknowledge")
         // exactly four delivered (one per source packet: acknowledged, never retransmitted)
         .betweenTimes(4, 4, on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() == B(100);
                   })
                   .describe("an acknowledged data packet at the sink").within(1.9));

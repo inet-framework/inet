@@ -7,7 +7,7 @@
 // to the concrete per-generation mode class to assert PHY rate / MCS / bandwidth /
 // spatial-stream count. Used from a test via:
 //
-//   .match([](const MatchContext& c){ return isVht(c.event, MHz(80), 1); })
+//   .filterEvent([](const MatchContext& c){ return isVht(c.event, MHz(80), 1); })
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //

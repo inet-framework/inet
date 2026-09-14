@@ -43,8 +43,8 @@ Define_ProtocolTestProgram()
         // Expected observation 1: the first fragment on link 1 (offset 0, M = 1, the UDP header to
         // port 5000 inside) -- the stimulus. Record its identification and its payload length.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("ipv6.protocolId == 44 && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
-                  .match([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
+                  .filterPacket("ipv6.protocolId == 44 && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
                   .capture("id", "Ipv6FragmentHeader.identification")
                   .capture("pl1", [](const PacketEvent& e) { return (intval_t)ipv6PayloadLength(e.packet); })
                   .describe("the first fragment on link 1")
@@ -52,8 +52,8 @@ Define_ProtocolTestProgram()
         // Expected observation 2: the last fragment carries payload length 236, and the first
         // carried 1240 (RFC8200-FRAG-4, FRAG-5, HDR-2).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.moreFragments == false")
-                  .match([](const MatchContext& c) { return ipv6PayloadLength(c.event.packet) == 236 && c.get("pl1").intValue() == 1240; })
+                  .filterPacket("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.moreFragments == false")
+                  .filterEvent([](const MatchContext& c) { return ipv6PayloadLength(c.event.packet) == 236 && c.get("pl1").intValue() == 1240; })
                   .describe("the last fragment on link 1 with payload length 236, after a first fragment with payload length 1240")
                   .within(0.5));
 }

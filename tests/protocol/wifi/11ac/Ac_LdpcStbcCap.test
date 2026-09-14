@@ -22,8 +22,8 @@ Define_ProtocolTest(wifi_11ac_ldpc_stbc_cap)
 {
     return ProtocolTest("wifi_11ac_ldpc_stbc_cap")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) {
                       auto m = dynamic_cast<const Ieee80211VhtMode *>(txMode(c.event));
                       // getSTBC() hardcoded to 0; no LDPC API exists.
                       return m != nullptr && m->getPreambleMode()->getSignalMode()->getSTBC() > 0;

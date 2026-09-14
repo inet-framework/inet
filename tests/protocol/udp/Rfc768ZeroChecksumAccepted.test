@@ -31,24 +31,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc768_zero_checksum_accepted")
         // The relay sets the UDP checksum to zero and changes nothing else.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { zeroUdpChecksum(frame); })
                      .describe("the datagram (set its UDP checksum to zero)"))
         // Expected observation 1: the datagram on link 2 before the relay carries a non-zero
         // checksum -- the sender did generate one.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && udp.checksum != 0")
+                  .filterPacket("udp.destPort == 5000 && udp.checksum != 0")
                   .describe("the datagram on link 2 before the relay, with a checksum")
                   .within(0.5))
         // Expected observation 2: at host B's interface the checksum field is all zero.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.checksum == 0")
+                  .filterPacket("udp.destPort == 5000 && udp.checksum == 0")
                   .describe("the datagram at host B's interface with an all-zero checksum")
                   .within(0.1))
         // Expected observation 3: host B's UDP hands the 100 octets upward -- an all-zero
         // checksum is not a failed checksum (RFC768-CKSUM-2, RFC1122-UCK-5).
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
                   .describe("the 100 octets handed up from host B's UDP toward the program")
                   .within(0.1));
 }

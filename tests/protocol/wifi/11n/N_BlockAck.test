@@ -15,13 +15,13 @@ Define_ProtocolTest(wifi_11n_block_ack)
 {
     return ProtocolTest("wifi_11n_block_ack")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 13")
+                  .filterPacket("ieee80211mac.type == 13")
                   .describe("ADDBA action frame from sta1").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 24")
+                  .filterPacket("ieee80211mac.type == 24")
                   .describe("BlockAckReq from sta1").within(1.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 25")
+                  .filterPacket("ieee80211mac.type == 25")
                   .describe("BlockAck received at sta1").within(0.02));
 }
 

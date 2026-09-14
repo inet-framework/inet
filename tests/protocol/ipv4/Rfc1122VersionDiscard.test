@@ -30,23 +30,23 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_version_discard")
         // The relay rewrites the version to 5 and keeps the checksum valid.
-        .intercept(intercept("tap").match("udp.destPort == 5000").nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
                      .mutate([](Packet *frame) { rewriteIpv4Header(frame, [](Ipv4Header& h) { h.setVersion(5); }); })
                      .describe("the datagram (set its version to 5)"))
         // Expected observation 1: at host B's interface the datagram carries version 5.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && ipv4.version == 5")
+                  .filterPacket("udp.destPort == 5000 && ipv4.version == 5")
                   .capture("id", "ipv4.identification")
                   .describe("the datagram at host B's interface with version 5")
                   .within(0.5))
         // Expected observation 2: host B discards it (RFC1122-VER-1).
         .once(on("hostB.ipv4.ip").signal("packetDropped")
-                  .packet("ipv4.identification == {id}")
+                  .filterPacket("ipv4.identification == {id}")
                   .describe("host B's discard of the version-5 datagram")
                   .within(0.1))
         // Expected observations 3 and 4: nothing goes up to UDP and no ICMP message leaves host B.
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return silenceBroken(c.event, "hostB", "udp.destPort == 5000"); })
+                  .filterEvent([](const MatchContext& c) { return silenceBroken(c.event, "hostB", "udp.destPort == 5000"); })
                   .describe("the datagram at host B's UDP, or any ICMP message from host B")
                   .within(0.2));
 }

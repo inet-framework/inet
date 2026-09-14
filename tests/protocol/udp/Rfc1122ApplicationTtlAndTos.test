@@ -33,13 +33,13 @@ Define_ProtocolTestProgram()
         // Expected observations 1 and 2: on link 1 the datagram carries the TTL and the TOS the
         // program named (RFC1122-UAPI-1).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 33 && ipv4.typeOfService == 8")
+                  .filterPacket("udp.destPort == 5000 && ipv4.timeToLive == 33 && ipv4.typeOfService == 8")
                   .describe("host A's datagram with the TTL and the TOS the program named")
                   .within(0.5))
         // Expected observation 3: host B's UDP hands the 100 octets upward, so neither value
         // stopped the delivery.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; })
                   .describe("the 100 octets handed up from host B's UDP toward the program")
                   .within(0.5));
 }

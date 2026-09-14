@@ -23,22 +23,22 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc4443_host_error_report")
         // Expected observation 1: the datagram to the closed port 5001 on link 1; record the addresses.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5001")
+                  .filterPacket("udp.destPort == 5001")
                   .capture("src", [](const PacketEvent& e) { return ipv6Address(e.packet, "ipv6.srcAddress"); })
                   .capture("dst", [](const PacketEvent& e) { return ipv6Address(e.packet, "ipv6.destAddress"); })
                   .describe("the datagram to the closed port 5001 on link 1")
                   .within(6.0))
         // Expected observation 2: host B's UDP finds no program for port 5001.
         .once(on("hostB.udp").signal("packetDropped")
-                  .match([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; })
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPort(c.event.packet) == 5001; })
                   .describe("host B's UDP discards the datagram for want of a port")
                   .within(0.5))
         // Expected observation 3: host A receives Destination Unreachable type 1 code 4, from the
         // datagram's destination, to the datagram's source, quoting the whole datagram
         // (RFC4443-DU-4, SRC-1, ERR-2, ERR-1).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 1 && Icmpv6DestUnreachableMsg.code == 4 && ipv6.payloadLength == 156B")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("icmpv6.type == 1 && Icmpv6DestUnreachableMsg.code == 4 && ipv6.payloadLength == 156B")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv6Address(c.event.packet, "ipv6.srcAddress") == c.get("dst").stdstringValue()
                           && ipv6Address(c.event.packet, "ipv6.destAddress") == c.get("src").stdstringValue();
                   })

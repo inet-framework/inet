@@ -19,8 +19,8 @@ Define_ProtocolTest(wifi_11ac_vht_80mhz)
 {
     return ProtocolTest("wifi_11ac_vht_80mhz")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) { return isVht(c.event, MHz(80), 1); })
+                  .filterPacket("ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) { return isVht(c.event, MHz(80), 1); })
                   .describe("a data frame transmitted in VHT mode at 80 MHz")
                   .within(2.5));
 }

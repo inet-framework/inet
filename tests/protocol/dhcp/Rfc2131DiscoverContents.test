@@ -34,14 +34,14 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_discover_contents")
         // Expected observation 1: a DHCPDISCOVER leaves the client's transport module.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPDISCOVER); })
                   .describe("a DHCPDISCOVER from the client")
                   .within(1.0))
         // Expected observations 2 to 6, on that same message: it is a broadcast at both layers,
         // its IP source address is 0.0.0.0, its ciaddr is 0.0.0.0, its chaddr and hlen name the
         // sending interface, and it carries no server identifier option.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;

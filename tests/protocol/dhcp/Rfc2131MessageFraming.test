@@ -61,23 +61,23 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_message_framing")
         // Expected observations 1 to 5 and 7, on the DHCPDISCOVER.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPDISCOVER, true); })
+                  .filterEvent([](const MatchContext& c) { return isWellFormed(c, DHCPDISCOVER, true); })
                   .describe("a DHCPDISCOVER whose option area starts with the magic cookie, parses to an end option with nothing left over, holds no code twice, and whose reserved flags bits and hops are zero")
                   .within(1.0))
         // The DHCPOFFER.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPOFFER, false); })
+                  .filterEvent([](const MatchContext& c) { return isWellFormed(c, DHCPOFFER, false); })
                   .describe("a DHCPOFFER whose option area starts with the magic cookie, parses to an end option with nothing left over, and holds no code twice")
                   .within(1.0))
         // The DHCPREQUEST.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isWellFormed(c, DHCPREQUEST, true); })
+                  .filterEvent([](const MatchContext& c) { return isWellFormed(c, DHCPREQUEST, true); })
                   .describe("a DHCPREQUEST whose option area starts with the magic cookie, parses to an end option with nothing left over, holds no code twice, and whose reserved flags bits and hops are zero")
                   .within(1.0))
         // The DHCPACK, and expected observation 6: the lease time as four octets in network byte
         // order.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (!isWellFormed(c, DHCPACK, false))
                           return false;
                       DhcpOptionScan scan = scanDhcpOptions(c.event.packet);

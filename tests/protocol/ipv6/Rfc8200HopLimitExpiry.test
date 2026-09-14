@@ -29,24 +29,24 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc8200_hop_limit_expiry")
         // Expected observation 1: the packet on link 1 with hop limit 1 -- the stimulus.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.hopLimit == 1")
+                  .filterPacket("udp.destPort == 5000 && ipv6.hopLimit == 1")
                   .describe("the packet on link 1 with hop limit 1")
                   .within(6.0))
         // Expected observation 2: the router originates Time Exceeded, type 3 code 0, at the
         // moment of the discard (RFC8200-HL-2, RFC4443-TE-1).
         .once(on("router.ipv6.ipv6").signal("packetReceivedFromUpper")
-                  .packet("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
+                  .filterPacket("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
                   .describe("the router's Time Exceeded message at the moment of the discard")
                   .within(0.5))
         // Expected observation 3: host A receives it, addressed to host A (RFC4443-ERR-2).
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
-                  .match([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .filterPacket("icmpv6.type == 3 && Icmpv6TimeExceededMsg.code == 0")
+                  .filterEvent([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
                   .describe("the Time Exceeded message at host A, addressed to host A")
                   .within(0.5))
         // Expected observation 4: from then on, the packet never appears on link 2.
         .never(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("the packet on link 2")
                   .within(0.5));
 }

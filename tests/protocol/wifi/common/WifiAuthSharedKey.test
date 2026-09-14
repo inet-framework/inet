@@ -20,7 +20,7 @@ Define_ProtocolTest(wifi_auth_sharedkey)
 {
     return ProtocolTest("wifi_auth_sharedkey")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 11 && ieee80211mac.sequenceNumber == 3")
+                  .filterPacket("ieee80211mac.type == 11 && ieee80211mac.sequenceNumber == 3")
                   .describe("Auth frame sequence 3 (WEP challenge text) from AP").within(2.5));
 }
 

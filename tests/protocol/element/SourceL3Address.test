@@ -22,14 +22,14 @@ Define_ProtocolTest(pe_source_l3address)
     return ProtocolTest("pe_source_l3address")
         // the sender stamps its own address into the source address header
         .once(on("sender").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<SourceL3AddressHeader>();
                       return h != nullptr && h->getSourceAddress() == L3Address(Ipv4Address("10.0.0.5"));
                   })
                   .describe("the packet carrying source address 10.0.0.5").within(1.5))
         // the receiver records the sender as an L3AddressInd on the delivered packet
         .once(on("sink").signal("packetPushed")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       const auto& ind = c.event.packet->findTag<L3AddressInd>();
                       return ind != nullptr && ind->getSrcAddress() == L3Address(Ipv4Address("10.0.0.5"));
                   })

@@ -24,8 +24,8 @@ Define_ProtocolTest(wifi_11ac_80p80)
 {
     return ProtocolTest("wifi_11ac_80p80")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 40")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("ieee80211mac.type == 40")
+                  .filterEvent([](const MatchContext& c) {
                       // 80+80 MHz is not representable; assert a non-contiguous mode
                       // which INET cannot produce.
                       return false;

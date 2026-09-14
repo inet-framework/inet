@@ -46,7 +46,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc6842_client_identifier_echoed")
         // Expected observation 1 and 5: each client sends an identifier, and the two differ.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -58,7 +58,7 @@ Define_ProtocolTestProgram()
                   .describe("a DHCPDISCOVER from client C carrying a client identifier option")
                   .within(1.0))
         .once(on("hostB.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -71,7 +71,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 2 and 3: client C gets its own identifier back, in both replies.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
                              && hasOption(dhcp, CLIENT_ID)
@@ -80,7 +80,7 @@ Define_ProtocolTestProgram()
                   .describe("a DHCPOFFER reaching client C with client C's own identifier, unaltered")
                   .within(2.0))
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
                              && hasOption(dhcp, CLIENT_ID)
@@ -90,7 +90,7 @@ Define_ProtocolTestProgram()
                   .within(2.0))
         // Expected observation 4: client D gets its own identifier and not client C's.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
                              && hasOption(dhcp, CLIENT_ID)

@@ -37,8 +37,8 @@ Define_ProtocolTestProgram()
         // HDR-3). Record the identification. The payload length is the subject of
         // Rfc8200FragmentPayloadLength.test.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("ipv6.protocolId == 44 && Ipv6FragmentHeader.nextHeaderProtocol == 17 && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
-                  .match([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
+                  .filterPacket("ipv6.protocolId == 44 && Ipv6FragmentHeader.nextHeaderProtocol == 17 && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
                   .capture("id", "Ipv6FragmentHeader.identification")
                   .describe("the first fragment on link 1: next header 44, offset 0, M = 1, the UDP header inside")
                   .within(6.0))
@@ -46,23 +46,23 @@ Define_ProtocolTestProgram()
         // 1232 octets, M = 0 (RFC8200-FRAG-5; the arithmetic of FRAG-3 and FRAG-6 is in the
         // check document).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("ipv6.protocolId == 44 && Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
+                  .filterPacket("ipv6.protocolId == 44 && Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
                   .describe("the last fragment on link 1 at octet offset 1232")
                   .within(0.5))
         // Expected observation 3: the first fragment on link 2, untouched by the router (RFC8200-EXT-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterPacket("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
                   .describe("the first fragment on link 2 with its fragment header unchanged")
                   .within(0.5))
         // Expected observation 4: the last fragment on link 2.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
+                  .filterPacket("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1232 && Ipv6FragmentHeader.moreFragments == false")
                   .describe("the last fragment on link 2")
                   .within(0.5))
         // Expected observation 5: host B's UDP receives the reassembled 1460-octet datagram
         // (RFC8200-REASM-1, REASM-2, MTU-4).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 1460B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 1460B")
                   .describe("the reassembled 1460-octet UDP datagram at host B's UDP")
                   .within(0.5));
 }

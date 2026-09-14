@@ -56,7 +56,7 @@ Define_ProtocolTestProgram()
         // Observation 1: host A sends its SYN. Record ISS_A. Confirms the connection
         // stimulus.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: after the send time, host A sends a segment with sequence number
@@ -69,8 +69,8 @@ Define_ProtocolTestProgram()
         // wrongly push the earliest acceptable match to ~0.29s, past the real 0.2s send
         // time; confirmed empirically).
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.sequenceNo == {issA} + 1 && tcp.ackBit == true")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 536; })
+                  .filterPacket("tcp.sequenceNo == {issA} + 1 && tcp.ackBit == true")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 536; })
                   .describe("host A's first data segment, 536 octets at ISS_A + 1, with ACK set")
                   .within(1.0))
         // Observation 3: host A sends a segment with sequence number ISS_A + 537 that
@@ -79,8 +79,8 @@ Define_ProtocolTestProgram()
         // while its next sequence number is ISS_A + 537 carries that same number and no
         // data, and with an echoing peer host A does send such acknowledgments.
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.sequenceNo == {issA} + 537")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
+                  .filterPacket("tcp.sequenceNo == {issA} + 537")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) > 0; })
                   .describe("host A's next data segment, continuing at ISS_A + 537 with no gap")
                   .within(1.0))
         // Observation 4: host A receives an acknowledgment of the whole stream, ISS_A +
@@ -88,7 +88,7 @@ Define_ProtocolTestProgram()
         // order). Decisive: a cumulative acknowledgment of the last octet cannot occur
         // unless every earlier octet was received in order.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo == {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo == {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream, ISS_A + 5001")
                   .within(1.0));
 }

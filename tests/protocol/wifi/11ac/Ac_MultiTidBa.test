@@ -19,7 +19,7 @@ Define_ProtocolTest(wifi_11ac_multi_tid_ba)
 {
     return ProtocolTest("wifi_11ac_multi_tid_ba")
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (!c.event.packet) return false;
                       auto ba = c.event.packet->peekAtFront<Ieee80211MultiTidBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
                       return ba != nullptr;

@@ -34,30 +34,30 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc9293_valid_reset")
         // The relay turns the first data segment into a reset at the sequence number host B
         // expects.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { makeReset(frame, tcpSequenceNumberOf(frame)); })
                      .describe("the first data segment (turn it into a reset at the expected sequence number)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the reset reaches host B at ISS_A + 1, the next sequence number it
         // expects. This confirms the stimulus.
         .once(on("host2.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.rstBit == true && tcp.sequenceNo == {issA} + 1")
+                  .filterPacket("tcp.rstBit == true && tcp.sequenceNo == {issA} + 1")
                   .describe("the valid reset at host B's TCP")
                   .within(1.0))
         // Observation 3: host B sends nothing more for this connection. It has none.
         .never(on("host2.tcp").signal("packetSentToLower")
-                  .packet("tcp.srcPort == 1000 && tcp.ackBit == true && tcp.rstBit == false")
+                  .filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true && tcp.rstBit == false")
                   .describe("any further acknowledgment from host B")
                   .within(0.5))
         // Observation 4: host A retransmits after its timeout, and the segment now reaches a
         // host with no such connection, which answers with a reset (RFC9293-RST-1). This is
         // the proof that host B aborted.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.rstBit == true")
+                  .filterPacket("tcp.rstBit == true")
                   .describe("host B's reset for a connection that no longer exists")
                   .within(8.0));
 }

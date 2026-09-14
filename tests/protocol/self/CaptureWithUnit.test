@@ -33,21 +33,21 @@ Define_ProtocolTestProgram()
         // Step 1: capture a field that carries a unit. The SYN's header length is 24B,
         // because the segment carries the maximum-segment-size option.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("synHeaderLength", "tcp.headerLength")
                   .describe("host A's SYN, whose header length is captured with its unit")
                   .within(0.3))
         // Step 2: use the captured quantity in an expression. The final ACK carries no
         // option, so its header is 20B, which is the captured value less four octets.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.ackBit == true && tcp.synBit == false && tcp.headerLength == {synHeaderLength} - 4B")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.headerLength == {synHeaderLength} - 4B")
                   .describe("host A's final ACK, four octets shorter than the SYN")
                   .within(0.5))
         // Step 3: a step that names no capture. Before the repair this step raised the
         // dimensionless-number error, because the substitution converted the stored
         // capture of step 1 although nothing here refers to it.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                   .describe("a later segment, in a step that names no capture")
                   .within(0.5));
 }

@@ -61,13 +61,13 @@ static Packet *buildForeignSubnetRequest(const CaptureStore&)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc2131_nak_wrong_subnet")
-        .inject(inject("server").into("eth[0]", "upperLayerOut").at(1.0)
+        .inject(at("server").into("eth[0]", "upperLayerOut").at(1.0)
                   .describe("a crafted DHCPREQUEST from INIT-REBOOT asking for 10.0.0.7, an address of a foreign subnet")
                   .packet(buildForeignSubnetRequest))
         // Expected observations 2 to 6: a DHCPNAK, broadcast at both layers, with a server
         // identifier and no other option, and with its three address fields zero.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPNAK)
                           return false;
@@ -93,7 +93,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 7: no DHCPACK answers the crafted message.
         .never(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPACK); })
                   .describe("a DHCPACK from the server")
                   .within(1.0));
 }

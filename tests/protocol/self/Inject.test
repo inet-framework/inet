@@ -58,11 +58,11 @@ static Packet *buildInjectedUdpDatagram(const CaptureStore&)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("udp_inject_echo")
-        .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
+        .inject(at("host2").into("eth[0]", "upperLayerOut").at(0.5)
                   .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
         // The inject is an ordered step, so this expect is anchored at the injection time.
         .once(on("host2.udp").signal("packetSentToLower")
-                  .packet("udp.srcPort == 5000").within(0.2));
+                  .filterPacket("udp.srcPort == 5000").within(0.2));
 }
 
 %activity:

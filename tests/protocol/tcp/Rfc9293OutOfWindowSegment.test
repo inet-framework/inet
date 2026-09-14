@@ -30,20 +30,20 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_out_of_window_segment")
         // The relay moves the first data segment far above the window.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) {
                          rewriteTcpHeader(frame, [](TcpHeader& h) { h.setSequenceNo(h.getSequenceNo() + 100000); });
                      })
                      .describe("the first data segment (add 100000 to its sequence number)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the crafted segment reaches host B, carrying the moved sequence
         // number. This confirms the stimulus.
         .once(on("host2.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.sequenceNo == {issA} + 100001")
+                  .filterPacket("tcp.sequenceNo == {issA} + 100001")
                   .describe("the out-of-window segment at host B's TCP")
                   .within(1.0))
         // Observation 3: host B answers with an empty acknowledgment that repeats where the
@@ -52,20 +52,20 @@ Define_ProtocolTestProgram()
         // of the segment is read from the IPv4 total length, and TCP hands a segment down
         // before the network layer adds that header.
         .once(on("host2.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo == {issA} + 1 && tcp.rstBit == false")
-                  .match([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 0; })
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo == {issA} + 1 && tcp.rstBit == false")
+                  .filterEvent([](const MatchContext& c) { return tcpSegmentDataLength(c.event.packet) == 0; })
                   .describe("host B's empty acknowledgment, still expecting ISS_A + 1")
                   .within(0.5))
         // Observation 4: host B never answers with a reset (RFC9293-RST-2).
         .never(on("host2.tcp").signal("packetSentToLower")
-                  .packet("tcp.rstBit == true")
+                  .filterPacket("tcp.rstBit == true")
                   .describe("a reset from host B")
                   .within(0.5))
         // Observation 5: the connection stays in the same state and finishes. Host A receives
         // an acknowledgment of the whole stream after it retransmits the segment that host B
         // could not use.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

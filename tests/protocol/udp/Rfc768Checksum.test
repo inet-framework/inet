@@ -49,13 +49,13 @@ Define_ProtocolTestProgram()
         // Expected observation 1: link 1 shows host A's datagram to port 5000 with a nonzero
         // checksum -- confirms the stimulus of the first half (a checksum was generated).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 108B && udp.checksum != 0")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 108B && udp.checksum != 0")
                   .describe("host A's 100-octet datagram on link 1 with a nonzero checksum")
                   .within(0.5))
         // Expected observation 2: host B's UDP hands the 100 octets upward -- the datagram
         // with a checksum was accepted.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 100;
                   })
                   .describe("host A's 100 octets handed up from host B's UDP, accepted with a checksum")
@@ -64,13 +64,13 @@ Define_ProtocolTestProgram()
         // all-zero checksum -- confirms the stimulus of the second half (no checksum was
         // generated).
         .once(on("hostC.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 208B && udp.checksum == 0")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 208B && udp.checksum == 0")
                   .describe("host C's 200-octet datagram on link 2 with an all-zero checksum")
                   .within(0.2))
         // Expected observation 4: host B's UDP hands the 200 octets upward -- the datagram
         // without a checksum was accepted, not discarded as a failed one.
         .once(on("hostB.udp").signal("packetSentToUpper")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getByteLength() == 200;
                   })
                   .describe("host C's 200 octets handed up from host B's UDP, accepted without a checksum")

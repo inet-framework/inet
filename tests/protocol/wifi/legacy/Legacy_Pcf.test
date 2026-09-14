@@ -17,7 +17,7 @@ Define_ProtocolTest(wifi_legacy_pcf)
 {
     return ProtocolTest("wifi_legacy_pcf")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 26")
+                  .filterPacket("ieee80211mac.type == 26")
                   .describe("a PS-Poll / CF-Poll frame from AP (PCF)").within(2.5));
 }
 

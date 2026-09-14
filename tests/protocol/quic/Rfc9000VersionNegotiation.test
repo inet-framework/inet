@@ -37,7 +37,7 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9000_version_negotiation")
         // The relay writes a version nobody speaks into the client's Initial packet.
-        .intercept(intercept("tap").match("udp.destPort == 1000")
+        .intercept(tap("tap").filterPacket("udp.destPort == 1000")
                      .mutate([](Packet *frame) {
                          mutateFirstQuicChunk<InitialPacketHeader>(frame, [](InitialPacketHeader& h) {
                              h.setVersion(0x0a0a0a0a);
@@ -46,7 +46,7 @@ Define_ProtocolTestProgram()
                      .describe("every Initial packet from the client (set its version to 0x0a0a0a0a)"))
         // Observation 1: the packet reaches the server carrying the unknown version.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = findQuicChunk<InitialPacketHeader>(c.event.packet);
                       return h != nullptr && h->getVersion() == 0x0a0a0a0a;
                   })
@@ -54,14 +54,14 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Observation 2: the server answers with a Version Negotiation packet (RFC9000-VER-1).
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<VersionNegotiationPacketHeader>(c.event.packet) != nullptr;
                   })
                   .describe("the server's Version Negotiation packet")
                   .within(1.0))
         // Observation 3: the connection does not open, so no stream data crosses the path.
         .never(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
                   })
                   .describe("stream data reaching the server")

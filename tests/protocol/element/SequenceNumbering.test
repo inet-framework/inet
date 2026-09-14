@@ -16,13 +16,13 @@ Define_ProtocolTest(pe_sequencenumbering)
 {
     return ProtocolTest("pe_sequencenumbering")
         .once(on("numbering").signal("packetPushedOut").protocol("sequenceNumber")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<SequenceNumberHeader>();
                       return h != nullptr && h->getSequenceNumber() == 0;
                   })
                   .describe("the first packet with sequence number 0").within(1.5))
         .once(on("numbering").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto h = c.event.packet->peekAtFront<SequenceNumberHeader>();
                       return h != nullptr && h->getSequenceNumber() == 1;
                   })

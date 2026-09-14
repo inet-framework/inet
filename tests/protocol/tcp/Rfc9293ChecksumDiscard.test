@@ -30,24 +30,24 @@ Define_ProtocolTestProgram()
         // The relay corrupts the checksum of the first data segment. A segment that carries
         // data is told from a bare acknowledgment by the length of its IP datagram: 40 octets
         // hold the two headers alone, and a full segment holds 536 octets more.
-        .intercept(intercept("tap").match("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { corruptTcpChecksum(frame); })
                      .describe("the first data segment (replace its checksum with the one's complement)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: host B's TCP discards the segment (RFC9293-CKSUM-2). The drop record
         // keeps the TCP header at its front, so the port can be read from it.
         .once(on("host2.tcp").signal("packetDropped")
-                  .packet("tcp.destPort == 1000")
+                  .filterPacket("tcp.destPort == 1000")
                   .describe("host B's TCP discards the segment whose checksum is wrong")
                   .within(1.0))
         // Observation 3: host B does not acknowledge the data of that segment. The
         // acknowledgment ISS_A + 537 can only follow a retransmission, which comes later.
         .never(on("host2.tcp").signal("packetSentToLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo == {issA} + 537")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo == {issA} + 537")
                   .describe("an acknowledgment of the discarded segment's data")
                   .within(0.2))
         // Observation 4: the connection recovers. Host A receives an acknowledgment of the
@@ -58,7 +58,7 @@ Define_ProtocolTestProgram()
         // matched with `>=` because host A's program closes while data is still unsent, so
         // the FIN travels with the tail of the stream and host B acknowledges both at once.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

@@ -28,24 +28,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc8200_short_fragment")
         // The relay shortens the first fragment by 4 octets.
-        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true").nth(1)
+        .intercept(tap("tap").filterPacket("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true").nth(1)
                      .mutate([](Packet *frame) { shortenFrame(frame, B(4)); })
                      .describe("the first fragment (shorten it by 4 octets: a piece of 1228)"))
         // Expected observation 1: at host B's interface a first fragment with payload length 1236.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
-                  .match([](const MatchContext& c) { return ipv6PayloadLength(c.event.packet) == 1236; })
+                  .filterPacket("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterEvent([](const MatchContext& c) { return ipv6PayloadLength(c.event.packet) == 1236; })
                   .capture("id", "Ipv6FragmentHeader.identification")
                   .describe("a first fragment at host B's interface with payload length 1236, not a multiple of 8 plus 8")
                   .within(6.0))
         // Expected observation 2: host A receives Parameter Problem, type 4 code 0.
         .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0")
+                  .filterPacket("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0")
                   .describe("the Parameter Problem message, code 0, at host A")
                   .within(0.5))
         // Expected observation 3: nothing of the datagram reaches UDP at host B (RFC8200-REASM-4).
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000"); })
+                  .filterEvent([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000"); })
                   .describe("the datagram at host B's UDP")
                   .within(0.5));
 }

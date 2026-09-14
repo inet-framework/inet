@@ -16,7 +16,7 @@ Define_ProtocolTest(pe_serialization)
 {
     return ProtocolTest("pe_serialization")
         .once(on("serializer").signal("packetPushedOut")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() == B(100);
                   })
                   .describe("the serialized 100-byte packet").within(1.5))

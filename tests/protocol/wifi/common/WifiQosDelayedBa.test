@@ -21,17 +21,17 @@ Define_ProtocolTest(wifi_qos_delayed_ba)
 {
     return ProtocolTest("wifi_qos_delayed_ba")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 24")
+                  .filterPacket("ieee80211mac.type == 24")
                   .describe("BlockAckReq from sta1").within(2.5))
         // In delayed BA, an ACK comes first (immediate ACK of the BAReq frame itself).
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 29")
+                  .filterPacket("ieee80211mac.type == 29")
                   .describe("immediate ACK of the BAReq (delayed BA)").within(0.01))
         // Then the BA arrives after PIFS (>= 25 µs additional wait).
         // INET's immediate BA skips the ACK step and sends BA directly, so the outer
         // ACK step above already fails in INET's implementation.
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 25")
+                  .filterPacket("ieee80211mac.type == 25")
                   .describe("delayed Block Ack after PIFS").within(0.002));
 }
 

@@ -17,7 +17,7 @@ Define_ProtocolTest(wifi_legacy_fragmentation)
 {
     return ProtocolTest("wifi_legacy_fragmentation")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 32 && ieee80211mac.moreFragments == true")
+                  .filterPacket("ieee80211mac.type == 32 && ieee80211mac.moreFragments == true")
                   .describe("a data fragment with moreFragments == true").within(2.5));
 }
 

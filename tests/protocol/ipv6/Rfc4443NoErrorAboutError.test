@@ -22,24 +22,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc4443_no_error_about_error")
         // The relay rewrites the hop limit of host B's report to 1.
-        .intercept(intercept("tap").match("icmpv6.type == 1").nth(1)
+        .intercept(tap("tap").filterPacket("icmpv6.type == 1").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Ipv6Header>(frame, [](Ipv6Header& h) { h.setHopLimit(1); }); })
                      .describe("host B's Destination Unreachable (set its hop limit to 1)"))
         // Expected observation 1: the datagram to the closed port on link 1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5001")
+                  .filterPacket("udp.destPort == 5001")
                   .describe("the datagram to the closed port 5001 on link 1")
                   .within(6.0))
         // Expected observation 2: the router's interface on link 2 receives the report with hop
         // limit 1 -- an error message about to expire; the anchor.
         .once(on("router.eth[1].mac").signal("packetReceivedFromLower")
-                  .packet("icmpv6.type == 1 && ipv6.hopLimit == 1")
+                  .filterPacket("icmpv6.type == 1 && ipv6.hopLimit == 1")
                   .describe("host B's Destination Unreachable with hop limit 1 at the router")
                   .within(0.5))
         // Expected observation 3: from then on, the router sends no Time Exceeded and forwards no
         // copy of the expired report (RFC4443-MPR-4).
         .never(on("router")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return c.event.kind == EventKind::SentToLower && c.event.sourcePath.rfind("router.eth", 0) == 0
                           && matchesExpression(c.event.packet, "icmpv6.type == 3 || icmpv6.type == 1");
                   })

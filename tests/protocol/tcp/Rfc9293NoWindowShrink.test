@@ -48,14 +48,14 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc9293_no_window_shrink")
         // Observation 1: host A sends its SYN. Record ISS_A, and anchor the watch below.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: over the whole transfer, no segment from host B carries a right edge
         // to the left of one it advertised earlier (RFC9293-WND-3).
         .never(on("host2.tcp").signal("packetSentToLower")
-                  .packet("tcp.ackBit == true")
-                  .match([](const MatchContext& c) { return rightEdgeMovedLeft(c.event.packet); })
+                  .filterPacket("tcp.ackBit == true")
+                  .filterEvent([](const MatchContext& c) { return rightEdgeMovedLeft(c.event.packet); })
                   .describe("a segment from host B whose right window edge moved to the left")
                   .within(1.5));
 }

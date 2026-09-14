@@ -52,7 +52,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_requested_parameters")
         // Expected observation 1: the client asks for the subnet mask and the router.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -68,14 +68,14 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 7: the DHCPOFFER carries observations 3 to 6.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return isDhcp(c.event.packet, DHCPOFFER) && carriesRequestedParameters(c.event.packet);
                   })
                   .describe("a DHCPOFFER carrying the subnet mask 255.255.255.0, a router option whose length is a multiple of 4, the mask before the router, and no code twice")
                   .within(1.0))
         // Expected observations 2 to 6: the DHCPACK.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPACK)
                           return false;

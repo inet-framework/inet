@@ -25,13 +25,13 @@ PacketDissector falls back to DefaultProtocolDissector, which visits the whole u
 remainder as one opaque chunk -- confirmed empirically: evalPacketField(pkt,
 "InitialPacketHeader.version") and friends all threw "protocol '...' not present in packet",
 at every observation point tried (client.udp, both directions, all four recognized
-signals). This test therefore never uses .packet("quic....") or evalPacketField() for QUIC
+signals). This test therefore never uses .filterPacket("quic....") or evalPacketField() for QUIC
 fields; it walks the packet's own chunk tree directly via QuicChunks.h's
 findQuicChunk<T>(), which *does* work reliably (also confirmed empirically) because
 inet::quic::QuicPacket::createOmnetPacket() builds each QUIC packet by insertAtBack()-ing
 distinct FieldsChunk-derived chunks, which INET represents as a flat SequenceChunk --
 including the UDP header, still flattened in rather than nested, at an observation point
-before UDP pops it. .packet("udp....") for plain UDP fields is unaffected (UDP has its own
+before UDP pops it. .filterPacket("udp....") for plain UDP fields is unaffected (UDP has its own
 registered dissector) and works normally, though this test does not need it.
 
 %includes:
@@ -53,7 +53,7 @@ Define_ProtocolTestProgram()
         // datagram that carries the Initial packet" is the whole datagram UDP hands to
         // IP, byteLength here, which already includes the 8-octet UDP header.
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto initial = findQuicChunk<InitialPacketHeader>(c.event.packet);
                       return initial != nullptr
                           && initial->getVersion() == 1
@@ -64,7 +64,7 @@ Define_ProtocolTestProgram()
         // Expected observation 3: host B answers with a datagram carrying a long header
         // packet -- the handshake proceeds in both directions.
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<LongPacketHeader>(c.event.packet) != nullptr;
                   })
                   .describe("host B's answering datagram, also a long-header packet")
@@ -73,7 +73,7 @@ Define_ProtocolTestProgram()
         // with a short header (RFC9000-PKT-2) -- the connection reached the state in
         // which application data travels.
         .once(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<ShortPacketHeader>(c.event.packet) != nullptr;
                   })
                   .describe("host A's later datagram: a short-header (1-RTT) packet")

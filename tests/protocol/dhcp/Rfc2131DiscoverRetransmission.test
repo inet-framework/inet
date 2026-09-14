@@ -57,7 +57,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_discover_retransmission")
         // Expected observation 1: the first DHCPDISCOVER; record its instant.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (!isDhcp(c.event.packet, DHCPDISCOVER))
                           return false;
                       lastAt = c.event.time;
@@ -69,12 +69,12 @@ Define_ProtocolTestProgram()
         // first repetition; a DHCPOFFER cannot arrive at all, because no node of the mockup sends
         // one.
         .never(on("hostA.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPOFFER); })
+                  .filterEvent([](const MatchContext& c) { return isDhcp(c.event.packet, DHCPOFFER); })
                   .describe("a DHCPOFFER reaching the client")
                   .within(59.0))
         // Expected observation 3: a second DHCPDISCOVER; record its instant.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (!isDhcp(c.event.packet, DHCPDISCOVER))
                           return false;
                       lastInterval = c.event.time - lastAt;
@@ -86,7 +86,7 @@ Define_ProtocolTestProgram()
         // Expected observations 4 and 5: a third DHCPDISCOVER, and the second interval is longer
         // than the first.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       if (!isDhcp(c.event.packet, DHCPDISCOVER))
                           return false;
                       simtime_t interval = c.event.time - lastAt;

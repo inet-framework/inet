@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_rrm_measurement)
 {
     return ProtocolTest("wifi_rrm_measurement")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 13 && Ieee80211MeasurementRequest.length >= 0")
+                  .filterPacket("ieee80211mac.type == 13 && Ieee80211MeasurementRequest.length >= 0")
                   .describe("a Measurement Request action frame from AP").within(2.5));
 }
 

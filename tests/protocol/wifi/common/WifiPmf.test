@@ -20,7 +20,7 @@ Define_ProtocolTest(wifi_pmf)
 {
     return ProtocolTest("wifi_pmf")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211PmfProtectedFrame.length >= 0")
+                  .filterPacket("Ieee80211PmfProtectedFrame.length >= 0")
                   .describe("a PMF-protected management frame from AP").within(2.5));
 }
 

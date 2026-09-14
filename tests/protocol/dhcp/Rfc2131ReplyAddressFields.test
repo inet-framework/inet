@@ -50,7 +50,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1, first half: the DHCPDISCOVER carries ciaddr 0.0.0.0 and
         // giaddr 0.0.0.0, so the two values the DHCPOFFER must repeat are both zero.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPDISCOVER
                              && dhcp->getCiaddr().isUnspecified()
@@ -60,7 +60,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 2 and 3: the DHCPOFFER carries both fields as 0.0.0.0.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPOFFER
                              && dhcp->getCiaddr().isUnspecified()     // observation 2
@@ -70,7 +70,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observation 1, second half: the DHCPREQUEST carries both fields as 0.0.0.0.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPREQUEST
                              && dhcp->getCiaddr().isUnspecified()
@@ -80,7 +80,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 4 and 5: the DHCPACK carries both fields as 0.0.0.0.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       return dhcp != nullptr && dhcp->getOptions().getMessageType() == DHCPACK
                              && dhcp->getCiaddr().isUnspecified()     // observation 4

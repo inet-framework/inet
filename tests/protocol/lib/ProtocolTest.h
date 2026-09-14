@@ -67,7 +67,7 @@ class INET_API Injection
 //   drop  -- discard the frame (force a retransmission)
 //   delay -- forward it after a hold time
 //   mutate-- run a C++ mutator on the (inner) frame, then forward it
-// The ProtocolTester installs these on the tap module at startup (see intercept(...)).
+// The ProtocolTester installs these on the tap module at startup (see tap(...)).
 //
 class INET_API Interception
 {
@@ -83,7 +83,6 @@ class INET_API Interception
     std::string description;      // optional human phrase
 
     Interception& filterPacket(const char *expr) { matchExpression = expr; return *this; }
-    Interception& match(const char *expr) { matchExpression = expr; return *this; } // older name of filterPacket
     Interception& minBytes(long n) { minimumBytes = n; return *this; }
     Interception& nth(int k) { occurrence = k; return *this; }
     // Act on the k-th match and on every match after it. A rule that must remove a segment
@@ -122,7 +121,7 @@ Step atLeastTimes(int n, EventPattern pattern);
 // Entry points of the fluent injection and interception chains.
 //
 // The builder and the step that carries it must not share a word. A line that reads
-// `intercept(intercept("tap")...)` says the same thing twice and neither time says which
+// `tap(tap("tap")...)` says the same thing twice and neither time says which
 // role it means: the inner call builds a clause, the outer adds it to the program. `on` and
 // `once` avoid this by accident, because the two words differ.
 //
@@ -134,18 +133,14 @@ Step atLeastTimes(int n, EventPattern pattern);
 Injection at(const char *nodeName);
 Interception tap(const char *tapName);
 
-// The older names of the same two builders. Phase 2 of
-// plan/pending/protocol-test-framework-gaps.md removes them.
-Injection inject(const char *nodeName);
-Interception intercept(const char *tapName);
 
 //
 // A protocol test program: an ordered list of steps with a name. Built with the
 // fluent API, e.g.:
 //
 //   ProtocolTest("udp")
-//       .expect(on("host1").sentToLower().match("udp.destPort == 5000").within(0.2))
-//       .expect(on("host2").receivedFromLower().match("udp.destPort == 5000").within(0.1));
+//       .expect(on("host1").sentToLower().filterPacket("udp.destPort == 5000").within(0.2))
+//       .expect(on("host2").receivedFromLower().filterPacket("udp.destPort == 5000").within(0.1));
 //
 class INET_API ProtocolTest
 {

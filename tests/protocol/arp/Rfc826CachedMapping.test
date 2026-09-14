@@ -34,8 +34,8 @@ Define_ProtocolTestProgram()
         // Expected observation 1: exactly one request for the address of host B leaves host
         // A in the whole run (RFC826-REQ-2).
         .betweenTimes(1, 1, on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress")
                              == interfaceIpv4Address("hostB.eth[0]").str();
                   })

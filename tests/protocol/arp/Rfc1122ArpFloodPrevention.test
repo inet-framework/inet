@@ -40,8 +40,8 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc1122_arp_flood_prevention")
         // Expected observations 1 and 3: between 1 and 11 requests for 10.0.0.99 in 10 s.
         .betweenTimes(1, 11, on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress") == "10.0.0.99";
                   })
                   .describe("an ARP request from host A for 10.0.0.99")

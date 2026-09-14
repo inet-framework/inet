@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_11n_2040_coex)
 {
     return ProtocolTest("wifi_11n_2040_coex")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 13 && Ieee802011_20_40CoexistenceInformation.length >= 0")
+                  .filterPacket("ieee80211mac.type == 13 && Ieee802011_20_40CoexistenceInformation.length >= 0")
                   .describe("a 20/40 BSS Coexistence action frame").within(2.5));
 }
 

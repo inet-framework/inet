@@ -58,18 +58,18 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9000_reordered_delivery")
         // The relay holds the first datagram that carries stream data.
-        .intercept(intercept("tap").match("udp.destPort == 1000").minBytes(1300).nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 1000").minBytes(1300).nth(1)
                      .delay(0.02)
                      .describe("the first datagram carrying stream data (hold it for 20 ms)"))
         // Observation 1: the server receives data from later in the stream first.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return streamOffset(c.event.packet) == 1454; })
+                  .filterEvent([](const MatchContext& c) { return streamOffset(c.event.packet) == 1454; })
                   .describe("the stream frame at offset 1454, arriving before the one at offset 0")
                   .within(1.0))
         // Observation 2: the whole block arrives (RFC9000-STR-2). The completing frame comes
         // while the gap at offset 0 is still open, which is what makes the buffering visible.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
                       return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
                   })
@@ -77,13 +77,13 @@ Define_ProtocolTestProgram()
                   .within(2.0))
         // Observation 3: the gap is filled afterwards.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return streamOffset(c.event.packet) == 0; })
+                  .filterEvent([](const MatchContext& c) { return streamOffset(c.event.packet) == 0; })
                   .describe("the stream frame at offset 0, filling the gap")
                   .within(2.0))
         // Observation 4: the client never sends the data that arrived early a second time, so
         // the server kept it rather than discarding it.
         .never(on("client.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) { return resentTheEarlyData(c.event.packet); })
+                  .filterEvent([](const MatchContext& c) { return resentTheEarlyData(c.event.packet); })
                   .describe("a second copy of the stream frame at offset 1454")
                   .within(1.0));
 }

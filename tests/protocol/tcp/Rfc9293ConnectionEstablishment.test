@@ -47,7 +47,7 @@ Define_ProtocolTestProgram()
         // CKSUM-1; observed at the MAC because the checksum isn't inserted until the IPv4
         // module's postRouting stage (see the %description deviation note).
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false && tcp.headerLength >= 20B && tcp.checksum != 0")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false && tcp.headerLength >= 20B && tcp.checksum != 0")
                   .capture("issA", "tcp.sequenceNo")
                   // Captured via a lambda, stripping the "B" unit into a plain number: the
                   // declarative string-form capture("name", "tcp.headerLength") stores the
@@ -65,13 +65,13 @@ Define_ProtocolTestProgram()
         // Observation 2: the SYN+ACK acknowledges ISS_A + 1. The plus one is
         // RFC9293-SEQ-1: the SYN occupied exactly one sequence number.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {issA} + 1")
                   .capture("issB", "tcp.sequenceNo")
                   .describe("host B's SYN+ACK acknowledging ISS_A + 1").within(0.5))
         // Observation 3: host A's final ACK acknowledges ISS_B + 1, with a 20-octet header:
         // no option, five words.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {issB} + 1 && tcp.headerLength == 20B")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {issB} + 1 && tcp.headerLength == 20B")
                   .describe("host A's final ACK acknowledging ISS_B + 1, with a 20-octet header").within(0.5));
 }
 

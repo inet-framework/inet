@@ -42,7 +42,7 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9000_unknown_frame_type")
         // The relay writes a frame type that no version of QUIC defines.
-        .intercept(intercept("tap").match("udp.destPort == 1000").minBytes(1300).nth(1)
+        .intercept(tap("tap").filterPacket("udp.destPort == 1000").minBytes(1300).nth(1)
                      .mutate([](Packet *frame) {
                          mutateFirstQuicChunk<StreamFrameHeader>(frame, [](StreamFrameHeader& h) {
                              h.setFrameType(static_cast<FrameHeaderType>(0x3f));
@@ -51,7 +51,7 @@ Define_ProtocolTestProgram()
                      .describe("the first stream frame (set its type to 0x3f, which no version defines)"))
         // Observation 1: the frame reaches the server carrying the unknown type.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       for (const auto& f : findAllQuicChunks<FrameHeader>(c.event.packet))
                           if (f->getFrameType() == static_cast<FrameHeaderType>(0x3f))
                               return true;
@@ -61,7 +61,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Observation 2: the server ends the connection and says why (RFC9000-ERR-1).
         .once(on("server.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       return findQuicChunk<ConnectionCloseFrameHeader>(c.event.packet) != nullptr;
                   })
                   .describe("the server's CONNECTION_CLOSE frame, naming the error")

@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_country_ie)
 {
     return ProtocolTest("wifi_country_ie")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 8 && Ieee80211CountryElement.length >= 0")
+                  .filterPacket("ieee80211mac.type == 8 && Ieee80211CountryElement.length >= 0")
                   .describe("a Beacon containing a Country IE").within(2.5));
 }
 

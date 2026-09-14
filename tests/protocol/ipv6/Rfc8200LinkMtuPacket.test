@@ -22,17 +22,17 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc8200_link_mtu_packet")
         // Expected observation 1: the 1500-octet packet on link 1, whole.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
+                  .filterPacket("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
                   .describe("the 1500-octet packet on link 1, whole")
                   .within(6.0))
         // Expected observation 2: the same packet on link 2, whole: the router accepted it.
         .once(on("router.eth[1].mac").signal("packetSentToLower")
-                  .packet("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
+                  .filterPacket("udp.destPort == 5000 && ipv6.protocolId == 17 && ipv6.payloadLength == 1460B")
                   .describe("the 1500-octet packet on link 2, whole")
                   .within(0.5))
         // Expected observation 3: host B's UDP receives the 1460-octet datagram (RFC8200-MTU-2).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
-                  .packet("udp.destPort == 5000 && udp.totalLengthField == 1460B")
+                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 1460B")
                   .describe("the 1460-octet UDP datagram at host B's UDP")
                   .within(0.5));
 }

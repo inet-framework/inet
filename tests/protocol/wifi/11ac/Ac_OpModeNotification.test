@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_11ac_opmode_notification)
 {
     return ProtocolTest("wifi_11ac_opmode_notification")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211VhtOperatingModeNotificationActionFrame.operatingModeField >= 0")
+                  .filterPacket("Ieee80211VhtOperatingModeNotificationActionFrame.operatingModeField >= 0")
                   .describe("a VHT Operating Mode Notification action frame").within(2.0));
 }
 

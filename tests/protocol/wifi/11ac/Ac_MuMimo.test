@@ -18,7 +18,7 @@ Define_ProtocolTest(wifi_11ac_mu_mimo)
 {
     return ProtocolTest("wifi_11ac_mu_mimo")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211VhtMuMimoHeader.groupId >= 0")
+                  .filterPacket("Ieee80211VhtMuMimoHeader.groupId >= 0")
                   .describe("an AP MU-MIMO downlink frame").within(2.5));
 }
 

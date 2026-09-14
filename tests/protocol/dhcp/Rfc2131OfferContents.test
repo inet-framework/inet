@@ -48,7 +48,7 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2131_offer_contents")
         // Expected observation 1: the DHCPDISCOVER; record the fields the answer must copy.
         .once(on("hostA.udp").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPDISCOVER)
                           return false;
@@ -62,7 +62,7 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 2 to 6, on the DHCPOFFER that answers it.
         .once(on("server.eth[0].mac").signal("packetSentToLower")
-                  .match([](const MatchContext& c) {
+                  .filterEvent([](const MatchContext& c) {
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPOFFER)
                           return false;

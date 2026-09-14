@@ -12,10 +12,10 @@ Define_ProtocolTest(wifi_probe)
 {
     return ProtocolTest("wifi_probe")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 4")
+                  .filterPacket("ieee80211mac.type == 4")
                   .describe("a ProbeReq from STA").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 5")
+                  .filterPacket("ieee80211mac.type == 5")
                   .describe("a ProbeResp to STA").within(0.5));
 }
 

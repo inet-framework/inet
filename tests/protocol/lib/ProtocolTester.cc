@@ -157,7 +157,7 @@ void ProtocolTester::subscribeStateSignals()
 
 void ProtocolTester::installInterceptions()
 {
-    // Push each standing intercept(...) rule onto its named PacketTap (a sibling module).
+    // Push each standing tap(...) rule onto its named PacketTap (a sibling module).
     for (const auto& interception : program->interceptions) {
         cModule *module = getParentModule()->getSubmodule(interception.tapName.c_str());
         auto tap = dynamic_cast<PacketTap *>(module);

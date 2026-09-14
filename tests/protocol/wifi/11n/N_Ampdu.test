@@ -16,7 +16,7 @@ Define_ProtocolTest(wifi_11n_ampdu)
 {
     return ProtocolTest("wifi_11n_ampdu")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("Ieee80211MpduSubframeHeader.length >= 0")
+                  .filterPacket("Ieee80211MpduSubframeHeader.length >= 0")
                   .describe("a frame containing an A-MPDU subframe header").within(2.0));
 }
 

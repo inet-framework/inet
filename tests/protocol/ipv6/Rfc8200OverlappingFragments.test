@@ -39,24 +39,24 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc8200_overlapping_fragments")
         // The relay moves the second fragment 8 octets back, onto the first.
-        .intercept(intercept("tap").match("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
+        .intercept(tap("tap").filterPacket("Ipv6FragmentHeader.fragmentOffset == 1232").nth(1)
                      .mutate([](Packet *frame) { rewriteHeader<Ipv6FragmentHeader>(frame, [](Ipv6FragmentHeader& fh) { fh.setFragmentOffset(1224); }); })
                      .describe("the second fragment (set its offset to 1224: an overlap of 8 octets)"))
         // Expected observation 1: the first fragment at host B's interface; record the identification.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterPacket("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
                   .capture("id", "Ipv6FragmentHeader.identification")
                   .describe("the first fragment at host B's interface")
                   .within(6.0))
         // Expected observation 2: a fragment of the same datagram at offset 1224 -- the overlap.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1224 && Ipv6FragmentHeader.moreFragments == false")
+                  .filterPacket("Ipv6FragmentHeader.identification == {id} && Ipv6FragmentHeader.fragmentOffset == 1224 && Ipv6FragmentHeader.moreFragments == false")
                   .describe("the second fragment at host B's interface, at offset 1224, overlapping the first")
                   .within(0.5))
         // Expected observation 3: nothing of the datagram reaches UDP at host B, and host B sends
         // no ICMPv6 message about it (RFC8504-NR-3, RFC8200-REASM-5).
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000") || icmpv6ErrorLeaves(c.event, "hostB"); })
+                  .filterEvent([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", "udp.destPort == 5000") || icmpv6ErrorLeaves(c.event, "hostB"); })
                   .describe("the datagram at host B's UDP, or any ICMPv6 error message from host B")
                   .within(0.5));
 }

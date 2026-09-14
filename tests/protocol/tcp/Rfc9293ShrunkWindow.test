@@ -35,20 +35,20 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_shrunk_window")
         // The relay shrinks the window of the fourth acknowledgment from host B.
-        .intercept(intercept("tap").match("tcp.srcPort == 1000 && tcp.ackBit == true").nth(4)
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true").nth(4)
                      .mutate([](Packet *frame) {
                          rewriteTcpHeader(frame, [](TcpHeader& h) { h.setWindow(100); });
                      })
                      .describe("host B's fourth acknowledgment (shrink its window to 100 octets)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
                   .capture("issA", "tcp.sequenceNo")
                   .describe("host A's SYN, carrying ISS_A").within(0.5))
         // Observation 2: the shrunk acknowledgment reaches host A. Record where it says the
         // stream stands; the new right edge is that number plus 100.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.window == 100")
+                  .filterPacket("tcp.ackBit == true && tcp.window == 100")
                   .capture("una", "tcp.ackNo")
                   .describe("the shrunk acknowledgment at host A, advertising 100 octets")
                   .within(1.0))
@@ -56,7 +56,7 @@ Define_ProtocolTestProgram()
         // on and the whole stream is acknowledged, so the negative window neither stopped it
         // nor broke it.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
-                  .packet("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
                   .within(8.0));
 }

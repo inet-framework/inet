@@ -28,16 +28,16 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc8200_fragment_identification")
         // Expected observation 1: the first fragment of datagram 1 (port 5000); record ID1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
-                  .match([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
+                  .filterPacket("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true")
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5000; })
                   .capture("id1", "Ipv6FragmentHeader.identification")
                   .describe("the first fragment of datagram 1 on link 1")
                   .within(6.0))
         // Expected observation 2: the first fragment of datagram 2 (port 5001) with another
         // identification (RFC8200-FRAG-2).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .packet("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true && Ipv6FragmentHeader.identification != {id1}")
-                  .match([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5001; })
+                  .filterPacket("Ipv6FragmentHeader.fragmentOffset == 0 && Ipv6FragmentHeader.moreFragments == true && Ipv6FragmentHeader.identification != {id1}")
+                  .filterEvent([](const MatchContext& c) { return udpDestinationPortInFragment(c.event.packet) == 5001; })
                   .describe("the first fragment of datagram 2 on link 1 with a different identification")
                   .within(0.5));
 }

@@ -63,13 +63,13 @@ Define_ProtocolTestProgram()
         // Observation 1: the client's first Initial packet reaches the server. This opens the
         // window the rule is about.
         .once(on("server.udp").signal("packetReceivedFromLower")
-                  .match([](const MatchContext& c) { return findQuicChunk<InitialPacketHeader>(c.event.packet) != nullptr; })
+                  .filterEvent([](const MatchContext& c) { return findQuicChunk<InitialPacketHeader>(c.event.packet) != nullptr; })
                   .describe("the client's Initial packet at the server")
                   .within(1.0))
         // Observation 2: at no moment before the address is validated has the server sent more
         // than three times what it received (RFC9000-AMP-1).
         .never(on("server.udp")
-                  .match([](const MatchContext& c) { return amplificationLimitBroken(c.event); })
+                  .filterEvent([](const MatchContext& c) { return amplificationLimitBroken(c.event); })
                   .describe("the server sending more than three times what it received")
                   .within(2.0));
 }

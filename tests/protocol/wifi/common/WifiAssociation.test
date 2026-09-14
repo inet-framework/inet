@@ -18,15 +18,15 @@ Define_ProtocolTest(wifi_association)
 {
     return ProtocolTest("wifi_association")
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 8").describe("a Beacon from the AP").within(2.0))
+                  .filterPacket("ieee80211mac.type == 8").describe("a Beacon from the AP").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 11").describe("an Authentication request").within(2.0))
+                  .filterPacket("ieee80211mac.type == 11").describe("an Authentication request").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 11").describe("the Authentication response").within(2.0))
+                  .filterPacket("ieee80211mac.type == 11").describe("the Authentication response").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .packet("ieee80211mac.type == 0").describe("an Association Request").within(2.0))
+                  .filterPacket("ieee80211mac.type == 0").describe("an Association Request").within(2.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .packet("ieee80211mac.type == 1").describe("the Association Response").within(2.0));
+                  .filterPacket("ieee80211mac.type == 1").describe("the Association Response").within(2.0));
 }
 
 } // namespace protocoltest

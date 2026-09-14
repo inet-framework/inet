@@ -35,8 +35,8 @@ Define_ProtocolTestProgram()
         // Expected observation 1: the request reaches host B, and its target protocol
         // address is the address of host C and not of host B.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .packet("arp.opcode == 1")
-                  .match([](const MatchContext& c) {
+                  .filterPacket("arp.opcode == 1")
+                  .filterEvent([](const MatchContext& c) {
                       auto packet = c.event.packet;
                       return ipv4AddressField(packet, "arp.destIpAddress") == interfaceIpv4Address("hostC.eth[0]").str()
                              && ipv4AddressField(packet, "arp.destIpAddress") != interfaceIpv4Address("hostB.eth[0]").str();
@@ -46,7 +46,7 @@ Define_ProtocolTestProgram()
         // Expected observation 3: host B puts no ARP packet on the link (RFC826-RECV-5,
         // RECV-1).
         .never(on("hostB")
-                  .match([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .filterEvent([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
                   .describe("any ARP packet from host B")
                   .within(0.85));
 }
