@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
@@ -402,6 +403,18 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
     if (ipv6Header->getSrcAddress().isMulticast()) {
         EV_INFO << "won't send ICMP error messages to multicast address, message " << ipv6Header << endl;
         return false;
+    }
+
+    // RFC 4443 section 2.4(e): no ICMPv6 error message about a packet that arrived as a
+    // link-layer broadcast or multicast. The conditions above read the IPv6 addresses; this
+    // one reads the frame the packet arrived in, whose destination the IPv6 header does not
+    // record.
+    if (auto& macAddressInd = packet->findTag<MacAddressInd>()) {
+        const MacAddress& destMacAddress = macAddressInd->getDestAddress();
+        if (destMacAddress.isBroadcast() || destMacAddress.isMulticast()) {
+            EV_INFO << "won't send ICMP error messages for a link-layer broadcast or multicast, message " << ipv6Header << endl;
+            return false;
+        }
     }
 
     // do not reply with error message to error message

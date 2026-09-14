@@ -45,7 +45,7 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc1122HostErrorReport.test | RFC1122-ERR-1, DU-1, ICMP-2, ICMP-4 | PASS |
 | Rfc1122NoErrorAboutError.test | RFC1122-ICMP-5 | PASS |
 | Rfc1122NoErrorForBroadcast.test | RFC1122-ICMP-6 | PASS |
-| Rfc1122NoErrorForLinkBroadcast.test | RFC1122-ICMP-7 | **FAIL (unexpected)** — defect |
+| Rfc1122NoErrorForLinkBroadcast.test | RFC1122-ICMP-7 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc1122NoErrorForNonInitialFragment.test | RFC1122-ICMP-8 | PASS |
 | Rfc1122NoErrorForInvalidSource.test | RFC1122-ICMP-9 | PASS |
 
@@ -53,8 +53,9 @@ Summary: 22 tests, 16 PASS, **2 FAIL (expected), 4 FAIL (unexpected)**, so the s
 FAIL. Each test keeps the faithful assertion and each failed at the step its description
 predicts. No specification misread was found.
 
-Since 2026-09-14 the suite is 22 tests, **17 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.
-`Rfc1122UnknownIcmpType.test` passes: its defect is repaired. The other three stand.
+Since 2026-09-14 the suite is 22 tests, **18 PASS, 2 FAIL (expected), 2 FAIL (unexpected)**.
+`Rfc1122UnknownIcmpType.test` and `Rfc1122NoErrorForLinkBroadcast.test` pass: their defects
+are repaired. The other two stand.
 
 ## Which failures are declared, and which are not
 
@@ -66,7 +67,7 @@ code. Four of the six failures were declared and should not have been.
 | Test | Class | The claim, in the model |
 | --- | --- | --- |
 | `Rfc1122ChecksumDiscard.test` | **defect** | `Ipv4Header::verifyChecksum` exists and `Ipv4.cc:282` calls it and drops on failure. The guard `!isCorrect() && !verifyChecksum()` short-circuits, so a well-formed header never reaches the test. A branch that exists and is unreachable for the case under test. |
-| `Rfc1122NoErrorForLinkBroadcast.test` | **defect** | `Icmp::maySendErrorMessage` suppresses for four conditions and its first comment reads "don't send ICMP error messages in response to broadcast or multicast messages". The mechanism is there and the link-layer condition is missing from it. |
+| `Rfc1122NoErrorForLinkBroadcast.test` | **repaired** | `Icmp::maySendErrorMessage` suppressed for four conditions, all reading the IP addresses, and its first comment read "don't send ICMP error messages in response to broadcast or multicast messages". The fifth condition reads the frame the datagram arrived in, through the `MacAddressInd` tag, which is where a link-layer broadcast is recorded. |
 | `Rfc1122UnknownIcmpType.test` | **repaired** | `Icmp::processIcmpMessage` had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 1122 section 3.2.2 requires. |
 | `Rfc791SameIdDifferentProtocol.test` | **defect** | `Ipv4FragBuf::Key` is the reassembly key (Ipv4FragBuf.h:31 to 40) and carries three of the four fields RFC 791 names. A key that exists and is incomplete. |
 | `Rfc1122VersionDiscard.test` | unimplemented | Nothing reads the version field on receipt. `getVersion` does not appear in `Ipv4.cc` at all. |

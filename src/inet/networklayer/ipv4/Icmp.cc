@@ -21,6 +21,7 @@
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/stlutils.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -120,6 +121,18 @@ bool Icmp::maySendErrorMessage(Packet *packet)
             || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
         EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << ipv4Header << endl;
         return false;
+    }
+
+    // RFC 1122 section 3.2.2: no ICMP error message about a datagram that arrived as a
+    // link-layer broadcast or multicast. The conditions above read the IP addresses; this
+    // one reads the frame the datagram arrived in, whose destination the IP header does not
+    // record.
+    if (auto& macAddressInd = packet->findTag<MacAddressInd>()) {
+        const MacAddress& destMacAddress = macAddressInd->getDestAddress();
+        if (destMacAddress.isBroadcast() || destMacAddress.isMulticast()) {
+            EV_DETAIL << "won't send ICMP error messages for a link-layer broadcast or multicast, message " << ipv4Header << endl;
+            return false;
+        }
     }
 
     // ICMP messages are only sent about errors in handling fragment zero of fragmented datagrams

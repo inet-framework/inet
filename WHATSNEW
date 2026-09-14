@@ -119,6 +119,22 @@ Notable backward incompatible changes are the following:
    Icmpv6 already kept the set of registered transport protocols and never read
    it. It reads it now and drops the report, as Icmp has always done for IPv4.
 
+8. No ICMP or ICMPv6 error about a link-layer broadcast or multicast
+
+   Icmp::maySendErrorMessage and Icmpv6::validateDatagramPromptingError each
+   suppressed an error report for four conditions, and every condition read an IP
+   address. RFC 1122 section 3.2.2 and RFC 4443 section 2.4(e) also forbid a
+   report about a datagram that arrived in a link-layer broadcast or multicast
+   frame, which no IP address records.
+
+   Both functions read the MacAddressInd tag of the arriving frame now. A node
+   that receives a unicast-addressed datagram inside a broadcast frame, for a
+   closed port or an unknown protocol, stays silent instead of answering the
+   address in the source field.
+
+   Simulations where that happens send fewer ICMP messages, so their
+   trajectories and fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
