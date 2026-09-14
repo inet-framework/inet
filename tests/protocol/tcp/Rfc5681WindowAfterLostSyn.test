@@ -1,0 +1,148 @@
+%description:
+
+RFC 5681 -- the initial window is one segment when the SYN was lost.
+
+Checks RFC5681-IW-3 (must).
+
+RFC 5681 section 3.1: when the SYN or the SYN-ACK is lost, the initial window after the
+correctly transmitted SYN is one segment. The larger initial window the same section allows
+is for a connection that opened at the first attempt; a loss during the handshake is already
+evidence about the path, and the sender must start from one segment.
+
+The scenario is the one `Rfc6298TimeoutAfterLostSyn.test` uses, as the check notes: a lost
+SYN changes both control loops, and the two answers come from the same episode. The relay
+discards the first SYN and lets the retry through.
+
+**The window is measured on the wire, not read from the signal.** The model never publishes
+the initial congestion window. `TcpBaseAlg::established` sets it and emits nothing, so the
+first publication of `cwnd` is already one acknowledgment later, by which time slow start has
+changed it. A check that read the first publication would be reading the wrong number, and it
+would pass for the wrong reason, because the grown value is still inside the bound the rule
+gives.
+
+What the initial window does decide, and what the wire shows, is how much data the sender may
+put in flight before any of it is acknowledged. That quantity is the window. So the check adds
+up the data host A sends between the start of the transfer and the first acknowledgment that
+covers data, and compares the total with one segment.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The data host A has put in flight since the transfer began, in bytes on the wire.
+static long bytesInFlight = 0;
+static long segmentSize = 0;
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+// Adds up every data segment host A sends. Never matches: this step only counts.
+static bool countSentData(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || packet->getByteLength() <= 100)
+        return false;
+    long bytes = packet->getByteLength();
+    if (bytes > segmentSize)
+        segmentSize = bytes;
+    bytesInFlight += bytes;
+    return false;
+}
+
+// RFC 5681 section 3.1: one segment. The bound carries one segment of slack, because the
+// wire measurement includes the TCP and IP headers and the rule speaks of payload. Two
+// segments would exceed it by a wide margin.
+static bool atMostOneSegmentInFlight(const MatchContext& context)
+{
+    return bytesInFlight <= 2 * segmentSize && segmentSize > 0;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_window_after_lost_syn")
+        .intercept(tap("relay")
+                       .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                       .nth(1)
+                       .drop().describe("host A's first SYN"))
+        // The retransmitted SYN opens the connection, so the handshake completed after a
+        // loss, which is the condition the rule is about.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .describe("the SYN+ACK, after the first SYN was lost")
+                  .within(20.0))
+        // From here to the first acknowledgment, count what host A puts in flight.
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(countSentData)
+                             .describe("every data segment host A sends")
+                             .within(30.0)))
+        // The first acknowledgment that covers data closes the window. What host A sent
+        // before it is the initial window, and RFC 5681 allows one segment.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .first()
+                  .assertEvent(atMostOneSegmentInFlight)
+                  .describe("the first acknowledgment, with one segment in flight before it")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_window_after_lost_syn compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network WindowAfterLostSynNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = WindowAfterLostSynNet
+sim-time-limit = 40s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+**.tcp.advertisedWindow = 65535
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+# The data transfer begins after the handshake has recovered from the lost SYN.
+*.host1.app[0].tSend = 10s
+*.host1.app[0].sendBytes = 20000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_window_after_lost_syn: PASS

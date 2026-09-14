@@ -87,11 +87,16 @@ Candidate checks, all deterministic through a signal:
 - [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [x] Step 4: the feature map gains the congestion control features. Six: CONGESTION-WINDOW, INITIAL-WINDOW, LOSS-RESPONSE, FAST-RETRANSMIT, RESTART-IDLE, DELAYED-ACK.
 - [x] Step 5: `protocol/tcp/checks/congestion-control.md`. Five checks.
-- [~] Step 6: the tests. Four of five written.
+- [x] Step 6: the tests. All five written.
       - `Rfc5681FastRetransmit.test` passes. Three duplicates repair the loss, the
         threshold falls, and the window becomes the threshold plus three segments.
         Observation 4 is a sharpening candidate, not a claim.
-      - `Rfc5681InitialWindow.test` passes.
+      - `Rfc5681InitialWindow.test` passes, after a correction: it read the first
+        publication of `cwnd`, which is already one acknowledgment later than the initial
+        window, so it passed without establishing anything. It measures the window on the
+        wire now.
+      - `Rfc5681WindowAfterLostSyn.test` passes, measured the same way. The model
+        implements the rule and quotes RFC 5681 in the code.
       - `Rfc5681TimeoutResponse.test` passes. The window becomes one segment and the
         threshold falls inside the bound. Needed `fromNth` on the relay, so that a whole
         window is removed and fast retransmit cannot repair the loss first.

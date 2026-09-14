@@ -21,10 +21,16 @@ One property of the model decides what "the initial window" means here. The wind
 published only when the algorithm changes it, not when the connection sets it up, so the
 first value the signal carries arrives with the first acknowledgment at about t=0.2.
 
-The step says the rule directly: `first()` picks the first publication, and `assertValueAtMost`
-is the bound the table gives. The two halves are separate on purpose. A bound written as a
-filter would pick the first publication that is small enough and pass over one that is not,
-which is the shape of a check that cannot fail.
+**The window is measured on the wire, not read from the signal.** The model never publishes
+the initial congestion window. `TcpBaseAlg::established` sets it and emits nothing, so the
+first publication of `cwnd` is already one acknowledgment later, by which time slow start has
+changed it. An earlier version of this check read that first publication, and it passed --
+for the wrong reason, because the grown value is still inside the bound. It established
+nothing about the initial window.
+
+What the initial window decides, and what the wire shows, is how much data the sender may put
+in flight before any of it is acknowledged. So the check adds up the data host A sends up to
+the first acknowledgment and compares the total with the bound of the table.
 
 The bound governs the initial window alone. After the transfer starts, slow start grows the
 window past it, which is what the same section of RFC 5681 requires, and no step here
@@ -44,16 +50,47 @@ using namespace inet::protocoltest;
 const long SMSS = 536;
 const long IW_BOUND = 4 * SMSS;   // 2144 bytes
 
+// The data host A has put in flight since the transfer began, in bytes on the wire.
+static long bytesInFlight = 0;
+static long segmentSize = 0;
+
+// Adds up every data segment host A sends. Never matches: this step only counts.
+static bool countSentData(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || packet->getByteLength() <= 100)
+        return false;
+    long bytes = packet->getByteLength();
+    if (bytes > segmentSize)
+        segmentSize = bytes;
+    bytesInFlight += bytes;
+    return false;
+}
+
+// RFC 5681 section 3.1 bounds the initial window by the table. The bound carries one segment
+// of slack, because the wire measurement includes the TCP and IP headers and the rule speaks
+// of payload.
+static bool withinTheInitialWindowBound(const MatchContext& context)
+{
+    return segmentSize > 0 && bytesInFlight <= IW_BOUND + segmentSize;
+}
+
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc5681_initial_window")
-        // Observations 1 and 2 together, in one step. The filter picks the first publication
-        // of the window; the assertion is the rule. A model whose first window is too large
-        // fails here and the engine does not look for a smaller later one.
-        .once(on("host1.tcp").signal("cwnd").first()
-                  .assertValueAtMost(IW_BOUND)
-                  .describe("host A's initial congestion window")
-                  .within(0.5));
+        // Count what host A puts in flight from the start of the transfer.
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(countSentData)
+                             .describe("every data segment host A sends")
+                             .within(20.0)))
+        // The first acknowledgment closes the initial window. What went out before it is
+        // that window, and RFC 5681 bounds it by the table of section 3.1.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .first()
+                  .assertEvent(withinTheInitialWindowBound)
+                  .describe("the first acknowledgment, with the initial window in flight before it")
+                  .within(20.0));
 }
 
 %activity:
