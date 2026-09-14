@@ -11,6 +11,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/common/checksum/Checksum.h"
@@ -142,6 +143,13 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
             errorOut(indication);
+        }
+        else if (!contains(transportProtocols, transportProtocol)) {
+            // Nothing registered for the protocol the quoted datagram names, so there is
+            // nobody to hand the report to. Sending it anyway reaches a MessageDispatcher
+            // that knows no route for it and stops the run. Icmp does the same check.
+            EV_ERROR << "Transport protocol " << transportProtocol << " not registered, packet dropped\n";
+            delete indication;
         }
         else {
             // Send the Indication to IPv6 via ipv6Out; IPv6 will pop the quoted

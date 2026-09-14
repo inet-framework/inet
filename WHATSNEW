@@ -109,6 +109,16 @@ Notable backward incompatible changes are the following:
    Simulations that reassemble IPv6 fragments deliver whole datagrams now, so
    their trajectories and fingerprints may change.
 
+7. ICMPv6 drops an error report for a protocol nothing registered
+
+   Icmpv6 handed the error indication up to the protocol the quoted datagram
+   names without asking whether anything on the node had registered it. The
+   MessageDispatcher then knew no route and stopped the run, so any node could be
+   halted by an ICMPv6 error about a protocol it does not run.
+
+   Icmpv6 already kept the set of registered transport protocols and never read
+   it. It reads it now and drops the report, as Icmp has always done for IPv4.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

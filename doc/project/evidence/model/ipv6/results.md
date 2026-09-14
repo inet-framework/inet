@@ -57,7 +57,7 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc4443NoErrorForLinkMulticast.test | RFC4443-MPR-7 | **FAIL (unexpected)** — defect |
 | Rfc4443NoErrorForLinkBroadcast.test | RFC4443-MPR-8 | **FAIL (unexpected)** — defect |
 | Rfc4443NoErrorForUnspecifiedSource.test | RFC4443-MPR-9 | PASS |
-| Rfc4443ErrorForUnknownProtocol.test | RFC4443-MPR-3, MPR-4 | **FAIL (unexpected)** — defect, a runtime error |
+| Rfc4443ErrorForUnknownProtocol.test | RFC4443-MPR-3, MPR-4 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc8200ZeroUdpChecksum.test | RFC8200-CKSUM-1 (the discard) | PASS |
 | Rfc8200UnrecognizedNextHeader.test | RFC8504-NR-6 (governs RFC8200-EXT-3) | PASS |
 | Rfc8200UnassignedNextHeader.test | RFC8504-NR-6, for an unassigned value | PASS |
@@ -67,9 +67,10 @@ repeated in the table below, because every test ran again on this tree.
 Summary: 27 tests in the suite, 19 PASS, **0 FAIL (expected), 8 FAIL (unexpected)**, so the suite
 reports FAIL.
 
-Since 2026-09-14 the suite is 27 tests, **22 PASS, 0 FAIL (expected), 5 FAIL (unexpected)**.
-`Rfc4443UnknownInformationalType.test`, `Rfc8200AtomicFragment.test` and
-`Rfc8200OverlappingFragments.test` pass: their defects are repaired. The other five stand.
+Since 2026-09-14 the suite is 27 tests, **23 PASS, 0 FAIL (expected), 4 FAIL (unexpected)**.
+`Rfc4443UnknownInformationalType.test`, `Rfc8200AtomicFragment.test`,
+`Rfc8200OverlappingFragments.test` and `Rfc4443ErrorForUnknownProtocol.test` pass: their
+defects are repaired. The other four stand.
 
 ## Which failures are declared, and which are not
 
@@ -84,7 +85,7 @@ wrong thing.
 | --- | --- |
 | `Rfc4443NoErrorForLinkBroadcast.test`, `…LinkMulticast.test` | `Icmpv6::validateDatagramPromptingError` suppresses for four conditions, one citing RFC 4443 §2.4(e). The mechanism is there and the link-layer condition is missing from it. |
 | `Rfc4443UnknownInformationalType.test` | **Repaired.** The type switch had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 4443 section 2.4(b) requires. |
-| `Rfc4443ErrorForUnknownProtocol.test` | The report is built and sent; the crash is in the path that delivers it. |
+| `Rfc4443ErrorForUnknownProtocol.test` | **Repaired.** The report is built and sent correctly; the crash was at the source, where the report comes back. `Icmpv6` handed the error indication to the protocol the quoted datagram names without asking whether anything had registered it, and the `MessageDispatcher` knew no route. `Icmpv6` keeps that set of registered protocols and simply never read it; it does now, as `Icmp` already did. |
 | `Rfc4443PacketTooBigMtu.test` | `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter (Icmpv6.h:55) and the caller hands it a literal 0 (Icmpv6.cc:273). The `// TODO implement MTU support.` above it is a bare "to do", which says the behavior is wanted and unfinished — a claim — and not a reason why it is unsupported. |
 | `Rfc8200FragmentPayloadLength.test` | `Ipv6::fragmentAndSend` builds every fragment and sets its header; the payload length it writes is the copied one. |
 | `Rfc8200AtomicFragment.test` | **Repaired.** The fragment buffer looked its entry up before it created it, so a datagram that completes from one fragment erased a stale `end()` iterator. It keeps the iterator of the entry it creates now. |
@@ -94,8 +95,9 @@ wrong thing.
 crafted but lawful input meets a `default:` branch, an erased iterator or an assertion, and the
 run ends. A stop is never a declarable failure.
 
-Three of those four are repaired, on 2026-09-14: the unknown ICMPv6 type, the atomic fragment
-and the overlapping fragments. The fourth, `Rfc4443ErrorForUnknownProtocol`, still stops.
+All four are repaired, on 2026-09-14: the unknown ICMPv6 type, the atomic fragment, the
+overlapping fragments, and the error report for an unknown protocol. No input in this suite
+stops the simulation any more.
 
 The atomic fragment uncovered a defect wider than the crafted case. The reassembled packet
 kept the base header of the first fragment, so its payload length described that fragment.
