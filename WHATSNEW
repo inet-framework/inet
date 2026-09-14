@@ -396,6 +396,10 @@ Notable backward compatible changes are the following:
    group rate becomes 24 Mbps in the default mixed legacy catalog. This changes
    airtime and fingerprints in affected existing scenarios.
 
+   The ac catalog now contains both 800 ns and 400 ns GI for all 310 supported
+   VHT width/NSS/MCS tuples. Existing unqualified lookups, mandatory/basic flags,
+   and reference modes retain their previous choices.
+
 
 
 INET-4.7 (July 2026) — feature release

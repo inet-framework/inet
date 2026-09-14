@@ -221,7 +221,8 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps, true }
     }, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::HT, true),
-    Ieee80211ModeSet("ac", {
+    Ieee80211ModeSet("ac", []() {
+        std::vector<Entry> entries {
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -537,9 +538,27 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode12MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz, true },
+        };
+        // IEEE Std 802.11-2024, 21.5 and Tables 21-29 through 21-60:
+        // each valid VHT tuple supports long GI, with short GI optional.
+        // New variants have lower unqualified-lookup priority than historical
+        // entries, preserving choices even across floating-point rate ties.
+        // Existing mandatory/basic flags and reference choices remain.
+        const size_t originalSize = entries.size();
+        for (size_t i = 0; i < originalSize; i++) {
+            const auto *data = dynamic_cast<const Ieee80211VhtDataMode *>(entries[i].mode->getDataMode());
+            if (data != nullptr) {
+                auto gi = data->getGuardIntervalType() == Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG ?
+                        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG;
+                entries.push_back({false, Ieee80211VhtCompliantModes::getCompliantMode(data->getModulationAndCodingScheme(),
+                        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, gi), false, false});
+            }
+        }
+        return entries;
+    }(),
     // Intentional model limitation: unlike IEEE Std 802.11-2024, 11.38.1,
     // this VHT-only profile has no selectable HT modes.
-    }, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::VHT),}; });
+    Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::VHT),}; });
 
 Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
         PhyType phyType, bool htOperationSupported) :
@@ -698,19 +717,27 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int 
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
 {
-    for (size_t index = 0; index < entries.size(); index++) {
-        auto mode = entries[index].mode;
-        auto dataMode = mode->getDataMode();
-        auto bitrate = dataMode->getNetBitrate();
-        bool guardIntervalMatches = guardInterval < SIMTIME_ZERO ||
-                dataMode->getGuardInterval() == guardInterval;
-        if (minBitrate <= bitrate && bitrate <= maxBitrate &&
-            (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth) &&
-            (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams) &&
-            guardIntervalMatches)
-        {
-            return entries[index].mode;
+    // Preserve prior unqualified queries even when a newly added GI variant
+    // sorts earlier because its mathematically equal bitrate rounds differently.
+    for (bool preferred : {true, false}) {
+        for (size_t index = 0; index < entries.size(); index++) {
+            if (guardInterval < SIMTIME_ZERO && entries[index].isPreferredForUnqualifiedLookup != preferred)
+                continue;
+            auto mode = entries[index].mode;
+            auto dataMode = mode->getDataMode();
+            auto bitrate = dataMode->getNetBitrate();
+            bool guardIntervalMatches = guardInterval < SIMTIME_ZERO ||
+                    dataMode->getGuardInterval() == guardInterval;
+            if (minBitrate <= bitrate && bitrate <= maxBitrate &&
+                (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth) &&
+                (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams) &&
+                guardIntervalMatches)
+            {
+                return entries[index].mode;
+            }
         }
+        if (guardInterval >= SIMTIME_ZERO)
+            break;
     }
     return nullptr;
 }
