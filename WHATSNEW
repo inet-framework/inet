@@ -297,6 +297,37 @@ Notable backward incompatible changes are the following:
     The selected legacy QoS and non-QoS ad hoc fingerprints remain unchanged;
     no recorded fingerprint baseline was updated.
 
+17. Packet queue extraction and lifecycle signals
+
+   IPacketQueue now supports queue-lifecycle signals and predicate-based extraction.
+   Direct C++ implementations of IPacketQueue must implement findPacket(), the
+   predicate overload of dequeuePacket(), and must emit packetQueueDeparture
+   with PacketQueueRemovalDetails exactly once whenever a packet is dequeued,
+   explicitly removed, or destructively dropped. Listeners subscribe to the queue
+   module and filter the source to exclude descendant queue emissions. Providers
+   connected to CompoundPacketQueueBase must also implement IPacketExtractor so
+   that a compound queue preserves the provider's scheduling policy when it
+   extracts a matching packet. Direct C++
+   implementations of IPacketExtractor must replace selected-pointer extraction
+   with findPacket(predicate) and dequeuePacket(predicate); predicates may be
+   evaluated repeatedly and must be stable and side-effect free throughout one
+   logical selection. WrrScheduler,
+   LabelScheduler, and PriorityScheduler accept ordinary IPassivePacketSource
+   inputs; they require IPacketCollection only when collection/aggregate access is
+   used and IPacketExtractor only when predicate extraction is used, reporting the
+   unsupported operation lazily.
+   PriorityScheduler aggregate queries no longer return -1 when an input lacks
+   IPacketCollection; getNumPackets() and getTotalLength() now report that
+   unsupported operation with cRuntimeError. Update callers that treated -1 as
+   an unknown aggregate size, or connect collection-capable providers.
+   IPacketBuffer::ICallback requires explicit handlePacketDropping() and
+   handlePacketDropped() implementations. The first detaches the packet; the
+   second publishes its departure after all victims of the overload operation
+   have been detached. Custom buffer owners must implement both phases. Compound
+   queues propagate destructive drops through arbitrary non-queue wrappers and
+   nested compound queues exactly once. PacketBuffer rejects packets owned by a
+   cPacketQueue whose owner cannot participate in the buffer callback contract.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
