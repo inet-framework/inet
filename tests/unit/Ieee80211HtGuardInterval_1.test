@@ -1,0 +1,54 @@
+%description:
+Validate complete IEEE 802.11 HT long/short guard-interval catalog, lookup, and airtime.
+
+%includes:
+#include <cmath>
+#include <map>
+#include <tuple>
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+// Reject unsupported VHT greenfield before any mixed-format cache request.
+bool rejectedVhtGreenfieldBeforeMixed = false;
+try {
+    Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+            Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD,
+            Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+}
+catch (cRuntimeError&) {
+    rejectedVhtGreenfieldBeforeMixed = true;
+}
+ASSERT(rejectedVhtGreenfieldBeforeMixed);
+
+Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+bool rejectedVhtGreenfieldAfterMixed = false;
+try {
+    Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+            Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD,
+            Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+}
+catch (cRuntimeError&) {
+    rejectedVhtGreenfieldAfterMixed = true;
+}
+ASSERT(rejectedVhtGreenfieldAfterMixed);
+
+EV << "HT guard interval catalog, timing, and lookup checks passed.\n";
+
+%contains: stdout
+HT guard interval catalog, timing, and lookup checks passed.
