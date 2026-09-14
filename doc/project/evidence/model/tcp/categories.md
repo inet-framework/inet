@@ -92,8 +92,31 @@ without any care from the test.
 | RFC9293-ZWP-1 | statistical, or protocol with a timing bound | a zero window followed by a probe within the persist timer; level 4 |
 | RFC9293-ACKD-1 | statistical | the delay is a distribution with a bound; level 4 |
 | The state machine as a whole | module test with a state signal | the states are internal |
-| Retransmission and the timer (RFC 6298) | statistical, or protocol with interception | needs loss, and the timer value is a distribution |
-| Congestion control (RFC 5681) | statistical | the window trajectory is the observable |
+| Retransmission and the timer (RFC 6298) | **protocol test with interception** — confirmed by pass 4 | the prediction of a statistical test was wrong. Every rule of RFC 6298 is a single value or a ratio of two intervals, and a relay that removes a segment produces both. Five checks were written as protocol tests and none needed a distribution |
+| Congestion control (RFC 5681) | **protocol test with interception** — confirmed by pass 4 | the prediction was wrong for the same reason. The window trajectory is not the observable: each rule names one value at one moment, or a bound over consecutive publications, and a guard reads both |
 | RFC9293-ICMP-4, a hard error should abort | protocol test with interception and a gateway | the same mockup as the soft-error check, with a Destination Unreachable of a hard code; what it needs first is a decision about which behaviour the model intends |
 | Silly window avoidance | protocol test with a program that reads slowly | no application in the model stalls its reads |
 | Simultaneous open and close | protocol test with two clients | needs both ends to open at once; a scenario question, not a toolset one |
+
+## Pass 4: the category predicted for the control loops was wrong
+
+Step 3 of pass 3 predicted a statistical test for both RFC 6298 and RFC 5681, because a
+timer value and a window trajectory look like distributions. Writing the ten checks settled
+it the other way: **all ten are protocol tests**, and none needed a statistical one.
+
+The reason is worth recording, because it will decide the category of the next control loop
+that enters the in-scope set. A standard states its rules as **one value at one moment**, or
+as **a relation between two consecutive values**. The initial timeout is a value; the
+doubling is a ratio of two intervals; the slow-start bound is a relation between consecutive
+publications; Karn's rule is the absence of one. None of those is a distribution. A
+statistical test would be the right category for a question the standard does not ask, such
+as how the throughput settles.
+
+What the checks did need was **interception**, in eight of the ten, and the ability to judge
+an event rather than filter for it. That is a toolset question, not a category one.
+
+One category decision did change. The estimator's own values — the timeout after each
+expiry, and the threshold before any loss — are not observable at the boundary this suite
+uses, because the model publishes a control variable only where it recomputes it. A
+**module test** with a state signal would reach them, and it is the right category for the
+half of the backoff check this pass could not make.

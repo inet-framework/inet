@@ -10,14 +10,14 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-11 15:39 +0200
-- INET: branch `topic/rfc-tests-tcp-level4`, commit `769e8e920b`, tree clean
+- Date: 2026-09-14 12:31 +0200
+- INET: branch `topic/rfc-tests-tcp-level4`, commit `e0ac3b7307`, tree clean
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -w tcp`
-- Target level: 3
+- Target level: 4
 
 ## Statement coverage
 
@@ -169,6 +169,7 @@ each stop short because some of their statements live at the interface to the pr
 | 1 | 2026-09-08 | 2, partial | RFC 9293 in scope; 10 catalog entries; 4 features; 3 checks; 3 tests; flow control had no feature. On a branch since dropped; the tests were restored from it. | 5 PASS |
 | 2 | 2026-09-08 | **2, reached** | 22 catalog entries (12 new), 9 features (5 new: data transfer, flow control, checksum, header, reset), 6 checks (3 new), 6 tests (3 new, 2 extended) | 8 tests: 7 PASS, 1 FAIL (expected) — the PSH bit; 8 features supported, 1 partial; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
 | 3 | 2026-09-09 | **3, reached** | RFC 9293's edges added to the same catalog: 13 entries, 4 features, 11 checks, 11 tests. No new document | 19 tests: 15 PASS, 4 declared FAIL naming four model gaps; 11 features supported, 2 partial; see [`results.md`](results.md) |
+| 4 | 2026-09-14 | **4, reached** | RFC 6298 and RFC 5681 enter the in-scope set: 39 catalog entries, 10 features, 10 checks, 10 tests, all new. The obsolete-citation sweep of pass 4 also moved the model's own references off RFC 793. | 27 tests: 22 PASS, 2 FAIL (expected), 3 FAIL (unexpected). One new finding, gap 5, a defect in the first round-trip measurement. Two of the level 3 declarations were withdrawn earlier in the pass, because they covered defects. See [`results.md`](results.md) |
 
 ## Out of scope
 

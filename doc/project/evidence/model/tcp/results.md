@@ -1,12 +1,12 @@
-# TCP checks — run results and model analysis (pass 3, level 3)
+# TCP checks — run results and model analysis (pass 4, level 4)
 
-> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9293/catalog.md), [checks.md](../../protocol/tcp/checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-14 · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9293/catalog.md), [rfc6298/catalog.md](../../standard/rfc6298/catalog.md), [rfc5681/catalog.md](../../standard/rfc5681/catalog.md), [checks.md](../../protocol/tcp/checks.md)
 
 Step 7 artifact of the standards test workflow. This is the first document of the TCP
 workflow that may reference code.
 
-- Date: 2026-09-11 15:39 +0200
-- INET: branch `topic/rfc-tests-tcp-level4`, commit `769e8e920b`, tree clean
+- Date: 2026-09-14 12:31 +0200
+- INET: branch `topic/rfc-tests-tcp-level4`, commit `e0ac3b7307`, tree clean
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -64,6 +64,101 @@ under a fault, and the model keeps them.
 Summary of pass 2: 8 tests, 7 PASS, 1 FAIL (expected), in 2.1 s. The runner's overall verdict is PASS,
 because the one failure is declared. The SYN's header length was captured as 24 octets: the
 MSS option is present, so the `should` of RFC9293-OPT-1 is met.
+
+## Pass 4, level 4: the two control loops
+
+RFC 6298 and RFC 5681 entered the in-scope set, and ten checks were written against them.
+The suite is 27 tests: **22 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.
+
+| Test | Checks | Verdict |
+| --- | --- | --- |
+| Rfc6298InitialTimeout.test | RFC6298-INIT-1 | PASS |
+| Rfc6298FirstMeasurement.test | RFC6298-FIRST-1, RFC6298-RTO-1; covers MIN-1 | **FAIL (unexpected)** — defect, gap 5 |
+| Rfc6298BackoffDoubling.test | RFC6298-BACK-1, RFC6298-EARLY-1 | PASS |
+| Rfc6298KarnsRule.test | RFC6298-KARN-1 | PASS |
+| Rfc6298TimeoutAfterLostSyn.test | RFC6298-SYN-1 | PASS |
+| Rfc5681InitialWindow.test | RFC5681-IW-1, RFC5681-IW-2 | PASS |
+| Rfc5681SlowStartGrowth.test | RFC5681-SS-2; covers SS-1, SSTH-1 | PASS |
+| Rfc5681TimeoutResponse.test | RFC5681-LOSS-1, RFC5681-LOSS-3 | PASS |
+| Rfc5681FastRetransmit.test | RFC5681-FR-1, FR-2, FR-3, FR-5; covers ACK-2 | PASS |
+| Rfc5681WindowAfterLostSyn.test | RFC5681-IW-3 | PASS |
+
+Nine of the ten pass. Both control loops are written, and the one difference the checks find
+is a defect rather than an absence.
+
+## Gap 5 (pass 4): the first round-trip measurement is smoothed — defect
+
+RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed value
+becomes R and the variance becomes R/2. The model has no such case.
+`TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every
+measurement, the first one included
+([TcpBaseAlg.cc:327-341](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L327-L341)).
+The run states it in one line:
+
+    Measured RTT=400.05104ms, updated SRTT=50.00638ms, new RTO=2875.0319ms
+
+| | RFC 6298 | the model |
+| --- | --- | --- |
+| smoothed value | 400.05 ms | 50.01 ms, one eighth |
+| variance | 200.03 ms | 706.26 ms |
+| timeout | 1200.15 ms | 2875.03 ms, 2.4 times |
+
+The class is **defect**. Code exists for the behaviour, it runs on the first acknowledgment,
+and it produces the wrong number. A timeout that long delays every recovery from a lost
+segment, and it is the timeout a connection starts with. The effect reproduces on a second
+link: `Rfc6298KarnsRule.test` measures 0.108 ms and smooths it to 0.0135 ms, the same factor
+of eight.
+
+## The model publishes a control variable only where it recomputes it
+
+**Five of the ten checks could not read the value the standard names**, and each had to
+measure the rule on the wire instead. This is one property of the model, and it shapes the
+whole pass.
+
+| The value the check names | Where the model publishes it | What the check does instead |
+| --- | --- | --- |
+| the timeout before any measurement | nowhere; `rto` comes only from `receivedDataAck` | measures the interval to the first retransmission |
+| the timeout after each expiry | nowhere; the expiry path emits nothing | measures the intervals between retransmissions |
+| the timeout at the first data send | nowhere, for the same reason | measures the interval again |
+| the initial congestion window | nowhere; `established` sets it and emits nothing | adds up the data in flight before the first acknowledgment |
+| the threshold before any loss | nowhere; `TcpReno` publishes it when it changes it | not read; the observation is dropped |
+
+Two consequences worth recording. The backoff check can verify only one of its two expected
+observations, and the note in `checks.md` is right that this matters: a model that doubled
+the variable but not the interval would pass one and fail the other, and this pass cannot
+tell those two apart. And the threshold observation of the slow-start check is dropped
+entirely.
+
+A second trap follows from the same property. Where the model *does* publish a value, it may
+publish it **earlier than the episode the check is about**. The threshold is published before
+any loss, and a step that bound the first publication ended the run at t=0.2007 with a
+verdict, before the relay had removed anything. The timeout-response check selects the
+publication at least one second after the loss begins for that reason.
+
+## Three checks of this pass were vacuous before they were repaired
+
+Each passed while establishing nothing, and each was found by disbelieving a pass rather
+than by a failure. They are recorded because the shape repeats.
+
+1. **A predicate on a scalar signal was refused by the framework.** The slow-start guard held
+   over nothing and passed with a bound of one segment, a quarter of a segment, and zero.
+   The third of those made no sense, which is what exposed it. Fixed in the framework.
+2. **The initial window was read from the first publication of `cwnd`**, which is one
+   acknowledgment later than the initial window. It passed, because the grown value is still
+   inside the bound. It now measures the data in flight before the first acknowledgment.
+3. **The window after a lost SYN was read the same way**, and that one nearly recorded a
+   defect that does not exist: the model implements the rule and quotes RFC 5681 in the
+   code.
+
+## Sharpening candidates for the next pass
+
+- **Observation 4 of the fast-retransmit check** — the window returns to the threshold when
+  the repair is acknowledged — is not asserted. Telling that publication apart from the
+  growth that follows needs the acknowledgment of new data as an anchor.
+- **The estimator side of the backoff check**, once the expiry publishes the timeout.
+- **The threshold before any loss**, once the model publishes it where it is set.
+- The **round-trip variance** is not read anywhere, although `rttvar` is published beside
+  `srtt`. Gap 5 quotes it, and a check of its own would bound it.
 
 ## The class of each failure, reviewed 2026-09-11
 

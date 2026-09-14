@@ -1,6 +1,6 @@
 # TCP — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-14 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
@@ -18,9 +18,12 @@ is a feature-level one.
   repeated and gave the same result.
   The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
   identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-11
-  on `topic/rfc-tests-tcp-level4`, commit `769e8e920b`. The verdicts are those of the earlier
-  pass; what changed is the class of two failures and not their outcome.
+- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-14
+  on `topic/rfc-tests-tcp-level4`, commit `e0ac3b7307`, which is the level 4 pass.
+- Claim scan for the level 4 features: 2026-09-14. `Tcp.ned` names RFC 9293 and RFC 5681 and
+  the flavour modules name their own documents; `TcpBaseAlg::established` quotes the
+  paragraph of RFC 5681 that governs the initial window after a lost SYN. The two control
+  loops are therefore claimed, in code and in the documentation.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalog, the feature map, or the check
@@ -121,6 +124,16 @@ ledger, and the level of the feature, by the table of step 8.
 | TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported; supporting WND-5 failed | **confirmed**, with finding 5, a statement-level defect |
 | TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | partial | **partial** — a Source Quench stops the run, finding 6 |
+| TCP-F-RTO-ESTIMATOR | mandatory | yes, RFC 6298 | partial | **partial** — the estimator runs and the first measurement is wrong, gap 5, a statement-level defect |
+| TCP-F-RTO-BOUNDS | mandatory | yes, RFC 6298 | supported | **confirmed** — one second before any measurement, and a ceiling of 240 seconds |
+| TCP-F-RTO-BACKOFF | mandatory | yes, RFC 6298 | supported | **confirmed** — the timeout doubles at every expiry |
+| TCP-F-RTT-SAMPLING | mandatory | yes, RFC 6298 | supported | **confirmed** — no sample is taken from a retransmitted segment |
+| TCP-F-CONGESTION-WINDOW | mandatory | yes, RFC 5681 | supported | **confirmed** — the growth stays inside one segment per acknowledgment |
+| TCP-F-INITIAL-WINDOW | mandatory | yes, RFC 5681 | supported | **confirmed** — inside the table, and one segment after a lost SYN |
+| TCP-F-LOSS-RESPONSE | mandatory | yes, RFC 5681 | supported | **confirmed** — the window falls to one segment and the threshold to half the flight |
+| TCP-F-FAST-RETRANSMIT | mandatory | yes, RFC 5681 | supported | **confirmed** — three duplicates repair the loss without the timer |
+| TCP-F-RESTART-IDLE | mandatory | yes, RFC 5681 | untested | **unverified** — no check of this pass reaches it |
+| TCP-F-DELAYED-ACK | recommended | yes, RFC 5681 | untested | **unverified** — no check of this pass reaches it |
 
 Eleven features `confirmed`, two `partial`. No feature reaches `defect` by the rules of the
 matrix. Three MUST-level statements are violated all the same, two of them on supporting
