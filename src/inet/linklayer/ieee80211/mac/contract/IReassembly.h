@@ -8,9 +8,14 @@
 #ifndef __INET_IREASSEMBLY_H
 #define __INET_IREASSEMBLY_H
 
+#include <vector>
+
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
+
+class Packet;
+
 namespace ieee80211 {
 
 class Ieee80211DataOrMgmtHeader;
@@ -31,6 +36,18 @@ class INET_API IReassembly
      * otherwise the function returns nullptr.
      */
     virtual Packet *addFragment(Packet *frame) = 0;
+
+    /**
+     * Return the earliest receive-lifetime deadline among incomplete frames,
+     * or SIMTIME_MAX when the reassembly buffer is empty.
+     */
+    virtual simtime_t getNextExpirationTime() const = 0;
+
+    /**
+     * Remove incomplete frames whose receive lifetime has elapsed and return
+     * their fragments to the caller for drop signaling and deletion.
+     */
+    virtual std::vector<Packet *> removeExpiredFragments(simtime_t currentTime) = 0;
 
     /**
      * Discard fragments from the reassembly buffer. Frames are identified by the transmitter

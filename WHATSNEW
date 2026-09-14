@@ -140,6 +140,14 @@ Notable backward incompatible changes are the following:
    trajectories. A-MSDU service now appears as dequeued traffic in queue counters and
    graphical fingerprints, instead of administrative removal.
 
+7. Fragment Reassembly and Receive Lifetime
+
+   Fragmented management actions are dispatched only after their complete body is
+   reassembled. Shared fragment reassembly now expires incomplete bodies after
+   maxReceiveLifetime, whose default is 512 TUs. Late fragments can therefore be dropped
+   instead of completing an old body; affected application deliveries, forwarding
+   trajectories and fingerprints change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
