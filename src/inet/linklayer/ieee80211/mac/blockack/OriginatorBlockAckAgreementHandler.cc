@@ -317,6 +317,7 @@ OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processR
 void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp)
 {
     agreement->setIsAddbaResponseReceived(true);
+    agreement->setIsAMsduSupported(addbaResp->getAMsduSupported());
     agreement->setBufferSize(addbaResp->getBufferSize());
     agreement->setBlockAckTimeoutValue(addbaResp->getBlockAckTimeoutValue());
     agreement->calculateExpirationTime();
