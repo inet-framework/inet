@@ -18,19 +18,19 @@
 # causes parsimPack() to abort — use ~tNl (no parsim serialization) instead; tyf excluded as unreliable
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldDemo -r 0,              30s,             f1b1-b523/~tNl, PASS, EthernetMac MLD
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldV2Ssm -r 0,            30s,             a22a-81c9/~tNl, PASS, EthernetMac MLD
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           50c9-9bb3/~tNlb, PASS, EthernetMac
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0e0c-b800/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            06b9-ff17/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           ae8a-8c69/~tNlb, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           f95b-bf3b/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            ab1e-9aa0/~tNlb, PASS,
 
 # IPv6 networking examples
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          f206-a0e2/~tNlb, PASS, EthernetMac
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8feb-3936/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             9661-c1f5/~tNlb, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             6360-9ed1/~tNlb, PASS,
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          6574-3289/~tNlb, PASS, EthernetMac
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             cbbd-f1df/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             07b3-4cca/~tNlb, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             273f-5638/~tNlb, PASS,
 
 # DYMO with IPv6
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             bbf0-c890/~tNlb, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             bbf0-c890/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             3f4a-17a7/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             3f4a-17a7/~tNlb, PASS,  wireless adhoc
 
 # EIGRP with IPv6
 /examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         c645-565e/~tNlb,  PASS,  eigrp EthernetMac
