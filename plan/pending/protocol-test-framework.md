@@ -1,8 +1,8 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **in progress** — Phases 0–6 and 8 done; Phase 7 docs/examples done, only the
-opp_test/opp_ci CI *harness wiring* (linking the `.test` cases into INET's regression runner
-+ fingerprint hookup) remains. **Phase 9 (state-machine / value-signal observation) done** —
+Status: **in progress** — Phases 0–6 and 8 done; Phase 7 done except the fingerprint
+hookup, which is an open decision and not remaining work (see §14 and the section at the
+end). **Phase 9 (state-machine / value-signal observation) done** —
 observe non-packet scalar signals (FSM state, counters) and assert state sequences; first
 subject is Ethernet PLCA (10BASE-T1S). See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
@@ -644,10 +644,23 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     the `@class` of the default-package tester to a non-existent class. (Demo configs still
     reference networks by simple name, e.g. `network = ProtocolTestDemo`, which resolves.)
   - Full suite: **22 configs, 17 PASS + 5 intentional FAIL**, no errors, after the repackaging.
-  - **Deferred (the opp_test / opp_ci CI *harness* itself):** wiring these `.test` cases into
-    INET's regression runner (Makefile/runner that links `libprotocoltest.so`), the
-    fingerprint hookup, and a golden-file CI check on `describe()` output. The `.test` files
-    are correct and runnable by hand; only the automated CI plumbing remains.
+  - **The CI harness. ✅ DONE on 2026-09-14, except the fingerprint hookup.**
+    - **The regression runner** already reaches the suite: `bin/inet_run_protocol_tests`,
+      `get_protocol_test_tasks` in `python/inet/test/all.py` with recursive discovery, and
+      the `protocol` entry in the `testdir` matrix of `.github/workflows/other-tests.yml`.
+    - **The library build was the one real gap, and it is fixed.** The runner builds the
+      library with `make` in `tests/protocol/lib` before a suite runs, and no `Makefile` was
+      there: it was gitignored, and `build.sh` generated it on each call with absolute paths
+      plus a `makefrag` holding one machine's rpath. A fresh checkout failed with "No targets
+      specified and no makefile found", so the `protocol` CI job could never have passed. The
+      `Makefile` is in git now with relative paths only, as `tests/unit/lib` and
+      `tests/module/lib` already do it. Verified by deleting every build artifact of the
+      library and running the whole suite with no `LD_LIBRARY_PATH` and no manual build.
+    - **The golden-file check on `describe()`** is `self/Describe.test`. It found that a
+      guard rendered exactly like an ordered step; a concurrent step now says "Meanwhile:".
+    - **Still open: the fingerprint hookup.** §10 wants the protocol scenarios in the
+      fingerprint CSV CI as a second safety net. It is the one item with a recurring cost,
+      so it is a decision and not a task — see "The fingerprint hookup" below.
 
 - **Phase 8 — Description generator (§13). ✅ DONE (early, brought forward before Phase 5).**
   AST→English renderer, phrasebook, `describe()`. Qtenv panel / golden-file CI hook remain
@@ -756,3 +769,26 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   binds to; risk of ambiguous matches — define precedence (most-specific selector wins)
   and detect/report ambiguity.
 ```
+
+## The fingerprint hookup — the one open decision
+
+§10 says the protocol tests are deterministic simulations, so they also produce fingerprints
+and could join the fingerprint CSV CI as a second safety net.
+
+**The recommendation is not to do it.** A protocol test already asserts the behaviour it
+cares about, directly and in English. A fingerprint asserts that nothing at all changed,
+which is a weaker statement about a stronger set of facts, and it carries a standing cost:
+
+- Every deliberate change to a scenario needs a baseline update, and the four gates already
+  ask for one. The protocol suite changes often, because a standards pass adds tests.
+- Thirty tests fail today, on purpose. Their fingerprints are valid records of what happened,
+  but a reviewer would have to read two failures for one finding.
+- The runtime-attached tester is a real module in the network, so it enters the fingerprint.
+  A change to the framework would then move the baseline of every protocol scenario, which is
+  noise of exactly the kind the fingerprint suite exists to avoid.
+
+What the fingerprint suite catches and the protocol tests do not is a change in a part of the
+model that no assertion names. That is a real gap, and the cheaper answer to it is a check
+that names the thing, not a hash over everything.
+
+Decide this before closing the plan.
