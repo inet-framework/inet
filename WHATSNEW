@@ -446,6 +446,11 @@ Notable backward incompatible changes are the following:
    complete management header in each fragment. Reassembly preserves the original body
    bytes and local transaction context.
 
+16. Malformed Peer Association IDs
+
+   Malformed peer association IDs now mark the decoded management header incorrect
+   instead of terminating the simulation during deserialization.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
