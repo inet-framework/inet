@@ -44,10 +44,11 @@ work needs to know.
    chunk, never as a total. The module's `totalRcvAppData` is a running total, but
    subscribing to it **aborts the run**: `Unsupported signal data type uintval_t`, because
    the tester implements only the signed overload.
-6. **A scalar signal cannot carry a predicate.** `EventPattern::selectorMatches` refuses
-   `.match()` and `.packet()` on any non-packet event, so a running total cannot be
-   accumulated on the signal side. The flow-control check keeps its total in state shared
-   between the steps' predicates instead.
+6. ~~**A scalar signal cannot carry a predicate.**~~ **Fixed on 2026-09-14.**
+   `EventPattern::selectorMatches` refused a predicate on any non-packet event, so a running
+   total could not be accumulated on the signal side. Only a packet-field expression is
+   refused now. The follow-up list below records the same fix, and this entry used to
+   contradict it.
 
 ## The vacuous pass, and why one test was withdrawn
 

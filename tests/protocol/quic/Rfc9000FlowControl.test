@@ -23,44 +23,23 @@ raises the limit, does not exceed 2000 octets"): the task brief suggested either
 an over-limit STREAM frame before the first MAX_STREAM_DATA, or a sum accumulated in a lambda.
 Neither is directly usable as first imagined, for reasons specific to this engine (confirmed by
 reading tests/protocol/lib/ProtocolTester.cc/EventPattern.cc, not just guessed):
-  - A running byte sum can't be accumulated on the *signal* side: EventPattern::selectorMatches()
-    used to refuse a predicate on a scalar (non-packet) event, which is fixed now -- see the deviation note in
-    Rfc9000StreamDataTransfer.test -- so this would have to run on packet events, which is exactly
-    what this test does (see below).
-  - A `never` step naturally expresses "must not happen", but a `never` (like any greedy
-    Count-backed step) only resolves -- and hence only lets the *next* step start watching the
-    event stream -- once its own `.within()` window fully elapses (confirmed in
-    ProtocolTester.cc's handleMessage(), StepType::Never/Count deadline handling). This engine is
-    strictly sequential and single-pass (exactly one step is "current" at a time; a non-matching
-    event is simply gone once a step has looked at it -- confirmed in ProtocolTester::processMatch()
-    switching on `program->steps[currentStep]`). The gap between "host A's initial burst finishes"
-    and "host B's first MAX_STREAM_DATA arrives" is under 200 microseconds in this scenario (checked
-    empirically with a throwaway probe), far too small a target to size a `never` step's `.within()`
-    against reliably -- and any value large enough to be robust would run past the point where host
-    A finishes sending the remainder, so a subsequent step looking for that completion would never
-    see it (its event already went by while the long `never` was still "current").
-  - A predicate cannot signal failure by throwing, either: EventPattern::selectorMatches() wraps
-    every `filterEvent` call in a try/catch that turns *any* exception into a silent non-match (by
-    design, so a predicate that peeks a field absent from an unrelated packet fails safe) -- so a
-    `throw` from inside a lambda can never surface as a test failure here.
-  - What *does* survive across steps cleanly: `once` steps advance the instant they match, so they
-    never withhold events from whatever step follows -- and a `once` step's predicate, even while
-    returning false and "still waiting", still runs once per candidate event, so it can perform side
-    effects. This test therefore threads two `std::shared_ptr<bool>` flags (`raised`, `violated`)
-    through three sequential `once` steps' predicates. Every predicate call first records, as a side
-    effect, whether the event is host B raising the limit or host A sending stream data that (before
-    any raise) exceeds it; only *then* does it evaluate its own step's specific match condition,
-    which for the "raise" step also requires `!*violated`. Since events are examined by whichever
-    step is current with no gaps between steps, this reconstructs a `never`-like invariant over the
-    causal interval "before the first raise" exactly, without depending on any guessed timing: if a
-    violation is ever recorded, the "raise" step can never match (its own condition includes
-    `!*violated`, permanently false from then on) and fails honestly by deadline miss, naming the
-    step and its `.describe()` text -- a real, visible, correctly-attributed failure, not a silently
-    swallowed one.
+  - The engine used to be strictly sequential and single-pass: one step was current at a
+    time, and an event a step did not match was gone. So the rule could not be a `never`
+    step. Any window long enough to be robust ran past the point the next step had to
+    observe, and the gap between host A's initial burst and host B's first MAX_STREAM_DATA
+    is under 200 microseconds here. The check therefore threaded mutable state through every
+    step's predicate.
 
-Implementation note: as in the other QUIC tests in this suite, evalPacketField()/.filterPacket("quic....")
-cannot see inside a QUIC packet; this test reads the STREAM and MAX_STREAM_DATA frames' fields
-directly off the packet's own chunk tree via QuicChunks.h's findQuicChunk<T>().
+    **That is no longer so, and this check is written the way the rule reads.** `meanwhile`
+    starts a guard without waiting for it, and one event now reaches every running step, so
+    the rule is a guard that runs beside the ordered steps and reports a violation at the
+    moment it happens. The guard was verified to fire: with the limit lowered to 100 octets
+    it reports "forbidden event occurred at t=0.1".
+
+  - One limit still holds. A predicate cannot signal failure by throwing:
+    `EventPattern::selectorMatches` wraps every `filterEvent` call in a try/catch that turns
+    any exception into a silent non-match, by design, so that a predicate peeking a field
+    absent from an unrelated packet fails safe.
 
 %includes:
 #include "ProtocolTest.h"
@@ -72,69 +51,82 @@ directly off the packet's own chunk tree via QuicChunks.h's findQuicChunk<T>().
 using namespace inet;
 using namespace inet::protocoltest;
 
+// The limit host B advertises for the stream, in octets. RFC 9000 section 4.1 binds the
+// sender to it: host A may not send past it until host B raises it.
+static const long STREAM_LIMIT = 2000;
+
+// True once host B has raised the limit. The guard below forbids a send past the limit only
+// while this is false, which is what "until it is raised" means.
+static bool limitRaised = false;
+
+// Runs on every datagram host A receives, and never matches: it only follows the stream.
+static bool followMaxStreamData(const MatchContext& context)
+{
+    if (context.event.packet != nullptr && findQuicChunk<MaxStreamDataFrameHeader>(context.event.packet))
+        limitRaised = true;
+    return false;
+}
+
+// True when host A sends past the limit while the limit still stands. This is the violation
+// RFC9000-FC-1 forbids, and the guard reports it the moment it happens.
+static bool sentPastTheLimit(const MatchContext& context)
+{
+    if (limitRaised || context.event.packet == nullptr)
+        return false;
+    auto frame = findQuicChunk<StreamFrameHeader>(context.event.packet);
+    return frame != nullptr && (long)(frame->getOffset() + frame->getLength()) > STREAM_LIMIT;
+}
+
+static bool streamFrame(const MatchContext& context)
+{
+    return context.event.packet != nullptr
+        && findQuicChunk<StreamFrameHeader>(context.event.packet) != nullptr;
+}
+
+static bool maxStreamDataFrame(const MatchContext& context)
+{
+    return context.event.packet != nullptr
+        && findQuicChunk<MaxStreamDataFrameHeader>(context.event.packet) != nullptr;
+}
+
+static bool completesTheBlock(const MatchContext& context)
+{
+    if (context.event.packet == nullptr)
+        return false;
+    auto frame = findQuicChunk<StreamFrameHeader>(context.event.packet);
+    return frame != nullptr && frame->getOffset() + frame->getLength() == 4000;
+}
+
 Define_ProtocolTestProgram()
 {
-    // Shared, mutable, causal-state flags threaded through the three steps below -- see the
-    // %description's implementation note for why this replaces a timing-based never/window.
-    auto raised = std::make_shared<bool>(false);     // host B has sent a MAX_STREAM_DATA frame
-    auto violated = std::make_shared<bool>(false);   // a STREAM frame exceeded 2000 before that
-
-    // Side effect only, run from every step's predicate on every candidate event: keeps
-    // `raised`/`violated` correct regardless of which step is "current" when the event arrives.
-    auto track = [raised, violated](const PacketEvent& e) {
-        if (e.packet == nullptr)
-            return;
-        if (e.signalName == "packetSentToLower") {
-            if (auto sf = findQuicChunk<StreamFrameHeader>(e.packet)) {
-                if (!*raised && sf->getOffset() + sf->getLength() > 2000)
-                    *violated = true;
-            }
-        }
-        else if (e.signalName == "packetReceivedFromLower") {
-            if (findQuicChunk<MaxStreamDataFrameHeader>(e.packet))
-                *raised = true;
-        }
-    };
-
     return ProtocolTest("rfc9000_flow_control")
-        // Expected observation 1: host A sends a datagram whose QUIC packet carries a
-        // STREAM frame. Confirms the stimulus.
-        .once(on("client.udp")
-                  .filterEvent([track](const MatchContext& c) {
-                      track(c.event);
-                      return c.event.signalName == "packetSentToLower"
-                          && findQuicChunk<StreamFrameHeader>(c.event.packet) != nullptr;
-                  })
+        // Follow host B's answers for the whole run, so the guard knows when the limit was
+        // raised. This guard never matches; it only records.
+        .meanwhile(never(on("client.udp").signal("packetReceivedFromLower")
+                             .filterEvent(followMaxStreamData)
+                             .describe("host B raising the limit")
+                             .within(5.0)))
+        // The rule itself, as a guard rather than as a condition threaded through the other
+        // steps: host A must not send past the limit while the limit stands. It runs beside
+        // every step below, so a violation at any moment ends the run and names itself.
+        .meanwhile(never(on("client.udp").signal("packetSentToLower")
+                             .filterEvent(sentPastTheLimit)
+                             .describe("a STREAM frame past the limit, before host B raised it")
+                             .within(5.0)))
+        // Host A sends a STREAM frame. This confirms the stimulus, so the guards hold over
+        // a run in which something happened.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .filterEvent(streamFrame)
                   .describe("host A's first STREAM frame")
                   .within(0.5))
-        // Expected observation 2 (the whole of RFC9000-FC-1: the limit binds a sender, it
-        // does not merely inform it) folded into the match condition for observation 3's
-        // first half: this step can only match a MAX_STREAM_DATA frame for which no
-        // earlier STREAM frame (tracked continuously since the previous step, see above)
-        // has already exceeded 2000 octets. If one had, `*violated` stays true forever and
-        // this step fails by deadline miss instead -- see the %description.
-        .once(on("client.udp")
-                  .filterEvent([track, violated](const MatchContext& c) {
-                      track(c.event);
-                      return !*violated
-                          && c.event.signalName == "packetReceivedFromLower"
-                          && findQuicChunk<MaxStreamDataFrameHeader>(c.event.packet) != nullptr;
-                  })
-                  .describe("host B raises the stream flow-control limit, with no STREAM frame from host A having exceeded 2000 octets beforehand")
-                  .within(1.0))
-        // Expected observation 3, second half: host A then sends the remainder, so that
-        // host B's application receives all 4000 octets -- observed, as in
-        // Rfc9000StreamDataTransfer.test, as the STREAM frame whose offset+length
-        // completes the 4000-octet block (no loss/reordering in this mockup, so this is
-        // the last one sent).
-        .once(on("client.udp")
-                  .filterEvent([track](const MatchContext& c) {
-                      track(c.event);
-                      if (c.event.signalName != "packetSentToLower")
-                          return false;
-                      auto sf = findQuicChunk<StreamFrameHeader>(c.event.packet);
-                      return sf != nullptr && sf->getOffset() + sf->getLength() == 4000;
-                  })
+        // Host B raises the limit.
+        .once(on("client.udp").signal("packetReceivedFromLower")
+                  .filterEvent(maxStreamDataFrame)
+                  .describe("host B's MAX_STREAM_DATA, raising the limit")
+                  .within(2.0))
+        // And only then does host A send the remainder, completing the 4000 octet block.
+        .once(on("client.udp").signal("packetSentToLower")
+                  .filterEvent(completesTheBlock)
                   .describe("host A sends the remainder, completing all 4000 octets")
                   .within(2.0));
 }
