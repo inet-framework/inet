@@ -1,6 +1,6 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a, 1c, 1h and 1h2 done in the worktree
+Status: **in progress** — steps 1a, 1b, 1c, 1h, 1h2, 1h3, 1h4 (commit 11) and 3 done in the worktree
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
 Branch: `topic/tcp-new`, head `33e8b0d073`, merge base `434658d729`, 61 commits, 183 files, +15840 / −3685.
@@ -401,7 +401,7 @@ Three conflicting paths, and each has a different shape:
 **Done when** `git merge-tree --write-tree` against `origin/master` is clean and the branch builds
 in both modes.
 
-### Step 3 — The release note (F-2)
+### Step 3 — The release note (F-2) — done 2026-09-14
 
 `WHATSNEW` is untouched today and `doc/src/` gains 15 lines, none of which mention a break. Four
 kinds of break need naming:
@@ -423,7 +423,11 @@ A migration guide entry under `doc/src/migration-guide/` carries 2 and 3;
 instructions, not only the announcement.
 
 **Done when** a user who upgrades can find, for each of the four, what to change in their own code
-or ini file.
+or ini file. — **done.** Writing it corrected the finding twice: the default list was missing
+`windowScalingSupport`, and `sndNxt` is renamed to `sndSeq` rather than removed. A migration guide
+entry turned out not to be owed: `doc/src/migration-guide/` is a 3.x-to-4.x document, and the
+release's own instructions belong in `WHATSNEW` beside the announcement, which is where the IEEE
+802.11 entry puts them.
 
 **Note for the project, not for this branch:** this same finding has now appeared in five pull
 requests from two authors. Five occurrences say the obligation is not visible where it is incurred,
