@@ -1,6 +1,7 @@
 # Resolve the audit findings of PR #1155
 
-Status: **ready** — both decisions made 2026-09-11, no step started.
+Status: **in progress** — steps 1a, 1c and 1h done in the worktree
+`/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: [doc/project/audit/report/pull-request/pr-1155.md](../../doc/project/audit/report/pull-request/pr-1155.md), third pass, 2026-09-11.
 Branch: `topic/tcp-new`, head `33e8b0d073`, merge base `434658d729`, 61 commits, 183 files, +15840 / −3685.
 
@@ -166,8 +167,12 @@ will ever have.
 one is `IIeee80211Band`, which master repaired after this branch's base and which this branch does
 not touch.
 
-**1d. Write twelve bodies (F-7).** Only the author can do this: the reasons exist and are not in
-the tree. The subjects are good, and that is the trap — *"undo a reduction that turned out to be
+**1d. Write twelve bodies (F-7). — blocked on 1i.** An attempt on 2026-09-14 found that the
+reasons are not recoverable per commit, because the commits are not per reason (F-10). Re-cut
+first; then each body writes itself from its feature. What follows is still the right question
+list, applied to the re-cut commits rather than to the present ones.
+
+Only the author can do this: the reasons exist and are not in the tree. The subjects are good, and that is the trap — *"undo a reduction that turned out to be
 unnecessary"* reads like a reason and is a restatement of what the code does.
 
 Each body answers the question the audit already asked of it:
@@ -200,6 +205,30 @@ This is not tidiness. With the trailers in place,
 claims no behavior change and carries a baseline row fails the gate. Without them, step 5 has no
 mechanical check at all.
 **Done when** `check-classification.sh` passes over the series.
+
+**1h. Declare every parameter where it is first read (F-9). — done 2026-09-14.**
+
+Eight commits read 62 of the branch's 67 new parameters before any NED declares them, so
+seventeen commits compile and no TCP simulation runs across them. Each declaration moved to the
+commit that first reads it, grouped under a `// parameters of: <subject>` header.
+
+The whole series was rebuilt tree by tree rather than replayed as patches, so there were no
+conflicts and every file except `Tcp.ned` is byte-identical to before.
+[check-ned-params.sh](../../doc/project/enforcement/check-ned-params.sh) went from 8 violations to
+`PASS`, and commit 35 shrank from declaring 63 parameters to changing 12 defaults — which is
+exactly the second half of its own subject.
+
+**1i. Re-cut phases B and C by feature (F-10). — open, and it is the large one.**
+
+The parameter half of the partition is repaired; the logic half is not. Commit 18 still carries
+the AccECN mode resolution of commit 24 and the `pushed_seq`/`forced_push` state of commit 29,
+commit 19 still carries state belonging to commits 18, 20 and 21, and commit 24 still carries the
+AccECN state block. **Until this is done, step 1d cannot be: a body cannot state the reason for a
+partition boundary.**
+
+The shape: each feature's parameter, state, logic, NED declaration and test in one commit. Step 1h
+has already placed the parameter and the declaration, so what remains is the state fields and the
+code.
 
 **1f. Add the reproduction to fourteen fix commits
 ([PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce)).**
