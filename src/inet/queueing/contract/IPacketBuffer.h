@@ -27,6 +27,18 @@ class INET_API IPacketBuffer : public virtual IPacketCollection
          * The packet is never nullptr.
          */
         virtual void handlePacketRemoved(Packet *packet) = 0;
+
+        /**
+         * Detaches a packet selected for an overload drop from its owner before
+         * drop observers are notified.
+         */
+        virtual void handlePacketDropping(Packet *packet) = 0;
+
+        /**
+         * Notifies the packet owner after all packets selected by one overload
+         * operation have been removed from their owners.
+         */
+        virtual void handlePacketDropped(Packet *packet) = 0;
     };
 
   public:

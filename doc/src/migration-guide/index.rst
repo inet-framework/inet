@@ -4,6 +4,32 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Packet Queue Extraction and Departure Callbacks
+-----------------------------------------------
+
+Direct implementations of ``IPacketQueue`` must implement ``findPacket(predicate)`` and
+``dequeuePacket(predicate)``. Compound-queue providers must implement
+``IPacketExtractor`` for predicate selection. Select through the provider's scheduling
+policy; do not use collection index order as a replacement. Predicates may be evaluated
+repeatedly and must remain stable and free of side effects during selection.
+
+Emit ``packetQueueDeparture`` once at each logical queue boundary while the borrowed
+packet is alive. Supply ``PacketQueueRemovalDetails`` with ``DEQUEUED=0``, ``REMOVED=1``
+or ``DROPPED=2``. A prequeue filter rejection is a drop even when the leaf queue never
+owned the packet. Listeners on a compound queue must filter child-queue emissions to
+avoid handling an outcome twice.
+
+Buffer owners implementing ``IPacketBuffer::ICallback`` must explicitly implement both
+``handlePacketDropping()`` and ``handlePacketDropped()``. Detach a victim during the
+first phase; publish its departure during the second phase, after every victim in the
+overflow batch has been detached. Do not read a borrowed packet after the publisher
+deletes it.
+
+``PriorityScheduler`` aggregate queries now throw when an input lacks
+``IPacketCollection``. Replace callers that interpret ``-1`` as an unknown aggregate
+size, or provide collection-capable inputs. Predicate extraction similarly requires an
+extraction-capable provider only when that operation is used.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

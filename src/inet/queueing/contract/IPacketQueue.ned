@@ -16,6 +16,7 @@ package inet.queueing.contract;
 moduleinterface IPacketQueue extends IPassivePacketSink, IPassivePacketSource
 {
     parameters:
+        @signal[packetQueueDeparture](type=inet::Packet); // Details: PacketQueueRemovalDetails; source identifies the logical queue
         @omittedTypename(OmittedPacketQueue);
         @display("i=block/queue");
 }
