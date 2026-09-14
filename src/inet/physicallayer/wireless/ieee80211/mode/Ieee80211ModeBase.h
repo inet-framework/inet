@@ -23,6 +23,9 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
     virtual int getHtMcsIndex() const override { return -1; }
     virtual bool isHtShortGuardInterval() const override { return false; }
     virtual const char *getName() const override { return name.c_str(); }
+    virtual const simtime_t getPreambleDuration() const override { return getPreambleMode()->getDuration(); }
+    virtual const simtime_t getHeaderDuration() const override { return getHeaderMode()->getDuration(); }
+    virtual const simtime_t getDataDuration(b dataLength) const override { return getDuration(dataLength) - getPreambleDuration() - getHeaderDuration(); }
 };
 
 } /* namespace physicallayer */

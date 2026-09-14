@@ -108,6 +108,11 @@ as :cpp:`GlobalArp` does, and the client then takes the address.
 Migrating IEEE 802.11 PHY Modes
 ------------------------------
 
+``IIeee80211Mode::getPreambleDuration()``, ``getHeaderDuration()`` and
+``getDataDuration(b)`` are now pure virtual. Direct interface implementations
+must implement them, or inherit ``Ieee80211ModeBase`` for the previous defaults.
+Existing HT/VHT overrides retain their format-specific timing behavior.
+
 External implementations of ``IIeee80211DataMode`` must now implement the pure
 virtual guard-interval query:
 

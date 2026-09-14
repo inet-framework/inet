@@ -151,9 +151,9 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
-    const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = duration - headerDuration - preambleDuration;
+    const simtime_t preambleDuration = transmissionMode->getPreambleDuration();
+    const simtime_t headerDuration = transmissionMode->getHeaderDuration();
+    const simtime_t dataDuration = transmissionMode->getDataDuration(B(phyHeader->getLengthField()));
     auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }

@@ -70,10 +70,8 @@ for (const auto& expected : optionalMcs) {
         ASSERT(data.getNumberOfSpatialStreams() == expected.streams);
         ASSERT(std::abs(data.getGrossBitrate().get() - expected.grossMbps * 1e6 * rateScale) < 1);
         ASSERT(std::abs(data.getNetBitrate().get() - expected.netMbps * 1e6 * rateScale) < 1);
-        if (!shortGi) {
-            ASSERT(data.getSymbolInterval() == symbol);
-            ASSERT(data.getDuration(b(1000)) == expected.symbolsFor1000Bits * symbol);
-        }
+        ASSERT(data.getSymbolInterval() == symbol);
+        ASSERT(data.getDuration(b(1000)) == expected.symbolsFor1000Bits * symbol);
     }
 }
 
