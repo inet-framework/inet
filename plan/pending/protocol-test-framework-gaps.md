@@ -65,14 +65,14 @@ A pattern has two halves and one vocabulary. Split them.
 
 | | Filter | Assertion |
 | --- | --- | --- |
-| expression over the packet | `filterExpr(e)` | `assertExpr(e)` |
-| | — | `assertNotExpr(e)` |
-| predicate over the event | `filterThat(f)` | `assertThat(f)` |
-| scalar equality | `filterEqual(v)` | `assertEqual(v)` |
-| | — | `assertNotEqual(v)` |
-| scalar lower bound | `filterAtLeast(v)` | `assertAtLeast(v)` |
-| scalar upper bound | `filterAtMost(v)` | `assertAtMost(v)` |
-| scalar range | `filterBetween(lo, hi)` | `assertBetween(lo, hi)` |
+| expression over the packet | `filterPacket(e)` | `assertPacket(e)` |
+| | — | `assertNotPacket(e)` |
+| predicate over the event | `filterEvent(f)` | `assertEvent(f)` |
+| scalar equality | `filterValue(v)` | `assertValue(v)` |
+| | — | `assertNotValue(v)` |
+| scalar lower bound | `filterValueAtLeast(v)` | `assertValueAtLeast(v)` |
+| scalar upper bound | `filterValueAtMost(v)` | `assertValueAtMost(v)` |
+| scalar range | `filterValueBetween(lo, hi)` | `assertValueBetween(lo, hi)` |
 
 Position words compare nothing and stay bare: `first()`, and `nth(k)`, the word the relay
 already uses. `first()` is `nth(1)`; it earns its place by making the intent visible.
@@ -80,10 +80,10 @@ already uses. `first()` is `nth(1)`; it earns its place by making the intent vis
 Three decisions that this table records:
 
 - **There is no `assertNotThat`.** A lambda negates itself, so `assertNotThat(f)` is exactly
-  `assertThat(!f)`. `assertNotExpr` is not redundant in the same way: it differs from
-  `assertExpr` of a negated expression when the chunk is **absent**, which is the case the
+  `assertEvent(!f)`. `assertNotPacket` is not redundant in the same way: it differs from
+  `assertPacket` of a negated expression when the chunk is **absent**, which is the case the
   ARP and IPv6 passes lost time to.
-- **`assertAtLeast` does not collide with `atLeastTimes`.** The cardinality family carries
+- **`assertValueAtLeast` does not collide with `atLeastTimes`.** The cardinality family carries
   the `Times` suffix, and that suffix is the distinction.
 - **The verb is `filter`, not `select`.** INET's own `PacketFilter` uses the word.
 
@@ -169,10 +169,10 @@ accident, because the adder is `once`.
 | build an injection | `inject("host1")` | `at("host1")` |
 | add either to the program | `.intercept(...)`, `.inject(...)` | unchanged |
 
-`Interception::match(e)` becomes `filterExpr(e)`, which removes the third meaning of `match`.
+`Interception::match(e)` becomes `filterPacket(e)`, which removes the third meaning of `match`.
 
 - [x] Add `tap(name)` and `at(name)`.
-- [x] Add `Interception::filterExpr`.
+- [x] Add `Interception::filterPacket`.
 
 ## The migration
 
@@ -181,7 +181,7 @@ the roughly 1700 existing call sites keep working.
 
 **Phase 2 removes the old words**, in a separate change: `.packet(` 729 sites, `.match(` 638,
 `.is(` 30, `intercept(` 223, `inject(` 85. All mechanical except `.match(`, which needs a
-judgment per site — `filterExpr` or `filterThat` by the argument type — and is worth doing in
+judgment per site — `filterPacket` or `filterEvent` by the argument type — and is worth doing in
 review rather than by script.
 
 ## Order of work

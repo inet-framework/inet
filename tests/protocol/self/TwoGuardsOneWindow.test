@@ -37,25 +37,25 @@ Define_ProtocolTestProgram()
     return ProtocolTest("two_guards_one_window")
         // Guard 1: nothing leaves host A for port 9999, for the whole run.
         .meanwhile(never(on("host1.udp").signal("packetSentToLower")
-                             .filterExpr("udp.destPort == 9999")
+                             .filterPacket("udp.destPort == 9999")
                              .describe("any datagram to port 9999")
                              .within(2.0)))
         // Guard 2: host A never receives a datagram on the port it sends to. It opens in the
         // same instant as guard 1 and covers the same window, which two ordered steps could
         // not do.
         .meanwhile(never(on("host1.udp").signal("packetReceivedFromLower")
-                             .filterExpr("udp.destPort == 5000")
+                             .filterPacket("udp.destPort == 5000")
                              .describe("a datagram arriving at host A on port 5000")
                              .within(2.0)))
         // The ordered observation happens inside both guards' windows. With a blocking
         // guard this step could not run until the guard's window had closed.
         .once(on("host1.udp").signal("packetSentToLower")
-                  .filterExpr("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("host A's datagram to port 5000")
                   .within(1.0))
         // And it is delivered, still inside the guards' windows.
         .once(on("host2.udp").signal("packetReceivedFromLower")
-                  .filterExpr("udp.destPort == 5000")
+                  .filterPacket("udp.destPort == 5000")
                   .describe("the datagram at host B")
                   .within(1.0));
 }

@@ -53,7 +53,7 @@ functional per concern**:
 | `.iface("eth0")` | interface | restrict to an interface |
 | `.packet("expr")` | packet content | content predicate over the packet (PacketFilter, §4) |
 | `.match([](const MatchContext& c){ ... })` | content (lambda) | typed content predicate |
-| `filterEqual(v)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
+| `filterValue(v)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
 | `.attributeTo("host1.ipv6.mipv6")` | narration POV | description point of view only — never affects matching (§8b) |
 | `.describe("phrase")` | narration | human phrase (rarely needed — `packet()` auto-translates) |
 | `.capture("name", "proto.field")` | capture | remember a field value for later steps (§4) |
@@ -105,11 +105,11 @@ looks for a later event.
 
 | | Filter — picks | Assertion — must hold |
 | --- | --- | --- |
-| expression over the packet | `filterExpr(e)` | `assertExpr(e)`, `assertNotExpr(e)` |
-| predicate over the event | `filterThat(f)` | `assertThat(f)` |
-| scalar equality | `filterEqual(v)` | `assertEqual(v)`, `assertNotEqual(v)` |
-| scalar bound | `filterAtLeast(v)`, `filterAtMost(v)` | `assertAtLeast(v)`, `assertAtMost(v)` |
-| scalar range | `filterBetween(lo, hi)` | `assertBetween(lo, hi)` |
+| expression over the packet | `filterPacket(e)` | `assertPacket(e)`, `assertNotPacket(e)` |
+| predicate over the event | `filterEvent(f)` | `assertEvent(f)` |
+| scalar equality | `filterValue(v)` | `assertValue(v)`, `assertNotValue(v)` |
+| scalar bound | `filterValueAtLeast(v)`, `filterValueAtMost(v)` | `assertValueAtLeast(v)`, `assertValueAtMost(v)` |
+| scalar range | `filterValueBetween(lo, hi)` | `assertValueBetween(lo, hi)` |
 
 Position words compare nothing and stay bare: `first()`, and `nth(k)`. `first()` is `nth(1)`.
 
@@ -118,23 +118,23 @@ that can fail and one that cannot:
 
 ```cpp
 // wrong: picks the first window that is small enough, and passes over one that is not
-.once(on("host1.tcp").signal("cwnd").filterAtMost(IW_BOUND).within(0.5))
+.once(on("host1.tcp").signal("cwnd").filterValueAtMost(IW_BOUND).within(0.5))
 
 // right: the first publication is the subject, and the bound is the verdict
-.once(on("host1.tcp").signal("cwnd").first().assertAtMost(IW_BOUND).within(0.5))
+.once(on("host1.tcp").signal("cwnd").first().assertValueAtMost(IW_BOUND).within(0.5))
 ```
 
-There is deliberately no `assertNotThat`: a lambda negates itself. `assertNotExpr` is not
-redundant in the same way, because it differs from `assertExpr` of a negated expression when
+There is deliberately no `assertNotThat`: a lambda negates itself. `assertNotPacket` is not
+redundant in the same way, because it differs from `assertPacket` of a negated expression when
 the chunk is **absent**.
 
-`assertAtLeast` does not collide with `atLeastTimes`: the cardinality family carries the
+`assertValueAtLeast` does not collide with `atLeastTimes`: the cardinality family carries the
 `Times` suffix.
 
 ### The expression engine
 
-`filterExpr("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
-(it asserts the signal value is a packet; for a scalar signal use `filterEqual(v)` or one
+`filterPacket("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
+(it asserts the signal value is a packet; for a scalar signal use `filterValue(v)` or one
 of the bounds instead).
 Protocol names are lowercase (`tcp`, `udp`, `ipv4`, `arp`, `ieee80211mac`), chunk class
 names are as declared (`BindingUpdate`, `Ieee80211DataHeader`). Examples:
@@ -191,9 +191,9 @@ running step rather than only the first:
 ```cpp
 .meanwhile(never(on("host1.ipv4").signal("packetSentToUpper").within(0.5)))
 .meanwhile(never(on("host1.eth[0].mac").signal("packetSentToLower")
-                     .filterExpr("icmpv4.type == 3").within(0.5)))
+                     .filterPacket("icmpv4.type == 3").within(0.5)))
 .once(on("router.ipv4.ip").signal("packetDropped")
-          .filterExpr("ipv4.identification == {id}").within(0.2))
+          .filterPacket("ipv4.identification == {id}").within(0.2))
 ```
 
 `never`, `atMostTimes` and `atLeastTimes` exist as free builders for this, and they return a
@@ -228,7 +228,7 @@ builds the clause and `.intercept(...)` adds it, so the two roles read different
 
 ```cpp
 .intercept(tap("relay")
-             .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
+             .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
              .minBytes(100)        // only the data-bearing segment
              .nth(1)               // the first match (1-based; 0 = every)
              .drop()               // or .delay(0.05) or .mutate([](Packet *p){ ... })
@@ -242,8 +242,8 @@ later rule for the frames it names, so an exception is a clause of its own rathe
 condition inside the other rule's expression.
 
 ```cpp
-.intercept(tap("relay").filterExpr("tcp.synBit == true").pass().describe("never touch a SYN"))
-.intercept(tap("relay").filterExpr("tcp.destPort == 1000").drop().describe("drop the data"))
+.intercept(tap("relay").filterPacket("tcp.synBit == true").pass().describe("never touch a SYN"))
+.intercept(tap("relay").filterPacket("tcp.destPort == 1000").drop().describe("drop the data"))
 ```
 
 Interceptions are **standing** rules (armed for the whole run, not ordered steps). The
@@ -276,7 +276,7 @@ as a second channel beside packets. INET's `Fsm` already emits its state on ever
 (`setStateChangedSignal`), so the state machine needs no modification.
 
 A scalar signal is just another `signal()` — selected the same way as a packet signal, with
-`filterEqual(v)` for its value and the ordinary cardinality builders (`once`/`never`/…):
+`filterValue(v)` for its value and the ordinary cardinality builders (`once`/`never`/…):
 
 ```cpp
 .once(on("node[0].eth[0].plca").signal("controlStateChanged")   // module path, then the signal
@@ -289,7 +289,7 @@ A scalar signal is just another `signal()` — selected the same way as a packet
 | Clause | Meaning |
 |---|---|
 | `on("path").signal("name")` | the emitting module and its scalar signal (e.g. `controlStateChanged`) |
-| `filterEqual(v)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
+| `filterValue(v)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
 | `once(p)` / `never(p)` / … | the same cardinality builders as packets — `once` = "reaches the value", `never` = "must not" |
 
 A scalar signal flows through the **same engine** as packets: a scalar step matches a scalar

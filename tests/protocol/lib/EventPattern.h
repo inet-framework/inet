@@ -83,7 +83,7 @@ class INET_API EventPattern
     // split, because a value written as a filter turns a wrong first value into a silent
     // search for a right later one.
     struct Assertion {
-        enum Kind { Expr, NotExpr, That, Equal, NotEqual, AtLeast, AtMost } kind = Expr;
+        enum Kind { Packet, NotPacket, Event, Value, NotValue, ValueAtLeast, ValueAtMost } kind = Packet;
         std::string expr;                                 // Expr / NotExpr
         MatchPredicate predicate;                         // That
         double value = 0;                                 // Equal / NotEqual / AtLeast / AtMost
@@ -119,29 +119,29 @@ class INET_API EventPattern
     EventPattern& match(const char *expression) { selExpr = expression; return *this; }
     EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
     // --- filter words: they pick the event ---
-    EventPattern& filterExpr(const char *expression) { selExpr = expression; return *this; }
-    EventPattern& filterThat(MatchPredicate p) { predicate = std::move(p); return *this; }
-    EventPattern& filterEqual(double v) { selHasValue = true; selValue = v; return *this; }
-    EventPattern& filterAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
-    EventPattern& filterAtMost(double v) { selHasMax = true; selMax = v; return *this; }
-    EventPattern& filterBetween(double lo, double hi) { return filterAtLeast(lo).filterAtMost(hi); }
+    EventPattern& filterPacket(const char *expression) { selExpr = expression; return *this; }
+    EventPattern& filterEvent(MatchPredicate p) { predicate = std::move(p); return *this; }
+    EventPattern& filterValue(double v) { selHasValue = true; selValue = v; return *this; }
+    EventPattern& filterValueAtLeast(double v) { selHasMin = true; selMin = v; return *this; }
+    EventPattern& filterValueAtMost(double v) { selHasMax = true; selMax = v; return *this; }
+    EventPattern& filterValueBetween(double lo, double hi) { return filterValueAtLeast(lo).filterValueAtMost(hi); }
 
     // --- position words: they pick which filtered event, and compare nothing ---
     EventPattern& nth(int k) { fltOccurrence = k; return *this; }
     EventPattern& first() { return nth(1); }
 
     // --- assertion words: they must hold on the picked event ---
-    EventPattern& assertExpr(const char *e) { assertions.push_back({Assertion::Expr, e, nullptr, 0}); return *this; }
-    EventPattern& assertNotExpr(const char *e) { assertions.push_back({Assertion::NotExpr, e, nullptr, 0}); return *this; }
-    EventPattern& assertThat(MatchPredicate p) { assertions.push_back({Assertion::That, "", std::move(p), 0}); return *this; }
-    EventPattern& assertEqual(double v) { assertions.push_back({Assertion::Equal, "", nullptr, v}); return *this; }
-    EventPattern& assertNotEqual(double v) { assertions.push_back({Assertion::NotEqual, "", nullptr, v}); return *this; }
-    EventPattern& assertAtLeast(double v) { assertions.push_back({Assertion::AtLeast, "", nullptr, v}); return *this; }
-    EventPattern& assertAtMost(double v) { assertions.push_back({Assertion::AtMost, "", nullptr, v}); return *this; }
-    EventPattern& assertBetween(double lo, double hi) { return assertAtLeast(lo).assertAtMost(hi); }
+    EventPattern& assertPacket(const char *e) { assertions.push_back({Assertion::Packet, e, nullptr, 0}); return *this; }
+    EventPattern& assertNotPacket(const char *e) { assertions.push_back({Assertion::NotPacket, e, nullptr, 0}); return *this; }
+    EventPattern& assertEvent(MatchPredicate p) { assertions.push_back({Assertion::Event, "", std::move(p), 0}); return *this; }
+    EventPattern& assertValue(double v) { assertions.push_back({Assertion::Value, "", nullptr, v}); return *this; }
+    EventPattern& assertNotValue(double v) { assertions.push_back({Assertion::NotValue, "", nullptr, v}); return *this; }
+    EventPattern& assertValueAtLeast(double v) { assertions.push_back({Assertion::ValueAtLeast, "", nullptr, v}); return *this; }
+    EventPattern& assertValueAtMost(double v) { assertions.push_back({Assertion::ValueAtMost, "", nullptr, v}); return *this; }
+    EventPattern& assertValueBetween(double lo, double hi) { return assertValueAtLeast(lo).assertValueAtMost(hi); }
     // There is deliberately no assertNotThat: a lambda negates itself, so it would be
-    // exactly assertThat of the negation. assertNotExpr is not redundant in the same way,
-    // because it differs from assertExpr of a negated expression when the chunk is absent.
+    // exactly assertEvent of the negation. assertNotPacket is not redundant in the same way,
+    // because it differs from assertPacket of a negated expression when the chunk is absent.
 
     // True when every assertion holds on this event. On a failure, reason says which one.
     bool assertionsHold(const MatchContext& context, std::string& reason) const;

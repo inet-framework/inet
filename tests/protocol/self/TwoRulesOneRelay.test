@@ -53,22 +53,22 @@ Define_ProtocolTestProgram()
         // and what `pass()` is for: the exception is a clause of its own, rather than a
         // condition that the other rule's expression has to carry.
         .intercept(tap("relay")
-                       .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                        .minBytes(100).nth(1)
                        .pass().describe("let the first data segment through"))
         .intercept(tap("relay")
-                       .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                        .minBytes(100)
                        .drop().describe("drop every other data segment"))
         // Rule 1 ran: host B receives the first data segment.
         .once(on("host2.tcp").signal("packetReceivedFromLower")
-                  .filterThat(dataSegment)
+                  .filterEvent(dataSegment)
                   .describe("the one data segment that reaches host B")
                   .within(1.0))
         // Rule 2 ran: no further data segment ever reaches host B, although host A keeps
         // retransmitting for the rest of the run.
         .never(on("host2.tcp").signal("packetReceivedFromLower")
-                   .filterThat(dataSegment)
+                   .filterEvent(dataSegment)
                    .describe("any further data segment at host B")
                    .within(8.0));
 }

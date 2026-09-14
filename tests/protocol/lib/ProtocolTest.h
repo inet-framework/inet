@@ -81,8 +81,8 @@ class INET_API Interception
     std::function<void(Packet *)> mutator; // for action == "mutate"
     std::string description;      // optional human phrase
 
-    Interception& filterExpr(const char *expr) { matchExpression = expr; return *this; }
-    Interception& match(const char *expr) { matchExpression = expr; return *this; } // older name of filterExpr
+    Interception& filterPacket(const char *expr) { matchExpression = expr; return *this; }
+    Interception& match(const char *expr) { matchExpression = expr; return *this; } // older name of filterPacket
     Interception& minBytes(long n) { minimumBytes = n; return *this; }
     Interception& nth(int k) { occurrence = k; return *this; }
     Interception& drop() { action = "drop"; return *this; }
@@ -122,7 +122,7 @@ Step atLeastTimes(int n, EventPattern pattern);
 //
 // So the builder takes the noun and the step keeps the verb:
 //
-//     .intercept(tap("tap").filterExpr("tcp.synBit == true").nth(1).drop())
+//     .intercept(tap("tap").filterPacket("tcp.synBit == true").nth(1).drop())
 //     .inject(at("host1").into("eth[0]", "upperLayerOut").after(0.001).packet(buildSynAck))
 //
 Injection at(const char *nodeName);
@@ -199,7 +199,7 @@ class INET_API ProtocolTest
     //
     //     .meanwhile(never(on("host1.ipv4").signal("packetSentToUpper").within(0.5)))
     //     .meanwhile(never(on("host1.eth[0].mac").signal("packetSentToLower")
-    //                          .filterExpr("icmpv4.type == 3").within(0.5)))
+    //                          .filterPacket("icmpv4.type == 3").within(0.5)))
     //     .once(on("router.ipv4.ip").signal("packetDropped").within(0.2))
     //
     // Without this, a guard holds the cursor for its whole window, so two guards cannot

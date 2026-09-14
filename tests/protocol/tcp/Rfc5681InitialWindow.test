@@ -21,7 +21,7 @@ One property of the model decides what "the initial window" means here. The wind
 published only when the algorithm changes it, not when the connection sets it up, so the
 first value the signal carries arrives with the first acknowledgment at about t=0.2.
 
-The step says the rule directly: `first()` picks the first publication, and `assertAtMost`
+The step says the rule directly: `first()` picks the first publication, and `assertValueAtMost`
 is the bound the table gives. The two halves are separate on purpose. A bound written as a
 filter would pick the first publication that is small enough and pass over one that is not,
 which is the shape of a check that cannot fail.
@@ -51,7 +51,7 @@ Define_ProtocolTestProgram()
         // of the window; the assertion is the rule. A model whose first window is too large
         // fails here and the engine does not look for a smaller later one.
         .once(on("host1.tcp").signal("cwnd").first()
-                  .assertAtMost(IW_BOUND)
+                  .assertValueAtMost(IW_BOUND)
                   .describe("host A's initial congestion window")
                   .within(0.5));
 }

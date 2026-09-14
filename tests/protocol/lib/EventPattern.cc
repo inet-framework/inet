@@ -115,19 +115,19 @@ bool EventPattern::assertionsHold(const MatchContext& context, std::string& reas
     const PacketEvent& event = context.event;
     for (auto& assertion : assertions) {
         switch (assertion.kind) {
-            case Assertion::Expr:
+            case Assertion::Packet:
                 if (!evaluateAssertionExpression(assertion.expr, context)) {
                     reason = "the packet does not satisfy '" + assertion.expr + "'";
                     return false;
                 }
                 break;
-            case Assertion::NotExpr:
+            case Assertion::NotPacket:
                 if (evaluateAssertionExpression(assertion.expr, context)) {
                     reason = "the packet satisfies '" + assertion.expr + "', which is forbidden";
                     return false;
                 }
                 break;
-            case Assertion::That:
+            case Assertion::Event:
                 try {
                     if (assertion.predicate && !assertion.predicate(context)) {
                         reason = "the predicate does not hold";
@@ -139,22 +139,22 @@ bool EventPattern::assertionsHold(const MatchContext& context, std::string& reas
                     return false;
                 }
                 break;
-            case Assertion::Equal:
-            case Assertion::NotEqual:
-            case Assertion::AtLeast:
-            case Assertion::AtMost: {
+            case Assertion::Value:
+            case Assertion::NotValue:
+            case Assertion::ValueAtLeast:
+            case Assertion::ValueAtMost: {
                 if (!event.hasValue) {
                     reason = "the event carries no scalar value";
                     return false;
                 }
                 const char *relation = nullptr;
-                if (assertion.kind == Assertion::Equal && event.value != assertion.value)
+                if (assertion.kind == Assertion::Value && event.value != assertion.value)
                     relation = "equal to";
-                else if (assertion.kind == Assertion::NotEqual && event.value == assertion.value)
+                else if (assertion.kind == Assertion::NotValue && event.value == assertion.value)
                     relation = "different from";
-                else if (assertion.kind == Assertion::AtLeast && event.value < assertion.value)
+                else if (assertion.kind == Assertion::ValueAtLeast && event.value < assertion.value)
                     relation = "at least";
-                else if (assertion.kind == Assertion::AtMost && event.value > assertion.value)
+                else if (assertion.kind == Assertion::ValueAtMost && event.value > assertion.value)
                     relation = "at most";
                 if (relation) {
                     reason = "the value is " + describeValue(event.value) + ", and it must be "
@@ -272,13 +272,13 @@ std::string EventPattern::str() const
             os << separator;
             separator = ", ";
             switch (assertion.kind) {
-                case Assertion::Expr: os << "'" << assertion.expr << "'"; break;
-                case Assertion::NotExpr: os << "not '" << assertion.expr << "'"; break;
-                case Assertion::That: os << "a predicate"; break;
-                case Assertion::Equal: os << "value == " << assertion.value; break;
-                case Assertion::NotEqual: os << "value != " << assertion.value; break;
-                case Assertion::AtLeast: os << "value >= " << assertion.value; break;
-                case Assertion::AtMost: os << "value <= " << assertion.value; break;
+                case Assertion::Packet: os << "packet '" << assertion.expr << "'"; break;
+                case Assertion::NotPacket: os << "not packet '" << assertion.expr << "'"; break;
+                case Assertion::Event: os << "a predicate on the event"; break;
+                case Assertion::Value: os << "value == " << assertion.value; break;
+                case Assertion::NotValue: os << "value != " << assertion.value; break;
+                case Assertion::ValueAtLeast: os << "value >= " << assertion.value; break;
+                case Assertion::ValueAtMost: os << "value <= " << assertion.value; break;
             }
         }
     }
