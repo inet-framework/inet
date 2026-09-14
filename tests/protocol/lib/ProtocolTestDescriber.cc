@@ -367,7 +367,9 @@ std::string describe(const ProtocolTest& test)
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
         }
-        os << "  " << (i + 1) << ". " << clause << "\n";
+        // A guard runs beside the steps after it. Without a word for that, a reader cannot
+        // tell it from an ordered step, and the two mean different things.
+        os << "  " << (i + 1) << ". " << (step.concurrent ? "Meanwhile: " : "") << clause << "\n";
     }
     return os.str();
 }

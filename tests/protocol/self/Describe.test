@@ -1,0 +1,90 @@
+%description:
+
+Protocol Test Framework self test -- the English description of a program.
+
+`ProtocolTester` prints the program in English at startup, from `ProtocolTestDescriber`.
+Nothing checked that text, so the describer could have been changed or broken silently. The
+golden block below is that check.
+
+The program is a spread of the phrasebook and not a protocol claim: a guard, a step with a
+capture and a window, a delivery, and a cardinality. It passes, so a failure here is about
+the words and not about the model.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("describe_golden")
+        .meanwhile(never(on("host1.udp").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 9999")
+                  .describe("a datagram to a port nobody uses")
+                  .within(0.9)))
+        .once(on("host1.udp").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .capture("srcPort", "udp.srcPort")
+                  .within(0.5))
+        .delivery(on("host1.udp").signal("packetSentToLower").filterPacket("udp.destPort == 5000"),
+                  on("host2.udp").signal("packetReceivedFromLower"), 0.1)
+        .exactlyTimes(2, on("host1.udp").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .within(0.45));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "describe_golden compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].localPort = 4000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST describe_golden: PASS
+
+%contains: stdout
+ProtocolTest "describe_golden":
+  1. Meanwhile: Within 0.9s, host1.udp must not send a datagram to a port nobody uses to the lower layer.
+  2. Within 0.5s, host1.udp must send a packet matching "udp.destPort == 5000" to the lower layer, remembering srcPort.
+  3. Within 0.1s, a packet matching "udp.destPort == 5000" sent by host1.udp is received by host2.udp (same packet).
+  4. 2 times: Within 0.45s, host1.udp must send a packet matching "udp.destPort == 5000" to the lower layer.
