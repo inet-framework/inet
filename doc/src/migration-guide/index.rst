@@ -4,6 +4,11 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+``RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION`` now has its standard value,
+62. Code using the symbolic name needs only recompilation. Update external
+numeric mappings that used 60 for this reason. Old stored value 60 cannot be
+reinterpreted automatically: it also denoted invalid mesh security capability.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 
