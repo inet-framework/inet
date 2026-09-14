@@ -293,6 +293,49 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. TCP modernization
+
+    The TCP model has been reworked. A flavour is now built from a choice of
+    congestion control and a choice of loss recovery, rather than from a subclass
+    that inherits both, and the model gained CUBIC, RACK-TLP loss detection,
+    Proportional Rate Reduction, F-RTO, Accurate ECN, TCP Fast Open, keepalive
+    probing and RFC 4821 packetized path MTU discovery.
+
+    The defaults changed, and this affects every simulation that uses TCP without
+    setting these parameters explicitly:
+
+     tcpAlgorithmClass       "TcpReno"       ->  "TcpCubic"
+     sackSupport             false           ->  true
+     timestampSupport        false           ->  true
+     windowScalingSupport    false           ->  true
+     delayedAcksEnabled      false           ->  true
+     limitedTransmitEnabled  false           ->  true
+     mss                     536             ->  -1  (derived from the path MTU)
+     advertisedWindow        14 * this.mss   ->  65535
+
+    The new defaults are what a current operating system does, so a simulation
+    that did not choose otherwise now models a modern TCP rather than one from
+    1999. To keep the old behavior, set the eight parameters above to their old
+    values. The results differ either way: these defaults are what moves the
+    recorded fingerprint of every scenario that carries TCP traffic.
+
+    The sndNxt signal and statistic are gone. The same quantity is recorded as
+    sndSeq, so a result-analysis script that names sndNxt must name sndSeq
+    instead. The model also gained the signals sndMax, bytesInFlight, delivered,
+    deliveredCe and deliveredCeBytes.
+
+    Two C++ base classes were renamed for what they are rather than for what they
+    inherit: TcpBaseAlg is now TcpAlgorithmBase, and TcpTahoeRenoFamily, which was
+    never limited to Tahoe and Reno, is now TcpClassicAlgorithmBase. The old names
+    remain as deprecated aliases in this release and go away in the next one, so a
+    TCP algorithm implemented outside INET still compiles, and should be updated
+    before the next release.
+
+    Such an algorithm needs more than the rename, however. The split into
+    congestion control and recovery removed or moved much of the protected surface
+    that a flavour used to override, so one implemented outside INET must be
+    rewritten against ITcpCongestionControl and ITcpRecovery rather than adapted.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
