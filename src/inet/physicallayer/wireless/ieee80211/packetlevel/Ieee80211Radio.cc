@@ -9,12 +9,14 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 
 #include <algorithm>
+#include <memory>
 
 #include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -132,7 +134,7 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     else
         transmitter->setModeSet(modeSet);
     receiver->setModeSet(modeSet);
-    receptionTimer = nullptr;
+    abortIncompatibleReception();
     if (modeSetCoordinator != nullptr)
         modeSetCoordinator->completeModeSetChange(modeSet);
     else if (modeSet != nullptr)
@@ -147,6 +149,23 @@ const Ieee80211Channel *Ieee80211Radio::getChannel() const
     return check_and_cast<const Ieee80211Transmitter *>(transmitter)->getChannel();
 }
 
+void Ieee80211Radio::abortIncompatibleReception()
+{
+    if (receptionTimer == nullptr)
+        return;
+    auto signal = check_and_cast<WirelessSignal *>(receptionTimer->getControlInfo());
+    auto reception = signal->getReception();
+    // Use the new receiver configuration, not the medium's cached listening or
+    // the local transmit mode. Possibility does not draw another error decision.
+    std::unique_ptr<const IListening> listening(receiver->createListening(this,
+            reception->getStartTime(), reception->getEndTime(),
+            reception->getStartPosition(), reception->getEndPosition()));
+    auto ieee80211Receiver = check_and_cast<const Ieee80211Receiver *>(receiver);
+    if (ieee80211Receiver->getModeSet() == nullptr ||
+            !receiver->computeIsReceptionPossible(listening.get(), reception, (IRadioSignal::SignalPart)receptionTimer->getKind()))
+        abortReception(receptionTimer);
+}
+
 bool Ieee80211Radio::isHtChannelWidthSupported(Hz channelWidth) const
 {
     return check_and_cast<const Ieee80211Transmitter *>(transmitter)->isHtChannelWidthSupported(channelWidth) &&
@@ -158,7 +177,6 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
-    receptionTimer = nullptr;
     emit(listeningChangedSignal, 0);
 }
 
@@ -169,7 +187,7 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
     ieee80211Transmitter->setBand(band);
     ieee80211Receiver->setBand(band);
     EV << "Changing radio band to " << band << endl;
-    receptionTimer = nullptr;
+    abortIncompatibleReception();
     const auto *channel = ieee80211Transmitter->getChannel();
     if (channel != nullptr) {
         Ieee80211RadioChannelChangedDetails details(channel->getBand());
@@ -187,7 +205,7 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
     ieee80211Transmitter->setChannel(channel);
     ieee80211Receiver->setChannel(new Ieee80211Channel(channel->getBand(), channel->getChannelNumber()));
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
-    receptionTimer = nullptr;
+    abortIncompatibleReception();
     Ieee80211RadioChannelChangedDetails details(channel->getBand());
     emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
     emit(listeningChangedSignal, 0);
@@ -200,7 +218,7 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     ieee80211Transmitter->setChannelNumber(newChannelNumber);
     ieee80211Receiver->setChannelNumber(newChannelNumber);
     EV << "Changing radio channel to " << newChannelNumber << ".\n";
-    receptionTimer = nullptr;
+    abortIncompatibleReception();
     Ieee80211RadioChannelChangedDetails details(ieee80211Transmitter->getChannel()->getBand());
     emit(radioChannelChangedSignal, newChannelNumber, &details);
     emit(listeningChangedSignal, 0);

@@ -105,6 +105,16 @@ answers; :cpp:`Arp` shows how. An implementation that resolves addresses
 without packets has nobody to ask. It overrides the method with an empty body,
 as :cpp:`GlobalArp` does, and the client then takes the address.
 
+IEEE 802.11 Radio Reconfiguration
+--------------------------------
+
+Radio setters no longer implicitly interrupt compatible ongoing receptions.
+Changing the transmit mode alone, reapplying unchanged receiver settings, or
+changing the mode set while retaining the incoming mode preserves reception.
+An incompatible receiver configuration still aborts reception and retains
+arrival timers for normal cleanup. Custom callers should not rely on a no-op
+setter or a transmit-mode change to cancel reception.
+
 Migrating IEEE 802.11 PHY Modes
 ------------------------------
 

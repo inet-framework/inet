@@ -385,6 +385,11 @@ Notable backward compatible changes are the following:
    migration guide. Default TXOP limits are resolved for each new TXOP after
    a mode-set change; active TXOPs and configured overrides retain their limits.
 
+   Radio reconfiguration preserves ongoing receptions when the incoming mode
+   and receiver listening configuration remain compatible. Transmit-only mode
+   changes and reapplying unchanged settings no longer interrupt reception.
+   Incompatible changes abort through the normal reception cleanup path.
+
    Group-addressed frames use a legacy basic rate when that set is nonempty.
    Eligible configured basic rates are preserved; other configured rates fall
    back to the fastest legacy basic rate. For example, a configured 54 Mbps
