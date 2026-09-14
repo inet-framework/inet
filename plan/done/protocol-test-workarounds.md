@@ -1,6 +1,6 @@
 # The workarounds the framework refactor made unnecessary
 
-**Status:** in progress. Started 2026-09-14 on `master`.
+**Status:** done. Started and finished 2026-09-14 on `master`.
 
 The protocol test framework gained four things during the TCP level 4 pass: an assertion
 beside a filter, a step that runs beside the steps after it, a relay that holds a list of
