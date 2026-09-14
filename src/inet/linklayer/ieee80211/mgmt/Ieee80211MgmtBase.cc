@@ -16,6 +16,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -128,6 +129,18 @@ Ieee80211HtOperation Ieee80211MgmtBase::computeLocalHtOperation(int primaryChann
 void Ieee80211MgmtBase::prepareLocalOperation()
 {
 
+}
+
+void Ieee80211MgmtBase::addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtCapabilities(frame, mib->getLocalVhtCapabilities());
+}
+
+void Ieee80211MgmtBase::addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtOperation(frame, mib->getLocalVhtOperation());
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const

@@ -331,15 +331,114 @@ static void writeHtOperationElement(MemoryOutputStream& stream, const Ieee80211H
         stream.writeByte(byte);
 }
 
-enum HtElementPresence : unsigned int {
+// IEEE Std 802.11-2024, 9.4.2.156 and 9.4.2.157.
+static constexpr uint8_t VHT_CAPABILITIES_ELEMENT_ID = 191;
+static constexpr uint8_t VHT_OPERATION_ELEMENT_ID = 192;
+
+static uint16_t encodeVhtMcsMap(const short *map)
+{
+    uint16_t result = 0;
+    for (int i = 0; i < 8; i++) {
+        int value = map[i];
+        if (value != -1 && value != 7 && value != 8 && value != 9)
+            throw cRuntimeError("Invalid VHT MCS map entry %d", value);
+        result |= (value == -1 ? 3 : value - 7) << (2 * i);
+    }
+    return result;
+}
+
+static void decodeVhtMcsMap(uint16_t encoded, short *map)
+{
+    for (int i = 0; i < 8; i++) {
+        int value = (encoded >> (2 * i)) & 3;
+        map[i] = value == 3 ? -1 : value + 7;
+    }
+}
+
+static void writeVhtCapabilitiesElement(MemoryOutputStream& stream, const Ieee80211VhtCapabilitiesElement& capabilities)
+{
+    if (capabilities.supportedChannelWidthSet < 0 || capabilities.supportedChannelWidthSet > 2 ||
+            capabilities.rxHighestLongGiRateMbps < 0 || capabilities.rxHighestLongGiRateMbps > 8191 ||
+            capabilities.txHighestLongGiRateMbps < 0 || capabilities.txHighestLongGiRateMbps > 8191)
+        throw cRuntimeError("Invalid VHT Capabilities fields");
+    stream.writeByte(VHT_CAPABILITIES_ELEMENT_ID);
+    stream.writeByte(12);
+    stream.writeUint32Le((capabilities.supportedChannelWidthSet << 2) |
+            (capabilities.shortGi80 << 5) | (capabilities.shortGi160 << 6));
+    stream.writeUint16Le(encodeVhtMcsMap(capabilities.rxMaxMcs));
+    stream.writeUint16Le(capabilities.rxHighestLongGiRateMbps);
+    stream.writeUint16Le(encodeVhtMcsMap(capabilities.txMaxMcs));
+    stream.writeUint16Le(capabilities.txHighestLongGiRateMbps);
+}
+
+static void writeVhtOperationElement(MemoryOutputStream& stream, const Ieee80211VhtOperationElement& operation)
+{
+    if (operation.channelWidth < 0 || operation.channelWidth > 3 ||
+            operation.centerFrequencySegment0 < 0 || operation.centerFrequencySegment0 > 255 ||
+            operation.centerFrequencySegment1 < 0 || operation.centerFrequencySegment1 > 255)
+        throw cRuntimeError("Invalid VHT Operation fields");
+    stream.writeByte(VHT_OPERATION_ELEMENT_ID);
+    stream.writeByte(5);
+    stream.writeByte(operation.channelWidth);
+    stream.writeByte(operation.centerFrequencySegment0);
+    stream.writeByte(operation.centerFrequencySegment1);
+    stream.writeUint16Le(encodeVhtMcsMap(operation.basicMaxMcs));
+}
+
+static void readVhtCapabilitiesElement(MemoryInputStream& stream, int length, const Ptr<Ieee80211MgmtFrame>& frame)
+{
+    if (length != 12 || frame->getVhtCapabilitiesPresent()) {
+        frame->markIncorrect();
+        stream.seek(stream.getPosition() + B(length));
+        return;
+    }
+    Ieee80211VhtCapabilitiesElement capabilities;
+    auto information = stream.readUint32Le();
+    capabilities.supportedChannelWidthSet = (information >> 2) & 3;
+    capabilities.shortGi80 = information & (1 << 5);
+    capabilities.shortGi160 = information & (1 << 6);
+    decodeVhtMcsMap(stream.readUint16Le(), capabilities.rxMaxMcs);
+    capabilities.rxHighestLongGiRateMbps = stream.readUint16Le() & 8191;
+    decodeVhtMcsMap(stream.readUint16Le(), capabilities.txMaxMcs);
+    capabilities.txHighestLongGiRateMbps = stream.readUint16Le() & 8191;
+    if (capabilities.supportedChannelWidthSet == 3)
+        frame->markIncorrect();
+    frame->setVhtCapabilities(capabilities);
+    frame->setVhtCapabilitiesPresent(true);
+}
+
+static void readVhtOperationElement(MemoryInputStream& stream, int length, const Ptr<Ieee80211MgmtFrame>& frame)
+{
+    if (length != 5 || frame->getVhtOperationPresent()) {
+        frame->markIncorrect();
+        stream.seek(stream.getPosition() + B(length));
+        return;
+    }
+    Ieee80211VhtOperationElement operation;
+    operation.channelWidth = stream.readByte();
+    operation.centerFrequencySegment0 = stream.readByte();
+    operation.centerFrequencySegment1 = stream.readByte();
+    decodeVhtMcsMap(stream.readUint16Le(), operation.basicMaxMcs);
+    if (operation.channelWidth > 3)
+        frame->markIncorrect();
+    frame->setVhtOperation(operation);
+    frame->setVhtOperationPresent(true);
+}
+
+// IEEE Std 802.11-2024, 9.3.3.2 and 9.3.3.5-9.3.3.10, Tables 9-62 and
+// 9-64 through 9-69: HT/VHT have the same subtype placement, but independent
+// presence conditions. These masks express subtype permission only.
+enum ManagementElementPresence : unsigned int {
     HT_ELEMENT_NONE = 0,
     HT_CAPABILITIES_ALLOWED = 1,
     HT_OPERATION_ALLOWED = 2,
     EXTENDED_SUPPORTED_RATES_ALLOWED = 4,
     BASIC_HT_MCS_SET_PRESENT = 8,
+    VHT_CAPABILITIES_ALLOWED = 16,
+    VHT_OPERATION_ALLOWED = 32,
 };
 
-static void writeHtElements(MemoryOutputStream& stream, ElementWriter& elements, const Ptr<const Ieee80211MgmtFrame>& frame, unsigned int allowedElements)
+static void writeManagementElements(MemoryOutputStream& stream, ElementWriter& elements, const Ptr<const Ieee80211MgmtFrame>& frame, unsigned int allowedElements)
 {
     if (!(allowedElements & EXTENDED_SUPPORTED_RATES_ALLOWED) && frame->getExtendedSupportedRatesPresent())
         throw cRuntimeError("Extended Supported Rates element is not allowed in this management frame subtype");
@@ -347,6 +446,10 @@ static void writeHtElements(MemoryOutputStream& stream, ElementWriter& elements,
         throw cRuntimeError("HT Capabilities element is not allowed in this management frame subtype");
     if (!(allowedElements & HT_OPERATION_ALLOWED) && frame->getHtOperationPresent())
         throw cRuntimeError("HT Operation element is not allowed in this management frame subtype");
+    if (!(allowedElements & VHT_CAPABILITIES_ALLOWED) && frame->getVhtCapabilitiesPresent())
+        throw cRuntimeError("VHT Capabilities element is not allowed in this management frame subtype");
+    if (!(allowedElements & VHT_OPERATION_ALLOWED) && frame->getVhtOperationPresent())
+        throw cRuntimeError("VHT Operation element is not allowed in this management frame subtype");
     if (frame->getHtCapabilitiesPresent()) {
         elements.beginModelledElement();
         writeHtCapabilitiesElement(stream, frame->getHtCapabilities());
@@ -354,6 +457,14 @@ static void writeHtElements(MemoryOutputStream& stream, ElementWriter& elements,
     if (frame->getHtOperationPresent()) {
         elements.beginModelledElement();
         writeHtOperationElement(stream, frame->getHtOperation(), allowedElements & BASIC_HT_MCS_SET_PRESENT);
+    }
+    if (frame->getVhtCapabilitiesPresent()) {
+        elements.beginModelledElement();
+        writeVhtCapabilitiesElement(stream, frame->getVhtCapabilities());
+    }
+    if (frame->getVhtOperationPresent()) {
+        elements.beginModelledElement();
+        writeVhtOperationElement(stream, frame->getVhtOperation());
     }
 }
 
@@ -444,7 +555,7 @@ static void readHtOperationElement(MemoryInputStream& stream, int length, const 
     frame->setHtOperation(operation);
 }
 
-static void readHtElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFrame>& frame, unsigned int allowedElements, int modelledElementCount)
+static void readManagementElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFrame>& frame, unsigned int allowedElements, int modelledElementCount)
 {
     while (stream.getRemainingLength() != b(0)) {
         if (stream.getRemainingLength() < B(2)) {
@@ -517,6 +628,30 @@ static void readHtElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFra
                 bool wasPresent = frame->getHtOperationPresent();
                 readHtOperationElement(stream, length, frame, allowedElements & BASIC_HT_MCS_SET_PRESENT);
                 if (!wasPresent && frame->getHtOperationPresent())
+                    modelledElementCount++;
+            }
+        }
+        else if (elementId == VHT_CAPABILITIES_ELEMENT_ID) {
+            if (!(allowedElements & VHT_CAPABILITIES_ALLOWED)) {
+                frame->markIncorrect();
+                stream.seek(stream.getPosition() + declaredBodyLength);
+            }
+            else {
+                bool wasPresent = frame->getVhtCapabilitiesPresent();
+                readVhtCapabilitiesElement(stream, length, frame);
+                if (!wasPresent && frame->getVhtCapabilitiesPresent())
+                    modelledElementCount++;
+            }
+        }
+        else if (elementId == VHT_OPERATION_ELEMENT_ID) {
+            if (!(allowedElements & VHT_OPERATION_ALLOWED)) {
+                frame->markIncorrect();
+                stream.seek(stream.getPosition() + declaredBodyLength);
+            }
+            else {
+                bool wasPresent = frame->getVhtOperationPresent();
+                readVhtOperationElement(stream, length, frame);
+                if (!wasPresent && frame->getVhtOperationPresent())
                     modelledElementCount++;
             }
         }
@@ -660,17 +795,17 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         stream.writeUint16Le(authenticationFrame->getStatusCode());
         // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
         // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
-        writeHtElements(stream, elements, authenticationFrame, HT_ELEMENT_NONE);
+        writeManagementElements(stream, elements, authenticationFrame, HT_ELEMENT_NONE);
     }
     else if (auto deauthenticationFrame = dynamicPtrCast<const Ieee80211DeauthenticationFrame>(chunk)) {
 //        type = ST_DEAUTHENTICATION;
         stream.writeUint16Le(deauthenticationFrame->getReasonCode());
-        writeHtElements(stream, elements, deauthenticationFrame, HT_ELEMENT_NONE);
+        writeManagementElements(stream, elements, deauthenticationFrame, HT_ELEMENT_NONE);
     }
     else if (auto disassociationFrame = dynamicPtrCast<const Ieee80211DisassociationFrame>(chunk)) {
 //        type = ST_DISASSOCIATION;
         stream.writeUint16Le(disassociationFrame->getReasonCode());
-        writeHtElements(stream, elements, disassociationFrame, HT_ELEMENT_NONE);
+        writeManagementElements(stream, elements, disassociationFrame, HT_ELEMENT_NONE);
     }
     else if (auto probeRequestFrame = dynamicPtrCast<const Ieee80211ProbeRequestFrame>(chunk)) {
 //        type = ST_PROBEREQUEST;
@@ -679,7 +814,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         writeSsidElement(stream, probeRequestFrame->getSSID());
         // 2    Supported rates
         writeSupportedRateElements(stream, elements, probeRequestFrame);
-        writeHtElements(stream, elements, probeRequestFrame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
+        writeManagementElements(stream, elements, probeRequestFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
         // 3    Request information         May be included if dot11MultiDomainCapabilityEnabled is true.
         // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -697,7 +832,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         writeSsidElement(stream, reassociationRequestFrame->getSSID());
         // 5    Supported rates
         writeSupportedRateElements(stream, elements, reassociationRequestFrame);
-        writeHtElements(stream, elements, reassociationRequestFrame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
+        writeManagementElements(stream, elements, reassociationRequestFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
         // 6    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 7    Power Capability           The Power Capability element shall be present if dot11SpectrumManagementRequired is true.
         // 8    Supported Channels         The Supported Channels element shall be present if dot11SpectrumManagementRequired is true.
@@ -716,7 +851,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         writeSsidElement(stream, associationRequestFrame->getSSID());
         // 4    Supported rates
         writeSupportedRateElements(stream, elements, associationRequestFrame);
-        writeHtElements(stream, elements, associationRequestFrame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
+        writeManagementElements(stream, elements, associationRequestFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    Power Capability           The Power Capability element shall be present if dot11SpectrumManagementRequired is true.
         // 7    Supported Channel          The Supported Channels element shall be present if dot11SpectrumManagementRequired is true.
@@ -734,7 +869,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         stream.writeUint16Le(encodeAssociationId(associationResponseFrame->getStatusCode(), associationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, elements, associationResponseFrame);
-        writeHtElements(stream, elements, associationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
+        writeManagementElements(stream, elements, associationResponseFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -749,7 +884,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         stream.writeUint16Le(encodeAssociationId(reassociationResponseFrame->getStatusCode(), reassociationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, elements, reassociationResponseFrame);
-        writeHtElements(stream, elements, reassociationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
+        writeManagementElements(stream, elements, reassociationResponseFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -768,7 +903,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         writeSsidElement(stream, beaconFrame->getSSID());
         // 5    Supported rates
         writeSupportedRateElements(stream, elements, beaconFrame);
-        writeHtElements(stream, elements, beaconFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT);
+        writeManagementElements(stream, elements, beaconFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT);
         // 6    Frequency-Hopping (FH) Parameter Set   The FH Parameter Set information element is present within Beacon frames generated by STAs using FH PHYs.
         // 8    CF Parameter Set                       The CF Parameter Set information element is present only within Beacon frames generated by APs supporting a PCF.
         // 9    IBSS Parameter Set                     The IBSS Parameter Set information element is present only within Beacon frames generated by STAs in an IBSS.
@@ -803,7 +938,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         writeSsidElement(stream, probeResponseFrame->getSSID());
         // 5      Supported rates
         writeSupportedRateElements(stream, elements, probeResponseFrame);
-        writeHtElements(stream, elements, probeResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT);
+        writeManagementElements(stream, elements, probeResponseFrame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT);
         // 6      FH Parameter Set                The FH Parameter Set information element is present within Probe Response frames generated by STAs using FH PHYs.
         // 8      CF Parameter Set                The CF Parameter Set information element is present only within Probe Response frames generated by APs supporting a PCF.
         // 9      IBSS Parameter Set              The IBSS Parameter Set information element is present only within Probe Response frames generated by STAs in an IBSS.
@@ -837,19 +972,19 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         stream.readUint16Le();
         frame->setSequenceNumber(stream.readUint16Le());
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
-        readHtElements(stream, frame, HT_ELEMENT_NONE, 0);
+        readManagementElements(stream, frame, HT_ELEMENT_NONE, 0);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211DeauthenticationFrame)) {
         auto frame = makeShared<Ieee80211DeauthenticationFrame>();
         frame->setReasonCode((Ieee80211ReasonCode)stream.readUint16Le());
-        readHtElements(stream, frame, HT_ELEMENT_NONE, 0);
+        readManagementElements(stream, frame, HT_ELEMENT_NONE, 0);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211DisassociationFrame)) {
         auto frame = makeShared<Ieee80211DisassociationFrame>();
         frame->setReasonCode((Ieee80211ReasonCode)stream.readUint16Le());
-        readHtElements(stream, frame, HT_ELEMENT_NONE, 0);
+        readManagementElements(stream, frame, HT_ELEMENT_NONE, 0);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211ProbeRequestFrame)) {
@@ -860,7 +995,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211AssociationRequestFrame)) {
@@ -873,7 +1008,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211ReassociationRequestFrame)) {
@@ -888,7 +1023,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 2);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211AssociationResponseFrame)) {
@@ -900,7 +1035,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 1);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 1);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211ReassociationResponseFrame)) {
@@ -912,7 +1047,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 1);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED, 1);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211BeaconFrame)) {
@@ -931,7 +1066,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT, 2);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT, 2);
         return frame;
     }
     else if (typeInfo == typeid(Ieee80211ProbeResponseFrame)) {
@@ -950,7 +1085,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
-        readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT, 2);
+        readManagementElements(stream, frame, HT_CAPABILITIES_ALLOWED | VHT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | VHT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED | BASIC_HT_MCS_SET_PRESENT, 2);
         return frame;
     }
     else

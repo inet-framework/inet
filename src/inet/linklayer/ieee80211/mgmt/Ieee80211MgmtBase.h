@@ -91,6 +91,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, pub
         return length;
     }
 
+    /** Adds local VHT capabilities; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    /** Adds local VHT operation; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
     /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
     Ieee80211HtOperation computeLocalHtOperation(int primaryChannel, const physicallayer::IIeee80211Band *band) const;
     virtual void prepareLocalOperation();

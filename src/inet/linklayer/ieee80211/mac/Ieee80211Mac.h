@@ -80,6 +80,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211MacConfig
     virtual void initialize(int) override;
     virtual void initializeRadioMode();
     void updateLocalHtCapabilities(bool reconfiguration = false);
+    void updateLocalVhtCapabilities();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

@@ -98,6 +98,7 @@ void Ieee80211Mac::prepareLocalCapabilities()
 
 void Ieee80211Mac::updateLocalHtCapabilities(bool reconfiguration)
 {
+    updateLocalVhtCapabilities();
     if (!modeSet->isHtOperationSupported()) {
         if (reconfiguration)
             mib->reconfigureLocalHtCapabilities(Ieee80211HtCapabilities(), false);
@@ -159,6 +160,53 @@ void Ieee80211Mac::updateLocalHtCapabilities(bool reconfiguration)
         mib->reconfigureLocalHtCapabilities(localHtCapabilities, true);
     else
         mib->installLocalHtCapabilities(localHtCapabilities, true);
+}
+
+void Ieee80211Mac::updateLocalVhtCapabilities()
+{
+    Ieee80211VhtCapabilities localVhtCapabilities;
+    bool supported = modeSet != nullptr && modeSet->getPhyType() == Ieee80211ModeSet::PhyType::VHT && mib->par("vhtSupported");
+    if (!supported) {
+        mib->installLocalVhtCapabilities(localVhtCapabilities, false);
+        return;
+    }
+    int spatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(), modeSet->getMaximumNumberOfSpatialStreams());
+    // Advertised maps are bounded by the actual long-GI primary-20 catalog,
+    // as well as the configured directional and antenna limits.
+    std::array<std::array<bool, 10>, 8> catalogMcs = {};
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        auto mode = modeSet->getMode(i);
+        auto data = mode->getDataMode();
+        int mcs = mode->getVhtMcsIndex();
+        int nss = data->getNumberOfSpatialStreams();
+        if (mcs >= 0 && mcs <= 9 && nss >= 1 && nss <= 8 && data->getBandwidth() == MHz(20) &&
+                data->getGuardInterval() == SimTime(800, SIMTIME_NS))
+            catalogMcs[nss - 1][mcs] = true;
+    }
+    auto readMap = [&](const char *parameter, std::array<int, 8>& map) {
+        auto values = check_and_cast<cValueArray *>(mib->par(parameter).objectValue());
+        if (values->size() != 8)
+            throw cRuntimeError("%s requires eight per-NSS MCS maxima", parameter);
+        for (int i = 0; i < 8; i++) {
+            int value = values->get(i).intValue();
+            if (value != -1 && value != 7 && value != 8 && value != 9)
+                throw cRuntimeError("%s entries must be -1, 7, 8 or 9", parameter);
+            int maximum = -1;
+            for (int mcs = 0; mcs <= value && catalogMcs[i][mcs]; mcs++)
+                if (mcs >= 7)
+                    maximum = mcs;
+            map[i] = i < spatialStreamLimit ? maximum : -1;
+        }
+        if (!isValidVhtMcsMap(map))
+            throw cRuntimeError("%s and the VHT catalog must support MCS 0 through 7 at one spatial stream", parameter);
+    };
+    readMap("vhtRxMcsMap", localVhtCapabilities.rxMaxMcs);
+    readMap("vhtTxMcsMap", localVhtCapabilities.txMaxMcs);
+    // Intentional limitation of the current packet-level primary-channel PHY:
+    // management operates the existing VHT-only profile at 20 MHz. Its catalog
+    // is broader, but does not establish primary/secondary channel support.
+    // No HT SGI negotiation is claimed by that profile, so 20 MHz uses long GI.
+    mib->installLocalVhtCapabilities(localVhtCapabilities, true);
 }
 
 void Ieee80211Mac::initializeRadioMode()
