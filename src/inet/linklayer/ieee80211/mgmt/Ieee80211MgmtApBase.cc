@@ -18,6 +18,9 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 
 namespace inet {
 

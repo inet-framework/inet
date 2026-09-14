@@ -32,6 +32,9 @@ namespace ieee80211 {
  */
 class INET_API QosRateSelection : public IQosRateSelection, public ModeSetModuleBase
 {
+  public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -57,6 +60,7 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void updateModes();
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
@@ -90,4 +94,3 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetModule
 } /* namespace inet */
 
 #endif
-

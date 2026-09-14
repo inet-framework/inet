@@ -28,20 +28,7 @@ void QosRateSelection::initialize(int stage)
     if (stage == INITSTAGE_LINK_LAYER) {
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
-        double multicastFrameBitrate = par("multicastFrameBitrate");
-        multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
-        double dataFrameBitrate = par("dataFrameBitrate");
-        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
-        double mgmtFrameBitrate = par("mgmtFrameBitrate");
-        mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
-        double controlFrameBitrate = par("controlFrameBitrate");
-        controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
-        double responseAckFrameBitrate = par("responseAckFrameBitrate");
-        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
-        double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
-        responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
-        double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
+        updateModes();
     }
 }
 
@@ -64,6 +51,31 @@ void QosRateSelection::ensurePerReceiverModesResolved()
             throw cRuntimeError("dataFrameBitratePerReceiver: cannot use rate '%s' for receiver '%s': %s", value.str().c_str(), path.c_str(), e.what());
         }
     }
+}
+
+void QosRateSelection::updateModes()
+{
+    if (modeSet == nullptr)
+        return;
+    fastestMandatoryMode = modeSet->getFastestMandatoryMode();
+    double multicastFrameBitrate = par("multicastFrameBitrate");
+    multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
+    double dataFrameBitrate = par("dataFrameBitrate");
+    dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
+    double mgmtFrameBitrate = par("mgmtFrameBitrate");
+    mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
+    double controlFrameBitrate = par("controlFrameBitrate");
+    controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
+    double responseAckFrameBitrate = par("responseAckFrameBitrate");
+    responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
+    double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
+    responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
+    double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
+    responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
+    fastestMandatoryMode = modeSet->getFastestMandatoryMode();
+    lastTransmittedFrameMode.clear();
+    perReceiverDataFrameMode.clear();
+    perReceiverResolved = false;
 }
 
 const IIeee80211Mode *QosRateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -102,10 +114,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
     ASSERT(modeSet->containsMode(mode));
     const IIeee80211Mode *responseMode;
     if (!responseAckFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            responseMode = mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            responseMode = slowerMode;
+        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
+            responseMode = mandatoryMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
@@ -121,10 +131,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
     ASSERT(modeSet->containsMode(mode));
     const IIeee80211Mode *responseMode;
     if (!responseCtsFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            responseMode = mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            responseMode = slowerMode;
+        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
+            responseMode = mandatoryMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
@@ -240,6 +248,14 @@ const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<co
         return getPeerCompatibleMode(header->getReceiverAddress(), computeControlFrameMode(header, txopProcedure));
 }
 
+void QosRateSelection::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    updateModes();
+    if (getSimulation()->getContextType() != CTX_INITIALIZE)
+        ensurePerReceiverModesResolved();
+}
 
 void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
@@ -249,6 +265,10 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
 {
+    // IEEE Std 802.11-2024, 10.6.5.8: Peer compatibility filtering is currently
+    // supported for HT (802.11n) modes using negotiated PeerHtState. Non-HT
+    // modes (legacy and VHT) return unchanged because VHT capability negotiation
+    // (VHT Capabilities/Operation elements) is not yet modeled in MIB.
     if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
     return selectPeerCompatibleMode(modeSet, mib->findPeerCapabilities(peerAddress), mode, peerAddress,
@@ -257,4 +277,3 @@ const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

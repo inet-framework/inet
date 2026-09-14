@@ -62,7 +62,8 @@ void Dcaf::calculateTimingParameters()
         cwMin = modeSet->getCwMin();
     if (cwMax == -1)
         cwMax = modeSet->getCwMax();
-    cw = cwMin;
+    // Model reconfiguration preserves retry backoff within the new bounds.
+    cw = std::min(cwMax, std::max(cwMin, cw));
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
@@ -119,7 +120,14 @@ void Dcaf::expectedChannelAccess(simtime_t time)
     // don't care
 }
 
+void Dcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
+    if (contention != nullptr)
+        contention->updateTimingParameters(ifs, eifs, slotTime);
+}
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

@@ -130,6 +130,49 @@ calls can omit it. Update member-function pointer declarations to include this
 argument and supply it when invoking through a pointer. Rebuild external code
 against the changed interface.
 
+``Ieee80211Mac`` implements ``IIeee80211ModeSetCoordinator`` for explicit runtime
+catalog reconfiguration. The radio's ``modeSetCoordinatorModule`` points to the
+MAC by default; a custom composition can provide another typed coordinator.
+``ModeSetModuleBase`` registers derived-state consumers through the configured
+catalog provider when that provider also supports coordination. Read-only
+replacement providers remain usable without a coordinator. Management registers
+through ``macModule`` in ``MANAGEMENT_STATE``. Preserve base initialization and
+put required updates in ``applyModeSet()``, not notification callbacks.
+
+The MAC updates local capabilities, management updates its operation, and derived
+consumers update their state before completion is published. Ordinary preparation
+remains idempotent. Explicit profile replacement refreshes directional capability
+caches only when their inputs change; operation changes do not rebuild those
+caches. Peer information remains scoped to its relationship, with selection gated
+by current eligibility and operation. Stop/restart retains prepared configuration.
+
+Observe ``modesetChanged`` from the MAC after a changed runtime catalog has been
+applied. Initialization queries the configured catalog without a notification;
+reapplying the same catalog does not reset algorithms or publish a catalog change.
+The borrowed mode-set payload is immutable. Observers never finish the transition.
+Standalone radios without a coordinator publish their own notification. Duplicate
+registration is idempotent; late registration and membership changes during a
+transition are rejected. Detach a consumer before deleting it. Participant or
+observer exceptions remain fatal; partially applied changes cannot be resumed.
+
+Catalog-only changes now check transmitter compatibility before opening the
+coordinated transition. After catching an incompatible-mode error, callers can
+retry with ``setModeSetAndMode()`` and a valid explicit mode. Custom transmitter
+implementations can override the non-mutating ``computeModeForModeSet()`` query
+to match their catalog-only setter's resolution policy; it must reject an
+unresolvable request without changing state.
+
+HT capability assembly queries the typed transmitter and receiver contributions
+described above. Management obtains channel/band context from the PHY. Generic
+legacy radios do not require HT contribution contracts.
+
+External ``IContention`` implementations must implement the new pure virtual
+``updateTimingParameters(ifs, eifs, slotTime)`` method. On a runtime timing change,
+retain completed whole backoff slots and the remaining random draw, restart the
+applicable IFS and any unfinished slot, and update the expected grant time.
+Unchanged timing preserves the existing schedule. This application must not emit
+an intermediate mode-set notification or generate a new random backoff.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

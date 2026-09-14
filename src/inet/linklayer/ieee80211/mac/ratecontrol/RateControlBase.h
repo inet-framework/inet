@@ -18,6 +18,7 @@ namespace ieee80211 {
 class INET_API RateControlBase : public ModeSetModuleBase, public IRateControl
 {
   public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
     static simsignal_t datarateChangedSignal;
 
   protected:

@@ -122,6 +122,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearAssociationIds();
     // Initialization/preparation only. A changed profile requires inactive BSS and no peers.
     void installLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported);
+    // Explicit coordinated reconfiguration; ordinary preparation remains guarded.
+    void reconfigureLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported);
     bool hasPreparedLocalCapabilities() const { return localCapabilitiesPrepared; }
     bool isLocalHtCapable() const { return localHtCapabilitiesValid; }
     bool hasActiveBss() const { return bssActive; }

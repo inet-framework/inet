@@ -74,7 +74,8 @@ void Edcaf::calculateTimingParameters()
         cwMin = getCwMin(ac, modeSet->getCwMin());
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
-    cw = cwMin;
+    // Model reconfiguration preserves retry backoff within the new bounds.
+    cw = std::min(cwMax, std::max(cwMin, cw));
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
@@ -186,7 +187,14 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
     }
 }
 
+void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
+    if (contention != nullptr)
+        contention->updateTimingParameters(ifs, eifs, slotTime);
+}
 
 } // namespace ieee80211
 } // namespace inet
-

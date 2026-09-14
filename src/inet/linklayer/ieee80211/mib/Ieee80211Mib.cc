@@ -178,6 +178,23 @@ const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerCapabilities(const MacAdd
     return it == peerHtStates.end() || !it->second.valid ? nullptr : &it->second;
 }
 
+void Ieee80211Mib::reconfigureLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported)
+{
+    checkStateMutation();
+    if (!localCapabilitiesPrepared)
+        throw cRuntimeError("Cannot reconfigure unprepared local HT capabilities");
+    if (localHtCapabilities == capabilities && localHtCapabilitiesValid == htSupported)
+        return;
+    localHtCapabilities = capabilities;
+    localHtCapabilitiesValid = htSupported;
+    for (auto& entry : peerHtStates) {
+        if (entry.second.valid)
+            entry.second.negotiatedCapabilities = std::make_shared<const Ieee80211NegotiatedHtCapabilities>(
+                    negotiateHtCapabilities(localHtCapabilities, entry.second.advertisedCapabilities));
+    }
+    stateChangePending = true;
+}
+
 bool Ieee80211Mib::relationshipAllowsHt(const MacAddress& address) const
 {
     const auto *peer = findPeerCapabilities(address);

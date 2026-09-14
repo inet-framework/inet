@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -33,6 +34,10 @@ namespace ieee80211 {
  */
 class INET_API RateSelection : public IRateSelection, public ModeSetModuleBase
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -57,6 +62,7 @@ class INET_API RateSelection : public IRateSelection, public ModeSetModuleBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void updateModes();
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
@@ -98,4 +104,3 @@ class INET_API RateSelection : public IRateSelection, public ModeSetModuleBase
 } // namespace inet
 
 #endif
-

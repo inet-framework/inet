@@ -72,19 +72,42 @@ const Ieee80211Channel *Ieee80211Transmitter::computeTransmissionChannel(const P
     return transmissionChannel;
 }
 
+const IIeee80211Mode *Ieee80211Transmitter::computeModeForModeSet(const Ieee80211ModeSet *modeSet) const
+{
+    if (this->modeSet == modeSet)
+        return mode;
+    if (modeSet == nullptr)
+        return nullptr;
+    if (mode != nullptr && !modeSet->containsMode(mode)) {
+        auto newMode = modeSet->findCompatibleMode(mode);
+        if (newMode == nullptr)
+            throw cRuntimeError("Cannot map current mode to operation mode '%s' without changing bitrate, bandwidth, spatial streams, or guard interval", modeSet->getName());
+        return newMode;
+    }
+    return mode;
+}
+
 void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     if (this->modeSet != modeSet) {
+        auto newMode = computeModeForModeSet(modeSet);
         this->modeSet = modeSet;
-        if (mode != nullptr)
-            mode = modeSet != nullptr ? modeSet->getMode(mode->getDataMode()->getNetBitrate()) : nullptr;
+        mode = newMode;
     }
+}
+
+void Ieee80211Transmitter::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    this->modeSet = modeSet;
+    this->mode = mode;
 }
 
 void Ieee80211Transmitter::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {
-        if (modeSet->findMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth()) == nullptr)
+        if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
             throw cRuntimeError("Invalid mode");
         this->mode = mode;
     }
