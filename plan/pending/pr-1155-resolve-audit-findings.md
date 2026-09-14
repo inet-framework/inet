@@ -228,6 +228,22 @@ The same tree-by-tree rebuild moved each field's declaration to the commit that 
 under a `// declared here for the code above that already uses it:` header. **The final tree is
 byte-identical to the audited head** — the repair adds nothing at the end, only earlier.
 
+**1h3. Repair the four forward includes (F-9). — open, and small.**
+
+Commits 11 to 14 include `TcpClassicAlgorithmBase.h`, `TcpAlgorithmBase.h` and `TcpCubic.h`
+before those files exist, which
+[check-includes.sh](../../doc/project/enforcement/check-includes.sh) now reports. Phase B was
+written against the names the rename would later give the files.
+
+Two ways to fix it, and the second is better. Point the includes at the names that exist at those
+commits and let the rename commit update them — which is what the rename commit is for, and it
+already touches those files' neighbours. The other way, moving the rename earlier, reorders the
+series for a smaller reason than it deserves.
+
+The gate also reports the repair's own move commit, commit 15, and that one is correct: a move
+that changes no content cannot fix its own includes, and
+[PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) exempts it.
+
 **1i. Re-cut phases B and C by feature (F-10). — open, and it is the large one.**
 
 The parameter half of the partition is repaired; the logic half is not. Commit 18 still carries
@@ -440,10 +456,26 @@ at the commit that uses it, across all 63 commits, by
 [check-ned-params.sh](../../doc/project/enforcement/check-ned-params.sh) and a matching pass over
 the state messages.
 
-**Setting up a reliable per-commit build is now the blocker for step 1i**, and
-[TR-CI-EVERY-COMMIT](../../doc/project/rule/testing.md#tr-ci-every-commit) wants it regardless. The
-recipe needs three things this session did not get right: build in `src/`, never leave a library
-in `src/`, and regenerate the `_m` files whenever the `.msg` files change under it.
+**The build recipe, which now works.** From the repository **root**, never from `src/`, because
+the root makefile generates `src/inet/features.h` and the sub-make does not:
+
+```bash
+export PATH=/home/levy/workspace/omnetpp/bin:$PATH OMNETPP_ROOT=/home/levy/workspace/omnetpp
+export LD_LIBRARY_PATH=/home/levy/workspace/omnetpp/lib:$LD_LIBRARY_PATH
+make MODE=release -j32
+```
+
+Three traps cost this session an hour. Objects go to **`src/out`**, not `out`. A `libINET.so`
+left in `src/` by an earlier attempt makes the whole tree look current, so `make` exits 0 having
+done nothing. And `git checkout` leaves the mtime of an unchanged file alone, so after moving to
+an older commit the files that differ must be touched before `make` will rebuild them:
+
+```bash
+git diff --name-only HEAD <newer-ref> -- 'src/*' | xargs -r touch
+```
+
+With that, the head builds — **1693 sources, 0 errors** — and a per-commit build works, which is
+what unblocked 1h3 above.
 
 **Done when** every commit that moves a recorded expectation carries it with a row-level
 explanation, `check-commits.sh` reports no `PR-SPLIT-BASELINE` violation, and
