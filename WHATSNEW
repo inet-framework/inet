@@ -167,6 +167,12 @@ Notable backward incompatible changes are the following:
    safe when a bounded management queue drops a generated DELBA synchronously. Timers
    and traffic may differ from runs that kept extending an inactivity interval.
 
+9. Fragment Identity Across Sequence Reuse
+
+   Receive reassembly separates fragment generations and sequence spaces. Late
+   fragments, retries and reused sequence numbers no longer combine bodies from
+   unrelated transmissions; affected receive drops and deliveries may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
