@@ -250,6 +250,7 @@ class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee8021
 class INET_API Ieee80211VhtMode : public Ieee80211ModeBase
 {
   public:
+    virtual int getVhtMcsIndex() const override { return dataMode->getMcsIndex(); }
     enum BandMode {
         BAND_2_4GHZ,
         BAND_5GHZ
