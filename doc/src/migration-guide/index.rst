@@ -130,6 +130,16 @@ context across fragmented transmission, reconstruct the complete action body, an
 dispatch its subtype only after reassembly. Fragmented on-air management headers do not
 carry a complete action body in every fragment.
 
+Management Frame Sequence Cancellation
+--------------------------------------
+
+Custom ``IFrameSequenceHandler`` implementations must explicitly implement
+``cancelFrameSequence()`` and ``abortFrameSequence()``. Preserve the distinction between
+requesting deferred cancellation and immediately aborting a sequence. Coordinate packet
+ownership with the caller: cancellation must not delete a packet still borrowed by an
+in-flight transmission or active sequence. Superseded AP management transactions must
+retire their queued siblings and terminal outcome exactly once.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

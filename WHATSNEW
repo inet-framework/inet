@@ -337,6 +337,8 @@ Notable backward incompatible changes are the following:
 
    Custom originator agreement handlers must explicitly implement
    isDelbaPending().
+   Custom IFrameSequenceHandler implementations must explicitly implement
+   cancelFrameSequence() and abortFrameSequence().
 
    IOriginatorBlockAckAgreementHandler::processReceivedDelba(),
    IOriginatorBlockAckAgreementHandler::processTransmittedDelba(), and
