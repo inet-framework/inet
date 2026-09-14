@@ -200,6 +200,13 @@ Notable backward incompatible changes are the following:
    inherits the request's advisory value. This corrects the previously reversed choice
    and can change agreement expiry and subsequent traffic.
 
+14. A-MSDU Size and Fragmentation Limits
+
+   Basic A-MSDUs now include subframe headers and padding in size checks and avoid the
+   ordinary fragmentation path. Eligible members retain flow order. Aggregation,
+   transmissions and delivered traffic may change in configurations that previously
+   built oversized or fragmentable A-MSDUs.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
