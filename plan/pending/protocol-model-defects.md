@@ -3,13 +3,22 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
-**Where it stands:** groups A, B and C are done. 11 of the 30 tests pass, from six repairs,
-and a twelfth that had declared an expected failure passes too. The suite is 257 tests, 193
-PASS, 44 FAIL (expected), 20 FAIL (unexpected), from 182 / 45 / 30.
+**Where it stands:** groups A, B and C are done and group D is half done. **15 of the 30
+tests pass**, from nine repairs, and one that had declared an expected failure passes too.
 
-No input in the protocol suite stops a simulation any more, and **the IPv6 suite is complete:
-all 27 tests pass**, from 19 PASS and 8 unexpected failures. IPv4 has 2 left, and groups D
-and E hold the rest.
+Three suites are complete, with no unexpected failure left:
+
+| Suite | Then | Now |
+| --- | --- | --- |
+| arp | 13 PASS, 3 unexpected FAIL | **16 PASS** |
+| ipv4 | 16 PASS, 2 expected, 4 unexpected | **20 PASS, 2 expected** |
+| ipv6 | 19 PASS, 8 unexpected FAIL | **27 PASS** |
+
+What is left: dhcp 8, tcp 3, quic 2, udp 2.
+
+A note on counting: an earlier figure of 257 tests was wrong. It came from a verdict list
+keyed by test name, and two suites use the same name for different tests. The runner's own
+per-suite totals are the ones to read.
 
 Seven standards passes measured the model and did not repair it, because a pass measures.
 Thirty tests fail for recorded reasons. This plan repairs the model so that they pass.
@@ -74,12 +83,11 @@ side and still fails.
 
 ### Group D — an incomplete key, field or check (12 tests)
 
-- [ ] `ipv4/Rfc791SameIdDifferentProtocol` — the reassembly key holds three of the four
-      fields RFC 791 names.
-- [ ] `ipv4/Rfc1122ChecksumDiscard` — the guard short-circuits, so a well-formed header never
-      reaches the checksum test.
-- [ ] `arp/Rfc5494ExperimentalOpcode`, `arp/Rfc5494ExperimentalHardwareSpace`,
-      `arp/Rfc826UnknownProtocolSpace`
+- [x] `ipv4/Rfc791SameIdDifferentProtocol` — done. The key carries the protocol.
+- [x] `ipv4/Rfc1122ChecksumDiscard` — done. The guard is an OR.
+- [x] `arp/Rfc5494ExperimentalOpcode`, `arp/Rfc5494ExperimentalHardwareSpace`,
+      `arp/Rfc826UnknownProtocolSpace` — done. Two crashes a neighbour controlled.
+      The two RARP branches still throw and no test covers them; the ARP results say so.
 - [ ] `quic/Rfc9000ServerInitialSize`, `quic/Rfc9000UnknownFrameType`
 - [ ] `tcp/Rfc6298FirstMeasurement`, `tcp/Rfc9293ShrunkWindowNoNewData`,
       `tcp/Rfc9293ChecksumDefault`
