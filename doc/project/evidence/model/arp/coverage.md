@@ -43,8 +43,8 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC826-REQ-5](../../standard/rfc826/catalog.md#rfc826-req-5) | no check | — | — | a permission about a field the standard calls meaningless. The run showed all zeros in it |
 | [RFC826-REQ-6](../../standard/rfc826/catalog.md#rfc826-req-6) | selected | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution) | Rfc826AddressResolution.test | PASS |
 | [RFC826-RECV-1](../../standard/rfc826/catalog.md#rfc826-recv-1) | covered | the five checks of [input-validation](../../protocol/arp/checks/input-validation.md) | five tests | PASS in three, **FAIL** in two: gap 1 and gap 2 |
-| [RFC826-RECV-2](../../standard/rfc826/catalog.md#rfc826-recv-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **FAIL**, gap 2 |
-| [RFC826-RECV-3](../../standard/rfc826/catalog.md#rfc826-recv-3) | selected | [an-unknown-protocol-space](../../protocol/arp/checks/input-validation.md#an-unknown-protocol-space) | Rfc826UnknownProtocolSpace.test | **FAIL**, gap 2 |
+| [RFC826-RECV-2](../../standard/rfc826/catalog.md#rfc826-recv-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **PASS** since 2026-09-14, gap 2 repaired |
+| [RFC826-RECV-3](../../standard/rfc826/catalog.md#rfc826-recv-3) | selected | [an-unknown-protocol-space](../../protocol/arp/checks/input-validation.md#an-unknown-protocol-space) | Rfc826UnknownProtocolSpace.test | **PASS** since 2026-09-14, gap 2 repaired |
 | [RFC826-RECV-4](../../standard/rfc826/catalog.md#rfc826-recv-4) | selected | [a-newer-hardware-address](../../protocol/arp/checks/cache.md#a-newer-hardware-address) | Rfc826SupersedingHardwareAddress.test | PASS |
 | [RFC826-RECV-5](../../standard/rfc826/catalog.md#rfc826-recv-5) | selected | [a-request-for-a-third-station](../../protocol/arp/checks/input-validation.md#a-request-for-a-third-station) | Rfc826ThirdStationRequest.test | PASS for a host. A router with proxy ARP answers for an address that is not its own; see [`results.md`](results.md) |
 | [RFC826-RECV-6](../../standard/rfc826/catalog.md#rfc826-recv-6) | selected | [learning-from-a-request](../../protocol/arp/checks/reply.md#learning-from-a-request), [a-reply-fills-the-table](../../protocol/arp/checks/cache.md#a-reply-fills-the-table) | Rfc826LearningFromRequest.test, Rfc826MergeBeforeOpcode.test | PASS, from a request and from a reply |
@@ -64,13 +64,13 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC1122-AUSE-1](../../standard/rfc1122/catalog.md#rfc1122-ause-1) | selected | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution) | Rfc826AddressResolution.test | PASS |
 | [RFC1122-ANOERR-1](../../standard/rfc1122/catalog.md#rfc1122-anoerr-1) | selected | [no-destination-unreachable](../../protocol/arp/checks/no-error-report.md#no-destination-unreachable) | Rfc1122NoDestinationUnreachable.test | PASS. No ICMP message of any type in 10 s |
 | [RFC5494-NUM-1](../../standard/rfc5494/catalog.md#rfc5494-num-1) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS. Neither reserved value appears in either field |
-| [RFC5494-NUM-2](../../standard/rfc5494/catalog.md#rfc5494-num-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **FAIL**, gap 2. The value did its work: it gave the check a defined input |
-| [RFC5494-NUM-3](../../standard/rfc5494/catalog.md#rfc5494-num-3) | selected | [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc5494ExperimentalOpcode.test | **FAIL**, gap 1 |
+| [RFC5494-NUM-2](../../standard/rfc5494/catalog.md#rfc5494-num-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **PASS** since 2026-09-14, gap 2 repaired. The value did its work: it gave the check a defined input |
+| [RFC5494-NUM-3](../../standard/rfc5494/catalog.md#rfc5494-num-3) | selected | [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc5494ExperimentalOpcode.test | **PASS** since 2026-09-14, gap 1 repaired |
 | [RFC5494-NUM-4](../../standard/rfc5494/catalog.md#rfc5494-num-4) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS. The field holds 0x0800, the Ethertype of IPv4 |
 | [RFC5494-PROC-1](../../standard/rfc5494/catalog.md#rfc5494-proc-1) | no check | — | — | the statement binds IANA; no behaviour of a host follows from it |
 
 39 entries: 28 from RFC 826, 6 from the ARP part of RFC 1122, and 5 from RFC 5494. 35
-reached a test: 32 with a PASS and 3 with an undeclared FAIL that names a defect. Four carry
+reached a test: 35 with a PASS, since the three defects were repaired on 2026-09-14. Four carry
 `no check`, each with its reason, and none of the four is mandatory: one is a `may` about a
 field the standard calls meaningless, one is overridden, one is a `should` about hardware
 that the in-scope set does not have, and one binds IANA.
@@ -135,7 +135,7 @@ set are six: the one `must` of RFC 826 that binds a sender (RFC826-REQ-1), the t
 RFC 1122 (ACACHE-1, AFLOOD-1, AUSE-1), and its one MUST NOT (ANOERR-1); RFC 5494 has none.
 Every one of the six has a check that ran, and all six passed.
 
-**Run** — 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reports FAIL. The three failures are defects against
+**Run** — 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reported FAIL. Since 2026-09-14 all 16 pass, the three defects repaired. The three failures were defects against
 statements whose strength is `description`, which is the strength of nearly every sentence
 of RFC 826. They do not hold the level back: the criterion asks that each mandatory statement
 have a check, and each one does. They are the findings of the pass.

@@ -168,6 +168,21 @@ Notable backward incompatible changes are the following:
    simulations that fragment two protocols at once reassemble them apart, so
    fingerprints for those scenarios may change.
 
+11. An ARP packet a host cannot process is discarded, not thrown
+
+    Arp::processArpPacket stopped the run in two places a neighbour controls. Its
+    opcode switch threw on any operation the model does not implement, and RFC
+    5494 section 3 makes 24 and 25 legal values a neighbour may put on a link. And
+    it peeked the packet with the default flags, which turns an incorrect chunk
+    into an error; the serializer marks a packet incorrect when its hardware space
+    is not Ethernet or its protocol space is not IPv4, so nothing ever read that
+    mark.
+
+    Both now end processing, as RFC 826 states: the unknown opcode breaks out of
+    the switch after the table step, and the unsupported space is dropped with a
+    packetDropped signal. The two RARP branches still throw, which the model means
+    as a statement that it does not implement RARP.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

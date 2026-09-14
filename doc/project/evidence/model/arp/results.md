@@ -46,14 +46,16 @@ Level 3, a crafted packet:
 | Rfc826UnsolicitedReply.test | RFC826-RECV-10; covers RECV-1 | PASS |
 | Rfc826SupersedingHardwareAddress.test | RFC826-TABLE-1, RECV-4 | PASS |
 | Rfc826MergeBeforeOpcode.test | RFC826-RECV-7, RECV-6 | PASS |
-| Rfc5494ExperimentalOpcode.test | RFC826-RECV-10, RFC5494-NUM-3 | FAIL, gap 1 |
-| Rfc5494ExperimentalHardwareSpace.test | RFC826-RECV-2, RFC5494-NUM-2 | FAIL, gap 2 |
-| Rfc826UnknownProtocolSpace.test | RFC826-RECV-3 | FAIL, gap 2 |
+| Rfc5494ExperimentalOpcode.test | RFC826-RECV-10, RFC5494-NUM-3 | **PASS** since 2026-09-14; gap 1 is repaired |
+| Rfc5494ExperimentalHardwareSpace.test | RFC826-RECV-2, RFC5494-NUM-2 | **PASS** since 2026-09-14; gap 2 is repaired |
+| Rfc826UnknownProtocolSpace.test | RFC826-RECV-3 | **PASS** since 2026-09-14; gap 2 is repaired |
 
 ## The failures
 
-All three failures are **defects**, and none is declared expected. No test error and no
+All three failures were **defects**, and none was declared expected. No test error and no
 specification misread came out of this pass; each test keeps its faithful assertion.
+
+**All three are repaired, on 2026-09-14, and the suite is 16 PASS.** No test was edited.
 
 Reviewed against
 [the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test),
@@ -75,7 +77,13 @@ A station that stops is the strongest possible way to fail that sentence, and it
 than a wrong reply: a wrong reply is a packet a neighbour can ignore, while a stop takes the
 station off the network.
 
-### Gap 1 — an opcode the model does not know stops the run
+### Gap 1 — an opcode the model does not know stopped the run. Repaired 2026-09-14.
+
+The default branch discards the packet and logs it. The table step above it has already
+run, which is what RFC 826 asks for. The two RARP branches still throw, and this repair
+leaves them: the evidence below reads them as a deliberate statement that the model does not
+do RARP. A neighbour can still stop a run with opcode 3 or 4, and no test covers that.
+
 
 `Arp::processArpPacket` reads the opcode in a `switch` whose default branch throws
 ([`src/inet/networklayer/arp/ipv4/Arp.cc:357-358`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)):
@@ -94,7 +102,14 @@ this check is about, because RFC 5494 §3 makes 24 and 25 legal values that a ne
 put on a link. RFC 826 wants the packet dropped after the table step, which the model has
 already done by the time it reaches the `switch`.
 
-### Gap 2 — a hardware space or a protocol space other than the Ethernet and IPv4 stops the run
+### Gap 2 — a hardware space or a protocol space other than Ethernet and IPv4 stopped the run. Repaired 2026-09-14.
+
+`Arp::processArpPacket` peeks permissively now and reads the mark the serializer leaves,
+which is the answer RFC 826's first two questions want. A packet whose hardware space is not
+Ethernet or whose protocol space is not IPv4 is dropped with a `packetDropped` signal, which
+is the "end of processing" the algorithm states. The marking was always right; what was
+missing was the discard.
+
 
 The packet class of the model carries four fields of the layout of RFC 826 implicitly, and
 its own comment says so

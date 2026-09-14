@@ -228,7 +228,20 @@ void Arp::dumpArpPacket(const ArpPacket *arp)
 void Arp::processArpPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from network protocol.\n";
-    const auto& arp = packet->peekAtFront<ArpPacket>();
+    // The serializer marks a packet incorrect when its hardware space is not Ethernet or
+    // its protocol space is not IPv4, which are the first two questions the reception
+    // algorithm of RFC 826 asks. Peeking with the default flags turned that mark into an
+    // error and stopped the run, so nothing ever read it. Peek permissively and then do
+    // what the algorithm says for either answer: end of processing.
+    const auto& arp = packet->peekAtFront<ArpPacket>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    if (!arp->isCorrect()) {
+        EV_WARN << "ARP packet with an unsupported hardware or protocol space, dropping\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
     dumpArpPacket(arp.get());
 
     // extract input port
@@ -355,7 +368,12 @@ void Arp::processArpPacket(Packet *packet)
                 throw cRuntimeError("RARP reply received: RARP is not supported");
 
             default:
-                throw cRuntimeError("Unsupported opcode %d in received ARP packet", arp->getOpcode());
+                // RFC 5494 section 3 makes 24 and 25 legal values a neighbour may put on a
+                // link, and RFC 826 ends processing for an operation the host does not
+                // implement. Throwing let any neighbour stop the run. The table step above
+                // has already run, which is what RFC 826 asks for.
+                EV_WARN << "Unsupported opcode " << arp->getOpcode() << " in received ARP packet, dropping\n";
+                break;
         }
     }
     else {
