@@ -236,8 +236,9 @@ violation** (`AV-*` or `NV-*`): repair it, or get it sanctioned first.
 
 **Every seal names the audit report that earned it.**
 
-A path row carries a link to its report under [audit/report/](../audit/README.md); a closed unit
-carries one in the same row or in the seal index. The report names the rules it checked and the
+A path row names its report under `audit/` at the repository root; a closed unit
+names one in the same row or in the seal index. The name is a path and not a link, because the
+folder is not in git — see [audit/README.md](../audit/README.md#where-a-report-lives). The report names the rules it checked and the
 commit it examined. Without that citation a seal is a claim with no evidence, and nobody can tell
 whether it is still true.
 

@@ -117,5 +117,5 @@ find here rather than fixing it silently in place:
 | Area | Date | Findings |
 |---|---|---|
 | Repo-wide convention scan (packages, modules, gates, params, signals, `.msg` types/fields, C++ types/methods/members/enums/macros/constants, `.ini`, `.oppfeatures`, directories, tests, icons) | 2026-07-20 | Seeded this ledger: NS-01…05, NV-01…17. Not an exhaustive per-file audit — a sampling scan; individual files may hold further violations not yet listed. |
-| `check-interfaces.sh` over every `I<Stem>` class (NR-CPP-TYPE: the prefix is a promise) | 2026-09-07 | [sweep/interfaces.md](report/sweep/interfaces.md). 3 classes carry the prefix and are not interfaces — NV-19; two the gate flags, one (`IRadioSignal`) it notes and a reviewer decided. |
-| `check-naming.sh` over `src/inet`, `images/`, `.github/workflows/` — the mechanical rules NR-PKG, NR-DIR, NR-GEN, NR-ASSET, NR-CI | 2026-08-31 | [sweep/naming.md](report/sweep/naming.md). 23 hits: 11 known, 12 new. NV-02 and NV-17 extended, NV-18 opened. NR-GEN and NR-CI clean. |
+| `check-interfaces.sh` over every `I<Stem>` class (NR-CPP-TYPE: the prefix is a promise) | 2026-09-07 | `audit/sweep/interfaces.md`. 3 classes carry the prefix and are not interfaces — NV-19; two the gate flags, one (`IRadioSignal`) it notes and a reviewer decided. |
+| `check-naming.sh` over `src/inet`, `images/`, `.github/workflows/` — the mechanical rules NR-PKG, NR-DIR, NR-GEN, NR-ASSET, NR-CI | 2026-08-31 | `audit/sweep/naming.md`. 23 hits: 11 known, 12 new. NV-02 and NV-17 extended, NV-18 opened. NR-GEN and NR-CI clean. |

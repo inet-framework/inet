@@ -92,7 +92,7 @@ In the order of the chain.
 | [audit/architecture-exceptions.md](audit/architecture-exceptions.md) | ledger | `AS-*`, `AV-*` | Which couplings depart from the architecture rules? |
 | [audit/naming-exceptions.md](audit/naming-exceptions.md) | ledger | `NS-*`, `NV-*` | Which names depart from the naming rules? |
 | [audit/seal-list.md](audit/seal-list.md) | ledger | — | Which paths are sealed, against which audit? |
-| [audit/report/](audit/README.md) | report | — | What did one audit find, on one date? |
+| `audit/` *(repository root, not in git)* | report | — | What did one audit find, on one date? |
 | [evidence/claim-coverage.md](evidence/claim-coverage.md) | measurement | — | Which test demonstrates each requirement? |
 | [evidence/standard/](evidence/standard/rfc791/catalog.md) | what | `<DOC>-*` | Which clause of one standard document is checkable? One folder per document. |
 | [evidence/protocol/](evidence/protocol/ipv4/features.md) | what · procedure | `<PROTO>-F-*` | Which features does a protocol have, and how is each one checked? One folder per protocol, free of INET names. |

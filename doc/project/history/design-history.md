@@ -66,7 +66,7 @@ seeded by a repository-wide scan on 2026-07-20 that produced `NS-01`…`NS-05`, 
 ## The seals
 
 `common/packet/` was sealed on 2026-07-20, as the first and so far only sealed path. The audit that
-earned it is [common-packet.md](../audit/report/subsystem/common-packet.md).
+earned it is `audit/subsystem/common-packet.md`.
 
 The 2026-08-31 restructure found that this seal does not satisfy
 [SR-AUDIT-FIRST](../rule/sealing.md#sr-audit-first): it was recorded over two `AV-ORG` clusters that

@@ -7,17 +7,18 @@ the step between a gate and a seal: a gate says whether one rule is broken right
 says whether a whole path, change or document complies with every rule that applies to it, on a named
 date, at a named commit.
 
-This folder holds what audits produce: the two **ledgers** of known deviations, the **seal registry**,
-and the **reports**.
+This folder holds two of the three things an audit produces: the two **ledgers** of known deviations
+and the **seal registry**. The third, the **report**, lives outside git — see
+[Where a report lives](#where-a-report-lives).
 
 ## The four kinds of audit
 
 | Kind | Input | Checked against | Output |
 | --- | --- | --- | --- |
-| **subsystem** | a directory tree | [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), the domain document when one applies | `report/subsystem/<slug>.md` |
-| **pull request** | a branch or a pull request | [pull-request.md](../rule/pull-request.md), plus the rules the diff touches | `report/pull-request/pr-<n>.md` |
-| **sweep** | one rule family, the whole tree | one rule document | `report/sweep/<rule>.md` |
-| **document** | one document of this set | [documentation.md](../rule/documentation.md) | `report/document/<slug>.md` |
+| **subsystem** | a directory tree | [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), the domain document when one applies | `audit/subsystem/<slug>.md` |
+| **pull request** | a branch or a pull request | [pull-request.md](../rule/pull-request.md), plus the rules the diff touches | `audit/pull-request/pr-<n>.md` |
+| **sweep** | one rule family, the whole tree | one rule document | `audit/sweep/<rule>.md` |
+| **document** | one document of this set | [documentation.md](../rule/documentation.md) | `audit/document/<slug>.md` |
 
 A subsystem audit is what a seal needs. A pull request audit is what a review needs. A sweep is what
 seeds a ledger. A document audit is what lets a document seal.
@@ -79,11 +80,13 @@ A report is a **snapshot**: it describes one audit, at one commit, on one date. 
 5. **One row per finding**, with the ledger identifier it became.
 6. **A verdict line** — `PASS` or `FAIL`, with counts.
 
-A finding that is not in a ledger is lost. Every finding gets a row, in the same change.
+A finding that is not in a ledger is lost. Every finding gets a row, and the row is committed. The
+report is not.
 
-**A re-audit rewrites the report file.** Git holds the older text, and a document describes what is —
-so a report carries no history section. The only exception is a pull request report, which is
-naturally unique to its pull request.
+**A re-audit rewrites the report file, and nothing holds the older text.** A document describes what
+is, so a report carries no history section, and what must outlive the file is already in a ledger row
+or a `seal-list.md` row. The only exception is a pull request report, which is naturally unique to its
+pull request.
 
 ## The ledgers
 
@@ -112,15 +115,33 @@ live inside the documents. The rules that govern it are `SR-*` in
 [SR-STATE-WHERE](../rule/sealing.md#sr-state-where): **the artifact is the authority, the registry is
 an index.**
 
-## The report folders
+## Where a report lives
+
+**A report is written to `audit/` at the repository root, and it is never committed.** `.gitignore`
+holds `/audit/`, so the folder stays out of every diff, every review and every clone.
+
+A report is working material. It judges one tree at one commit, a re-audit replaces it, and the part
+that must outlive it is already elsewhere: a finding becomes a ledger row, a seal becomes a
+`seal-list.md` row. Keeping the reports in git grew the history without adding a fact that a reader
+needs later, and put a long document in the diff of every change that touched the process.
 
 | Folder | Naming | Lifetime |
 | --- | --- | --- |
-| [report/subsystem/](report/subsystem/) | the path with slashes turned to hyphens, `src/inet/` stripped: `common-packet.md` | rewritten by each re-audit |
-| [report/pull-request/](report/pull-request/) | `pr-<number>.md` | one per pull request |
-| [report/sweep/](report/sweep/) | the rule family: `naming.md`, `architecture.md` | rewritten by each sweep |
-| `report/document/` | the document path with slashes turned to hyphens: `rule-naming.md` | rewritten by each re-audit; **empty — no document has been audited yet** |
+| `audit/subsystem/` | the path with slashes turned to hyphens, `src/inet/` stripped: `common-packet.md` | rewritten by each re-audit |
+| `audit/pull-request/` | `pr-<number>.md` | one per pull request |
+| `audit/sweep/` | the rule family: `naming.md`, `architecture.md` | rewritten by each sweep |
+| `audit/document/` | the document path with slashes turned to hyphens: `rule-naming.md` | rewritten by each re-audit |
 
-The three pull request reports in this tree — [pr-1124](report/pull-request/pr-1124.md),
-[pr-1125](report/pull-request/pr-1125.md), [pr-1144](report/pull-request/pr-1144.md) — are the worked
-examples. Read one before you write your first.
+Three consequences to hold on to:
+
+1. **The folder is per checkout.** Another worktree, and another person's clone, do not have your
+   reports. Say what a report found; do not send a path and assume the reader can open it.
+2. **A re-audit destroys the older text.** Nothing recovers it. Write the durable part into a ledger
+   row in the same change, as [audit-a-subsystem.md](../guide/audit-a-subsystem.md) step 4 asks.
+3. **A document in git cites a report by path, not by link.** A link would resolve on the author's
+   machine and break in every clone, and [check-links.sh](../enforcement/check-links.sh) would not
+   catch it. Write `` `audit/pull-request/pr-1144.md` `` and say what it found.
+
+Read one report before you write your first. `audit/pull-request/pr-1124.md`,
+`audit/pull-request/pr-1125.md` and `audit/pull-request/pr-1144.md` are the worked examples, in the
+checkout where they were written.

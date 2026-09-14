@@ -5,9 +5,9 @@
 How to audit a branch against the `PR-*` and `CR-*` rules and write the two reports. The rules are
 [rule/pull-request.md](../rule/pull-request.md), which says what a *change* must look like, and
 [rule/classification.md](../rule/classification.md), which says what a commit *is*. Worked examples
-are in [audit/report/pull-request/](../audit/report/pull-request/pr-1144.md), and
-[classification-on-tcp-new.md](../audit/report/sweep/classification-on-tcp-new.md) applies the
-classification to a 61-commit branch.
+are `audit/pull-request/pr-1144.md`, and `audit/sweep/classification-on-tcp-new.md` applies the
+classification to a 61-commit branch. Both live at the repository root, in a folder that is not in
+git — see [audit/README.md](../audit/README.md#where-a-report-lives).
 
 **The commit is the unit of the `PR-*` audit, not the pull request.** Read the series one commit at a
 time so each commit can be judged as one change. Review each commit's code correctness with
@@ -53,7 +53,7 @@ git log --format=%s $MB..refs/pr/<n>
 
 **The whitespace check needs `--ignore-blank-lines` as well as `-w`.** With `-w` alone a branch that
 removes blank lines instead of changing indentation reports nothing. That is a real finding from
-[pr-1144](../audit/report/pull-request/pr-1144.md), and it is the reason the flag is written here.
+`audit/pull-request/pr-1144.md`, and it is the reason the flag is written here.
 
 ## 3. Audit the commit messages
 
@@ -122,7 +122,7 @@ behavioral review, so the line tells you how much of the series you can read qui
 
 This breakdown belongs in the **summary**, not in the audit report: the summary says what the
 change is, and the audit judges it. Paste the gate's breakdown into
-`audit/report/pull-request/pr-<n>-summary.md` under a heading `## The commits`, above the interface
+`audit/pull-request/pr-<n>-summary.md` under a heading `## The commits`, above the interface
 sections. `opp_summarize_changes` does not generate it yet.
 
 ## 5. Judge what a script cannot
@@ -189,7 +189,9 @@ are locally valid in separate commits but inconsistent when composed.
 
 ## 8. Write the report
 
-**Two files.** `audit/report/pull-request/pr-<n>.md` judges the commits; `pr-<n>-summary.md` states
+**Two files**, both at the repository root, in a folder that is not in git — see
+[audit/README.md](../audit/README.md#where-a-report-lives).
+`audit/pull-request/pr-<n>.md` judges the commits; `audit/pull-request/pr-<n>-summary.md` states
 what the change does and carries the breakdown from step 4.
 
 In the audit, one row per rule with a verdict — `PASS`, `FLAG`, `PARTIAL` or `not verified` — and

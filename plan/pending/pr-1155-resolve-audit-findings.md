@@ -2,7 +2,7 @@
 
 Status: **in progress** — steps 1a, 1c, 1h and 1h2 done in the worktree
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
-Audit: [doc/project/audit/report/pull-request/pr-1155.md](../../doc/project/audit/report/pull-request/pr-1155.md), third pass, 2026-09-11.
+Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
 Branch: `topic/tcp-new`, head `33e8b0d073`, merge base `434658d729`, 61 commits, 183 files, +15840 / −3685.
 
 ## 1. What this plan resolves
@@ -197,7 +197,7 @@ Five more commits have no body and are under the gate's 50-line threshold — `f
 **Done when** `check-commits.sh` reports no `PR-MSG-BODY` violation.
 
 **1e. Add the `Change:` trailers.** All 61, from the reconstruction in
-[classification-on-tcp-new.md](../../doc/project/audit/report/sweep/classification-on-tcp-new.md),
+`audit/sweep/classification-on-tcp-new.md`,
 which already writes them.
 
 This is not tidiness. With the trailers in place,
@@ -338,7 +338,7 @@ kinds of break need naming:
    rather than a break, and the note says when the alias goes.
 3. **Removed public surface** — 25 functions removed outright, 22 more moved with their renamed
    class, and `PppTrailer` removed. The exact list is the *Breaking* section of
-   [pr-1155-summary.md](../../doc/project/audit/report/pull-request/pr-1155-summary.md); do not
+   `audit/pull-request/pr-1155-summary.md`; do not
    retype it, generate it.
 4. **Changed defaults** — `tcpAlgorithmClass` `"TcpReno"` → `"TcpCubic"`; `sackSupport`,
    `timestampSupport`, `delayedAcksEnabled`, `limitedTransmitEnabled` `false` → `true`; `mss` `536`

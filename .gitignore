@@ -27,6 +27,9 @@ precompiled_*.h.*
 python/levy.py
 CLAUDE.md
 
+# audit reports: working material, written at the repository root, never committed
+/audit/
+
 # output and result files
 .settings/
 .ccls-cache/

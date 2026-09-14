@@ -127,7 +127,7 @@ while read -r sha; do
   while read -r f; do
     [ -z "$f" ] && continue
     # -w alone is not enough: a branch that removes blank lines reports nothing without
-    # --ignore-blank-lines. That is a real finding from audit/report/pull-request/pr-1144.md.
+    # --ignore-blank-lines. That is a real finding from audit/pull-request/pr-1144.md.
     if [ -z "$(git show -w --ignore-blank-lines --numstat --pretty="" "$sha" -- "$f")" ]; then
       ws+="$f "
     else

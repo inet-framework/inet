@@ -207,9 +207,9 @@ the one body a C++ interface cannot avoid, and it is the only one.
 **A default body is not a small exception; it is the failure mode.** `IIndicatorFigure::getNumSeries()`
 had a default body returning 1. When it was renamed to `getNumItems()`, every implementation outside
 INET kept compiling, its override was silently never called again, and each figure reported one item
-([pr-1125.md](../audit/report/pull-request/pr-1125.md) F-2). A pure virtual would have made every one
-of those a compile error. The default body is what turned a loud break into a quiet one — and it was
-put there, as such comments always say, "for backward compatibility".
+(`audit/pull-request/pr-1125.md` F-2). A pure virtual would have made every one of those a compile
+error. The default body is what turned a loud break into a quiet one — and it was put there, as such
+comments always say, "for backward compatibility".
 
 **Where a default goes: `<Stem>Base`.** INET already pairs 58 interfaces with a `<Stem>Base` class,
 and 206 `*Base` classes exist. That is the designed place for shared machinery and for a default an
@@ -228,8 +228,8 @@ is short.
 
 The tree already reads this way. A sweep of all 176 contract headers found eight static non-signal
 members, in two files, and every one is an enum-naming helper of that second kind
-([sweep/contract-purity.md](../audit/report/sweep/contract-purity.md)). This rule writes down what
-INET does; it does not ask for a change.
+(`audit/sweep/contract-purity.md`). This rule writes down what INET does; it does not ask for a
+change.
 
 Where does the helper go? If it serves the **implementors**, it belongs in the `*Base` class they
 already extend ([AR-ORG-CONTRACTS](#ar-org-contracts) keeps contract, base and concrete apart for

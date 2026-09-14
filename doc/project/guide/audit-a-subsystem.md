@@ -53,16 +53,21 @@ Each finding is one of three things, and the sorting is the judgment:
 | a deliberate, permanent exception | an `AS-*` or `NS-*` row with the reason, **and** the allowlist entry in the gate |
 | already in a ledger | nothing — it is known, not a finding |
 
-**A finding that is not in a ledger is lost.** Add the rows in the same change as the report.
+**A finding that is not in a ledger is lost**, because the report is not in git and a re-audit
+overwrites it. Add the rows, and commit them.
 
 ## 5. Write the report
 
-`audit/report/subsystem/<slug>.md`, where the slug is the path with slashes turned to hyphens and
-`src/inet/` stripped — `common/packet` becomes `common-packet.md`. It holds the scope, the date, the
-commit, the commands, the rules checked, one row per finding with its ledger identifier, and a verdict
-line. A re-audit rewrites the file; git holds the older text.
+`audit/subsystem/<slug>.md`, at the repository root, where the slug is the path with slashes turned
+to hyphens and `src/inet/` stripped — `common/packet` becomes `common-packet.md`. It holds the scope,
+the date, the commit, the commands, the rules checked, one row per finding with its ledger
+identifier, and a verdict line.
 
-[common-packet.md](../audit/report/subsystem/common-packet.md) is the worked example.
+**`audit/` is not in git.** A re-audit overwrites the file and nothing recovers the older text, so
+the durable part of a finding belongs in a ledger row, written in the same change — step 4 above.
+See [audit/README.md](../audit/README.md#where-a-report-lives).
+
+`audit/subsystem/common-packet.md` is the worked example.
 
 ## 6. Report before you offer
 

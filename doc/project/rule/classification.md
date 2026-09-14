@@ -553,9 +553,8 @@ practice and it is correct: `fingerprint` there is the **scope** — the commit 
 
 **Why the rule was widened.** An earlier version told the author to leave out what the trailer
 states. Applying it to the 61 commits of `topic/tcp-new` showed the fault
-([classification-on-tcp-new.md](../audit/report/sweep/classification-on-tcp-new.md), F-1): it
-permitted dropping `tcp:` from 47 subjects, and dropping it would have made `git log --oneline`
-worse in every one. A rule that pushes an author toward a worse log is wrong, whatever the trailer
+(`audit/sweep/classification-on-tcp-new.md`, F-1): it permitted dropping `tcp:` from 47 subjects,
+and dropping it would have made `git log --oneline` worse in every one. A rule that pushes an author toward a worse log is wrong, whatever the trailer
 holds.
 
 *Enforced at T3 — a gate compares each prefix with the trailer and reports a disagreement. The
