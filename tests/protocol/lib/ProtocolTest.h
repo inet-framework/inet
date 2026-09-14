@@ -81,10 +81,15 @@ class INET_API Interception
     std::function<void(Packet *)> mutator; // for action == "mutate"
     std::string description;      // optional human phrase
 
-    Interception& match(const char *expr) { matchExpression = expr; return *this; }
+    Interception& filterExpr(const char *expr) { matchExpression = expr; return *this; }
+    Interception& match(const char *expr) { matchExpression = expr; return *this; } // older name of filterExpr
     Interception& minBytes(long n) { minimumBytes = n; return *this; }
     Interception& nth(int k) { occurrence = k; return *this; }
     Interception& drop() { action = "drop"; return *this; }
+    // An explicit no-op. It earns its place now that the rules are ordered: it shadows a
+    // later rule for the frames it names, so "never touch a SYN, drop the data" is two
+    // clauses rather than one expression that has to say both.
+    Interception& pass() { action = "pass"; return *this; }
     Interception& delay(double t) { action = "delay"; delayTime = t; return *this; }
     Interception& mutate(std::function<void(Packet *)> fn) { action = "mutate"; mutator = std::move(fn); return *this; }
     Interception& describe(const char *phrase) { description = phrase; return *this; }
@@ -100,10 +105,24 @@ struct Step {
     int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
 };
 
-// Entry point of the fluent injection chain.
-Injection inject(const char *nodeName);
+// Entry points of the fluent injection and interception chains.
+//
+// The builder and the step that carries it must not share a word. A line that reads
+// `intercept(intercept("tap")...)` says the same thing twice and neither time says which
+// role it means: the inner call builds a clause, the outer adds it to the program. `on` and
+// `once` avoid this by accident, because the two words differ.
+//
+// So the builder takes the noun and the step keeps the verb:
+//
+//     .intercept(tap("tap").filterExpr("tcp.synBit == true").nth(1).drop())
+//     .inject(at("host1").into("eth[0]", "upperLayerOut").after(0.001).packet(buildSynAck))
+//
+Injection at(const char *nodeName);
+Interception tap(const char *tapName);
 
-// Entry point of the fluent interception chain (names the PacketTap to drive).
+// The older names of the same two builders. Phase 2 of
+// plan/pending/protocol-test-framework-gaps.md removes them.
+Injection inject(const char *nodeName);
 Interception intercept(const char *tapName);
 
 //

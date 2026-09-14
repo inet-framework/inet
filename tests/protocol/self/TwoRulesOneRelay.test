@@ -1,0 +1,123 @@
+%description:
+
+Protocol Test Framework self test -- two rules on one relay.
+
+A relay used to hold one rule. `PacketTap::configure` assigned its fields, so a second
+`intercept` clause replaced the first and the tap reported `mutated 0` for the rule that
+disappeared. Four standards passes met this, and each worked around it with two taps in
+series. The DHCP pass had to write down the arithmetic of which occurrence the second tap
+sees, because the first tap had already removed frames from the stream the second counted.
+
+A relay now holds a list. A frame is offered to the rules in order and the first that
+matches applies; a frame that matches none passes through. Each rule counts its own
+occurrences, so neither rule shifts the other's numbering.
+
+This test uses the order of the rules, so that neither rule alone can produce the result.
+The first rule lets host A's **first** data segment through with the explicit `pass()`
+action; the second drops **every** data segment. A frame stops at the first rule that
+matches it, so the first segment reaches host B and no later one does.
+
+That makes the check decisive in both directions:
+
+- without the first rule, the second drops the first segment too, and host B receives
+  nothing, so step 1 misses its deadline;
+- without the second rule, every segment reaches host B, so step 2 sees a second one and
+  the `never` fails.
+
+It also uses the two builder words that replace the ones which collided with their step.
+`tap("relay")` builds the clause and `.intercept(...)` adds it, so the line no longer reads
+`intercept(intercept(...))`.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A pure acknowledgment carries the same port and no SYN, so a filter that names those two
+// things alone also picks it. The TCP notes record that trap: a sequence number does not
+// identify a data segment. Every step below therefore also requires a data-bearing segment.
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("two_rules_one_relay")
+        // Rule 1 shadows rule 2 for one frame. This is what an ordered list of rules buys,
+        // and what `pass()` is for: the exception is a clause of its own, rather than a
+        // condition that the other rule's expression has to carry.
+        .intercept(tap("relay")
+                       .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(1)
+                       .pass().describe("let the first data segment through"))
+        .intercept(tap("relay")
+                       .filterExpr("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100)
+                       .drop().describe("drop every other data segment"))
+        // Rule 1 ran: host B receives the first data segment.
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterThat(dataSegment)
+                  .describe("the one data segment that reaches host B")
+                  .within(1.0))
+        // Rule 2 ran: no further data segment ever reaches host B, although host A keeps
+        // retransmitting for the rest of the run.
+        .never(on("host2.tcp").signal("packetReceivedFromLower")
+                   .filterThat(dataSegment)
+                   .describe("any further data segment at host B")
+                   .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "two_rules_one_relay compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with one relay spliced on the link -- note: NO tester (attached at runtime).
+network TwoRulesNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TwoRulesNet
+sim-time-limit = 12s
+seed-set = 0
+
+# static ARP: the only frames on the wire are the TCP/IP ones.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 4000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST two_rules_one_relay: PASS

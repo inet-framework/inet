@@ -18,7 +18,7 @@ and [`dhcp/notes.md`](../../doc/project/evidence/model/dhcp/notes.md#scenario-qu
 
 | Gap | Passes | State |
 | --- | --- | --- |
-| One relay carries one rule | ipv4, ipv6, tcp, dhcp | item 4 below |
+| One relay carries one rule | ipv4, ipv6, tcp, dhcp | **done**, item 4 below |
 | The engine is a strictly sequential consumer | ipv4, arp, dhcp, tcp level 4 | item 3 below |
 | A unit-bearing capture breaks the next step | tcp, ipv6 | **done**, item 1 below |
 | An address field cannot be compared in an expression | arp, dhcp | not in this plan |
@@ -140,9 +140,14 @@ write down the arithmetic of which occurrence the second tap sees.
 A tap accumulates rules. Each clause adds one. A frame is offered to the rules in order and
 the first that matches applies; a frame that matches none passes.
 
-- [ ] `PacketTap` holds a list of rules.
-- [ ] `configure` appends instead of replacing.
-- [ ] Add `pass()` as an explicit action, which shadows a later rule for the frames it names.
+- [x] `PacketTap` holds a list of rules.
+- [x] `configure` appends instead of replacing.
+- [x] Add `pass()` as an explicit action, which shadows a later rule for the frames it names.
+- [x] `self/TwoRulesOneRelay.test` proves it, and is decisive in both directions: without
+      the first rule step 1 misses its deadline, without the second the `never` fires.
+- **A compiled `PacketFilter` does not survive a copy.** A rule holds one by pointer, and the
+  list is a `deque`, so nothing that is compiled ever moves. A `vector<Rule>` with the filter
+  by value segfaults during the tester's initialize.
 
 ## Item 5 — the builder and the step adder share a word
 
@@ -158,8 +163,8 @@ accident, because the adder is `once`.
 
 `Interception::match(e)` becomes `filterExpr(e)`, which removes the third meaning of `match`.
 
-- [ ] Add `tap(name)` and `at(name)`.
-- [ ] Add `Interception::filterExpr`.
+- [x] Add `tap(name)` and `at(name)`.
+- [x] Add `Interception::filterExpr`.
 
 ## The migration
 
