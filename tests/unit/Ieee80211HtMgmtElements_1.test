@@ -273,6 +273,7 @@ ASSERT(allowedProbeRequestPacket.peekAllAsBytes()->getChunkLength() == B(34));
 for (bool probeResponse : {false, true}) {
     Ptr<Ieee80211BeaconFrame> discovery = probeResponse ? staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) : makeShared<Ieee80211BeaconFrame>();
     discovery->setSSID("");
+    discovery->setBeaconInterval(SimTime(102400, SIMTIME_US));
     discovery->setSupportedRates(original->getSupportedRates());
     discovery->setHtCapabilitiesPresent(true);
     discovery->setHtCapabilities(original->getHtCapabilities());

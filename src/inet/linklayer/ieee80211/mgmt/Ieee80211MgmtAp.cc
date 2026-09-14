@@ -16,6 +16,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -47,7 +48,7 @@ void Ieee80211MgmtAp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // read params and init vars
         ssid = par("ssid").stdstringValue();
-        beaconInterval = par("beaconInterval");
+        beaconInterval = normalizeIeee80211BeaconInterval(par("beaconInterval"));
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)
             throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);

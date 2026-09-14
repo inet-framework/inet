@@ -47,8 +47,8 @@
 /examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       4c65-91ae/tplx;72b5-8f0b/~tNl;190a-bc02/~tND;40ef-e3e2/tyf, PASS, wireless Ipv4
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           df67-0fe0/tplx;023a-3c37/~tNl;fdc9-84e1/~tND;8a53-9a15/tyf, PASS, EthernetMac Ipv4
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            a931-fbf9/tplx;f19a-7352/~tNl;c02f-f110/~tND;d3a7-5f49/tyf, PASS, wireless EthernetMac Ipv4
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            c440-71e7/tplx;6ca7-4ad3/~tNl;cfb3-5fa9/~tND;3497-9980/tyf, PASS, wireless EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            1b57-d2e8/tplx;ac86-dd61/~tNl;a386-b193/~tND;d3a7-5f49/tyf, PASS, wireless EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            c938-527f/tplx;0566-81a4/~tNl;005d-ddb5/~tND;3497-9980/tyf, PASS, wireless EthernetMac Ipv4
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            df1a-1a1e/tplx;0610-405e/~tNl;4ae3-3dec/~tND;fbd6-20e8/tyf, PASS, EthernetMac Ipv4
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0, PASS,   # abstract-config
@@ -380,10 +380,10 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;3aa0-49ed/tyf, PASS,  wireless adhoc Ipv4
 
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             17ac-0898/tplx;8bbc-d083/~tNl;5b2d-7e79/~tND;44ef-1a45/tyf, PASS, wireless EthernetMac
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,             19e2-a165/tplx;d96c-5e41/~tNl;28d2-bf93/~tND;ed3e-17fa/tyf, PASS, wireless EthernetMac
-/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,             123e-b941/tplx;4e91-d6bb/~tNl;0064-ad46/~tND;afae-2b3c/tyf, PASS, wireless EthernetMac
-/examples/ipv6/pmipv6/,              -f omnetpp.ini -c General -r 0,                 60s,             8bf1-01f5/tplx;c5d4-bce4/~tNl;3228-a825/~tND;0277-d784/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             40da-712f/tplx;a44c-17bf/~tNl;b25a-96c2/~tND;44ef-1a45/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,             04c8-ea00/tplx;e6db-28c0/~tNl;1b44-dabf/~tND;ed3e-17fa/tyf, PASS, wireless EthernetMac
+/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,             9a69-122e/tplx;28ce-974e/~tNl;261c-bbb8/~tND;afae-2b3c/tyf, PASS, wireless EthernetMac
+/examples/ipv6/pmipv6/,              -f omnetpp.ini -c General -r 0,                 60s,             8e0a-8bc5/tplx;1064-9bd4/~tNl;c22c-d7f1/~tND;0277-d784/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;7dd1-18eb/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;fa92-f68c/tyf, PASS,
@@ -573,7 +573,7 @@
 /examples/wireless/filtering/,       -f omnetpp.ini -c ListeningFilter -r 0,          100s,         946b-6f7f/tplx;e5d7-0ef7/~tNl;fc55-a160/~tND;17b4-4f41/tyf, PASS, Ipv4
 /examples/wireless/filtering/,       -f omnetpp.ini -c MacAddressFilter -r 0,         100s,         d2d8-8182/tplx;d14e-6ff1/~tNl;1e5f-e0e5/~tND;1853-1300/tyf, PASS, Ipv4
 
-/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        eee3-0da3/tplx;baf5-5f0e/~tNl;1172-7007/~tND;c710-ff2e/tyf, PASS, wireless
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        ccea-d0cd/tplx;7bfd-9fb3/~tNl;cb3d-a776/~tND;c710-ff2e/tyf, PASS, wireless
 
 /examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         8383-735e/tplx;8e4d-20ee/~tNl;1298-9ea7/~tND;af51-7b12/tyf, PASS, wireless
 
@@ -654,11 +654,11 @@
 
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            6fae-d558/tplx;b8ea-b2fc/~tNl;7a95-cf35/~tND, PASS, wireless Ipv4
 
-/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                 10s,         f252-8a4b/tplx;481d-4747/~tNl;713b-1d7f/~tND;6097-a429/tyf, PASS, wireless Ipv4
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         31b0-6212/tplx;82ec-9fde/~tNl;4042-8007/~tND;9f3c-4512/tyf, PASS, wireless Ipv4
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         acd6-0108/tplx;b339-294a/~tNl;8ead-af05/~tND;a4c3-19bf/tyf, PASS, wireless Ipv4
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         9ece-fbfb/tplx;c1af-29ff/~tNl;0b19-cdb3/~tND;b2d6-1329/tyf, PASS, wireless Ipv4
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         d094-b008/tplx;173a-e3fb/~tNl;92f3-e87f/~tND;08b5-d005/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                 10s,         16b2-6f72/tplx;5eb9-6cea/~tNl;8ba8-df6e/~tND;6097-a429/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0adf-0909/tplx;6188-6ffd/~tNl;7e19-5357/~tND;9f3c-4512/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         38e1-6afa/tplx;78d2-bb9a/~tNl;1956-a58c/~tND;a4c3-19bf/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         2992-5bcb/tplx;7c57-849b/~tNl;55c3-c1ca/~tND;b2d6-1329/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         83a2-4aad/tplx;a8c3-d9fe/~tNl;31bf-62c0/~tND;08b5-d005/tyf, PASS, wireless Ipv4
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;6e1e-3b7b/~tND;19fe-8b0e/tyf, PASS, wireless
 
@@ -678,4 +678,4 @@
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           a4d8-abf4/tplx;f424-9aaf/~tNl;24fe-19e3/~tND;bb2f-ec63/tyf, PASS, wireless
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,         3b2b-5123/tplx;0009-ca8c/~tNl;a4a2-725a/~tND;032e-0333/tyf, PASS, wireless
 
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      af04-d760/tplx;95c2-6625/~tNl;5286-7eac/~tND;b4df-273e/tyf, PASS, wireless EthernetMac Ipv4
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      27e0-17f3/tplx;13cb-5046/~tNl;5add-7e09/~tND;b4df-273e/tyf, PASS, wireless EthernetMac Ipv4

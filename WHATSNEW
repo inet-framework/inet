@@ -40,6 +40,10 @@ Notable backward incompatible changes are the following:
 
    HR/DSSS and ERP transmissions carry their specific PHY protocol identities.
 
+   AP beacon intervals are rounded down to whole 1024-us TUs for both target
+   scheduling and advertisement (100ms becomes 99.328ms). Configured intervals
+   must be between 1 and 65535 TUs.
+
    The mesh no-forwarding-information reason code is corrected from 60 to 62.
    These corrections change affected packet bytes and may change Wi-Fi
    simulation trajectories and fingerprints.

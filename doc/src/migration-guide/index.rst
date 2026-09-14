@@ -4,6 +4,20 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Beacon and Probe Response Fields
+------------------------------------------
+
+AP ``beaconInterval`` values are rounded down to whole 1024-us TUs once, during
+initialization, and must be between 1 and 65535 TUs. The effective value drives
+both target scheduling and advertised content. Use ``102400us`` for exactly
+100 TUs; the default ``100ms`` now schedules targets 97 TUs apart. Actual beacon
+transmissions can be delayed by channel access. Custom producers should put
+the same effective interval in Beacon and Probe Response bodies as they use
+for target scheduling.
+The serializers require an interval between 1 and 65535 TUs for both frame
+types and throw for out-of-range values, including the default zero interval.
+Custom producers must set a valid interval before serialization.
+
 ``RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION`` now has its standard value,
 62. Code using the symbolic name needs only recompilation. Update external
 numeric mappings that used 60 for this reason. Old stored value 60 cannot be

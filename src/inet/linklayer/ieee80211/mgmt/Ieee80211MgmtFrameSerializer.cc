@@ -13,6 +13,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
 
 namespace inet {
 
@@ -593,7 +594,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: the TSF timer counts in microseconds.
         stream.writeUint64Le(simTime().inUnit(SIMTIME_US));
         // 2    Beacon interval
-        stream.writeUint16Le((uint16_t)(beaconFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
+        stream.writeUint16Le(normalizeIeee80211BeaconInterval(beaconFrame->getBeaconInterval()).inUnit(SIMTIME_US) / 1024);
         // 3    Capability
         stream.writeUint16Le(0); // FIXME set  capability
         // 4    Service Set Identifier (SSID)
@@ -632,7 +633,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
         // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: the TSF timer counts in microseconds.
         stream.writeUint64Le(simTime().inUnit(SIMTIME_US));
         // 2      Beacon interval
-        stream.writeUint16Le((uint16_t)(probeResponseFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
+        stream.writeUint16Le(normalizeIeee80211BeaconInterval(probeResponseFrame->getBeaconInterval()).inUnit(SIMTIME_US) / 1024);
         // 3      Capability
         stream.writeUint16Le(0); // FIXME
         // 4      SSID
