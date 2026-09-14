@@ -1,6 +1,6 @@
 %description:
 Exercise real packet-level and bit-level radio encapsulation/decapsulation,
-OFDM header generation and independent SIGNAL parity corruption.
+derived PHY factories and tags, and independent SIGNAL parity corruption.
 
 %includes:
 #include "inet/common/ProtocolTag_m.h"
@@ -63,14 +63,22 @@ Ieee80211Transmitter transmitter;
 TestRadio radio;
 radio.configure(&transmitter);
 const auto *ofdm = &Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20));
-const IIeee80211Mode *modes[] = {ofdm};
-const Protocol *protocols[] = {&Protocol::ieee80211OfdmPhy};
-for (int i = 0; i < 1; i++) {
+const IIeee80211Mode *modes[] = {
+    &Ieee80211DsssCompliantModes::dsssMode1Mbps,
+    &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble,
+    ofdm,
+    &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps
+};
+const Protocol *protocols[] = {&Protocol::ieee80211DsssPhy, &Protocol::ieee80211HrDsssPhy,
+    &Protocol::ieee80211OfdmPhy, &Protocol::ieee80211ErpOfdmPhy};
+for (int i = 0; i < 4; i++) {
     Packet packet("radio", makeShared<ByteCountChunk>(B(3)));
     packet.addTag<Ieee80211ModeReq>()->setMode(modes[i]);
     radio.encapsulate(&packet);
     ASSERT(packet.getTag<PacketProtocolTag>()->getProtocol() == protocols[i]);
-    {
+    if (i == 3)
+        ASSERT(dynamicPtrCast<const Ieee80211ErpOfdmPhyHeader>(packet.peekAtFront<Ieee80211PhyHeader>()) != nullptr);
+    if (i >= 2) {
         auto header = packet.peekAtFront<Ieee80211OfdmPhyHeader>();
         ASSERT(header->getRate() == 13 && header->getParity());
         auto bytes = packet.peekDataAt<BytesChunk>(b(0), B(5));
@@ -143,7 +151,7 @@ for (int length : {1, 3}) {
         }
     }
 }
-EV << "Radio SIGNAL validation verified.\n";
+EV << "Radio PHY identity and SIGNAL validation verified.\n";
 
 %contains: stdout
-Radio SIGNAL validation verified.
+Radio PHY identity and SIGNAL validation verified.

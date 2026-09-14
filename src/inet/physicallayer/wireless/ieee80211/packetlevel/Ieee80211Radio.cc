@@ -239,7 +239,10 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211Transmitter *>(transmitter);
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
-    auto phyHeader = mode->getHeaderMode()->createHeader();
+    // ERP reuses OFDM's SIGNAL mode objects, whose factory creates a base
+    // OFDM header. Preserve the selected PHY family when constructing the PPDU.
+    auto phyHeader = dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr ?
+            staticPtrCast<Ieee80211PhyHeader>(makeShared<Ieee80211ErpOfdmPhyHeader>()) : mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getDataLength()));
     if (auto ofdmHeader = dynamicPtrCast<Ieee80211OfdmPhyHeader>(phyHeader)) {
@@ -261,14 +264,14 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         protocol = &Protocol::ieee80211FhssPhy;
     else if (dynamic_cast<Ieee80211IrPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211IrPhy;
-    else if (dynamic_cast<Ieee80211DsssPhyHeader *>(phyHeader.get()))
-        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211HrDsssPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211HrDsssPhy;
-    else if (dynamic_cast<Ieee80211OfdmPhyHeader *>(phyHeader.get()))
-        protocol = &Protocol::ieee80211OfdmPhy;
+    else if (dynamic_cast<Ieee80211DsssPhyHeader *>(phyHeader.get()))
+        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211ErpOfdmPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211ErpOfdmPhy;
+    else if (dynamic_cast<Ieee80211OfdmPhyHeader *>(phyHeader.get()))
+        protocol = &Protocol::ieee80211OfdmPhy;
     else if (dynamic_cast<Ieee80211HtPhyHeader *>(phyHeader.get()))
         protocol = &Protocol::ieee80211HtPhy;
     else if (dynamic_cast<Ieee80211VhtPhyHeader *>(phyHeader.get()))

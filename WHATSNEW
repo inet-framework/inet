@@ -38,6 +38,8 @@ Notable backward incompatible changes are the following:
    OFDM radios generate and check SIGNAL parity and reject undefined RATE codes in compliant mode.
    Noncompliant layered reception uses its configured mode and still checks parity.
 
+   HR/DSSS and ERP transmissions carry their specific PHY protocol identities.
+
    The mesh no-forwarding-information reason code is corrected from 60 to 62.
    These corrections change affected packet bytes and may change Wi-Fi
    simulation trajectories and fingerprints.
