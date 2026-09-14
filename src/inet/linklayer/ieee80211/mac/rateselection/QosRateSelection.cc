@@ -269,11 +269,12 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
 {
-    // IEEE Std 802.11-2024, 10.6.5.8: Peer compatibility filtering is currently
-    // supported for HT (802.11n) modes using negotiated PeerHtState. Non-HT
-    // modes (legacy and VHT) return unchanged because VHT capability negotiation
-    // (VHT Capabilities/Operation elements) is not yet modeled in MIB.
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
+    if (mode == nullptr || peerAddress.isMulticast() || !mib)
+        return mode;
+    if (mode->getVhtMcsIndex() >= 0)
+        return selectPeerCompatibleVhtMode(modeSet, mib->localVhtCapabilities, mib->localVhtOperation,
+                mib->findPeerVhtState(peerAddress), mode);
+    if (mode->getHtMcsIndex() < 0)
         return mode;
     return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
 }

@@ -29,6 +29,13 @@ INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleMode(
         const physicallayer::IIeee80211Mode *mode,
         const MacAddress& peerAddress);
 
+// VHT selection intersects local Tx and peer Rx; absent negotiation uses legacy.
+INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleVhtMode(
+        const physicallayer::Ieee80211ModeSet *modeSet,
+        const Ieee80211VhtCapabilities& local, const Ieee80211VhtOperation& localOperation,
+        const Ieee80211Mib::PeerVhtState *peer,
+        const physicallayer::IIeee80211Mode *requested);
+
 } // namespace ieee80211
 } // namespace inet
 

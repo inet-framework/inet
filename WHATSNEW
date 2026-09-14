@@ -156,6 +156,15 @@ Notable backward compatible changes are the following:
    VHT width/NSS/MCS tuples. Existing unqualified lookups, mandatory/basic flags,
    and reference modes retain their previous choices.
 
+   Detailed AP/STA management now exchanges VHT Capabilities and VHT Operation
+   elements. Both rate selectors constrain VHT unicast by local Tx and peer Rx
+   MCS/NSS maps, bandwidth, GI, and advertised long-GI rate limits. Association
+   loss and mode-set application invalidate peer state. Missing VHT negotiation
+   falls back to legacy rates, including simplified-management and ad-hoc setups;
+   this changes their airtime and fingerprints. Current detailed VHT operation
+   is limited to 20 MHz and long GI. See the migration guide for configuration
+   and the retained VHT-only profile limitations.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

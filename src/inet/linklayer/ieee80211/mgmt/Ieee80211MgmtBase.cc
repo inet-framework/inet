@@ -16,6 +16,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -76,6 +77,18 @@ void Ieee80211MgmtBase::applyModeSet(const physicallayer::Ieee80211ModeSet *newM
     }
     supportedRates.numRates = rateIndex;
     extendedSupportedRates.numRates = extendedRateIndex;
+}
+
+void Ieee80211MgmtBase::addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtCapabilities(frame, mib->localVhtCapabilities);
+}
+
+void Ieee80211MgmtBase::addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtOperation(frame, mib->localVhtOperation);
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
@@ -195,7 +208,7 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
-    mib->clearPeerHtCapabilities();
+    mib->clearPeerCapabilities();
 }
 
 } // namespace ieee80211

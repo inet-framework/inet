@@ -107,6 +107,7 @@ void Ieee80211Mac::updateLocalHtCapabilities()
                 operationalChannelWidths.insert(channelWidth);
     }
     mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit, operationBand);
+    mib->updateLocalVhtCapabilities(modeSet, operationalHtSpatialStreamLimit);
 }
 
 void Ieee80211Mac::initializeRadioMode()

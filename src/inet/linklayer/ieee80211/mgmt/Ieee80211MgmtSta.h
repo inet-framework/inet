@@ -79,6 +79,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
         bool htCapabilitiesPresent = false;
         Ieee80211HtCapabilities htCapabilities;
+        bool vhtAdvertisementValid = false;
+        Ieee80211VhtCapabilities vhtCapabilities;
+        Ieee80211VhtOperation vhtOperation;
         bool htOperationPresent = false;
         Ieee80211HtOperation htOperation;
         simtime_t beaconInterval;
@@ -125,6 +128,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     AccessPointList apList;
 
     // associated Access Point
+    uint64_t pendingVhtGeneration = 0;
     cMessage *assocTimeoutMsg; // if non-nullptr: association is in progress
     bool reassociationInProgress = false;
     AssociatedApInfo assocAP;

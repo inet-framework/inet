@@ -11,6 +11,7 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211VhtCapabilities.h"
 
 namespace inet {
 
@@ -67,6 +68,11 @@ class INET_API Ieee80211Mib : public SimpleModule
         uint64_t generation = 0;
     };
 
+    struct PeerVhtState {
+        Ieee80211VhtCapabilities advertisedCapabilities;
+        Ieee80211VhtOperation operation;
+    };
+
   public:
     MacAddress address;
     Mode mode = static_cast<Mode>(-1);
@@ -79,6 +85,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     // This is a deliberately model-backed subset, not a full Annex C HT MIB implementation.
     bool localHtCapabilitiesValid = false;
     Ieee80211HtCapabilities localHtCapabilities;
+    uint64_t vhtCapabilityGeneration = 0;
+    bool localVhtCapabilitiesValid = false;
+    Ieee80211VhtCapabilities localVhtCapabilities;
+    Ieee80211VhtOperation localVhtOperation;
 
   private:
     Ieee80211HtOperation htOperation;
@@ -86,6 +96,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     bool primaryChannelAvailable = false;
     std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
+    std::map<MacAddress, PeerVhtState> peerVhtStates;
 
   protected:
     virtual void initialize(int stage) override;
@@ -113,6 +124,13 @@ class INET_API Ieee80211Mib : public SimpleModule
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);
     void removePeerHtCapabilities(const MacAddress& address);
     void clearPeerHtCapabilities();
+    void updateLocalVhtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, int spatialStreamLimit);
+    bool isVhtOperationSupported() const { return localVhtCapabilitiesValid; }
+    const PeerVhtState *findPeerVhtState(const MacAddress& address) const;
+    void setPeerVhtCapabilities(const MacAddress& address, const Ieee80211VhtCapabilities& capabilities, const Ieee80211VhtOperation& operation);
+    void removePeerVhtCapabilities(const MacAddress& address);
+    void removePeerCapabilities(const MacAddress& address);
+    void clearPeerCapabilities();
 };
 
 } // namespace ieee80211

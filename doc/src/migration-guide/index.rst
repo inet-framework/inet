@@ -96,8 +96,8 @@ applicable IFS and any unfinished slot, and update the expected grant time.
 Unchanged timing preserves the existing schedule. This application must not emit
 an intermediate mode-set notification or generate a new random backoff.
 
-Migrating VHT Catalogs
----------------------
+Migrating VHT Catalogs and Peer Rate Selection
+----------------------------------------------
 
 The ``ac`` catalog provides both 800 ns and 400 ns GI for 310 legal VHT tuples
 at 20/40/80/160 MHz and one through eight spatial streams. IEEE 802.11-2024,
@@ -108,11 +108,43 @@ catalog entries; historical mandatory/basic flags, reference/default modes, and
 previously accepted unspecified-GI lookups are preserved. Explicit GI queries
 can select either variant. This catalog does not establish operational support
 for bonded primary/secondary channels.
+
 External ``IIeee80211Mode`` implementations must implement ``getVhtMcsIndex()``:
 return the VHT MCS index (0 through 9), or -1 for other PHY families.
 ``Ieee80211ModeBase`` supplies the non-VHT default. VHT selection is independent
 of the HT MCS bitmap.
 
+``Ieee80211MgmtAp`` and ``Ieee80211MgmtSta`` now exchange and interpret VHT
+Capabilities and VHT Operation elements (IEEE 802.11-2024, 9.4.2.156 and
+9.4.2.157). The MIB owns committed per-peer state. The AP commits after the
+successful association/reassociation response is acknowledged; the STA commits
+after receiving a successful response with usable capability and operation
+information. Pending VHT snapshots cannot survive a local mode-set application.
+Disassociation, deauthentication, teardown, and mode-set application remove
+committed state. Authoritative beacons can refresh the associated AP's state.
+
+To restrict VHT reception or transmission, configure the corresponding map in
+:ned:`Ieee80211Mib`; that module documents the parameters and their constraints.
+For example, ``wlan[*].mib.vhtRxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]`` restricts
+reception to one stream with MCS 0 through 7 while leaving transmission
+configuration independent.
+
+Both DCF and HCF choose VHT unicast modes within local Tx and peer Rx maps,
+local/BSS operation width, GI eligibility, and the optional advertised highest
+long-GI rate limits. Selection never exceeds the requested rate. Missing or
+incompatible VHT negotiation uses a legacy operational mode. Consequently,
+``Ieee80211MgmtApSimplified``, ``Ieee80211MgmtStaSimplified``, and ad-hoc
+compositions use legacy unicast until a management implementation supplies
+valid VHT peer state. Existing VHT results, including ``lan80211ac/Ping1``, can
+change even though unspecified-GI catalog lookup is preserved.
+
+The current packet-level detailed-management support envelope is 20 MHz with
+long GI. The existing ``ac`` profile remains VHT-only and does not supply the
+HT modes required for full standards-conforming VHT operation. In particular,
+it does not negotiate HT-carried short-GI bits for 20/40 MHz. Wider catalog and
+selector tests do not claim bonded-channel operation. MU, beamforming, 80+80,
+extended NSS bandwidth signaling, and operating-mode notifications are not
+implemented by this change.
 
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------

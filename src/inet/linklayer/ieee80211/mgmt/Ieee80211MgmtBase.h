@@ -88,6 +88,8 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, pub
     }
 
     /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
     virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
     virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const;
 
