@@ -46,8 +46,12 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
 
     DatagramBuffer *buf = nullptr;
     if (i == bufs.end()) {
-        // this is the first fragment of that datagram, create reassembly buffer for it
-        buf = &bufs[key];
+        // this is the first fragment of that datagram, create reassembly buffer for it.
+        // Keep the iterator of the new entry. A datagram that completes on its first
+        // fragment -- an atomic fragment, offset 0 with M=0 -- erases this entry later in
+        // the same call, and erasing a stale end() iterator aborts the run.
+        i = bufs.emplace(key, DatagramBuffer()).first;
+        buf = &(i->second);
         buf->packet = nullptr;
         buf->createdAt = now;
     }
@@ -160,10 +164,21 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
             unfragmentableExtHdrs.back()->setNextHeaderProtocol(fragNextHdr);
         }
 
+        // RFC 8200 section 3: the payload length counts every octet after the base header,
+        // extension headers included. The base header here is a copy of the first
+        // fragment's, and its payload length describes that fragment and not the datagram.
+        // Left uncorrected, Ipv6::decapsulate asserts and the run stops.
+        const auto& reassembledData = buf->buf.getReassembledData();
+        b payloadLength = b(0);
+        for (auto& extHdr : unfragmentableExtHdrs)
+            payloadLength += extHdr->getChunkLength();
+        payloadLength += reassembledData->getChunkLength();
+        hdr->setPayloadLength(B(payloadLength));
+
         pk->insertAtFront(hdr);
         for (auto& extHdr : unfragmentableExtHdrs)
             pk->insertAtBack(extHdr);
-        pk->insertAtBack(buf->buf.getReassembledData());
+        pk->insertAtBack(reassembledData);
         delete buf->packet;
         bufs.erase(i);
         return pk;

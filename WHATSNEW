@@ -90,6 +90,25 @@ Notable backward incompatible changes are the following:
    No baseline moves. A scenario that reached either branch aborted, so it cannot
    be in a passing fingerprint or statistical baseline.
 
+6. IPv6 reassembly writes the payload length of the reassembled datagram
+
+   Ipv6FragBuf::addFragment rebuilt the datagram from the base header of the
+   first fragment and left its Payload Length field untouched, so the field
+   described that fragment and not the datagram.
+
+   Where the field exceeded the reassembled data, Ipv6::decapsulate asserted and
+   the run stopped. Where it fell short, which is the ordinary two-fragment case,
+   the same function truncated the datagram silently to the first fragment's
+   length. Every IPv6 reassembly was affected. The field now counts every octet
+   after the base header, extension headers included, as RFC 8200 section 3
+   requires.
+
+   The same function also erased a stale end() iterator when one fragment
+   completed a datagram, which aborted the run on an atomic fragment.
+
+   Simulations that reassemble IPv6 fragments deliver whole datagrams now, so
+   their trajectories and fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

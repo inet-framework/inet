@@ -11,16 +11,30 @@ to one onto its expected observations. Host A fragments a 1500-octet packet for 
 datagram by the definition of RFC 8200 §4.5. Mapping of the mockup with a relay: host A =
 hostA, router R = router, relay T = tap, host B = hostB.
 
-Defect. This test FAILS and the failure is NOT declared expected, because the model claims the
-behaviour: the fragment buffer exists and runs, and what it does on a single-fragment datagram is
-use an iterator it has already erased. This is a defect in the ordinary sense of the word -- a
-memory bug in live code -- and stopping the simulation is the worst way for it to show.
+Expected result: PASS, since 2026-09-14.
 
-What the run shows: The model's fragment buffer stops the simulation with a C++
-assertion when a single fragment completes a datagram: Ipv6FragBuf::addFragment looks the
-buffer up before it creates it, and on completion erases the stale end iterator
-(Ipv6FragBuf.cc:168). No verdict line is printed, and the runner counts the missing line
-as a failure. See doc/project/evidence/model/ipv6/results.md.
+It failed until then, as a defect. `Ipv6FragBuf::addFragment` looked the buffer up before it
+created it, so on a datagram that completes from one fragment it erased a stale `end()`
+iterator and a C++ assertion stopped the run. The buffer keeps the iterator of the entry it
+creates now.
+
+One repair uncovered a second defect and a fault in this test.
+
+The second defect: the reassembled packet carried the base header of the first fragment
+unchanged, so its payload length described that fragment and not the datagram, and
+`Ipv6::decapsulate` asserted. `Ipv6FragBuf` computes the payload length of the reassembled
+datagram now. That repair also turned `Rfc8200OverlappingFragments.test` green.
+
+The fault in this test: expected observation 2 used to filter on `udp.destPort == 5000`, and
+that filter can never match here. The vehicle is the first of two fragments with its M flag
+cleared, so the datagram this host reassembles is a UDP datagram whose header claims 1460
+octets and whose body holds 1232. It is truncated by construction, the dissector will not
+read it, and UDP discards it as a bit error, which is correct of UDP. The step therefore
+could not have been decisive about the port even with the model repaired; the crash hid that.
+The step reads the length of the packet handed up instead, which is what the rule is about:
+the content went up as one whole packet.
+
+See doc/project/evidence/model/ipv6/results.md.
 
 %includes:
 #include <csignal>
@@ -60,8 +74,12 @@ Define_ProtocolTestProgram()
                   .within(6.0))
         // Expected observation 2: host B's internet layer hands its content to UDP as a whole
         // packet (RFC8504-NR-4, RFC8200-REASM-6).
+        // The packet is read by length and not by field. The atomic fragment carries 1232
+        // octets of a datagram whose UDP header claims 1460, so no field of it can be
+        // dissected. 1232 is the whole content of the fragment: 1280 on the wire, less the
+        // 40-octet base header and the 8-octet fragment header.
         .once(on("hostB.ipv6.ipv6").signal("packetSentToUpper")
-                  .filterPacket("udp.destPort == 5000")
+                  .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 1232; })
                   .describe("the content of the atomic fragment handed to UDP at host B as a whole packet")
                   .within(0.5));
 }

@@ -43,8 +43,8 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200SourceFragmentation.test | RFC8200-FRAG-3, FRAG-4, FRAG-5 (structure), FRAG-6, EXT-1, REASM-1, REASM-2, MTU-4; covers HDR-3, RFC8504-NR-2, NR-3, NR-4, NR-8 (the sender halves) | PASS |
 | Rfc8200FragmentPayloadLength.test | RFC8200-FRAG-4, FRAG-5 (payload length), HDR-2 | **FAIL (unexpected)** — defect |
 | Rfc8200FragmentIdentification.test | RFC8200-FRAG-2; notes RFC8504-NR-5 | PASS |
-| Rfc8200AtomicFragment.test | RFC8504-NR-4 (receiver; governs RFC8200-REASM-6) | **FAIL (unexpected)** — defect, a C++ assertion |
-| Rfc8200OverlappingFragments.test | RFC8504-NR-3 (receiver; governs RFC8200-REASM-5) | **FAIL (unexpected)** — defect, a runtime assertion |
+| Rfc8200AtomicFragment.test | RFC8504-NR-4 (receiver; governs RFC8200-REASM-6) | **PASS** since 2026-09-14; two defects repaired |
+| Rfc8200OverlappingFragments.test | RFC8504-NR-3 (receiver; governs RFC8200-REASM-5) | **PASS** since 2026-09-14; the payload length repair closed it |
 | Rfc8200ShortFragment.test | RFC8200-REASM-4 | PASS |
 | Rfc8200OversizedFragmentOffset.test | RFC8200-REASM-8 | PASS |
 | Rfc4443PacketTooBig.test | RFC8200-FRAG-1, RFC4443-PTB-1, RFC4443-ERR-2; covers RFC8504-NR-11 | PASS |
@@ -67,9 +67,9 @@ repeated in the table below, because every test ran again on this tree.
 Summary: 27 tests in the suite, 19 PASS, **0 FAIL (expected), 8 FAIL (unexpected)**, so the suite
 reports FAIL.
 
-Since 2026-09-14 the suite is 27 tests, **20 PASS, 0 FAIL (expected), 7 FAIL (unexpected)**.
-`Rfc4443UnknownInformationalType.test` passes: its defect is repaired. The other seven
-stand.
+Since 2026-09-14 the suite is 27 tests, **22 PASS, 0 FAIL (expected), 5 FAIL (unexpected)**.
+`Rfc4443UnknownInformationalType.test`, `Rfc8200AtomicFragment.test` and
+`Rfc8200OverlappingFragments.test` pass: their defects are repaired. The other five stand.
 
 ## Which failures are declared, and which are not
 
@@ -87,12 +87,22 @@ wrong thing.
 | `Rfc4443ErrorForUnknownProtocol.test` | The report is built and sent; the crash is in the path that delivers it. |
 | `Rfc4443PacketTooBigMtu.test` | `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter (Icmpv6.h:55) and the caller hands it a literal 0 (Icmpv6.cc:273). The `// TODO implement MTU support.` above it is a bare "to do", which says the behavior is wanted and unfinished — a claim — and not a reason why it is unsupported. |
 | `Rfc8200FragmentPayloadLength.test` | `Ipv6::fragmentAndSend` builds every fragment and sets its header; the payload length it writes is the copied one. |
-| `Rfc8200AtomicFragment.test` | The fragment buffer runs and uses an iterator it has already erased. A memory bug in live code. |
-| `Rfc8200OverlappingFragments.test` | The reassembly buffer runs, completes a datagram from the overlapping set, and then trips the model's own assertion in `Ipv6::decapsulate`. |
+| `Rfc8200AtomicFragment.test` | **Repaired.** The fragment buffer looked its entry up before it created it, so a datagram that completes from one fragment erased a stale `end()` iterator. It keeps the iterator of the entry it creates now. |
+| `Rfc8200OverlappingFragments.test` | **Repaired.** The reassembled packet carried the base header of the first fragment unchanged, so its payload length described that fragment and not the datagram, and `Ipv6::decapsulate` asserted. `Ipv6FragBuf` computes the payload length of the reassembled datagram now. |
 
 **Four of the eight stop the simulation**, and that is the loudest finding of this suite: a
 crafted but lawful input meets a `default:` branch, an erased iterator or an assertion, and the
 run ends. A stop is never a declarable failure.
+
+Three of those four are repaired, on 2026-09-14: the unknown ICMPv6 type, the atomic fragment
+and the overlapping fragments. The fourth, `Rfc4443ErrorForUnknownProtocol`, still stops.
+
+The atomic fragment uncovered a defect wider than the crafted case. The reassembled packet
+kept the base header of the first fragment, so its payload length described that fragment.
+Where it exceeded the reassembled data, `Ipv6::decapsulate` asserted, which is how the two
+crafted tests found it. Where it fell short, which is the ordinary two-fragment case, the
+same function truncated the datagram silently to the first fragment's length. Every IPv6
+reassembly in the model was affected.
 
 Every FAIL is a
 model gap declared with `%# expected-result: FAIL`; each test keeps the faithful assertion
