@@ -48,6 +48,7 @@ measured.
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
 | the test suites | T2 | GitHub Actions test workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
 | `inet_featuretool` | T3 | the feature workflow | `AR-EXT-FEATURES` |
+| [check-includes.sh](check-includes.sh) | T3 | by hand; not yet in CI | that every `#include "inet/…"` a commit writes resolves at that commit — a header that arrives later makes every commit before it fail to compile |
 | [check-ned-params.sh](check-ned-params.sh) | T3 | by hand; not yet in CI | that every `par("x")` a commit reads is declared by a NED in the tree at that commit — a read ahead of its declaration compiles and cannot run |
 | [check-classification.sh](check-classification.sh) | T3 | by hand; not yet in CI | `CR-TAG-TRAILER`, `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
 
