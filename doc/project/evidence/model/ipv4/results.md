@@ -41,7 +41,7 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc1122VersionDiscard.test | RFC1122-VER-1 | FAIL (expected) — unimplemented |
 | Rfc1122ForeignDestination.test | RFC1122-ADDR-2 | PASS |
 | Rfc1122InvalidSourceAddress.test | RFC1122-ADDR-3, ADDR-4 | FAIL (expected) — unimplemented |
-| Rfc1122UnknownIcmpType.test | RFC1122-ICMP-1 | **FAIL (unexpected)** — defect, a runtime error |
+| Rfc1122UnknownIcmpType.test | RFC1122-ICMP-1 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc1122HostErrorReport.test | RFC1122-ERR-1, DU-1, ICMP-2, ICMP-4 | PASS |
 | Rfc1122NoErrorAboutError.test | RFC1122-ICMP-5 | PASS |
 | Rfc1122NoErrorForBroadcast.test | RFC1122-ICMP-6 | PASS |
@@ -52,6 +52,9 @@ repeated in the table below, because every test ran again on this tree.
 Summary: 22 tests, 16 PASS, **2 FAIL (expected), 4 FAIL (unexpected)**, so the suite reports
 FAIL. Each test keeps the faithful assertion and each failed at the step its description
 predicts. No specification misread was found.
+
+Since 2026-09-14 the suite is 22 tests, **17 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.
+`Rfc1122UnknownIcmpType.test` passes: its defect is repaired. The other three stand.
 
 ## Which failures are declared, and which are not
 
@@ -64,7 +67,7 @@ code. Four of the six failures were declared and should not have been.
 | --- | --- | --- |
 | `Rfc1122ChecksumDiscard.test` | **defect** | `Ipv4Header::verifyChecksum` exists and `Ipv4.cc:282` calls it and drops on failure. The guard `!isCorrect() && !verifyChecksum()` short-circuits, so a well-formed header never reaches the test. A branch that exists and is unreachable for the case under test. |
 | `Rfc1122NoErrorForLinkBroadcast.test` | **defect** | `Icmp::maySendErrorMessage` suppresses for four conditions and its first comment reads "don't send ICMP error messages in response to broadcast or multicast messages". The mechanism is there and the link-layer condition is missing from it. |
-| `Rfc1122UnknownIcmpType.test` | **defect** | `Icmp::processIcmpMessage` has a `default:` branch for a type it does not know, and that branch throws. A branch that exists and does the wrong thing. |
+| `Rfc1122UnknownIcmpType.test` | **repaired** | `Icmp::processIcmpMessage` had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 1122 section 3.2.2 requires. |
 | `Rfc791SameIdDifferentProtocol.test` | **defect** | `Ipv4FragBuf::Key` is the reassembly key (Ipv4FragBuf.h:31 to 40) and carries three of the four fields RFC 791 names. A key that exists and is incomplete. |
 | `Rfc1122VersionDiscard.test` | unimplemented | Nothing reads the version field on receipt. `getVersion` does not appear in `Ipv4.cc` at all. |
 | `Rfc1122InvalidSourceAddress.test` | unimplemented | Nothing validates the source address of a received datagram. The one source test in the receive path, `Ipv4.cc:824`, only warns about an unspecified address and discards nothing. |

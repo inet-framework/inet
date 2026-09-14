@@ -322,8 +322,17 @@ void Icmp::processIcmpMessage(Packet *packet)
             delete packet;
             break;
 
-        default:
-            throw cRuntimeError("Unknown ICMP type %d", icmpmsg->getType());
+        default: {
+            // RFC 1122 section 3.2.2: a host MUST silently discard an ICMP message of a
+            // type it does not recognize. Stopping the simulation let any peer end the run
+            // with one packet.
+            EV_WARN << "Unknown ICMP type " << icmpmsg->getType() << ", packet dropped\n";
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            break;
+        }
     }
 }
 

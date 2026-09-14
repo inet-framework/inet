@@ -18,25 +18,24 @@ by declaration; that is the simulation form of a rewriter that computes the chec
 Source Quench was deprecated for routers by RFC 6633, and RFC 9293 keeps the receive rule
 for exactly that reason: a host still meets the message and must ignore it.
 
-Expected result: FAIL. The class is an **unimplemented feature**, so the declaration below
-stands: the model does not claim this behaviour. `Icmp::processIcmpMessage` has no branch for
-type 4 at all, so there is no code path, no function and no field for it.
+Expected result: PASS, since 2026-09-14.
 
-The model does not know the message. `Icmp::processIcmpMessage`
-switches on the type, and its default branch throws
-`cRuntimeError("Unknown ICMP type %d")` (src/inet/networklayer/ipv4/Icmp.cc). The run stops
-before TCP is ever offered the message:
+It failed until then, as an **unimplemented feature**. `Icmp::processIcmpMessage` had no
+branch for type 4, and its default branch threw `cRuntimeError("Unknown ICMP type %d")`. The
+run stopped before TCP was ever offered the message, no verdict line was printed, and the
+runner counted the missing line as a failure. A stop is not a silent discard.
 
-    Error: Unknown ICMP type 4 -- in module (inet::Icmp) Rfc9293IcmpNet.host1.ipv4.icmp
-    (id=48), at t=0.20016446s, event #84
+That default branch discards now, as RFC 1122 section 3.2.2 requires of any ICMP type a host
+does not recognize. This test predicted the correction: it is the same branch that
+tests/protocol/ipv4/Rfc1122UnknownIcmpType.test reaches with a type that names no message at
+all, and the two findings shared one cause and one correction.
 
-No verdict line is printed, and the runner counts the missing line as a failure. A stop is
-not a silent discard.
-
-This is the same branch that tests/protocol/ipv4/Rfc1122UnknownIcmpType.test reaches with a
-type that names no message at all. The two findings share one cause and one correction; this
-one shows that the branch is reached by a type the standards still describe, and that a TCP
-host meets it. See doc/project/evidence/model/tcp/results.md.
+The repair does not give the model a branch for Source Quench. The message is discarded
+because its type is unrecognized, not because the host knows what it is. RFC9293-ICMP-2 is a
+rule about what must not happen, and that is what the steps below establish: the message
+reaches host A, no reset leaves host A, and the whole 5000-octet stream is acknowledged. The
+observable rule is met. A host that one day implements type 4 would still have to meet it.
+See doc/project/evidence/model/tcp/results.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -147,6 +146,5 @@ seed-set = 0
 *.host2.app[0].localPort = 1000
 *.host2.app[0].echoFactor = 0
 
-%# expected-result: FAIL
 %contains: stdout
 PROTOCOLTEST rfc9293_source_quench: PASS

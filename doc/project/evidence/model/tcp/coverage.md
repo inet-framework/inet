@@ -59,7 +59,7 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC9293-WND-4](../../standard/rfc9293/catalog.md#rfc9293-wnd-4) | selected | [shrunk-window](../../protocol/tcp/checks/window.md#shrunk-window) | Rfc9293ShrunkWindow.test | PASS |
 | [RFC9293-WND-5](../../standard/rfc9293/catalog.md#rfc9293-wnd-5) | selected | [no-new-data-past-a-shrunk-edge](../../protocol/tcp/checks/window.md#no-new-data-past-a-shrunk-edge) | Rfc9293ShrunkWindowNoNewData.test | **FAIL**, gap 3 |
 | [RFC9293-ICMP-1](../../standard/rfc9293/catalog.md#rfc9293-icmp-1) | covered | [soft-icmp-error](../../protocol/tcp/checks/icmp.md#soft-icmp-error) | Rfc9293SoftIcmpError.test | PASS; the report reached the connection, which is what the check needed of it |
-| [RFC9293-ICMP-2](../../standard/rfc9293/catalog.md#rfc9293-icmp-2) | selected | [source-quench](../../protocol/tcp/checks/icmp.md#source-quench) | Rfc9293SourceQuench.test | **FAIL**, gap 4 |
+| [RFC9293-ICMP-2](../../standard/rfc9293/catalog.md#rfc9293-icmp-2) | selected | [source-quench](../../protocol/tcp/checks/icmp.md#source-quench) | Rfc9293SourceQuench.test | **PASS**; gap 4 closed |
 | [RFC9293-ICMP-3](../../standard/rfc9293/catalog.md#rfc9293-icmp-3) | selected | [soft-icmp-error](../../protocol/tcp/checks/icmp.md#soft-icmp-error) | Rfc9293SoftIcmpError.test | PASS |
 | [RFC9293-ICMP-4](../../standard/rfc9293/catalog.md#rfc9293-icmp-4) | candidate | — | — | — |
 

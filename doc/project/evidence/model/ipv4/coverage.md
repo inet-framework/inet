@@ -78,7 +78,7 @@ which is not a failure.
 | [RFC1122-FRAG-3](../../standard/rfc1122/catalog.md#rfc1122-frag-3) | candidate (conditional on the absence of FRAG-1) | — | — | — |
 | [RFC1122-FRAG-4](../../standard/rfc1122/catalog.md#rfc1122-frag-4) | covered | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test | **declined** (a should: 1028 octets sent whole off-net) |
 | [RFC1122-FRAG-5](../../standard/rfc1122/catalog.md#rfc1122-frag-5) | covered | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test | PASS (on a gateway interface of the same module type) |
-| [RFC1122-ICMP-1](../../standard/rfc1122/catalog.md#rfc1122-icmp-1) | selected | [unknown-icmp-type](../../protocol/ipv4/checks/input-validation.md#unknown-icmp-type) | Rfc1122UnknownIcmpType.test | **FAIL** (model gap: a runtime error) |
+| [RFC1122-ICMP-1](../../standard/rfc1122/catalog.md#rfc1122-icmp-1) | selected | [unknown-icmp-type](../../protocol/ipv4/checks/input-validation.md#unknown-icmp-type) | Rfc1122UnknownIcmpType.test | **PASS** (the runtime error is repaired) |
 | [RFC1122-ICMP-2](../../standard/rfc1122/catalog.md#rfc1122-icmp-2) | selected | [host-error-report](../../protocol/ipv4/checks/error-report.md#host-error-report) | Rfc1122HostErrorReport.test | PASS |
 | [RFC1122-ICMP-3](../../standard/rfc1122/catalog.md#rfc1122-icmp-3) | later (module test: a handoff) | — | — | — |
 | [RFC1122-ICMP-4](../../standard/rfc1122/catalog.md#rfc1122-icmp-4) | selected | [host-error-report](../../protocol/ipv4/checks/error-report.md#host-error-report) | Rfc1122HostErrorReport.test | PASS (a should) |

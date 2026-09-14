@@ -46,7 +46,7 @@ Pass 3, level 3:
 | Rfc9293SoftIcmpError.test | RFC9293-ICMP-3; covers ICMP-1 | PASS |
 | Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL (unexpected)** — defect, gap 2 |
 | Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **FAIL (unexpected)** — defect, gap 3 |
-| Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **FAIL (expected)** — unimplemented feature, gap 4 |
+| Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **PASS** since 2026-09-14; gap 4 is closed by the ICMP repair |
 
 Summary after pass 3: 19 tests, 15 PASS, 4 FAIL, each failure declared with
 `%# expected-result: FAIL`. The other four suites of the same tree stay where they were:
@@ -69,6 +69,10 @@ MSS option is present, so the `should` of RFC9293-OPT-1 is met.
 
 RFC 6298 and RFC 5681 entered the in-scope set, and ten checks were written against them.
 The suite is 27 tests: **22 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.
+
+Since 2026-09-14 it is **23 PASS, 1 FAIL (expected), 3 FAIL (unexpected)**.
+`Rfc9293SourceQuench.test` passes and its declaration is removed: the ICMP repair that the
+IPv4 suite asked for closed gap 4 as well, exactly as that test predicted.
 
 | Test | Checks | Verdict |
 | --- | --- | --- |
@@ -174,7 +178,7 @@ not against the earlier wording.
 | Test | Does code exist for the behaviour? | Class | Declared? |
 | --- | --- | --- | --- |
 | Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature | yes |
-| Rfc9293SourceQuench | `Icmp::processIcmpMessage` has no branch for type 4; the default throws | unimplemented feature | yes |
+| Rfc9293SourceQuench | `Icmp::processIcmpMessage` still has no branch for type 4, but its default discards instead of throwing, which meets the rule | closed 2026-09-14 | no, removed |
 | Rfc9293ChecksumDefault | `TcpChecksumInsertionHook::computeChecksum` computes the value, and the `computed` mode runs it — step 1 of the test proves it on host B | **defect** | **no, removed** |
 | Rfc9293ShrunkWindowNoNewData | `sendData` limits a send by `min(snd_wnd, congestionWindow)`, and the sibling test shows the shrunk advertisement is read | **defect** | **no, removed** |
 

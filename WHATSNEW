@@ -77,6 +77,19 @@ Notable backward incompatible changes are the following:
    producer. Inside INET, the client in the Network6 and Network7 steps of
    tutorials/protocol now sends its packet; before, it sent none.
 
+5. An unrecognized ICMP or ICMPv6 type is discarded, not thrown
+
+   Icmp::processIcmpMessage and the ICMPv6 type switch each had a default branch
+   for a message type they do not know, and each branch threw a cRuntimeError.
+   Any peer could therefore end a simulation with one packet.
+
+   RFC 1122 section 3.2.2 and RFC 4443 section 2.4(b) both require a silent
+   discard. Both branches now emit packetDropped and delete the packet. A
+   simulation that used to stop with "Unknown ICMP type" carries on.
+
+   No baseline moves. A scenario that reached either branch aborted, so it cannot
+   be in a passing fingerprint or statistical baseline.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

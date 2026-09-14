@@ -62,10 +62,14 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200UnrecognizedNextHeader.test | RFC8504-NR-6 (governs RFC8200-EXT-3) | PASS |
 | Rfc8200UnassignedNextHeader.test | RFC8504-NR-6, for an unassigned value | PASS |
 | Rfc4443UnknownErrorType.test | RFC4443-MPR-4 (the silence); notes MPR-1 | PASS |
-| Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **FAIL (unexpected)** — defect, a runtime error |
+| Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **PASS** since 2026-09-14; the defect is repaired |
 
 Summary: 27 tests in the suite, 19 PASS, **0 FAIL (expected), 8 FAIL (unexpected)**, so the suite
 reports FAIL.
+
+Since 2026-09-14 the suite is 27 tests, **20 PASS, 0 FAIL (expected), 7 FAIL (unexpected)**.
+`Rfc4443UnknownInformationalType.test` passes: its defect is repaired. The other seven
+stand.
 
 ## Which failures are declared, and which are not
 
@@ -79,7 +83,7 @@ wrong thing.
 | Test | The claim, in the model |
 | --- | --- |
 | `Rfc4443NoErrorForLinkBroadcast.test`, `…LinkMulticast.test` | `Icmpv6::validateDatagramPromptingError` suppresses for four conditions, one citing RFC 4443 §2.4(e). The mechanism is there and the link-layer condition is missing from it. |
-| `Rfc4443UnknownInformationalType.test` | The type switch has a `default:` branch for a type it does not know, and that branch throws. |
+| `Rfc4443UnknownInformationalType.test` | **Repaired.** The type switch had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 4443 section 2.4(b) requires. |
 | `Rfc4443ErrorForUnknownProtocol.test` | The report is built and sent; the crash is in the path that delivers it. |
 | `Rfc4443PacketTooBigMtu.test` | `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter (Icmpv6.h:55) and the caller hands it a literal 0 (Icmpv6.cc:273). The `// TODO implement MTU support.` above it is a bare "to do", which says the behavior is wanted and unfinished — a claim — and not a reason why it is unsupported. |
 | `Rfc8200FragmentPayloadLength.test` | `Ipv6::fragmentAndSend` builds every fragment and sets its header; the payload length it writes is the copied one. |

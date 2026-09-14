@@ -187,8 +187,17 @@ void Icmpv6::processICMPv6Message(Packet *packet)
                 send(packet, "ipv6Out");
                 break;
             }
-            default:
-                throw cRuntimeError("Unknown ICMPv6 message type %d received", type);
+            default: {
+                // RFC 4443 section 2.4(b): a node MUST silently discard an ICMPv6
+                // informational message of a type it does not recognize. Stopping the
+                // simulation let any peer end the run with one packet.
+                EV_WARN << "Unknown ICMPv6 message type " << type << ", packet dropped\n";
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+                break;
+            }
         }
     }
 }
