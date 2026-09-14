@@ -182,6 +182,14 @@ retain completed whole backoff slots and the remaining random draw, restart the
 applicable IFS and any unfinished slot, and update the expected grant time.
 Unchanged timing preserves the existing schedule. This application must not emit
 an intermediate mode-set notification or generate a new random backoff.
+Migrating VHT Catalogs and Peer Rate Selection
+----------------------------------------------
+
+External ``IIeee80211Mode`` implementations must implement ``getVhtMcsIndex()``:
+return the VHT MCS index (0 through 9), or -1 for other PHY families.
+``Ieee80211ModeBase`` supplies the non-VHT default. VHT selection is independent
+of the HT MCS bitmap.
+
 
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
