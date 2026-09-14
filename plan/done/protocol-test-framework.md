@@ -1,8 +1,8 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **in progress** — Phases 0–6 and 8 done; Phase 7 done except the fingerprint
-hookup, which is an open decision and not remaining work (see §14 and the section at the
-end). **Phase 9 (state-machine / value-signal observation) done** —
+Status: **done**, 2026-09-14. Phases 0 to 9 are all implemented. The fingerprint hookup
+of §10 is deliberately not built; the decision and its reasons are at the end of this
+document, with the list of what else was left out. **Phase 9 (state-machine / value-signal observation) done** —
 observe non-packet scalar signals (FSM state, counters) and assert state sequences; first
 subject is Ethernet PLCA (10BASE-T1S). See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
@@ -608,7 +608,7 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     tap's wire-level filter, so one could write `intercept(on("host1")...).drop()` instead of a
     raw `match("tcp...")` string; multiple simultaneous rules per tap.
 
-- **Phase 7 — Harness, CI, docs. 🟡 PARTIAL (docs + examples done; CI wiring deferred).**
+- **Phase 7 — Harness, CI, docs. ✅ DONE.**
   - **Authoring guide + cookbook** (`tests/protocol/lib/AUTHORING.md`): the full vocabulary
     reference (selectors, cardinality, content/captures, combinators, injection, interception,
     self-description, running tests) plus worked cookbook entries — TCP handshake, TCP
@@ -658,9 +658,8 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
       library and running the whole suite with no `LD_LIBRARY_PATH` and no manual build.
     - **The golden-file check on `describe()`** is `self/Describe.test`. It found that a
       guard rendered exactly like an ordered step; a concurrent step now says "Meanwhile:".
-    - **Still open: the fingerprint hookup.** §10 wants the protocol scenarios in the
-      fingerprint CSV CI as a second safety net. It is the one item with a recurring cost,
-      so it is a decision and not a task — see "The fingerprint hookup" below.
+    - **The fingerprint hookup is not done, by decision of 2026-09-14.** See "The
+      fingerprint hookup" below.
 
 - **Phase 8 — Description generator (§13). ✅ DONE (early, brought forward before Phase 5).**
   AST→English renderer, phrasebook, `describe()`. Qtenv panel / golden-file CI hook remain
@@ -770,7 +769,7 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   and detect/report ambiguity.
 ```
 
-## The fingerprint hookup — the one open decision
+## The fingerprint hookup — decided against, 2026-09-14
 
 §10 says the protocol tests are deterministic simulations, so they also produce fingerprints
 and could join the fingerprint CSV CI as a second safety net.
@@ -791,4 +790,35 @@ What the fingerprint suite catches and the protocol tests do not is a change in 
 model that no assertion names. That is a real gap, and the cheaper answer to it is a check
 that names the thing, not a hash over everything.
 
-Decide this before closing the plan.
+**Decided on 2026-09-14: not done.** The protocol tests stand on their own assertions.
+
+## What else was left out
+
+These were deferred inside a phase record and never built. None blocks anything; each is
+here so that nobody has to re-derive it from the phase notes.
+
+- **Per-flow scoping** — concurrent flow cursors, the most automaton-heavy piece. `unordered`
+  covers explicit interleaving, and specific filters keep flows apart.
+- **`repeatUntil(cond)`** — a loop step.
+- **`use()` inside an injected field value**, and `.frame(...)` chunk sugar. Captures are
+  read inside predicates only.
+- **A pattern as a relay's filter** — writing `tap(on("host1")...)` instead of a wire-level
+  match expression.
+- **Precise layer classification.** `ProtocolTester::inferLayer` is still a path heuristic.
+
+Three things the phase notes list as deferred were built later and the notes are stale: a
+relay holds a list of rules (`self/TwoRulesOneRelay.test`), the inline relay module exists,
+and `.describe()` answers the lambda-opacity problem.
+
+## One correction to the Phase 0 record
+
+Phase 0 recorded that "some modules emit a signal twice (e.g. `udp` `receivedFromLower`) —
+matching must be robust to duplicate emissions". That read a model defect as a property of
+the world and made the framework carry it. It was one module, not "some", and it was wrong:
+`Udp` emitted the signal that its base class had already emitted. The framework was never
+robust to it either — a cardinality at a receiving UDP module counted double, and a QUIC
+check passed only because the duplicate primed a counter that its own step shape had left at
+zero. The emit is gone from `Udp.cc`, and `self/CountAtReceiver.test` holds it gone.
+
+The lesson is worth more than the bug: an observation that surprises the framework author is
+a finding about the model until it is proven otherwise.
