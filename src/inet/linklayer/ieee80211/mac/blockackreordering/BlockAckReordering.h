@@ -33,6 +33,7 @@ class INET_API BlockAckReordering
 
   protected:
     std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
+    simtime_t maxReceiveLifetime = SIMTIME_MAX;
 
   protected:
     static Fragments sortFragmentsByFragmentNumber(const Fragments& fragments);
@@ -40,16 +41,24 @@ class INET_API BlockAckReordering
     ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 
     std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
-    bool isComplete(const Fragments& fragments);
     void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
     void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
     ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
     bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum);
 
   public:
+    struct QosFrameProcessingResult {
+        ReorderBuffer frames;
+        Fragments tombstonedFragments;
+    };
+
+    explicit BlockAckReordering(simtime_t maxReceiveLifetime = SIMTIME_MAX) : maxReceiveLifetime(maxReceiveLifetime) {}
     virtual ~BlockAckReordering();
 
     std::vector<Packet *> resetReceiveBuffer(Tid tid, MacAddress originatorAddr);
+    simtime_t getNextExpirationTime() const;
+    std::vector<Packet *> removeExpiredFragments(simtime_t currentTime);
+    QosFrameProcessingResult processReceivedQoSFrameWithResult(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };

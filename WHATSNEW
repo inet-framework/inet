@@ -173,6 +173,12 @@ Notable backward incompatible changes are the following:
    fragments, retries and reused sequence numbers no longer combine bodies from
    unrelated transmissions; affected receive drops and deliveries may change.
 
+10. Receive Lifetime in Block Ack Reordering
+
+   Receive lifetime now remains anchored to first reception while fragments wait in
+   Block Ack reordering. A later stage no longer gives an old incomplete body a fresh
+   lifetime, so delayed or incomplete bodies may be dropped earlier.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
