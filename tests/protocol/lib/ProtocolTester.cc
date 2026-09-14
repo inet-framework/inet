@@ -165,6 +165,7 @@ void ProtocolTester::installInterceptions()
             throw cRuntimeError("ProtocolTest '%s': intercept target '%s' is not a PacketTap",
                                 program->name.c_str(), interception.tapName.c_str());
         tap->configure(interception.matchExpression, interception.minimumBytes, interception.occurrence,
+                       interception.fromOccurrence,
                        interception.action, interception.delayTime, interception.mutator);
     }
 }

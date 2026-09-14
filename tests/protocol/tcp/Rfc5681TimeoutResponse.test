@@ -1,0 +1,199 @@
+%description:
+
+RFC 5681 -- a loss the timer detects drops the window to one segment.
+
+Checks RFC5681-LOSS-1 (must, as an upper bound) and RFC5681-LOSS-3 (must).
+
+RFC 5681 section 3.1: when the retransmission timer detects a loss, the threshold becomes no
+more than half the data in flight, with a floor of two segments, and the window becomes one
+segment.
+
+**The relay removes a whole window, not one segment.** From the twentieth data segment
+onward every one is discarded. If only one were removed, the segments behind it would still
+reach host B, host B would answer with duplicate acknowledgments, and fast retransmit would
+repair the loss before the timer ever expired. The check would then be measuring the wrong
+mechanism. That is why the relay uses `fromNth` rather than `nth`.
+
+**The flight size comes from the wire.** RFC 5681 computes the threshold from the data in
+flight, and the text names the substitution of the congestion window for the flight size as
+an easy mistake to make. So this check does not read the window: it adds up the data host A
+sent and subtracts what host B acknowledged, from the segments and acknowledgments
+themselves, and compares the threshold against that.
+
+Both values are read at the moment of the expiry. `TcpReno::processRexmitTimer` publishes
+`ssthresh` and then `cwnd`, so two ordered steps read one moment.
+
+**The model conforms.** The relay removes twenty segments, the timer expires, and the window
+becomes 536 bytes, which is one segment. The threshold falls inside the bound RFC 5681 gives.
+
+**A trap worth recording.** The model also publishes the threshold **early**, before any
+loss. A step that bound the first publication read that one and ended the run at t=0.2007,
+before the relay had removed anything and before the timer had ever run -- and it did so
+while reporting a verdict, so nothing looked wrong except the numbers. The step therefore
+selects the publication at least one second after the loss begins. That interval chooses
+which publication is meant; the value is still what is judged, so the check can fail.
+
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The data in flight, followed from the wire: the highest sequence number host A has sent
+// past, less the highest acknowledgment host B has returned. RFC 5681 computes the threshold
+// from this and not from the congestion window, and the text names the substitution of one
+// for the other an easy mistake, so the check follows the stream itself.
+static long highestSentPast = 0;   // the highest sequence number plus payload host A sent
+static long highestAcked = 0;      // the highest acknowledgment host A received
+static long segmentSize = 0;       // the largest data segment seen, which is SMSS plus header
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+// Runs on every data segment host A sends. Never matches: this step only follows the stream.
+static bool recordSent(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || packet->getByteLength() <= 100)
+        return false;
+    long sequence = fieldOf(packet, "tcp.sequenceNo");
+    long bytes = packet->getByteLength();
+    if (bytes > segmentSize)
+        segmentSize = bytes;
+    if (sequence >= 0 && sequence + bytes > highestSentPast)
+        highestSentPast = sequence + bytes;
+    return false;
+}
+
+// Runs on every acknowledgment host A receives. Never matches either.
+static bool recordAcked(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr)
+        return false;
+    long acknowledgment = fieldOf(packet, "tcp.ackNo");
+    if (acknowledgment > highestAcked)
+        highestAcked = acknowledgment;
+    return false;
+}
+
+// RFC 5681 section 3.1 at the moment of the expiry: the threshold is at most half the data
+// in flight, and at least two segments. One segment of slack absorbs the header bytes that
+// the wire measurement carries and the payload measurement does not.
+static bool thresholdWithinTheBound(const MatchContext& context)
+{
+    if (!context.event.hasValue)
+        return false;
+    double threshold = context.event.value;
+    double inFlight = (double)(highestSentPast - highestAcked);
+    double upperBound = inFlight / 2.0 + (double)segmentSize;
+    double lowerBound = 2.0 * (double)segmentSize - (double)segmentSize;
+    return inFlight > 0 && threshold <= upperBound && threshold >= lowerBound;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_timeout_response")
+        // Remove the twentieth data segment and every one after it, so no duplicate
+        // acknowledgment can reach host A and only the timer can detect the loss.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).fromNth(20)
+                       .drop().describe("the twentieth data segment and every one after it"))
+        // Watch the stream so the flight size is known from the wire and not from the
+        // window. This guard never matches; it only records.
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(recordSent)
+                             .describe("every data segment host A sends")
+                             .within(30.0)))
+        .meanwhile(never(on("host1.tcp").signal("packetReceivedFromLower")
+                             .filterEvent(recordAcked)
+                             .describe("every acknowledgment host A receives")
+                             .within(30.0)))
+        // The window has grown well past one segment by the time the loss happens.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment).nth(20)
+                  .describe("the first segment the relay removes")
+                  .within(20.0))
+        // The timer expires about three seconds after the last segment leaves, so a
+        // publication at least one second after the loss began is the one this rule is
+        // about. The model also publishes the threshold early, before any loss, and
+        // `first()` alone would bind that one and end the run before the timer ever ran.
+        // The interval selects which publication is meant; the value is what is judged.
+        .once(on("host1.tcp").signal("ssthresh")
+                  .notBefore(1.0).first()
+                  .assertEvent(thresholdWithinTheBound)
+                  .describe("the threshold after the timer expired")
+                  .within(20.0))
+        // And the window is one segment.
+        .once(on("host1.tcp").signal("cwnd").first()
+                  .assertValueAtMost(1500)
+                  .describe("the window after the timer expired, one segment")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_timeout_response compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network TimeoutResponseNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TimeoutResponseNet
+sim-time-limit = 40s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+**.tcp.advertisedWindow = 65535
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_timeout_response: PASS

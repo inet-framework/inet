@@ -47,6 +47,7 @@ class INET_API PacketTap : public SimpleModule
         long minPacketBytes = 0;       // also require the inner frame to be at least this big
         std::string action;            // "drop" | "delay" | "mutate" | "pass"
         int occurrence = 0;            // act on the Nth selected frame (1-based); 0 = every
+        int fromOccurrence = 0;        // act on the Nth and every one after it; 0 = unused
         simtime_t delayTime = 0;
         std::function<void(Packet *)> mutator; // for action == "mutate"
 
@@ -91,7 +92,7 @@ class INET_API PacketTap : public SimpleModule
     // Install an interception rule programmatically (used by the ProtocolTester to apply a
     // test program's intercept(...) clause). Wins over the NED/ini parameters regardless of
     // module initialization order.
-    void configure(const std::string& matchExpr, long minBytes, int occ, const std::string& act,
+    void configure(const std::string& matchExpr, long minBytes, int occ, int fromOcc, const std::string& act,
                    simtime_t delay, std::function<void(Packet *)> mut);
 };
 

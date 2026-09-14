@@ -75,7 +75,8 @@ class INET_API Interception
     std::string tapName;          // PacketTap module name (a sibling of the tester)
     std::string matchExpression;  // PacketFilter expression over the dissected frame
     long minimumBytes = 0;        // also require the (inner) frame to be at least this big
-    int occurrence = 0;           // act on the Nth selected frame (1-based); 0 = every
+    int occurrence = 0;               // act on the Nth selected frame (1-based); 0 = every
+    int fromOccurrence = 0;           // act on the Nth and every one after it; 0 = unused
     std::string action = "drop";  // "drop" | "delay" | "mutate"
     simtime_t delayTime = 0;
     std::function<void(Packet *)> mutator; // for action == "mutate"
@@ -85,6 +86,11 @@ class INET_API Interception
     Interception& match(const char *expr) { matchExpression = expr; return *this; } // older name of filterPacket
     Interception& minBytes(long n) { minimumBytes = n; return *this; }
     Interception& nth(int k) { occurrence = k; return *this; }
+    // Act on the k-th match and on every match after it. A rule that must remove a segment
+    // and everything behind it needs this: nth(k) alone removes one frame, and the rest of
+    // the window still reaches the receiver, which answers with the duplicate
+    // acknowledgments that repair the loss before the timer can see it.
+    Interception& fromNth(int k) { fromOccurrence = k; return *this; }
     Interception& drop() { action = "drop"; return *this; }
     // An explicit no-op. It earns its place now that the rules are ordered: it shadows a
     // later rule for the frames it names, so "never touch a SYN, drop the data" is two

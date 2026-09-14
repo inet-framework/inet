@@ -47,7 +47,7 @@ void PacketTap::compileRule(Rule& rule)
         rule.hasFilter = false;
 }
 
-void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ,
+void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ, int fromOcc,
                           const std::string& act, simtime_t delay, std::function<void(Packet *)> mut)
 {
     // Append. The first call from a test program also discards whatever the parameters put
@@ -60,6 +60,7 @@ void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ,
     rule.matchExpression = matchExpr;
     rule.minPacketBytes = minBytes;
     rule.occurrence = occ;
+    rule.fromOccurrence = fromOcc;
     rule.action = act;
     rule.delayTime = delay;
     rule.mutator = std::move(mut);
@@ -95,7 +96,9 @@ PacketTap::Rule *PacketTap::selectRule(Packet *packet)
         if (rule.minPacketBytes > 0 && packet->getByteLength() < rule.minPacketBytes)
             continue;
         rule.numSelected++;
-        if (rule.occurrence == 0 || rule.numSelected == rule.occurrence) {
+        bool wanted = rule.fromOccurrence > 0 ? rule.numSelected >= rule.fromOccurrence
+                                              : (rule.occurrence == 0 || rule.numSelected == rule.occurrence);
+        if (wanted) {
             numSelected++;
             return &rule;
         }
