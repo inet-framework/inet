@@ -53,7 +53,7 @@ functional per concern**:
 | `.iface("eth0")` | interface | restrict to an interface |
 | `.packet("expr")` | packet content | content predicate over the packet (PacketFilter, §4) |
 | `.match([](const MatchContext& c){ ... })` | content (lambda) | typed content predicate |
-| `.is(value)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
+| `filterEqual(v)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
 | `.attributeTo("host1.ipv6.mipv6")` | narration POV | description point of view only — never affects matching (§8b) |
 | `.describe("phrase")` | narration | human phrase (rarely needed — `packet()` auto-translates) |
 | `.capture("name", "proto.field")` | capture | remember a field value for later steps (§4) |
@@ -134,7 +134,8 @@ the chunk is **absent**.
 ### The expression engine
 
 `filterExpr("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
-(it asserts the signal value is a packet; for a scalar signal use `.is(value)` instead).
+(it asserts the signal value is a packet; for a scalar signal use `filterEqual(v)` or one
+of the bounds instead).
 Protocol names are lowercase (`tcp`, `udp`, `ipv4`, `arp`, `ieee80211mac`), chunk class
 names are as declared (`BindingUpdate`, `Ieee80211DataHeader`). Examples:
 
@@ -275,7 +276,7 @@ as a second channel beside packets. INET's `Fsm` already emits its state on ever
 (`setStateChangedSignal`), so the state machine needs no modification.
 
 A scalar signal is just another `signal()` — selected the same way as a packet signal, with
-`.is(value)` for its value and the ordinary cardinality builders (`once`/`never`/…):
+`filterEqual(v)` for its value and the ordinary cardinality builders (`once`/`never`/…):
 
 ```cpp
 .once(on("node[0].eth[0].plca").signal("controlStateChanged")   // module path, then the signal
@@ -288,7 +289,7 @@ A scalar signal is just another `signal()` — selected the same way as a packet
 | Clause | Meaning |
 |---|---|
 | `on("path").signal("name")` | the emitting module and its scalar signal (e.g. `controlStateChanged`) |
-| `.is(value)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
+| `filterEqual(v)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
 | `once(p)` / `never(p)` / … | the same cardinality builders as packets — `once` = "reaches the value", `never` = "must not" |
 
 A scalar signal flows through the **same engine** as packets: a scalar step matches a scalar
