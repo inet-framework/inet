@@ -17,7 +17,7 @@ Define_ProtocolTest(pe_duplicateremoval)
 {
     return ProtocolTest("pe_duplicateremoval")
         // exactly 3 deliveries for 3 sources -> the duplicate of each was removed
-        .betweenTimes(3, 3, on("sink").signal("packetPushed")
+        .exactlyTimes(3, on("sink").signal("packetPushed")
                   .describe("a de-duplicated packet at the sink").within(2.5));
 }
 

@@ -19,7 +19,7 @@ Define_ProtocolTest(pe_acknowledge)
 {
     return ProtocolTest("pe_acknowledge")
         // exactly four delivered (one per source packet: acknowledged, never retransmitted)
-        .betweenTimes(4, 4, on("sink").signal("packetPushed")
+        .exactlyTimes(4, on("sink").signal("packetPushed")
                   .filterEvent([](const MatchContext& c) {
                       return c.event.packet->getDataLength() == B(100);
                   })
