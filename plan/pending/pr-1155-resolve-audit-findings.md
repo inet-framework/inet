@@ -421,14 +421,29 @@ tip built in a separate workspace, the suite run there, 53 rows named by family,
 what it deliberately did not touch. That text becomes the explanation of commit 33 and the source
 of the per-commit wording for the rest.
 
-**A note on verification, from 2026-09-14.** The two repairs done so far are checked
-**statically** — every parameter and every state field is declared at the commit that uses it, by
+**A note on verification, from 2026-09-14.**
+
+**The branch head builds: 1738 sources compiled, 0 errors.** So neither repair broke the final
+tree, which is the claim that matters most.
+
+**No intermediate commit has been built, and the attempt did not converge.** A per-commit build in
+this worktree is defeated by `make` reporting nothing to do: it writes to `src/out`, not `out`,
+and a target library left in `src/` from an earlier attempt makes the whole tree look current.
+Three runs at commit 11 reported two compiler errors in `TcpSocket.cc` naming
+`TcpSetPathMtuCommand` and `TcpSetRcvBufCommand` — **those errors are not real.** Commit 11's
+`TcpSocket.cc` contains neither name, and both the use and the declaration of each arrive together
+in a later commit. The errors came from a mixed tree that the build left behind, and they are
+recorded here only so nobody re-discovers them as a finding.
+
+So the two repairs rest on **static** evidence: every parameter and every state field is declared
+at the commit that uses it, across all 63 commits, by
 [check-ned-params.sh](../../doc/project/enforcement/check-ned-params.sh) and a matching pass over
-the state messages. **No commit has been compiled.** An attempt to prove commit 11 builds, by
-hardlinking a sibling worktree's objects, failed to prove anything: `make` treated the borrowed
-objects as current and compiled none of the TCP sources. A real per-commit build is what
-[TR-CI-EVERY-COMMIT](../../doc/project/rule/testing.md#tr-ci-every-commit) asks for and it is still
-owed.
+the state messages.
+
+**Setting up a reliable per-commit build is now the blocker for step 1i**, and
+[TR-CI-EVERY-COMMIT](../../doc/project/rule/testing.md#tr-ci-every-commit) wants it regardless. The
+recipe needs three things this session did not get right: build in `src/`, never leave a library
+in `src/`, and regenerate the `_m` files whenever the `.msg` files change under it.
 
 **Done when** every commit that moves a recorded expectation carries it with a row-level
 explanation, `check-commits.sh` reports no `PR-SPLIT-BASELINE` violation, and
