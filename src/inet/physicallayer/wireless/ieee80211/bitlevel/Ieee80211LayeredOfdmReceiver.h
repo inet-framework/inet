@@ -86,6 +86,8 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
   public:
     virtual ~Ieee80211LayeredOfdmReceiver();
 
+    bool getIsCompliant() const { return isCompliant; }
+
     virtual const Ieee80211OfdmMode *getMode(const Packet *packet) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;

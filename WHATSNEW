@@ -35,6 +35,9 @@ Notable backward incompatible changes are the following:
 
    Non-QoS Data no longer aliases the QoS TID-0 duplicate cache.
 
+   OFDM radios generate and check SIGNAL parity and reject undefined RATE codes in compliant mode.
+   Noncompliant layered reception uses its configured mode and still checks parity.
+
    The mesh no-forwarding-information reason code is corrected from 60 to 62.
    These corrections change affected packet bytes and may change Wi-Fi
    simulation trajectories and fingerprints.

@@ -34,6 +34,7 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
     auto mode = ofdmTransmitter->getMode(packet);
     phyHeader->setRate(mode->getSignalMode()->getRate());
     phyHeader->setLengthField(B(packet->getDataLength()));
+    phyHeader->setParity(computeIeee80211OfdmSignalParity(phyHeader->getRate(), false, phyHeader->getLengthField().get<B>()));
     packet->insertAtFront(phyHeader);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
@@ -44,9 +45,21 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
 void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
 {
     if (!packet->hasBitError()) {
+        if (packet->getDataLength() < B(5)) {
+            packet->setBitError(true);
+            return;
+        }
         auto ofdmReceiver = check_and_cast<const Ieee80211LayeredOfdmReceiver *>(receiver);
         const auto& phyHeaderBytes = packet->peekDataAt<BytesChunk>(b(0), B(5), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         auto signalField = unpackIeee80211OfdmSignalField(phyHeaderBytes->getByte(0), phyHeaderBytes->getByte(1), phyHeaderBytes->getByte(2));
+        // Noncompliant modes use a configured modulation/coding scheme and RATE 0.
+        // Their SIGNAL still carries parity, but RATE does not select a standard mode.
+        bool isSignalValid = ofdmReceiver->getIsCompliant() ? isIeee80211OfdmSignalValid(signalField) :
+                signalField.parity == computeIeee80211OfdmSignalParity(signalField.rate, signalField.reserved, signalField.length);
+        if (!isSignalValid) {
+            packet->setBitError(true);
+            return;
+        }
         const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
         phyHeader->setRate(signalField.rate);
         phyHeader->setReserved(signalField.reserved);
