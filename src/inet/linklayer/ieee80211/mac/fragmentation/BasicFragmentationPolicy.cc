@@ -36,7 +36,13 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
             return {};
         const auto& trailer = frame->peekAtBack<Ieee80211MacTrailer>(B(4));
         int trailerLength = trailer->getChunkLength().get<B>();
-        if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        if (const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            // IEEE Std 802.11-2024, 10.2.7 Note 2, 10.4, and 10.11: A-MSDUs are
+            // fragmented only through the capability-gated HE dynamic
+            // fragmentation procedure (26.3.2), which this basic policy does
+            // not implement.
+            if (dataHeader->getAMsduPresent())
+                return {};
             headerLength = header->getChunkLength().get<B>();
             payloadLength = frame->getByteLength() - headerLength - trailerLength;
         }

@@ -197,6 +197,14 @@ the ADDBA request. The model's zero-policy convention inherits the request timeo
 Check configurations that previously depended on the reversed selection; the negotiated
 inactivity deadline may change.
 
+A-MSDU Size and Fragmentation Limits
+------------------------------------
+
+Basic A-MSDU selection must fit the configured limit including subframe headers and
+padding. It must not rely on ordinary MPDU fragmentation to split an oversized A-MSDU.
+Check aggregation and fragmentation thresholds together when reproducing a study that
+previously selected such aggregates.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
