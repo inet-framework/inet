@@ -1,0 +1,146 @@
+%description:
+
+RFC 6298 -- no round-trip sample is taken from a retransmitted segment.
+
+Checks RFC6298-KARN-1 (must not).
+
+RFC 6298 section 3, Karn's rule: a round-trip sample is never taken from a segment that was
+retransmitted, because the acknowledgment does not say which copy it answers. The timestamp
+option removes that ambiguity, so the check needs the option to be absent, and it is: the
+scenario turns it off.
+
+**How the rule is observed.** The written procedure reads the smoothed value before and
+after and requires it to be unchanged. The model gives a sharper observable: a sample is
+taken in `TcpBaseAlg::rttMeasurementComplete`, and that function is the only place that
+publishes `srtt`, `rttvar` and `rto`. So a forbidden sample is not a changed value, it is a
+**publication that must not happen**. The check forbids it outright, which is stronger than
+comparing two values: a sample that happened to give the same number would still be a
+violation of the rule, and this form catches it.
+
+The guard runs beside the ordered steps. Without that it could not be written at all: a
+blocking guard would hold the cursor for its whole window, so the acknowledgment that proves
+the exchange completed could not be observed inside it.
+
+**The model conforms.** The run takes exactly one round-trip sample, from the first
+segment, and cancels the measurement when the timer expires:
+
+    Measured RTT=0.10804ms, updated SRTT=0.013505ms, new RTO=2625.067525ms
+    Performing retransmission #1; increasing RTO from 2.625067525s to 5.25013505s,
+        and cancelling RTT measurement
+
+The guard was verified to detect a sample: opened before the permitted one instead of after
+it, it fires with "forbidden event occurred at t=0.20010804".
+
+That first line also shows the defect `Rfc6298FirstMeasurement.test` records, on a different
+link: the measured trip is 0.108 ms and the smoothed value becomes 0.0135 ms, one eighth of
+it, where RFC 6298 section 2.2 requires the two to be equal.
+
+**Why the check is not vacuous.** A forbidden publication is only meaningful if a permitted
+one is possible in the same window, so the last step observes the acknowledgment of the
+retransmission actually arriving. Without it the guard would hold on a run where nothing
+happened at all. The scenario also sends exactly two segments, so no later segment can take
+a legitimate sample inside the guard's window and trip it for the wrong reason.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A pure acknowledgment carries the same port and no SYN, so a step that wants a data
+// segment says so.
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6298_karns_rule")
+        // Discard the second data segment once. Its retransmission gets through, and the
+        // acknowledgment of that retransmission is the ambiguous one Karn's rule is about.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(2)
+                       .drop().describe("the second data segment, dropped once"))
+        // The first segment is acknowledged cleanly, so the estimator takes its one
+        // permitted sample here. This proves the signal is alive, so the guard below
+        // forbids something the model really does publish.
+        .once(on("host1.tcp").signal("srtt").first()
+                  .describe("the one permitted round-trip sample, from the first segment")
+                  .within(5.0))
+        // Host A gives up on the second segment and sends it again.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment).nth(2)
+                  .capture("retransmittedSeq", "tcp.sequenceNo")
+                  .describe("the retransmission of the second data segment")
+                  .within(20.0))
+        // From here on, no sample may be taken. The acknowledgment of the retransmission
+        // arrives inside this window, and it must not reach the estimator.
+        .meanwhile(never(on("host1.tcp").signal("srtt")
+                             .describe("a round-trip sample taken from the retransmission")
+                             .within(5.0)))
+        // The exchange really did complete inside the guard's window, so the guard held
+        // over something rather than over nothing.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackBit == true && tcp.ackNo > {retransmittedSeq}")
+                  .describe("the acknowledgment of the retransmitted segment")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6298_karns_rule compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network KarnNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = KarnNet
+sim-time-limit = 40s
+seed-set = 0
+
+# static ARP: the only frames on the wire are the TCP/IP ones.
+**.ipv4.arp.typename = "GlobalArp"
+
+# The timestamp option would remove the ambiguity Karn's rule is about.
+**.tcp.timestampSupport = false
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+# Two segments and no more, so no later segment can take a permitted sample inside the
+# guard's window.
+*.host1.app[0].sendBytes = 1000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6298_karns_rule: PASS
