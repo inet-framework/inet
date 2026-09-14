@@ -102,13 +102,16 @@ Notable backward incompatible changes are the following:
 
 5. Block Ack DELBA agreement ownership
 
-   Custom originator agreement handlers must explicitly implement
-   isDelbaPending().
-   Custom IFrameSequenceHandler implementations must explicitly implement
-   cancelFrameSequence() and abortFrameSequence().
-   Custom agreement callbacks must implement cancelBlockAckTeardown();
-   recipient handlers must implement processAcknowledgedDelba(),
-   processAbortedDelba(), getPendingTeardownGenerationId() and isDelbaPending().
+   Custom IBlockAckAgreementHandlerCallback implementations must explicitly
+   implement releaseBlockAckAgreementFrames() and cancelBlockAckTeardown().
+   Custom IFrameSequenceHandler implementations must implement both
+   cancelFrameSequence() and abortFrameSequence(), preserving their deferred
+   and immediate cancellation contracts. Custom originator and recipient
+   agreement handlers must implement isDelbaPending(); recipient handlers must
+   also implement processAcknowledgedDelba(), processAbortedDelba() and
+   getPendingTeardownGenerationId(). These methods no longer supply default
+   behavior in the interfaces. The built-in implementations already provide
+   these operations.
 
    IOriginatorBlockAckAgreementHandler::processReceivedDelba(),
    IOriginatorBlockAckAgreementHandler::processTransmittedDelba(), and
@@ -178,6 +181,13 @@ Notable backward incompatible changes are the following:
    Receive lifetime now remains anchored to first reception while fragments wait in
    Block Ack reordering. A later stage no longer gives an old incomplete body a fresh
    lifetime, so delayed or incomplete bodies may be dropped earlier.
+
+11. Expired Agreement Quarantine and Frame Release
+
+   Expired Block Ack agreements are quarantined from data-plane use while teardown state
+   is retained. Outstanding frames are released through the normal
+   acknowledgment/recovery paths before teardown proceeds, including when callbacks
+   replace agreement state.
 
 Notable backward compatible changes are the following:
 

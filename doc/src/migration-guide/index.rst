@@ -133,6 +133,17 @@ owned packets; callers must report their final drop and delete them. Use
 and tombstoned fragments. Negative ``maxReceiveLifetime`` values are rejected; zero is a
 valid immediate-expiry setting.
 
+Expired Agreement Quarantine and Frame Release
+----------------------------------------------
+
+Custom ``IBlockAckAgreementHandlerCallback`` implementations must explicitly implement
+``releaseBlockAckAgreementFrames()`` and report whether they changed outstanding state.
+Retained teardown state is not an active data-plane agreement; use the active-agreement
+query for data transmission, acknowledgment and receive admission. Frame release may
+synchronously remove or replace an agreement, so relookup the original generation before
+generating its DELBA. If an implementation has no outstanding frames, returning false
+must be an explicit implementation decision.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
