@@ -27,7 +27,7 @@ record-vector-results = false
 record-scalar-results = false
 
 *.ap.wlan[0].radio.channelNumber = -1
-*.ap.wlan[0].mgmt.beaconInterval = 1us
+*.ap.wlan[0].mgmt.beaconInterval = 1024us
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.wlan[0].bitrate = 65Mbps
 **.wlan[0].radio.bandName = "2.4 GHz"
