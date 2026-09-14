@@ -544,4 +544,3 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW40MHz([](){ return new Ie
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

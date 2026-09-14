@@ -331,4 +331,3 @@ Ieee80211LayeredOfdmTransmitter::~Ieee80211LayeredOfdmTransmitter()
 } // namespace physicallayer
 
 } // namespace inet
-
