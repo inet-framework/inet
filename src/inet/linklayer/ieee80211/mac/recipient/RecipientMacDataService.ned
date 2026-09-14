@@ -19,7 +19,7 @@ module RecipientMacDataService extends Module
 {
     parameters:
         @class(RecipientMacDataService);
-        double maxReceiveLifetime @unit(s) = default(524288us); // IEEE Std 802.11-2024 dot11MaxReceiveLifetime default: 512 TUs
+        double maxReceiveLifetime @unit(s) = default(524288us); // Nonnegative relative receive lifetime; IEEE Std 802.11-2024 dot11MaxReceiveLifetime default: 512 TUs
         @display("i=block/join");
         @signal[packetDefragmented](type=inet::Packet);
         @signal[packetDeaggregated](type=inet::Packet);

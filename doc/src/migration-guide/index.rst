@@ -166,6 +166,18 @@ peer/TID/generation values as the work list and relookup the live state before u
 after a callback; incrementing a map iterator before calling out does not protect a
 removed sibling.
 
+Receive Lifetime in Block Ack Reordering
+----------------------------------------
+
+Custom receive/reordering implementations must retain the first-reception time of a
+fragmented body while it waits in a Block Ack reorder buffer. Moving fragments between
+receive stages must not restart their lifetime. Expire incomplete state and reject late
+fragments before delivering a reassembled body. ``IReassembly::purge()`` now returns
+owned packets; callers must report their final drop and delete them. Use
+``BlockAckReordering::processReceivedQoSFrameWithResult()`` to handle released frames
+and tombstoned fragments. Negative ``maxReceiveLifetime`` values are rejected; zero is a
+valid immediate-expiry setting.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
