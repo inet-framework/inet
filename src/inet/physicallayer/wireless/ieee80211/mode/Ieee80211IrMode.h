@@ -66,6 +66,7 @@ class INET_API Ieee80211IrDataMode : public IIeee80211DataMode
   public:
     Ieee80211IrDataMode(const PpmModulationBase *modulation);
 
+    virtual const simtime_t getGuardInterval() const override { return -1; }
     virtual Hz getBandwidth() const override { return Hz(NaN); }
     virtual bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }

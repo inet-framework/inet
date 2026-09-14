@@ -297,6 +297,12 @@ Notable backward incompatible changes are the following:
     The selected legacy QoS and non-QoS ad hoc fingerprints remain unchanged;
     no recorded fingerprint baseline was updated.
 
+17. IEEE 802.11 PHY mode API
+
+   External implementations of IIeee80211DataMode must implement the new pure
+   virtual getGuardInterval() query. Return the modeled guard interval as a
+   simtime_t, or -1 when the PHY has no guard interval.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

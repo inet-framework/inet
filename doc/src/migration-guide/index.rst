@@ -105,6 +105,20 @@ answers; :cpp:`Arp` shows how. An implementation that resolves addresses
 without packets has nobody to ask. It overrides the method with an empty body,
 as :cpp:`GlobalArp` does, and the client then takes the address.
 
+Migrating IEEE 802.11 PHY Modes
+------------------------------
+
+External implementations of ``IIeee80211DataMode`` must now implement the pure
+virtual guard-interval query:
+
+.. code-block:: c++
+
+   const simtime_t getGuardInterval() const override;
+
+Return the modeled guard interval in simulation time units. For a PHY without a
+guard interval, use an explicit override returning ``-1``. FHSS, DSSS, HR-DSSS,
+and IR use this value; OFDM, HT, and VHT return their modeled interval.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 
