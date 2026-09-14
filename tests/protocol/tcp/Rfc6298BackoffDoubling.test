@@ -1,0 +1,162 @@
+%description:
+
+RFC 6298 -- each expiry of the retransmission timer doubles the timeout.
+
+Checks RFC6298-BACK-1 (must) and RFC6298-EARLY-1 (must).
+
+RFC 6298 section 5.5: every time the timer expires, the timeout is doubled. Section 5: a
+segment is never retransmitted sooner than one timeout after its previous transmission.
+
+The relay discards every copy of host A's data segment, so the segment never arrives and the
+timer expires again and again. The intervals between consecutive transmissions of the same
+sequence number are the timeouts that were in force, one after another, and each must be
+twice the one before it.
+
+The check asserts the ratio and not the values. The initial timeout is the subject of
+`Rfc6298InitialTimeout.test`; this check is about the doubling alone, so it holds on a model
+whose first timeout is any value.
+
+**One of the three expected observations cannot be made.** The check asks for the doubling
+from both sides: from the link, as the interval, and from the estimator, as the timeout
+variable after each expiry. The model publishes no signal on expiry. `TcpBaseAlg` emits
+`rto` only from `receivedDataAck`, and the doubling happens in the expiry path
+(src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc:213), which emits nothing. So only the
+link side is checked here. The note in `checks.md` is right that keeping both would be
+better: a model that doubled the variable but not the interval would pass one and fail the
+other. Until the expiry publishes the value, this check cannot tell those two apart.
+
+The doubling is bounded at 240 seconds by `MAX_REXMIT_TIMEOUT`, which RFC6298-MAX-1 permits.
+The three intervals this check reads are far below that bound, so the cap does not enter.
+
+**The model conforms.** The run doubles the timeout at every expiry, and says so itself:
+
+    Performing retransmission #1; increasing RTO from 3s  to 6s, and cancelling RTT measurement
+    Performing retransmission #2; increasing RTO from 6s  to 12s, and cancelling RTT measurement
+    Performing retransmission #3; increasing RTO from 12s  to 24s, and cancelling RTT measurement
+
+Those lines also show the model cancels the round-trip measurement on a retransmission,
+which is Karn's rule and the subject of a check of its own.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+#include <cmath>
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A pure acknowledgment carries the same port and no SYN, so every step here also requires
+// a data-bearing segment.
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+// The interval that ends at this event must be twice the interval between the two captured
+// moments. One per cent of the earlier interval is far tighter than any other law would fit
+// and far wider than the transmission times involved.
+static bool intervalDoubled(const MatchContext& context, const char *earlier, const char *later)
+{
+    double a = context.get(earlier).doubleValue();
+    double b = context.get(later).doubleValue();
+    double previous = b - a;
+    double current = context.event.time.dbl() - b;
+    return previous > 0 && std::fabs(current - 2 * previous) <= 0.01 * previous;
+}
+
+static bool secondIntervalDoubled(const MatchContext& context) { return intervalDoubled(context, "t0", "t1"); }
+static bool thirdIntervalDoubled(const MatchContext& context) { return intervalDoubled(context, "t1", "t2"); }
+
+static cValue eventTime(const PacketEvent& event) { return cValue(event.time.dbl()); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6298_backoff_doubling")
+        // Discard every copy of the data segment. Only one segment is ever in flight,
+        // because nothing is acknowledged, so this is every copy of the first one.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100)
+                       .drop().describe("every copy of host A's data segment"))
+        // The original transmission.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment)
+                  .capture("firstSeq", "tcp.sequenceNo")
+                  .capture("t0", eventTime)
+                  .describe("host A's data segment, first transmission")
+                  .within(2.0))
+        // The first retransmission. Its interval is the initial timeout, whatever that is.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {firstSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
+                  .capture("t1", eventTime)
+                  .describe("the first retransmission")
+                  .within(20.0))
+        // The second retransmission, after an interval twice the first.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {firstSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
+                  .assertEvent(secondIntervalDoubled)
+                  .capture("t2", eventTime)
+                  .describe("the second retransmission, twice as long after the first")
+                  .within(40.0))
+        // And the third, after an interval twice the second.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {firstSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
+                  .assertEvent(thirdIntervalDoubled)
+                  .describe("the third retransmission, twice as long after the second")
+                  .within(80.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6298_backoff_doubling compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network BackoffNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = BackoffNet
+sim-time-limit = 60s
+seed-set = 0
+
+# static ARP: the only frames on the wire are the TCP/IP ones.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 500B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6298_backoff_doubling: PASS
