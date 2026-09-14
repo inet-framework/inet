@@ -1,0 +1,70 @@
+%description:
+Verify RC1/RC2 separation for non-QoS and QoS Data retries (IEEE 802.11-2024,
+10.3.2.14.3, Table 10-6), with independent TID, transmitter and fragment identities.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestRecipient : public RecipientQosMacDataService
+{
+  public:
+    TestRecipient()
+    {
+        duplicateRemoval = new QoSDuplicateRemoval();
+        aMsduDeaggregation = new MsduDeaggregation();
+    }
+    virtual ~TestRecipient() {}
+};
+
+static Ptr<Ieee80211DataHeader> frame(bool qos, bool retry, int tid = 0, int fragment = 0, int transmitter = 1)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
+    header->setTransmitterAddress(MacAddress(transmitter));
+    header->setReceiverAddress(MacAddress(2));
+    header->setSequenceNumber(SequenceNumberCyclic(42));
+    header->setFragmentNumber(fragment);
+    header->setTid(tid);
+    header->setRetry(retry);
+    return header;
+}
+
+%activity:
+for (bool firstQos : {false, true}) {
+    QoSDuplicateRemoval removal;
+    ASSERT(!removal.isDuplicate(frame(firstQos, false)));
+    ASSERT(!removal.isDuplicate(frame(!firstQos, true)));
+    ASSERT(removal.isDuplicate(frame(firstQos, true)));
+    ASSERT(removal.isDuplicate(frame(!firstQos, true)));
+    ASSERT(!removal.isDuplicate(frame(true, true, 1)));
+    ASSERT(!removal.isDuplicate(frame(true, true, 0, 1)));
+    ASSERT(removal.isDuplicate(frame(true, true, 0, 1)));
+    ASSERT(!removal.isDuplicate(frame(true, true, 0, 1, 3)));
+    ASSERT(!removal.isDuplicate(frame(true, false, 0, 1)));
+    ASSERT(!removal.isDuplicate(frame(false, false)));
+}
+for (bool firstQos : {false, true}) {
+    TestRecipient recipient;
+    auto deliver = [&](bool qos, bool retry, bool duplicate) {
+        auto header = frame(qos, retry);
+        auto packet = new Packet("recipient", header);
+        auto result = recipient.dataFrameReceived(packet, header, nullptr);
+        ASSERT(result.size() == (duplicate ? 0 : 1));
+        for (auto delivered : result)
+            delete delivered;
+    };
+    deliver(firstQos, false, false);
+    deliver(!firstQos, true, false);
+    deliver(firstQos, true, true);
+    deliver(!firstQos, true, true);
+}
+EV << "Receive duplicate cache identities verified.\n";
+
+%contains: stdout
+Receive duplicate cache identities verified.
