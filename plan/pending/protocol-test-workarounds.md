@@ -49,11 +49,32 @@ rather than the protocol exchange, and it cannot say when the packet arrived.
 With `meanwhile` the count runs beside the steps that follow, so the observation returns to
 the wire.
 
-- [ ] `Rfc826CachedMapping`, `Rfc826LearningFromRequest`, `Rfc826ThirdStationRequest`,
-      `Rfc1122ArpFloodPrevention`, `Rfc1122NoDestinationUnreachable`, and the sixth the
-      grep finds.
-- [ ] Each observation moves from the printed line to the event it is about.
-- [ ] The deviation notes that explain the workaround go with it.
+**Attempted on 2026-09-14 and stopped. `meanwhile` is necessary and not sufficient.**
+
+`Rfc826CachedMapping` was rewritten so that the count runs beside the steps and the five
+datagrams are observed on the wire. It passed, and it was **not decisive**: demanding six
+datagrams instead of five passed as well. The run had ended at t=0.3 with two datagrams
+received, so the step that was meant to count five had resolved on something else.
+
+Two things stand in the way, and neither is the greedy step:
+
+- **The tester ends the run at its verdict.** A program step for "all five arrive" makes the
+  last arrival the verdict, and the run stops there. The ARP notes already record this from
+  the other side: a first version of `Rfc1122ArpPacketQueue` asserted a printed line and got
+  `received 0 packets`, because the verdict came first. Moving an observation *into* the
+  program moves the end of the run with it.
+- **`exactlyTimes(n)` resolves on the nth match and does not forbid an n+1th.** It reads as
+  "exactly n" and means "at least n", so it cannot say "five and no more". That is worth a
+  look on its own: the word promises more than the step delivers.
+
+The printed line, for all its faults, asserts a total after the run has finished, which no
+step of the current engine can do. So the workaround is better judged than it looked, and
+this group needs the two points above settled first.
+
+- [ ] Decide whether a step may observe without ending the run, or whether the tester should
+      run to the end of the window before it reports.
+- [ ] Decide whether `exactlyTimes` should mean what its name says.
+- [ ] Then the six ARP tests.
 
 ## Group 3 — nine tests that carry a combined guard
 
