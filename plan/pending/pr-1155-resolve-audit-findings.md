@@ -1,6 +1,6 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a, 1c and 1h done in the worktree
+Status: **in progress** — steps 1a, 1c, 1h and 1h2 done in the worktree
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: [doc/project/audit/report/pull-request/pr-1155.md](../../doc/project/audit/report/pull-request/pr-1155.md), third pass, 2026-09-11.
 Branch: `topic/tcp-new`, head `33e8b0d073`, merge base `434658d729`, 61 commits, 183 files, +15840 / −3685.
@@ -218,6 +218,16 @@ conflicts and every file except `Tcp.ned` is byte-identical to before.
 `PASS`, and commit 35 shrank from declaring 63 parameters to changing 12 defaults — which is
 exactly the second half of its own subject.
 
+**1h2. Declare every state field where it is first used (F-9). — done 2026-09-14.**
+
+The state is the worse half. **104 of the 175 state fields the branch adds are used in code before
+any `.msg` declares them**, which is a compile error rather than a run-time throw, so **commits 11
+to 33 do not build.**
+
+The same tree-by-tree rebuild moved each field's declaration to the commit that first uses it,
+under a `// declared here for the code above that already uses it:` header. **The final tree is
+byte-identical to the audited head** — the repair adds nothing at the end, only earlier.
+
 **1i. Re-cut phases B and C by feature (F-10). — open, and it is the large one.**
 
 The parameter half of the partition is repaired; the logic half is not. Commit 18 still carries
@@ -226,9 +236,14 @@ commit 19 still carries state belonging to commits 18, 20 and 21, and commit 24 
 AccECN state block. **Until this is done, step 1d cannot be: a body cannot state the reason for a
 partition boundary.**
 
-The shape: each feature's parameter, state, logic, NED declaration and test in one commit. Step 1h
-has already placed the parameter and the declaration, so what remains is the state fields and the
-code.
+The shape: each feature's parameter, state, logic, NED declaration and test in one commit. Steps
+1h and 1h2 have placed the parameter and the state declaration; **what remains is the code**.
+
+Note what the two done steps did and did not buy. They make every commit build and run, which is
+what [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) protects and what
+`git bisect` needs. They do **not** re-cut by concern: commit 18 still carries the AccECN mode
+resolution of commit 24 and the `pushed_seq` and `forced_push` handling of commit 29. A reviewer
+still cannot read commit 18 as one change, and step 1d still cannot write its body.
 
 **1f. Add the reproduction to fourteen fix commits
 ([PR-MSG-REPRODUCE](../../doc/project/rule/pull-request.md#pr-msg-reproduce)).**
