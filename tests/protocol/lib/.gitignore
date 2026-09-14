@@ -1,5 +1,7 @@
+# The Makefile is in git: it uses relative paths, and a fresh checkout needs it to
+# build the library before the tests run. Regenerate it with the command in its header
+# whenever a source file is added or removed.
 # generated / machine-specific build artifacts
-Makefile
 makefrag
 out/
 *.so

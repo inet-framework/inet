@@ -1,16 +1,12 @@
 #!/bin/sh
 # Build the protocol-test framework library.
 #
-# Phase 0 links against a pre-built INET checkout (headers + libINET.so) at the
-# same commit, to avoid a full INET rebuild in this worktree. Override INET_DIR if
-# your built INET lives elsewhere. (Proper in-tree build comes with the Phase 7
-# harness integration.)
+# The Makefile is in git and uses relative paths, so this script only runs make. It stays
+# because the run records of the standards passes name it, and because MODE defaults to
+# release here while the test harness builds debug.
+#
+# Add or remove a source file and the Makefile needs regenerating. The command is in its
+# header; run it from this folder.
 set -e
 cd "$(dirname "$0")"
-# Default to this worktree's own (built) INET; override INET_DIR to link elsewhere.
-INET_DIR="${INET_DIR:-$(cd ../../.. && pwd)}"
-
-printf 'LIBS += -Wl,-rpath,%s/src\n' "$INET_DIR" > makefrag
-# $(D) expands to _dbg in a debug build, so the library links the same INET as its caller
-opp_makemake -f --deep -s -o protocoltest -I"$INET_DIR/src" -L"$INET_DIR/src" -lINET'$(D)'
 make MODE="${MODE:-release}" -j"$(nproc)"
