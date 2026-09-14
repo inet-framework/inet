@@ -1,0 +1,199 @@
+%description:
+
+RFC 5681 -- three duplicate acknowledgments repair a loss without the timer.
+
+Checks RFC5681-FR-1 (should), RFC5681-FR-2 (must), RFC5681-FR-3 (must) and RFC5681-FR-5
+(must); covers RFC5681-ACK-2.
+
+RFC 5681 section 3.2: three duplicate acknowledgments indicate a loss. The sender
+retransmits at once, sets the threshold by the same formula a timeout uses, sets the window
+to the threshold plus three segments, and puts the window back to the threshold when the
+repair is acknowledged.
+
+The five statements are one episode and the steps below follow it in order. The third
+duplicate is the trigger, so everything after it is the response, and anchoring there keeps
+the steps away from the threshold publication the model makes early, before any loss.
+
+**One segment is removed, not a window.** This is the opposite of the timeout check: here the
+later segments must get through, because they are what makes host B answer with duplicate
+acknowledgments. `nth` removes exactly one; `fromNth` would remove the rest with it and the
+timer would be the only thing left to detect the loss.
+
+**The model conforms.** The relay removes exactly one frame, host B repeats its
+acknowledgment, and host A repairs the loss on the third duplicate: the threshold falls, the
+window becomes the threshold plus three segments, and the repair leaves well inside one
+second, where the timer would have waited three.
+
+Observation 4 of the check, that the window returns to the threshold when the repair is
+acknowledged, is not asserted here. The model publishes the window again at that point, but
+telling that publication apart from the growth that follows it needs the acknowledgment of
+new data as an anchor, and that anchor is the next check's subject. It is recorded as a
+sharpening candidate rather than claimed.
+
+**The retransmission carries a second bound.** It must arrive well before the retransmission
+timer would have fired, or a slow timer and fast retransmit look the same. The timer is three
+seconds here, and the step allows one.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static long segmentSize = 0;
+static long previousAck = -1;
+static int duplicateCount = 0;
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+static bool dataSegment(const MatchContext& context)
+{
+    if (context.event.packet == nullptr || context.event.packet->getByteLength() <= 100)
+        return false;
+    if (context.event.packet->getByteLength() > segmentSize)
+        segmentSize = context.event.packet->getByteLength();
+    return true;
+}
+
+// True on the third acknowledgment in a row that carries the same acknowledgment number.
+// RFC 5681 section 3.2 counts those, and the third one is the trigger.
+static bool thirdDuplicateAcknowledgment(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr)
+        return false;
+    long acknowledgment = fieldOf(packet, "tcp.ackNo");
+    if (acknowledgment < 0)
+        return false;
+    if (acknowledgment == previousAck)
+        duplicateCount++;
+    else {
+        previousAck = acknowledgment;
+        duplicateCount = 0;
+    }
+    return duplicateCount == 3;
+}
+
+// RFC 5681 section 3.2: the window becomes the threshold plus three segments. One segment of
+// slack absorbs the header bytes the wire measurement carries.
+static bool thresholdPlusThreeSegments(const MatchContext& context)
+{
+    if (!context.event.hasValue)
+        return false;
+    double window = context.event.value;
+    double threshold = context.get("threshold").doubleValue();
+    double expected = threshold + 3.0 * (double)segmentSize;
+    return window >= expected - (double)segmentSize && window <= expected + (double)segmentSize;
+}
+
+// The repair must come well before the retransmission timer, which is three seconds here.
+static bool wellBeforeTheTimer(const MatchContext& context)
+{
+    double lostAt = context.get("lostAt").doubleValue();
+    return context.event.time.dbl() - lostAt < 1.0;
+}
+
+static cValue eventTime(const PacketEvent& event) { return cValue(event.time.dbl()); }
+static cValue eventValue(const PacketEvent& event) { return cValue(event.value); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_fast_retransmit")
+        // Remove exactly one segment from the middle of a window. Every later segment gets
+        // through, and each one makes host B repeat the same acknowledgment.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(20)
+                       .drop().describe("one data segment in the middle of a window"))
+        // The segment that is removed. Remember where it starts and when it left.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment).nth(20)
+                  .capture("lostSeq", "tcp.sequenceNo")
+                  .capture("lostAt", eventTime)
+                  .describe("the segment the relay removes")
+                  .within(20.0))
+        // Host B answers each later segment with the same acknowledgment. The third of them
+        // is the trigger RFC 5681 names.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterEvent(thirdDuplicateAcknowledgment)
+                  .describe("the third duplicate acknowledgment")
+                  .within(5.0))
+        // The threshold falls. Remember it, so the window can be judged against it.
+        .once(on("host1.tcp").signal("ssthresh").first()
+                  .capture("threshold", eventValue)
+                  .describe("the threshold after the third duplicate")
+                  .within(1.0))
+        // And the window becomes the threshold plus three segments.
+        .once(on("host1.tcp").signal("cwnd").first()
+                  .assertEvent(thresholdPlusThreeSegments)
+                  .describe("the window, the threshold plus three segments")
+                  .within(1.0))
+        // The missing segment is sent again at once, well before the timer would fire.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {lostSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
+                  .assertEvent(wellBeforeTheTimer)
+                  .describe("the repair, well before the retransmission timer")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_fast_retransmit compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network FastRetransmitNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = FastRetransmitNet
+sim-time-limit = 30s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+**.tcp.advertisedWindow = 65535
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_fast_retransmit: PASS

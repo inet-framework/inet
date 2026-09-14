@@ -87,7 +87,10 @@ Candidate checks, all deterministic through a signal:
 - [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [x] Step 4: the feature map gains the congestion control features. Six: CONGESTION-WINDOW, INITIAL-WINDOW, LOSS-RESPONSE, FAST-RETRANSMIT, RESTART-IDLE, DELAYED-ACK.
 - [x] Step 5: `protocol/tcp/checks/congestion-control.md`. Five checks.
-- [~] Step 6: the tests. Three of five written.
+- [~] Step 6: the tests. Four of five written.
+      - `Rfc5681FastRetransmit.test` passes. Three duplicates repair the loss, the
+        threshold falls, and the window becomes the threshold plus three segments.
+        Observation 4 is a sharpening candidate, not a claim.
       - `Rfc5681InitialWindow.test` passes.
       - `Rfc5681TimeoutResponse.test` passes. The window becomes one segment and the
         threshold falls inside the bound. Needed `fromNth` on the relay, so that a whole
