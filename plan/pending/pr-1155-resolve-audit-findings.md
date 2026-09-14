@@ -239,6 +239,23 @@ partition boundary.**
 The shape: each feature's parameter, state, logic, NED declaration and test in one commit. Steps
 1h and 1h2 have placed the parameter and the state declaration; **what remains is the code**.
 
+**The work list is four commits.** Tracing thirteen features by their identifiers shows each one
+spread over three to eight commits, and commits **13, 17, 18 and 19** appear in nearly every list
+— between them they carry the code of twelve of the thirteen. Dissect those four and give each
+piece to the commit that owns it, and the rest of the series is already in order.
+
+Two of the four call themselves refactors, which they are not: 13 introduces the state of Accurate
+ECN, F-RTO, loss undo, reordering and PRR, and 17 introduces Tail Loss Probe, keepalive and the
+delayed-ACK state.
+
+**Order for this step.** Take the features whose code sits in fewest commits first — keepalive is
+in one, delayed ACK in two — because each one done shrinks what is left in 13, 17, 18 and 19 and
+makes the next easier to see. Accurate ECN, spread over eight, comes last.
+
+**This step needs a build.** Every move changes what a commit compiles, and nothing in the static
+checks can tell whether the piece left behind still builds. Steps 1h and 1h2 were safe without one
+because they only add declarations; this step removes code.
+
 Note what the two done steps did and did not buy. They make every commit build and run, which is
 what [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) protects and what
 `git bisect` needs. They do **not** re-cut by concern: commit 18 still carries the AccECN mode
@@ -403,6 +420,15 @@ assume the defaults commit owns everything.
 tip built in a separate workspace, the suite run there, 53 rows named by family, and a record of
 what it deliberately did not touch. That text becomes the explanation of commit 33 and the source
 of the per-commit wording for the rest.
+
+**A note on verification, from 2026-09-14.** The two repairs done so far are checked
+**statically** — every parameter and every state field is declared at the commit that uses it, by
+[check-ned-params.sh](../../doc/project/enforcement/check-ned-params.sh) and a matching pass over
+the state messages. **No commit has been compiled.** An attempt to prove commit 11 builds, by
+hardlinking a sibling worktree's objects, failed to prove anything: `make` treated the borrowed
+objects as current and compiled none of the TCP sources. A real per-commit build is what
+[TR-CI-EVERY-COMMIT](../../doc/project/rule/testing.md#tr-ci-every-commit) asks for and it is still
+owed.
 
 **Done when** every commit that moves a recorded expectation carries it with a row-level
 explanation, `check-commits.sh` reports no `PR-SPLIT-BASELINE` violation, and
