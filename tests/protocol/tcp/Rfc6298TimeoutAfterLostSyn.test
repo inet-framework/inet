@@ -1,0 +1,150 @@
+%description:
+
+RFC 6298 -- the timeout is three seconds when data starts after a lost SYN.
+
+Checks RFC6298-SYN-1 (must).
+
+RFC 6298 section 5.7: when the timer expires while the sender is waiting for the
+acknowledgment of a SYN, and the timeout in use is below three seconds, the timeout is set
+to three seconds when the data transfer begins. This is the one rule RFC 6298 added over the
+document it replaced, so a model written against the older text is likely to keep whatever
+value it had.
+
+**How the rule is observed.** The written procedure reads the timeout of host A at the first
+data send. The model publishes no signal that carries it: `TcpBaseAlg` emits `rto` only from
+`receivedDataAck`, which has not run at that point in this scenario, because nothing has been
+acknowledged yet. The timeout is read behaviourally instead. The relay discards the first
+data segment as well, and the interval until host A sends it again **is** the timeout that
+was in force at the first data send.
+
+The scenario needs both losses on one path, which is two rules on one relay: the first SYN,
+and then the first data segment. Each rule counts its own occurrences, so neither shifts the
+other's numbering.
+
+**The model conforms.** The run drops both frames and host A retries the SYN:
+
+    PacketTap dropping SYN (selected #1)
+    PacketTap dropping tcpseg(l=500) (selected #2)
+
+and the interval to the retransmission of the data segment is three seconds. The model
+reaches the value RFC 6298 section 5.7 demands, although it reaches it for a different
+reason than the rule gives: three seconds is the model's timeout from the start, the default
+of `rexmit_timeout` in `TcpBaseAlgState.msg`, and the SYN loss does not lower it. A model
+whose initial timeout were below three seconds would have to raise it here, and this check
+would then be measuring the rule rather than the default. That distinction belongs in the
+results, not in the verdict: the observable the standard names is the value, and the value
+is right.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+#include <cmath>
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A pure acknowledgment carries the same port and no SYN, so a step that wants a data
+// segment says so.
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+// RFC 6298 section 5.7: three seconds, and this check reads it as an interval.
+static bool threeSecondsAfterTheDataSend(const MatchContext& context)
+{
+    double sentAt = context.get("dataSentAt").doubleValue();
+    double interval = context.event.time.dbl() - sentAt;
+    return std::fabs(interval - 3.0) <= 0.01;
+}
+
+static cValue eventTime(const PacketEvent& event) { return cValue(event.time.dbl()); }
+
+Define_ProtocolTestProgram()
+{
+    // Two rules on one relay. The first loses the SYN, the second loses the first data
+    // segment so that the timeout in force can be read as an interval.
+    return ProtocolTest("rfc6298_timeout_after_lost_syn")
+        .intercept(tap("relay")
+                       .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                       .nth(1)
+                       .drop().describe("host A's first SYN"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(1)
+                       .drop().describe("host A's first data segment"))
+        // The retransmitted SYN opens the connection, so the handshake completed after a
+        // loss, which is the condition the rule is about.
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .describe("the SYN+ACK, after the first SYN was lost")
+                  .within(20.0))
+        // The data transfer begins. Remember the moment.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment)
+                  .capture("firstSeq", "tcp.sequenceNo")
+                  .capture("dataSentAt", eventTime)
+                  .describe("the first data segment after the handshake")
+                  .within(20.0))
+        // It is lost, so host A sends it again after the timeout that was in force, which
+        // RFC 6298 says must be three seconds.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {firstSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
+                  .assertEvent(threeSecondsAfterTheDataSend)
+                  .describe("the retransmission, three seconds after the first data send")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6298_timeout_after_lost_syn compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network LostSynNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = LostSynNet
+sim-time-limit = 60s
+seed-set = 0
+
+# static ARP: the only frames on the wire are the TCP/IP ones.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+# The data transfer begins well after the handshake has recovered from the lost SYN.
+*.host1.app[0].tSend = 10s
+*.host1.app[0].sendBytes = 500B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6298_timeout_after_lost_syn: PASS

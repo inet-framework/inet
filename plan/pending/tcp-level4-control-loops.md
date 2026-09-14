@@ -48,7 +48,7 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
 - [x] Step 3: `standard/rfc6298/catalog.md`, identifiers `RFC6298-*`. 18 entries.
 - [x] Step 4: the feature map gains the retransmission timer features. Four: RTO-ESTIMATOR, RTO-BOUNDS, RTO-BACKOFF, RTT-SAMPLING.
 - [x] Step 5: `protocol/tcp/checks/retransmission-timer.md`. Five checks.
-- [~] Step 6: the tests. Four of five written.
+- [x] Step 6: the tests. All five written.
       - `Rfc6298FirstMeasurement.test` fails and finds a **defect**. The model has no
         first-measurement case: `TcpBaseAlg` smooths the first measurement like any other,
         so the smoothed value is R/8 rather than R and the timeout is 2.4 times what
@@ -59,6 +59,9 @@ a deterministic check. Only a tolerance-bearing rule stays statistical.
       - `Rfc6298KarnsRule.test` passes. Exactly one sample is taken, and the expiry
         cancels the measurement. The observable is the absence of a publication, which
         needed the guard that does not block.
+      - `Rfc6298TimeoutAfterLostSyn.test` passes, with a caveat for the results: the
+        model reaches three seconds because that is its default, not because the SYN loss
+        raised it.
       - `Rfc6298InitialTimeout.test` passes. The initial timeout is three seconds, which
         RFC 6298 permits as a value above the recommended one second. The timeout is not
         published as a signal before the first measurement, so the check reads it
