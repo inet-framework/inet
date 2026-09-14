@@ -5,6 +5,7 @@ Also verify exact sparse HT MCS and width derivation from typed mode entries.
 
 %includes:
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
@@ -39,6 +40,42 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
 }
 
 %activity:
+
+// IEEE Std 802.11-2024, Tables 19-35, 19-38 and 19-41. These optional
+// table entries are not part of the selectable MCS 0-31 catalog below.
+struct OptionalMcsExpectation {
+    const Ieee80211Htmcs *mcs;
+    int streams;
+    int bitsPerSubcarrier[4];
+    double grossMbps;
+    double netMbps;
+    int symbolsFor1000Bits;
+};
+const OptionalMcsExpectation optionalMcs[] = {
+    {&Ieee80211HtmcsTable::htMcs32BW40MHz, 1, {1, 0, 0, 0}, 12, 6, 43},
+    {&Ieee80211HtmcsTable::htMcs73BW40MHz, 4, {6, 6, 4, 2}, 486, 364.5, 1},
+    {&Ieee80211HtmcsTable::htMcs76BW20MHz, 4, {6, 6, 6, 4}, 286, 214.5, 2},
+};
+for (const auto& expected : optionalMcs) {
+    const Ieee80211OfdmModulation *streams[] = {expected.mcs->getModulation(),
+        expected.mcs->getStreamExtension1Modulation(), expected.mcs->getStreamExtension2Modulation(),
+        expected.mcs->getStreamExtension3Modulation()};
+    for (int i = 0; i < 4; i++)
+        ASSERT((streams[i] ? streams[i]->getSubcarrierModulation()->getCodeWordSize() : 0) == expected.bitsPerSubcarrier[i]);
+    for (auto gi : {Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT}) {
+        Ieee80211HtDataMode data(expected.mcs, expected.mcs->getBandwidth(), gi);
+        bool shortGi = gi == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT;
+        auto symbol = SimTime(shortGi ? 3600 : 4000, SIMTIME_NS);
+        double rateScale = shortGi ? 10.0 / 9 : 1;
+        ASSERT(data.getNumberOfSpatialStreams() == expected.streams);
+        ASSERT(std::abs(data.getGrossBitrate().get() - expected.grossMbps * 1e6 * rateScale) < 1);
+        ASSERT(std::abs(data.getNetBitrate().get() - expected.netMbps * 1e6 * rateScale) < 1);
+        if (!shortGi) {
+            ASSERT(data.getSymbolInterval() == symbol);
+            ASSERT(data.getDuration(b(1000)) == expected.symbolsFor1000Bits * symbol);
+        }
+    }
+}
 
 const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
 const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");

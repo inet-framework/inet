@@ -124,6 +124,9 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. IEEE 802.11 HT/VHT guard intervals and timing
+
+   HT MCS 32, 73, and 76 definitions are corrected.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
