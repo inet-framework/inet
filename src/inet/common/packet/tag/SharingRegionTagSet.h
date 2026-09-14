@@ -183,9 +183,10 @@ class INET_API SharingRegionTagSet : public cObject
     inline const RegionTag<TagBase> getRegionTagForUpdate(int index);
 
     /**
-     * Clears the set of tags in the given region.
+     * Clears the set of tags in the given region. The optional function
+     * selects the tags that are cleared, all of them by default.
      */
-    void clearTags(b offset, b length);
+    void clearTags(b offset, b length, std::function<bool(const TagBase *)> f = [] (const TagBase *) { return true; });
 
     /**
      * Moves all tags with the provided shift.
@@ -493,7 +494,7 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::remov
 {
     SELFDOC_FUNCTION_T;
     auto result = getAllTags<T>(offset, length);
-    clearTags(offset, length);
+    clearTags(offset, length, [] (const TagBase *tag) { return typeid(T) == typeid(*tag); });
     return result;
 }
 

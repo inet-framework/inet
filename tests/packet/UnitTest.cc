@@ -1821,6 +1821,73 @@ static void testRegionTagSet()
     ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(1500) && regionTagSet.getRegionTag(1).getLength() == b(500));
     }
 
+    { // 11b. removeTagsWherePresent keeps the tags of the other types
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet.addTag<PropagationTimeTag>(b(0), b(1000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tags1.size() == 1);
+    ASSERT(regionTagSet.getNumTags() == 1);
+    ASSERT(regionTagSet.findTag<PropagationTimeTag>(b(0), b(1000)) != nullptr);
+    }
+
+    { // 11c. removeTagsWherePresent cuts the end of the region of the given type only
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet.addTag<PropagationTimeTag>(b(0), b(1000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(500), b(500));
+    ASSERT(tags1.size() == 1);
+    ASSERT(tags1[0].getOffset() == b(500) && tags1[0].getLength() == b(500));
+    ASSERT(regionTagSet.getNumTags() == 2);
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(500)) != nullptr);
+    ASSERT(regionTagSet.findTag<PropagationTimeTag>(b(0), b(1000)) != nullptr);
+    }
+
+    { // 11d. removeTagsWherePresent cuts the beginning of the region of the given type only
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(500), b(1000));
+    regionTagSet.addTag<PropagationTimeTag>(b(500), b(1000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tags1.size() == 1);
+    ASSERT(tags1[0].getOffset() == b(500) && tags1[0].getLength() == b(500));
+    ASSERT(regionTagSet.getNumTags() == 2);
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(1000), b(500)) != nullptr);
+    ASSERT(regionTagSet.findTag<PropagationTimeTag>(b(500), b(1000)) != nullptr);
+    }
+
+    { // 11e. removeTagsWherePresent splits the region of the given type only
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(3000));
+    regionTagSet.addTag<PropagationTimeTag>(b(0), b(3000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(1000), b(1000));
+    ASSERT(tags1.size() == 1);
+    ASSERT(tags1[0].getOffset() == b(1000) && tags1[0].getLength() == b(1000));
+    ASSERT(regionTagSet.getNumTags() == 3);
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(1000)) != nullptr);
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(2000), b(1000)) != nullptr);
+    ASSERT(regionTagSet.findTag<PropagationTimeTag>(b(0), b(3000)) != nullptr);
+    }
+
+    { // 11f. removeTagsWherePresent leaves a shared tags vector alone
+    SharingRegionTagSet regionTagSet1;
+    regionTagSet1.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet1.addTag<ElapsedTimeTag>(b(0), b(1000));
+    SharingRegionTagSet regionTagSet2 = regionTagSet1;
+    regionTagSet2.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(regionTagSet1.getNumTags() == 2);
+    ASSERT(regionTagSet2.getNumTags() == 1);
+    ASSERT(regionTagSet1.findTag<CreationTimeTag>(b(0), b(1000)) != nullptr);
+    ASSERT(regionTagSet2.findTag<ElapsedTimeTag>(b(0), b(1000)) != nullptr);
+    }
+
+    { // 11g. clearTags removes the tags of every type
+    SharingRegionTagSet regionTagSet;
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet.addTag<PropagationTimeTag>(b(0), b(1000));
+    regionTagSet.clearTags(b(0), b(1000));
+    ASSERT(regionTagSet.getNumTags() == 0);
+    }
+
     { // 12. copyTags
     SharingRegionTagSet regionTagSet1;
     SharingRegionTagSet regionTagSet2;

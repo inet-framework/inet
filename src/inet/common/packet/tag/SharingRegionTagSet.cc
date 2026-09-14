@@ -176,7 +176,7 @@ void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<
     }
 }
 
-void SharingRegionTagSet::clearTags(b offset, b length)
+void SharingRegionTagSet::clearTags(b offset, b length, std::function<bool(const TagBase *)> f)
 {
     if (regionTags != nullptr) {
         bool changed = false;
@@ -184,7 +184,11 @@ void SharingRegionTagSet::clearTags(b offset, b length)
         b clearEndOffset = offset + length;
         for (size_t i = 0; i < regionTags->size(); i++) {
             auto& regionTag = (*regionTags)[i];
-            if (clearEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= clearStartOffset)
+            auto tagObject = regionTag.getTag().get();
+            if (!f(tagObject))
+                // filtered out, leave it alone
+                continue;
+            else if (clearEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= clearStartOffset)
                 // no intersection
                 continue;
             else if (clearStartOffset <= regionTag.getStartOffset() && regionTag.getEndOffset() <= clearEndOffset) {

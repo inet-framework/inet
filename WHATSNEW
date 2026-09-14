@@ -67,6 +67,22 @@ Notable backward compatible changes are the following:
    default. Serializers written against an earlier INET version need no source
    change. See the migration guide for the new signatures.
 
+5. Region tag removal by type
+
+   The removeTagsWherePresent() method of SharingRegionTagSet removed the region
+   tags of every type in the given range, and not only the tags of the requested
+   type. It now removes only the requested type, as its documentation always
+   stated. The same correction reaches Chunk::removeTagsWherePresent() and
+   Packet::removeRegionTagsWherePresent(), which forward to it. The clearTags()
+   method gained an optional predicate that selects the tags to clear, and clears
+   all of them by default, so its own behavior is unchanged.
+
+   This may change the results of a simulation that removes the region tags of one
+   type while the region tags of another type cover the same range. Inside INET
+   this happens when ResidenceTimeMeasurer ends a measurement: it removed the
+   ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
+   Those two tags now survive the measurement.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
