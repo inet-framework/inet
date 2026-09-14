@@ -270,7 +270,7 @@ void Icmpv6::processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg
     delete packet;
 }
 
-void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
+void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, int mtu)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
@@ -286,9 +286,10 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
         errorMsg = createDestUnreachableMsg(static_cast<Icmpv6DestUnav>(code));
-    // TODO implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
-        errorMsg = createPacketTooBigMsg(0);
+        // RFC 4443 section 3.2: the MTU field carries the MTU of the next-hop link. It
+        // used to be a literal zero, which names no link and tells the source nothing.
+        errorMsg = createPacketTooBigMsg(mtu);
     else if (type == ICMPv6_TIME_EXCEEDED)
         errorMsg = createTimeExceededMsg(static_cast<Icmpv6TimeEx>(code));
     else if (type == ICMPv6_PARAMETER_PROBLEM)

@@ -209,7 +209,7 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, const MacAddress& macAddr);
 
-    void sendIcmpError(Packet *origPacket, Icmpv6Type type, int code);
+    void sendIcmpError(Packet *origPacket, Icmpv6Type type, int code, int mtu = 0);
 
     // NetFilter functions:
 

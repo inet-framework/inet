@@ -1067,7 +1067,9 @@ void Ipv6::fragmentAndSend(Packet *packet)
     // routed datagrams are not fragmented
     if (!fromHL) {
         // FIXME check for multicast datagrams, how many ICMP error should be sent
-        sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0); // TODO set MTU
+        // RFC 4443 section 3.2: the report carries the MTU of the link the datagram did
+        // not fit, which is the one this interface has.
+        sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0, mtu);
         return;
     }
 
@@ -1112,6 +1114,10 @@ void Ipv6::fragmentAndSend(Packet *packet)
         // Base header points to Fragment Header
         const auto& fragBaseHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
         fragBaseHdr->setProtocolId(IP_PROT_IPv6EXT_FRAGMENT);
+        // RFC 8200 section 3: the payload length counts every octet after the base header
+        // of this packet. The copy carries the length of the whole datagram, which
+        // describes no fragment of it.
+        fragBaseHdr->setPayloadLength(IPv6_FRAGMENT_HEADER_LENGTH + thisFragmentLength);
 
         fragPk->insertAtFront(fh);
         fragPk->insertAtFront(fragBaseHdr);
@@ -1514,9 +1520,9 @@ INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
+void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code, int mtu)
 {
-    icmp->sendErrorMessage(packet, type, code);
+    icmp->sendErrorMessage(packet, type, code, mtu);
     delete packet;
 }
 

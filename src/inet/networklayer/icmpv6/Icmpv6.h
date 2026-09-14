@@ -42,7 +42,12 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
      *      - Parameter Problem Message       - 4
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
-    virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code);
+    /**
+     * Sends an ICMPv6 error message about the given datagram. mtu is the MTU of the
+     * next-hop link and is only read for ICMPv6_PACKET_TOO_BIG, whose MTU field RFC 4443
+     * section 3.2 requires; every other type ignores it.
+     */
+    virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0);
 
     static bool verifyChecksum(const Packet *packet);
 

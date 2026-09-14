@@ -41,14 +41,14 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200HopLimitOneAtDestination.test | RFC8200-HL-3; covers HL-1 | PASS |
 | Rfc8200HopLimitZeroAtDestination.test | RFC8200-HL-3, the exact case | PASS |
 | Rfc8200SourceFragmentation.test | RFC8200-FRAG-3, FRAG-4, FRAG-5 (structure), FRAG-6, EXT-1, REASM-1, REASM-2, MTU-4; covers HDR-3, RFC8504-NR-2, NR-3, NR-4, NR-8 (the sender halves) | PASS |
-| Rfc8200FragmentPayloadLength.test | RFC8200-FRAG-4, FRAG-5 (payload length), HDR-2 | **FAIL (unexpected)** — defect |
+| Rfc8200FragmentPayloadLength.test | RFC8200-FRAG-4, FRAG-5 (payload length), HDR-2 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc8200FragmentIdentification.test | RFC8200-FRAG-2; notes RFC8504-NR-5 | PASS |
 | Rfc8200AtomicFragment.test | RFC8504-NR-4 (receiver; governs RFC8200-REASM-6) | **PASS** since 2026-09-14; two defects repaired |
 | Rfc8200OverlappingFragments.test | RFC8504-NR-3 (receiver; governs RFC8200-REASM-5) | **PASS** since 2026-09-14; the payload length repair closed it |
 | Rfc8200ShortFragment.test | RFC8200-REASM-4 | PASS |
 | Rfc8200OversizedFragmentOffset.test | RFC8200-REASM-8 | PASS |
 | Rfc4443PacketTooBig.test | RFC8200-FRAG-1, RFC4443-PTB-1, RFC4443-ERR-2; covers RFC8504-NR-11 | PASS |
-| Rfc4443PacketTooBigMtu.test | RFC4443-PTB-2 | **FAIL (unexpected)** — defect |
+| Rfc4443PacketTooBigMtu.test | RFC4443-PTB-2 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc8200LinkMtuPacket.test | RFC8200-MTU-2 | PASS |
 | Rfc4443HostErrorReport.test | RFC4443-DU-4, ERR-1, ERR-2, SRC-1 | PASS |
 | Rfc4443ReportSourceAddress.test | RFC4443-SRC-2 | PASS |
@@ -67,10 +67,10 @@ repeated in the table below, because every test ran again on this tree.
 Summary: 27 tests in the suite, 19 PASS, **0 FAIL (expected), 8 FAIL (unexpected)**, so the suite
 reports FAIL.
 
-Since 2026-09-14 the suite is 27 tests, **25 PASS, 0 FAIL (expected), 2 FAIL (unexpected)**.
-Six repairs landed: the unknown informational type, the atomic fragment, the overlapping
-fragments, the error report for an unregistered protocol, and the two link-layer suppression
-rules. Only `Rfc4443PacketTooBigMtu` and `Rfc8200FragmentPayloadLength` stand.
+Since 2026-09-14 the suite is 27 tests and **all 27 pass**. Eight defects were repaired:
+the unknown informational type, the atomic fragment, the overlapping fragments, the error
+report for an unregistered protocol, the two link-layer suppression rules, the Packet Too Big
+MTU, and the payload length of a fragment. Nothing in this suite is outstanding.
 
 ## Which failures are declared, and which are not
 
@@ -86,8 +86,8 @@ wrong thing.
 | `Rfc4443NoErrorForLinkBroadcast.test`, `…LinkMulticast.test` | **Repaired.** `Icmpv6::validateDatagramPromptingError` suppressed for four conditions, all reading the IPv6 addresses, one of them citing RFC 4443 §2.4(e). The fifth condition reads the frame the packet arrived in, through the `MacAddressInd` tag, which is where a link-layer broadcast or multicast is recorded. |
 | `Rfc4443UnknownInformationalType.test` | **Repaired.** The type switch had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 4443 section 2.4(b) requires. |
 | `Rfc4443ErrorForUnknownProtocol.test` | **Repaired.** The report is built and sent correctly; the crash was at the source, where the report comes back. `Icmpv6` handed the error indication to the protocol the quoted datagram names without asking whether anything had registered it, and the `MessageDispatcher` knew no route. `Icmpv6` keeps that set of registered protocols and simply never read it; it does now, as `Icmp` already did. |
-| `Rfc4443PacketTooBigMtu.test` | `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter (Icmpv6.h:55) and the caller hands it a literal 0 (Icmpv6.cc:273). The `// TODO implement MTU support.` above it is a bare "to do", which says the behavior is wanted and unfinished — a claim — and not a reason why it is unsupported. |
-| `Rfc8200FragmentPayloadLength.test` | `Ipv6::fragmentAndSend` builds every fragment and sets its header; the payload length it writes is the copied one. |
+| `Rfc4443PacketTooBigMtu.test` | **Repaired.** `Icmpv6::createPacketTooBigMsg` takes an `mtu` parameter and the caller handed it a literal 0, under a bare `// TODO implement MTU support.`. `Icmpv6::sendErrorMessage` takes the MTU now and `Ipv6` passes the one it already read from the outgoing interface, two lines above the call. |
+| `Rfc8200FragmentPayloadLength.test` | **Repaired.** `Ipv6::fragmentAndSend` builds every fragment from a copy of the base header, so the payload length it wrote was the whole datagram's and described no fragment. Each fragment carries its own now: the fragment header plus that fragment's share. |
 | `Rfc8200AtomicFragment.test` | **Repaired.** The fragment buffer looked its entry up before it created it, so a datagram that completes from one fragment erased a stale `end()` iterator. It keeps the iterator of the entry it creates now. |
 | `Rfc8200OverlappingFragments.test` | **Repaired.** The reassembled packet carried the base header of the first fragment unchanged, so its payload length described that fragment and not the datagram, and `Ipv6::decapsulate` asserted. `Ipv6FragBuf` computes the payload length of the reassembled datagram now. |
 

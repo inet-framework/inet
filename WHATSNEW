@@ -135,6 +135,22 @@ Notable backward incompatible changes are the following:
    Simulations where that happens send fewer ICMP messages, so their
    trajectories and fingerprints may change.
 
+9. IPv6 fills in two length fields it used to leave wrong
+
+   A Packet Too Big report carried an MTU of zero. Icmpv6::sendErrorMessage took
+   no MTU and handed createPacketTooBigMsg a literal 0, under a bare "TODO
+   implement MTU support". It takes one now, and Ipv6 passes the MTU it has
+   already read from the outgoing interface two lines above the call, as RFC 4443
+   section 3.2 requires. A source that receives the report can act on it.
+
+   Every fragment of a fragmented datagram carried the Payload Length of the
+   whole datagram, because Ipv6::fragmentAndSend builds each fragment from a copy
+   of the base header. Each fragment now carries its own: the fragment header
+   plus that fragment's share.
+
+   Simulations that fragment IPv6 datagrams or report a too-big packet put
+   different bytes on the wire, so their fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
