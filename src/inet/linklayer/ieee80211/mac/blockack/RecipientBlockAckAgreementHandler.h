@@ -27,11 +27,16 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
   protected:
     std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *> blockAckAgreements;
     std::map<std::pair<MacAddress, Tid>, Ptr<const Ieee80211AddbaResponse>> lastAddbaResponses;
+    // A tagged local DELBA remains eligible after its agreement is removed
+    // until the final fragment is acknowledged or terminally aborted.
+    std::map<std::pair<MacAddress, Tid>, uint64_t> pendingTeardownGenerationIds;
+    uint64_t nextAgreementGenerationId = 1;
 
   protected:
     virtual RecipientBlockAckAgreement *removeAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, bool accepted);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
+    virtual uint64_t allocateAgreementGenerationId();
     virtual simtime_t computeEarliestExpirationTime();
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
@@ -41,10 +46,14 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual void processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback) override;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
+    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(Packet *packet) override;
+    virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual bool processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;
+    virtual uint64_t getPendingTeardownGenerationId(Tid tid, MacAddress originatorAddr) const override;
+    virtual bool isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const override;
 };
 
 } // namespace ieee80211
