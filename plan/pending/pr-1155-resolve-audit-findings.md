@@ -262,11 +262,21 @@ commit 57's virtual at commit 11 and carry it through the 46 commits between. Th
 **Result:** the include gate goes from 5 violations to 1, the one being the exempt move commit,
 and commit 11 goes from failing after 200 sources to compiling 1685.
 
-**1h4. The fifth shape: symbols, not files. — open, and only the re-cut fixes it.**
+**1h4. The fifth shape: symbols, not files. — commit 11 done, the rest open.**
 
 Building the repaired commit 11 got 1685 sources in and then failed on six symbols:
 `getBytesInFlight`, which enters `TcpAlgorithm.h` at commit 19, and `cwndSignal` and
 `ssthreshSignal`, which exist at commit 9 but whose include is not added until commit 17.
+
+Both were repaired for commit 11, and **commit 11 now builds**: the signals include was added
+where the signals are used, and `getBytesInFlight` moved to its first user together with the two
+implementations `TcpBaseAlg` and `DumbTcp` owe it.
+
+`check-series-builds.sh` then measured the rest. Commits 10 and 11 build; 12 fails on
+`TcpSackRexmitQueue::markHeadLost`, 13 on `TcpAlgorithm::calculateSsthreshForFastRecovery` and
+`TcpSackRexmitQueue::updateLost`, and 14 onward cascade. **Every one is the same move: a method to
+its first user.** The work is convergent and it is long, and each step now has a build to confirm
+it.
 
 This is the same defect one layer deeper, and it is the point at which patching stops paying.
 Each shape repaired reveals the next, because they are all the one fault: **phase B was written
