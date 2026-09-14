@@ -1,0 +1,130 @@
+%description:
+
+RFC 6298 -- the first round-trip measurement sets the estimator.
+
+Checks RFC6298-FIRST-1 (must) and RFC6298-RTO-1 (must); covers RFC6298-MIN-1.
+
+RFC 6298 section 2.2: when the first round-trip measurement R is made, the smoothed value
+becomes R and the variance becomes R/2. Section 2.3 then gives the timeout as the smoothed
+value plus four times the variance. Section 2.4 raises a result below one second to one
+second.
+
+The link carries a one-way delay of 200 ms, so one round trip is about 400 ms. That is
+chosen, and is a scenario constant of the check: it makes the formula of section 2.3 give
+about 1.2 s, which is above the floor of section 2.4. On a fast link the floor would decide
+the answer and this check would prove nothing about the formula.
+
+So the first publication of each of the three signals must be:
+
+    srtt   = R              about 0.400 s
+    rttvar = R / 2          about 0.200 s
+    rto    = srtt + 4*rttvar = 3*R  about 1.200 s
+
+The three are read at their first publication, which is the moment the first measurement
+completes. `TcpBaseAlg::receivedDataAck` emits srtt, rttvar and rto in that order at one
+simulation time, so three ordered steps read one moment.
+
+This test fails, and the failure is a **defect**, so nothing declares it expected.
+
+The model has no first-measurement case. `TcpBaseAlg::receivedDataAck`
+(src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc:327-341) applies the smoothing formula
+of section 2.3 to every measurement, the first one included, so the first smoothed value is
+one eighth of R rather than R. The run says so in one line:
+
+    Measured RTT=400.05104ms, updated SRTT=50.00638ms, new RTO=2875.0319ms
+
+Against RFC 6298 the three values should be about 400.05 ms, 200.03 ms and 1200.15 ms. The
+smoothed value is out by a factor of eight, and the timeout is 2.4 times what the standard
+gives. The step below reports it as:
+
+    the value is 0.0500064, and it must be at least 0.4
+
+The class is defect and not unimplemented feature, because code exists for this behaviour:
+the estimator is written, it runs on the first acknowledgment, and it produces the wrong
+number. A timeout too long delays every recovery from a lost segment, and it is the first
+timeout of a connection that this governs.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// One way is 200 ms, so a round trip is 400 ms plus the transmission of one segment and one
+// acknowledgment, which is a few tens of microseconds on a 100 Mbit link. The bands below
+// are wide enough for that and far too narrow to admit a different formula.
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6298_first_measurement")
+        // RFC 6298 section 2.2: the first measurement sets the smoothed value to R.
+        .once(on("host1.tcp").signal("srtt").first()
+                  .assertValueBetween(0.400, 0.401)
+                  .describe("the smoothed round-trip time after the first measurement")
+                  .within(2.0))
+        // RFC 6298 section 2.2: and the variance to half of R.
+        .once(on("host1.tcp").signal("rttvar").first()
+                  .assertValueBetween(0.200, 0.2005)
+                  .describe("the round-trip variance after the first measurement")
+                  .within(0.001))
+        // RFC 6298 sections 2.3 and 2.4: the timeout is the smoothed value plus four times
+        // the variance, and never below one second. Here the formula gives about 1.2 s, so
+        // the floor does not decide it.
+        .once(on("host1.tcp").signal("rto").first()
+                  .assertValueBetween(1.199, 1.204)
+                  .describe("the retransmission timeout after the first measurement")
+                  .within(0.001));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6298_first_measurement compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import ned.DatarateChannel;
+
+// A link whose one-way delay is a known constant, so the round-trip time is known.
+channel SlowLink extends DatarateChannel
+{
+    delay = 200ms;
+    datarate = 100Mbps;
+}
+
+network FirstMeasurementNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> SlowLink <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = FirstMeasurementNet
+sim-time-limit = 10s
+seed-set = 0
+
+# static ARP: no address resolution shares the link with the measured exchange.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 1.0s
+*.host1.app[0].sendBytes = 500B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6298_first_measurement: PASS
