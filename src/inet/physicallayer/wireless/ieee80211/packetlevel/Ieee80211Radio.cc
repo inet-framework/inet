@@ -6,6 +6,7 @@
 
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -50,6 +51,14 @@ void Ieee80211Radio::initialize(int stage)
         int channelNumber = par("channelNumber");
         if (channelNumber != -1)
             setChannelNumber(channelNumber);
+        else {
+            // Publish a channel configured directly on the transmitter as well.
+            const auto *channel = check_and_cast<const Ieee80211Transmitter *>(transmitter)->getChannel();
+            if (channel != nullptr) {
+                Ieee80211RadioChannelChangedDetails details(channel->getBand());
+                emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
+            }
+        }
     }
 }
 
@@ -110,8 +119,10 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
     EV << "Changing radio band to " << band << endl;
     receptionTimer = nullptr;
     const auto *channel = ieee80211Transmitter->getChannel();
-    if (channel != nullptr)
-        emit(radioChannelChangedSignal, channel->getChannelNumber());
+    if (channel != nullptr) {
+        Ieee80211RadioChannelChangedDetails details(channel->getBand());
+        emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
+    }
     emit(listeningChangedSignal, 0);
 }
 
@@ -122,10 +133,11 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannel(channel);
-    ieee80211Receiver->setChannel(channel);
+    ieee80211Receiver->setChannel(new Ieee80211Channel(channel->getBand(), channel->getChannelNumber()));
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
     receptionTimer = nullptr;
-    emit(radioChannelChangedSignal, channel->getChannelNumber());
+    Ieee80211RadioChannelChangedDetails details(channel->getBand());
+    emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
     emit(listeningChangedSignal, 0);
 }
 
@@ -137,7 +149,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     ieee80211Receiver->setChannelNumber(newChannelNumber);
     EV << "Changing radio channel to " << newChannelNumber << ".\n";
     receptionTimer = nullptr;
-    emit(radioChannelChangedSignal, newChannelNumber);
+    Ieee80211RadioChannelChangedDetails details(ieee80211Transmitter->getChannel()->getBand());
+    emit(radioChannelChangedSignal, newChannelNumber, &details);
     emit(listeningChangedSignal, 0);
 }
 
