@@ -1,9 +1,15 @@
 %description:
 
-Protocol Test Framework self test -- the exactlyTimes combinator.
+Protocol Test Framework self test -- the exactlyTimes cardinality.
 
-host1 sends a datagram every 0.2s. exactlyTimes(3, ...) must match exactly three of
-them inside the 2s window.
+host1 sends a datagram every 0.2s, starting at 0.1s, so three of them fall inside a 0.65s
+window and the fourth does not. `exactlyTimes(3, ...)` must hold on that window: a fourth
+match inside it fails at once, and fewer than three fails when the window closes.
+
+The window is the subject of the check, not a detail. This test used to name a 2s window, in
+which ten datagrams occur, and it passed -- because `exactlyTimes` then resolved on the third
+match and never looked at the rest. The word said a cardinality and delivered a sequence. The
+sequence has its own word now, `nextTimes`, and `self/NextTimes.test` covers it.
 
 %includes:
 #include "ProtocolTest.h"
@@ -17,7 +23,7 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("udp_repeat")
         .exactlyTimes(3, on("host1.udp").signal("packetSentToLower")
-                  .filterPacket("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
+                  .filterPacket("udp.destPort == 5000").describe("a datagram to port 5000").within(0.65));
 }
 
 %activity:

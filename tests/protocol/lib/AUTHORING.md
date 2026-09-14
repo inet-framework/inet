@@ -79,18 +79,28 @@ comes first for the parameterized ones.
 | `never(p)` | 0 | fail if a match occurs in the window, else advance |
 | `once(p)` | 1 | advance on the first match (the common case) |
 | `atMostOnce(p)` | 0..1 | match-or-skip |
-| `exactlyTimes(n, p)` | n | advance on the nth match |
+| `nextTimes(n, p)` | the next n | advance on the nth match; **does not forbid an n+1th** |
 | `oneOrMoreTimes(p)` | 1..∞ | greedy: consume the whole `within` window, need ≥1 |
 | `anyNumberOfTimes(p)` | 0..∞ | greedy: consume the window |
 | `atLeastTimes(n, p)` | n..∞ | greedy: consume the window, need ≥n |
 | `atMostTimes(n, p)` | 0..n | greedy: fail on the (n+1)th |
 | `betweenTimes(a, b, p)` | a..b | greedy: need the count in [a, b] |
+| `exactlyTimes(n, p)` | n..n | greedy: fail at once on an n+1th, and on fewer than n when the window closes |
 
-**Fixed-count** kinds (`once`, `exactlyTimes`) advance the instant the count is reached, so
-they don't disturb the timing of later steps. **Greedy** kinds (`oneOrMore`, `atLeast`,
-`atMost`, `between`, `anyNumber`) consume *every* matching frame until their `within` window
-closes, then check the range — size `within` so the window ends before the next expected
-frame, or a greedy step will swallow it.
+**Sequencing** kinds (`once`, `atMostOnce`, `nextTimes`) advance the instant the count is
+reached, so they don't disturb the timing of later steps. **Cardinality** kinds
+(`oneOrMore`, `atLeast`, `atMost`, `between`, `exactlyTimes`, `anyNumber`) consume *every*
+matching frame until their `within` window closes, then check the range.
+
+**Read `nextTimes` and `exactlyTimes` carefully; they are not the same rule.** `nextTimes(3,
+p)` takes the next three matches and hands the fourth to the step after it.
+`exactlyTimes(3, p)` says there are three in the window and no more, so a fourth fails. The
+two shared the name `exactlyTimes` until 2026-09-14, and the cardinality was the one that did
+not exist: a check that said "exactly three" got "the next three" and passed over everything
+after them. `self/Repeat.test` and `self/NextTimes.test` cover the two.
+
+A cardinality step is greedy, so size its `within` to end before the next expected frame, or
+put it in `meanwhile(...)` and let it run beside the steps that follow.
 
 ---
 
@@ -449,7 +459,7 @@ A 4000-byte datagram over a 1500-byte MTU yields several fragments.
 
 ### 802.11 Block Ack sequence (`WifiBlockAckFull`)
 The full agreement: ADDBA handshake (each frame ACKed), then a block of 5 QoS data frames,
-a Block Ack Request, and one Block Ack — using `exactlyTimes(5, ...)` for the block. See
+a Block Ack Request, and one Block Ack — using `nextTimes(5, ...)` for the block. See
 `wifi_block_ack_full` for the complete sequence.
 
 ### DHCP (pattern)

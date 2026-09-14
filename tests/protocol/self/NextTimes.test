@@ -1,0 +1,90 @@
+%description:
+
+Protocol Test Framework self test -- the nextTimes sequencing word.
+
+`nextTimes(n, ...)` matches the next n events and then lets the steps after it begin. It
+**sequences**; it does not bound. An n+1th match is not forbidden, because by then the step
+has finished and the step after it owns the stream.
+
+That is the difference from `exactlyTimes(n, ...)`, which is a cardinality: it waits its
+window out, fails at once on an n+1th match, and fails on too few when the window closes.
+`self/Repeat.test` covers that one.
+
+The two used to share the name `exactlyTimes`, and the cardinality was the one that did not
+exist. A check that said "exactly three" got "the next three" and passed over everything
+after them.
+
+host1 sends a datagram every 0.2 s from 0.1 s. This test takes the first three with
+`nextTimes`, and then observes a fourth. The fourth is the proof: after a cardinality of
+three the fourth datagram would be a failure, and after a sequence of three it is simply the
+next event, which a later step may read.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("next_times")
+        // The next three datagrams. The step resolves on the third.
+        .nextTimes(3, on("host1.udp").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("the next three datagrams to port 5000")
+                  .within(2.0))
+        // And the fourth, which the step above neither consumed nor forbade. A cardinality
+        // of three would have failed on this event; a sequence of three hands it on.
+        .once(on("host1.udp").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("the fourth datagram, which the sequence left for this step")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "next_times compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Two hosts on one link -- note: NO tester (attached at runtime).
+network NextTimesNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NextTimesNet
+sim-time-limit = 3s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST next_times: PASS

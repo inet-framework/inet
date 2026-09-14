@@ -178,7 +178,10 @@ class INET_API ProtocolTest
     }
 
     // Exactly n: advance when the nth matching event is observed (fail on deadline).
-    ProtocolTest& exactlyTimes(int n, const EventPattern& pattern)
+    // The next n matches, in sequence. The step resolves on the nth and the steps after it
+    // begin there, so this word **sequences**; it does not bound. An n+1th match is not
+    // forbidden, because by then the step has finished and a later step owns the stream.
+    ProtocolTest& nextTimes(int n, const EventPattern& pattern)
     {
         steps.push_back(Step{StepType::ExactlyTimes, pattern, {}, {}, {}, n});
         return *this;
@@ -192,6 +195,10 @@ class INET_API ProtocolTest
     ProtocolTest& atLeastTimes(int n, const EventPattern& pattern)       { return addCount(pattern, n, -1); }  // n..*
     ProtocolTest& atMostTimes(int n, const EventPattern& pattern)        { return addCount(pattern, 0, n); }   // 0..n
     ProtocolTest& betweenTimes(int a, int b, const EventPattern& pattern) { return addCount(pattern, a, b); }  // a..b
+    // Exactly n in the window: an n+1th fails at once, and fewer than n fails when the
+    // window closes. This is a cardinality, so it waits the window out. For "the next n,
+    // then carry on", which resolves on the nth, the word is nextTimes.
+    ProtocolTest& exactlyTimes(int n, const EventPattern& pattern)       { return addCount(pattern, n, n); }   // n..n
 
     // All patterns must match, in any order, before advancing. The group window is
     // the longest within() among its patterns.
