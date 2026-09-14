@@ -372,6 +372,10 @@ Notable backward compatible changes are the following:
    previous defaults are supplied by Ieee80211ModeBase; direct external
    implementations must provide these queries or inherit the base defaults.
 
+   RateSelection and QosRateSelection now accept dataFrameGuardInterval to
+   qualify a configured dataFrameBitrate. The default, -1s, leaves the GI
+   unspecified; an explicit value must match the selected mode's modeled GI.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
