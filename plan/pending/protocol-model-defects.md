@@ -3,6 +3,10 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
+**Where it stands:** 5 of the 30 tests pass, from two repairs. The suite is 257 tests, 187
+PASS, 44 FAIL (expected), 26 FAIL (unexpected), from 182 / 45 / 30. Group A has one test
+left.
+
 Seven standards passes measured the model and did not repair it, because a pass measures.
 Thirty tests fail for recorded reasons. This plan repairs the model so that they pass.
 
@@ -37,14 +41,17 @@ By how clear the defect is, not by protocol.
 A peer can stop the simulation with a packet. These are the worst of the thirty and the
 least arguable.
 
-- [ ] `ipv4/Rfc1122UnknownIcmpType` — `Icmp::processIcmpMessage` has a `default:` branch for
-      an unknown type, and that branch throws.
-- [ ] `ipv6/Rfc4443UnknownInformationalType` — the same shape in the ICMPv6 type switch.
+- [x] `ipv4/Rfc1122UnknownIcmpType` — done. The `default:` branch discards.
+- [x] `ipv6/Rfc4443UnknownInformationalType` — done, the same repair.
+      It also closed `tcp/Rfc9293SourceQuench`, which had declared an expected failure:
+      Source Quench is type 4, which fell into the same branch.
 - [ ] `ipv6/Rfc4443ErrorForUnknownProtocol` — the report is built and sent; the crash is in
       the path that delivers it.
-- [ ] `ipv6/Rfc8200AtomicFragment` — the fragment buffer uses an iterator it has erased.
-- [ ] `ipv6/Rfc8200OverlappingFragments` — reassembly completes and then trips the model's
-      own assertion in `Ipv6::decapsulate`.
+- [x] `ipv6/Rfc8200AtomicFragment` — done. It also uncovered the payload length defect
+      below, and a step of the test that could never have matched.
+- [x] `ipv6/Rfc8200OverlappingFragments` — done, closed by the payload length repair.
+      That repair reaches every IPv6 reassembly: an ordinary two-fragment datagram was
+      being truncated silently to the first fragment's length.
 
 ### Group B — a condition missing from a mechanism that exists (3 tests)
 
@@ -53,6 +60,10 @@ least arguable.
 - [ ] `ipv6/Rfc4443NoErrorForLinkMulticast`
 
 ### Group C — a value that is never filled in (2 tests)
+
+One of the two, the fragment payload length, turned out to be the same defect Group A
+repaired, but on the receive side. `ipv6/Rfc8200FragmentPayloadLength` is about the send
+side and still fails.
 
 - [ ] `ipv6/Rfc4443PacketTooBigMtu` — the caller hands `createPacketTooBigMsg` a literal 0.
 - [ ] `ipv6/Rfc8200FragmentPayloadLength` — every fragment carries the copied length.
