@@ -7,8 +7,9 @@
 
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
-#include <algorithm>
+#include <tuple>
 
+#include <algorithm>
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -112,6 +113,13 @@ const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
     return htOperation;
 }
 
+std::function<void()> Ieee80211Mib::saveHtState()
+{
+    return [this, state = std::make_tuple(localHtCapabilitiesValid, localHtCapabilities, htOperation, configuredSecondaryChannelOffset, primaryChannelAvailable, peerHtStates)]() mutable {
+        std::tie(localHtCapabilitiesValid, localHtCapabilities, htOperation, configuredSecondaryChannelOffset, primaryChannelAvailable, peerHtStates) = std::move(state);
+    };
+}
+
 void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
         const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit)
 {
@@ -164,6 +172,7 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
             localHtCapabilities.txMcsNss.maxMcsPerNss[nss] = std::max(localHtCapabilities.txMcsNss.maxMcsPerNss[nss], mcs % 8);
         }
     }
+    localHtCapabilities.greenfield = modeSet->isHtGreenfieldSupported();
     if (localHtCapabilities.supportedChannelWidths.empty())
         throw cRuntimeError("HT operation mode set '%s' does not provide an HT channel width", modeSet->getName());
     localHtCapabilities.maxAmpduLengthExponent = par("htMaxAmpduLengthExponent");

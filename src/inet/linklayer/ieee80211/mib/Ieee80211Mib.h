@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211MIB_H
 #define __INET_IEEE80211MIB_H
 
+#include <functional>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
@@ -100,6 +102,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     short allocateAssociationId(const MacAddress& address);
     void releaseAssociationId(const MacAddress& address);
     void clearAssociationIds();
+    std::function<void()> saveHtState();
     void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
             const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }

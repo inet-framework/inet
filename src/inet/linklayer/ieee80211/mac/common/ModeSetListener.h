@@ -10,12 +10,18 @@
 
 #include "inet/common/SimpleModule.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API ModeSetListener : public SimpleModule, public cListener
+class INET_API ModeSetListener : public SimpleModule, public cListener, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual std::function<void()> saveModeSetState() override;
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
 

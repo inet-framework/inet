@@ -30,10 +30,13 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     static const Ptr<const Ieee80211PhyHeader> peekIeee80211PhyHeaderAtFront(const Packet *packet, b length = b(-1), int flags = 0);
 
   protected:
+    bool changingModeSet = false;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
 
   protected:
     virtual void initialize(int stage) override;
+
+    void changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode);
 
     virtual void handleUpperCommand(cMessage *message) override;
 
@@ -46,7 +49,12 @@ class INET_API Ieee80211Radio : public FlatRadioBase
   public:
     Ieee80211Radio();
 
+    // These setters snapshot transactional mode-set consumers before applying
+    // the catalog, and restore them if an update throws. Notifications publish
+    // committed state; listener exceptions propagate without rolling it back.
+    // Behavioral consumers implement IIeee80211ModeSetListener.
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
@@ -57,4 +65,3 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 } // namespace inet
 
 #endif
-

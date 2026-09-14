@@ -23,7 +23,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBas
 module Ieee80211Receiver extends NarrowbandReceiverBase
 {
     parameters:
-        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","n(greenfield-2.4Ghz)","p","ac");
         string bandName @enum("2.4 GHz","5 GHz","5 GHz (20 MHz)","5 GHz (40 MHz)","5 GHz (80 MHz)","5 GHz (160 MHz)","5.9 GHz");
         int channelNumber;
         modulation = default("BPSK"); // TODO this is simply wrong
@@ -32,4 +32,3 @@ module Ieee80211Receiver extends NarrowbandReceiverBase
         *.opMode = this.opMode;
         @class(Ieee80211Receiver);
 }
-
