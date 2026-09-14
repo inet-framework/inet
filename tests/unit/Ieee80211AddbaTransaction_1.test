@@ -1090,6 +1090,35 @@ assertMaxReceiveLifetimeValidation("inet.linklayer.ieee80211.mac.recipient.Recip
     ASSERT(request1->getDialogToken() == 1);
 }
 
+// IEEE Std 802.11-2024, 9.4.1.13: the recipient's A-MSDU support controls
+// whether an A-MSDU can use Block Ack under the established agreement.
+for (bool responseSupportsAMsdu : { false, true }) {
+    TestOriginatorHandler capabilityHandler;
+    TestCallback capabilityCallback;
+    Packet capabilityTrigger("capabilityTrigger");
+    auto capabilityHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(100));
+    capabilityHandler.processAcknowledgedDataFrame(&capabilityTrigger, capabilityHeader, &originatorPolicy, &capabilityCallback);
+    auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(capabilityCallback.managementHeader);
+    ASSERT(request != nullptr && request->getAMsduSupported());
+    capabilityHandler.processTransmittedAddbaReq(capabilityCallback.managementPacket, request, &originatorPolicy, &capabilityCallback);
+    auto response = makeResponse(peer1, 3, request->getDialogToken(), 0);
+    response->setAMsduSupported(responseSupportsAMsdu);
+    auto outcome = capabilityHandler.processReceivedAddbaResp(response, &originatorPolicy, &capabilityCallback);
+    auto agreement = outcome.establishedAgreement;
+    ASSERT(agreement != nullptr);
+    ASSERT(agreement->getIsAMsduSupported() == responseSupportsAMsdu);
+
+    TestOriginatorQosAckPolicy ackPolicy;
+    ackPolicy.configureBlockAckSelection(1000, 1);
+    for (bool aMsduPresent : { false, true }) {
+        auto header = makeQosHeader(peer1, 3, request->getStartingSequenceNumber());
+        header->setAMsduPresent(aMsduPresent);
+        Packet packet("capabilityData", header);
+        ASSERT(ackPolicy.computeAckPolicy(&packet, header, agreement) ==
+                (aMsduPresent && !responseSupportsAMsdu ? NORMAL_ACK : BLOCK_ACK));
+    }
+}
+
 TestOriginatorHandler handler;
 Packet triggerPacket("trigger");
 auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
