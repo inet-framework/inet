@@ -95,6 +95,22 @@ ownership with the caller: cancellation must not delete a packet still borrowed 
 in-flight transmission or active sequence. Superseded AP management transactions must
 retire their queued siblings and terminal outcome exactly once.
 
+Generation-Aware Block Ack Teardown
+-----------------------------------
+
+Custom agreement callbacks must implement ``cancelBlockAckTeardown()``. Match the role,
+peer, TID and generation so cancellation cannot affect a replacement agreement. Preserve
+``Ieee80211BlockAckAgreementTag::generationId`` on locally generated DELBA fragments and
+retries; the role, peer and TID come from DELBA and its processing context.
+
+Recipient agreement handlers must explicitly implement ``isDelbaPending()``,
+``processAcknowledgedDelba()``, ``processAbortedDelba()`` and
+``getPendingTeardownGenerationId()``. Update ``processTransmittedDelba()``
+implementations and callers to the full ``Packet *`` form where required, so local
+generation metadata remains available. Keep teardown pending until its final fragment is
+acknowledged or the exchange terminates; do not retire a replacement generation from a
+stale completion.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
