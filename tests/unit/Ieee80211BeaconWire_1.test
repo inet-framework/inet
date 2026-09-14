@@ -1,0 +1,23 @@
+%description:
+Check the mesh no-forwarding-information reason code on wire.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+ASSERT(RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION == 62);
+auto reason = makeShared<Ieee80211DeauthenticationFrame>();
+reason->setReasonCode(RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION);
+reason->setChunkLength(B(2));
+Packet reasonPacket("reason", reason);
+ASSERT(reasonPacket.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({62, 0}));
+EV << "Mesh reason wire checks passed.\n";
+
+%contains: stdout
+Mesh reason wire checks passed.
