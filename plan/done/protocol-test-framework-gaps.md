@@ -1,6 +1,6 @@
 # Protocol test framework — the gaps the standards passes found
 
-**Status:** phase 1 complete. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`.
+**Status:** done. Started 2026-09-11 on `topic/rfc-tests-tcp-level4`, finished 2026-09-14 on `master`.
 Every item below is implemented and covered by a self test. Phase 2, which removed the old
 words, is done.
 
@@ -99,7 +99,11 @@ Semantics, stated exactly:
 
 - [x] Add the six filter words and the eight assertion words.
 - [x] Add `first()` and `nth(k)` to a pattern.
-- [ ] Rename the internal fields from `sel*` to `flt*`.
+- [x] Rename the internal fields from `sel*` to `flt*`, on 2026-09-14. Nineteen fields in
+      `EventPattern`, and their uses in `EventPattern.cc`, `ProtocolTester.cc` and
+      `ProtocolTestDescriber.cc`. The user-facing vocabulary already said `filter`; only the
+      private fields still said `sel`. No verdict moved. One test description quoted the old
+      code by field name, and the quote is now a sentence instead.
 - [x] The describer renders an assertion differently from a filter, after an arrow, and
       `str()` now shows the scalar filters and the position word it used to omit.
 - [x] `tcp/Rfc5681InitialWindow.test` states its rule directly. Verified both ways: with a
