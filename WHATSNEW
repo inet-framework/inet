@@ -207,6 +207,12 @@ Notable backward incompatible changes are the following:
    transmissions and delivered traffic may change in configurations that previously
    built oversized or fragmentable A-MSDUs.
 
+15. Serialized Management Fragment Bodies
+
+   Management fragmentation now slices the serialized body instead of repeating a
+   complete management header in each fragment. Reassembly preserves the original body
+   bytes and local transaction context.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
