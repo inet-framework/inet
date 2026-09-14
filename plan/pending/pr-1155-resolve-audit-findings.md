@@ -228,7 +228,7 @@ The same tree-by-tree rebuild moved each field's declaration to the commit that 
 under a `// declared here for the code above that already uses it:` header. **The final tree is
 byte-identical to the audited head** — the repair adds nothing at the end, only earlier.
 
-**1h3. Repair the four forward includes (F-9). — open, and small.**
+**1h3. Repair the four forward includes (F-9). — done 2026-09-14, and it was not small.**
 
 Commits 11 to 14 include `TcpClassicAlgorithmBase.h`, `TcpAlgorithmBase.h` and `TcpCubic.h`
 before those files exist, which
@@ -243,6 +243,35 @@ series for a smaller reason than it deserves.
 The gate also reports the repair's own move commit, commit 15, and that one is correct: a move
 that changes no content cannot fix its own includes, and
 [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) exempts it.
+
+**What it took.** Three of the four were the rename, and pointing them at the names that exist
+before commit 16 was mechanical. The fourth was not: `Rfc5681Recovery.cc` at commit 11 includes
+`TcpCubic.h` because it sniffs the concrete type —
+
+```cpp
+// TODO move this to a derived class or use function pointer for ssthresh calculation?
+if (TcpCubic *tcpCubic = dynamic_cast<TcpCubic *>(conn->getTcpAlgorithmForUpdate()))
+```
+
+— and `TcpCubic` arrives at commit 14, which itself needs commits 12 and 13. **A cycle no
+reordering can break.** The series already contains the repair, at commit 57, *"pick the
+fast-retransmit ssthresh by virtual, not by concrete-type sniffing"*, so the fix was to apply
+commit 57's virtual at commit 11 and carry it through the 46 commits between. The author's own
+`TODO` says they knew.
+
+**Result:** the include gate goes from 5 violations to 1, the one being the exempt move commit,
+and commit 11 goes from failing after 200 sources to compiling 1685.
+
+**1h4. The fifth shape: symbols, not files. — open, and only the re-cut fixes it.**
+
+Building the repaired commit 11 got 1685 sources in and then failed on six symbols:
+`getBytesInFlight`, which enters `TcpAlgorithm.h` at commit 19, and `cwndSignal` and
+`ssthreshSignal`, which exist at commit 9 but whose include is not added until commit 17.
+
+This is the same defect one layer deeper, and it is the point at which patching stops paying.
+Each shape repaired reveals the next, because they are all the one fault: **phase B was written
+against the finished tree.** Step 1i is the repair; 1h4 is not a separate task but a measure of
+how much of phase B the re-cut has to touch.
 
 **1i. Re-cut phases B and C by feature (F-10). — open, and it is the large one.**
 
