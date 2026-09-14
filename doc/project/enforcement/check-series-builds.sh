@@ -37,7 +37,13 @@ echo "  ${#SHAS[@]} commit(s); this takes minutes per commit"
 log=$(mktemp); status=0; prev="$START"; n=0
 for sha in "${SHAS[@]}"; do
   n=$((n+1))
-  git checkout -q --detach "$sha" || { echo "  SKIP ${sha:0:9} (checkout failed)"; continue; }
+  # a build leaves generated _m files behind, and they block the next checkout
+  git clean -xdfq -e src/out
+  if ! git checkout -q --detach "$sha"; then
+    # a skipped commit is not a passed commit
+    printf "  %3d/%d  SKIP  %s  checkout failed\n" "$n" "${#SHAS[@]}" "${sha:0:9}"
+    status=1; continue
+  fi
   # make cannot see a file whose mtime git left alone
   git diff --name-only "$sha" "$prev" -- 'src/*' | xargs -r touch 2>/dev/null
   rm -f src/libINET.so src/libINET_dbg.so
@@ -53,8 +59,9 @@ done
 rm -f "$log"
 echo
 if [ "$status" -eq 0 ]; then
-  echo "PASS: every commit in the range builds."
+  echo "PASS: all ${#SHAS[@]} commit(s) in the range build."
 else
-  echo "FAIL: at least one commit does not build; see PR-SERIES-BUILDS."
+  echo "FAIL: a commit did not build, or could not be checked; see PR-SERIES-BUILDS."
+  echo "      A skipped commit counts as a failure: a gate that checks nothing must not say PASS."
 fi
 exit "$status"
