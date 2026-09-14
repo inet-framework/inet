@@ -1,7 +1,7 @@
 # Keep the audit reports out of git
 
-Status: **in progress** — worktree `/home/levy/workspace/inet-audit-reports-out-of-git`,
-branch `topic/audit-reports-out-of-git`, off `master` at `83396aa655`.
+Status: **done** — worktree `/home/levy/workspace/inet-audit-reports-out-of-git`,
+branch `topic/audit-reports-out-of-git`, off `master` at `3c215c0754`, commit `6dd84c6fe7`.
 
 ## 1. What this changes
 
