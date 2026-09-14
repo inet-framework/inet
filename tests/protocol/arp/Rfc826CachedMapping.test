@@ -11,13 +11,15 @@ host B = hostB.
 Host A sends five datagrams, one every 0.1 s. The first one starts a resolution; the other
 four find the mapping in the table and go out with no packet on the link.
 
-Expected observation 1 -- exactly one request in the whole run -- is one greedy step that
-consumes the whole observation window and then checks the count.
+Both expected observations are counts over one window, so the request count runs as a guard
+beside the delivery count. Before `meanwhile` existed, a greedy step consumed its whole
+window and left nothing for a second observation, so the delivery was asserted on the line
+that the receiving program prints at the end of the run. That line reported the same fact
+but could not say when a datagram arrived.
 
-Deviation: expected observation 2, that all five datagrams arrive, is not a program step.
-A greedy step consumes its whole window, so a later step would look for the datagrams after
-they had already arrived. The delivery is asserted instead on the line that the receiving
-program prints at the end of the run, which reports the same fact.
+The delivery is counted where IPv4 hands the datagram up, not at host B's UDP. A UDP module
+raises `packetReceivedFromLower` twice for one datagram, because `Udp` and its base class
+both emit it; see doc/project/evidence/model/udp/notes.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -32,14 +34,20 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc826_cached_mapping")
         // Expected observation 1: exactly one request for the address of host B leaves host
-        // A in the whole run (RFC826-REQ-2).
-        .exactlyTimes(1, on("hostA.eth[0].mac").signal("packetSentToLower")
+        // A in the whole run (RFC826-REQ-2). The count runs beside the step below, so the
+        // two observations share one window instead of competing for it.
+        .meanwhile(exactlyTimes(1, on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("arp.opcode == 1")
                   .filterEvent([](const MatchContext& c) {
                       return ipv4AddressField(c.event.packet, "arp.destIpAddress")
                              == interfaceIpv4Address("hostB.eth[0]").str();
                   })
                   .describe("an ARP request from host A for the address of host B")
+                  .within(0.9)))
+        // Expected observation 2: all five datagrams arrive at host B.
+        .exactlyTimes(5, on("hostB.ipv4.ip").signal("packetSentToUpper")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("a datagram of host A delivered up at host B")
                   .within(0.9));
 }
 
@@ -90,6 +98,3 @@ seed-set = 0
 
 %contains: stdout
 PROTOCOLTEST rfc826_cached_mapping: PASS
-
-%contains: stdout
-hostB.app[0]: received 5 packets

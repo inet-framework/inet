@@ -13,12 +13,12 @@ too, and host B takes the negative branch of the target question: end of process
 packet is discarded. Host B runs no program and sends nothing of its own, so any packet from
 host B would be an answer to this request.
 
-Deviation: expected observation 2, that host C answers the request, is not a program step.
-The absence watch of expected observation 3 has to cover the moment right after host B
-receives the request, which is also the moment host C answers, and a greedy step consumes
-its whole window. The answer of host C is asserted instead on the line that its program
-prints at the end of the run: a datagram that arrived proves that the resolution completed,
-and only a reply from host C could have completed it.
+Expected observations 2 and 3 are guards that run beside the ordered step, so both cover the
+moment right after host B receives the request, which is also the moment host C answers.
+Before `meanwhile` existed the absence watch consumed that window alone, so the answer of
+host C was asserted on the line that its program prints at the end of the run. That line
+proved the resolution completed and left the reader to argue back to the reply. The reply
+itself is now on the link, with a time.
 
 %includes:
 #include "ProtocolTest.h"
@@ -32,6 +32,19 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc826_third_station_request")
+        // Expected observation 3: host B puts no ARP packet on the link, at any time in the
+        // run (RFC826-RECV-5, RECV-1). Host B runs no program and has nothing of its own to
+        // resolve, so the guard covers the whole run and not only the part after the
+        // request.
+        .meanwhile(never(on("hostB")
+                  .filterEvent([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
+                  .describe("any ARP packet from host B")
+                  .within(0.9)))
+        // Expected observation 2: host C answers the request, exactly once.
+        .meanwhile(exactlyTimes(1, on("hostC.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("arp.opcode == 2")
+                  .describe("host C's reply to the request")
+                  .within(0.9)))
         // Expected observation 1: the request reaches host B, and its target protocol
         // address is the address of host C and not of host B.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
@@ -42,13 +55,7 @@ Define_ProtocolTestProgram()
                              && ipv4AddressField(packet, "arp.destIpAddress") != interfaceIpv4Address("hostB.eth[0]").str();
                   })
                   .describe("the request for the address of host C, at host B's interface")
-                  .within(0.5))
-        // Expected observation 3: host B puts no ARP packet on the link (RFC826-RECV-5,
-        // RECV-1).
-        .never(on("hostB")
-                  .filterEvent([](const MatchContext& c) { return arpPacketLeaves(c.event, "hostB"); })
-                  .describe("any ARP packet from host B")
-                  .within(0.85));
+                  .within(0.5));
 }
 
 %activity:
@@ -99,6 +106,3 @@ seed-set = 0
 
 %contains: stdout
 PROTOCOLTEST rfc826_third_station_request: PASS
-
-%contains: stdout
-hostC.app[0]: received 1 packets

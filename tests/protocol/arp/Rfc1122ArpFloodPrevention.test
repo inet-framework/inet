@@ -17,10 +17,11 @@ send its first request at the moment the first datagram arrives.
 Expected observations 1 and 3 are one greedy step: at least one request, and at most 11, in
 the whole run.
 
-Deviation: expected observation 2, that no reply for the address ever crosses the link, is
-not a program step, because a greedy step consumes its whole window. It is asserted instead
-on the line that the program of host B prints at the end of the run: host B received nothing,
-so no datagram of host A reached any station, so no resolution succeeded.
+Expected observation 2, that no reply for the address ever crosses the link, is a guard that
+runs beside the greedy count. Before `meanwhile` existed the count consumed its whole window,
+so observation 2 was asserted on the line that the program of host B prints at the end of the
+run. That line said only that host B received nothing, from which a reader had to argue back
+to the reply.
 
 Note on the bound: the MUST of RFC 1122 is about the mechanism, and the rate of one per
 second is a recommendation. A host that chose a higher rate would fail this step and could
@@ -38,6 +39,15 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_arp_flood_prevention")
+        // Expected observation 2: no reply for 10.0.0.99 ever reaches host A. Nobody owns
+        // the address, so any reply at all is an answer that should not exist.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("arp.opcode == 2")
+                  .filterEvent([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.srcIpAddress") == "10.0.0.99";
+                  })
+                  .describe("an ARP reply for 10.0.0.99 arriving at host A")
+                  .within(9.9)))
         // Expected observations 1 and 3: between 1 and 11 requests for 10.0.0.99 in 10 s.
         .betweenTimes(1, 11, on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("arp.opcode == 1")
@@ -95,6 +105,3 @@ seed-set = 0
 
 %contains: stdout
 PROTOCOLTEST rfc1122_arp_flood_prevention: PASS
-
-%contains: stdout
-hostB.app[0]: received 0 packets

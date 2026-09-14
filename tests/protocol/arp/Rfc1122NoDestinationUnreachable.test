@@ -17,10 +17,11 @@ The absence watch looks for any ICMP message and not for the Destination Unreach
 alone. Nothing in this scenario gives a host a reason to send any ICMP message, so the wider
 watch costs nothing and catches a host that reports the failure as another type.
 
-Deviation: expected observation 2, that no reply for the address ever crosses the link, is
-not a program step, because the absence watch of expected observation 3 consumes the rest of
-the run. It is asserted instead on the line that the program of host B prints at the end of
-the run: host B received nothing, so no resolution succeeded.
+Expected observation 2, that no reply for the address ever crosses the link, is a guard that
+runs beside the ordered steps. Before `meanwhile` existed the absence watch of expected
+observation 3 consumed the rest of the run, so observation 2 was asserted on the line that
+the program of host B prints at the end of the run. That line said only that host B received
+nothing, from which a reader had to argue back to the reply.
 
 %includes:
 #include "ProtocolTest.h"
@@ -34,6 +35,15 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc1122_no_destination_unreachable")
+        // Expected observation 2: no reply for 10.0.0.99 ever reaches host A. Nobody owns
+        // the address, so any reply at all is an answer that should not exist.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("arp.opcode == 2")
+                  .filterEvent([](const MatchContext& c) {
+                      return ipv4AddressField(c.event.packet, "arp.srcIpAddress") == "10.0.0.99";
+                  })
+                  .describe("an ARP reply for 10.0.0.99 arriving at host A")
+                  .within(9.9)))
         // Expected observation 1: the resolution really was attempted.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("arp.opcode == 1")
@@ -99,6 +109,3 @@ seed-set = 0
 
 %contains: stdout
 PROTOCOLTEST rfc1122_no_destination_unreachable: PASS
-
-%contains: stdout
-hostB.app[0]: received 0 packets

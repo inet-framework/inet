@@ -16,16 +16,19 @@ reception algorithm reads before it reads the opcode.
 The two hosts use two ports, 5000 for the datagrams of host A and 6000 for the datagram of
 host B, so that a step cannot match the wrong datagram.
 
-Deviation: expected observation 2, that the datagram of host B reaches host A, is not a
-program step. The absence watch of expected observation 3 has to cover the moment at 0.5 s
-when host B needs the hardware address of host A, and a greedy step consumes its whole
-window, so a later step would look for the datagram after it had already arrived. The
-delivery is asserted instead on the line that the receiving program prints at the end of the
-run.
+Expected observations 2 and 3 are guards that run beside the ordered steps, so both cover
+the moment at 0.5 s when host B needs the hardware address of host A. Before `meanwhile`
+existed the absence watch consumed that window alone, so the delivery was asserted on the
+line that the receiving program prints at the end of the run. That line could not say when
+the datagram arrived.
 
-The absence watch runs from the reply of host B to the end of the run. The one window it
-does not cover is the start of the run before the reply, and in it host B has nothing to
-send and therefore no address to resolve.
+The absence watch now runs from the start of the run and not from the reply of host B. Host
+B has nothing to send before 0.5 s and therefore no address to resolve, so the wider window
+holds the same claim over more of the run.
+
+The delivery is counted where IPv4 hands the datagram up, not at host A's UDP. A UDP module
+raises `packetReceivedFromLower` twice for one datagram, because `Udp` and its base class
+both emit it; see doc/project/evidence/model/udp/notes.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -39,6 +42,17 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc826_learning_from_request")
+        // Expected observation 3: host B never asks for the address of host A, although it
+        // sends a datagram to host A at 0.5 s (RFC826-RECV-6, RECV-7).
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("arp.opcode == 1")
+                  .describe("an ARP request from host B")
+                  .within(0.9)))
+        // Expected observation 2: the datagram of host B reaches host A, exactly once.
+        .meanwhile(exactlyTimes(1, on("hostA.ipv4.ip").signal("packetSentToUpper")
+                  .filterPacket("udp.destPort == 6000")
+                  .describe("host B's datagram delivered up at host A")
+                  .within(0.9)))
         // Expected observation 1: the request of host A, and the reply of host B.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("arp.opcode == 1")
@@ -47,13 +61,7 @@ Define_ProtocolTestProgram()
         .once(on("hostB.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("arp.opcode == 2")
                   .describe("host B's reply")
-                  .within(0.1))
-        // Expected observation 3: host B never asks for the address of host A, although it
-        // sends a datagram to host A at 0.5 s (RFC826-RECV-6, RECV-7).
-        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .filterPacket("arp.opcode == 1")
-                  .describe("an ARP request from host B")
-                  .within(0.85));
+                  .within(0.1));
 }
 
 %activity:
@@ -110,6 +118,3 @@ seed-set = 0
 
 %contains: stdout
 PROTOCOLTEST rfc826_learning_from_request: PASS
-
-%contains: stdout
-hostA.app[1]: received 1 packets
