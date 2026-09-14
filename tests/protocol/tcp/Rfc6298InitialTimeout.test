@@ -1,0 +1,133 @@
+%description:
+
+RFC 6298 -- the timeout before any round-trip measurement.
+
+Checks RFC6298-INIT-1 (should).
+
+RFC 6298 section 2.1: until a round-trip time has been measured, the sender's retransmission
+timeout is one second. The text permits a larger value, because the document it replaced used
+three seconds. So the rule is a lower bound: one second or more.
+
+**Deviation from the written procedure.** The check says to read the timeout of host A before
+the first acknowledgment arrives. The model publishes no signal that carries it:
+`TcpBaseAlg` emits `rto` only from `receivedDataAck`, which runs after the first measurement
+and therefore after the value this check is about has been replaced. The timeout is read
+behaviourally instead: the relay removes host A's first data segment, and the interval until
+host A sends that segment again **is** the timeout that was in force.
+
+The scenario keeps the estimator untouched up to that point. The model takes no round-trip
+sample from the handshake -- only `receivedDataAck` measures, and the acknowledgment of a
+SYN is not a data acknowledgment -- so the segment that is dropped is sent under the initial
+timeout, which is what the check asks for.
+
+**The model conforms, and the observed value is three seconds.** The run sends the segment
+at t=0.2 and repeats it at t=3.2. Three seconds is the default of `rexmit_timeout` in
+`TcpBaseAlgState.msg`, and it is the value RFC 2988 used before RFC 6298 lowered the
+recommendation to one second. RFC 6298 permits it for exactly that reason, so the `should`
+is met. A model that used a value below one second would fail this step.
+
+The interval is asserted and not filtered. A `notBefore` clause would merely skip a
+retransmission that came too early and wait for the next one, which on a model that backs
+off would find a later interval that is long enough. That is the shape of a check that
+cannot fail. `assertEvent` judges the first retransmission and fails on it.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// A pure acknowledgment carries the same port and no SYN, so a filter naming those alone
+// also picks it. Every step here requires a data-bearing segment.
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+// RFC 6298 section 2.1: one second, or more.
+static const double INITIAL_TIMEOUT_FLOOR = 1.0;
+
+static bool atLeastTheInitialTimeoutLater(const MatchContext& context)
+{
+    simtime_t sentAt = context.get("sentAt").doubleValue();
+    return (context.event.time - sentAt).dbl() >= INITIAL_TIMEOUT_FLOOR;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6298_initial_timeout")
+        // Remove host A's first data segment, so the only way it can arrive is a
+        // retransmission driven by the timeout.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(1)
+                       .drop().describe("host A's first data segment"))
+        // Host A sends it. Remember the sequence number and the moment.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment)
+                  .capture("firstSeq", "tcp.sequenceNo")
+                  .capture("sentAt", [](const PacketEvent& event) { return cValue(event.time.dbl()); })
+                  .describe("host A's first data segment, sent under the initial timeout")
+                  .within(2.0))
+        // It never arrives, so host A sends that same sequence number again. The first
+        // repeat is the one the rule is about, and the interval must be at least one second.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {firstSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment)
+                  .first()
+                  .assertEvent(atLeastTheInitialTimeoutLater)
+                  .describe("the first retransmission, at least one second later")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6298_initial_timeout compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network InitialTimeoutNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = InitialTimeoutNet
+sim-time-limit = 30s
+seed-set = 0
+
+# static ARP: the only frames on the wire are the TCP/IP ones.
+**.ipv4.arp.typename = "GlobalArp"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 500B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6298_initial_timeout: PASS
