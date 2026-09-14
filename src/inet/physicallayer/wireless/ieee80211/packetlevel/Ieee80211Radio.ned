@@ -49,4 +49,3 @@ module Ieee80211Radio extends FlatRadioBase
         @signal[radioChannelChanged](type=long);
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
 }
-

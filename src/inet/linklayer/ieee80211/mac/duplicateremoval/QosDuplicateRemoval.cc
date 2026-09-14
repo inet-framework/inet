@@ -51,4 +51,3 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
 
 } // namespace ieee80211
 } // namespace inet
-
