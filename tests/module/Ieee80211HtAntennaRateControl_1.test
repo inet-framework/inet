@@ -259,7 +259,7 @@ record-scalar-results = false
 
 *.sta.wlan[0].mac.dcf.rateControl.typename = "RecordingAarfRateControl"
 *.sta.wlan[0].mac.dcf.rateControl.initialRate = 65Mbps
-*.sta.wlan[0].mac.dcf.rateControl.interval = 1ms
+*.sta.wlan[0].mac.dcf.rateControl.minTimerThreshold = 1
 *.sta.wlan[0].mac.dcf.rateControl.increaseThreshold = 1
 *.sta.wlan[0].mac.dcf.rateSelection.dataFrameBitrate = -1bps
 

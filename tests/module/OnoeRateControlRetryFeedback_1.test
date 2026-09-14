@@ -1,0 +1,166 @@
+%description:
+Real DCF and HCF each send ten frames that fail once then succeed. A paired
+DCF/HCF run adds one extra failure on the first frame. The tenth completion
+crosses the interval: ten retries holds 24 Mbps, eleven lowers it to 18 Mbps.
+Reference: MadWifi ath_rate_ctl(), a7531fd223a1f454d3fd74a975b4581cde5411bb.
+
+%file: RetryFeedback.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+namespace inet {
+namespace ieee80211 {
+class RetryFeedbackControl : public OnoeRateControl
+{
+  protected:
+    using cListener::finish;
+    int failures = 0;
+    int successes = 0;
+    MacAddress receiver;
+
+    void finish() override
+    {
+        bool extraFailure = getContainingNode(this)->getIndex() >= 2;
+        ASSERT(failures == (extraFailure ? 11 : 10));
+        ASSERT(successes == 10);
+        ASSERT(getRate(receiver)->getDataMode()->getNetBitrate().get() == (extraFailure ? 18e6 : 24e6));
+        const auto& state = stations.at(receiver);
+        ASSERT(state.numOfSuccTransmissions == 0);
+        ASSERT(state.numOfRetries == 0);
+        ASSERT(state.credit == 0);
+        std::cout << getFullPath() << ": retry accounting verified.\n";
+    }
+
+  public:
+    void frameTransmitted(Packet *frame, int retryCount, bool successful, bool givenUp) override
+    {
+        bool extraFailure = getContainingNode(this)->getIndex() >= 2 && successes == 0;
+        ASSERT(retryCount == 1 || (extraFailure && retryCount == 2));
+        if (successful)
+            ASSERT(retryCount == (extraFailure ? 2 : 1));
+        ASSERT(!givenUp);
+        if (successful)
+            successes++;
+        else
+            failures++;
+        receiver = getReceiverAddress(frame);
+        OnoeRateControl::frameTransmitted(frame, retryCount, successful, givenUp);
+        if (successes < 10)
+            ASSERT(getRate(receiver)->getDataMode()->getNetBitrate().get() == 24e6);
+    }
+};
+Define_Module(RetryFeedbackControl);
+} // namespace ieee80211
+namespace physicallayer {
+class FirstAttemptErrorModel : public Ieee80211NistErrorModel
+{
+  protected:
+    mutable std::map<std::pair<int, int>, int> attempts;
+    mutable std::map<int, int> firstSequences;
+    mutable std::map<int, double> errors;
+
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override
+    {
+        auto transmission = snir->getReception()->getTransmission();
+        auto packet = transmission->getPacket();
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header = packet->peekAt<ieee80211::Ieee80211MacHeader>(phyHeader->getChunkLength());
+        auto dataHeader = dynamicPtrCast<const ieee80211::Ieee80211DataHeader>(header);
+        if (!dataHeader || header->getReceiverAddress().isMulticast())
+            return 0;
+        auto found = errors.find(transmission->getId());
+        if (found != errors.end())
+            return found->second;
+        int source = getContainingNode(check_and_cast<const cModule *>(transmission->getTransmitterRadio()))->getIndex();
+        int sequence = dataHeader->getSequenceNumber().get();
+        auto first = firstSequences.emplace(source, sequence).first;
+        int failures = source >= 2 && sequence == first->second ? 2 : 1;
+        double error = ++attempts[{source, sequence}] <= failures ? 1 : 0;
+        errors[transmission->getId()] = error;
+        return error;
+    }
+};
+Define_Module(FirstAttemptErrorModel);
+} // namespace physicallayer
+} // namespace inet
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple RetryFeedbackControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::RetryFeedbackControl);
+}
+module FirstAttemptErrorModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        @class(::inet::physicallayer::FirstAttemptErrorModel);
+}
+network RetryFeedbackNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source[4]: AdhocHost;
+        sink: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RetryFeedbackNetwork
+sim-time-limit = 7500ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+*.source[*].mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.*.ipv4.arp.typename = "GlobalArp"
+*.source[1].wlan[0].mac.qosStation = true
+*.source[3].wlan[0].mac.qosStation = true
+*.source[0].wlan[0].mac.dcf.rateControl.typename = "RetryFeedbackControl"
+*.source[1].wlan[0].mac.hcf.rateControl.typename = "RetryFeedbackControl"
+*.source[2].wlan[0].mac.dcf.rateControl.typename = "RetryFeedbackControl"
+*.source[3].wlan[0].mac.hcf.rateControl.typename = "RetryFeedbackControl"
+*.source[*].wlan[0].mac.*.rateControl.initialRate = 24Mbps
+*.source[*].wlan[0].mac.*.rateControl.interval = 1s
+*.source[*].wlan[0].mac.*.rateSelection.dataFrameBitrate = -1bps
+*.sink.mobility.initialX = 1m
+*.sink.wlan[0].radio.receiver.errorModel.typename = "FirstAttemptErrorModel"
+*.source[*].numApps = 1
+*.source[*].app[0].typename = "UdpBasicApp"
+*.source[*].app[0].destAddresses = "sink"
+*.source[*].app[0].destPort = 5000
+*.source[*].app[0].messageLength = 100B
+*.source[0].app[0].startTime = 1ms
+*.source[1].app[0].startTime = 2001ms
+*.source[2].app[0].startTime = 4001ms
+*.source[3].app[0].startTime = 6001ms
+*.source[0].app[0].stopTime = 1101ms
+*.source[1].app[0].stopTime = 3101ms
+*.source[2].app[0].stopTime = 5101ms
+*.source[3].app[0].stopTime = 7101ms
+*.source[*].app[0].sendInterval = 120ms
+
+%contains: stdout
+source[0].wlan[0].mac.dcf.rateControl: retry accounting verified.
+%contains: stdout
+source[1].wlan[0].mac.hcf.rateControl: retry accounting verified.
+%contains: stdout
+source[2].wlan[0].mac.dcf.rateControl: retry accounting verified.
+%contains: stdout
+source[3].wlan[0].mac.hcf.rateControl: retry accounting verified.

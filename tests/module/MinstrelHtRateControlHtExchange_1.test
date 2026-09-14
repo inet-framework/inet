@@ -1,0 +1,217 @@
+%description:
+Real HT infrastructure association followed by DCF and HCF Minstrel traffic.
+The AP advertises one spatial stream; stations have two antennas. Force the
+first transmission of every data MPDU to fail until 200ms, then clear the link.
+Observe probes, fallbacks, feedback, delivery and upward adaptation.
+
+%file: ExchangeTest.cc
+#include <set>
+#include "inet/applications/udpapp/UdpSink.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelHtRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelRateControlTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+namespace inet {
+namespace ieee80211 {
+class ExchangeControl : public MinstrelHtRateControl
+{
+  protected:
+    using cListener::finish;
+    int successes = 0;
+    int failures = 0;
+    int probes = 0;
+    int fallbacks = 0;
+    std::set<const physicallayer::IIeee80211Mode *> attemptedModes;
+
+    void finish() override
+    {
+        std::cout << getFullPath() << ": successes=" << successes << " failures=" << failures
+                  << " probes=" << probes << " fallbacks=" << fallbacks << "\n";
+        ASSERT(successes >= 50 && failures > 0);
+        ASSERT(probes > 0 && fallbacks > 0);
+        ASSERT(attemptedModes.size() > 1);
+        ASSERT(stations.size() == 1);
+        const auto& state = stations.begin()->second;
+        ASSERT(state.lastUpdate >= SimTime(1200, SIMTIME_MS));
+        ASSERT(state.rates[state.bestThroughput[0]].mode->getDataMode()->getNetBitrate() >
+               state.rates.front().mode->getDataMode()->getNetBitrate());
+        int measured = 0;
+        for (const auto& rate : state.rates) {
+            measured += rate.measured;
+            ASSERT(rate.mode->getHtMcsIndex() >= 0 && rate.mode->getHtMcsIndex() < 8);
+            ASSERT(rate.mode->getDataMode()->getBandwidth() == MHz(20));
+            ASSERT(rate.mode->getDataMode()->getNumberOfSpatialStreams() == 1);
+        }
+        ASSERT(measured > 1);
+        auto peer = mib->findPeerHtState(state.address);
+        ASSERT(peer && peer->valid);
+        std::cout << "HT Minstrel exchange verified: " << getFullPath()
+                  << " successes=" << successes << " failures=" << failures
+                  << " probes=" << probes << " fallbacks=" << fallbacks << "\n";
+    }
+
+  public:
+    void frameTransmitted(Packet *frame, int retries, bool successful, bool givenUp) override
+    {
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header) && !header->getReceiverAddress().isMulticast()) {
+            ASSERT(!givenUp);
+            const auto& plan = frame->getTag<MinstrelRateControlTag>();
+            auto mode = frame->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            ASSERT(mode == plan->getModes(plan->getStage()));
+            ASSERT(mode->getHtMcsIndex() >= 0 && mode->getHtMcsIndex() < 8);
+            attemptedModes.insert(mode);
+            probes += plan->getProbe() && plan->getStage() == 0;
+            fallbacks += plan->getStage() > 0;
+            successes += successful;
+            failures += !successful;
+        }
+        MinstrelHtRateControl::frameTransmitted(frame, retries, successful, givenUp);
+    }
+};
+Define_Module(ExchangeControl);
+} // namespace ieee80211
+
+class CheckingSink : public UdpSink
+{
+  protected:
+    void finish() override
+    {
+        ASSERT(numReceived >= 100);
+        UdpSink::finish();
+        std::cout << "Minstrel end-to-end delivery verified.\n";
+    }
+};
+Define_Module(CheckingSink);
+
+namespace physicallayer {
+class FirstAttemptErrorModel : public Ieee80211NistErrorModel
+{
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override
+    {
+        auto packet = snir->getReception()->getTransmission()->getPacket();
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header = dynamicPtrCast<const ieee80211::Ieee80211DataHeader>(
+                packet->peekAt<ieee80211::Ieee80211MacHeader>(phy->getChunkLength()));
+        return simTime() < SimTime(200, SIMTIME_MS) && header &&
+               !header->getReceiverAddress().isMulticast() && !header->getRetry() ? 1 : 0;
+    }
+};
+Define_Module(FirstAttemptErrorModel);
+} // namespace physicallayer
+} // namespace inet
+
+%file: test.ned
+import inet.applications.udpapp.UdpSink;
+import inet.linklayer.ieee80211.mac.ratecontrol.MinstrelHtRateControl;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+simple ExchangeControl extends MinstrelHtRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::ExchangeControl);
+}
+simple CheckingSink extends UdpSink
+{
+    parameters:
+        @class(::inet::CheckingSink);
+}
+module FirstAttemptErrorModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        @class(::inet::physicallayer::FirstAttemptErrorModel);
+}
+network ExchangeNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        source[2]: WirelessHost;
+        ap: AccessPoint;
+        server: StandardHost;
+    connections:
+        ap.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ExchangeNetwork
+sim-time-limit = 1500ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+# Slotted DCF/EDCA contenders may legitimately choose the same backoff slot.
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.configurator.addStaticRoutes = true
+*.configurator.assignDisjunctSubnetAddresses = false
+**.arp.typename = "GlobalArp"
+**.mobility.initFromDisplayString = false
+*.source[*].mobility.initialX = 10m
+*.ap.mobility.initialX = 20m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = -1bps
+**.radio.bandName = "2.4 GHz"
+**.radio.channelNumber = 6
+**.radio.transmitter.power = 100mW
+**.radio.receiver.sensitivity = -85dBm
+**.radio.receiver.snirThreshold = 4dB
+*.source[*].wlan[0].radio.antenna.numAntennas = 2
+*.ap.wlan[0].radio.antenna.numAntennas = 1
+*.ap.wlan[0].radio.receiver.errorModel.typename = "FirstAttemptErrorModel"
+*.ap.wlan[0].mac.qosStation = true
+*.ap.wlan[0].mgmt.ssid = "minstrel-test"
+*.ap.wlan[0].mgmt.beaconInterval = 5ms
+*.source[*].wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.source[*].wlan[0].mgmt.numChannels = 1
+*.source[*].wlan[0].agent.typename = "Ieee80211AgentSta"
+*.source[0].wlan[0].agent.startingTime = 0s
+*.source[1].wlan[0].agent.startingTime = 10ms
+*.source[*].wlan[0].agent.defaultSsid = "minstrel-test"
+*.source[*].wlan[0].agent.channelsToScan = "6"
+*.source[*].wlan[0].agent.probeDelay = 1ms
+*.source[*].wlan[0].agent.minChannelTime = 5ms
+*.source[*].wlan[0].agent.maxChannelTime = 5ms
+*.source[*].wlan[0].agent.authenticationTimeout = 20ms
+*.source[*].wlan[0].agent.associationTimeout = 20ms
+*.source[1].wlan[0].mac.qosStation = true
+*.source[0].wlan[0].mac.dcf.rateControl.typename = "ExchangeControl"
+*.source[1].wlan[0].mac.hcf.rateControl.typename = "ExchangeControl"
+*.source[*].wlan[0].mac.*.rateControl.maxChannelWidth = 40MHz
+*.source[*].wlan[0].mac.*.rateControl.interval = 20ms
+*.source[*].wlan[0].mac.*.rateSelection.dataFrameBitrate = -1bps
+*.source[*].numApps = 1
+*.source[*].app[0].typename = "UdpBasicApp"
+*.source[*].app[0].destAddresses = "server"
+*.source[*].app[0].destPort = 5000
+*.source[*].app[0].messageLength = 1000B
+*.source[*].app[0].sendInterval = 3ms
+*.source[0].app[0].startTime = 50ms
+*.source[1].app[0].startTime = 51ms
+*.source[*].app[0].stopTime = 1350ms
+*.server.numApps = 1
+*.server.app[0].typename = "CheckingSink"
+*.server.app[0].localPort = 5000
+
+%contains: stdout
+HT Minstrel exchange verified: ExchangeNetwork.source[0].wlan[0].mac.dcf.rateControl
+
+%contains: stdout
+HT Minstrel exchange verified: ExchangeNetwork.source[1].wlan[0].mac.hcf.rateControl
+
+%contains: stdout
+Minstrel end-to-end delivery verified.

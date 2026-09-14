@@ -1,0 +1,172 @@
+%description:
+Establish Onoe's terminal retry-count input using real DCF and HCF transmissions:
+clean success, two failures then success, and retry exhaustion after one or three
+failures. The receiver applies deterministic errors; each source sends one packet.
+This checks the INET adapter input to MadWifi ath_rate_tx_complete-style sampling.
+
+%file: CompletionFeedback.cc
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+namespace inet {
+namespace ieee80211 {
+class CompletionFeedbackControl : public OnoeRateControl
+{
+  protected:
+    using cListener::finish;
+    int failures = 0;
+    int completions = 0;
+
+    void finish() override
+    {
+        int scenario = getContainingNode(this)->getIndex() / 2;
+        const int expectedFailures[] = {0, 2, 1, 3};
+        ASSERT(failures == expectedFailures[scenario]);
+        ASSERT(completions == 1);
+        std::cout << getFullPath() << ": completion feedback verified.\n";
+    }
+
+  public:
+    void frameTransmitted(Packet *frame, int retryCount, bool successful, bool givenUp) override
+    {
+        int scenario = getContainingNode(this)->getIndex() / 2;
+        if (!successful)
+            failures++;
+        ASSERT(retryCount == failures);
+        if (successful || givenUp) {
+            completions++;
+            ASSERT(successful == (scenario < 2));
+            ASSERT(givenUp == (scenario >= 2));
+        }
+        std::cout << getFullPath() << ": retryCount=" << retryCount
+                  << " success=" << successful << " givenUp=" << givenUp << "\n";
+        OnoeRateControl::frameTransmitted(frame, retryCount, successful, givenUp);
+    }
+};
+Define_Module(CompletionFeedbackControl);
+} // namespace ieee80211
+namespace physicallayer {
+class CompletionErrorModel : public Ieee80211NistErrorModel
+{
+  protected:
+    mutable std::map<int, int> attempts;
+    mutable std::map<int, double> errors;
+
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override
+    {
+        auto transmission = snir->getReception()->getTransmission();
+        auto packet = transmission->getPacket();
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header = packet->peekAt<ieee80211::Ieee80211MacHeader>(phyHeader->getChunkLength());
+        if (header->getReceiverAddress().isMulticast())
+            return 0;
+        auto node = getContainingNode(check_and_cast<const cModule *>(transmission->getTransmitterRadio()));
+        int source = node->getIndex();
+        int scenario = source / 2;
+        auto found = errors.find(transmission->getId());
+        if (found != errors.end())
+            return found->second;
+        int attempt = ++attempts[source];
+        double error = scenario == 0 ? 0 : scenario == 1 ? (attempt <= 2 ? 1 : 0) : 1;
+        errors[transmission->getId()] = error;
+        return error;
+    }
+};
+Define_Module(CompletionErrorModel);
+} // namespace physicallayer
+} // namespace inet
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple CompletionFeedbackControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::CompletionFeedbackControl);
+}
+module CompletionErrorModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        @class(::inet::physicallayer::CompletionErrorModel);
+}
+network CompletionFeedbackNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source[8]: AdhocHost;
+        sink: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CompletionFeedbackNetwork
+sim-time-limit = 1s
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+*.source[*].mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.*.ipv4.arp.typename = "GlobalArp"
+*.source[1].wlan[0].mac.qosStation = true
+*.source[3].wlan[0].mac.qosStation = true
+*.source[5].wlan[0].mac.qosStation = true
+*.source[7].wlan[0].mac.qosStation = true
+*.source[0].wlan[0].mac.dcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[1].wlan[0].mac.hcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[2].wlan[0].mac.dcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[3].wlan[0].mac.hcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[4].wlan[0].mac.dcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[5].wlan[0].mac.hcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[6].wlan[0].mac.dcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[7].wlan[0].mac.hcf.rateControl.typename = "CompletionFeedbackControl"
+*.source[*].wlan[0].mac.*.rateControl.initialRate = 24Mbps
+*.source[*].wlan[0].mac.*.rateSelection.dataFrameBitrate = -1bps
+*.source[4..5].wlan[0].mac.**.shortRetryLimit = 1
+*.source[*].wlan[0].mac.**.shortRetryLimit = 3
+*.sink.mobility.initialX = 1m
+*.sink.wlan[0].radio.receiver.errorModel.typename = "CompletionErrorModel"
+*.source[*].numApps = 1
+*.source[*].app[0].typename = "UdpBasicApp"
+*.source[*].app[0].destAddresses = "sink"
+*.source[*].app[0].destPort = 5000
+*.source[*].app[0].messageLength = 100B
+*.source[0].app[0].startTime = 1ms
+*.source[1].app[0].startTime = 101ms
+*.source[2].app[0].startTime = 201ms
+*.source[3].app[0].startTime = 301ms
+*.source[4].app[0].startTime = 401ms
+*.source[5].app[0].startTime = 501ms
+*.source[6].app[0].startTime = 601ms
+*.source[7].app[0].startTime = 701ms
+*.source[*].app[0].sendInterval = 2s
+
+%contains: stdout
+source[0].wlan[0].mac.dcf.rateControl: completion feedback verified.
+%contains: stdout
+source[1].wlan[0].mac.hcf.rateControl: completion feedback verified.
+%contains: stdout
+source[2].wlan[0].mac.dcf.rateControl: completion feedback verified.
+%contains: stdout
+source[3].wlan[0].mac.hcf.rateControl: completion feedback verified.
+%contains: stdout
+source[4].wlan[0].mac.dcf.rateControl: completion feedback verified.
+%contains: stdout
+source[5].wlan[0].mac.hcf.rateControl: completion feedback verified.
+%contains: stdout
+source[6].wlan[0].mac.dcf.rateControl: completion feedback verified.
+%contains: stdout
+source[7].wlan[0].mac.hcf.rateControl: completion feedback verified.

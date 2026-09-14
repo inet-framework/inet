@@ -1,0 +1,120 @@
+%description:
+Verify AARF's decrease threshold using actual DCF and HCF failed transmissions.
+The receiver is below sensitivity at all rates. Both MACs must report failure
+count 1 for each fresh packet; Appendix A must not combine these into one retry sequence.
+The first two HCF failures also belong to distinct video/voice access categories.
+
+%file: RetryFeedback.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+class RetryFeedbackControl : public AarfRateControl
+{
+  protected:
+    using cListener::finish;
+    int failures = 0;
+    int firstTid = -1;
+
+    void finish() override
+    {
+        ASSERT(failures >= 2);
+        std::cout << getFullPath() << ": retry threshold verified.\n";
+    }
+
+  public:
+    void frameTransmitted(Packet *frame, int retryCount, bool successful, bool givenUp) override
+    {
+        ASSERT(!successful);
+        failures++;
+        ASSERT(retryCount == 1);
+        ASSERT(givenUp);
+        auto header = frame->peekAtFront<Ieee80211DataHeader>();
+        if (header->getType() == ST_DATA_WITH_QOS) {
+            if (failures == 1)
+                firstTid = header->getTid();
+            else if (failures == 2)
+                ASSERT(header->getTid() != firstTid);
+        }
+        AarfRateControl::frameTransmitted(frame, retryCount, successful, givenUp);
+        double rate = getRate(getReceiverAddress(frame))->getDataMode()->getNetBitrate().get();
+        if (failures == 1)
+            ASSERT(rate == 24e6);
+        else if (failures == 2)
+            ASSERT(rate == 24e6);
+    }
+};
+Define_Module(RetryFeedbackControl);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple RetryFeedbackControl extends AarfRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::RetryFeedbackControl);
+}
+network RetryFeedbackNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source[2]: AdhocHost;
+        sink: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RetryFeedbackNetwork
+sim-time-limit = 50ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+*.source[*].mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.*.ipv4.arp.typename = "GlobalArp"
+*.source[1].wlan[0].mac.qosStation = true
+*.source[0].wlan[0].mac.dcf.rateControl.typename = "RetryFeedbackControl"
+*.source[1].wlan[0].mac.hcf.rateControl.typename = "RetryFeedbackControl"
+*.source[*].wlan[0].mac.*.rateControl.initialRate = 24Mbps
+*.source[*].wlan[0].mac.*.rateControl.minTimerThreshold = 100000
+*.source[*].wlan[0].mac.*.rateControl.decreaseThreshold = 2
+*.source[*].wlan[0].mac.*.rateSelection.dataFrameBitrate = -1bps
+*.sink.mobility.initialX = 100m
+*.sink.wlan[0].radio.receiver.sensitivity = 0dBm
+# HCF alternates video and voice access categories towards the same receiver.
+*.source[1].wlan[0].classifier.typename = "QosClassifier"
+*.source[1].numApps = 2
+*.source[1].app[0].sendInterval = 1s
+*.source[1].app[1].typename = "UdpBasicApp"
+*.source[1].app[1].destAddresses = "sink"
+*.source[1].app[1].destPort = 4000
+*.source[1].app[1].messageLength = 100B
+*.source[1].app[1].startTime = 11ms
+*.source[1].app[1].stopTime = 12ms
+*.source[1].app[1].sendInterval = 1s
+*.source[*].numApps = 1
+*.source[*].app[0].typename = "UdpBasicApp"
+*.source[*].app[0].destAddresses = "sink"
+*.source[*].app[0].destPort = 5000
+*.source[*].app[0].messageLength = 100B
+*.source[*].app[0].startTime = 1ms
+*.source[*].app[0].stopTime = 22ms
+*.source[*].app[0].sendInterval = 10ms
+**.shortRetryLimit = 1
+**.longRetryLimit = 1
+
+%contains: stdout
+source[0].wlan[0].mac.dcf.rateControl: retry threshold verified.
+%contains: stdout
+source[1].wlan[0].mac.hcf.rateControl: retry threshold verified.

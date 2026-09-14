@@ -1,0 +1,148 @@
+%description:
+HT mode eligibility uses the existing negotiated MIB state, including sparse
+receive MCS masks, BSS width, SGI and local antenna limits. A capability change
+invalidates a pending retry plan; a different receiver retains its own state.
+This API fixture complements the real association in HtExchange.
+It explicitly supplies a 20/40 MHz local MIB capability for group tests; the
+current packet-level HT PHY advertises only 20 MHz and is not exercised at 40 MHz.
+
+%file: EligibilityTest.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelHtRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelRateControlTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+class EligibilityControl : public MinstrelHtRateControl
+{
+  public:
+    void checkEligibility()
+    {
+        Enter_Method("checkEligibility");
+        const MacAddress receiver("02:00:00:00:00:10"), other("02:00:00:00:00:11");
+        ASSERT(mib->localHtCapabilitiesValid);
+        mib->updateLocalHtCapabilities(modeSet, {MHz(20), MHz(40)}, 2);
+        mib->setPrimaryChannel(6);
+        ASSERT(getRate(receiver)->getHtMcsIndex() == -1);
+        ASSERT(stations.at(receiver).rates.empty());
+        auto capabilities = mib->localHtCapabilities;
+        capabilities.rxMcsSupported.fill(false);
+        capabilities.rxMcsSupported[0] = true;
+        capabilities.rxMcsSupported[7] = true;
+        capabilities.rxMcsSupported[16] = true; // peer's third stream exceeds local antennas
+        capabilities.shortGi20 = capabilities.shortGi40 = false;
+        auto operation = mib->getHtOperation();
+        operation.operatingChannelWidth = MHz(20);
+        operation.secondaryChannelOffset = 0;
+        mib->setPeerHtCapabilities(receiver, capabilities, operation);
+        auto& state = getState(receiver);
+        ASSERT(state.rates.size() == 2 && state.groups.size() == 1);
+        for (const auto& rate : state.rates) {
+            ASSERT(rate.mode->getHtMcsIndex() == 0 || rate.mode->getHtMcsIndex() == 7);
+            ASSERT(!rate.mode->isHtShortGuardInterval());
+            ASSERT(rate.mode->getDataMode()->getBandwidth() == MHz(20));
+        }
+        auto single = capabilities;
+        single.rxMcsSupported.fill(false);
+        single.rxMcsSupported[0] = true;
+        mib->setPeerHtCapabilities(other, single, operation);
+        auto& otherState = getState(other);
+        ASSERT(otherState.rates.size() == 1);
+        uint64_t otherGeneration = otherState.generation;
+        ASSERT(selectSample(otherState) == -1);
+
+        auto frame = new Packet("pending");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(receiver);
+        frame->insertAtFront(header);
+        auto oldMode = getRateForFrame(frame);
+        frame->addTagIfAbsent<physicallayer::Ieee80211ModeReq>()->setMode(oldMode);
+        auto oldGeneration = frame->getTag<MinstrelRateControlTag>()->getGeneration();
+        capabilities.shortGi20 = true;
+        mib->setPeerHtCapabilities(receiver, capabilities, operation);
+        // Old feedback may not populate the new rate set's probabilities.
+        frameTransmitted(frame, 0, true, false);
+        ASSERT(stations.at(receiver).rates.size() == 4);
+        for (const auto& rate : stations.at(receiver).rates)
+            ASSERT(rate.attempts == 0 && rate.successes == 0);
+        getRateForFrame(frame);
+        ASSERT(frame->getTag<MinstrelRateControlTag>()->getGeneration() != oldGeneration);
+        ASSERT(getState(other).generation == otherGeneration);
+        ASSERT(getState(other).rates.size() == 1);
+
+        operation.operatingChannelWidth = MHz(40);
+        operation.secondaryChannelOffset = 1;
+        mib->setPeerHtCapabilities(receiver, capabilities, operation);
+        ASSERT(getState(receiver).rates.size() == 6);
+        capabilities.shortGi40 = true;
+        mib->setPeerHtCapabilities(receiver, capabilities, operation);
+        ASSERT(getState(receiver).rates.size() == 8);
+        ASSERT(getState(receiver).groups.size() == 4);
+        mib->removePeerHtCapabilities(receiver);
+        ASSERT(getRateForFrame(frame)->getHtMcsIndex() == -1);
+        ASSERT(!frame->findTag<MinstrelRateControlTag>());
+        ASSERT(getState(other).generation == otherGeneration);
+        delete frame;
+        std::cout << "Minstrel negotiated eligibility and plan invalidation verified.\n";
+    }
+};
+Define_Module(EligibilityControl);
+
+class EligibilityTest : public cSimpleModule
+{
+  public:
+    EligibilityTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override
+    {
+        check_and_cast<EligibilityControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"))->checkEligibility();
+    }
+};
+Define_Module(EligibilityTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.ratecontrol.MinstrelHtRateControl;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple EligibilityControl extends MinstrelHtRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::EligibilityControl);
+}
+simple EligibilityTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::EligibilityTest);
+}
+network EligibilityNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: EligibilityTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = EligibilityNetwork
+sim-time-limit = 1ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.radio.antenna.numAntennas = 2
+**.radio.channelNumber = 6
+*.sta.wlan[0].mac.dcf.rateControl.typename = "EligibilityControl"
+*.sta.wlan[0].mac.dcf.rateControl.maxChannelWidth = 40MHz
+
+%contains: stdout
+Minstrel negotiated eligibility and plan invalidation verified.

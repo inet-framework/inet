@@ -1,0 +1,114 @@
+%description:
+A beacon timeout affects only its own WLAN, including when the other WLAN is
+already scanning. Exercise real management timers, host-propagated signals,
+and agent-to-management scan commands on two interfaces of one station.
+
+%file: BeaconLossTest.cc
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class BeaconLossMgmt : public Ieee80211MgmtSta
+{
+  public:
+    int scanCommands = 0;
+
+    void associateUntil(const MacAddress& address, simtime_t timeout)
+    {
+        Enter_Method("associateUntil");
+        mib->bssData.bssid = address;
+        mib->bssStationData.isAssociated = true;
+        assocAP.address = address;
+        assocAP.channel = 1;
+        assocAP.ssid = "test";
+        assocAP.beaconInterval = SimTime(100, SIMTIME_MS);
+        // MK_BEACON_TIMEOUT, the production management timer kind.
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", 6);
+        scheduleAfter(timeout, assocAP.beaconTimeoutMsg);
+    }
+
+    bool associated() const { return mib->bssStationData.isAssociated; }
+    bool scanningNow() const { return isScanning; }
+
+  protected:
+    void processScanCommand(Ieee80211Prim_ScanRequest *request) override
+    {
+        scanCommands++;
+        Ieee80211MgmtSta::processScanCommand(request);
+    }
+};
+Define_Module(BeaconLossMgmt);
+
+class BeaconLossTest : public cSimpleModule
+{
+  public:
+    BeaconLossTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto first = check_and_cast<BeaconLossMgmt *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        auto second = check_and_cast<BeaconLossMgmt *>(getModuleByPath("^.sta.wlan[1].mgmt"));
+        first->associateUntil(MacAddress("02:00:00:00:00:01"), SimTime(1, SIMTIME_US));
+        second->associateUntil(MacAddress("02:00:00:00:00:02"), SimTime(3, SIMTIME_US));
+        wait(SimTime(2, SIMTIME_US));
+        ASSERT(first->scanCommands == 1 && first->scanningNow() && !first->associated());
+        ASSERT(second->scanCommands == 0 && !second->scanningNow() && second->associated());
+        wait(SimTime(2, SIMTIME_US));
+        ASSERT(first->scanCommands == 1 && first->scanningNow());
+        ASSERT(second->scanCommands == 1 && second->scanningNow() && !second->associated());
+        std::cout << "Beacon loss isolated to the emitting WLAN, including overlapping scans.\n";
+    }
+};
+Define_Module(BeaconLossTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple BeaconLossMgmt extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::BeaconLossMgmt);
+}
+simple BeaconLossTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::BeaconLossTest);
+}
+network BeaconLossNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost;
+        test: BeaconLossTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = BeaconLossNetwork
+sim-time-limit = 10us
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta.numWlanInterfaces = 2
+*.sta.wlan[*].mgmt.typename = "BeaconLossMgmt"
+*.sta.wlan[*].agent.startingTime = 1s
+*.sta.wlan[*].agent.activeScan = false
+*.sta.wlan[*].agent.channelsToScan = "1"
+
+%contains: stdout
+Beacon loss isolated to the emitting WLAN, including overlapping scans.

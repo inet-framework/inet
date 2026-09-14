@@ -138,7 +138,7 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
 // Poll+CF-ACK, the rate chosen to transmit the frame must be supported by both the addressed recipient STA
 // and the STA to which the ACK is intended.
 //
-const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
@@ -159,7 +159,7 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
     // it is never acknowledged, so nothing would ever correct a rate chosen for it. Group-addressed
     // frames therefore take a mandatory rate, as the clause above requires.
     if (dataOrMgmtRateControl && !dataOrMgmtHeader->getReceiverAddress().isMulticast())
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRateForFrame(packet));
     else
         return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
@@ -179,7 +179,7 @@ const IIeee80211Mode *RateSelection::computeControlFrameMode(const Ptr<const Iee
 const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
-        return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
+        return computeDataOrMgmtFrameMode(packet, dataOrMgmtHeader);
     else
         return computeControlFrameMode(header);
 }

@@ -1,0 +1,392 @@
+%description:
+Algorithm vectors from Linux v4.19 minstrel_calc_rate_stats,
+minstrel_ht_get_tp_avg, minstrel_get_sample_rate and minstrel_calc_retransmit.
+Exercise the production packet API for stable queries, retries, actual-mode
+attribution, peer/TID/fragment isolation, idle intervals and mode-set reset.
+This computation/API test is complemented by HT/VHT exchange tests.
+
+%file: ReferenceTest.cc
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelHtRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/MinstrelRateControlTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+using namespace physicallayer;
+
+class ReferenceControl : public MinstrelHtRateControl
+{
+  public:
+    void checkReference()
+    {
+        Enter_Method("checkReference");
+        State sample;
+        auto modes = getSupportedModes(MacAddress("02:00:00:00:00:10"));
+        modes.erase(std::remove_if(modes.begin(), modes.end(), [](const IIeee80211Mode *mode) {
+            auto data = mode->getDataMode();
+            return data->getNumberOfSpatialStreams() != 1 || data->getBandwidth() != MHz(20) ||
+                   check_and_cast<const Ieee80211VhtMode *>(mode)->getDataMode()->getGuardIntervalType() != Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG;
+        }), modes.end());
+        ASSERT(modes.size() >= 3);
+        modes.resize(3);
+        initializeState(sample, modes);
+        auto& rate = sample.rates[0];
+        rate.attempts = 4;
+        rate.successes = 3;
+        updateStatistics(sample);
+        ASSERT(rate.probability == 3072); // first sample: exactly 3/4
+        rate.attempts = 8;
+        rate.successes = 3;
+        updateStatistics(sample);
+        ASSERT(rate.probability == 2688); // .75*.75 + .25*.375 = .65625
+        updateStatistics(sample);
+        ASSERT(rate.probability == 2688 && rate.skippedIntervals == 1);
+        rate.attempts = 10;
+        rate.successes = 0;
+        updateStatistics(sample);
+        ASSERT(rate.probability == 2016 && rate.skippedIntervals == 0);
+        ASSERT(rate.attempts == 0 && rate.successes == 0);
+        rate.attempts = rate.successes = 3;
+        updateStatistics(sample);
+        ASSERT(rate.probability == 2536);
+        // Integer division must truncate the negative EWMA delta toward zero.
+        rate.probability = 3;
+        rate.attempts = 1;
+        updateStatistics(sample);
+        ASSERT(rate.probability == 3);
+
+        const SimTime millisecond(1, SIMTIME_MS);
+        ASSERT(computeThroughput(408, millisecond) == 0);
+        ASSERT(computeThroughput(409, millisecond) > 0);
+        ASSERT(std::abs(computeThroughput(2048, millisecond) - 500) < 1e-9);
+        ASSERT(computeThroughput(3686, millisecond) == computeThroughput(4096, millisecond));
+
+        // Select expected delivered packets/time, not greatest nominal bitrate.
+        sample.rates[0].exchangeDuration = SimTime(1000, SIMTIME_US);
+        sample.rates[1].exchangeDuration = SimTime(500, SIMTIME_US);
+        sample.rates[2].exchangeDuration = SimTime(100, SIMTIME_US);
+        for (auto& item : sample.rates) {
+            item.measured = false;
+            item.attempts = 100;
+        }
+        sample.rates[0].successes = 99;
+        sample.rates[1].successes = 60;
+        sample.rates[2].successes = 9;
+        updateStatistics(sample);
+        ASSERT(sample.bestThroughput[0] == 1);
+        ASSERT(sample.bestThroughput[1] == 0);
+        ASSERT(sample.bestProbability == 0);
+        sample.rates[2].attempts = 10;
+        sample.rates[2].successes = 10;
+        sample.rates[2].measured = false;
+        updateStatistics(sample);
+        ASSERT(sample.bestThroughput[0] == 2 && sample.bestProbability == 2);
+
+        // Retry boundary oracle: slot=9us, CW=15,31,63,...; 1ms exchange.
+        // Attempt totals are 1.0675, 2.207, 3.4905, 5.062, 7.2095ms.
+        rate.exchangeDuration = millisecond;
+        rate.probability = 819; // Q12 20% boundary: normal segment calculation
+        ASSERT(computeRetryCount(rate) == 4);
+        rate.probability = 818;
+        ASSERT(computeRetryCount(rate) == 2);
+        rate.probability = 4096;
+        rate.exchangeDuration = SimTime(10, SIMTIME_MS);
+        ASSERT(computeRetryCount(rate) == 2);
+        rate.exchangeDuration = SimTime(1, SIMTIME_US);
+        ASSERT(computeRetryCount(rate) == 6);
+
+        const auto originalRetrySegmentDuration = retrySegmentDuration;
+        // Linux v4.19 minstrel_calc_retransmit requires a strictly smaller total.
+        rate.exchangeDuration = millisecond;
+        retrySegmentDuration = SimTime(5062, SIMTIME_US) - SimTime(1, SIMTIME_NS);
+        ASSERT(computeRetryCount(rate) == 3);
+        retrySegmentDuration = SimTime(5062, SIMTIME_US);
+        ASSERT(computeRetryCount(rate) == 3);
+        retrySegmentDuration += SimTime(1, SIMTIME_NS);
+        ASSERT(computeRetryCount(rate) == 4);
+        // With ample airtime, the configured retry cap still limits the stage.
+        rate.exchangeDuration = SimTime(1, SIMTIME_US);
+        retrySegmentDuration = SimTime(20, SIMTIME_MS);
+        ASSERT(computeRetryCount(rate) == 7);
+        retrySegmentDuration = originalRetrySegmentDuration;
+
+        State groups;
+        initializeState(groups, getSupportedModes(MacAddress("02:00:00:00:00:10")));
+        ASSERT(groups.groups.size() >= 2);
+        std::set<const IIeee80211Mode *> uniqueModes;
+        for (const auto& item : groups.rates) {
+            ASSERT(uniqueModes.insert(item.mode).second);
+            ASSERT(item.mode->getDataMode()->getNumberOfSpatialStreams() <= 2);
+            ASSERT(item.mode->getDataMode()->getBandwidth() <= MHz(80));
+        }
+        for (const auto& group : groups.groups) {
+            auto first = check_and_cast<const Ieee80211VhtMode *>(groups.rates[group.rates.front()].mode)->getDataMode();
+            for (int index : group.rates) {
+                auto data = check_and_cast<const Ieee80211VhtMode *>(groups.rates[index].mode)->getDataMode();
+                ASSERT(data->getBandwidth() == first->getBandwidth());
+                ASSERT(data->getNumberOfSpatialStreams() == first->getNumberOfSpatialStreams());
+                ASSERT(data->getGuardIntervalType() == first->getGuardIntervalType());
+            }
+            std::set<int> expected(group.rates.begin(), group.rates.end());
+            for (const auto& column : group.samples)
+                ASSERT(std::set<int>(column.begin(), column.end()) == expected);
+        }
+
+        // A working one-stream group is preferred for the probability fallback
+        // even when the primary's two-stream rate also has >75% success.
+        const IIeee80211Mode *twoStreams = nullptr;
+        for (const auto& item : groups.rates)
+            if (item.mode->getDataMode()->getNumberOfSpatialStreams() == 2 &&
+                    item.mode->getDataMode()->getBandwidth() == MHz(20)) {
+                twoStreams = item.mode;
+                break;
+            }
+        ASSERT(twoStreams);
+        State spatial;
+        initializeState(spatial, {modes[0], twoStreams});
+        spatial.rates[0].exchangeDuration = millisecond;
+        spatial.rates[1].exchangeDuration = millisecond / 2;
+        for (auto& item : spatial.rates) {
+            item.attempts = 10;
+            item.successes = 9;
+        }
+        updateStatistics(spatial);
+        ASSERT(spatial.bestThroughput[0] == 1 && spatial.bestProbability == 0);
+        spatial.rates[1].attempts = 30;
+        downgradeRate(spatial, 0);
+        ASSERT(spatial.bestThroughput[0] == 1);
+        spatial.rates[1].attempts = 31;
+        spatial.rates[1].successes = 7;
+        downgradeRate(spatial, 0);
+        ASSERT(spatial.bestThroughput[0] == 1);
+        spatial.rates[1].successes = 6;
+        downgradeRate(spatial, 0);
+        ASSERT(spatial.bestThroughput[0] == 0);
+
+        // One controlled group tests exclusion thresholds and slow-sample budget.
+        State probing;
+        initializeState(probing, modes);
+        ASSERT(probing.groups.size() == 1);
+        probing.bestThroughput = {0, 1};
+        probing.bestProbability = 0;
+        auto& group = probing.groups[0];
+        auto choose = [&]() {
+            group.samples[0] = {2, 1, 0};
+            group.column = group.index = 0;
+            probing.sampleTries = 1;
+            return selectSample(probing);
+        };
+        probeEnabled = true;
+        probing.rates[2].dataDuration = SimTime(1, SIMTIME_US);
+        probing.rates[2].probability = 3891; // floor(.95 * 4096)
+        ASSERT(choose() == 2 && probing.sampleTries == 0);
+        probing.bestProbability = 2;
+        ASSERT(choose() == -1);
+        probing.bestProbability = 0;
+        probing.bestThroughput[0] = 2;
+        ASSERT(choose() == -1);
+        probing.bestThroughput[0] = 0;
+        probing.rates[2].probability = 3892;
+        ASSERT(choose() == -1 && probing.sampleTries == 1);
+        probing.rates[2].probability = 0;
+        probing.sampleWait = 1;
+        ASSERT(choose() == -1 && probing.sampleWait == 0);
+        probing.rates[2].dataDuration = SimTime(1, SIMTIME_S);
+        probing.rates[2].skippedIntervals = 19;
+        ASSERT(choose() == -1);
+        probing.rates[2].skippedIntervals = 20;
+        for (int i = 0; i < 3; i++)
+            ASSERT(choose() == 2);
+        ASSERT(choose() == -1);
+        probeEnabled = false;
+    }
+
+    void prepareChain(const MacAddress& receiver)
+    {
+        Enter_Method("prepareChain");
+        auto& state = getState(receiver);
+        ASSERT(state.rates.size() >= 3);
+        state.bestThroughput = {2, 1};
+        state.bestProbability = 0;
+    }
+
+    void checkCounts(const MacAddress& receiver, int index, uint64_t attempts, uint64_t successes)
+    {
+        const auto& rate = stations.at(receiver).rates.at(index);
+        ASSERT(rate.attempts == attempts && rate.successes == successes);
+    }
+
+    const IIeee80211Mode *mode(const MacAddress& receiver, int index)
+    {
+        return stations.at(receiver).rates.at(index).mode;
+    }
+
+    void checkIdle(const MacAddress& receiver, simtime_t deadline)
+    {
+        ASSERT(stations.at(receiver).lastUpdate == deadline);
+    }
+
+    void checkProbability(const MacAddress& receiver, int index, int probability)
+    {
+        ASSERT(stations.at(receiver).rates.at(index).probability == probability);
+    }
+
+    void resetThroughSignal()
+    {
+        Enter_Method("resetThroughSignal");
+        getContainingNicModule(this)->emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+        ASSERT(stations.empty());
+    }
+};
+Define_Module(ReferenceControl);
+
+class ReferenceTest : public cSimpleModule
+{
+  public:
+    ReferenceTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto control = check_and_cast<ReferenceControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
+        control->checkReference();
+        const MacAddress receiver("02:00:00:00:00:10"), other("02:00:00:00:00:11");
+        control->prepareChain(receiver);
+        control->prepareChain(other);
+        auto makeFrame = [&](const MacAddress& address, int tid, int fragment) {
+            auto frame = new Packet("test-data");
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setReceiverAddress(address);
+            header->setTid(tid);
+            header->setFragmentNumber(fragment);
+            frame->insertAtFront(header);
+            return frame;
+        };
+        auto background = makeFrame(receiver, 1, 0);
+        auto voice = makeFrame(receiver, 6, 0);
+        auto fragment = makeFrame(receiver, 1, 1);
+        auto otherFrame = makeFrame(other, 1, 0);
+        auto query = [&](Packet *frame) {
+            auto mode = control->getRateForFrame(frame);
+            frame->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+            return mode;
+        };
+        auto primary = query(background);
+        ASSERT(primary == control->mode(receiver, 2));
+        for (int i = 0; i < 20; i++)
+            ASSERT(query(background) == primary);
+        ASSERT(query(voice) == primary && query(fragment) == primary);
+        query(otherFrame);
+        // Non-data failures cannot advance the data retry stage or statistics.
+        control->rtsFrameTransmissionFailed(background, 5, false);
+        control->frameDroppedDueToInternalCollision(fragment, 7);
+        ASSERT(query(background) == primary);
+        control->checkCounts(receiver, 2, 0, 0);
+        IRateControl *api = control;
+        api->frameTransmitted(background, 1, 6, false, false);
+        ASSERT(query(background) == primary);
+        api->frameTransmitted(background, 2, 7, false, false);
+        ASSERT(query(background) == control->mode(receiver, 1));
+        ASSERT(query(voice) == primary && query(fragment) == primary);
+        api->frameTransmitted(voice, 0, 0, true, false);
+        ASSERT(!voice->findTag<MinstrelRateControlTag>());
+        control->checkCounts(receiver, 2, 3, 1);
+        control->checkCounts(other, 2, 0, 0);
+        // Statistics must credit a PHY request that differs from the planned rate.
+        background->getTagForUpdate<Ieee80211ModeReq>()->setMode(control->mode(receiver, 0));
+        api->frameTransmitted(background, 3, 8, false, false);
+        control->checkCounts(receiver, 0, 1, 0);
+        ASSERT(query(background) == control->mode(receiver, 1));
+        api->frameTransmitted(background, 4, 9, false, false);
+        ASSERT(query(background) == control->mode(receiver, 0));
+        api->frameTransmitted(background, 5, 10, false, true);
+        ASSERT(!background->findTag<MinstrelRateControlTag>());
+
+        // Feedback at the deadline includes that attempt; queries do not train.
+        wait(SimTime(50, SIMTIME_MS));
+        query(otherFrame);
+        control->checkIdle(other, SIMTIME_ZERO);
+        api->frameTransmitted(otherFrame, 0, 0, true, false);
+        control->checkIdle(other, simTime());
+        control->checkProbability(other, 2, 4096);
+        uint64_t oldGeneration = fragment->getTag<MinstrelRateControlTag>()->getGeneration();
+        control->resetThroughSignal();
+        query(fragment);
+        ASSERT(fragment->getTag<MinstrelRateControlTag>()->getGeneration() != oldGeneration);
+        ASSERT(fragment->getTag<MinstrelRateControlTag>()->getStage() == 0);
+
+        auto multicast = makeFrame(MacAddress::BROADCAST_ADDRESS, 0, 0);
+        ASSERT(query(multicast)->getHtMcsIndex() < 0);
+        ASSERT(!multicast->findTag<MinstrelRateControlTag>());
+        auto noAck = makeFrame(receiver, 0, 0);
+        auto header = noAck->removeAtFront<Ieee80211DataHeader>();
+        header->setAckPolicy(BLOCK_ACK);
+        noAck->insertAtFront(header);
+        bool rejected = false;
+        try { query(noAck); }
+        catch (const cRuntimeError& error) { rejected = std::string(error.what()).find("normal-ACK") != std::string::npos; }
+        ASSERT(rejected);
+        delete background;
+        delete voice;
+        delete fragment;
+        delete otherFrame;
+        delete multicast;
+        delete noAck;
+        std::cout << "Minstrel reference vectors and packet feedback verified.\n";
+    }
+};
+Define_Module(ReferenceTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.ratecontrol.MinstrelHtRateControl;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple ReferenceControl extends MinstrelHtRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::ReferenceControl);
+}
+simple ReferenceTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::ReferenceTest);
+}
+network ReferenceNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: ReferenceTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ReferenceNetwork
+sim-time-limit = 51ms
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "ac"
+**.radio.antenna.numAntennas = 2
+*.sta.wlan[0].mac.dcf.rateControl.typename = "ReferenceControl"
+*.sta.wlan[0].mac.dcf.rateControl.probeEnabled = false
+*.sta.wlan[0].mac.dcf.rateControl.maxChannelWidth = 80MHz
+
+%contains: stdout
+Minstrel reference vectors and packet feedback verified.
