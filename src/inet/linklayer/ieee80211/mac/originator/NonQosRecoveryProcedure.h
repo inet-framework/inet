@@ -58,6 +58,8 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader, StationRetryCounters *stationCounters);
     virtual void dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& failedHeader, StationRetryCounters *stationCounters);
     virtual int getRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+    // Read the completed-packet rate-control input, including RTS and data failures.
+    virtual int getTotalRetryCount(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const;
     virtual int getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
     virtual int getLongRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
@@ -74,4 +76,3 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
 } /* namespace inet */
 
 #endif
-

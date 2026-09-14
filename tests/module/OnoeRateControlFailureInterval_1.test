@@ -1,0 +1,149 @@
+%description:
+Exercise initialized rate-control modules through the public feedback and rate
+query APIs. Fixed feedback sequences isolate adaptation from channel randomness.
+Observe downward rate-change signals, including suppression at the minimum rate.
+Sparse traffic earns one credit per ten completed packets, following MadWifi
+ath_rate_ctl(), revision a7531fd223a1f454d3fd74a975b4581cde5411bb.
+
+%file: FeedbackTest.cc
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+
+#include <vector>
+
+namespace inet {
+namespace ieee80211 {
+
+class RateChangeListener : public cListener
+{
+  public:
+    std::vector<double> rates;
+
+    void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override
+    {
+        rates.push_back(value);
+    }
+};
+
+class FeedbackTest : public cSimpleModule
+{
+  public:
+    FeedbackTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto control = check_and_cast<OnoeRateControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
+        const MacAddress receiver("02:00:00:00:00:01");
+        const MacAddress otherReceiver("02:00:00:00:00:02");
+        auto frame = new Packet("feedback");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(receiver);
+        frame->insertAtFront(header);
+        auto rate = [&]() { return control->getRate(receiver)->getDataMode()->getNetBitrate().get(); };
+        ASSERT(rate() == 24e6);
+        ASSERT(control->getRate(otherReceiver)->getDataMode()->getNetBitrate().get() == 24e6);
+        auto tick = [&]() { wait(SimTime(1, SIMTIME_S)); return rate(); };
+        // Idle intervals must not manufacture upward credit.
+        for (int i = 0; i < 10; i++)
+            ASSERT(tick() == 24e6);
+        // A retry-only interval has no completed packet to evaluate yet.
+        control->frameTransmitted(frame, 1, false, false);
+        ASSERT(tick() == 24e6);
+        control->frameTransmitted(frame, 2, false, true);
+        ASSERT(tick() == 18e6);
+        ASSERT(tick() == 18e6); // evaluated failures were cleared
+        // Repeated sufficient neutral samples must not create negative credit.
+        for (int period = 0; period < 10; period++) {
+            for (int i = 0; i < 10; i++) {
+                control->frameTransmitted(frame, 1, false, false);
+                if (i == 9)
+                    wait(SimTime(1, SIMTIME_S));
+                control->frameTransmitted(frame, 1, true, false);
+            }
+            ASSERT(rate() == 18e6);
+        }
+        // One clean completion each second needs 100 packets to earn ten credits.
+        for (int i = 0; i < 99; i++) {
+            wait(SimTime(1, SIMTIME_S));
+            control->frameTransmitted(frame, 0, true, false);
+            ASSERT(rate() == 18e6);
+        }
+        wait(SimTime(1, SIMTIME_S));
+        control->frameTransmitted(frame, 0, true, false);
+        ASSERT(rate() == 24e6);
+        // A sufficient high-retry sample lowers the rate on its last completion.
+        for (int i = 0; i < 9; i++)
+            control->frameTransmitted(frame, 0, true, false);
+        for (int i = 1; i <= 11; i++)
+            control->frameTransmitted(frame, i, false, false);
+        wait(SimTime(1, SIMTIME_S));
+        control->frameTransmitted(frame, 11, true, false);
+        ASSERT(rate() == 18e6);
+        // Failed-only intervals repeatedly lower the rate, respecting the floor.
+        RateChangeListener listener;
+        control->subscribe("datarateChanged", &listener);
+        const double expectedRates[] = {12e6, 9e6, 6e6, 6e6};
+        for (double expectedRate : expectedRates) {
+            wait(SimTime(1, SIMTIME_S));
+            control->frameTransmitted(frame, 1, false, true);
+            ASSERT(rate() == expectedRate);
+        }
+        ASSERT((listener.rates == std::vector<double>{12e6, 9e6, 6e6}));
+        // The retained floor failure and nine successes form a sufficient sample.
+        for (int i = 0; i < 8; i++)
+            control->frameTransmitted(frame, 0, true, false);
+        for (int i = 1; i <= 10; i++)
+            control->frameTransmitted(frame, i, false, false);
+        wait(SimTime(1, SIMTIME_S));
+        control->frameTransmitted(frame, 10, true, false);
+        ASSERT(tick() == 6e6);
+        ASSERT(tick() == 6e6);
+        ASSERT(control->getRate(otherReceiver)->getDataMode()->getNetBitrate().get() == 24e6);
+        ASSERT(listener.rates.size() == 3);
+        control->unsubscribe("datarateChanged", &listener);
+        delete frame;
+        std::cout << "OnoeRateControlFailureInterval verified.\n";
+    }
+};
+Define_Module(FeedbackTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple FeedbackTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::FeedbackTest);
+}
+network FeedbackNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: AdhocHost;
+        test: FeedbackTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FeedbackNetwork
+sim-time-limit = 150s
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(erp)"
+*.sta.wlan[0].mac.dcf.rateControl.typename = "OnoeRateControl"
+*.sta.wlan[0].mac.dcf.rateControl.initialRate = 24Mbps
+*.sta.wlan[0].mac.dcf.rateControl.interval = 1s
+
+%contains: stdout
+OnoeRateControlFailureInterval verified.

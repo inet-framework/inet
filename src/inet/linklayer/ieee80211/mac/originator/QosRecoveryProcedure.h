@@ -32,9 +32,9 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
   protected:
     ICwCalculator *cwCalculator = nullptr;
 
-    // TODO why do we need Tid, is this class per AC or not? we should decide
-    std::map<std::pair<Tid, SequenceControlField>, int> shortRetryCounter; // SRC
-    std::map<std::pair<Tid, SequenceControlField>, int> longRetryCounter; // LRC
+    using RetryKey = std::pair<MacAddress, std::pair<Tid, SequenceControlField>>;
+    std::map<RetryKey, int> shortRetryCounter; // SRC
+    std::map<RetryKey, int> longRetryCounter; // LRC
 
     // TODO these counters should be per AC, it's not done here but as separate recovery procedure modules
     int stationLongRetryCounter = 0; // QLRC
@@ -48,7 +48,8 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    void incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter);
+    static RetryKey getRetryKey(const Ptr<const Ieee80211DataHeader>& header);
+    void incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter);
     void incrementStationSrc();
     void incrementStationLrc();
     void resetStationSrc() { stationShortRetryCounter = 0; }
@@ -56,7 +57,7 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     void incrementContentionWindow();
     void resetContentionWindow();
     int doubleCw(int cw);
-    int getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter);
+    int getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter);
     bool isMulticastFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
   public:
@@ -71,6 +72,8 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 
     virtual bool isRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
     virtual int getRetryCount(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
+    // Missing short or long counters contribute zero, including a clean first attempt.
+    virtual int getTotalRetryCount(const Ptr<const Ieee80211DataHeader>& header) const;
     virtual bool isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader);
 
     virtual void retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
@@ -83,4 +86,3 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 } /* namespace inet */
 
 #endif
-

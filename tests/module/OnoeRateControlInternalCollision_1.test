@@ -1,0 +1,234 @@
+%description:
+Enter the production HCF internal-collision handler with QoS data and management
+frames. Cover short retry exhaustion and long retry exhaustion after seeded RTS
+and data failures. Verify terminal feedback before cleanup, exactly one Onoe
+completion with the full recovery total, and no legacy AARF attempt feedback.
+Collisions are injected: this does not claim natural AC_VO collision reachability.
+
+%file: InternalCollisionFeedback.cc
+#include <type_traits>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/OnoeRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+
+template<typename Base>
+class CollisionFeedbackControl : public Base
+{
+  public:
+    int completions = 0;
+    int legacyAttempts = 0;
+    int expectedTotal = 0;
+    Packet *expectedFrame = nullptr;
+    using Base::frameTransmitted;
+
+    void frameTransmitted(Packet *frame, int retryCount, bool successful, bool givenUp) override
+    {
+        legacyAttempts++;
+        Base::frameTransmitted(frame, retryCount, successful, givenUp);
+    }
+
+    void frameDroppedDueToInternalCollision(Packet *frame, int totalRetryCount) override
+    {
+        ASSERT(frame == expectedFrame);
+        ASSERT(totalRetryCount == expectedTotal);
+        completions++;
+        Base::frameDroppedDueToInternalCollision(frame, totalRetryCount);
+    }
+
+    void verify(const MacAddress& receiver, int total)
+    {
+        auto& state = this->stations.at(receiver);
+        ASSERT(state.mode->getDataMode()->getNetBitrate().get() == 24e6);
+        if constexpr (std::is_same_v<Base, OnoeRateControl>) {
+            ASSERT(state.numOfGivenUpTransmissions == 1);
+            ASSERT(state.numOfSuccTransmissions == 0);
+            ASSERT(state.numOfRetries == total);
+            ASSERT(state.credit == 0);
+            // Evaluate the observed failed-only sample without depending on a timer.
+            this->computeMode(state);
+            ASSERT(state.mode->getDataMode()->getNetBitrate().get() == 18e6);
+            ASSERT(state.numOfRetries == 0 && state.numOfGivenUpTransmissions == 0);
+        }
+        else {
+            ASSERT(legacyAttempts == 0);
+            ASSERT(state.timer == 0 && !state.probing);
+            ASSERT(state.numberOfConsSuccTransmissions == 0);
+        }
+    }
+};
+
+class CollisionOnoeControl : public CollisionFeedbackControl<OnoeRateControl> {};
+class CollisionAarfControl : public CollisionFeedbackControl<AarfRateControl> {};
+Define_Module(CollisionOnoeControl);
+Define_Module(CollisionAarfControl);
+
+class CollisionFeedbackHcf : public Hcf
+{
+  public:
+    template<typename Control>
+    void exercise(Control *control, bool management, bool mixed, const MacAddress& receiver)
+    {
+        Enter_Method("exercise");
+        auto edcaf = edca->getEdcaf(management ? AC_VO : AC_BE);
+        auto frames = edcaf->getInProgressFrames();
+        auto packet = new Packet("collision-feedback");
+        Ptr<Ieee80211DataOrMgmtHeader> header;
+        if (management) {
+            auto mgmtHeader = makeShared<Ieee80211MgmtHeader>();
+            mgmtHeader->setType(ST_ASSOCIATIONRESPONSE);
+            header = mgmtHeader;
+        }
+        else {
+            auto dataHeader = makeShared<Ieee80211DataHeader>();
+            dataHeader->setType(ST_DATA_WITH_QOS);
+            dataHeader->setTid(0);
+            header = dataHeader;
+        }
+        header->setReceiverAddress(receiver);
+        packet->insertAtFront(header);
+        if (mixed)
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(1000)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        edcaf->getPendingQueue()->enqueuePacket(packet);
+        // The data service may replace the pending packet and assign its sequence.
+        packet = frames->getFrameToTransmit();
+        auto currentHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(currentHeader);
+        auto qosRecovery = edcaf->getRecoveryProcedure();
+        auto mgmtRecovery = edca->getMgmtAndNonQoSRecoveryProcedure();
+        auto total = [&]() {
+            return dataHeader ? qosRecovery->getTotalRetryCount(dataHeader) : mgmtRecovery->getTotalRetryCount(currentHeader);
+        };
+        ASSERT(total() == 0);
+        control->getRate(receiver);
+        int previousCompletions = control->completions;
+        control->expectedFrame = packet;
+        control->expectedTotal = mixed ? 3 : 2;
+        if (mixed) {
+            // Seed both recovery histories; the final long-count increment must
+            // preserve the earlier short-count RTS failure in the callback total.
+            if (dataHeader) {
+                qosRecovery->rtsFrameTransmissionFailed(dataHeader);
+                qosRecovery->dataFrameTransmissionFailed(packet, dataHeader);
+            }
+            else {
+                mgmtRecovery->rtsFrameTransmissionFailed(currentHeader, edcaf->getStationRetryCounters());
+                mgmtRecovery->dataOrMgmtFrameTransmissionFailed(packet, currentHeader, edcaf->getStationRetryCounters());
+            }
+            ASSERT(total() == 2);
+        }
+        else {
+            handleInternalCollision({edcaf});
+            ASSERT(total() == 1);
+            ASSERT(control->completions == previousCompletions);
+        }
+        handleInternalCollision({edcaf});
+        ASSERT(control->completions == previousCompletions + 1);
+        ASSERT(total() == 0);
+        ASSERT(!frames->hasInProgressFrames());
+        control->verify(receiver, mixed ? 3 : 2);
+        control->expectedFrame = nullptr;
+        frames->clearDroppedFrames();
+    }
+};
+Define_Module(CollisionFeedbackHcf);
+
+class CollisionFeedbackTest : public cSimpleModule
+{
+  public:
+    CollisionFeedbackTest() : cSimpleModule(65536) {}
+
+  protected:
+    void activity() override
+    {
+        auto onoeHcf = check_and_cast<CollisionFeedbackHcf *>(getModuleByPath("^.ap[0].wlan[0].mac.hcf"));
+        auto aarfHcf = check_and_cast<CollisionFeedbackHcf *>(getModuleByPath("^.ap[1].wlan[0].mac.hcf"));
+        auto onoe = check_and_cast<CollisionOnoeControl *>(onoeHcf->getSubmodule("rateControl"));
+        auto aarf = check_and_cast<CollisionAarfControl *>(aarfHcf->getSubmodule("rateControl"));
+        MacAddress untouched("02:00:00:00:00:20");
+        onoe->getRate(untouched);
+        for (int scenario = 0; scenario < 4; scenario++) {
+            MacAddress receiver(uint64_t(0x020000000010ULL + scenario));
+            onoeHcf->exercise(onoe, scenario & 1, scenario & 2, receiver);
+            aarfHcf->exercise(aarf, scenario & 1, scenario & 2, receiver);
+        }
+        ASSERT(onoe->completions == 4 && aarf->completions == 4);
+        ASSERT(onoe->getRate(untouched)->getDataMode()->getNetBitrate().get() == 24e6);
+        std::cout << "HCF internal-collision completion totals and AARF compatibility verified: 8 scenarios.\n";
+        endSimulation();
+    }
+};
+Define_Module(CollisionFeedbackTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl;
+import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple CollisionOnoeControl extends OnoeRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::CollisionOnoeControl);
+}
+simple CollisionAarfControl extends AarfRateControl
+{
+    parameters:
+        @class(::inet::ieee80211::CollisionAarfControl);
+}
+module CollisionFeedbackHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::CollisionFeedbackHcf);
+}
+simple CollisionFeedbackTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::CollisionFeedbackTest);
+}
+network CollisionFeedbackNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap[2]: AccessPoint;
+        test: CollisionFeedbackTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CollisionFeedbackNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 1ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap[*].wlan[0].opMode = "g(erp)"
+*.ap[*].wlan[0].mgmt.beaconInterval = 10s
+*.ap[*].wlan[0].mac.qosStation = true
+*.ap[*].wlan[0].mac.hcf.typename = "CollisionFeedbackHcf"
+*.ap[0].wlan[0].mac.hcf.rateControl.typename = "CollisionOnoeControl"
+*.ap[1].wlan[0].mac.hcf.rateControl.typename = "CollisionAarfControl"
+*.ap[*].wlan[0].mac.hcf.rateControl.initialRate = 24Mbps
+*.ap[0].wlan[0].mac.hcf.rateControl.interval = 1s
+*.ap[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 512B
+*.ap[*].wlan[0].mac.**.shortRetryLimit = 2
+*.ap[*].wlan[0].mac.**.longRetryLimit = 2
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+HCF internal-collision completion totals and AARF compatibility verified: 8 scenarios.

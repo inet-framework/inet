@@ -15,7 +15,7 @@ namespace ieee80211 {
 
 Define_Module(QosRecoveryProcedure);
 
-inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
+inline std::ostream& operator<<(std::ostream& os, const std::pair<MacAddress, std::pair<Tid, SequenceControlField>>& p) { return os << p.first << "#" << p.second.first << "#" << p.second.second; }
 
 //
 // Contention window management
@@ -65,9 +65,14 @@ void QosRecoveryProcedure::incrementStationLrc()
         incrementContentionWindow();
 }
 
-void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
+QosRecoveryProcedure::RetryKey QosRecoveryProcedure::getRetryKey(const Ptr<const Ieee80211DataHeader>& header)
 {
-    auto id = std::make_pair((Tid)header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    return std::make_pair(header->getReceiverAddress(), std::make_pair((Tid)header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())));
+}
+
+void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter)
+{
+    auto id = getRetryKey(header);
     if (containsKey(retryCounter, id))
         retryCounter[id]++;
     else
@@ -114,19 +119,14 @@ void QosRecoveryProcedure::blockAckFrameReceived()
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
-    auto id = std::make_pair(ackedHeader->getTid(), SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber()));
-    if (packet->getByteLength() >= rtsThreshold) {
+    auto id = getRetryKey(ackedHeader);
+    if (packet->getByteLength() >= rtsThreshold)
         resetStationLrc();
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
+    else
         resetStationSrc();
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    // Completion retires both histories while preserving other receivers, TIDs and fragments.
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
     //
     // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
     // all or part of an MSDU or MMPDU
@@ -141,17 +141,9 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    auto id = getRetryKey(header);
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
     emit(retryLimitReachedSignal, packet);
 }
 
@@ -216,6 +208,15 @@ void QosRecoveryProcedure::incrementContentionWindow()
         emit(contentionWindowChangedSignal, cwCalculator->getCw());
 }
 
+int QosRecoveryProcedure::getTotalRetryCount(const Ptr<const Ieee80211DataHeader>& header) const
+{
+    auto id = getRetryKey(header);
+    auto shortCounter = shortRetryCounter.find(id);
+    auto longCounter = longRetryCounter.find(id);
+    return (shortCounter == shortRetryCounter.end() ? 0 : shortCounter->second) +
+           (longCounter == longRetryCounter.end() ? 0 : longCounter->second);
+}
+
 void QosRecoveryProcedure::resetContentionWindow()
 {
     auto oldCw = cwCalculator->getCw();
@@ -230,9 +231,9 @@ bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr
     return getRc(packet, protectedHeader, shortRetryCounter) >= shortRetryLimit;
 }
 
-int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
+int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter)
 {
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    auto id = getRetryKey(header);
     auto it = retryCounter.find(id);
     if (it != retryCounter.end())
         return it->second;
@@ -249,4 +250,3 @@ bool QosRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
