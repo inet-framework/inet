@@ -151,6 +151,23 @@ Notable backward incompatible changes are the following:
    Simulations that fragment IPv6 datagrams or report a too-big packet put
    different bytes on the wire, so their fingerprints may change.
 
+10. IPv4 verifies the header checksum, and reassembly reads the protocol
+
+   Ipv4 dropped a datagram whose header checksum failed only when the header was
+   also structurally incorrect: the guard read "!isCorrect() && !verifyChecksum()"
+   and an AND short-circuits, so a well-formed header never reached the checksum
+   test and a wrong checksum was accepted. The guard is an OR now, which is what
+   RFC 1122 section 3.2.1.2 requires.
+
+   Ipv4FragBuf::Key, the reassembly key, carried three of the four fields RFC 791
+   names: source, destination and identification, but not the protocol. Fragments
+   of two datagrams that shared an identification but used different protocols
+   reassembled into each other. The key carries the protocol now.
+
+   Simulations with header bit errors drop more datagrams than before, and
+   simulations that fragment two protocols at once reassemble them apart, so
+   fingerprints for those scenarios may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

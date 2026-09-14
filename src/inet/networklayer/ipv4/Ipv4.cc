@@ -279,7 +279,11 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
 
-    if (!ipv4Header->isCorrect() && !ipv4Header->verifyChecksum()) {
+    // RFC 1122 section 3.2.1.2: a host MUST verify the header checksum of every datagram it
+    // receives and silently discard the datagram when it fails. The condition used to be an
+    // AND, which short-circuits: a structurally correct header never reached the checksum
+    // test, so a header with a wrong checksum was accepted.
+    if (!ipv4Header->isCorrect() || !ipv4Header->verifyChecksum()) {
         EV_WARN << "checksum error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);

@@ -39,6 +39,7 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
     key.id = ipv4Header->getIdentification();
     key.src = ipv4Header->getSrcAddress();
     key.dest = ipv4Header->getDestAddress();
+    key.protocolId = ipv4Header->getProtocolId();
 
     auto i = bufs.find(key);
 

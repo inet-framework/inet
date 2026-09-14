@@ -35,9 +35,9 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc791MinimumSizes.test | RFC791-FRAG-6; RFC1122-REASM-2 (governs RFC791-REASM-2) | PASS |
 | Rfc1122TtlOneAtDestination.test | RFC1122-TTL-2; covers TTL-3, RFC791-TTL-1 | PASS |
 | Rfc791InterleavedReassembly.test | RFC791-REASM-3, RFC1122-REASM-1 | PASS |
-| Rfc791SameIdDifferentProtocol.test | RFC791-REASM-1 (four-field key), REASM-3 | **FAIL (unexpected)** — defect |
+| Rfc791SameIdDifferentProtocol.test | RFC791-REASM-1 (four-field key), REASM-3 | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc6864AtomicIdentification.test | RFC6864-ID-3, ID-7; covers ID-6, notes ID-2 | PASS |
-| Rfc1122ChecksumDiscard.test | RFC1122-CKSUM-1 (governs RFC791-CKSUM-2) | **FAIL (unexpected)** — defect |
+| Rfc1122ChecksumDiscard.test | RFC1122-CKSUM-1 (governs RFC791-CKSUM-2) | **PASS** since 2026-09-14; the defect is repaired |
 | Rfc1122VersionDiscard.test | RFC1122-VER-1 | FAIL (expected) — unimplemented |
 | Rfc1122ForeignDestination.test | RFC1122-ADDR-2 | PASS |
 | Rfc1122InvalidSourceAddress.test | RFC1122-ADDR-3, ADDR-4 | FAIL (expected) — unimplemented |
@@ -53,9 +53,9 @@ Summary: 22 tests, 16 PASS, **2 FAIL (expected), 4 FAIL (unexpected)**, so the s
 FAIL. Each test keeps the faithful assertion and each failed at the step its description
 predicts. No specification misread was found.
 
-Since 2026-09-14 the suite is 22 tests, **18 PASS, 2 FAIL (expected), 2 FAIL (unexpected)**.
-`Rfc1122UnknownIcmpType.test` and `Rfc1122NoErrorForLinkBroadcast.test` pass: their defects
-are repaired. The other two stand.
+Since 2026-09-14 the suite is 22 tests, **20 PASS and 2 FAIL (expected)**, and **nothing
+fails unexpectedly**. All four defects are repaired: the unknown ICMP type, the link-layer
+broadcast suppression, the four-field reassembly key, and the header checksum guard.
 
 ## Which failures are declared, and which are not
 
@@ -66,10 +66,10 @@ code. Four of the six failures were declared and should not have been.
 
 | Test | Class | The claim, in the model |
 | --- | --- | --- |
-| `Rfc1122ChecksumDiscard.test` | **defect** | `Ipv4Header::verifyChecksum` exists and `Ipv4.cc:282` calls it and drops on failure. The guard `!isCorrect() && !verifyChecksum()` short-circuits, so a well-formed header never reaches the test. A branch that exists and is unreachable for the case under test. |
+| `Rfc1122ChecksumDiscard.test` | **repaired** | `Ipv4Header::verifyChecksum` existed and `Ipv4.cc` called it and dropped on failure, but the guard `!isCorrect() && !verifyChecksum()` short-circuits: a structurally correct header never reached the test, so a wrong checksum was accepted. The guard is an OR now, which is what RFC 1122 section 3.2.1.2 requires. |
 | `Rfc1122NoErrorForLinkBroadcast.test` | **repaired** | `Icmp::maySendErrorMessage` suppressed for four conditions, all reading the IP addresses, and its first comment read "don't send ICMP error messages in response to broadcast or multicast messages". The fifth condition reads the frame the datagram arrived in, through the `MacAddressInd` tag, which is where a link-layer broadcast is recorded. |
 | `Rfc1122UnknownIcmpType.test` | **repaired** | `Icmp::processIcmpMessage` had a `default:` branch for a type it does not know, and that branch threw. It emits `packetDropped` and deletes the packet now, which is the silent discard RFC 1122 section 3.2.2 requires. |
-| `Rfc791SameIdDifferentProtocol.test` | **defect** | `Ipv4FragBuf::Key` is the reassembly key (Ipv4FragBuf.h:31 to 40) and carries three of the four fields RFC 791 names. A key that exists and is incomplete. |
+| `Rfc791SameIdDifferentProtocol.test` | **repaired** | `Ipv4FragBuf::Key` is the reassembly key and carried three of the four fields RFC 791 names. It carries the protocol too now, so two senders that reuse one identification for two protocols no longer reassemble into each other. |
 | `Rfc1122VersionDiscard.test` | unimplemented | Nothing reads the version field on receipt. `getVersion` does not appear in `Ipv4.cc` at all. |
 | `Rfc1122InvalidSourceAddress.test` | unimplemented | Nothing validates the source address of a received datagram. The one source test in the receive path, `Ipv4.cc:824`, only warns about an unspecified address and discards nothing. |
 

@@ -28,14 +28,22 @@ class INET_API Ipv4FragBuf
     //
     // Key for finding the reassembly buffer for a datagram.
     //
+    // RFC 791, "Fragmentation": the fragments of a datagram are identified by the four
+    // fields source address, destination address, protocol and identification. The protocol
+    // belongs here: two senders may reuse one identification for two protocols, and without
+    // it their fragments reassemble into each other.
     struct Key {
         ushort id = static_cast<ushort>(-1);
         Ipv4Address src;
         Ipv4Address dest;
+        int protocolId = -1;
 
         inline bool operator<(const Key& b) const
         {
-            return (id != b.id) ? (id < b.id) : (src != b.src) ? (src < b.src) : (dest < b.dest);
+            return (id != b.id) ? (id < b.id)
+                 : (src != b.src) ? (src < b.src)
+                 : (dest != b.dest) ? (dest < b.dest)
+                 : (protocolId < b.protocolId);
         }
     };
 
