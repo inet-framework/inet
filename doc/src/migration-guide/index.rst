@@ -103,6 +103,17 @@ transaction tag through retries and fragments. Recipient responses must echo the
 token. An originator accepts only a matching live response; a response using the old
 default token zero no longer completes a transaction.
 
+Recipient ADDBA Lifecycle
+-------------------------
+
+Update custom recipient handlers and callers to the current
+``processReceivedAddbaRequest()`` callback arguments and returned agreement. An accepted
+request establishes or replaces recipient state when the response is formed. Reset the
+receive/reordering state for a replacement agreement. Replaying a cached duplicate
+response must not establish the agreement again or reset its receive window. Use the
+returned ownership-bearing teardown result when publishing a deleted-agreement
+notification.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
