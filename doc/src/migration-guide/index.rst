@@ -189,6 +189,14 @@ synchronously remove or replace an agreement, so relookup the original generatio
 generating its DELBA. If an implementation has no outstanding frames, returning false
 must be an explicit implementation decision.
 
+Recipient Block Ack Timeout Policy
+----------------------------------
+
+A nonzero recipient ``blockAckTimeoutValue`` policy overrides the advisory timeout in
+the ADDBA request. The model's zero-policy convention inherits the request timeout.
+Check configurations that previously depended on the reversed selection; the negotiated
+inactivity deadline may change.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

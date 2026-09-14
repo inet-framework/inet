@@ -1881,6 +1881,27 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(threw);
 }
 
+// IEEE Std 802.11-2024, 10.25.2: the recipient policy may inherit the
+// originator's advisory timeout when it does not configure an override. The
+// response, installed agreement, and inactivity deadline must use that one
+// negotiated value.
+{
+    RecipientBlockAckAgreementHandler recipientHandler;
+    TestRecipientPolicy recipientPolicy;
+    TestCallback responseCallback;
+    auto request = makeRequest(peer1, 8, 93, SequenceNumberCyclic(200), 32);
+    request->setBlockAckTimeoutValue(3);
+    auto agreementCreationTime = simTime();
+    auto agreement = recipientHandler.processReceivedAddbaRequest(request, &recipientPolicy, &responseCallback, &responseCallback);
+    ASSERT(agreement != nullptr);
+    auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader);
+    ASSERT(response != nullptr);
+    ASSERT(response->getBlockAckTimeoutValue() == 3);
+    ASSERT(agreement->getBlockAckTimeoutValue() == 3);
+    ASSERT(agreement->getExpirationTime() == agreementCreationTime + 3);
+    ASSERT(responseCallback.recipientInactivityDeadline == agreementCreationTime + 3);
+}
+
 // An initially rejected request has no agreement, so its response is never
 // replayable and must not consume replay-cache state.
 {
@@ -1950,6 +1971,7 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto firstRequest = makeRequest(peer2, 6, 90, SequenceNumberCyclic(100), 32);
     firstRequest->setSequenceNumber(SequenceNumberCyclic(50));
     firstRequest->setBlockAckTimeoutValue(3);
+    auto firstAgreementCreationTime = simTime();
     auto firstReception = recipientDataService->managementFrameReceived(new Packet("firstAddbaRequest", firstRequest), firstRequest);
     ASSERT(!firstReception.duplicate);
     ASSERT(firstReception.completeFrames.empty());
@@ -1970,8 +1992,10 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(firstResponse->getTid() == 6);
     ASSERT(firstResponse->getBlockAckPolicy());
     ASSERT(firstResponse->getBufferSize() == 32);
-    ASSERT(firstResponse->getBlockAckTimeoutValue() == 3);
+    ASSERT(firstResponse->getBlockAckTimeoutValue() == 1);
     ASSERT(firstResponse->getAMsduSupported());
+    ASSERT(firstAgreement->getBlockAckTimeoutValue() == 1);
+    ASSERT(firstAgreement->getExpirationTime() == firstAgreementCreationTime + 1);
 
     auto bufferedHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(101));
     bufferedHeader->setTransmitterAddress(peer2);
@@ -2029,7 +2053,7 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(rejectedResponse->getStatusCode() != 0);
     ASSERT(rejectedResponse->getTid() == 6);
     ASSERT(rejectedResponse->getBufferSize() == 1);
-    ASSERT(rejectedResponse->getBlockAckTimeoutValue() == 4);
+    ASSERT(rejectedResponse->getBlockAckTimeoutValue() == 1);
     ASSERT(!rejectedResponse->getAMsduSupported());
 
     auto duplicateRejectedRequest = makeRequest(peer2, 6, 91, SequenceNumberCyclic(200), 16);
@@ -2424,8 +2448,13 @@ ASSERT(firstImmediateAgreement != nullptr);
 ASSERT(immediateRecipientHandler.getAgreement(6, peer1) == firstImmediateAgreement);
 ASSERT(firstImmediateAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(0));
 auto acceptedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(recipientCallback.managementHeader);
+ASSERT(acceptedResponse != nullptr);
 ASSERT(acceptedResponse->getDialogToken() == 77);
 ASSERT(acceptedResponse->getStatusCode() == 0);
+ASSERT(acceptedResponse->getBlockAckTimeoutValue() == 0);
+ASSERT(firstImmediateAgreement->getBlockAckTimeoutValue() == 0);
+ASSERT(firstImmediateAgreement->getExpirationTime() == SIMTIME_MAX);
+ASSERT(recipientCallback.recipientInactivityDeadline == SIMTIME_MAX);
 
 // Renegotiation replaces the recipient agreement and the HCF reset boundary
 // must discard the old reorder window before frames use the new SSN.
@@ -5699,14 +5728,14 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
 {
     TestRecipientHandler expiryHandler;
     TestRecipientPolicy expiryPolicy;
-    expiryPolicy.blockAckTimeoutValue = 1;
+    expiryPolicy.blockAckTimeoutValue = 2;
     TestCallback expiryCallback;
     auto request = makeRequest(peer2, 10, 101, SequenceNumberCyclic(310), 32);
-    request->setBlockAckTimeoutValue(1);
+    request->setBlockAckTimeoutValue(3);
     auto firstAgreement = expiryHandler.processReceivedAddbaRequest(request, &expiryPolicy, &expiryCallback, &expiryCallback);
     ASSERT(firstAgreement != nullptr);
     auto firstGenerationId = firstAgreement->getGenerationId();
-    wait(1);
+    wait(2);
     expiryHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
     auto stalePacket = expiryCallback.managementPacket;
     auto staleDelba = dynamicPtrCast<const Ieee80211Delba>(expiryCallback.managementHeader);
@@ -5755,17 +5784,23 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     wait(1);
     TestRecipientHandler recipientHandler;
     TestRecipientPolicy recipientPolicy;
-    recipientPolicy.blockAckTimeoutValue = 3;
+    recipientPolicy.blockAckTimeoutValue = 2;
     TestCallback setupCallback;
     auto request = makeRequest(peer2, 12, 109, SequenceNumberCyclic(330), 32);
     request->setBlockAckTimeoutValue(3);
+    auto agreementCreationTime = simTime();
     auto agreement = recipientHandler.processReceivedAddbaRequest(request, &recipientPolicy, &setupCallback, &setupCallback);
     ASSERT(agreement != nullptr);
     ASSERT(recipientHandler.getActiveAgreement(12, peer2) == agreement);
     auto creationTime = simTime();
     ASSERT(creationTime > 0);
-    ASSERT(agreement->getExpirationTime() == creationTime + 3);
-    ASSERT(setupCallback.recipientInactivityDeadline == creationTime + 3);
+    auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(setupCallback.managementHeader);
+    ASSERT(response != nullptr);
+    ASSERT(response->getBlockAckTimeoutValue() == 2);
+    ASSERT(agreement->getBlockAckTimeoutValue() == 2);
+    ASSERT(agreement->getExpirationTime() == agreementCreationTime + 2);
+    ASSERT(agreement->getExpirationTime() == creationTime + 2);
+    ASSERT(setupCallback.recipientInactivityDeadline == creationTime + 2);
 
     auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
     basicBlockAckReq->setTransmitterAddress(peer2);
@@ -5773,9 +5808,9 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     wait(1);
     auto barReceptionTime = simTime();
     recipientHandler.blockAckReqReceived(basicBlockAckReq, &setupCallback);
-    ASSERT(agreement->getExpirationTime() == barReceptionTime + 3);
-    ASSERT(agreement->getExpirationTime() > creationTime + 3);
-    ASSERT(setupCallback.recipientInactivityDeadline == barReceptionTime + 3);
+    ASSERT(agreement->getExpirationTime() == barReceptionTime + 2);
+    ASSERT(agreement->getExpirationTime() > creationTime + 2);
+    ASSERT(setupCallback.recipientInactivityDeadline == barReceptionTime + 2);
 
     wait(4);
     TestCallback expiryCallback;

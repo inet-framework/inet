@@ -427,6 +427,12 @@ Notable backward incompatible changes are the following:
    When a BAR releases data fragments that do not reassemble into a packet, recipient
    processing skips data dispatch instead of dereferencing a null result.
 
+13. Recipient Block Ack Timeout Policy
+
+   Recipient Block Ack timeout selection now honors a nonzero local policy value; zero
+   inherits the request's advisory value. This corrects the previously reversed choice
+   and can change agreement expiry and subsequent traffic.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
