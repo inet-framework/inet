@@ -24,6 +24,17 @@ requirement of RFC9000-SIZE-1, so the server's budget is 3600 octets from the fi
 receives. The server's whole handshake is far smaller than that. The two rules are one design:
 the floor exists so that this bound does not stop a handshake from finishing.
 
+The margin is wide. A budget of one times the received bytes passes as well, so the server
+never sends even as much as it receives before validation. A budget of zero fails at the
+server's first send, which is how the guard was shown to look at anything at all.
+
+The watch is a guard and not an ordered step, and that matters. As an ordered step it began
+only after the arrival that opens the window, so it credited the server nothing for that
+arrival and its received sum started at zero. The check still passed, because `Udp` raised
+`packetReceivedFromLower` twice for one datagram and the second copy primed the sum. Two
+faults cancelled. The duplicate emit is gone from `Udp.cc`, and the guard now counts the
+opening arrival itself, which is what the rule needs.
+
 %includes:
 #include "ProtocolTest.h"
 #include "QuicChunks.h"
@@ -60,18 +71,20 @@ static bool amplificationLimitBroken(const PacketEvent& event)
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9000_anti_amplification")
+        // Observation 2: at no moment before the address is validated has the server sent more
+        // than three times what it received (RFC9000-AMP-1). The guard runs beside the step
+        // below, so it counts the arrival that opens the window as well. An ordered step
+        // would start only after that arrival and would credit the server nothing for it.
+        .meanwhile(never(on("server.udp")
+                  .filterEvent([](const MatchContext& c) { return amplificationLimitBroken(c.event); })
+                  .describe("the server sending more than three times what it received")
+                  .within(2.0)))
         // Observation 1: the client's first Initial packet reaches the server. This opens the
         // window the rule is about.
         .once(on("server.udp").signal("packetReceivedFromLower")
                   .filterEvent([](const MatchContext& c) { return findQuicChunk<InitialPacketHeader>(c.event.packet) != nullptr; })
                   .describe("the client's Initial packet at the server")
-                  .within(1.0))
-        // Observation 2: at no moment before the address is validated has the server sent more
-        // than three times what it received (RFC9000-AMP-1).
-        .never(on("server.udp")
-                  .filterEvent([](const MatchContext& c) { return amplificationLimitBroken(c.event); })
-                  .describe("the server sending more than three times what it received")
-                  .within(2.0));
+                  .within(1.0));
 }
 
 %activity:
