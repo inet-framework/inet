@@ -179,7 +179,13 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
         return false;
     if (selHasValue && (!event.hasValue || event.value != selValue))  // scalar signal value
         return false;
-    if (event.packet == nullptr && (!selExpr.empty() || predicate))
+    // A packet-field expression needs a packet. A predicate does not: it receives the whole
+    // context, so it can judge a scalar signal's value, the time, or a capture. Refusing it
+    // here made every rule about a scalar unwritable, and silently: the step simply never
+    // matched, so a guard over a scalar held over nothing and the check could not fail.
+    // The QUIC pass reported this from the other side, when a running total could not be
+    // accumulated on the signal side.
+    if (event.packet == nullptr && !selExpr.empty())
         return false;
     if (!selExpr.empty() && !matchesExpression(context))
         return false;

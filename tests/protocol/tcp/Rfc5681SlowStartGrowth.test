@@ -1,0 +1,139 @@
+%description:
+
+RFC 5681 -- in slow start the window grows by at most one segment per acknowledgment.
+
+Checks RFC5681-SS-2 (the upper bound); covers RFC5681-SS-1 and RFC5681-SSTH-1.
+
+RFC 5681 section 3.1: while the congestion window is below the threshold, it may be
+increased by at most SMSS bytes for each acknowledgment that covers new data. The rule is an
+upper bound, and that is what this check reads.
+
+**How the rule is observed.** The rule is about two consecutive publications of the window,
+not about any one of them, so the check keeps the previous value and judges each increase
+against it. The guard runs beside the transfer and forbids an increase larger than one
+segment, so a single violation anywhere in the run fails the check. A step that looked at
+one publication could not say this at all.
+
+The segment size is taken from the run rather than assumed: the first data segment's length
+is captured and used as the bound. That length includes the TCP header, so the bound is
+larger than SMSS by about twenty bytes. The bound is therefore slightly generous, and a
+model that grew the window by two segments would still fail it by a wide margin.
+
+**One expected observation cannot be made.** The check also asks for the threshold to be
+read before any loss. `TcpReno` publishes `ssthresh` only when it changes it, which happens
+on a loss, so a run without loss publishes it never. This is the same gap the RFC 6298
+checks met from the other side: the model publishes a control variable only where it
+recomputes it, not where it is used.
+
+Observation 3 of the check, that the window roughly doubles each round trip, is weaker than
+the bound above and is not asserted. A model that grows more slowly meets the `MUST` and
+misses the shape, which the check calls a deviation to record rather than a violation.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The previous publication of the window. One program runs once per binary, so file scope
+// is the state this rule needs; the QUIC flow-control check keeps its total the same way.
+static double previousWindow = -1;
+
+// True when this publication grew the window by more than one segment since the last one.
+// The guard below forbids exactly that.
+static bool grewByMoreThanOneSegment(const MatchContext& context)
+{
+    if (!context.event.hasValue)
+        return false;
+    double window = context.event.value;
+    double oneSegment = context.get("segmentBytes").doubleValue();
+    bool tooFast = previousWindow >= 0 && (window - previousWindow) > oneSegment;
+    previousWindow = window;
+    return tooFast;
+}
+
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && context.event.packet->getByteLength() > 100;
+}
+
+static cValue packetBytes(const PacketEvent& event)
+{
+    return cValue((double)event.packet->getByteLength());
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_slow_start_growth")
+        // Take the segment size from the run. This is the bound the rule uses.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                  .filterEvent(dataSegment)
+                  .capture("segmentBytes", packetBytes)
+                  .describe("host A's first data segment, whose length is the bound")
+                  .within(2.0))
+        // From here to the end of the transfer, no acknowledgment may grow the window by
+        // more than one segment.
+        .meanwhile(never(on("host1.tcp").signal("cwnd")
+                             .filterEvent(grewByMoreThanOneSegment)
+                             .describe("a window that grew by more than one segment")
+                             .within(8.0)))
+        // The transfer really ran inside that window, so the guard held over something.
+        // Several round trips of growth happen before this point.
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterEvent(dataSegment).nth(20)
+                  .describe("the twentieth data segment at host B")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_slow_start_growth compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// Two hosts on one link -- note: NO tester (attached at runtime).
+network SlowStartNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SlowStartNet
+sim-time-limit = 20s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+
+# A receiver window large enough never to limit the sender, so the congestion window is the
+# only thing that decides how much is in flight.
+**.tcp.advertisedWindow = 65535
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+# Enough data to fill several windows, so the growth is visible over several round trips.
+*.host1.app[0].sendBytes = 100000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_slow_start_growth: PASS

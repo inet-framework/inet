@@ -24,7 +24,7 @@ and [`dhcp/notes.md`](../../doc/project/evidence/model/dhcp/notes.md#scenario-qu
 | The engine is a strictly sequential consumer | ipv4, arp, dhcp, tcp level 4 | **done**, item 3 below |
 | A unit-bearing capture breaks the next step | tcp, ipv6 | **done**, item 1 below |
 | An address field cannot be compared in an expression | arp, dhcp | not in this plan |
-| A scalar signal refuses a predicate | quic | item 2 below |
+| A scalar signal refuses a predicate | quic, tcp level 4 | **done**, 2026-09-14 |
 | A scalar signal type aborts the run | quic, tcp level 4 | **done**, c39f2ee13c |
 | A scalar signal compares by equality only | tcp level 4 | **done**, c39f2ee13c |
 | The raw event trace is off in a self-contained test | arp | not in this plan |

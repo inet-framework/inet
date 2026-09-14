@@ -87,7 +87,11 @@ Candidate checks, all deterministic through a signal:
 - [x] Step 3: `standard/rfc5681/catalog.md`, identifiers `RFC5681-*`. 21 entries.
 - [x] Step 4: the feature map gains the congestion control features. Six: CONGESTION-WINDOW, INITIAL-WINDOW, LOSS-RESPONSE, FAST-RETRANSMIT, RESTART-IDLE, DELAYED-ACK.
 - [x] Step 5: `protocol/tcp/checks/congestion-control.md`. Five checks.
-- [~] Step 6: the tests. One of five written and passing: `Rfc5681InitialWindow.test`.
+- [~] Step 6: the tests. Two of five written.
+      - `Rfc5681InitialWindow.test` passes.
+      - `Rfc5681SlowStartGrowth.test` passes. Writing it found a framework fault: a
+        predicate was refused on a scalar event, so the guard held over nothing and the
+        check could not fail. Fixed, and the check is decisive now.
 - [ ] Steps 7 to 9: run, results, conformance, categories.
 
 Candidate checks:
