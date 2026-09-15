@@ -1,8 +1,7 @@
 # Resolve the audit findings of PR #1148
 
-Status: **approved reconstruction in progress** — F1/F2 and interface repairs, isolated
-rebase, and all 17 diagnostic source-prefix checks are complete. Final history
-authoring and verification are in progress after explicit acceptance of the exact baseline and history proposals.
+Status: **complete** — the repairs, approved reconstruction, per-commit checks,
+feature builds, final union and middle-commit checks are complete.
 Prepared: 2026-09-14.
 PR: [INET #1148](https://github.com/inet-framework/inet/pull/1148).
 Audit evidence: local, ignored `audit/pull-request/pr-1148.md`,
@@ -120,7 +119,7 @@ Tests and acceptance:
   pre-existing ledgered `ITransmitStep`/`IReceiveStep` defaults outside this repair.
 - [x] S5: assign `DEQUEUED=0`, `REMOVED=1`, `DROPPED=2` explicitly in
   `src/inet/queueing/contract/IPacketQueue.h`; preserve those values in future changes.
-- [ ] Compile affected implementations with the relevant optional features both enabled and
+- [x] Compile affected implementations with the relevant optional features both enabled and
   disabled. Run the interface scan and manually inspect nested callbacks, which the audit's
   scanner did not detect.
 
@@ -151,25 +150,25 @@ messages. The final commit count follows the resulting decisions, not a target o
 
 - [x] Build a fresh debug library and run the focused tests on the repaired original-base tree.
   Preserve that tested checkpoint before rebasing.
-- [ ] Pin the then-current upstream target. The audit observed a merge conflict against
+- [x] Pin the then-current upstream target. The audit observed a merge conflict against
   `0c85e5dd6bc2969987286210962983b19384670e`; do not assume that is still the target.
   Resolve the rebase in an isolated candidate, using the INET rebase workflow and scoped
   `opp_repl` evidence. Record conflict decisions and rerun affected tests after resolution.
-- [ ] Inventory the 16 fingerprint rows added/changed by the audited series, then recompute the
+- [x] Inventory the 16 fingerprint rows added/changed by the audited series, then recompute the
   inventory against the pinned new base. Map changed production paths through dependency data
   to affected configurations, runs and seeds; include all declared ingredients (`tplx`, `~tNl`,
   `~tND` where applicable).
-- [ ] For each moving row, record configuration/run, old and candidate values, ingredient,
+- [x] For each moving row, record configuration/run, old and candidate values, ingredient,
   causal source commit, observed behavioral difference, correctness argument and artifact paths.
   Multiple transitions of the same row need evidence at each responsible commit.
-- [ ] Investigate mismatches before replacing expectations. Present the exact proposed baseline
+- [x] Investigate mismatches before replacing expectations. Present the exact proposed baseline
   changes for acceptance under [change-a-baseline.md](../../doc/project/guide/change-a-baseline.md).
   Candidate calculations remain evidence until the required approval is recorded.
-- [ ] Reconstruct the final series on the fixed new base using the INET branch-cleanup workflow.
+- [x] Reconstruct the final series on the fixed new base using the INET branch-cleanup workflow.
   Split C12, fold each accepted baseline transition into its causal commit, remove standalone
   C14, restore S6's incidental whitespace and complete S3's trailers. Do not squash all baseline
   changes into C13 merely because it precedes C14.
-- [ ] Verify each final intermediate tree with its directly applicable build/tests and scoped
+- [x] Verify each final intermediate tree with its directly applicable build/tests and scoped
   fingerprints. Compare the reconstructed final source tree with the tested post-rebase tree;
   account explicitly for intended whitespace, documentation and baseline differences.
 
@@ -183,28 +182,28 @@ inet_run_module_tests -m debug -f '(Ieee80211BlockAckInactivityTimer_1|Ieee80211
 inet_run_queueing_tests -m debug -f 'PacketQueueDepartureSignal_1\.test$'
 ```
 
-- [ ] Add explicit filters for the new regressions and retain commands, mode, seeds, exit status
+- [x] Add explicit filters for the new regressions and retain commands, mode, seeds, exit status
   and logs. Repeat tests after relevant changes; do not reuse pre-rebase results as final evidence.
-- [ ] Complete debug and release compilation and the affected feature matrix using the supported
+- [x] Complete debug and release compilation and the affected feature matrix using the supported
   build workflow. Run source-seal, architecture, interface, naming, classification, commit and
   whitespace gates as described in [run-the-gates.md](../../doc/project/guide/run-the-gates.md).
-- [ ] Resolve the audit's usage/override inventory and affected standards-traceability gaps.
+- [x] Resolve the audit's usage/override inventory and affected standards-traceability gaps.
   Inspect authoritative local clauses for claims this series makes; record unavailable evidence
   explicitly rather than marking it passed. Keep pre-existing ledgered findings separate.
-- [ ] Refresh the audit and commit summary against the final exact head/base. Close F1/F2 only
+- [x] Refresh the audit and commit summary against the final exact head/base. Close F1/F2 only
   with the production-path tests above; close S1 only with per-row and per-commit evidence.
-- [ ] Correct the PR description: malformed AID handling is
+- [x] Correct the PR description: malformed AID handling is
   `Ieee80211MgmtFrameSerializer::decodeAssociationId` calling `markIncorrect`; the teardown tag
   carries `generationId`, while role/peer/TID come from DELBA/context. Include actual reading
   order, architectural/API surface, baseline causes and verified test scope.
-- [ ] Hand off the final diff, revised description and evidence table for review. Move the plan
+- [x] Hand off the final diff, revised description and evidence table for review. Move the plan
   to `plan/done/` only after its required repairs and verification are complete.
 
 Completion means both reproduced defects are covered and repaired, all six policy findings are
 resolved, the series builds and passes its applicable tests at every commit, and the final audit
 clearly distinguishes verified claims from any remaining evidence limitations.
 
-## Execution checkpoint — 2026-09-15
+## Historical execution checkpoint — 2026-09-15
 
 Reviewed head preserved at `archive/pr-1148-reviewed-991f626a4f`. The original-base
 repair checkpoint is `d3045c9780`, preserved at
@@ -241,7 +240,7 @@ intact. No new fingerprint expectation has been accepted or written. S1, final
 C12 split, S3 classification, S6 restoration, per-commit verification, and final
 review handoff remain open. Do not move this plan to done at this checkpoint.
 
-## Diagnostic checkpoint — 2026-09-15 01:25
+## Historical diagnostic checkpoint — 2026-09-15 01:25
 
 All 17 source prefixes build in debug and release and pass their available
 focused cases (202 case executions). All 994 declared fingerprint ingredients
@@ -260,3 +259,37 @@ Apply inherited upstream graphical drift in a prerequisite baseline commit,
 then this plan, then the 17 measured source decisions with their causal
 expectations and migration notes, and finally the verified closure. Preserve
 the original topic and all diagnostic checkpoints.
+
+## Final verification — 2026-09-15
+
+The user accepted the exact baseline and history proposals. The reconstructed
+source series is verified through `ab2531bf32c20fe6fd7efb0299ce8ea00058907e`, on pinned
+base `0c85e5dd6bc2969987286210962983b19384670e`. The preserved original topic remains
+`37c6119f7ee6a090b2aa0999d1d9ffc3dca94144`.
+
+All 19 prerequisite/plan/source commits have passing debug/release and scoped
+verification. The final union passes five unit, six module and three queueing
+cases plus 59 fingerprint ingredients across 16 mapped rows. Middle checks
+cover C03 transactions/RED, C08 reentrant expiry/HCF overflow and C13 A-MSDU
+validity. Queueing-only and Wi-Fi-required debug builds pass.
+
+Every source-owned baseline transition is in its causal commit; the ten
+inherited graphical tokens are in the approved upstream-control prerequisite.
+C12 is split, C14 is removed, C17 and the whole series have classification
+trailers, incidental whitespace is restored, and new public contracts have
+migration-guide and release notes. The final source matches the tested rebase
+except for the planned whitespace and three verified figure-reference comments.
+
+Full-tree architecture/interface/naming gates retain the same 25/15/23 findings
+as pinned upstream, with no new findings. Scoped architecture, queue interfaces,
+changed NED/MSG declarations, source seals, history and whitespace checks pass.
+The two existing Wi-Fi interface defaults remain ledgered by AV-CONTRACT-02.
+The source-based usage inventory replaces the unavailable historical helper;
+external implementations and every optional IEEE procedure are not certified.
+
+The completion record and its pure move are separate under PR-SPLIT-MOVE, so
+the final series contains 21 commits without changing the accepted source
+order or baseline scope. Local final audit, commit summary, revised PR
+description, exact commands/results and tree proof are under ignored
+`audit/pull-request/pr-1148-repair/`; the original audit remains preserved.
+No remote publication is part of this execution.
