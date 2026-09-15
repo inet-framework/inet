@@ -1,3 +1,5 @@
-PCAPng capture limits
+PCAP writer contract and PCAPng capture limits
+
+Custom IPcapWriter implementations must now implement writePacketWithPrefix(), or derive from a writer that implements it. This method writes capture metadata before the selected bytes of a Packet. Both parts count toward the record length and capture length limit. See the PCAP Writers section of the migration guide for the signature and required behavior.
 
 PcapngWriter now truncates records at a finite snaplen limit but keeps their original lengths. Previously, it wrote the complete selected range regardless of that limit. Set a sufficiently large limit or zero if your PCAPng consumers require complete records. A zero PCAPng snaplen remains unlimited.
