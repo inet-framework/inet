@@ -1,0 +1,81 @@
+%description:
+Malformed A-MSDUs reaching the production QoS recipient data service produce one
+malformed-packet drop, no delivery and no successful-deaggregation observation.
+A valid subsequent aggregate is still delivered normally.
+
+%file: TestMalformedMsduReceive.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+namespace inet { namespace ieee80211 {
+class TestMalformedMsduReceive : public RecipientQosMacDataService, public cListener {
+  protected:
+    using cListener::finish;
+    int drops = 0, deaggregations = 0;
+    virtual void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *details) override {
+        if (signal == packetDroppedSignal) {
+            ASSERT(check_and_cast<PacketDropDetails *>(details)->getReason() == INCORRECTLY_RECEIVED);
+            drops++;
+        }
+        if (signal == packetDeaggregatedSignal) deaggregations++;
+    }
+    virtual void initialize() override {
+        RecipientQosMacDataService::initialize();
+        subscribe(packetDroppedSignal, this);
+        subscribe(packetDeaggregatedSignal, this);
+        scheduleAt(SIMTIME_ZERO, new cMessage("exercise"));
+    }
+    virtual void handleMessage(cMessage *message) override {
+        delete message;
+        for (bool malformed : {true, false}) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setDurationField(SIMTIME_ZERO);
+            header->setSequenceNumber(SequenceNumberCyclic(malformed ? 0 : 1));
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+            header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+            header->setAddress3(MacAddress("02:00:00:00:00:03"));
+            header->setAMsduPresent(true);
+            auto packet = new Packet("aggregate", header);
+            auto subframe = makeShared<Ieee80211MsduSubframeHeader>();
+            subframe->setSa(header->getTransmitterAddress());
+            subframe->setDa(header->getReceiverAddress());
+            subframe->setLength(malformed ? 200 : 3);
+            packet->insertAtBack(subframe);
+            packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3}));
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            auto received = dataFrameReceived(packet, header, nullptr);
+            ASSERT(received.size() == (malformed ? 0 : 1));
+            ASSERT(drops == 1);
+            ASSERT(deaggregations == (malformed ? 0 : 1));
+            for (auto frame : received) delete frame;
+        }
+        unsubscribe(packetDroppedSignal, this);
+        unsubscribe(packetDeaggregatedSignal, this);
+        std::cout << "Malformed A-MSDU drops once without delivery or a success observation.\n";
+    }
+};
+Define_Module(TestMalformedMsduReceive);
+}}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+module TestMalformedMsduReceive extends RecipientQosMacDataService {
+    parameters: @class(::inet::ieee80211::TestMalformedMsduReceive);
+}
+network MalformedMsduNetwork {
+    submodules: service: TestMalformedMsduReceive;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MalformedMsduNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Malformed A-MSDU drops once without delivery or a success observation.

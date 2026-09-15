@@ -98,8 +98,16 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         for (auto defragmentedFrame : defragmentedFrames) {
             auto defragmentedHeader = defragmentedFrame->peekAtFront<Ieee80211DataHeader>();
             if (defragmentedHeader->getAMsduPresent()) {
-                emit(packetDeaggregatedSignal, defragmentedFrame);
+                if (aMsduDeaggregation->isValidAggregate(defragmentedFrame))
+                    emit(packetDeaggregatedSignal, defragmentedFrame);
                 auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
+                if (subframes == nullptr) {
+                    PacketDropDetails details;
+                    details.setReason(INCORRECTLY_RECEIVED);
+                    emit(packetDroppedSignal, defragmentedFrame, &details);
+                    delete defragmentedFrame;
+                    continue;
+                }
                 for (auto subframe : *subframes)
                     deaggregatedFrames.push_back(subframe);
                 delete subframes;
@@ -169,8 +177,16 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         if (aMsduDeaggregation) {
             for (auto frame : defragmentedFrames) {
                 if (frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent()) {
-                    emit(packetDeaggregatedSignal, frame);
+                    if (aMsduDeaggregation->isValidAggregate(frame))
+                        emit(packetDeaggregatedSignal, frame);
                     auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
+                    if (subframes == nullptr) {
+                        PacketDropDetails details;
+                        details.setReason(INCORRECTLY_RECEIVED);
+                        emit(packetDroppedSignal, frame, &details);
+                        delete frame;
+                        continue;
+                    }
                     for (auto subframe : *subframes)
                         deaggregatedFrames.push_back(subframe);
                     delete subframes;
