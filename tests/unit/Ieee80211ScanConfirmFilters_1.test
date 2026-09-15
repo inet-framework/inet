@@ -1,0 +1,77 @@
+%description:
+Exercise the production scan-confirm construction with discovered BSSs that
+share an SSID, unrelated beacons, exact filters and wildcards. Filtering must
+not destroy the discovery cache used by subsequent management operations.
+
+%includes:
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+class ScanConfirmStation : public Ieee80211MgmtSta
+{
+  public:
+    std::vector<MacAddress> results;
+    int confirmations = 0;
+
+    void addBss(const char *address, const char *ssid)
+    {
+        apList.emplace_back();
+        auto& ap = apList.back();
+        ap.address = MacAddress(address);
+        ap.ssid = ssid;
+        ap.channel = 1;
+        ap.supportedRates.numRates = 0;
+        ap.extendedSupportedRates.numRates = 0;
+    }
+
+    void confirm(const MacAddress& bssid, const char *ssid, bool active)
+    {
+        scanning = ScanningInfo();
+        scanning.bssid = bssid;
+        scanning.ssid = ssid;
+        scanning.activeScan = active;
+        results.clear();
+        sendScanConfirm();
+        ASSERT(apList.size() == 3);
+    }
+
+  protected:
+    virtual void sendConfirm(Ieee80211PrimConfirm *message, Ieee80211PrimResultCode code) override
+    {
+        ASSERT(code == PRC_SUCCESS);
+        auto confirm = check_and_cast<Ieee80211Prim_ScanConfirm *>(message);
+        confirmations++;
+        for (size_t i = 0; i < confirm->getBssListArraySize(); i++)
+            results.push_back(confirm->getBssList(i).getBSSID());
+        delete confirm;
+    }
+};
+
+%activity:
+ScanConfirmStation station;
+const MacAddress a("02:00:00:00:00:01"), b("02:00:00:00:00:02"), c("02:00:00:00:00:03");
+station.addBss("02:00:00:00:00:01", "requested");
+station.addBss("02:00:00:00:00:02", "requested");
+station.addBss("02:00:00:00:00:03", "unrelated");
+for (bool active : {false, true}) {
+    station.confirm(MacAddress::BROADCAST_ADDRESS, "", active);
+    ASSERT(station.results == std::vector<MacAddress>({a, b, c}));
+    station.confirm(MacAddress::BROADCAST_ADDRESS, "requested", active);
+    ASSERT(station.results == std::vector<MacAddress>({a, b}));
+    station.confirm(b, "", active);
+    ASSERT(station.results == std::vector<MacAddress>({b}));
+    station.confirm(b, "requested", active);
+    ASSERT(station.results == std::vector<MacAddress>({b}));
+    station.confirm(b, "unrelated", active);
+    ASSERT(station.results.empty());
+    station.confirm(MacAddress::BROADCAST_ADDRESS, "absent", active);
+    ASSERT(station.results.empty());
+}
+ASSERT(station.confirmations == 12);
+EV << "Scan confirms honor both filters and preserve discovery cache.\n";
+
+%contains: stdout
+Scan confirms honor both filters and preserve discovery cache.
