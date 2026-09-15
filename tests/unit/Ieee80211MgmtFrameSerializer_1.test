@@ -173,6 +173,15 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 }
 
 %activity:
+for (uint16_t algorithm : {0, 1, 0xffff}) {
+    auto auth = makeShared<Ieee80211AuthenticationFrame>();
+    auth->setAlgorithmNumber(algorithm);
+    auth->setSequenceNumber(2);
+    auth->setStatusCode(SC_SUCCESSFUL);
+    std::vector<uint8_t> expected = {uint8_t(algorithm), uint8_t(algorithm >> 8), 2, 0, 0, 0};
+    assertSerializedBody(auth, expected);
+    ASSERT(deserializeBody<Ieee80211AuthenticationFrame>(expected)->getAlgorithmNumber() == algorithm);
+}
 
 {
     const std::vector<uint8_t> body = {0x00, 0x00, 0x34, 0x12, 0x0E, 0x00};

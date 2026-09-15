@@ -15,13 +15,17 @@ class TestStaMgmtBssid : public Ieee80211Mac
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
             ASSERT(header->getAddress3() == header->getReceiverAddress());
             if (header->getType() == ST_PROBEREQUEST) probes++;
-            if (header->getType() == ST_AUTHENTICATION) authentications++;
+            if (header->getType() == ST_AUTHENTICATION) {
+                auto body = packet->peekDataAt<Ieee80211AuthenticationFrame>(header->getChunkLength());
+                ASSERT(body->getAlgorithmNumber() == 0 && body->getSequenceNumber() == 1);
+                authentications++;
+            }
             if (header->getType() == ST_ASSOCIATIONREQUEST) associations++;
         }
         Ieee80211Mac::processUpperFrame(packet, header);
     }
     virtual void finish() override {
-        ASSERT(probes > 0 && authentications > 0 && associations > 0);
+        ASSERT(probes > 0 && authentications == 1 && associations > 0);
         std::cout << "STA scan, authentication and association headers carry their target BSSID.\n";
     }
 };

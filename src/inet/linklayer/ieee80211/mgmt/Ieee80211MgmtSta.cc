@@ -741,48 +741,14 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         return;
     }
 
-    // check authentication sequence number is OK
-    if (frameAuthSeq != ap->authSeqExpected) {
-        // wrong sequence number: send error and return
-        EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
-        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
-        body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
-        delete packet;
-
-        // cancel timeout, send error to agent
-        cancelAndDelete(ap->authTimeoutMsg);
-        ap->authTimeoutMsg = nullptr;
-        sendAuthenticationConfirm(ap, PRC_REFUSED); // TODO or what resultCode?
-        return;
-    }
-
-    // check if more exchanges are needed for auth to be complete
+    // IEEE Std 802.11-2024, 12.3.3.2: wire algorithm/transaction fields
+    // determine completion, never the old model-only isLast flag.
+    bool validResponse = requestBody->getAlgorithmNumber() == 0 && frameAuthSeq == 2;
     int statusCode = requestBody->getStatusCode();
-
-    if (statusCode == SC_SUCCESSFUL && !requestBody->isLast()) {
-        EV << "More steps required, sending another Authentication frame\n";
-
-        // more steps required, send another Authentication frame
-        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
-        body->setSequenceNumber(frameAuthSeq + 1);
-        body->setStatusCode(SC_SUCCESSFUL);
-        // TODO frame length could be increased to account for challenge text length etc.
-        sendManagementFrame("Auth", body, ST_AUTHENTICATION, address);
-        ap->authSeqExpected += 2;
-    }
-    else {
-        if (statusCode == SC_SUCCESSFUL)
-            EV << "Authentication successful\n";
-        else
-            EV << "Authentication failed\n";
-
-        // authentication completed
-        ap->isAuthenticated = (statusCode == SC_SUCCESSFUL);
-        cancelAndDelete(ap->authTimeoutMsg);
-        ap->authTimeoutMsg = nullptr;
-        sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
-    }
+    ap->isAuthenticated = validResponse && statusCode == SC_SUCCESSFUL;
+    cancelAndDelete(ap->authTimeoutMsg);
+    ap->authTimeoutMsg = nullptr;
+    sendAuthenticationConfirm(ap, validResponse ? statusCodeToPrimResultCode(statusCode) : PRC_REFUSED);
 
     delete packet;
 }
