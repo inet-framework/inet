@@ -4,6 +4,14 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+PCAPng Capture Limits
+---------------------
+
+``PcapngWriter`` now honors the configured ``snaplen``. Captures exceeding a
+finite limit are truncated while retaining their original length; zero means
+unlimited for PCAPng. Set a sufficiently large limit or zero if existing
+PCAPng consumers require complete records.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 

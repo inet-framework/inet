@@ -64,6 +64,11 @@ Notable backward incompatible changes are the following:
    counted arrivals or summed bytes reported twice the true value and now reports
    the true one.
 
+4. PCAPng capture limits
+
+   PcapngWriter now obeys finite snaplen limits while retaining the original
+   record length. A zero PCAPng snaplen remains unlimited.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
