@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211CapabilityInformation.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 
 #include "inet/common/INETUtils.h"
@@ -365,6 +366,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
 
     // create and send association request
     const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
     addHtCapabilities(body);
@@ -387,6 +389,7 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
         throw cRuntimeError("startReassociation: not authenticated with AP address='%s'", ap->address.str().c_str());
     changeChannel(ap->channel);
     const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     body->setCurrentAP(assocAP.address);
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
