@@ -1,25 +1,54 @@
-%# expected-result: FAIL
 %description:
-802.11n HT Operation information element in Beacon (type 8): an Ieee80211HtOperation
-chunk is present in the Beacon frame. [NOT-MODELED -- INET's Ieee80211BeaconFrame
-contains only SSID, supportedRates, beaconInterval, channelNumber, and
-handoverParameters; no HT Operation IE is generated]
+An HT AP's generated Beacon carries HT Operation in its management body and on
+wire (IEEE 802.11-2024 Section 9.4.2.55). The fixture pins the primary channel
+index to zero, corresponding to IEEE channel 1 in the 2.4 GHz band.
 
 %file: N_HtOperationIe.cc
 
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec-required assertion: Beacons from an HT AP must include the HT Operation
-// element (IEEE 802.11-2020 Section 9.4.2.57). INET omits this element entirely.
+static bool hasExpectedHtOperation(const Packet *packet)
+{
+    const auto& header = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+    const auto& body = packet->peekAt<ieee80211::Ieee80211BeaconFrame>(header->getChunkLength());
+    if (!body->getHtOperationPresent() || body->getHtOperation().primaryChannel != 1)
+        return false;
+    const auto bytes = packet->peekAllAsBytes()->getBytes();
+    size_t offset = header->getChunkLength().get<B>() + 12; // TSF, interval, capability
+    constexpr size_t fcsLength = 4;
+    if (offset + fcsLength > bytes.size())
+        return false;
+    const size_t end = bytes.size() - fcsLength;
+    bool found = false;
+    while (offset + 2 <= end) {
+        const auto id = bytes[offset++];
+        const size_t length = bytes[offset++];
+        if (offset + length > end)
+            return false;
+        if (id == 61) {
+            if (found || length != 22 || bytes[offset] != 1)
+                return false;
+            found = true;
+        }
+        offset += length;
+    }
+    return found && offset == end;
+}
+
 Define_ProtocolTest(wifi_11n_ht_operation_ie)
 {
     return ProtocolTest("wifi_11n_ht_operation_ie")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 8 && Ieee80211HtOperation.length >= 0")
-                  .describe("a Beacon frame containing HT Operation IE").within(2.5));
+                  .filterPacket("ieee80211mac.type == 8")
+                  .assertPacket("Ieee80211BeaconFrame.htOperationPresent == true")
+                  .assertEvent([](const MatchContext& c) { return hasExpectedHtOperation(c.event.packet); })
+                  .describe("an HT Beacon advertising primary channel 1 in its body and wire IE")
+                  .within(2.5));
 }
 
 } // namespace protocoltest
@@ -31,6 +60,8 @@ Define_ProtocolTest(wifi_11n_ht_operation_ie)
 *.tester.testName = "wifi_11n_ht_operation_ie"
 include ../../ini/_n.ini
 include ../../ini/_base.ini
+*.ap.wlan[0].radio.channelNumber = 0
+*.ap.wlan[0].mac.fcsMode = "computed"
 
 %contains: stdout
 PROTOCOLTEST wifi_11n_ht_operation_ie: PASS
