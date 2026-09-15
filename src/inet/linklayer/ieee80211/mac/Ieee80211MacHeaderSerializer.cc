@@ -193,10 +193,11 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         if (dataHeader->getFromDS() && dataHeader->getToDS())
             stream.writeMacAddress(dataHeader->getAddress4());
         if (macHeader->getSubType() & 0x08) {
-            // IEEE Std 802.11-2024, Table 9-10. Modeling simplification:
-            // leave bit 4 clear (no EOSP or Queue Size report); the second
-            // octet remains zero (no TXOP duration request or AP PS buffer state).
+            // IEEE Std 802.11-2024, Table 9-10. Modeling simplification: no Queue
+            // Size report; the second octet remains zero (no TXOP duration request
+            // or AP PS buffer state).
             stream.writeByte((dataHeader->getTid() & 0x0F) |
+                    (dataHeader->getEosp() ? 0x10 : 0) |
                     ((dataHeader->getAckPolicy() & 3) << 5) |
                     (dataHeader->getAMsduPresent() ? 0x80 : 0));
             stream.writeByte(0);
@@ -453,6 +454,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
         if (macHeader->getSubType() & 0x08) {
             auto qosControl = stream.readByte();
             dataHeader->setTid(qosControl & 0x0F);
+            dataHeader->setEosp((qosControl & 0x10) != 0);
             dataHeader->setAckPolicy(static_cast<AckPolicy>((qosControl >> 5) & 3));
             dataHeader->setAMsduPresent((qosControl & 0x80) != 0);
             stream.readByte();
