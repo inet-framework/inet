@@ -64,7 +64,11 @@ Notable backward incompatible changes are the following:
    counted arrivals or summed bytes reported twice the true value and now reports
    the true one.
 
-4. PCAPng capture limits
+4. PCAP writer contract and PCAPng capture limits
+
+   Custom IPcapWriter implementations must implement writePacketWithPrefix(),
+   which writes capture metadata followed by the selected packet bytes. See
+   the migration guide for the signature and length semantics.
 
    PcapngWriter now obeys finite snaplen limits while retaining the original
    record length. A zero PCAPng snaplen remains unlimited.

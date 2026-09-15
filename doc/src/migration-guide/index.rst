@@ -4,6 +4,24 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Migrating PCAP Writers
+----------------------
+
+``IPcapWriter`` now requires ``writePacketWithPrefix()``. Custom implementations
+must implement this pure virtual method, or derive from a built-in writer that
+implements it. Its signature is:
+
+.. code-block:: c++
+
+   void writePacketWithPrefix(simtime_t time, const std::vector<uint8_t>& prefix,
+       const Packet *packet, b frontOffset, b backOffset, Direction direction,
+       NetworkInterface *ie, PcapLinkType linkType) override;
+
+Write the prefix followed by the selected packet range. Count both parts in
+the original record length and apply the capture length limit to their combined
+length. Do not modify or take ownership of the packet. The existing
+``writePacket()`` entry point remains available for records without a prefix.
+
 PCAPng Capture Limits
 ---------------------
 
