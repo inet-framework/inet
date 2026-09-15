@@ -17,8 +17,8 @@
 namespace inet {
 
 namespace internal {
-void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *thisModuleAsResolver);
-std::string doResolveExpression(cModule *targetModule, const char *expression);
+INET_API void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *thisModuleAsResolver);
+INET_API std::string doResolveExpression(cModule *targetModule, const char *expression);
 }
 
 /**
