@@ -55,6 +55,8 @@ class INET_API Ieee80211Mib : public SimpleModule
 
     class INET_API BssAccessPointData {
       public:
+        // Detailed management enforces association; simplified management may model all peers as associated.
+        bool requireAssociatedTransmitter = true;
         std::map<MacAddress, BssMemberStatus> stations;
         std::map<MacAddress, short> associationIds;
     };

@@ -227,8 +227,19 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, recipientAckPolicy, this);
-    if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+    if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        // Keep the immediate ACK independent of Class-3 data admission (IEEE Std 802.11-2024, 10.3.2.11).
+        if (!mac->isDataFrameFromAssociatedStation(dataHeader)) {
+            mac->notifyClass3FrameRejected(dataHeader);
+            EV_INFO << "Discarding data from unassociated transmitter " << dataHeader->getTransmitterAddress() << "\n";
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader));
+    }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
