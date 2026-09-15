@@ -43,8 +43,15 @@ Custom producers must set a valid interval before serialization.
 numeric mappings that used 60 for this reason. Old stored value 60 cannot be
 reinterpreted automatically: it also denoted invalid mesh security capability.
 
-IEEE 802.11 Management Advertisement Hooks
------------------------------------------
+IEEE 802.11 Radio Reconfiguration and Management Hooks
+----------------------------------------------------
+
+Radio setters no longer implicitly interrupt compatible ongoing receptions.
+Changing the transmit mode alone, reapplying unchanged receiver settings, or
+changing the mode set while retaining the incoming mode preserves reception.
+An incompatible receiver configuration still aborts reception and retains
+arrival timers for normal cleanup. Custom callers should not rely on a no-op
+setter or a transmit-mode change to cancel reception.
 
 ``Ieee80211MgmtBase::addVhtCapabilities()`` and ``addVhtOperation()`` are now
 virtual, like the HT advertisement helpers. Subclasses may override them to

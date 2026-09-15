@@ -1,7 +1,8 @@
 %description:
-Reconfigure during a real HT reception through each IEEE 802.11 radio setter.
-The radio immediately stops reporting decoding, retains arrival timers until
-normal cleanup, drops the interrupted packet and receives the next packet.
+Reconfigure during HT and legacy receptions through each IEEE 802.11 radio setter.
+Compatible changes retain decoding and deliver the original packet exactly once.
+Removing the incoming mode or retuning interrupts decoding, retains arrival timers
+until cleanup, and suppresses the original packet. Both paths receive a later packet.
 Exercise whole-signal and separate-part reception with seed 0.
 
 %file: ReceptionReconfiguration.cc
@@ -32,6 +33,11 @@ class ReconfigurationRadio : public Ieee80211Radio
                 break;
             }
             case 5: setChannelNumber(11); break;
+            case 6: setModeSet(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")); break;
+            case 7: setMode(legacy->getMode(Mbps(12))); break;
+            case 8: setChannel(new Ieee80211Channel(getChannel()->getBand(), getChannel()->getChannelNumber())); break;
+            case 9: setChannelNumber(getChannel()->getChannelNumber()); break;
+            case 10: setBand(Ieee80211CompliantBands::getBand("5 GHz")); break;
             default: throw cRuntimeError("Unknown operation");
         }
     }
@@ -41,6 +47,7 @@ class ReconfigurationRadio : public Ieee80211Radio
         // Reusing the radio-owned channel must also preserve distinct PHY owners.
         setChannel(getChannel());
         setModeSet(Ieee80211ModeSet::getModeSet("g(mixed)"));
+        setBand(Ieee80211CompliantBands::getBand("2.4 GHz"));
         setChannelNumber(6);
     }
 };
@@ -58,6 +65,24 @@ class ReceptionReconfigurationTest : public cSimpleModule, public cListener
     {
         return check_and_cast<ReconfigurationRadio *>(getParentModule()->getSubmodule("rx"));
     }
+    bool expectAbort() const
+    {
+        int operation = par("operation");
+        return operation == 4 || operation == 5 || operation == 10 ||
+                ((operation == 0 || operation == 1) && par("incomingHt").boolValue());
+    }
+    void checkReconfigured() const
+    {
+        if (expectAbort())
+            checkAborted();
+        else {
+            auto radio = receiverRadio();
+            ASSERT(radio->hasActiveReception());
+            ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING);
+            ASSERT(radio->getReceivedSignalPart() != IRadioSignal::SIGNAL_PART_NONE);
+            ASSERT(radio->getArrivalTimerCount() == 1);
+        }
+    }
     void checkAborted() const
     {
         auto radio = receiverRadio();
@@ -68,10 +93,11 @@ class ReceptionReconfigurationTest : public cSimpleModule, public cListener
     }
     void transmit(bool first)
     {
-        auto packet = new Packet(first ? "interrupted" : "subsequent");
+        auto packet = new Packet(first ? "original" : "subsequent");
         packet->insertAtBack(makeShared<ByteCountChunk>(B(1500)));
-        const auto *catalog = Ieee80211ModeSet::getModeSet(first ? "n(mixed-2.4Ghz)" : "g(mixed)");
-        const auto *mode = first ? catalog->getMode(Mbps(6.5), MHz(20), 1, 800e-9) : catalog->getMode(Mbps(6));
+        bool ht = first && par("incomingHt").boolValue();
+        const auto *catalog = Ieee80211ModeSet::getModeSet(ht ? "n(mixed-2.4Ghz)" : "g(mixed)");
+        const auto *mode = ht ? catalog->getMode(Mbps(6.5), MHz(20), 1, 800e-9) : catalog->getMode(Mbps(12));
         packet->addTag<Ieee80211ModeReq>()->setMode(mode);
         send(packet, "out");
     }
@@ -92,14 +118,14 @@ class ReceptionReconfigurationTest : public cSimpleModule, public cListener
         else if (signal == IRadio::receivedSignalPartChangedSignal)
             partNotifications++;
         else {
-            checkAborted();
+            checkReconfigured();
             configurationNotifications++;
         }
     }
     virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override
     {
         if (switching) {
-            checkAborted();
+            checkReconfigured();
             configurationNotifications++;
         }
     }
@@ -107,7 +133,10 @@ class ReceptionReconfigurationTest : public cSimpleModule, public cListener
     {
         if (!message->isSelfMessage()) {
             auto packet = check_and_cast<Packet *>(message);
-            ASSERT(!strcmp(packet->getName(), "subsequent"));
+            if (delivered == 0 && !expectAbort())
+                ASSERT(!strcmp(packet->getName(), "original"));
+            else
+                ASSERT(!strcmp(packet->getName(), "subsequent"));
             ASSERT(!packet->hasBitError());
             delivered++;
             delete packet;
@@ -132,26 +161,26 @@ class ReceptionReconfigurationTest : public cSimpleModule, public cListener
             switching = true;
             radio->reconfigure(par("operation"));
             switching = false;
-            checkAborted();
-            ASSERT(stateNotifications == 1);
-            ASSERT(partNotifications == 1);
+            checkReconfigured();
+            ASSERT(stateNotifications == (expectAbort() ? 1 : 0));
+            ASSERT(partNotifications == (expectAbort() ? 1 : 0));
             ASSERT(configurationNotifications >= 1);
         }
         else if (phase == 2) {
             ASSERT(radio->getArrivalTimerCount() == 0);
-            ASSERT(delivered == 0);
+            ASSERT(delivered == (expectAbort() ? 0 : 1));
             radio->prepareNextReception();
             transmit(false);
         }
         else {
-            ASSERT(delivered == 1);
+            ASSERT(delivered == (expectAbort() ? 1 : 2));
             ASSERT(!radio->hasActiveReception());
             ASSERT(radio->getArrivalTimerCount() == 0);
             ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
             for (auto signal : {IRadio::receptionStateChangedSignal, IRadio::receivedSignalPartChangedSignal,
                     IRadio::listeningChangedSignal, Ieee80211Radio::radioChannelChangedSignal, modesetChangedSignal})
                 radio->unsubscribe(signal, this);
-            std::cout << "Reception abort, timer cleanup and subsequent delivery verified.\n";
+            std::cout << "Reception compatibility, timer cleanup and subsequent delivery verified.\n";
             endSimulation();
         }
     }
@@ -173,6 +202,7 @@ simple ReceptionReconfigurationTest extends SimpleModule
 {
     parameters:
         int operation;
+        bool incomingHt;
         @class(::ReceptionReconfigurationTest);
     gates:
         input in;
@@ -200,7 +230,8 @@ seed-set = 0
 cmdenv-express-mode = false
 record-vector-results = false
 record-scalar-results = false
-*.test.operation = ${operation=0,1,2,3,4,5}
+*.test.operation = ${operation=0,1,2,3,4,5,6,7,8,9,10}
+*.test.incomingHt = ${incomingHt=false,true}
 *.rx.separateReceptionParts = ${parts=false,true}
 *.tx.separateTransmissionParts = ${parts}
 *.tx.initialRadioMode = "off"
@@ -220,4 +251,4 @@ record-scalar-results = false
 **.antenna.mobility.initialZ = 0m
 
 %contains: stdout
-Reception abort, timer cleanup and subsequent delivery verified.
+Reception compatibility, timer cleanup and subsequent delivery verified.

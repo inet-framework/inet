@@ -146,6 +146,11 @@ Notable backward compatible changes are the following:
    migration guide. Default TXOP limits are resolved for each new TXOP after
    a mode-set change; active TXOPs and configured overrides retain their limits.
 
+   Radio reconfiguration preserves ongoing receptions when the incoming mode
+   and receiver listening configuration remain compatible. Transmit-only mode
+   changes and reapplying unchanged settings no longer interrupt reception.
+   Incompatible changes abort through the normal reception cleanup path.
+
    Management subclasses can override addVhtCapabilities and addVhtOperation
    to customize advertisements produced by inherited AP/STA frame builders.
 

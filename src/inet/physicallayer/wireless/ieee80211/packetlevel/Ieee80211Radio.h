@@ -43,6 +43,7 @@ class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio
     virtual void initialize(int stage) override;
 
     void changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode, bool explicitMode);
+    void abortIncompatibleReception();
 
     virtual void handleUpperCommand(cMessage *message) override;
 
