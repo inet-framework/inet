@@ -1,0 +1,3 @@
+PCAPng capture limits
+
+PcapngWriter now truncates records at a finite snaplen limit but keeps their original lengths. Previously, it wrote the complete selected range regardless of that limit. Set a sufficiently large limit or zero if your PCAPng consumers require complete records. A zero PCAPng snaplen remains unlimited.
