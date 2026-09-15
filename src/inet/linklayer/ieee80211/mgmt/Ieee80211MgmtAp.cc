@@ -222,6 +222,20 @@ void Ieee80211MgmtAp::sendBeacon()
     sendManagementFrame("Beacon", body, ST_BEACON, MacAddress::BROADCAST_ADDRESS);
 }
 
+void Ieee80211MgmtAp::handleClass3FrameIndication(Ieee80211Class3FrameInd *indication)
+{
+    // IEEE Std 802.11-2024, 11.3.5.1: authenticated but unassociated
+    // peers normally receive Disassociation (Table 9-79, reason 7).
+    auto peer = mib->bssAccessPointData.stations.find(indication->getTransmitterAddress());
+    if (indication->getIndividuallyAddressed() && peer != mib->bssAccessPointData.stations.end() &&
+        peer->second == Ieee80211Mib::AUTHENTICATED) {
+        const auto& body = makeShared<Ieee80211DisassociationFrame>();
+        body->setReasonCode(RC_NONASS_CLASS3);
+        sendManagementFrame("Disassoc-Class3", body, ST_DISASSOCIATION, indication->getTransmitterAddress());
+    }
+    delete indication;
+}
+
 void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
@@ -567,6 +581,7 @@ void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
     staList.clear();
+    mib->bssAccessPointData.stations.clear();
     nextAssociationTransactionId = 0;
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();

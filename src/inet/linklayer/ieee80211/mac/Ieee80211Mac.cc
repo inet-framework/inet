@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211Class3FrameInd_m.h"
 
 #include <algorithm>
 
@@ -199,6 +200,27 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
     }
     processUpperFrame(packet, header);
 }
+
+void Ieee80211Mac::notifyClass3FrameRejected(const Ptr<const Ieee80211DataHeader>& header)
+{
+    Enter_Method("notifyClass3FrameRejected");
+    auto indication = new Ieee80211Class3FrameInd("Class3FrameRejected");
+    indication->setTransmitterAddress(header->getTransmitterAddress());
+    indication->setIndividuallyAddressed(!header->getReceiverAddress().isMulticast());
+    send(indication, "mgmtOut");
+}
+
+
+bool Ieee80211Mac::isDataFrameFromAssociatedStation(const Ptr<const Ieee80211DataHeader>& header) const
+{
+    // IEEE Std 802.11-2024, 11.3.3 and 11.3.5.1: infrastructure data is Class 3.
+    if (mib->mode != Ieee80211Mib::INFRASTRUCTURE || mib->bssStationData.stationType != Ieee80211Mib::ACCESS_POINT ||
+        !mib->bssAccessPointData.requireAssociatedTransmitter)
+        return true;
+    auto it = mib->bssAccessPointData.stations.find(header->getTransmitterAddress());
+    return it != mib->bssAccessPointData.stations.end() && it->second == Ieee80211Mib::ASSOCIATED;
+}
+
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
