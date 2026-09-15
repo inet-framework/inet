@@ -14,6 +14,9 @@
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211BssidReq_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -37,6 +40,7 @@ Define_Module(Ieee80211MgmtSta);
 Register_Class(Ieee80211MgmtSta::HtNegotiationFailure);
 
 simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSignal("htNegotiationFailed");
+static const simsignal_t scanRadioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 // message kind values for timers
 #define MK_AUTH_TIMEOUT           1
@@ -45,6 +49,7 @@ simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSi
 #define MK_SCAN_MINCHANNELTIME    4
 #define MK_SCAN_MAXCHANNELTIME    5
 #define MK_BEACON_TIMEOUT         6
+#define MK_SCAN_NEXTCHANNEL       7
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
@@ -160,7 +165,7 @@ void Ieee80211MgmtSta::initialize(int stage)
         assocTimeoutMsg = nullptr;
         numChannels = par("numChannels");
 
-        host = getContainingNode(this);
+        scanningRadio = getModuleFromPar<cModule>(par("radioModule"), this);
 
         WATCH(isScanning);
 
@@ -199,7 +204,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         else
             sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
-    else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
+    else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME || msg->getKind() == MK_SCAN_NEXTCHANNEL) {
         ASSERT(msg == scanTimer);
         scanTimer = nullptr;
         // go to next channel during scanning
@@ -213,10 +218,11 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         scanTimer = nullptr;
         // Active Scan: send a probe request, then wait for minChannelTime (11.1.3.2.2)
         delete msg;
-        sendProbeRequest();
-        ASSERT(scanTimer == nullptr);
-        scanTimer = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAfter(scanning.minChannelTime, scanTimer); // TODO actually, we should start waiting after ProbeReq actually got transmitted
+        scanPhase = SCAN_WAIT_PROBE;
+        if (++nextProbeTransactionId == 0)
+            throw cRuntimeError("Probe transaction identifier exhausted");
+        pendingProbeTransactionId = nextProbeTransactionId;
+        sendProbeRequest(); // Dwell begins on completion of this probe's final fragment.
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
         ASSERT(msg == scanTimer);
@@ -226,6 +232,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         if (scanning.busyChannelDetected) {
             EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
             ASSERT(scanTimer == nullptr);
+            scanPhase = SCAN_MAX_DWELL;
             scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
             scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, scanTimer);
         }
@@ -323,6 +330,8 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
     // IEEE Std 802.11-2024, 9.3.3.1: use the target AP, including before association.
     packet->addTag<Ieee80211BssidReq>()->setBssid(address);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    if (subtype == ST_PROBEREQUEST && isScanning && scanPhase == SCAN_WAIT_PROBE)
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(pendingProbeTransactionId);
     packet->insertAtBack(body);
     sendDown(packet);
 }
@@ -402,15 +411,87 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    // Note that we are only subscribed during scanning!
-    if (signalID == IRadio::receptionStateChangedSignal) {
-        IRadio::ReceptionState newReceptionState = static_cast<IRadio::ReceptionState>(value);
-        if (newReceptionState != IRadio::RECEPTION_STATE_UNDEFINED && newReceptionState != IRadio::RECEPTION_STATE_IDLE) {
-            EV << "busy radio channel detected during scanning\n";
-            scanning.busyChannelDetected = true;
+    if (!isScanning || source != scanningRadio)
+        return;
+    if (signalID == scanRadioChannelChangedSignal && scanPhase == SCAN_WAIT_CHANNEL &&
+        value == scanning.channelList[scanning.currentChannelIndex]) {
+        ASSERT(scanTimer == nullptr);
+        if (scanning.activeScan) {
+            scanPhase = SCAN_PROBE_DELAY;
+            scanTimer = new cMessage("sendProbe", MK_SCAN_SENDPROBE);
+            scheduleAfter(scanning.probeDelay, scanTimer);
+        }
+        else {
+            scanPhase = SCAN_MAX_DWELL;
+            scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+            scheduleAfter(scanning.maxChannelTime, scanTimer);
         }
     }
+    else if (signalID == IRadio::receptionStateChangedSignal && scanPhase == SCAN_MIN_DWELL) {
+        auto state = static_cast<IRadio::ReceptionState>(value);
+        if (state != IRadio::RECEPTION_STATE_UNDEFINED && state != IRadio::RECEPTION_STATE_IDLE)
+            scanning.busyChannelDetected = true;
+    }
+}
+
+void Ieee80211MgmtSta::startScanDwell()
+{
+    // IEEE Std 802.11-2024, 11.1.4.3.2: send the probe before starting ActiveScanningTimer.
+    // Matching transmission completion implements that ordering after contention.
+    ASSERT(scanTimer == nullptr);
+    pendingProbeTransactionId = 0;
+    scanPhase = SCAN_MIN_DWELL;
+    auto state = check_and_cast<IRadio *>(scanningRadio.get())->getReceptionState();
+    scanning.busyChannelDetected = state != IRadio::RECEPTION_STATE_UNDEFINED && state != IRadio::RECEPTION_STATE_IDLE;
+    scanTimer = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
+    scheduleAfter(scanning.minChannelTime, scanTimer);
+}
+
+void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID != packetSentToPeerSignal && signalID != Ieee80211Mac::frameTransmissionOutcomeSignal) {
+        Ieee80211MgmtBase::receiveSignal(source, signalID, obj, details);
+        return;
+    }
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isScanning || scanPhase != SCAN_WAIT_PROBE)
+        return;
+    auto packet = dynamic_cast<const Packet *>(obj);
+    if (!packet)
+        return;
+    auto tag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    if (!tag || tag->getTransactionId() != pendingProbeTransactionId)
+        return;
+    auto header = dynamicPtrCast<const Ieee80211MgmtHeader>(packet->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR));
+    if (!header || header->getType() != ST_PROBEREQUEST)
+        return;
+    if (signalID == packetSentToPeerSignal) {
+        if (!header->getMoreFragments())
+            startScanDwell();
+    }
+    else {
+        auto outcome = check_and_cast<const FrameTransmissionDetails *>(details);
+        if (outcome->getStatus() == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION ||
+            outcome->getStatus() == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED) {
+            pendingProbeTransactionId = 0;
+            scanPhase = SCAN_IDLE;
+            scanTimer = new cMessage("nextScanChannel", MK_SCAN_NEXTCHANNEL);
+            scheduleAt(simTime(), scanTimer);
+        }
+    }
+}
+
+void Ieee80211MgmtSta::stopScanListening()
+{
+    if (isScanning) {
+        scanningRadio->unsubscribe(IRadio::receptionStateChangedSignal, this);
+        scanningRadio->unsubscribe(scanRadioChannelChangedSignal, this);
+        myIface->unsubscribe(packetSentToPeerSignal, this);
+        myIface->unsubscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
+    }
+    isScanning = false;
+    scanPhase = SCAN_IDLE;
+    pendingProbeTransactionId = 0;
 }
 
 void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
@@ -444,8 +525,10 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
             scanning.channelList.push_back(i);
 
     // start scanning
-    if (scanning.activeScan)
-        host->subscribe(IRadio::receptionStateChangedSignal, this);
+    scanningRadio->subscribe(IRadio::receptionStateChangedSignal, this);
+    scanningRadio->subscribe(scanRadioChannelChangedSignal, this);
+    myIface->subscribe(packetSentToPeerSignal, this);
+    myIface->subscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -456,29 +539,17 @@ bool Ieee80211MgmtSta::scanNextChannel()
     // if we're already at the last channel, we're through
     if (scanning.currentChannelIndex == (int)scanning.channelList.size() - 1) {
         EV << "Finished scanning last channel\n";
-        if (scanning.activeScan)
-            host->unsubscribe(IRadio::receptionStateChangedSignal, this);
-        isScanning = false;
+        stopScanListening();
         return true; // we're done
     }
 
-    // tune to next channel
+    // Start timing only after the own radio confirms that the requested channel is applied.
     int newChannel = scanning.channelList[++scanning.currentChannelIndex];
-    changeChannel(newChannel);
     scanning.busyChannelDetected = false;
-
+    pendingProbeTransactionId = 0;
+    scanPhase = SCAN_WAIT_CHANNEL;
     ASSERT(scanTimer == nullptr);
-    if (scanning.activeScan) {
-        // Active Scan: first wait probeDelay, then send a probe. Listening
-        // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
-        scanTimer = new cMessage("sendProbe", MK_SCAN_SENDPROBE);
-        scheduleAfter(scanning.probeDelay, scanTimer);
-    }
-    else {
-        // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
-        scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAfter(scanning.maxChannelTime, scanTimer);
-    }
+    changeChannel(newChannel);
 
     return false;
 }
@@ -660,9 +731,7 @@ bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& add
 
 void Ieee80211MgmtSta::stop()
 {
-    if (host != nullptr && isScanning && scanning.activeScan)
-        host->unsubscribe(IRadio::receptionStateChangedSignal, this);
-    isScanning = false;
+    stopScanListening();
     cancelScanTimer();
     scanning = ScanningInfo();
 
