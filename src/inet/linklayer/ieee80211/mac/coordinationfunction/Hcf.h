@@ -164,6 +164,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Hcf();
+    virtual bool isFrameSequenceRunning() const { return frameSequenceHandler->isSequenceRunning(); }
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

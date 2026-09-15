@@ -1,0 +1,47 @@
+%description:
+Scan busy detection accepts only the scanning radio's indication, and a completed
+probe from an older transaction cannot advance a new scan's state machine.
+
+%includes:
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+class ScopedScanStation : public Ieee80211MgmtSta {
+  public:
+    void checkScope(cModule *own, cModule *other) {
+        ASSERT(own != other);
+        isScanning = true;
+        scanPhase = SCAN_MIN_DWELL;
+        scanningRadio = own;
+        scanning.busyChannelDetected = false;
+        receiveSignal(other, IRadio::receptionStateChangedSignal, intval_t(IRadio::RECEPTION_STATE_RECEIVING), nullptr);
+        ASSERT(!scanning.busyChannelDetected);
+        receiveSignal(own, IRadio::receptionStateChangedSignal, intval_t(IRadio::RECEPTION_STATE_RECEIVING), nullptr);
+        ASSERT(scanning.busyChannelDetected);
+        scanPhase = SCAN_WAIT_PROBE;
+        pendingProbeTransactionId = 8;
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_PROBEREQUEST);
+        Packet stale("old-probe", header);
+        stale.addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(7);
+        receiveSignal(own, packetSentToPeerSignal, &stale, nullptr);
+        ASSERT(scanPhase == SCAN_WAIT_PROBE && pendingProbeTransactionId == 8 && scanTimer == nullptr);
+        // This harness calls the handler directly; it never installs subscriptions.
+        isScanning = false;
+        scanningRadio = nullptr;
+    }
+};
+
+%activity:
+ScopedScanStation station;
+station.checkScope(getSimulation()->getSystemModule(), &station);
+EV << "Scan events are scoped to the radio and probe transaction.\n";
+
+%contains: stdout
+Scan events are scoped to the radio and probe transaction.
