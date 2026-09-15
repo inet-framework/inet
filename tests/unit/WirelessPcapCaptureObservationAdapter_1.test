@@ -1,0 +1,108 @@
+%description:
+Test wireless PCAP observation translation for signals, transmissions, receptions, and unsupported objects.
+
+%includes:
+#include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/pcap/WirelessPcapCaptureObservationAdapter.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+class FakeTransmission : public cObject, public ITransmission
+{
+  public:
+    const Packet *packet;
+    FakeTransmission(const Packet *packet) : packet(packet) {}
+    virtual std::ostream& printToStream(std::ostream& stream, int, int = 0) const override { return stream; }
+    virtual int getId() const override { return 1; }
+    virtual const IRadio *getTransmitterRadio() const override { return nullptr; }
+    virtual int getTransmitterRadioId() const override { return -1; }
+    virtual const IAntennaGain *getTransmitterAntennaGain() const override { return nullptr; }
+    virtual const IRadioMedium *getMedium() const override { return nullptr; }
+    virtual const Packet *getPacket() const override { return packet; }
+    virtual const simtime_t getStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataDuration() const override { return SIMTIME_ZERO; }
+    virtual const Coord& getStartPosition() const override { static Coord value; return value; }
+    virtual const Coord& getEndPosition() const override { static Coord value; return value; }
+    virtual const Quaternion& getStartOrientation() const override { static Quaternion value; return value; }
+    virtual const Quaternion& getEndOrientation() const override { static Quaternion value; return value; }
+    virtual const ITransmissionPacketModel *getPacketModel() const override { return nullptr; }
+    virtual const ITransmissionBitModel *getBitModel() const override { return nullptr; }
+    virtual const ITransmissionSymbolModel *getSymbolModel() const override { return nullptr; }
+    virtual const ITransmissionSampleModel *getSampleModel() const override { return nullptr; }
+    virtual const ITransmissionAnalogModel *getAnalogModel() const override { return nullptr; }
+};
+
+class FakeReception : public cObject, public IReception
+{
+  public:
+    const ITransmission *transmission;
+    FakeReception(const ITransmission *transmission) : transmission(transmission) {}
+    virtual std::ostream& printToStream(std::ostream& stream, int, int = 0) const override { return stream; }
+    virtual const IRadio *getReceiverRadio() const override { return nullptr; }
+    virtual const ITransmission *getTransmission() const override { return transmission; }
+    virtual const simtime_t getStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataStartTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataEndTime() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart) const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getPreambleDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getHeaderDuration() const override { return SIMTIME_ZERO; }
+    virtual const simtime_t getDataDuration() const override { return SIMTIME_ZERO; }
+    virtual const Coord& getStartPosition() const override { static Coord value; return value; }
+    virtual const Coord& getEndPosition() const override { static Coord value; return value; }
+    virtual const Quaternion& getStartOrientation() const override { static Quaternion value; return value; }
+    virtual const Quaternion& getEndOrientation() const override { static Quaternion value; return value; }
+    virtual const IReceptionAnalogModel *getAnalogModel() const override { return nullptr; }
+};
+
+%activity:
+WirelessPcapCaptureObservationAdapter adapter;
+Packet packet("packet");
+Signal signal("signal");
+signal.encapsulate(packet.dup());
+auto signalObservation = adapter.tryCreateObservation(&signal, DIRECTION_OUTBOUND);
+REQUIRE(signalObservation && signalObservation->packet == signal.getEncapsulatedPacket());
+REQUIRE(signalObservation->direction == DIRECTION_OUTBOUND && signalObservation->transmission == nullptr && signalObservation->reception == nullptr);
+
+FakeTransmission transmission(&packet);
+auto transmissionObservation = adapter.tryCreateObservation(&transmission, DIRECTION_OUTBOUND);
+REQUIRE(transmissionObservation && transmissionObservation->packet == &packet);
+REQUIRE(transmissionObservation->transmission == &transmission && transmissionObservation->reception == nullptr);
+
+FakeReception reception(&transmission);
+auto receptionObservation = adapter.tryCreateObservation(&reception, DIRECTION_INBOUND);
+REQUIRE(receptionObservation && receptionObservation->packet == &packet);
+REQUIRE(receptionObservation->direction == DIRECTION_INBOUND);
+REQUIRE(receptionObservation->transmission == &transmission && receptionObservation->reception == &reception);
+
+cObject unsupported;
+REQUIRE(!adapter.tryCreateObservation(&unsupported, DIRECTION_UNDEFINED));
+EV << "Wireless PCAP observation translation tested successfully.\n";
+
+%contains: stdout
+Wireless PCAP observation translation tested successfully.
