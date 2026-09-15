@@ -23,6 +23,7 @@ class INET_API PcapngWriter : public IPcapWriter
   protected:
     std::string fileName;
     FILE *dumpfile = nullptr; // pcap file
+    unsigned int snaplen = 0;
     bool flush = false;
     int nextPcapngInterfaceId = 0;
     int timePrecision = 6;
