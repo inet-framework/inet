@@ -130,6 +130,11 @@ Register_ResultFilter("dataAge", DataAgeFilter);
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<Packet *>(object)) {
+        // A packet may carry no data at all: RFC 768 allows a UDP datagram of the header
+        // alone. peekData() on an empty packet is an error, and an empty packet holds no
+        // region to report, so there is nothing to do.
+        if (packet->getDataLength() == b(0))
+            return;
         for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
             WeightedHistogramRecorder::cWeight weight(region.getLength().get<b>());
             fire(this, t, t - region.getTag()->getCreationTime(), &weight);
@@ -178,6 +183,11 @@ Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<Packet *>(object)) {
+        // An empty packet holds no application packet, and peekAtFront() on one is an
+        // error. RFC 768 allows a UDP datagram of the header alone, which arrives here as
+        // a packet of zero length.
+        if (packet->getDataLength() == b(0))
+            return;
         if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
             fire(this, t, (intval_t)applicationPacket->getSequenceNumber(), details);
     }
@@ -665,9 +675,13 @@ void PacketLifeTimeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, 
     int count = 0;
     simtime_t lifeTime = -1;
     auto packet = check_and_cast<Packet *>(object);
-    for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
-        lifeTime = simTime() - region.getTag()->getCreationTime();
-        count++;
+    // An empty packet holds no region, so the count stays zero and the result is NaN.
+    // peekData() on one is an error.
+    if (packet->getDataLength() != b(0)) {
+        for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
+            lifeTime = simTime() - region.getTag()->getCreationTime();
+            count++;
+        }
     }
     fire(this, t, count == 1 ? lifeTime.dbl() : NaN, details != nullptr ? details : object);
 }
@@ -679,6 +693,9 @@ void LifeTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
 {
     simtime_t now = simTime();
     auto packet = check_and_cast<Packet *>(object);
+    // An empty packet holds no region to fire, and peekData() on one is an error.
+    if (packet->getDataLength() == b(0))
+        return;
     for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
         PacketRegionValue packetRegionValue;
         packetRegionValue.packet = packet;

@@ -139,6 +139,24 @@ inline void emptyUdpDatagram(Packet *frame)
     });
 }
 
+// The UDP header of a frame, or nullptr when the frame carries none.
+//
+// It walks the chunks instead of dissecting the packet. A relay that shortens a frame leaves
+// a frame below the Ethernet minimum, which no dissector will read, so a field expression
+// observes nothing on it while this walk still works. Use it only where that matters; a
+// field expression is clearer everywhere else.
+inline Ptr<const UdpHeader> findUdpHeader(const Packet *frame)
+{
+    std::unique_ptr<Packet> copy(frame->dup());
+    while (copy->getDataLength() > b(0)) {
+        const auto& front = copy->peekAtFront<Chunk>();
+        if (auto udpHeader = dynamicPtrCast<const UdpHeader>(front))
+            return udpHeader;
+        copy->removeAtFront<Chunk>(front->getChunkLength());
+    }
+    return nullptr;
+}
+
 // The checksum field of the UDP header of a frame, as it stands.
 inline uint16_t udpChecksumField(const Packet *frame)
 {

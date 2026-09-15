@@ -155,6 +155,21 @@ trap waits for any check that serializes a chunk the model marked rather than co
 (`packetSentToUpper` with a size predicate), and two programs are told apart by the sizes of
 their data.
 
+### A relay that shortens a frame leaves one no field expression can read
+
+`emptyUdpDatagram` removes 100 octets of data, which leaves a 46-octet Ethernet frame. That
+is below the minimum, and the packet dissector will not walk a frame that short: every field
+expression on it observes nothing, at any layer. `ethernetmac.typeOrLength >= 0` fails on it
+as surely as `udp.destPort == 5000` does.
+
+This is easy to misread as a model fault, because the datagram itself is lawful and the
+model delivers it correctly. The proof that the vehicle is at fault and not the observation
+point: with the mutation switched off, the same filter at the same module matches.
+
+`Rfc768EmptyDatagram.test` reads the header by walking the chunks instead, through
+`findUdpHeader` in `UdpMutations.h`. Any mutation that makes a frame shorter needs the same
+care, or needs to pad the frame back.
+
 ## Follow-ups, in the order I would do them
 
 The first three of pass 1 are done. What follows is the list as pass 2 leaves it.

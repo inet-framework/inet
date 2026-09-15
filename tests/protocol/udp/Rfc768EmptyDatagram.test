@@ -69,8 +69,17 @@ Define_ProtocolTestProgram()
                   .within(0.5))
         // Expected observation 2: at host B's interface the length field is eight, the minimum
         // (RFC768-HDR-3).
+        // The header is read by walking the chunks, not by a field expression. The relay
+        // leaves a frame of 46 octets, below the Ethernet minimum, and no dissector will
+        // read a frame that short, so a field expression observes nothing on it. The walk
+        // reads the same two fields.
         .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
-                  .filterPacket("udp.destPort == 5000 && udp.totalLengthField == 8B")
+                  .filterEvent([](const MatchContext& c) {
+                      auto udpHeader = findUdpHeader(c.event.packet);
+                      return udpHeader != nullptr
+                             && udpHeader->getDestinationPort() == 5000
+                             && udpHeader->getTotalLengthField() == B(8);
+                  })
                   .describe("the datagram at host B's interface with a length field of eight")
                   .within(0.1))
         // Expected observation 3: host B's UDP hands zero octets upward -- it accepted the
