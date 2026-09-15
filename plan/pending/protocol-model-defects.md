@@ -3,19 +3,27 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
-**Where it stands:** groups A, B and C are done, and group D has 3 tests left of 12. **17 of
-the 30 tests pass**, from eleven repairs, and one that had declared an expected failure
-passes too.
+**Where it stands:** **28 of the 30 tests pass.** Two remain, and neither is a plain defect:
+
+| Test | Why it is still open |
+| --- | --- |
+| `udp/Rfc1122ChecksumDefault` | Deferred. UDP cannot default to a computed checksum until every payload in the tree serializes; QUIC has no serializer for its packet headers. |
+| `dhcp/Rfc2131DuplicateAddressDeclined` | Gap 11, recorded as an untestable claim rather than a defect. |
+
+Six suites have no unexpected failure left: arp, element, ethernet, ipv4, ipv6, quic, self
+and tcp.
 
 Three suites are complete, with no unexpected failure left:
 
 | Suite | Then | Now |
 | --- | --- | --- |
-| arp | 13 PASS, 3 unexpected FAIL | **16 PASS** |
+| arp | 13 PASS, 3 unexpected | **16 PASS** |
+| dhcp | 13 PASS, 5 expected, 8 unexpected | **20 PASS, 5 expected, 1 unexpected** |
 | ipv4 | 16 PASS, 2 expected, 4 unexpected | **20 PASS, 2 expected** |
-| ipv6 | 19 PASS, 8 unexpected FAIL | **27 PASS** |
-
-What is left: dhcp 8, tcp 2, quic 2, udp 1.
+| ipv6 | 19 PASS, 8 unexpected | **27 PASS** |
+| quic | 8 PASS, 1 expected, 2 unexpected | **10 PASS, 1 expected** |
+| tcp | 22 PASS, 2 expected, 3 unexpected | **26 PASS, 1 expected** |
+| udp | 10 PASS, 1 expected, 2 unexpected | **11 PASS, 1 expected, 1 unexpected** |
 
 A note on counting: an earlier figure of 257 tests was wrong. It came from a verdict list
 keyed by test name, and two suites use the same name for different tests. The runner's own
@@ -89,10 +97,17 @@ side and still fails.
 - [x] `arp/Rfc5494ExperimentalOpcode`, `arp/Rfc5494ExperimentalHardwareSpace`,
       `arp/Rfc826UnknownProtocolSpace` — done. Two crashes a neighbour controlled.
       The two RARP branches still throw and no test covers them; the ARP results say so.
-- [ ] `quic/Rfc9000ServerInitialSize`, `quic/Rfc9000UnknownFrameType`
+- [x] `quic/Rfc9000UnknownFrameType` — done. Three stops, each hidden behind the one before
+      it: the frame dispatcher, the frame loop and the datagram loop.
+- [x] `quic/Rfc9000ServerInitialSize` — done, and a step of the test was wrong: two `once`
+      steps on one datagram, so the second could never match.
 - [x] `tcp/Rfc9293ChecksumDefault` — done. The same one-word default change is clean for
       TCP, and it moves every TCP fingerprint.
-- [ ] `tcp/Rfc6298FirstMeasurement`, `tcp/Rfc9293ShrunkWindowNoNewData`
+- [x] `tcp/Rfc6298FirstMeasurement` — done. The first measurement has RFC 6298 section 2.2's
+      case of its own.
+- [x] `tcp/Rfc9293ShrunkWindowNoNewData` — **a test error, not a defect.** The model refuses
+      the send and says so; the peer reopens the window 59 microseconds later and the watch
+      ran for 0.3 seconds, catching a lawful send.
 - [x] `udp/Rfc768EmptyDatagram` — done. Four result filters stopped the run on a packet of
       zero length, which RFC 768 allows. One step of the test changed: a relay that shortens
       a frame leaves one no dissector will read.
@@ -102,14 +117,16 @@ side and still fails.
       QUIC tests stop and two others fall with them. The test does not pass either way. UDP
       cannot default to a computed checksum until every payload in the tree serializes.
 
-### Group E — DHCP (8 tests, 14 gaps)
+### Group E — DHCP (8 tests, 14 gaps) — 7 of 8 DONE 2026-09-15
 
-The heaviest suite: 8 of its 26 tests fail. One of the fourteen, gap 11
-(`Rfc2131DuplicateAddressDeclined`), is recorded as an **untestable claim** and not a
-defect, so it may not belong here at all. Read the gap list before starting.
-
-- [ ] Read `model/dhcp/notes.md` and split the eight into what is one defect and what is
-      several.
+- [x] Seven defects repaired: gaps 1, 2, 3, 4, 8, 10, 13 and 14. The transaction identifier,
+      three field values the server had no right to write, a domain name server option with
+      no value, the silent answer to a foreign subnet, and the whole retransmission strategy.
+      Repairing gap 14 also corrected a step of its test, an ordered `never` that consumed
+      the window the repeated request needed.
+- [ ] `dhcp/Rfc2131DuplicateAddressDeclined` — gap 11, recorded as an **untestable claim**
+      and not a defect. It is the last DHCP failure and it may not belong in this plan at
+      all; read the gap before starting.
 
 ## Not in this plan
 
