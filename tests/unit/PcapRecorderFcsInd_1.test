@@ -1,0 +1,73 @@
+%description:
+Capture FCS indications apply only to the complete imported MAC frame. Selected
+ranges and aggregate members use their own trailers; explicit absence wins over
+a conflicting trailer, while explicit presence may use its BADFCS information.
+
+%includes:
+#include "inet/common/FcsInd_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/pcap/Ieee80211RadiotapPcapCaptureAdapter.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+static uint8_t captureFlags(Packet& packet, b front = b(0), b back = b(0))
+{
+    Ieee80211RadiotapPcapCaptureAdapter adapter;
+    auto records = adapter.createRecords(PcapCaptureObservation(&packet, DIRECTION_INBOUND), front, back);
+    REQUIRE(records.size() == 1);
+    return records.front().getPrefix().at(8);
+}
+
+%activity:
+Packet raw("raw");
+raw.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(12, 0)));
+raw.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+REQUIRE(captureFlags(raw) == 0);
+raw.addTag<FcsInd>()->setHasFcs(true);
+REQUIRE(captureFlags(raw) == 0x10);
+REQUIRE(captureFlags(raw, B(1), b(0)) == 0);
+REQUIRE(captureFlags(raw, b(0), B(4)) == 0);
+raw.getTagForUpdate<PacketProtocolTag>()->setFrontOffset(B(1));
+REQUIRE(captureFlags(raw) == 0);
+raw.getTagForUpdate<PacketProtocolTag>()->setFrontOffset(b(0));
+raw.setBackOffset(raw.getTotalLength() - B(4));
+REQUIRE(captureFlags(raw) == 0);
+raw.setBackOffset(raw.getTotalLength());
+raw.setFrontOffset(B(1));
+REQUIRE(captureFlags(raw) == 0);
+raw.setFrontOffset(b(0));
+raw.getTagForUpdate<FcsInd>()->setHasFcs(false);
+REQUIRE(captureFlags(raw) == 0);
+
+Packet typed("typed");
+typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(8, 0)));
+auto trailer = makeShared<Ieee80211MacTrailer>();
+trailer->setFcsMode(FCS_DECLARED_INCORRECT);
+typed.insertAtBack(trailer);
+typed.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+REQUIRE(captureFlags(typed) == 0x50);
+typed.addTag<FcsInd>()->setHasFcs(false);
+REQUIRE(captureFlags(typed) == 0);
+typed.getTagForUpdate<FcsInd>()->setHasFcs(true);
+REQUIRE(captureFlags(typed) == 0x50);
+REQUIRE(captureFlags(typed, b(0), B(4)) == 0);
+
+Packet aggregate("aggregate");
+auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+delimiter->setLength(12);
+aggregate.insertAtBack(delimiter);
+aggregate.insertAtBack(typed.peekData());
+aggregate.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+aggregate.addTag<FcsInd>()->setHasFcs(false);
+REQUIRE(captureFlags(aggregate) == 0x50); // packet-level absence must not override the member trailer
+
+EV << "FcsInd scope and trailer precedence verified.\n";
+
+%contains: stdout
+FcsInd scope and trailer precedence verified.

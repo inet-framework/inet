@@ -152,6 +152,35 @@ protocol work and verification rather than merely changing recorder output, so
 they are part of the simulation configuration and should be held constant when
 comparing runs.
 
+IEEE 802.11 Radiotap captures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Radiotap captures let an analyzer inspect available PHY metadata beside each IEEE 802.11 frame. A Radiotap header precedes the MAC bytes and describes the transmission or reception. :ned:`PcapRecorder` writes bare MAC frames (link type 105) by default. Its optional protocol-specific capture adapter adds Radiotap headers and selects link type 127.
+
+For a host named ``host`` with a WLAN interface, use this configuration:
+
+.. code-block:: ini
+
+   *.host.numPcapRecorders = 1
+   *.host.pcapRecorder[0].pcapFile = "wlan.pcap"
+   *.host.pcapRecorder[0].fileFormat = "pcap"
+   *.host.pcapRecorder[0].dumpProtocols = "ieee80211mac"
+   *.host.pcapRecorder[0].enableProtocolSpecificCaptureAdapters = true
+   *.host.pcapRecorder[0].enableConvertingPackets = true
+   *.host.wlan[*].mac.fcsMode = "computed"
+
+When the recorder observes an IEEE 802.11 frame, this configuration writes its MAC bytes with a Radiotap header to ``wlan.pcap``. Both ``enableProtocolSpecificCaptureAdapters`` and ``enableConvertingPackets`` must be true. If either option is false, the recorder retains bare MAC output. The ``fcsMode`` setting supplies serializable FCS bytes, as described above.
+
+PCAPng also supports Radiotap. Set ``fileFormat = "pcapng"`` when one file must contain multiple interfaces or link types. Classic PCAP supports one link type per file. The capture length limit, ``snaplen``, includes the Radiotap header. A limit that truncates this header can prevent an analyzer from decoding the record.
+
+The adapter records available legacy data rate and HR-DSSS short preamble information, HT MCS information, and VHT single-user information. It also records available channel, power, and direction information. The adapter uses the transmission's selected mode first, followed by the mode request tag or mode indication tag. Channel and power fields require a supported analog model from the transmission or reception. The adapter omits unavailable fields. It does not provide HE or EHT metadata.
+
+FCS metadata tells the analyzer whether the captured MAC bytes contain an FCS. The adapter uses a typed MAC trailer as evidence of FCS presence. For an intact MAC frame imported from a capture, it also accepts the frame's FCS indication tag, ``FcsInd``. An explicit indication of absence takes precedence over a typed trailer. That tag does not apply to selected subranges or individual MPDUs within an aggregate. The adapter does not infer FCS presence from raw bytes alone.
+
+The adapter recognizes an A-MPDU from typed delimiter chunks. It writes one record per nonempty MPDU, without delimiters or aggregate padding. For example, a recognized A-MPDU with two MPDUs produces two records, each with its own Radiotap header. Inbound records include a shared aggregate reference and the last-MPDU status. Outbound records omit A-MPDU status.
+
+If the adapter cannot parse a typed aggregate, it preserves the complete selected PSDU as one record. Delimiter-only input also produces one record. An analyzer might not decode these records as MAC frames. The adapter does not infer an aggregate from raw bytes.
+
 .. _ug:sec:results:recording-routing-tables:
 
 Recording Routing Tables

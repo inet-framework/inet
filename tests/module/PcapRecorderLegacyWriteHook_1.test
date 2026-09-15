@@ -1,0 +1,98 @@
+%description:
+Legacy packet-only write overrides filter and replace packets in both plain and
+Radiotap captures reached through the production signal path.
+
+%includes:
+#include <memory>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapReader.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
+
+%file: TestNetwork.ned
+import inet.common.packet.recorder.PcapRecorder;
+
+simple LegacyWriteRecorder extends PcapRecorder
+{
+    parameters:
+        @class(LegacyWriteRecorder);
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        plain: LegacyWriteRecorder;
+        radiotap: LegacyWriteRecorder;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+**.verbose = false
+**.moduleNamePatterns = "test"
+**.sendingSignalNames = "capture"
+**.receivingSignalNames = ""
+**.fileFormat = "pcap"
+**.alwaysFlush = true
+*.plain.pcapFile = "plain.pcap"
+*.radiotap.pcapFile = "radiotap.pcap"
+*.radiotap.enableProtocolSpecificCaptureAdapters = true
+
+%global:
+using namespace inet;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+class LegacyWriteRecorder : public PcapRecorder
+{
+  public:
+    int calls = 0;
+    bool suppress = true;
+
+  protected:
+    virtual void writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset,
+            Direction direction, NetworkInterface *networkInterface) override
+    {
+        calls++;
+        if (suppress)
+            return;
+        auto bytes = packet->peekDataAsBytes()->getBytes();
+        bytes.back() = 0x55;
+        Packet replacement("redacted", makeShared<BytesChunk>(bytes));
+        PcapRecorder::writePacket(protocol, &replacement, frontOffset, backOffset, direction, networkInterface);
+    }
+};
+
+Define_Module(LegacyWriteRecorder);
+
+%activity:
+auto plain = check_and_cast<LegacyWriteRecorder *>(getModuleByPath("plain"));
+auto radiotap = check_and_cast<LegacyWriteRecorder *>(getModuleByPath("radiotap"));
+auto capture = registerSignal("capture");
+std::vector<uint8_t> bytes = {0xd4, 0, 0, 0, 2, 0, 0, 0, 0, 0x11}; // ACK without FCS
+Packet packet("original", makeShared<BytesChunk>(bytes));
+packet.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+emit(capture, &packet);
+REQUIRE(plain->calls == 1);
+REQUIRE(radiotap->calls == 1);
+plain->suppress = false;
+radiotap->suppress = false;
+emit(capture, &packet);
+REQUIRE(plain->calls == 2);
+REQUIRE(radiotap->calls == 2);
+REQUIRE(packet.peekDataAsBytes()->getBytes() == bytes);
+bytes.back() = 0x55;
+for (auto filename : {"plain.pcap", "radiotap.pcap"}) {
+    PcapReader reader;
+    reader.openPcap(filename, nullptr);
+    std::unique_ptr<Packet> recorded(reader.readPacket().second);
+    REQUIRE(recorded != nullptr);
+    REQUIRE(recorded->peekDataAsBytes()->getBytes() == bytes);
+    REQUIRE(reader.readPacket().second == nullptr);
+    reader.closePcap();
+}
+EV << "Legacy write hooks suppress and redact plain and Radiotap records.\n";
+
+%contains: stdout
+Legacy write hooks suppress and redact plain and Radiotap records.
