@@ -39,6 +39,11 @@ for (auto duration : {SIMTIME_ZERO, elapsed - SimTime(1, SIMTIME_US), elapsed, e
     auto actual = policy.computeBasicBlockAckDurationField(&packet, bar);
     ASSERT(actual == (duration <= elapsed ? SIMTIME_ZERO : SimTime(37, SIMTIME_US)));
 }
+for (int special : {32768, 65535}) {
+    auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+    bar->setDurationField(SimTime(special, SIMTIME_US));
+    ASSERT(policy.computeBasicBlockAckDurationField(&packet, bar) == SIMTIME_ZERO);
+}
 EV << "BlockAck duration is zero for insufficient reservations and preserves positive residuals.\n";
 
 %contains: stdout

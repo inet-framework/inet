@@ -10,6 +10,13 @@
 namespace inet {
 namespace ieee80211 {
 
+// Only the ordinary 15-bit encoding denotes a reservation. Reserved and
+// special Duration/ID values must not enter response-duration arithmetic.
+inline simtime_t getIeee80211OrdinaryDuration(simtime_t duration)
+{
+    return duration >= SIMTIME_ZERO && duration <= SimTime(32767, SIMTIME_US) ? duration : SIMTIME_ZERO;
+}
+
 inline simtime_t normalizeIeee80211Duration(simtime_t duration)
 {
     // IEEE Std 802.11-2024, 9.2.5.1: negative calculations become zero; fractions round upward.
