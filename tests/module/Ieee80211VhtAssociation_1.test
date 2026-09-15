@@ -1,0 +1,321 @@
+%description:
+Detailed AP/STA VHT association and reassociation with two asymmetric peers.
+Exercise DCF and HCF, serialized IEs, negotiated data transmissions, absent-IE
+fallback, disassociation isolation and coordinated mode-set invalidation.
+
+%file: VhtAssociation.cc
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+// Request the catalog maximum so peer filtering must narrow width/NSS/MCS/GI.
+class VhtProbeRateControl : public AarfRateControl
+{
+  protected:
+    virtual const IIeee80211Mode *getInitialMode() override { return modeSet->getFastestMode(); }
+};
+Define_Module(VhtProbeRateControl);
+
+class VhtProbeMac : public Ieee80211Mac
+{
+  public:
+    int delivered = 0;
+    int vhtSent = 0;
+    int legacySent = 0;
+    int requests = 0;
+    int responses = 0;
+    int reRequests = 0;
+    int reResponses = 0;
+    virtual void sendDownFrame(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+            auto peer = mib->findPeerVhtState(header->getReceiverAddress());
+            if (peer == nullptr) {
+                ASSERT(mode->getVhtMcsIndex() < 0);
+                legacySent++;
+            }
+            else {
+                ASSERT(mode->getVhtMcsIndex() >= 0);
+                auto data = mode->getDataMode();
+                int nss = data->getNumberOfSpatialStreams();
+                ASSERT(mode->getVhtMcsIndex() <= peer->advertisedCapabilities.rxMaxMcs[nss - 1]);
+                ASSERT(mode->getVhtMcsIndex() <= mib->localVhtCapabilities.txMaxMcs[nss - 1]);
+                ASSERT(data->getBandwidth() == MHz(20));
+                ASSERT(data->getGuardInterval() == SimTime(800, SIMTIME_NS));
+                vhtSent++;
+            }
+        }
+        else if (header->getType() == ST_ASSOCIATIONREQUEST || header->getType() == ST_REASSOCIATIONREQUEST ||
+                header->getType() == ST_ASSOCIATIONRESPONSE || header->getType() == ST_REASSOCIATIONRESPONSE) {
+            auto body = packet->peekAt<Ieee80211MgmtFrame>(header->getChunkLength());
+            bool response = header->getType() == ST_ASSOCIATIONRESPONSE || header->getType() == ST_REASSOCIATIONRESPONSE;
+            ASSERT(body->getVhtCapabilitiesPresent() == mib->isVhtOperationSupported());
+            ASSERT(body->getVhtOperationPresent() == (response && mib->isVhtOperationSupported()));
+            Packet wire("actual-management-body", body);
+            auto bytes = wire.peekAllAsBytes();
+            Packet encoded("encoded", bytes);
+            Ptr<const Ieee80211MgmtFrame> decoded;
+            if (header->getType() == ST_ASSOCIATIONREQUEST) {
+                decoded = encoded.peekAtFront<Ieee80211AssociationRequestFrame>();
+                requests++;
+            }
+            else if (header->getType() == ST_REASSOCIATIONREQUEST) {
+                decoded = encoded.peekAtFront<Ieee80211ReassociationRequestFrame>();
+                reRequests++;
+            }
+            else if (header->getType() == ST_ASSOCIATIONRESPONSE) {
+                decoded = encoded.peekAtFront<Ieee80211AssociationResponseFrame>();
+                responses++;
+            }
+            else {
+                decoded = encoded.peekAtFront<Ieee80211ReassociationResponseFrame>();
+                reResponses++;
+            }
+            ASSERT(!decoded->isIncorrect() && !decoded->isIncomplete());
+            ASSERT(decoded->getVhtCapabilitiesPresent() == body->getVhtCapabilitiesPresent());
+            if (body->getVhtCapabilitiesPresent())
+                for (int i = 0; i < 8; i++) {
+                    ASSERT(decoded->getVhtCapabilities().rxMaxMcs[i] == body->getVhtCapabilities().rxMaxMcs[i]);
+                    ASSERT(decoded->getVhtCapabilities().txMaxMcs[i] == body->getVhtCapabilities().txMaxMcs[i]);
+                }
+        }
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+    virtual void sendUpFrame(Packet *packet) override
+    {
+        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
+            Enter_Method("sendUpFrame");
+            take(packet);
+            delivered++;
+            delete packet; // End synthetic data at the MAC service boundary.
+        }
+        else
+            Ieee80211Mac::sendUpFrame(packet);
+    }
+};
+Define_Module(VhtProbeMac);
+
+// Inherited AP frame builders must dispatch through the advertisement hooks.
+class VhtProbeAp : public Ieee80211MgmtAp
+{
+  public:
+    mutable int capabilitiesAdded = 0;
+    mutable int operationAdded = 0;
+  protected:
+    virtual void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const override
+    {
+        capabilitiesAdded++;
+        Ieee80211MgmtAp::addVhtCapabilities(frame);
+    }
+    virtual void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const override
+    {
+        operationAdded++;
+        Ieee80211MgmtAp::addVhtOperation(frame);
+    }
+};
+Define_Module(VhtProbeAp);
+
+class VhtProbeSta : public Ieee80211MgmtSta
+{
+  public:
+    void reassociate(const MacAddress& ap)
+    {
+        Enter_Method("reassociate");
+        Ieee80211Prim_ReassociateRequest request;
+        request.setAddress(ap);
+        request.setTimeout(SimTime(20, SIMTIME_MS));
+        processReassociateCommand(&request);
+    }
+    void disconnect(const MacAddress& ap)
+    {
+        Enter_Method("disconnect");
+        Ieee80211Prim_DisassociateRequest request;
+        request.setAddress(ap);
+        request.setReasonCode(RC_DIASS_MS_LEAVING);
+        processDisassociateCommand(&request);
+    }
+};
+Define_Module(VhtProbeSta);
+
+class VhtAssociationTest : public cSimpleModule
+{
+    cMessage *action = nullptr;
+    int phase = 0;
+    Ieee80211Mib *mib(const char *host) { return check_and_cast<Ieee80211Mib *>(getModuleByPath((std::string("^.") + host + ".wlan[0].mib").c_str())); }
+    VhtProbeMac *mac(const char *host) { return check_and_cast<VhtProbeMac *>(getModuleByPath((std::string("^.") + host + ".wlan[0].mac").c_str())); }
+    void sendData(const char *from, const char *to)
+    {
+        auto sender = mac(from);
+        auto receiver = mac(to);
+        auto packet = new Packet("negotiated-vht-data");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(par("qos") ? ST_DATA_WITH_QOS : ST_DATA);
+        header->setChunkLength(DATAFRAME_HEADER_MINLENGTH + (par("qos") ? QOSCONTROL_PART_LENGTH : b(0)));
+        header->setTid(0);
+        header->setReceiverAddress(receiver->getAddress());
+        header->setTransmitterAddress(sender->getAddress());
+        header->setAddress3(receiver->getAddress());
+        packet->insertAtBack(header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(trailer);
+        sender->processUpperFrame(packet, header);
+    }
+  protected:
+    virtual void initialize() override { action = new cMessage("phase"); scheduleAt(SimTime(30, SIMTIME_MS), action); }
+    virtual void handleMessage(cMessage *) override
+    {
+        auto ap = mib("ap");
+        auto first = mib("sta[0]");
+        auto second = mib("sta[1]");
+        bool missing = par("missing");
+        if (phase == 0) {
+            ASSERT(first->bssStationData.isAssociated && second->bssStationData.isAssociated);
+            ASSERT(ap->findPeerVhtState(first->address)->advertisedCapabilities.rxMaxMcs[0] == 7);
+            ASSERT((ap->findPeerVhtState(second->address) == nullptr) == missing);
+            ASSERT((second->findPeerVhtState(ap->address) == nullptr) == missing);
+            if (!missing) {
+                ASSERT(ap->findPeerVhtState(second->address)->advertisedCapabilities.rxMaxMcs[0] == 8);
+                ASSERT(ap->findPeerVhtState(second->address)->advertisedCapabilities.rxMaxMcs[1] == 8);
+            }
+            sendData("ap", "sta[0]");
+            sendData("ap", "sta[1]");
+            sendData("sta[0]", "ap");
+            sendData("sta[1]", "ap");
+        }
+        else if (phase == 1) {
+            ASSERT(mac("ap")->delivered == 2 && mac("sta[0]")->delivered == 1 && mac("sta[1]")->delivered == 1);
+            ASSERT(mac("sta[0]")->vhtSent >= 1);
+            ASSERT(missing ? mac("sta[1]")->legacySent >= 1 : mac("sta[1]")->vhtSent >= 1);
+            // Change only STA0's receiver limit before a real same-AP reassociation.
+            first->localVhtCapabilities.rxMaxMcs[0] = 8;
+            check_and_cast<VhtProbeSta *>(getModuleByPath("^.sta[0].wlan[0].mgmt"))->reassociate(ap->address);
+        }
+        else if (phase == 2) {
+            ASSERT(first->bssStationData.isAssociated);
+            ASSERT(ap->findPeerVhtState(first->address)->advertisedCapabilities.rxMaxMcs[0] == 8);
+            ASSERT((ap->findPeerVhtState(second->address) == nullptr) == missing);
+            ASSERT(mac("sta[0]")->reRequests > 0 && mac("ap")->reResponses > 0);
+            sendData("ap", "sta[0]");
+        }
+        else if (phase == 3) {
+            ASSERT(mac("sta[0]")->delivered == 2);
+            check_and_cast<VhtProbeSta *>(getModuleByPath("^.sta[0].wlan[0].mgmt"))->disconnect(ap->address);
+            ASSERT(first->findPeerVhtState(ap->address) == nullptr);
+        }
+        else if (phase == 4) {
+            ASSERT(ap->findPeerVhtState(first->address) == nullptr);
+            ASSERT((ap->findPeerVhtState(second->address) == nullptr) == missing);
+            auto radio = check_and_cast<Ieee80211Radio *>(getModuleByPath("^.ap.wlan[0].radio"));
+            ASSERT(radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING);
+            radio->setMode(Ieee80211ModeSet::getModeSet("ac")->getMode(Mbps(24)));
+            radio->setModeSet(Ieee80211ModeSet::getModeSet("a"));
+            radio->setModeSet(Ieee80211ModeSet::getModeSet("ac"));
+            ASSERT(ap->findPeerVhtState(second->address) == nullptr);
+            sendData("ap", "sta[1]");
+        }
+        else {
+            ASSERT(mac("sta[1]")->delivered == 2);
+            ASSERT(mac("ap")->legacySent >= 1);
+            ASSERT(mac("ap")->responses >= 2 && mac("sta[0]")->requests >= 1 && mac("sta[1]")->requests >= 1);
+            auto mgmt = check_and_cast<VhtProbeAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+            ASSERT(mgmt->capabilitiesAdded >= mac("ap")->responses);
+            ASSERT(mgmt->operationAdded >= mac("ap")->responses);
+            std::cout << "VHT exchange verified: qos=" << par("qos").boolValue() << " missing=" << missing << "\n";
+            endSimulation();
+            return;
+        }
+        phase++;
+        scheduleAfter(SimTime(10, SIMTIME_MS), action);
+    }
+    virtual void finish() override { ASSERT(phase == 5); }
+  public:
+    virtual ~VhtAssociationTest() { cancelAndDelete(action); }
+};
+Define_Module(VhtAssociationTest);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple VhtProbeRateControl extends AarfRateControl { parameters: @class(::VhtProbeRateControl); }
+module VhtProbeMac extends Ieee80211Mac { parameters: @class(::VhtProbeMac); }
+simple VhtProbeAp extends Ieee80211MgmtAp { parameters: @class(::VhtProbeAp); }
+simple VhtProbeSta extends Ieee80211MgmtSta { parameters: @class(::VhtProbeSta); }
+simple VhtAssociationTest { parameters: @class(::VhtAssociationTest); bool qos; bool missing; }
+network VhtNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta[2]: WirelessHost;
+        test: VhtAssociationTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VhtNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 100ms
+seed-set = 0
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore" # Deterministic simultaneous data submissions exercise contention.
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.test.qos = ${qos=false,true}
+*.test.missing = ${missing=false,true}
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 10m
+*.sta[0].mobility.initialX = 11m
+*.sta[1].mobility.initialX = 12m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "ac"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.bandName = "5 GHz (20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.antenna.numAntennas = 2
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].mac.typename = "VhtProbeMac"
+**.mac.qosStation = ${qos}
+**.mac.*.rateControl.typename = "VhtProbeRateControl"
+*.sta[*].wlan[*].mgmt.typename = "VhtProbeSta"
+*.sta[*].wlan[*].agent.typename = "Ieee80211AgentSta"
+*.ap.wlan[*].mgmt.typename = "VhtProbeAp"
+*.ap.wlan[*].mgmt.beaconInterval = 1s
+*.sta[0].wlan[*].mib.vhtRxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]
+*.sta[0].wlan[*].mib.vhtTxMcsMap = [8,8,-1,-1,-1,-1,-1,-1]
+*.sta[1].wlan[*].mib.vhtRxMcsMap = [8,8,-1,-1,-1,-1,-1,-1]
+*.sta[1].wlan[*].mib.vhtTxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]
+*.sta[1].wlan[*].mib.vhtSupported = !${missing}
+*.sta[0].wlan[*].agent.startingTime = 0s
+*.sta[1].wlan[*].agent.startingTime = 10ms
+*.sta[*].wlan[*].agent.channelsToScan = "0"
+*.sta[*].wlan[*].agent.probeDelay = 1ms
+*.sta[*].wlan[*].agent.minChannelTime = 5ms
+*.sta[*].wlan[*].agent.maxChannelTime = 5ms
+*.sta[*].wlan[*].agent.authenticationTimeout = 20ms
+*.sta[*].wlan[*].agent.associationTimeout = 20ms
+
+%file: check.py
+from pathlib import Path
+text = Path('test.out').read_text()
+for qos in (0, 1):
+    for missing in (0, 1):
+        assert text.count(f'VHT exchange verified: qos={qos} missing={missing}') == 1
+%postrun-command: python3 check.py

@@ -43,6 +43,125 @@ Custom producers must set a valid interval before serialization.
 numeric mappings that used 60 for this reason. Old stored value 60 cannot be
 reinterpreted automatically: it also denoted invalid mesh security capability.
 
+IEEE 802.11 Radio Reconfiguration and Management Hooks
+----------------------------------------------------
+
+Radio setters no longer implicitly interrupt compatible ongoing receptions.
+Changing the transmit mode alone, reapplying unchanged receiver settings, or
+changing the mode set while retaining the incoming mode preserves reception.
+An incompatible receiver configuration still aborts reception and retains
+arrival timers for normal cleanup. Custom callers should not rely on a no-op
+setter or a transmit-mode change to cancel reception.
+
+``Ieee80211MgmtBase::addVhtCapabilities()`` and ``addVhtOperation()`` are now
+virtual, like the HT advertisement helpers. Subclasses may override them to
+customize advertisements in inherited frame builders; use ``override`` on
+these declarations. Rebuild external management subclasses against the new
+header and library.
+
+Migrating IEEE 802.11 PHY Modes
+------------------------------
+
+External implementations of ``IIeee80211DataMode`` must now implement the pure
+virtual guard-interval query:
+
+.. code-block:: c++
+
+   const simtime_t getGuardInterval() const override;
+
+Return the modeled guard interval in simulation time units. For a PHY without a
+guard interval, use an explicit override returning ``-1``. FHSS, DSSS, HR-DSSS,
+and IR use this value; OFDM, HT, and VHT return their modeled interval.
+
+The bitrate-based ``Ieee80211ModeSet::getMode()`` and ``findMode()`` overloads
+now take a trailing ``simtime_t guardInterval = -1`` argument. Existing ordinary
+calls can omit it. Update member-function pointer declarations to include this
+argument and supply it when invoking through a pointer. Rebuild external code
+against the changed interface.
+
+``Ieee80211Interface`` now implements ``IIeee80211ModeSetCoordinator``.
+``Ieee80211Mac``, ``Ieee80211MgmtBase``, ``RateSelection``, and
+``ModeSetListener`` register their ``IIeee80211ModeSetListener`` contract during
+initialization. External subclasses must preserve base initialization and place
+mode-set state updates in ``applyModeSet()``, not ``receiveSignal()``. Custom
+interface compositions must provide the coordinator contract and register their
+consumers explicitly. Register the MAC in ``MAC_STATE`` and independent derived
+consumers in ``DERIVED_STATE``. Duplicate registration in the same phase is
+idempotent; registration after initial application is rejected. Detach a consumer
+before deleting it; membership cannot change during a transition.
+
+Observe ``modesetChanged`` at the interface. It is published once after initial
+link-layer setup, and once after every successful runtime application, including
+reapplication of the same catalog. The interface is the source; the MAC and the
+attached radio no longer publish this signal. The borrowed mode-set payload is
+immutable. Observers do not participate in the transaction. Standalone radios
+without ``modeSetCoordinatorModule`` continue to publish their own notification.
+Participant and observer failures remain fatal simulation errors; partial changes
+are not rolled back and continuation is unsupported.
+
+HT-capable radio implementations must provide ``IIeee80211Radio`` in addition to
+``IRadio``. Its ``isHtChannelWidthSupported()`` query covers both PHY directions,
+and ``getChannel()`` returns the borrowed configured channel or null. Generic
+legacy radios do not need this contract. AP channel/band validation now precedes
+the initial mode-set notification as well as runtime publication.
+
+External ``IContention`` implementations must implement the new pure virtual
+``updateTimingParameters(ifs, eifs, slotTime)`` method. On a runtime timing change,
+retain completed whole backoff slots and the remaining random draw, restart the
+applicable IFS and any unfinished slot, and update the expected grant time.
+Unchanged timing preserves the existing schedule. This application must not emit
+an intermediate mode-set notification or generate a new random backoff.
+
+Migrating VHT Catalogs and Peer Rate Selection
+----------------------------------------------
+
+The ``ac`` catalog provides both 800 ns and 400 ns GI for 310 legal VHT tuples
+at 20/40/80/160 MHz and one through eight spatial streams. IEEE 802.11-2024,
+21.5, Tables 21-29 through 21-60 exclude: 20 MHz MCS 9 except NSS 3 and 6;
+80 MHz MCS 6 at NSS 3 and 7; 80 MHz MCS 9 at NSS 6; and 160 MHz MCS 9 at NSS 3.
+The band/preamble envelope remains 5 GHz, mixed format. New variants are optional
+catalog entries; historical mandatory/basic flags, reference/default modes, and
+previously accepted unspecified-GI lookups are preserved. Explicit GI queries
+can select either variant. This catalog does not establish operational support
+for bonded primary/secondary channels.
+
+External ``IIeee80211Mode`` implementations must implement ``getVhtMcsIndex()``:
+return the VHT MCS index (0 through 9), or -1 for other PHY families.
+``Ieee80211ModeBase`` supplies the non-VHT default. VHT selection is independent
+of the HT MCS bitmap.
+
+``Ieee80211MgmtAp`` and ``Ieee80211MgmtSta`` now exchange and interpret VHT
+Capabilities and VHT Operation elements (IEEE 802.11-2024, 9.4.2.156 and
+9.4.2.157). The MIB owns committed per-peer state. The AP commits after the
+successful association/reassociation response is acknowledged; the STA commits
+after receiving a successful response with usable capability and operation
+information. Pending VHT snapshots cannot survive a local mode-set application.
+Disassociation, deauthentication, teardown, and mode-set application remove
+committed state. Authoritative beacons can refresh the associated AP's state.
+
+To restrict VHT reception or transmission, configure the corresponding map in
+:ned:`Ieee80211Mib`; that module documents the parameters and their constraints.
+For example, ``wlan[*].mib.vhtRxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]`` restricts
+reception to one stream with MCS 0 through 7 while leaving transmission
+configuration independent.
+
+Both DCF and HCF choose VHT unicast modes within local Tx and peer Rx maps,
+local/BSS operation width, GI eligibility, and the optional advertised highest
+long-GI rate limits. Selection never exceeds the requested rate. Missing or
+incompatible VHT negotiation uses a legacy operational mode. Consequently,
+``Ieee80211MgmtApSimplified``, ``Ieee80211MgmtStaSimplified``, and ad-hoc
+compositions use legacy unicast until a management implementation supplies
+valid VHT peer state. Existing VHT results, including ``lan80211ac/Ping1``, can
+change even though unspecified-GI catalog lookup is preserved.
+
+The current packet-level detailed-management support envelope is 20 MHz with
+long GI. The existing ``ac`` profile remains VHT-only and does not supply the
+HT modes required for full standards-conforming VHT operation. In particular,
+it does not negotiate HT-carried short-GI bits for 20/40 MHz. Wider catalog and
+selector tests do not claim bonded-channel operation. MU, beamforming, 80+80,
+extended NSS bandwidth signaling, and operating-mode notifications are not
+implemented by this change.
+
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------
 

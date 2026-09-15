@@ -22,7 +22,7 @@ Define_Module(Dcaf);
 void Dcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
+        ModeSetListener::initialize(stage);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // TODO calculateTimingParameters()
@@ -65,7 +65,8 @@ void Dcaf::calculateTimingParameters()
         cwMin = modeSet->getCwMin();
     if (cwMax == -1)
         cwMax = modeSet->getCwMax();
-    cw = cwMin;
+    // Model reconfiguration preserves retry backoff within the new bounds.
+    cw = std::min(cwMax, std::max(cwMin, cw));
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
@@ -125,11 +126,16 @@ void Dcaf::expectedChannelAccess(simtime_t time)
 void Dcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    // Mode-set application uses the coordinator contract, not notifications.
+}
 
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        calculateTimingParameters();
-    }
+void Dcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
+    if (contention != nullptr)
+        contention->updateTimingParameters(ifs, eifs, slotTime);
 }
 
 } /* namespace ieee80211 */

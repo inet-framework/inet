@@ -19,6 +19,10 @@ import inet.common.SimpleModule;
 simple Ieee80211Mib extends SimpleModule
 {
     parameters:
+        bool vhtSupported = default(true); // Effective only for a VHT mode set
+        object vhtRxMcsMap = default([9, 9, 9, 9, 9, 9, 9, 9]); // Per-NSS maximum MCS: -1, 7, 8 or 9; limited by PHY antennas and the primary-20 catalog
+        object vhtTxMcsMap = default([9, 9, 9, 9, 9, 9, 9, 9]); // Per-NSS maximum MCS: -1, 7, 8 or 9; limited by PHY antennas and the primary-20 catalog
+
         @class(Ieee80211Mib);
         // Model-backed subset of IEEE Std 802.11-2024 HT capability/operation state; not a full Annex C MIB.
         int htMaxAmpduLengthExponent = default(0); // maximum received A-MPDU length exponent (0..3)

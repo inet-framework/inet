@@ -8,7 +8,6 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 #include <algorithm>
-
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -113,7 +112,8 @@ const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
 }
 
 void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
-        const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit)
+        const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit,
+        const physicallayer::IIeee80211Band *operationBand)
 {
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
@@ -182,6 +182,12 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (protectionMode < 0 || protectionMode > 3)
         throw cRuntimeError("htProtectionMode must be between 0 and 3");
     htOperation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protectionMode);
+    if (operationBand != nullptr) {
+        // Validate/fallback before peers see the rebuilt operation. This also
+        // renegotiates peers once, against the final channel width and offset.
+        setPrimaryChannel(requirePrimaryChannel(), operationBand);
+        return;
+    }
     for (auto& entry : peerHtStates) {
         if (entry.second.valid) {
             entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,
@@ -222,6 +228,85 @@ void Ieee80211Mib::removePeerHtCapabilities(const MacAddress& address)
 void Ieee80211Mib::clearPeerHtCapabilities()
 {
     peerHtStates.clear();
+}
+
+void Ieee80211Mib::updateLocalVhtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, int spatialStreamLimit)
+{
+    ++vhtCapabilityGeneration;
+    peerVhtStates.clear();
+    localVhtCapabilities = Ieee80211VhtCapabilities();
+    localVhtOperation = Ieee80211VhtOperation();
+    localVhtCapabilitiesValid = modeSet != nullptr && modeSet->getPhyType() == physicallayer::Ieee80211ModeSet::PhyType::VHT && par("vhtSupported");
+    if (!localVhtCapabilitiesValid)
+        return;
+    // Advertised maps are bounded by the actual long-GI primary-20 catalog,
+    // as well as the configured directional and antenna limits.
+    std::array<std::array<bool, 10>, 8> catalogMcs = {};
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        auto mode = modeSet->getMode(i);
+        auto data = mode->getDataMode();
+        int mcs = mode->getVhtMcsIndex();
+        int nss = data->getNumberOfSpatialStreams();
+        if (mcs >= 0 && mcs <= 9 && nss >= 1 && nss <= 8 && data->getBandwidth() == MHz(20) &&
+                data->getGuardInterval() == SimTime(800, SIMTIME_NS))
+            catalogMcs[nss - 1][mcs] = true;
+    }
+    auto readMap = [&](const char *parameter, std::array<int, 8>& map) {
+        auto values = check_and_cast<cValueArray *>(par(parameter).objectValue());
+        if (values->size() != 8)
+            throw cRuntimeError("%s requires eight per-NSS MCS maxima", parameter);
+        for (int i = 0; i < 8; i++) {
+            int value = values->get(i).intValue();
+            if (value != -1 && value != 7 && value != 8 && value != 9)
+                throw cRuntimeError("%s entries must be -1, 7, 8 or 9", parameter);
+            int maximum = -1;
+            for (int mcs = 0; mcs <= value && catalogMcs[i][mcs]; mcs++)
+                if (mcs >= 7)
+                    maximum = mcs;
+            map[i] = i < spatialStreamLimit ? maximum : -1;
+        }
+        if (!isValidVhtMcsMap(map))
+            throw cRuntimeError("%s and the VHT catalog must support MCS 0 through 7 at one spatial stream", parameter);
+    };
+    readMap("vhtRxMcsMap", localVhtCapabilities.rxMaxMcs);
+    readMap("vhtTxMcsMap", localVhtCapabilities.txMaxMcs);
+    // Intentional limitation of the current packet-level primary-channel PHY:
+    // management operates the existing VHT-only profile at 20 MHz. Its catalog
+    // is broader, but does not establish primary/secondary channel support.
+    // No HT SGI negotiation is claimed by that profile, so 20 MHz uses long GI.
+}
+
+const Ieee80211Mib::PeerVhtState *Ieee80211Mib::findPeerVhtState(const MacAddress& address) const
+{
+    auto it = peerVhtStates.find(address);
+    return it == peerVhtStates.end() ? nullptr : &it->second;
+}
+
+void Ieee80211Mib::setPeerVhtCapabilities(const MacAddress& address, const Ieee80211VhtCapabilities& capabilities, const Ieee80211VhtOperation& operation)
+{
+    if (!localVhtCapabilitiesValid || !isValidVhtMcsMap(capabilities.rxMaxMcs) || !isValidVhtMcsMap(capabilities.txMaxMcs) ||
+            !supportsBasicVhtMcsSet(localVhtCapabilities, operation) || !supportsBasicVhtMcsSet(capabilities, operation)) {
+        peerVhtStates.erase(address);
+        return;
+    }
+    peerVhtStates[address] = {capabilities, operation};
+}
+
+void Ieee80211Mib::removePeerVhtCapabilities(const MacAddress& address)
+{
+    peerVhtStates.erase(address);
+}
+
+void Ieee80211Mib::removePeerCapabilities(const MacAddress& address)
+{
+    removePeerHtCapabilities(address);
+    removePeerVhtCapabilities(address);
+}
+
+void Ieee80211Mib::clearPeerCapabilities()
+{
+    clearPeerHtCapabilities();
+    peerVhtStates.clear();
 }
 
 std::string Ieee80211Mib::getSsidStr() const
@@ -310,7 +395,7 @@ void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
 {
     associationIdReservations.erase(address);
     bssAccessPointData.associationIds.erase(address);
-    removePeerHtCapabilities(address);
+    removePeerCapabilities(address);
 }
 
 void Ieee80211Mib::clearAssociationIds()
@@ -318,7 +403,7 @@ void Ieee80211Mib::clearAssociationIds()
     bssAccessPointData.stations.clear();
     associationIdReservations.clear();
     bssAccessPointData.associationIds.clear();
-    clearPeerHtCapabilities();
+    clearPeerCapabilities();
 }
 
 } // namespace ieee80211

@@ -75,16 +75,31 @@ const Ieee80211Channel *Ieee80211Transmitter::computeTransmissionChannel(const P
 void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     if (this->modeSet != modeSet) {
+        auto newMode = mode;
+        if (mode != nullptr && modeSet != nullptr && !modeSet->containsMode(mode)) {
+            newMode = modeSet->findCompatibleMode(mode);
+            if (newMode == nullptr)
+                throw cRuntimeError("Cannot map current mode to operation mode '%s' without changing bitrate, bandwidth, spatial streams, or guard interval", modeSet->getName());
+        }
+        else if (modeSet == nullptr)
+            newMode = nullptr;
         this->modeSet = modeSet;
-        if (mode != nullptr)
-            mode = modeSet != nullptr ? modeSet->getMode(mode->getDataMode()->getNetBitrate()) : nullptr;
+        mode = newMode;
     }
+}
+
+void Ieee80211Transmitter::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    this->modeSet = modeSet;
+    this->mode = mode;
 }
 
 void Ieee80211Transmitter::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {
-        if (modeSet->findMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth()) == nullptr)
+        if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
             throw cRuntimeError("Invalid mode");
         this->mode = mode;
     }
@@ -151,9 +166,9 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
-    const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = duration - headerDuration - preambleDuration;
+    const simtime_t preambleDuration = transmissionMode->getPreambleDuration();
+    const simtime_t headerDuration = transmissionMode->getHeaderDuration();
+    const simtime_t dataDuration = transmissionMode->getDataDuration(B(phyHeader->getLengthField()));
     auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }
@@ -161,4 +176,3 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
 } // namespace physicallayer
 
 } // namespace inet
-

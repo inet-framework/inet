@@ -1,0 +1,84 @@
+%description:
+Ieee80211Interface initializes with the actual GenericRadio and Ieee80211OfdmRadio
+replaceable types, neither of which declares modeSetCoordinatorModule. Compound
+parameter patterns must not impose that parameter on those radio implementations.
+
+%file: AlternativeRadioStartup.cc
+#include "inet/common/InitStages.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+using namespace inet;
+class AlternativeRadioStartup : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(SIMTIME_ZERO, new cMessage("check startup")); }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        auto radio = getModuleByPath("^.host.wlan[0].radio");
+        ASSERT(dynamic_cast<physicallayer::IRadio *>(radio) != nullptr);
+        ASSERT(!radio->hasPar("modeSetCoordinatorModule"));
+        ASSERT(std::string(radio->getModuleType()->getName()) == par("radioType").stdstringValue());
+        std::cout << "Alternative radio initialized: " << par("radioType").stdstringValue() << "\n";
+        endSimulation();
+    }
+};
+Define_Module(AlternativeRadioStartup);
+
+%file: test.ned
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+simple AlternativeRadioStartup
+{
+    parameters:
+        @class(::AlternativeRadioStartup);
+        string radioType;
+}
+network AlternativeRadioNetwork
+{
+    submodules:
+        radioMedium: <> like IRadioMedium;
+        host: AdhocHost;
+        test: AlternativeRadioStartup;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AlternativeRadioNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 1ms
+record-vector-results = false
+record-scalar-results = false
+*.test.radioType = ${radio="GenericRadio","Ieee80211OfdmRadio"}
+*.host.wlan[*].radio.typename = ${radio}
+*.radioMedium.typename = ${radio} == "GenericRadio" ? "UnitDiskRadioMedium" : "Ieee80211DimensionalRadioMedium"
+*.host.mobility.initFromDisplayString = false
+*.host.mobility.initialX = 10m
+*.host.mobility.initialY = 10m
+*.host.mobility.initialZ = 0m
+*.host.wlan[*].typename = "Ieee80211Interface"
+*.host.wlan[*].opMode = "g(mixed)"
+*.host.wlan[*].bitrate = 24Mbps
+*.host.wlan[*].radio.signalAnalogRepresentation = ${radio} == "GenericRadio" ? "unitDisk" : "dimensional"
+*.host.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host.wlan[*].radio.transmitter.headerLength = 96b
+*.host.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+*.host.wlan[*].radio.transmitter.analogModel.interferenceRange = 0m
+*.host.wlan[*].radio.transmitter.analogModel.detectionRange = 0m
+*.host.wlan[*].radio.receiver.ignoreInterference = true
+*.host.wlan[*].radio.centerFrequency = 2.4GHz
+*.host.wlan[*].radio.bandwidth = 20MHz
+*.host.wlan[*].radio.transmitter.power = 0.1mW
+*.host.wlan[*].radio.receiver.sensitivity = -100dBm
+*.host.wlan[*].radio.receiver.snirThreshold = 4dB
+*.host.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host.wlan[*].radio.receiver.channelSpacing = 20MHz
+**.levelOfDetail = "symbol"
+**.isCompliant = true
+
+%contains: stdout
+Alternative radio initialized: GenericRadio
+
+%contains: stdout
+Alternative radio initialized: Ieee80211OfdmRadio

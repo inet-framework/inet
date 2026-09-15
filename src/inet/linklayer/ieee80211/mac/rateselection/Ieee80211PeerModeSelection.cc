@@ -5,6 +5,7 @@
 //
 
 
+#include <cmath>
 #include <cstring>
 
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
@@ -13,6 +14,23 @@ namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+const IIeee80211Mode *selectGroupAddressedMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *requestedMode)
+{
+    // IEEE Std 802.11-2024, 10.6.5.1 and 10.6.5.4. The model advertises
+    // mandatory legacy operational modes as its BSS basic legacy rate set.
+    const auto *resolvedMode = modeSet->containsMode(requestedMode) ? requestedMode : modeSet->findCompatibleMode(requestedMode);
+    const IIeee80211Mode *legacyMode = nullptr;
+    for (const auto *candidate : modeSet->getLegacyOperationalModes()) {
+        if (!modeSet->getIsMandatory(candidate))
+            continue;
+        if (candidate == resolvedMode)
+            return candidate;
+        if (legacyMode == nullptr || candidate->getDataMode()->getNetBitrate() > legacyMode->getDataMode()->getNetBitrate())
+            legacyMode = candidate;
+    }
+    return legacyMode != nullptr ? legacyMode : requestedMode;
+}
 
 namespace {
 
@@ -132,6 +150,77 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
             bestMode = candidate;
     }
     return bestMode != nullptr ? bestMode : getLegacyFallback(modeSet, mode, peerAddress);
+}
+
+const IIeee80211Mode *selectPeerCompatibleVhtMode(const Ieee80211ModeSet *modeSet,
+        const Ieee80211VhtCapabilities& local, const Ieee80211VhtOperation& localOperation,
+        const Ieee80211Mib::PeerVhtState *peer, const IIeee80211Mode *requested)
+{
+    if (requested == nullptr || requested->getVhtMcsIndex() < 0)
+        return requested;
+    if (modeSet == nullptr)
+        throw cRuntimeError("Cannot select a VHT mode without a mode set");
+    const IIeee80211Mode *best = nullptr;
+    auto ceiling = requested->getDataMode()->getNetBitrate();
+    if (peer != nullptr) {
+        const auto& remote = peer->advertisedCapabilities;
+        auto compatible = [&](const IIeee80211Mode *mode) {
+            int mcs = mode->getVhtMcsIndex();
+            auto data = mode->getDataMode();
+            int nss = data->getNumberOfSpatialStreams();
+            auto width = data->getBandwidth();
+            if (mcs < 0 || nss < 1 || nss > 8 || local.txMaxMcs[nss - 1] < mcs || remote.rxMaxMcs[nss - 1] < mcs ||
+                    width > localOperation.channelWidth || width > peer->operation.channelWidth ||
+                    (width > MHz(80) && (!local.supported160Mhz || !remote.supported160Mhz)))
+                return false;
+            bool shortGi = data->getGuardInterval() == SimTime(400, SIMTIME_NS);
+            bool giSupported = width == MHz(20) ? local.shortGi20 && remote.shortGi20 :
+                    width == MHz(40) ? local.shortGi40 && remote.shortGi40 :
+                    width == MHz(80) ? local.shortGi80 && remote.shortGi80 : local.shortGi160 && remote.shortGi160;
+            if (shortGi && !giSupported)
+                return false;
+            // Highest Supported Long GI Data Rate limits refer to long-GI rate,
+            // including when selecting a corresponding short-GI transmission.
+            auto longGiRate = data->getNetBitrate();
+            if (shortGi) {
+                bool found = false;
+                for (int i = 0; i < modeSet->getNumModes(); i++) {
+                    auto counterpart = modeSet->getMode(i);
+                    auto counterpartData = counterpart->getDataMode();
+                    if (counterpart->getVhtMcsIndex() == mcs && counterpartData->getBandwidth() == width &&
+                            counterpartData->getNumberOfSpatialStreams() == nss &&
+                            counterpartData->getGuardInterval() == SimTime(800, SIMTIME_NS)) {
+                        longGiRate = counterpartData->getNetBitrate();
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    return false;
+            }
+            // The wire field is floor(rate in Mb/s), per Table 9-315.
+            int encodedRate = std::floor(longGiRate.get<Mbps>());
+            return (local.txHighestLongGiRateMbps == 0 || encodedRate <= local.txHighestLongGiRateMbps) &&
+                    (remote.rxHighestLongGiRateMbps == 0 || encodedRate <= remote.rxHighestLongGiRateMbps);
+        };
+        if (modeSet->containsMode(requested) && compatible(requested))
+            return requested;
+        for (int i = 0; i < modeSet->getNumModes(); i++) {
+            auto mode = modeSet->getMode(i);
+            if (mode->getDataMode()->getNetBitrate() <= ceiling && compatible(mode) &&
+                    (best == nullptr || mode->getDataMode()->getNetBitrate() > best->getDataMode()->getNetBitrate()))
+                best = mode;
+        }
+    }
+    if (best != nullptr)
+        return best;
+    for (auto mode : modeSet->getLegacyOperationalModes())
+        if (mode->getDataMode()->getNetBitrate() <= ceiling &&
+                (best == nullptr || mode->getDataMode()->getNetBitrate() > best->getDataMode()->getNetBitrate()))
+            best = mode;
+    if (best == nullptr)
+        throw cRuntimeError("No legacy fallback for unnegotiated VHT mode");
+    return best;
 }
 
 } // namespace ieee80211

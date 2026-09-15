@@ -134,6 +134,10 @@ const auto *shortGiFallback = selectPeerCompatibleMode(modeSet, &shortGiDisabled
 ASSERT(shortGiFallback == mcs8Long);
 ASSERT(!shortGiFallback->isHtShortGuardInterval());
 
+auto shortGiDisabledOnlyMcs0Peer = makePeerState({0}, {MHz(20)}, MHz(20));
+const auto *shortGiMcs0Fallback = selectPeerCompatibleMode(modeSet, &shortGiDisabledOnlyMcs0Peer, mcs8Short, peer);
+ASSERT(shortGiMcs0Fallback == mcs0Long);
+
 auto compatiblePeer = makePeerState({2}, {MHz(20)}, MHz(40));
 ASSERT(selectPeerCompatibleMode(modeSet, &compatiblePeer, mcs2Long, peer) == mcs2Long);
 
