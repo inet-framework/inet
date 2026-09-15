@@ -213,6 +213,8 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     for (auto& ackStatus : ackStatuses) {
+        if (ackStatus.first.first != blockAckReq->getReceiverAddress())
+            continue;
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
         auto& status = ackStatus.second;
