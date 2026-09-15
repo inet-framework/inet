@@ -1,0 +1,5 @@
+Opt-in IEEE 802.11 Radiotap capture
+
+PcapRecorder can now add a Radiotap header before each captured IEEE 802.11 frame. The header describes available PHY metadata for legacy, HT and VHT single-user transmissions. Enable enableProtocolSpecificCaptureAdapters. Keep enableConvertingPackets enabled. Bare IEEE 802.11 output (link type 105) remains the default; Radiotap uses link type 127. HE and EHT metadata are unsupported.
+
+The capture adapter splits recognized typed A-MPDUs into MPDU records without delimiters or aggregate padding. It preserves malformed aggregates as one PSDU record, which an analyzer might not decode as a MAC frame. An intact imported MAC frame retains its FCS indication. The capture length limit includes the Radiotap header. See IEEE 802.11 Radiotap captures in the user's guide for configuration and metadata limits.
