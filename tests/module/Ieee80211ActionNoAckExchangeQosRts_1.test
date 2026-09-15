@@ -1,0 +1,263 @@
+%description:
+Verify the forced RTS/CTS protected HCF exchange for a unicast Action No Ack management frame.
+The frame is transmitted once without waiting for a peer ACK, and a following
+ordinary Probe Request reaches the same peer and completes with an ACK.
+
+%file: Ieee80211ActionNoAckExchangeQosRts.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211BssidReq_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211ActionNoAckExchangeQosRtsMac : public Ieee80211Mac
+{
+  public:
+    void injectManagement(Packet *packet)
+    {
+        Enter_Method("injectManagement");
+        handleMgmtPacket(packet);
+    }
+};
+
+Define_Module(Ieee80211ActionNoAckExchangeQosRtsMac);
+
+class Ieee80211ActionNoAckExchangeQosRtsTest : public cSimpleModule, public cListener
+{
+  protected:
+    using cListener::finish;
+
+    cMessage *actionTimer = nullptr;
+    cMessage *probeTimer = nullptr;
+    cMessage *checkTimer = nullptr;
+    cComponent *sourceHcf = nullptr;
+    cComponent *sourceEdcaf = nullptr;
+    cComponent *apHcf = nullptr;
+    Ieee80211ActionNoAckExchangeQosRtsMac *sourceMac = nullptr;
+    MacAddress sourceAddress;
+    MacAddress apAddress;
+    int actionTransmissions = 0;
+    int probeTransmissions = 0;
+    int sourceRtsTransmissions = 0;
+    int apAcks = 0;
+    int apCts = 0;
+    int probeAcknowledged = 0;
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    Packet *makeActionNoAckPacket()
+    {
+        auto packet = new Packet("ActionNoAck");
+        packet->addTag<MacAddressReq>()->setDestAddress(apAddress);
+        packet->addTag<Ieee80211BssidReq>()->setBssid(apAddress);
+        packet->addTag<Ieee80211SubtypeReq>()->setSubtype(ST_NOACKACTION);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(1);
+        // The Action category/body is intentionally opaque to the management
+        // module; two bytes are sufficient for an Action header/body prefix.
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(2)));
+        return packet;
+    }
+
+    Packet *makeProbeRequestPacket()
+    {
+        auto packet = new Packet("ProbeRequestAfterNoAck");
+        packet->addTag<MacAddressReq>()->setDestAddress(apAddress);
+        packet->addTag<Ieee80211BssidReq>()->setBssid(apAddress);
+        packet->addTag<Ieee80211SubtypeReq>()->setSubtype(ST_PROBEREQUEST);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(2);
+        auto body = makeShared<Ieee80211ProbeRequestFrame>();
+        body->setSSID("");
+        body->setChunkLength(B(2));
+        packet->insertAtBack(body);
+        return packet;
+    }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            sourceMac = check_and_cast<Ieee80211ActionNoAckExchangeQosRtsMac *>(getModuleByPath("^.source.wlan[0].mac"));
+            sourceHcf = getModuleByPath("^.source.wlan[0].mac.hcf");
+            sourceEdcaf = getModuleByPath("^.source.wlan[0].mac.hcf.edca.edcaf[3]");
+            apHcf = getModuleByPath("^.ap.wlan[0].mac.hcf");
+            sourceAddress = sourceMac->getAddress();
+            apAddress = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.ap.wlan[0].mac"))->getAddress();
+            ASSERT(!sourceAddress.isUnspecified());
+            ASSERT(!apAddress.isUnspecified());
+
+            sourceEdcaf->subscribe(packetSentToPeerSignal, this);
+            apHcf->subscribe(packetSentToPeerSignal, this);
+            sourceHcf->subscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
+
+            actionTimer = new cMessage("sendActionNoAck");
+            probeTimer = new cMessage("sendProbeRequest");
+            checkTimer = new cMessage("checkExchange");
+            scheduleAt(SimTime(1, SIMTIME_MS), actionTimer);
+            scheduleAt(SimTime(2, SIMTIME_MS), probeTimer);
+            scheduleAt(SimTime(4, SIMTIME_MS), checkTimer);
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (signalID == packetSentToPeerSignal && value != nullptr) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (source == sourceEdcaf) {
+                if (header->getType() == ST_NOACKACTION)
+                    actionTransmissions++;
+                else if (header->getType() == ST_RTS)
+                    sourceRtsTransmissions++;
+                else if (header->getType() == ST_PROBEREQUEST)
+                    probeTransmissions++;
+            }
+            else if (source == apHcf) {
+                if (header->getType() == ST_ACK && header->getReceiverAddress() == sourceAddress)
+                    apAcks++;
+                else if (header->getType() == ST_CTS && header->getReceiverAddress() == sourceAddress)
+                    apCts++;
+            }
+        }
+        else if (source == sourceHcf && signalID == Ieee80211Mac::frameTransmissionOutcomeSignal && value != nullptr && details != nullptr) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            auto outcome = check_and_cast<const FrameTransmissionDetails *>(details);
+            if (header->getType() == ST_PROBEREQUEST && outcome->getStatus() == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED)
+                probeAcknowledged++;
+        }
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message == actionTimer) {
+            delete actionTimer;
+            actionTimer = nullptr;
+            sourceMac->injectManagement(makeActionNoAckPacket());
+        }
+        else if (message == probeTimer) {
+            delete probeTimer;
+            probeTimer = nullptr;
+            sourceMac->injectManagement(makeProbeRequestPacket());
+        }
+        else if (message == checkTimer) {
+            delete checkTimer;
+            checkTimer = nullptr;
+            ASSERT(sourceRtsTransmissions == 2);
+            ASSERT(apCts == 2);
+            ASSERT(actionTransmissions == 1);
+            ASSERT(probeTransmissions == 1);
+            ASSERT(apAcks == 1);
+            ASSERT(probeAcknowledged == 1);
+            std::cout << "Unicast Action No Ack completed once without an ACK wait; the following Probe Request was ACKed.\n";
+        }
+        else
+            throw cRuntimeError("Unexpected timer");
+    }
+
+    virtual void finish() override
+    {
+        if (sourceEdcaf != nullptr)
+            sourceEdcaf->unsubscribe(packetSentToPeerSignal, this);
+        if (sourceHcf != nullptr)
+            sourceHcf->unsubscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
+        if (apHcf != nullptr)
+            apHcf->unsubscribe(packetSentToPeerSignal, this);
+        if (actionTimer != nullptr)
+            cancelAndDelete(actionTimer);
+        if (probeTimer != nullptr)
+            cancelAndDelete(probeTimer);
+        if (checkTimer != nullptr)
+            cancelAndDelete(checkTimer);
+    }
+};
+
+Define_Module(Ieee80211ActionNoAckExchangeQosRtsTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module Ieee80211ActionNoAckExchangeQosRtsMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211ActionNoAckExchangeQosRtsMac);
+}
+
+simple Ieee80211ActionNoAckExchangeQosRtsTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211ActionNoAckExchangeQosRtsTest);
+}
+
+network Ieee80211ActionNoAckExchangeQosRtsTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        source: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+                wlan[*].mac.typename = "Ieee80211ActionNoAckExchangeQosRtsMac";
+        }
+        test: Ieee80211ActionNoAckExchangeQosRtsTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211ActionNoAckExchangeQosRtsTestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 4ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.source.wlan[0].address = "02:00:00:00:00:02"
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtAp"
+*.ap.wlan[0].mgmt.ssid = "audit-bss"
+*.source.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.ap.wlan[0].mgmt.beaconInterval = 100ms
+
+**.wlan[*].opMode = "g(erp)"
+*.source.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 0B
+**.wlan[*].mac.qosStation = true
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].radio.transmitter.power = 50mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+*.ap.mobility.typename = "StationaryMobility"
+*.source.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 5m
+*.ap.mobility.initialY = 0m
+*.ap.mobility.initialZ = 0m
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.source.mobility.initialZ = 0m
+
+%contains: stdout
+Unicast Action No Ack completed once without an ACK wait; the following Probe Request was ACKed.

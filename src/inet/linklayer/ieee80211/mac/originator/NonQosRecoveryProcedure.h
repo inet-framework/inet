@@ -53,7 +53,8 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
     virtual void multicastFrameTransmitted(StationRetryCounters *stationCounters);
 
     virtual void ctsFrameReceived(StationRetryCounters *stationCounters);
-    virtual void ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters);
+    // A shared management recovery procedure may serve a different EDCAF than its configured calculator.
+    virtual void ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters, ICwCalculator *successfulCwCalculator = nullptr);
 
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader, StationRetryCounters *stationCounters);
     virtual void dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& failedHeader, StationRetryCounters *stationCounters);

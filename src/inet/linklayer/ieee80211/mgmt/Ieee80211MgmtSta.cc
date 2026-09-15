@@ -14,6 +14,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211BssidReq_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
@@ -319,6 +320,8 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
 {
     auto packet = new Packet(name);
     packet->addTag<MacAddressReq>()->setDestAddress(address);
+    // IEEE Std 802.11-2024, 9.3.3.1: use the target AP, including before association.
+    packet->addTag<Ieee80211BssidReq>()->setBssid(address);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);

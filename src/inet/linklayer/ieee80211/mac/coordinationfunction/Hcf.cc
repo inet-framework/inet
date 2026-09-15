@@ -465,8 +465,18 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
         }
         else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(transmittedHeader))
             originatorProcessTransmittedDataFrame(packet, dataHeader, ac);
-        else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader))
+        else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader)) {
             originatorProcessTransmittedManagementFrame(mgmtHeader, ac);
+            if (!originatorAckPolicy->isAckNeeded(mgmtHeader)) {
+                // IEEE Std 802.11-2024, 10.3.2.11 and 10.23.2.2: implicit acknowledgement is success.
+                auto recovery = edca->getMgmtAndNonQoSRecoveryProcedure();
+                if (dataAndMgmtRateControl)
+                    dataAndMgmtRateControl->frameTransmitted(packet, recovery->getRetryCount(packet, mgmtHeader), true, false);
+                recovery->ackFrameReceived(packet, mgmtHeader, edcaf->getStationRetryCounters(), edcaf);
+                edcaf->getInProgressFrames()->dropFrame(packet);
+                edcaf->getAckHandler()->dropFrame(mgmtHeader);
+            }
+        }
         else // TODO Ieee80211ControlFrame
             originatorProcessTransmittedControlFrame(transmittedHeader, ac);
     }
