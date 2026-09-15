@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -194,6 +195,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     auto pendingPacket = channelAccess->getInProgressFrames()->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
+    duration = normalizeIeee80211Duration(duration);
     updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);

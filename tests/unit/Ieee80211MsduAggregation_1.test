@@ -67,6 +67,8 @@ for (bool toDS : {false, true}) {
         // OriginatorQosMacDataService assigns the sequence after aggregation, before transmission.
         auto sequencedHeader = aggregate->removeAtFront<Ieee80211DataHeader>();
         sequenceNumbers.assignSequenceNumber(sequencedHeader);
+        // The MAC assigns Duration before a frame is serialized for transmission.
+        sequencedHeader->setDurationField(SIMTIME_ZERO);
         aggregate->insertAtFront(sequencedHeader);
         auto outer = aggregate->peekAtFront<Ieee80211DataHeader>();
         ASSERT(outer->getReceiverAddress() == ra);

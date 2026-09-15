@@ -99,8 +99,11 @@ bool Rx::lowerFrameReceived(Packet *packet)
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
-        if (header->getReceiverAddress() != address)
-            setOrExtendNav(header->getDurationField());
+        // IEEE Std 802.11-2024, 9.2.4.2: bit 15 distinguishes special
+        // Duration/ID encodings; they are not ordinary NAV intervals.
+        auto duration = header->getDurationField();
+        if (header->getReceiverAddress() != address && duration >= SIMTIME_ZERO && duration <= SimTime(32767, SIMTIME_US))
+            setOrExtendNav(duration);
         return true;
     }
     else {
