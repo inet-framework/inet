@@ -4,6 +4,162 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+Packet Queue Extraction and Departure Callbacks
+-----------------------------------------------
+
+Direct implementations of ``IPacketQueue`` must implement ``findPacket(predicate)`` and
+``dequeuePacket(predicate)``. Compound-queue providers must implement
+``IPacketExtractor`` for predicate selection. Select through the provider's scheduling
+policy; do not use collection index order as a replacement. Predicates may be evaluated
+repeatedly and must remain stable and free of side effects during selection.
+
+Emit ``packetQueueDeparture`` once at each logical queue boundary while the borrowed
+packet is alive. Supply ``PacketQueueRemovalDetails`` with ``DEQUEUED=0``, ``REMOVED=1``
+or ``DROPPED=2``. A prequeue filter rejection is a drop even when the leaf queue never
+owned the packet. Listeners on a compound queue must filter child-queue emissions to
+avoid handling an outcome twice.
+
+Buffer owners implementing ``IPacketBuffer::ICallback`` must explicitly implement both
+``handlePacketDropping()`` and ``handlePacketDropped()``. Detach a victim during the
+first phase; publish its departure during the second phase, after every victim in the
+overflow batch has been detached. Do not read a borrowed packet after the publisher
+deletes it.
+
+``PriorityScheduler`` aggregate queries now throw when an input lacks
+``IPacketCollection``. Replace callers that interpret ``-1`` as an unknown aggregate
+size, or provide collection-capable inputs. Predicate extraction similarly requires an
+extraction-capable provider only when that operation is used.
+
+Originator ADDBA Transactions and Eligible Frames
+-------------------------------------------------
+
+Custom ``IOriginatorBlockAckAgreementPolicy`` implementations must replace
+``computeAddbaFailureTimeout()`` with ``getAddbaResponseTimeout()`` and implement
+``computeAddbaRetryBackoff()``. Configure ``addbaResponseTimeout`` and
+``addbaRetryBackoff`` on the originator agreement policy. The response interval begins
+when the request is actually transmitted, so rejecting an unsent request must not arm
+it.
+
+Custom originator data services must implement ``setFrameEligibilityFunction()``,
+``isFrameEligible()`` and ``hasEligibleFrame()``. Keep availability queries free of
+dequeue side effects. A-MSDU policies now receive the provider-selected anchor and
+eligibility predicate; retain that anchor first and select only available, unique,
+eligible members in valid flow order. Dequeue those members through the provider,
+including scheduler accounting. Successful A-MSDU service therefore increments queue
+dequeue counters instead of administrative-removal counters.
+
+Custom originator agreement handlers must explicitly implement ``isDelbaPending()``.
+Adapt ADDBA response callers to the typed outcome and DELBA callers to ownership
+transfer through ``unique_ptr`` where declared by the interface. Do not keep an
+agreement pointer across a callback that may replace or remove it.
+
+Custom ADDBA request producers must assign a nonzero Dialog Token and preserve the local
+transaction tag through retries and fragments. Recipient responses must echo the request
+token. An originator accepts only a matching live response; a response using the old
+default token zero no longer completes a transaction.
+
+Recipient ADDBA Lifecycle
+-------------------------
+
+Update custom recipient handlers and callers to the current
+``processReceivedAddbaRequest()`` callback arguments and returned agreement. An accepted
+request establishes or replaces recipient state when the response is formed. Reset the
+receive/reordering state for a replacement agreement. Replaying a cached duplicate
+response must not establish the agreement again or reset its receive window. Use the
+returned ownership-bearing teardown result when publishing a deleted-agreement
+notification.
+
+Fragment Reassembly and Receive Lifetime
+----------------------------------------
+
+``RecipientMacDataService`` and ``RecipientQosMacDataService`` now expose
+``maxReceiveLifetime``, defaulting to ``524288us`` (512 TUs). Incomplete bodies are
+discarded when that receive lifetime expires. Models that relied on arbitrarily late
+completion will deliver fewer packets; select a deliberate lifetime for the study rather
+than treating the previous unbounded retention as a guarantee.
+
+Custom recipient services returning ``ManagementFrameReceptionResult`` must supply
+``completeHeader`` only when a complete management body is available. A duplicate
+fragment can be acknowledged without dispatching ADDBA or DELBA. Preserve local action
+context across fragmented transmission, reconstruct the complete action body, and
+dispatch its subtype only after reassembly. Fragmented on-air management headers do not
+carry a complete action body in every fragment.
+
+Management Frame Sequence Cancellation
+--------------------------------------
+
+Custom ``IFrameSequenceHandler`` implementations must explicitly implement
+``cancelFrameSequence()`` and ``abortFrameSequence()``. Preserve the distinction between
+requesting deferred cancellation and immediately aborting a sequence. Coordinate packet
+ownership with the caller: cancellation must not delete a packet still borrowed by an
+in-flight transmission or active sequence. Superseded AP management transactions must
+retire their queued siblings and terminal outcome exactly once.
+
+Generation-Aware Block Ack Teardown
+-----------------------------------
+
+Custom agreement callbacks must implement ``cancelBlockAckTeardown()``. Match the role,
+peer, TID and generation so cancellation cannot affect a replacement agreement. Preserve
+``Ieee80211BlockAckAgreementTag::generationId`` on locally generated DELBA fragments and
+retries; the role, peer and TID come from DELBA and its processing context.
+
+Recipient agreement handlers must explicitly implement ``isDelbaPending()``,
+``processAcknowledgedDelba()``, ``processAbortedDelba()`` and
+``getPendingTeardownGenerationId()``. Update ``processTransmittedDelba()``
+implementations and callers to the full ``Packet *`` form where required, so local
+generation metadata remains available. Keep teardown pending until its final fragment is
+acknowledged or the exchange terminates; do not retire a replacement generation from a
+stale completion.
+
+Block Ack Inactivity Timer Callbacks
+------------------------------------
+
+Schedule the shared Block Ack inactivity timer for the earliest enabled absolute
+agreement deadline and cancel it when no enabled deadline remains. Expiry callbacks can
+synchronously remove or replace the current agreement or a sibling. Keep
+peer/TID/generation values as the work list and relookup the live state before using it
+after a callback; incrementing a map iterator before calling out does not protect a
+removed sibling.
+
+Receive Lifetime in Block Ack Reordering
+----------------------------------------
+
+Custom receive/reordering implementations must retain the first-reception time of a
+fragmented body while it waits in a Block Ack reorder buffer. Moving fragments between
+receive stages must not restart their lifetime. Expire incomplete state and reject late
+fragments before delivering a reassembled body. ``IReassembly::purge()`` now returns
+owned packets; callers must report their final drop and delete them. Use
+``BlockAckReordering::processReceivedQoSFrameWithResult()`` to handle released frames
+and tombstoned fragments. Negative ``maxReceiveLifetime`` values are rejected; zero is a
+valid immediate-expiry setting.
+
+Expired Agreement Quarantine and Frame Release
+----------------------------------------------
+
+Custom ``IBlockAckAgreementHandlerCallback`` implementations must explicitly implement
+``releaseBlockAckAgreementFrames()`` and report whether they changed outstanding state.
+Retained teardown state is not an active data-plane agreement; use the active-agreement
+query for data transmission, acknowledgment and receive admission. Frame release may
+synchronously remove or replace an agreement, so relookup the original generation before
+generating its DELBA. If an implementation has no outstanding frames, returning false
+must be an explicit implementation decision.
+
+Recipient Block Ack Timeout Policy
+----------------------------------
+
+A nonzero recipient ``blockAckTimeoutValue`` policy overrides the advisory timeout in
+the ADDBA request. The model's zero-policy convention inherits the request timeout.
+Check configurations that previously depended on the reversed selection; the negotiated
+inactivity deadline may change.
+
+A-MSDU Size and Fragmentation Limits
+------------------------------------
+
+Basic A-MSDU selection must fit the configured limit including subframe headers and
+padding. It must not rely on ordinary MPDU fragmentation to split an oversized A-MSDU.
+Check aggregation and fragmentation thresholds together when reproducing a study that
+previously selected such aggregates.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
