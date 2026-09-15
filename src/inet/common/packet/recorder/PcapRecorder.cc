@@ -223,9 +223,29 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObservation& observation, b frontOffset, b backOffset, NetworkInterface *networkInterface)
 {
-    auto packet = observation.packet;
+    // Preserve the established packet-only override before expanding adapter records. As with
+    // recordPacket(), nested calls and exceptions must restore the borrowed observation.
+    auto previousObservation = activeCaptureObservation;
+    activeCaptureObservation = &observation;
+    try {
+        writePacket(protocol, observation.packet, frontOffset, backOffset, observation.direction, networkInterface);
+        activeCaptureObservation = previousObservation;
+    }
+    catch (...) {
+        activeCaptureObservation = previousObservation;
+        throw;
+    }
+}
+
+void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
+{
     auto adapter = findProtocolCaptureAdapter(protocol);
     if (adapter != nullptr) {
+        // A legacy override may replace the packet. Only the original packet can retain the
+        // borrowed PHY context; use the direction forwarded by the override in either case.
+        const PcapCaptureObservation observation = activeCaptureObservation != nullptr && activeCaptureObservation->packet == packet ?
+                PcapCaptureObservation(packet, direction, activeCaptureObservation->transmission, activeCaptureObservation->reception) :
+                PcapCaptureObservation(packet, direction);
         // A protocol adapter owns its output link type and complete record layout, so its
         // records bypass the generic link-type matching and packet-conversion helpers below.
         auto records = adapter->createRecords(observation, frontOffset, backOffset);
@@ -242,17 +262,6 @@ void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObserv
                 emit(packetRecordedSignal, packet);
             }
         }
-        return;
-    }
-
-    writePacketWithResolvedAdapter(protocol, nullptr, packet, frontOffset, backOffset, observation.direction, networkInterface);
-}
-
-void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
-{
-    auto adapter = findProtocolCaptureAdapter(protocol);
-    if (adapter != nullptr) {
-        writePacketWithResolvedAdapter(protocol, adapter, PcapCaptureObservation(packet, direction), frontOffset, backOffset, networkInterface);
         return;
     }
 

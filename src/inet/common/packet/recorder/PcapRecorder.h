@@ -56,7 +56,7 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     bool enableProtocolSpecificCaptureAdapters = false;
     bool recordPcap = false;
     PcapCaptureAdapterRegistry *captureAdapterRegistry = nullptr;
-    // Transiently carries enriched capture data through the legacy virtual recordPacket(cPacket *) hook.
+    // Transiently carries enriched capture data through the legacy recordPacket() and writePacket() hooks.
     const PcapCaptureObservation *activeCaptureObservation = nullptr;
     // Transiently carries one resolved protocol adapter through the legacy virtual writePacket() hooks.
     bool captureAdapterResolutionActive = false;
