@@ -94,6 +94,12 @@ void PcapWriter::writeHeader(PcapLinkType linkType)
 
 void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
 {
+    writePacketWithPrefix(stime, {}, packet, frontOffset, backOffset, direction, ie, linkTypePar);
+}
+
+void PcapWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+        Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
+{
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
@@ -113,9 +119,6 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffse
     (void)ie; // unused
 
     EV_INFO << "Writing packet" << EV_FIELD(packet) << EV_FIELD(fileName) << EV_ENDL;
-    uint8_t buf[MAXBUFLENGTH];
-    memset(buf, 0, sizeof(buf));
-
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32_t)stime.inUnit(SIMTIME_S);
     switch(timePrecision) {
@@ -123,19 +126,20 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffse
         case 9: ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S)); break;
         default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
     }
-    b capturedLength = packet->getDataLength() - frontOffset - backOffset;
-    if (capturedLength != b(0)) {
-        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
-        auto bytes = data->getBytes();
-        for (size_t i = 0; i < bytes.size(); i++) {
-            buf[i] = bytes[i];
-        }
-    }
-    ph.orig_len = capturedLength.get<B>();
-
+    b packetLength = packet->getDataLength() - frontOffset - backOffset;
+    size_t packetLengthBytes = packetLength.get<B>();
+    ph.orig_len = prefix.size() + packetLengthBytes;
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
     fwrite(&ph, sizeof(ph), 1, dumpfile);
-    fwrite(buf, ph.incl_len, 1, dumpfile);
+    auto capturedPrefixLength = std::min<size_t>(prefix.size(), ph.incl_len);
+    if (capturedPrefixLength != 0)
+        fwrite(prefix.data(), capturedPrefixLength, 1, dumpfile);
+    auto capturedPacketLength = ph.incl_len - capturedPrefixLength;
+    if (capturedPacketLength != 0) {
+        auto data = packet->peekDataAt<BytesChunk>(frontOffset, B(capturedPacketLength));
+        const auto& bytes = data->getBytes();
+        fwrite(bytes.data(), bytes.size(), 1, dumpfile);
+    }
     if (flush)
         fflush(dumpfile);
 }
@@ -149,4 +153,3 @@ void PcapWriter::close()
 }
 
 } // namespace inet
-
