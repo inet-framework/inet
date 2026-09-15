@@ -44,7 +44,7 @@ Pass 3, level 3:
 | Rfc9293ShrunkWindow.test | RFC9293-WND-4 | PASS |
 | Rfc9293NoWindowShrink.test | RFC9293-WND-3 | PASS |
 | Rfc9293SoftIcmpError.test | RFC9293-ICMP-3; covers ICMP-1 | PASS |
-| Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL (unexpected)** — defect, gap 2 |
+| Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL (unexpected)** — defect, gap 2. The repair is blocked; see below |
 | Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **FAIL (unexpected)** — defect, gap 3 |
 | Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **PASS** since 2026-09-14; gap 4 is closed by the ICMP repair |
 
@@ -179,7 +179,7 @@ not against the earlier wording.
 | --- | --- | --- | --- |
 | Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature | yes |
 | Rfc9293SourceQuench | `Icmp::processIcmpMessage` still has no branch for type 4, but its default discards instead of throwing, which meets the rule | closed 2026-09-14 | no, removed |
-| Rfc9293ChecksumDefault | `TcpChecksumInsertionHook::computeChecksum` computes the value, and the `computed` mode runs it — step 1 of the test proves it on host B | **defect** | **no, removed** |
+| Rfc9293ChecksumDefault | **Defect, and the repair is blocked.** `TcpChecksumInsertionHook::computeChecksum` computes the value and the `computed` mode runs it; what is wrong is the default, which `Tcp.ned` sets to `declared`. Changing it to `computed` was tried on 2026-09-15 and reverted. Computing a checksum serializes the segment, and the copy that comes back has lost the region tags its payload carried: `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of TCP data without a GenericAppMsgReq region tag at its front". The protocol suite cannot see this, because none of its scenarios uses a region-tagged payload; the fingerprint run found it. **TCP cannot default to a computed checksum until a serialized payload keeps its region tags.** This is the same blocker that stops the UDP default, where QUIC has no serializer at all | **defect** | **no, removed** |
 | Rfc9293ShrunkWindowNoNewData | `sendData` limits a send by `min(snd_wnd, congestionWindow)`, and the sibling test shows the shrunk advertisement is read | **defect** | **no, removed** |
 
 Two declarations were removed. The suite result moves from 18 TOTAL, 14 PASS, 4 FAIL
