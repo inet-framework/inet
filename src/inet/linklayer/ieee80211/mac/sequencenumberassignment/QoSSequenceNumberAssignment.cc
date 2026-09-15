@@ -38,14 +38,15 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
             it->second = seqNum = it->second + 1;
     }
     if (type == SHARED) {
+        // IEEE Std 802.11-2024, 10.3.2.14.2 and Table 10-5 (SNS1/TR1): advance the shared counter per frame and skip a same-RA duplicate.
+        seqNum = lastSentSharedCounterSeqNum;
+        lastSentSharedCounterSeqNum = lastSentSharedCounterSeqNum + 1;
         auto it = lastSentSharedSeqNums.find(address);
-        if (it == lastSentSharedSeqNums.end())
-            lastSentSharedSeqNums[address] = seqNum = lastSentSharedCounterSeqNum;
-        else {
-            if (it->second == lastSentSharedCounterSeqNum)
-                lastSentSharedCounterSeqNum = lastSentSharedCounterSeqNum + 1; // make it different from the last sequence number sent to that RA (spec: "add 2")
-            it->second = seqNum = lastSentSharedCounterSeqNum;
+        if (it != lastSentSharedSeqNums.end() && it->second == seqNum) {
+            seqNum = lastSentSharedCounterSeqNum;
+            lastSentSharedCounterSeqNum = lastSentSharedCounterSeqNum + 1; // make it different from the last sequence number sent to that RA (spec: "add 2")
         }
+        lastSentSharedSeqNums[address] = seqNum;
     }
     else if (type == DATA) {
         const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
@@ -64,4 +65,3 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
