@@ -6,6 +6,8 @@
 
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211DsssPlcp.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PlcpCrc.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
@@ -154,13 +156,29 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     emit(listeningChangedSignal, 0);
 }
 
+namespace {
+uint16_t computePlcpCrc(const Ieee80211FhssPhyHeader& header)
+{
+    uint16_t fields = (header.getPlw() & 0x0fff) | (header.getPsf() << 12);
+    uint8_t bytes[] = {uint8_t(fields), uint8_t(fields >> 8)};
+    return computeIeee80211PlcpCrc(bytes, sizeof(bytes));
+}
+
+uint16_t computePlcpCrc(const Ieee80211DsssPhyHeader& header)
+{
+    uint8_t bytes[] = {header.getSignal(), header.getService(),
+            uint8_t(header.getPlcpLength()), uint8_t(header.getPlcpLength() >> 8)};
+    return computeIeee80211PlcpCrc(bytes, sizeof(bytes));
+}
+} // namespace
+
 void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
 {
     if (auto header = dynamic_cast<Ieee80211FhssPhyHeader *>(phyHeader.get())) {
         header->setFcsMode(fcsMode);
         switch (fcsMode) {
             case FCS_COMPUTED:
-                header->setFcs(0); // TODO calculate FCS
+                header->setFcs(computePlcpCrc(*header));
                 break;
             case FCS_DECLARED_CORRECT:
                 header->setFcs(0xC00D);
@@ -176,7 +194,7 @@ void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
         header->setFcsMode(fcsMode);
         switch (fcsMode) {
             case FCS_COMPUTED:
-                header->setFcs(0); // TODO calculate FCS
+                throw cRuntimeError("Computed IR PLCP CRC is not implemented");
                 break;
             case FCS_DECLARED_CORRECT:
                 header->setFcs(0xC00D);
@@ -192,7 +210,7 @@ void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
         header->setFcsMode(fcsMode);
         switch (fcsMode) {
             case FCS_COMPUTED:
-                header->setFcs(0); // TODO calculate FCS
+                header->setFcs(computePlcpCrc(*header));
                 break;
             case FCS_DECLARED_CORRECT:
                 header->setFcs(0xC00D);
@@ -211,7 +229,7 @@ bool Ieee80211Radio::verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) c
     if (auto header = dynamicPtrCast<const Ieee80211FhssPhyHeader>(phyHeader)) {
         switch (header->getFcsMode()) {
             case FCS_COMPUTED:
-                return true; // TODO calculate and check FCS
+                return header->getFcs() == computePlcpCrc(*header);
             case FCS_DECLARED_CORRECT:
                 return true;
             case FCS_DECLARED_INCORRECT:
@@ -223,7 +241,7 @@ bool Ieee80211Radio::verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) c
     else if (auto header = dynamicPtrCast<const Ieee80211IrPhyHeader>(phyHeader)) {
         switch (header->getFcsMode()) {
             case FCS_COMPUTED:
-                return true; // TODO calculate and check FCS
+                throw cRuntimeError("Computed IR PLCP CRC is not implemented");
             case FCS_DECLARED_CORRECT:
                 return true;
             case FCS_DECLARED_INCORRECT:
@@ -235,7 +253,7 @@ bool Ieee80211Radio::verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) c
     else if (auto header = dynamicPtrCast<const Ieee80211DsssPhyHeader>(phyHeader)) {
         switch (header->getFcsMode()) {
             case FCS_COMPUTED:
-                return true; // TODO calculate and check FCS
+                return header->getFcs() == computePlcpCrc(*header);
             case FCS_DECLARED_CORRECT:
                 return true;
             case FCS_DECLARED_INCORRECT:
@@ -262,6 +280,30 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         auto ofdmMode = check_and_cast<const Ieee80211OfdmMode *>(mode);
         ofdmHeader->setRate(ofdmMode->getSignalMode()->getRate());
         ofdmHeader->setParity(computeIeee80211OfdmSignalParity(ofdmHeader->getRate(), false, ofdmHeader->getLengthField().get<B>()));
+    }
+    if (auto dsssHeader = dynamicPtrCast<Ieee80211DsssPhyHeader>(phyHeader)) {
+        auto bitrate = mode->getDataMode()->getNetBitrate().get<bps>();
+        uint8_t signal;
+        if (bitrate == 1000000) signal = 10;
+        else if (bitrate == 2000000) signal = 20;
+        else if (bitrate == 5500000) signal = 55;
+        else if (bitrate == 11000000) signal = 110;
+        else throw cRuntimeError("Unsupported DSSS bitrate");
+        auto octets = phyHeader->getLengthField().get<B>();
+        auto length = computeIeee80211DsssPlcpLength(octets, signal);
+        dsssHeader->setSignal(signal);
+        dsssHeader->setPlcpLength(length);
+        dsssHeader->setService(computeIeee80211DsssLengthExtension(octets, signal, length) ? 0x80 : 0);
+    }
+    else if (auto fhssHeader = dynamicPtrCast<Ieee80211FhssPhyHeader>(phyHeader)) {
+        auto octets = phyHeader->getLengthField().get<B>();
+        if (octets < 0 || octets > 4095)
+            throw cRuntimeError("FHSS PSDU exceeds PLW capacity");
+        fhssHeader->setPlw(octets);
+        auto bitrate = mode->getDataMode()->getNetBitrate().get<bps>();
+        if (bitrate != 1000000 && bitrate != 2000000)
+            throw cRuntimeError("Unsupported FHSS bitrate");
+        fhssHeader->setPsf(bitrate == 1000000 ? 0 : 4);
     }
     insertFcs(phyHeader);
     packet->insertAtFront(phyHeader);
