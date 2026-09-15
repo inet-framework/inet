@@ -242,6 +242,44 @@ Notable backward incompatible changes are the following:
     DHCP exchanges now take different times and put different bytes on the wire,
     so trajectories and fingerprints of simulations that use DHCP move.
 
+15. A DHCP client checks the granted address before it takes it
+
+    RFC 2131 section 4.4.1 asks a client to check that the address it was granted
+    is not already in use, and RFC 5227 section 2.1.1 makes that check an ARP
+    Probe. The client now sends one, waits probeWait (1s by default; 0s turns the
+    check off), and takes the address only if nobody answers. If somebody does, it
+    sends a DHCPDECLINE and starts again. It probes only an address it is about to
+    start using, after REQUESTING or REBOOTING, and only on a link that uses ARP.
+
+    Three of the four pieces this needed were already written and unreachable.
+    Arp::sendArpProbe had no caller, DhcpClient::sendDecline had no caller, and
+    Arp::processArpPacket threw "wrong ARP packet: source IPv4 address is empty"
+    on the very packet a probe is, so a neighbour's lawful probe stopped the run.
+    An all-zero sender protocol address marks a probe: it claims nothing, so the
+    table steps are skipped for it and the target question still gets its answer.
+
+    Arp gained an arpAddressConflictDetected signal. A reply to a probe is
+    addressed to the all-zero sender address, so the target question cannot
+    recognize it; Arp remembers what it is probing and matches the reply by its
+    sender protocol address instead.
+
+    IArp gained a pure virtual sendArpProbe, which DhcpClient calls. An IArp
+    implementation outside INET must override it; the migration guide says how.
+    GlobalArp overrides it with an empty body, because it has nobody to ask.
+
+    DhcpClient gained an arpModule parameter and a probeWait parameter.
+    DHCPDECLINE now carries the server identifier, which RFC 2131 table 5
+    requires.
+
+    DhcpServer marks a declined address unavailable, which RFC 2131 section 4.3.3
+    makes a MUST. Without it the server offered the same address again and the
+    client declined again for the whole run.
+
+    Every DHCP client now spends probeWait between the acknowledgement and taking
+    the address. The lease timers T1 and T2 are armed when the acknowledgement
+    arrives, so renewal timing does not move; traffic from the client starts one
+    probeWait later.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

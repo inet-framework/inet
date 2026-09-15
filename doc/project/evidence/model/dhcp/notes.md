@@ -132,6 +132,30 @@ Three of the four rows are right, which is why one check alone could not have fo
 the subnet test above the table lookup fixes the fourth row and changes nothing in the other
 three.
 
+### The probe needs an ARP link and a new address, and its timer stops with the client
+
+**Found on 2026-09-17 by the module suite, and repaired in the commit that adds the probe.** Every
+DHCP protocol test runs on Ethernet and keeps its nodes up, so the protocol suite could not see
+either defect:
+
+- `tests/module/DHCP_2` runs the client over PPP. A PPP interface has no MAC address, and
+  `Arp::sendArpProbe` stopped on `ASSERT(!srcAddr.isUnspecified())`. The client now probes only
+  where `Ipv4` does ARP, which is a broadcast interface with a MAC address. On other links it
+  binds at once, as with `probeWait = 0s`.
+- `tests/module/DHCP_lifecycle_1` stops the client during the probe wait. The stop and crash
+  handlers cancelled every timer except the probe timer, so the timer fired in a stopped
+  application. The client now cancels `timerProbe` wherever it cancels its other timers, and in
+  `initClient`, which every restart calls.
+
+- `tests/module/DHCP_lifecycle_2` renews its lease, and the client probed the address again on the
+  renewal and bound it a second time when the probe went unanswered. RFC 5227 section 2.1 asks
+  for a probe before a host begins to use an address, and RFC 2131 sections 3.1 and 3.2 place the
+  check after REQUESTING and after REBOOTING. The client now probes only in those two states; a
+  renewal or a rebinding binds at once. The expected output of the test shows the assignment
+  directly before the renewal acknowledgement, so a probe on renewal fails it.
+
+The first two module tests stop with an error without the repair.
+
 ## Scenario quirks
 
 ### A DHCP client refuses to start on an interface that already has an address

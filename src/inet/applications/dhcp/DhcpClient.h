@@ -17,6 +17,8 @@
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
+#include "inet/networklayer/contract/IArp.h"
+
 namespace inet {
 
 /**
@@ -40,6 +42,9 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     cModule *host = nullptr; // containing host module (@networkNode)
     NetworkInterface *ie = nullptr; // interface to configure
     ModuleRefByPar<IIpv4RoutingTable> irt; // routing table to update
+    ModuleRefByPar<IArp> arp; // ARP module, used to probe the granted address
+    simtime_t probeWait; // how long to wait for an answer to the probe; 0 turns the probe off
+    cMessage *timerProbe = nullptr; // RFC 5227: waiting for an answer to the probe
 
     // state
     cMessage *timerT1 = nullptr; // time at which the client enters the RENEWING state
@@ -127,6 +132,13 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Client to server indicating network address is already in use.
      */
     virtual void sendDecline(Ipv4Address declinedIp);
+
+    /**
+     * RFC 2131 section 4.4.1: the client SHOULD check that the granted address is not
+     * already in use before it takes it. The check is an ARP probe (RFC 5227 section 2.1.1),
+     * and its answer, if one comes, arrives as an arpAddressConflictDetected signal.
+     */
+    virtual void probeGrantedAddress();
 
     /*
      * Records configuration parameters from a DHCPACK message.

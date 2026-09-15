@@ -57,6 +57,7 @@ enum DhcpTimerType
     T2 = 4;
     LEASE_TIMEOUT = 5;
     START_DHCP = 6;
+    WAIT_PROBE = 7; // RFC 5227: waiting for an answer to the probe of the granted address
 }
 
 //

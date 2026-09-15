@@ -281,6 +281,31 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 }
             }
         }
+        else if (messageType == DHCPDECLINE) { // RFC 2131, 4.3.3
+            // "If the server receives a DHCPDECLINE message, the client has discovered
+            // through some other means that the suggested network address is already in
+            // use. The server MUST mark the network address as not available and SHOULD
+            // notify the local system administrator of a possible configuration problem."
+            //
+            // Without this the server keeps offering the same address to the same client,
+            // which declines it again, for as long as the run lasts.
+            Ipv4Address declinedAddress = dhcpMsg->getOptions().getRequestedIp();
+            if (!declinedAddress.isUnspecified()) {
+                EV_WARN << "DHCPDECLINE arrived for " << declinedAddress
+                        << ", which somebody outside this server's records already holds. "
+                        << "Marking it unavailable." << endl;
+                DhcpLease& declined = leased[declinedAddress];
+                declined.ip = declinedAddress;
+                declined.subnetMask = subnetMask;
+                declined.gateway = gateway;
+                // Taken, and by nobody this server knows: the address is never offered
+                // again, and no client's hardware address leads back to it.
+                declined.leased = true;
+                declined.mac = MacAddress::UNSPECIFIED_ADDRESS;
+            }
+            else
+                EV_WARN << "DHCPDECLINE arrived with no requested address option. Dropping it." << endl;
+        }
         else
             EV_WARN << "BOOTREQUEST arrived, but DHCP message type is unknown. Dropping it." << endl;
     }

@@ -14,6 +14,7 @@ Register_Abstract_Class(IArp::Notification);
 const simsignal_t IArp::arpResolutionInitiatedSignal = cComponent::registerSignal("arpResolutionInitiated");
 const simsignal_t IArp::arpResolutionCompletedSignal = cComponent::registerSignal("arpResolutionCompleted");
 const simsignal_t IArp::arpResolutionFailedSignal = cComponent::registerSignal("arpResolutionFailed");
+const simsignal_t IArp::arpAddressConflictDetectedSignal = cComponent::registerSignal("arpAddressConflictDetected");
 
 } // namespace inet
 

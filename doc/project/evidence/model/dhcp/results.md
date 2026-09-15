@@ -49,7 +49,7 @@ behavior.
 | `Rfc6842ClientIdentifierEchoed.test` | FAIL (expected), gap 5 | [client-identifier-echoed](../../protocol/dhcp/checks/client-identity.md#client-identifier-echoed) |
 | `Rfc6842ForeignClientIdentifier.test` | FAIL (expected), gap 6 | [foreign-client-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-client-identifier-discarded) |
 | `Rfc2131ForeignTransactionId.test` | PASS | [foreign-transaction-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-transaction-identifier-discarded) |
-| `Rfc2131DuplicateAddressDeclined.test` | **FAIL (unexpected)**, gap 11, an untestable claim | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) |
+| `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15, gap 11 closed
 | `Rfc2131InformWithoutLease.test` | FAIL (expected), gap 9 | [inform-answered-without-a-lease](../../protocol/dhcp/checks/inform.md#inform-answered-without-a-lease) |
 | `Rfc2131ReleaseOnShutdown.test` | FAIL (expected), gap 12 | [release-on-shutdown](../../protocol/dhcp/checks/release.md#release-on-shutdown) |
 | `Rfc2131BroadcastBitClear.test` | FAIL (expected), gap 7 | [reply-to-a-client-that-clears-the-broadcast-bit](../../protocol/dhcp/checks/reply-delivery.md#reply-to-a-client-that-clears-the-broadcast-bit) |
@@ -139,10 +139,10 @@ The current split is the one the rule produces: five declared, eight not.
 
 ## The model gaps
 
-**Seven of the fourteen are repaired, on 2026-09-15: gaps 1, 2, 3, 4, 8, 10, 13 and 14.**
-The suite is 26 tests, **20 PASS, 5 FAIL (expected) and 1 FAIL (unexpected)**, from 13 / 5 / 8.
-The one left is gap 11, an untestable claim and not a defect. The seven that remain beyond it
-are all recorded as unimplemented and carry their declaration.
+**Eight of the fourteen are closed, on 2026-09-15: gaps 1, 2, 3, 4, 8, 10, 11, 13 and 14,
+and part of gap 9 with them.** The suite is 26 tests, **21 PASS and 5 FAIL (expected)**, from
+13 / 5 / 8: **nothing fails unexpectedly any more.** The gaps that remain are all recorded as
+unimplemented and carry their declaration.
 
 Repairing gap 14 also corrected a step of its test. The absence of observations 3 and 5 was
 an ordered `never` over 90 seconds, and an ordered step consumes its whole window before the
@@ -448,6 +448,34 @@ they say the model is silent in both cases where the standard asks for silence i
 only. Neither check alone could establish that.
 
 ### Gap 11 (untestable claim) — the client never probes the address it was given
+
+**Closed 2026-09-15.** The client probes the granted address before it takes it, and refuses
+it when somebody answers. Four pieces were needed, and three of them were already written and
+unreachable:
+
+- `Arp::sendArpProbe` built the RFC 5227 probe and nothing called it.
+- `DhcpClient::sendDecline` built the DHCPDECLINE and nothing called it. It also lacked the
+  server identifier that RFC 2131 table 5 requires, which no run had ever shown.
+- `Arp::processArpPacket` threw `wrong ARP packet: source IPv4 address is empty` on the very
+  packet the probe is, so a neighbour's lawful probe stopped the run. An all-zero sender
+  protocol address marks a probe: it claims nothing, so the table steps are skipped for it
+  and the target question still gets its answer.
+- A reply to a probe is addressed to that all-zero address, so the target question cannot
+  recognize it. `Arp` remembers what it is probing and matches the reply by its sender
+  protocol address, as RFC 5227 section 2.1.1 states, then reports
+  `arpAddressConflictDetected`.
+
+The client waits `probeWait` (1 s by default, 0 s turns the check off) and binds if nobody
+answers. The lease timers are armed when the acknowledgement arrives, not when the address is
+taken, so the probe does not move T1 or T2.
+
+Closing it also exposed **gap 9** from a new side: the server ignored the DHCPDECLINE, so it
+offered the same address again and the client declined again, for the whole run. RFC 2131
+section 4.3.3 makes marking the address unavailable a MUST, and the server does it now.
+
+The four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are tested
+now rather than untested, which is what made this an untestable claim.
+
 
 `DhcpClient::handleDhcpAck` (`DhcpClient.cc:665`) records the lease and calls `bindLease`
 (`:306`), which configures the interface. Neither one sends an address resolution request for

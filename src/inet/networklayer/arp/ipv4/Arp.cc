@@ -244,6 +244,24 @@ void Arp::processArpPacket(Packet *packet)
     }
     dumpArpPacket(arp.get());
 
+    // RFC 5227 section 2.1.1: "if the host receives an ARP Reply where the 'sender IP
+    // address' is the address being probed for, the host MUST treat this address as being in
+    // use by some other host". The reply answers a probe whose sender protocol address was
+    // all zero, so it is addressed to 0.0.0.0 and addressRecognized below cannot see it.
+    if (arp->getOpcode() == ARP_REPLY) {
+        auto probed = probedAddresses.find(arp->getSrcIpAddress());
+        if (probed != probedAddresses.end()) {
+            EV_INFO << "Address conflict: " << arp->getSrcIpAddress() << " is in use by "
+                    << arp->getSrcMacAddress() << "." << endl;
+            Notification signal(arp->getSrcIpAddress(), arp->getSrcMacAddress(),
+                    ift->getInterfaceById(probed->second));
+            emit(arpAddressConflictDetectedSignal, &signal);
+            probedAddresses.erase(probed);
+            delete packet;
+            return;
+        }
+    }
+
     // extract input port
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
@@ -280,17 +298,24 @@ void Arp::processArpPacket(Packet *packet)
 
     if (srcMacAddress.isUnspecified())
         throw cRuntimeError("wrong ARP packet: source MAC address is empty");
-    if (srcIpAddress.isUnspecified())
-        throw cRuntimeError("wrong ARP packet: source IPv4 address is empty");
+    // RFC 5227 section 2.1.1 makes an all-zero sender protocol address lawful: the packet is
+    // an ARP Probe, which asks whether anybody holds the target address and claims nothing
+    // for itself. Throwing let any neighbour stop the run with one. A probe carries no
+    // sender address to record, so the table steps below are skipped for it, and the target
+    // question still gets its answer.
+    bool isProbe = srcIpAddress.isUnspecified();
 
     bool mergeFlag = false;
-    // "If ... sender protocol address is already in my translation table"
-    auto it = arpCache.find(srcIpAddress);
-    if (it != arpCache.end()) {
-        // "update the sender hardware address field"
-        ArpCacheEntry *entry = it->second;
-        updateArpCache(entry, srcMacAddress);
-        mergeFlag = true;
+    auto it = arpCache.end();
+    if (!isProbe) {
+        // "If ... sender protocol address is already in my translation table"
+        it = arpCache.find(srcIpAddress);
+        if (it != arpCache.end()) {
+            // "update the sender hardware address field"
+            ArpCacheEntry *entry = it->second;
+            updateArpCache(entry, srcMacAddress);
+            mergeFlag = true;
+        }
     }
 
     // "?Am I the target protocol address?"
@@ -298,7 +323,7 @@ void Arp::processArpPacket(Packet *packet)
     if (addressRecognized(arp->getDestIpAddress(), ie)) {
         // "If Merge_flag is false, add the triplet protocol type, sender
         // protocol address, sender hardware address to the translation table"
-        if (!mergeFlag) {
+        if (!mergeFlag && !isProbe) {
             ArpCacheEntry *entry;
             if (it != arpCache.end()) {
                 entry = it->second;
@@ -509,6 +534,8 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     // both must be set
     ASSERT(!srcAddr.isUnspecified());
     ASSERT(!probedAddr.isUnspecified());
+
+    probedAddresses[probedAddr] = ie->getInterfaceId();
 
     Packet *packet = new Packet("arpProbe");
     const auto& arp = makeShared<ArpPacket>();

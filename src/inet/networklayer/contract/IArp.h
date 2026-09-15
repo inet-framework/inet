@@ -41,6 +41,12 @@ class INET_API IArp
     static const simsignal_t arpResolutionInitiatedSignal;
     static const simsignal_t arpResolutionCompletedSignal;
     static const simsignal_t arpResolutionFailedSignal;
+    /**
+     * Emitted when a reply names an address this host is probing, which means the address is
+     * in use by somebody else. RFC 5227 section 2.1.1. The notification carries the probed
+     * address and the hardware address that answered for it.
+     */
+    static const simsignal_t arpAddressConflictDetectedSignal;
 
   public:
     virtual ~IArp() {}
@@ -59,6 +65,18 @@ class INET_API IArp
      * resolution procedure terminates.
      */
     virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *ie) = 0;
+
+    /**
+     * Asks whether anybody already holds the given address, by sending an ARP Probe: a
+     * request that carries an all-zero sender protocol address, so it claims nothing. RFC
+     * 5227 section 2.1.1. An answer, if one comes, is reported through
+     * arpAddressConflictDetectedSignal.
+     *
+     * An implementation that resolves addresses without packets cannot ask the question, so
+     * it sends nothing and reports no conflict. A caller must therefore treat silence as
+     * "nobody holds it", which is what the standard asks of it anyway.
+     */
+    virtual void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr) = 0;
 };
 
 } // namespace inet

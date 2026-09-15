@@ -50,6 +50,7 @@ simple Arp extends SimpleModule like IArp
         @signal[arpResolutionInitiated](type=inet::IArp::Notification);
         @signal[arpResolutionCompleted](type=inet::IArp::Notification);
         @signal[arpResolutionFailed](type=inet::IArp::Notification);
+        @signal[arpAddressConflictDetected](type=inet::IArp::Notification);
         @statistic[arpRequestSent](title="ARP request sent"; source=arpRequestSent; record=count,"sum(packetBytes)","vector(packetBytes)");
         @statistic[arpReplySent](title="ARP replies sent"; source=arpReplySent; record=count,"sum(packetBytes)","vector(packetBytes)");
         @statistic[arpResolutionInitiated](title="ARP initiated resolutions"; record=count);

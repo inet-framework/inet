@@ -89,7 +89,13 @@ class INET_API Arp : public OperationalBase, public IArp
     ///@}
 
     void sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
-    void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr);
+    virtual void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr) override;
+
+    // The addresses this host is probing, and the interface each probe went out of. A probe
+    // carries an all-zero sender protocol address, so a reply to it is addressed to 0.0.0.0
+    // and the target question of the reception algorithm cannot recognize it. RFC 5227
+    // section 2.1.1 matches the reply by its sender protocol address instead.
+    std::map<Ipv4Address, int> probedAddresses;
 
   protected:
     virtual void initialize(int stage) override;

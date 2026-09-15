@@ -26,6 +26,7 @@ Define_Module(DhcpClient);
 
 DhcpClient::~DhcpClient()
 {
+    cancelAndDelete(timerProbe);
     cancelAndDelete(timerT1);
     cancelAndDelete(timerTo);
     cancelAndDelete(timerT2);
@@ -39,6 +40,7 @@ void DhcpClient::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        timerProbe = new cMessage("Probe Timeout", WAIT_PROBE);
         timerT1 = new cMessage("T1 Timer", T1);
         timerT2 = new cMessage("T2 Timer", T2);
         timerTo = new cMessage("DHCP Timeout");
@@ -67,6 +69,8 @@ void DhcpClient::initialize(int stage)
         WATCH(responseTimeout);
         // get the routing table to update and subscribe it to the blackboard
         irt.reference(this, "routingTableModule", true);
+        arp.reference(this, "arpModule", true);
+        probeWait = par("probeWait");
         // set client to idle state
         clientState = IDLE;
         // get the interface to configure
@@ -77,6 +81,7 @@ void DhcpClient::initialize(int stage)
         // for a wireless interface subscribe the association event to start the DHCP protocol
         host->subscribe(l2AssociatedSignal, this);
         host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(IArp::arpAddressConflictDetectedSignal, this);
         socket.setCallback(this);
         socket.setOutputGate(gate("socketOut"));
     }
@@ -114,6 +119,7 @@ NetworkInterface *DhcpClient::chooseInterface()
 
 void DhcpClient::finish()
 {
+    cancelEvent(timerProbe);
     cancelEvent(timerT1);
     cancelEvent(timerTo);
     cancelEvent(timerT2);
@@ -227,6 +233,11 @@ void DhcpClient::handleTimer(cMessage *msg)
             initClient();
         }
     }
+    else if (category == WAIT_PROBE) {
+        // Nobody answered the probe, so the address is free and the client may take it.
+        EV_DETAIL << "The probe of " << lease->ip << " went unanswered. The address is free." << endl;
+        bindLease();
+    }
     else if (category == WAIT_OFFER) {
         // RFC 2131 section 3.1: the client retransmits the DHCPDISCOVER. Restarting the
         // whole process here reset the backoff, so every attempt waited the same time.
@@ -339,14 +350,6 @@ void DhcpClient::bindLease()
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
 
-    /*
-        The client SHOULD perform a final check on the parameters (ping, Arp).
-        If the client detects that the address is already in use:
-        EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
-        sendDecline(lease->ip);
-        initClient();
-     */
-
     EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
             << host->getFullName() << "." << endl;
 
@@ -395,6 +398,7 @@ void DhcpClient::initClient()
     retransmissionDelay = DHCP_INITIAL_RETRANSMISSION_DELAY;
     numRequestRetransmissions = 0;
 
+    cancelEvent(timerProbe);
     cancelEvent(timerT1);
     cancelEvent(timerT2);
     cancelEvent(timerTo);
@@ -537,6 +541,20 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         if (associatedIE && ie == associatedIE && clientState != IDLE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             unbindLease();
+            initClient();
+        }
+    }
+    else if (signalID == IArp::arpAddressConflictDetectedSignal) {
+        // RFC 2131 section 4.4.1: "If the client detects that the address is already in use,
+        // the client MUST send a DHCPDECLINE message to the server and restarts the
+        // configuration process."
+        auto notification = check_and_cast_nullable<const IArp::Notification *>(obj);
+        if (notification != nullptr && timerProbe->isScheduled()
+            && lease != nullptr && notification->l3Address == lease->ip)
+        {
+            EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
+            cancelEvent(timerProbe);
+            sendDecline(lease->ip);
             initClient();
         }
     }
@@ -690,6 +708,12 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     length += 3;
     options.setRequestedIp(declinedIp);
     length += 6;
+    // RFC 2131 table 5: a DHCPDECLINE MUST carry the server identifier as well as the
+    // requested address, so the server that granted the address knows whose grant is
+    // refused. It also MUST NOT carry a lease time or a parameter request list, and its
+    // ciaddr is zero; none of those is set here.
+    options.setServerIdentifier(lease->serverId);
+    length += 6;
 
     // magic cookie and the end field
     length += 5;
@@ -706,9 +730,42 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 {
     recordLease(msg);
     cancelEvent(timerTo);
+
+    // T1 and T2 measure the lease, which starts when the server granted it, so they are
+    // armed here whether or not the address is probed first.
     scheduleTimerT1();
     scheduleTimerT2();
+
+    // RFC 2131 section 4.4.1: "The client SHOULD perform a check on the suggested address to
+    // ensure that the address is not already in use." The address is taken only when the
+    // probe goes unanswered, so binding waits for the probe timer. A probeWait of zero turns
+    // the check off and binds at once, which is what this function always used to do.
+    //
+    // A probe is an ARP packet. On a link where Ipv4 does no ARP, for example PPP, nobody can
+    // answer one and the interface has no MAC address to send it from, so the client binds at
+    // once there as well.
+    //
+    // The check is for an address the client is about to start using, which is the case after
+    // REQUESTING and after REBOOTING (RFC 2131 sections 3.1 and 3.2). A renewal or a rebinding
+    // extends an address the client already uses, and RFC 5227 section 2.1 asks for a probe only
+    // before a host begins to use an address.
+    bool linkUsesArp = ie->isBroadcast() && !ie->getMacAddress().isUnspecified();
+    bool beginsToUseAddress = clientState == REQUESTING || clientState == REBOOTING;
+    if (probeWait > SIMTIME_ZERO && linkUsesArp && beginsToUseAddress) {
+        probeGrantedAddress();
+        rescheduleAfter(probeWait, timerProbe);
+        return;
+    }
+
     bindLease();
+}
+
+void DhcpClient::probeGrantedAddress()
+{
+    EV_INFO << "Probing the granted address " << lease->ip << " before taking it." << endl;
+    // The probe carries an all-zero sender protocol address, so it tells nobody that this
+    // host holds an address it has not taken yet. See RFC 5227 section 2.1.1.
+    arp->sendArpProbe(ie, macAddress, lease->ip);
 }
 
 void DhcpClient::scheduleRetransmissionTimerTO(DhcpTimerType type)
@@ -774,6 +831,7 @@ void DhcpClient::handleStartOperation(LifecycleOperation *operation)
 
 void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 {
+    cancelEvent(timerProbe);
     cancelEvent(timerT1);
     cancelEvent(timerT2);
     cancelEvent(timerTo);
@@ -790,6 +848,7 @@ void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 
 void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
 {
+    cancelEvent(timerProbe);
     cancelEvent(timerT1);
     cancelEvent(timerT2);
     cancelEvent(timerTo);

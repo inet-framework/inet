@@ -144,6 +144,12 @@ MacAddress GlobalArp::resolveL3Address(const L3Address& address, const NetworkIn
     throw cRuntimeError("Address must be one of unicast, multicast, or broadcast");
 }
 
+void GlobalArp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr)
+{
+    // No packet goes on the wire, so nobody can answer a probe. The silence means "nobody
+    // holds the address", which is what IArp promises a caller.
+}
+
 MacAddress GlobalArp::mapUnicastAddress(L3Address address)
 {
     switch (address.getType()) {
