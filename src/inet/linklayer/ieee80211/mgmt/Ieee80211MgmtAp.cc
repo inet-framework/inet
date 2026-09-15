@@ -16,6 +16,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211CapabilityInformation.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
@@ -211,6 +212,7 @@ void Ieee80211MgmtAp::sendBeacon()
 {
     EV << "Sending beacon\n";
     const auto& body = makeShared<Ieee80211BeaconFrame>();
+    body->setCapabilityInformation(CAPABILITY_ESS | (mib->qos ? CAPABILITY_QOS : 0));
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
@@ -374,6 +376,7 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
 
     // IEEE Std 802.11-2024, 11.3.5.3 g): an HT STA must support every Basic HT-MCS.
     const auto& body = makeShared<Ieee80211AssociationResponseFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     // Constructing an HT response requires an authoritative primary channel.
     // Do this before reserving an AID or publishing pending transaction state,
     // so an unavailable channel cannot leave a half-created association.
@@ -454,6 +457,7 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
 
     // send OK response
     const auto& body = makeShared<Ieee80211ReassociationResponseFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     // See the association response path above: fail while constructing the
     // response, before mutating association bookkeeping.
     if (pendingHtOperationValid) {
@@ -525,6 +529,7 @@ void Ieee80211MgmtAp::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
 
     EV << "Sending ProbeResponse frame\n";
     const auto& body = makeShared<Ieee80211ProbeResponseFrame>();
+    body->setCapabilityInformation(CAPABILITY_ESS | (mib->qos ? CAPABILITY_QOS : 0));
     body->setSSID(ssid.c_str());
     setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
