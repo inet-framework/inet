@@ -264,8 +264,8 @@
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==350',             500s,            6518-1016/tplx;b21f-0ea2/~tNl;0ef5-d7e0/~tND;9b47-3a1d/tyf, PASS,    wireless Ipv4
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==350',             500s,            7a69-d427/tplx;3aa8-584d/~tNl;e972-9ec9/~tND;6be5-e4ba/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       1s,            52b9-628f/tplx;3fec-74a2/~tNl;dbb5-67b0/~tND;8871-1dd1/tyf, PASS,    wireless Ipv4
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            57ee-7ddf/tplx;dab9-5e8d/~tNl;2e7b-0729/~tND;f985-34fb/tyf, PASS,    wireless Ipv4
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       1s,            52b9-628f/tplx;3fec-74a2/~tNl;e0f6-575e/~tND;8871-1dd1/tyf, PASS,    wireless Ipv4
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            57ee-7ddf/tplx;dab9-5e8d/~tNl;7d08-3938/~tND;f985-34fb/tyf, PASS,    wireless Ipv4
 /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            f7a5-cf0a/tplx;a24a-a070/~tNl;5dae-0b8e/~tND;335d-6687/tyf, PASS,    wireless Ipv4
 /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                 1s,            5abb-93a6/tplx;2bdd-d1fa/~tNl;31ab-28b7/~tND;6f6e-b101/tyf, PASS,    wireless Ipv4
 
