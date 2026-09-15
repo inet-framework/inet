@@ -233,7 +233,16 @@ void DhcpServer::processDhcpMessage(Packet *packet)
 //                    std::cout << "init-reboot" << endl;
                     Ipv4Address requestedAddress = dhcpMsg->getOptions().getRequestedIp();
                     auto it = leased.find(requestedAddress);
-                    if (it == leased.end()) {
+                    // RFC 2131 section 4.3.2 asks the subnet question first, and it does not
+                    // need a lease entry: an address of a foreign subnet is in no table of
+                    // leases, so asking the table first made the server silent for exactly
+                    // the case that must be answered with a DHCPNAK. The reference is the
+                    // server's own network and not a leased address, which may not exist.
+                    if (!Ipv4Address::maskedAddrAreEqual(requestedAddress, ipAddressStart, subnetMask)) {
+                        EV_ERROR << "The requested IP address " << requestedAddress << " is on the wrong network." << endl;
+                        sendNak(dhcpMsg);
+                    }
+                    else if (it == leased.end()) {
                         // if DHCP server has no record of the requested IP, then it must remain silent
                         // and may output a warning to the network admin
                         EV_WARN << "DHCP server has no record of IP " << requestedAddress << "." << endl;
@@ -335,8 +344,15 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->setHops(0);
     ack->setXid(lease->xid); // transaction id;
     ack->setSecs(0); // 0 seconds from transaction started
-    ack->setBroadcast(false);
-    ack->setCiaddr(lease->ip); // client IP addr.
+    // RFC 2131 table 3: the flags of a DHCPACK are the flags of the client's DHCPREQUEST.
+    // A constant false told every client the reply was unicast whatever it had asked for.
+    // sendNak already copies the value.
+    ack->setBroadcast(packet->getBroadcast());
+    // RFC 2131 table 3 allows two values for the ciaddr of a DHCPACK: the ciaddr of the
+    // DHCPREQUEST, or 0. The leased address is a third that the table does not allow, and it
+    // says something untrue: ciaddr means "I hold this address", and the client does not
+    // hold it yet.
+    ack->setCiaddr(packet->getCiaddr());
     ack->setYiaddr(lease->ip); // client IP addr.
 
     ack->setChaddr(lease->mac); // client MAC address
@@ -357,9 +373,13 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->getOptionsForUpdate().setRouterArraySize(1);
     ack->getOptionsForUpdate().setRouter(0, lease->gateway);
     length += (2 + 1 * sizeof(uint32_t));
-    ack->getOptionsForUpdate().setDnsArraySize(1);
-    ack->getOptionsForUpdate().setDns(0, lease->dns);
-    length += (2 + 1 * sizeof(uint32_t));
+    // Only return a domain name server option when there is a server to name. Nothing in
+    // the model assigns DhcpLease::dns, so the option used to go out holding 0.0.0.0.
+    if (!lease->dns.isUnspecified()) {
+        ack->getOptionsForUpdate().setDnsArraySize(1);
+        ack->getOptionsForUpdate().setDns(0, lease->dns);
+        length += (2 + 1 * sizeof(uint32_t));
+    }
 
     // add the server ID as the RFC says
     ack->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
@@ -416,10 +436,15 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->setHops(0);
     offer->setXid(lease->xid); // transaction id
     offer->setSecs(0); // 0 seconds from transaction started
-    offer->setBroadcast(false); // unicast
+    // RFC 2131 table 3: the flags of a DHCPOFFER are the flags of the client's DHCPDISCOVER.
+    offer->setBroadcast(packet->getBroadcast());
 
     offer->setYiaddr(lease->ip); // ip offered.
-    offer->setGiaddr(lease->gateway); // next server ip
+    // RFC 2131 table 3: the giaddr of a DHCPOFFER is the giaddr of the client's
+    // DHCPDISCOVER, which is 0.0.0.0 on a subnet with no relay agent. It used to carry the
+    // gateway address, which is a different field's meaning: the router a client needs
+    // travels in option 3, which this function also sets. sendNak already reads it this way.
+    offer->setGiaddr(packet->getGiaddr());
 
     offer->setChaddr(lease->mac); // client mac address
     offer->setSname(""); // no server name given
@@ -439,9 +464,12 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->getOptionsForUpdate().setRouterArraySize(1);
     offer->getOptionsForUpdate().setRouter(0, lease->gateway);
     length += (2 + 1 * sizeof(uint32_t));
-    offer->getOptionsForUpdate().setDnsArraySize(1);
-    offer->getOptionsForUpdate().setDns(0, lease->dns);
-    length += (2 + 1 * sizeof(uint32_t));
+    // The same rule as in sendAck: no option without a value for it.
+    if (!lease->dns.isUnspecified()) {
+        offer->getOptionsForUpdate().setDnsArraySize(1);
+        offer->getOptionsForUpdate().setDns(0, lease->dns);
+        length += (2 + 1 * sizeof(uint32_t));
+    }
 
     // add the server_id as the RFC says
     offer->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());

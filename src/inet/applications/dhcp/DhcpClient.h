@@ -57,12 +57,26 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     int numReceived = 0; // number of received DHCP messages
     int responseTimeout = 0; // timeout waiting for DHCPACKs, DHCPOFFERs
 
+    // RFC 2131 section 4.1 asks for a randomized exponential backoff between
+    // retransmissions: 4 seconds before the first, doubled each time, up to 64, each
+    // randomized by a uniform value between -1 and +1 second. retransmissionDelay holds the
+    // undelayed value for the next arming; a new transaction resets it.
+    simtime_t retransmissionDelay;
+    int numRequestRetransmissions = 0; // DHCPREQUESTs sent in this transaction with no reply
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void scheduleTimerTO(DhcpTimerType type);
+
+    /**
+     * Arms the response timeout with the randomized exponential backoff of RFC 2131
+     * section 4.1. Only the initial exchange uses it: RFC 2131 section 4.4.5 gives
+     * RENEWING and REBINDING a schedule of their own, and scheduleTimerTO keeps that.
+     */
+    virtual void scheduleRetransmissionTimerTO(DhcpTimerType type);
     virtual void scheduleTimerT1();
     virtual void scheduleTimerT2();
     static const char *getStateName(ClientState state);

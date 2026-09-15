@@ -46,10 +46,10 @@
 /examples/communicationcache/,       -f omnetpp.ini -c MapCommunicationCache -r 0,        10s,       4c65-91ae/tplx;72b5-8f0b/~tNl;190a-bc02/~tND;40ef-e3e2/tyf, PASS, wireless Ipv4
 /examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       4c65-91ae/tplx;72b5-8f0b/~tNl;190a-bc02/~tND;40ef-e3e2/tyf, PASS, wireless Ipv4
 
-/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           df67-0fe0/tplx;023a-3c37/~tNl;fdc9-84e1/~tND;8a53-9a15/tyf, PASS, EthernetMac Ipv4
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            d282-cc4a/tplx;ac86-dd61/~tNl;e4f3-81b8/~tND;d3a7-5f49/tyf, PASS, wireless EthernetMac Ipv4
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            4149-27a9/tplx;0566-81a4/~tNl;5f5a-289c/~tND;3497-9980/tyf, PASS, wireless EthernetMac Ipv4
-/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            df1a-1a1e/tplx;0610-405e/~tNl;4ae3-3dec/~tND;fbd6-20e8/tyf, PASS, EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           d9e3-1ab8/tplx;4c5c-0018/~tNl;b35f-1bee/~tND;8a53-9a15/tyf, PASS, EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            3a30-ead6/tplx;2b97-b5c7/~tNl;69ee-486a/~tND;d3a7-5f49/tyf, PASS, wireless EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            65d6-086d/tplx;882f-e575/~tNl;4524-0643/~tND;3497-9980/tyf, PASS, wireless EthernetMac Ipv4
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            6056-57f3/tplx;e6fd-c7a8/~tNl;8fa5-901b/~tND;fbd6-20e8/tyf, PASS, EthernetMac Ipv4
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0, PASS,   # abstract-config
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0,                  10s,             0, PASS,   # abstract-config

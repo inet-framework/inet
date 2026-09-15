@@ -12,7 +12,7 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           0b7e-7adc/tplx;12a6-f004/~tNl;8b42-bf7b/~tND;d3f3-ed4c/tyf, PASS,    wireless EthernetMac Ipv4   # Step8A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           b1ac-8912/tplx;12a6-f004/~tNl;96e2-030b/~tND;af16-1150/tyf, PASS,    wireless EthernetMac Ipv4
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           3383-4549/tplx;4ff7-140d/~tNl;75f7-37ae/~tND;c38c-98ef/tyf, PASS,    wireless EthernetMac Ipv4
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           0fca-ae83/tplx;d39c-9f1f/~tNl;c4ee-f7ca/~tND;c38c-98ef/tyf, PASS,    wireless EthernetMac Ipv4
 /tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;095d-75bd/tyf, PASS,   wireless # Step10A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;4d60-fcf9/tyf, PASS,   wireless # Step10B extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx;4a61-20ba/~tNl;707b-bb40/~tND;f078-56fe/tyf, PASS,    wireless Ipv4

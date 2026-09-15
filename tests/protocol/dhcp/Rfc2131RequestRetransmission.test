@@ -70,7 +70,14 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Expected observations 3 and 5 as one absence: no DHCPACK and no DHCPNAK reaches the
         // client, and no DHCPDISCOVER leaves it, until the repeated DHCPREQUEST comes.
-        .never(on("hostA")
+        //
+        // The absence is a guard and not an ordered step. An ordered one consumes its whole
+        // window before the step after it begins, so the repeated DHCPREQUEST that this test
+        // is about would be looked for only after the 90 seconds had passed, by which time
+        // the client has given up and gone back to sending DHCPDISCOVERs. The guard runs
+        // beside the step after it, which is what "until the repeated DHCPREQUEST comes"
+        // means.
+        .meanwhile(never(on("hostA")
                   .filterEvent([](const MatchContext& c) {
                       if (c.event.kind == EventKind::ReceivedFromLower)
                           if (isDhcp(c.event.packet, DHCPACK) || isDhcp(c.event.packet, DHCPNAK))
@@ -79,7 +86,7 @@ Define_ProtocolTestProgram()
                              && isDhcp(c.event.packet, DHCPDISCOVER); // observation 5
                   })
                   .describe("a DHCPACK or a DHCPNAK reaching the client, or a DHCPDISCOVER leaving it")
-                  .within(90.0))
+                  .within(59.0)))
         // Expected observations 4 and 6: a second DHCPREQUEST, asking for the same address.
         .once(on("hostA.udp").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) {

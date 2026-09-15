@@ -2,10 +2,12 @@
 In this test the server shuts down immediately after (t = 0.0s) the starting and reboots
 at t = 190s. Client acts according to its default behavior and starts sending DHCPDISCOVER
 messages via UDP broadcasts.
-As the client got no responses within its default timeout (60s) it periodically retransmits
-the DHCPDISCOVER message.
-In this scenario, server reboots at 190s so client has to retransmit DHCPDISCOVER four times
-before its first success.
+The client gets no answer and retransmits the DHCPDISCOVER message with the backoff of
+RFC 2131 section 4.1: after about 4, 8, 16, 32 and 64 seconds, and then every 64 seconds,
+each delay randomized by up to one second. A retransmission keeps the transaction and does
+not restart the configuration.
+In this scenario, server reboots at 190s so client has to retransmit DHCPDISCOVER six times
+before its first success. The client then renews its lease.
 
 %inifile: omnetpp.ini
 [General]
@@ -73,23 +75,32 @@ LifecycleTest.server shutting down
 .*
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
-.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
-.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
+.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
+.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
 .*
 LifecycleTest.server started
 .*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
 DHCPDISCOVER arrived. Handling it.
 .*
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
+DHCPACK message arrived in RENEWING state. The renewing process was successful.
 .*
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

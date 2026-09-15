@@ -212,6 +212,36 @@ Notable backward incompatible changes are the following:
     requires a server to expand a datagram carrying an ack-eliciting Initial
     packet to at least 1200 octets, which the client's builder has always done.
 
+14. DHCP corrects seven defects in its client and server
+
+    The client drew a new transaction identifier for every DHCPREQUEST, so a
+    request never carried the identifier of the offer it answered, against RFC
+    2131 section 4.4.1. It keeps the identifier of the exchange now, and a new
+    transaction draws its own.
+
+    The server wrote three field values it had no right to write. It put the
+    gateway address into the giaddr of a DHCPOFFER, where RFC 2131 table 3 wants
+    the giaddr of the client's DHCPDISCOVER; it put the leased address into the
+    ciaddr of a DHCPACK, where the table allows only the client's ciaddr or zero;
+    and it wrote a constant false into the flags of every reply, where the table
+    wants the flags of the message it answers. It also returned a domain name
+    server option holding 0.0.0.0, because nothing in the model ever assigns that
+    field.
+
+    The server stayed silent for a DHCPREQUEST naming an address of a foreign
+    subnet, because it asked its lease table before it asked about the subnet and
+    a foreign address is in no table. RFC 2131 section 4.3.2 wants a DHCPNAK.
+
+    The client's retransmission delay was a constant 60 seconds, and it never
+    repeated a DHCPREQUEST at all: it abandoned the transaction at the first
+    timeout. RFC 2131 section 4.1 asks for a randomized exponential backoff, 4
+    seconds doubling to 64, and section 3.1 asks for the request to be repeated.
+    Both are there now, for the initial exchange only: RENEWING and REBINDING keep
+    the schedule of section 4.4.5.
+
+    DHCP exchanges now take different times and put different bytes on the wire,
+    so trajectories and fingerprints of simulations that use DHCP move.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

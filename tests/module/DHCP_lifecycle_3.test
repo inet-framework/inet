@@ -66,21 +66,32 @@ network LifecycleTest
 .*
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
-.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
-.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
-(DETAIL: )?No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
 .*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
+.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
+Sending DHCPDISCOVER.
+.*
+LifecycleTest.server started
+.*
+(DETAIL: )?No DHCP offer received within timeout. Retransmitting DHCPDISCOVER.
 Sending DHCPDISCOVER.
 .*
 DHCPDISCOVER arrived. Handling it.
 .*
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
+DHCPACK message arrived in RENEWING state. The renewing process was successful.
 .*
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

@@ -16,6 +16,12 @@
 
 namespace inet {
 
+// RFC 2131 section 4.1: 4 seconds before the first retransmission, doubled each time, up to
+// 64. Section 3.1 suggests about four retransmissions of a DHCPREQUEST before giving up.
+static const int DHCP_INITIAL_RETRANSMISSION_DELAY = 4;
+static const int DHCP_MAX_RETRANSMISSION_DELAY = 64;
+static const int DHCP_MAX_REQUEST_RETRANSMISSIONS = 4;
+
 Define_Module(DhcpClient);
 
 DhcpClient::~DhcpClient()
@@ -43,6 +49,8 @@ void DhcpClient::initialize(int stage)
         numReceived = 0;
         xid = 0;
         responseTimeout = 60; // response timeout in seconds RFC 2131, 4.4.3
+        retransmissionDelay = DHCP_INITIAL_RETRANSMISSION_DELAY;
+        numRequestRetransmissions = 0;
 
         WATCH(numSent);
         WATCH(numReceived);
@@ -220,17 +228,35 @@ void DhcpClient::handleTimer(cMessage *msg)
         }
     }
     else if (category == WAIT_OFFER) {
-        EV_DETAIL << "No DHCP offer received within timeout. Restarting. " << endl;
-        initClient();
+        // RFC 2131 section 3.1: the client retransmits the DHCPDISCOVER. Restarting the
+        // whole process here reset the backoff, so every attempt waited the same time.
+        EV_DETAIL << "No DHCP offer received within timeout. Retransmitting DHCPDISCOVER." << endl;
+        sendDiscover();
+        scheduleRetransmissionTimerTO(WAIT_OFFER);
     }
     else if (category == WAIT_ACK) {
-        EV_DETAIL << "No DHCP ACK received within timeout. Restarting." << endl;
-        initClient();
+        // RFC 2131 section 3.1: "The client times out and retransmits the DHCPREQUEST
+        // message if the client receives neither a DHCPACK or a DHCPNAK message", and it
+        // restarts only after enough attempts. The client used to abandon the transaction at
+        // the first timeout and send a fresh DHCPDISCOVER instead.
+        if (clientState == REQUESTING && numRequestRetransmissions < DHCP_MAX_REQUEST_RETRANSMISSIONS) {
+            numRequestRetransmissions++;
+            EV_DETAIL << "No DHCP ACK received within timeout. Retransmitting DHCPREQUEST ("
+                      << numRequestRetransmissions << " of " << DHCP_MAX_REQUEST_RETRANSMISSIONS << ")." << endl;
+            sendRequest();
+            scheduleRetransmissionTimerTO(WAIT_ACK);
+        }
+        else {
+            EV_DETAIL << "No DHCP ACK received after " << DHCP_MAX_REQUEST_RETRANSMISSIONS
+                      << " retransmissions. Restarting." << endl;
+            initClient();
+        }
     }
     else if (category == T1) {
         EV_DETAIL << "T1 expired. Starting RENEWING state." << endl;
         clientState = RENEWING;
         scheduleTimerTO(WAIT_ACK);
+        xid = intuniform(0, RAND_MAX); // a renewal is a new transaction
         sendRequest();
     }
     else if (category == T2 && clientState == RENEWING) {
@@ -241,6 +267,7 @@ void DhcpClient::handleTimer(cMessage *msg)
         cancelEvent(timerTo);
 //        cancelEvent(leaseTimer);
 
+        xid = intuniform(0, RAND_MAX); // rebinding is a new transaction
         sendRequest();
         scheduleTimerTO(WAIT_ACK);
     }
@@ -364,18 +391,23 @@ void DhcpClient::initClient()
 {
     EV_INFO << "Starting DHCP configuration process." << endl;
 
+    // a new transaction: the backoff starts again
+    retransmissionDelay = DHCP_INITIAL_RETRANSMISSION_DELAY;
+    numRequestRetransmissions = 0;
+
     cancelEvent(timerT1);
     cancelEvent(timerT2);
     cancelEvent(timerTo);
     cancelEvent(leaseTimer);
 
     sendDiscover();
-    scheduleTimerTO(WAIT_OFFER);
+    scheduleRetransmissionTimerTO(WAIT_OFFER);
     clientState = SELECTING;
 }
 
 void DhcpClient::initRebootedClient()
 {
+    xid = intuniform(0, RAND_MAX); // a reboot starts a new transaction
     sendRequest();
     scheduleTimerTO(WAIT_ACK);
     clientState = REBOOTING;
@@ -405,7 +437,12 @@ void DhcpClient::handleDhcpMessage(Packet *packet)
         case SELECTING:
             if (messageType == DHCPOFFER) {
                 EV_INFO << "DHCPOFFER message arrived in SELECTING state with IP address: " << msg->getYiaddr() << "." << endl;
-                scheduleTimerTO(WAIT_ACK);
+                // RFC 2131 section 3.1: "The client retransmits the DHCPREQUEST according to
+                // the retransmission algorithm in section 4.1", which applies the algorithm
+                // to this message, so the series starts again here.
+                retransmissionDelay = DHCP_INITIAL_RETRANSMISSION_DELAY;
+                numRequestRetransmissions = 0;
+                scheduleRetransmissionTimerTO(WAIT_ACK);
                 clientState = REQUESTING;
                 recordOffer(msg);
                 sendRequest(); // we accept the first offer
@@ -511,9 +548,12 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 
 void DhcpClient::sendRequest()
 {
-    // setting the xid
-    xid = intuniform(0, RAND_MAX); // generating a new xid for each transmission
-
+    // The transaction identifier is NOT drawn here. RFC 2131 section 4.4.1: "The
+    // DHCPREQUEST message contains the same 'xid' as the DHCPOFFER message", so a request
+    // that answers an offer must carry the identifier the exchange already has. Drawing one
+    // here broke that for every request, and the servers that were not chosen could then not
+    // connect the request to the offer they made. A new transaction draws its own; see the
+    // three callers that start one.
     const auto& request = makeShared<DhcpMessage>();
     request->setOp(BOOTREQUEST);
     uint16_t length = 236; // packet size without the options field
@@ -669,6 +709,26 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
     scheduleTimerT1();
     scheduleTimerT2();
     bindLease();
+}
+
+void DhcpClient::scheduleRetransmissionTimerTO(DhcpTimerType type)
+{
+    // RFC 2131 section 4.1: "The client MUST adopt a retransmission strategy that
+    // incorporates a randomized exponential backoff algorithm to determine the delay between
+    // retransmissions." The delay used to be the same 60 seconds every time, which is
+    // neither half of that. It is 4 seconds before the first retransmission, doubled each
+    // time up to 64, and each arming is randomized by a uniform value between -1 and +1
+    // second.
+    //
+    // Only the initial exchange uses this. RFC 2131 section 4.4.5 gives RENEWING and
+    // REBINDING a schedule of their own, which scheduleTimerTO keeps.
+    simtime_t delay = retransmissionDelay + uniform(-1, 1);
+    if (delay < SIMTIME_ZERO)
+        delay = SIMTIME_ZERO;
+    retransmissionDelay = std::min(retransmissionDelay * 2, simtime_t(DHCP_MAX_RETRANSMISSION_DELAY));
+
+    timerTo->setKind(type);
+    rescheduleAfter(delay, timerTo);
 }
 
 void DhcpClient::scheduleTimerTO(DhcpTimerType type)
