@@ -3,8 +3,9 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
-**Where it stands:** groups A, B and C are done and group D is half done. **15 of the 30
-tests pass**, from nine repairs, and one that had declared an expected failure passes too.
+**Where it stands:** groups A, B and C are done, and group D has 3 tests left of 12. **17 of
+the 30 tests pass**, from eleven repairs, and one that had declared an expected failure
+passes too.
 
 Three suites are complete, with no unexpected failure left:
 
@@ -14,7 +15,7 @@ Three suites are complete, with no unexpected failure left:
 | ipv4 | 16 PASS, 2 expected, 4 unexpected | **20 PASS, 2 expected** |
 | ipv6 | 19 PASS, 8 unexpected FAIL | **27 PASS** |
 
-What is left: dhcp 8, tcp 3, quic 2, udp 2.
+What is left: dhcp 8, tcp 2, quic 2, udp 1.
 
 A note on counting: an earlier figure of 257 tests was wrong. It came from a verdict list
 keyed by test name, and two suites use the same name for different tests. The runner's own
@@ -89,9 +90,17 @@ side and still fails.
       `arp/Rfc826UnknownProtocolSpace` — done. Two crashes a neighbour controlled.
       The two RARP branches still throw and no test covers them; the ARP results say so.
 - [ ] `quic/Rfc9000ServerInitialSize`, `quic/Rfc9000UnknownFrameType`
-- [ ] `tcp/Rfc6298FirstMeasurement`, `tcp/Rfc9293ShrunkWindowNoNewData`,
-      `tcp/Rfc9293ChecksumDefault`
-- [ ] `udp/Rfc1122ChecksumDefault`, `udp/Rfc768EmptyDatagram`
+- [x] `tcp/Rfc9293ChecksumDefault` — done. The same one-word default change is clean for
+      TCP, and it moves every TCP fingerprint.
+- [ ] `tcp/Rfc6298FirstMeasurement`, `tcp/Rfc9293ShrunkWindowNoNewData`
+- [x] `udp/Rfc768EmptyDatagram` — done. Four result filters stopped the run on a packet of
+      zero length, which RFC 768 allows. One step of the test changed: a relay that shortens
+      a frame leaves one no dissector will read.
+- [ ] `udp/Rfc1122ChecksumDefault` — **blocked, and the block is the finding.** Changing the
+      default to `computed` was tried on 2026-09-15 and reverted. Computing a UDP checksum
+      serializes the payload, and QUIC has no serializer for its packet headers, so 10 of 11
+      QUIC tests stop and two others fall with them. The test does not pass either way. UDP
+      cannot default to a computed checksum until every payload in the tree serializes.
 
 ### Group E — DHCP (8 tests, 14 gaps)
 
