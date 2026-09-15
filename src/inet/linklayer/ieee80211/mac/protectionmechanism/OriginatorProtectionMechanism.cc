@@ -49,6 +49,7 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
 //   — If the More Fragments bit is 1 in the Frame Control field of a frame and the Address 1 field contains
 //     an individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this data frame, plus two ACK frames, plus three SIFS intervals.
+// IEEE Std 802.11-2024, 9.3.2.1.5 and 10.6.6.5.2: each response ACK uses the applicable response rate.
 //
 simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
@@ -61,7 +62,7 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
         simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
         auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
         RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode);
-        simtime_t ackToPendingFrame = pendingFrameMode->getDuration(LENGTH_ACK);
+        simtime_t ackToPendingFrame = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
         return pendingFrameDuration + ackToDataFrameDuration + ackToPendingFrame + 3 * modeSet->getSifsTime();
     }
 }
@@ -104,4 +105,3 @@ simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, co
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
