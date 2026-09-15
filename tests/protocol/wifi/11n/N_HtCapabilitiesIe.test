@@ -1,27 +1,69 @@
-%# expected-result: FAIL
 %description:
-802.11n HT Capabilities information element in Association Request (type 0): an
-Ieee80211HtCapabilities chunk is present in the frame. [NOT-MODELED -- INET's
-Ieee80211MgmtFrame.msg defines AssociationRequestFrame with only SSID and
-supportedRates fields; no HT Capabilities or HT Operation IE chunk is generated;
-the classes Ieee80211HtCapabilities and Ieee80211HtOperation do not exist in INET]
+802.11n HT Capabilities information element in an Association Request (type 0).
+The n(mixed-2.4Ghz) fixture must advertise HT through the actual management-frame
+body, include a meaningful mandatory MCS bit, and carry the HT Capabilities element
+on the serialized wire. [Required -- IEEE 802.11-2024 Section 9.4.2.54]
 
 %file: N_HtCapabilitiesIe.cc
 
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+#include <cstddef>
+#include <cstdint>
 
 namespace inet {
 namespace protocoltest {
 
-// Spec-required assertion: an Association Request from an HT STA must include the
-// HT Capabilities element (IEEE 802.11-2020 Section 9.4.2.56). INET's mgmt layer
-// never inserts this chunk; the filter will never match.
+static bool hasHtCapabilitiesMcs0InModel(const Packet *packet)
+{
+    const auto& macHeader = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+    const auto& body = packet->peekAt<ieee80211::Ieee80211AssociationRequestFrame>(macHeader->getChunkLength());
+    return body->getHtCapabilitiesPresent() && body->getHtCapabilities().rxMcsSupported[0];
+}
+
+// The packetSentToLower event is still in the packet domain, so checking the typed
+// management body alone would not prove the bytes produced by the serializer. Parse
+// the serialized Association Request body as information elements. The
+// EID (45) and fixed body length (26) are the HT Capabilities element; MCS 0 is
+// bit 0 of the first byte of the 16-octet Supported MCS Set (body offset 3).
+static bool hasHtCapabilitiesElementOnWire(const Packet *packet)
+{
+    const auto bytes = packet->peekAllAsBytes()->getBytes();
+    const auto& macHeader = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+    const size_t headerLength = macHeader->getChunkLength().get<B>();
+    constexpr size_t fixedAssociationRequestLength = 4; // Capability + Listen Interval
+    constexpr size_t fcsLength = 4;
+    if (headerLength + fixedAssociationRequestLength + fcsLength > bytes.size())
+        return false;
+    size_t offset = headerLength + fixedAssociationRequestLength;
+    const size_t bodyEnd = bytes.size() - fcsLength;
+    while (offset + 2 <= bodyEnd) {
+        const uint8_t elementId = bytes[offset++];
+        const size_t length = bytes[offset++];
+        if (offset + length > bodyEnd)
+            return false;
+        if (elementId == 45)
+            return length == 26 && (bytes[offset + 3] & 1) != 0;
+        offset += length;
+    }
+    return false;
+}
+
+// The association request must enter the real STA management path with the HT
+// capability gate enabled.  The assertion is deliberately separate from the
+// selector: if the IE disappears, the first Association Request is selected and
+// the test fails immediately instead of waiting for a later matching event.
 Define_ProtocolTest(wifi_11n_ht_capabilities_ie)
 {
     return ProtocolTest("wifi_11n_ht_capabilities_ie")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 0 && Ieee80211HtCapabilities.length >= 0")
-                  .describe("an Association Request containing HT Capabilities IE").within(2.5));
+                  .filterPacket("ieee80211mac.type == 0")
+                  .assertPacket("Ieee80211AssociationRequestFrame.htCapabilitiesPresent == true")
+                  .assertEvent([](const MatchContext& c) { return hasHtCapabilitiesMcs0InModel(c.event.packet) && hasHtCapabilitiesElementOnWire(c.event.packet); })
+                  .describe("an HT Association Request with MCS 0 and a serialized HT Capabilities IE")
+                  .within(2.5));
 }
 
 } // namespace protocoltest
@@ -33,6 +75,7 @@ Define_ProtocolTest(wifi_11n_ht_capabilities_ie)
 *.tester.testName = "wifi_11n_ht_capabilities_ie"
 include ../../ini/_n.ini
 include ../../ini/_base.ini
+*.sta1.wlan[0].mac.fcsMode = "computed"
 
 %contains: stdout
 PROTOCOLTEST wifi_11n_ht_capabilities_ie: PASS
