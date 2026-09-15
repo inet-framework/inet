@@ -46,6 +46,7 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     //@{
     simtime_t srtt = 0; ///< smoothed round-trip time
     simtime_t rttvar = 3.0 / 4.0; ///< variance of round-trip time
+    bool rttMeasured = false; ///< whether a round-trip time has been measured yet (RFC 6298 2.2 vs 2.3)
     //@}
 
     /// number of RTOs

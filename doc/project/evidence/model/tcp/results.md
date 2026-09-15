@@ -45,7 +45,7 @@ Pass 3, level 3:
 | Rfc9293NoWindowShrink.test | RFC9293-WND-3 | PASS |
 | Rfc9293SoftIcmpError.test | RFC9293-ICMP-3; covers ICMP-1 | PASS |
 | Rfc9293ChecksumDefault.test | RFC9293-CKSUM-1 (the value) | **FAIL (unexpected)** — defect, gap 2. The repair is blocked; see below |
-| Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **FAIL (unexpected)** — defect, gap 3 |
+| Rfc9293ShrunkWindowNoNewData.test | RFC9293-WND-5 | **PASS** since 2026-09-15; gap 3 was a **test error**, not a defect |
 | Rfc9293SourceQuench.test | RFC9293-ICMP-2 | **PASS** since 2026-09-14; gap 4 is closed by the ICMP repair |
 
 Summary after pass 3: 19 tests, 15 PASS, 4 FAIL, each failure declared with
@@ -77,7 +77,7 @@ IPv4 suite asked for closed gap 4 as well, exactly as that test predicted.
 | Test | Checks | Verdict |
 | --- | --- | --- |
 | Rfc6298InitialTimeout.test | RFC6298-INIT-1 | PASS |
-| Rfc6298FirstMeasurement.test | RFC6298-FIRST-1, RFC6298-RTO-1; covers MIN-1 | **FAIL (unexpected)** — defect, gap 5 |
+| Rfc6298FirstMeasurement.test | RFC6298-FIRST-1, RFC6298-RTO-1; covers MIN-1 | **PASS** since 2026-09-15; gap 5 is repaired |
 | Rfc6298BackoffDoubling.test | RFC6298-BACK-1, RFC6298-EARLY-1 | PASS |
 | Rfc6298KarnsRule.test | RFC6298-KARN-1 | PASS |
 | Rfc6298TimeoutAfterLostSyn.test | RFC6298-SYN-1 | PASS |
@@ -180,7 +180,7 @@ not against the earlier wording.
 | Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature | yes |
 | Rfc9293SourceQuench | `Icmp::processIcmpMessage` still has no branch for type 4, but its default discards instead of throwing, which meets the rule | closed 2026-09-14 | no, removed |
 | Rfc9293ChecksumDefault | **Defect, and the repair is blocked.** `TcpChecksumInsertionHook::computeChecksum` computes the value and the `computed` mode runs it; what is wrong is the default, which `Tcp.ned` sets to `declared`. Changing it to `computed` was tried on 2026-09-15 and reverted. Computing a checksum serializes the segment, and the copy that comes back has lost the region tags its payload carried: `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of TCP data without a GenericAppMsgReq region tag at its front". The protocol suite cannot see this, because none of its scenarios uses a region-tagged payload; the fingerprint run found it. **TCP cannot default to a computed checksum until a serialized payload keeps its region tags.** This is the same blocker that stops the UDP default, where QUIC has no serializer at all | **defect** | **no, removed** |
-| Rfc9293ShrunkWindowNoNewData | `sendData` limits a send by `min(snd_wnd, congestionWindow)`, and the sibling test shows the shrunk advertisement is read | **defect** | **no, removed** |
+| Rfc9293ShrunkWindowNoNewData | **Reclassified 2026-09-15: a test error, and the model obeys the rule.** `sendData` refuses the send and says so: `Effective window is zero (advertised window 100, congestion window 2144), cannot send.` Host A had 2320 octets buffered, so it wanted to send and did not. 59 microseconds later host B advertises 7504 again, because only the relay shrank anything, and host A then sends lawfully. The old watch ran for 0.3 seconds and caught that lawful send. It runs for 50 microseconds now, inside the interval the shrunk edge stands | **test error** | **no, removed** |
 
 Two declarations were removed. The suite result moves from 18 TOTAL, 14 PASS, 4 FAIL
 (expected) — reported as PASS — to 18 TOTAL, 14 PASS, 2 FAIL (expected), 2 FAIL (unexpected),

@@ -183,6 +183,20 @@ Notable backward incompatible changes are the following:
     packetDropped signal. The two RARP branches still throw, which the model means
     as a statement that it does not implement RARP.
 
+12. TCP takes its first round-trip measurement as RFC 6298 states
+
+    rttMeasurementComplete folded the first measurement into the recurrence of
+    RFC 6298 section 2.3, starting from srtt = 0 and rttvar = 3/4. The first
+    smoothed value was therefore one eighth of the measurement and the first
+    timeout described the initial guess rather than the path.
+
+    Section 2.2 gives the first measurement a case of its own: SRTT = R and
+    RTTVAR = R/2. The estimator now does that, and a new rttMeasured flag in the
+    algorithm state tells the two cases apart.
+
+    Every TCP connection's early retransmission timeout changes, so trajectories
+    and fingerprints of TCP simulations move with it.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

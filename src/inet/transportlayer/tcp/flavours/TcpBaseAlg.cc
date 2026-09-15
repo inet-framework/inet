@@ -331,10 +331,23 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     simtime_t& srtt = state->srtt;
     simtime_t& rttvar = state->rttvar;
 
-    simtime_t err = newRTT - srtt;
+    if (!state->rttMeasured) {
+        // RFC 6298 section 2.2: the first measurement has a case of its own. Folding it
+        // into the recurrence below started the estimator from srtt = 0 and rttvar = 3/4,
+        // so the first smoothed value was one eighth of the measurement and the first
+        // timeout described the initial guess rather than the path.
+        srtt = newRTT;
+        rttvar = newRTT / 2;
+        state->rttMeasured = true;
+    }
+    else {
+        // RFC 6298 section 2.3, with alpha = 1/8 and beta = 1/4. rttvar is updated from the
+        // old srtt, so it comes first.
+        simtime_t err = newRTT - srtt;
 
-    srtt += g * err;
-    rttvar += g * (fabs(err) - rttvar);
+        srtt += g * err;
+        rttvar += g * (fabs(err) - rttvar);
+    }
 
     // assign RTO (here: rexmit_timeout) a new value
     simtime_t rto = srtt + 4 * rttvar;
