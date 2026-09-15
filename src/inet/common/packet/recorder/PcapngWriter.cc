@@ -96,6 +96,7 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
 
     flush = false;
+    this->snaplen = snaplen;
 
     // TODO check validity of timePrecision
     this->timePrecision = timePrecision;
@@ -135,7 +136,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     ibh.blockTotalLength = blockTotalLength;
     ibh.linkType = linkType;
     ibh.reserved = 0;
-    ibh.snaplen = 0;
+    ibh.snaplen = snaplen;
     fwrite(&ibh, sizeof(ibh), 1, dumpfile);
 
     // interface name option
@@ -215,7 +216,8 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     if (networkInterface == nullptr)
         throw cRuntimeError("The interface entry not found for packet");
 
-    b capturedLength = packet->getDataLength() - frontOffset - backOffset;
+    b originalLength = packet->getDataLength() - frontOffset - backOffset;
+    b capturedLength = snaplen == 0 ? originalLength : std::min(originalLength, b(B(snaplen)));
     uint32_t optionsLength = (4 + 4) + 4;
     uint32_t blockTotalLength = 32 + roundUp(capturedLength.get<B>()) + optionsLength;
     ASSERT(blockTotalLength % 4 == 0);
@@ -229,7 +231,7 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     pbh.timestampHigh = static_cast<uint32_t>((timestamp >> 32) & 0xFFFFFFFFLLU);
     pbh.timestampLow = static_cast<uint32_t>(timestamp & 0xFFFFFFFFLLU);
     pbh.capturedPacketLength = capturedLength.get<B>();
-    pbh.originalPacketLength = capturedLength.get<B>();
+    pbh.originalPacketLength = originalLength.get<B>();
     fwrite(&pbh, sizeof(pbh), 1, dumpfile);
 
     if (capturedLength != b(0)) {
