@@ -91,9 +91,10 @@ simtime_t RecipientQosAckPolicy::computeAckDurationField(Packet *packet, const P
 //
 simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BasicBlockAckReq>& basicBlockAckReq) const
 {
-    return basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
+    simtime_t duration = basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
+    // IEEE Std 802.11-2024, 9.2.5.1: a negative calculated Duration/ID is inserted as zero.
+    return duration < 0 ? 0 : duration;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
