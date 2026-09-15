@@ -125,7 +125,7 @@
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c OneNetwork -r 0,                                  5s,            46cc-9c41/tplx;c427-dece/~tNl;eae3-92e1/~tND;9c21-dd33/tyf, PASS,    wireless
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c MultipleNetworks -r 0,                            5s,            5094-e358/tplx;3c17-6ee0/~tNl;4dff-fa35/~tND;3be5-9494/tyf, PASS,    wireless
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            7fb8-49dc/tplx;2f60-762d/~tNl;0437-f151/~tND;07bb-3973/tyf, PASS,    wireless
-/showcases/visualizer/canvas/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         51ec-d359/tplx;cec5-d464/~tNl;a0c6-b121/~tND;c099-e5c5/tyf, PASS, Ipv4
+/showcases/visualizer/canvas/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         051b-668f/tplx;cec5-d464/~tNl;a0c6-b121/~tND;c099-e5c5/tyf, PASS, Ipv4
 
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;b145-6576/tyf, PASS,   wireless Ipv4 # VisualizingSubmoduleInformation extended
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;4677-fc97/tyf, PASS,    wireless Ipv4
