@@ -45,7 +45,7 @@ seed-set = 1
 *.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
 *.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
 
-**.wlan*.mgmt.numAuthSteps = 4
+**.wlan*.mgmt.numAuthSteps = 2
 **.AP*.wlan*.mgmt.beaconInterval = 0.1s
 **.AP_Home.wlan*.mgmt.ssid = "HOME"
 **.AP_Home.wlan*.address = "10:AA:00:00:00:01"

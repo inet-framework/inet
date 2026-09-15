@@ -1,0 +1,73 @@
+%description:
+Infrastructure STA management packets retain the target BSSID at the real MAC
+header construction boundary, including wildcard scans before association.
+
+%file: TestStaMgmtBssid.cc
+#include <iostream>
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+namespace inet { namespace ieee80211 {
+class TestStaMgmtBssid : public Ieee80211Mac
+{
+  protected:
+    int probes = 0, authentications = 0, associations = 0;
+    virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
+            ASSERT(header->getAddress3() == header->getReceiverAddress());
+            if (header->getType() == ST_PROBEREQUEST) probes++;
+            if (header->getType() == ST_AUTHENTICATION) {
+                auto body = packet->peekDataAt<Ieee80211AuthenticationFrame>(header->getChunkLength());
+                ASSERT(body->getAlgorithmNumber() == 0 && body->getSequenceNumber() == 1);
+                authentications++;
+            }
+            if (header->getType() == ST_ASSOCIATIONREQUEST) associations++;
+        }
+        Ieee80211Mac::processUpperFrame(packet, header);
+    }
+    virtual void finish() override {
+        ASSERT(probes > 0 && authentications == 1 && associations > 0);
+        std::cout << "STA scan, authentication and association headers carry their target BSSID.\n";
+    }
+};
+Define_Module(TestStaMgmtBssid);
+}}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.node.wireless.AccessPoint;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module TestStaMgmtBssid extends Ieee80211Mac {
+    parameters:
+        @class(::inet::ieee80211::TestStaMgmtBssid);
+}
+network StaMgmtBssidNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = StaMgmtBssidNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.sta.wlan[0].mac.typename = "TestStaMgmtBssid"
+*.ap.wlan[0].mgmt.ssid = "test"
+*.sta.wlan[0].agent.defaultSsid = "test"
+*.sta.wlan[0].agent.channelsToScan = "0"
+**.opMode = "g(erp)"
+**.bitrate = 6Mbps
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 0m
+*.sta.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+STA scan, authentication and association headers carry their target BSSID.
