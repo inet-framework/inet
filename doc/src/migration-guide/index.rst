@@ -43,6 +43,15 @@ Custom producers must set a valid interval before serialization.
 numeric mappings that used 60 for this reason. Old stored value 60 cannot be
 reinterpreted automatically: it also denoted invalid mesh security capability.
 
+IEEE 802.11 Management Advertisement Hooks
+-----------------------------------------
+
+``Ieee80211MgmtBase::addVhtCapabilities()`` and ``addVhtOperation()`` are now
+virtual, like the HT advertisement helpers. Subclasses may override them to
+customize advertisements in inherited frame builders; use ``override`` on
+these declarations. Rebuild external management subclasses against the new
+header and library.
+
 Migrating IEEE 802.11 PHY Modes
 ------------------------------
 

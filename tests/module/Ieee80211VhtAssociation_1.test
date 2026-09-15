@@ -8,6 +8,7 @@ fallback, disassociation isolation and coordinated mode-set invalidation.
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -103,6 +104,26 @@ class VhtProbeMac : public Ieee80211Mac
     }
 };
 Define_Module(VhtProbeMac);
+
+// Inherited AP frame builders must dispatch through the advertisement hooks.
+class VhtProbeAp : public Ieee80211MgmtAp
+{
+  public:
+    mutable int capabilitiesAdded = 0;
+    mutable int operationAdded = 0;
+  protected:
+    virtual void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const override
+    {
+        capabilitiesAdded++;
+        Ieee80211MgmtAp::addVhtCapabilities(frame);
+    }
+    virtual void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const override
+    {
+        operationAdded++;
+        Ieee80211MgmtAp::addVhtOperation(frame);
+    }
+};
+Define_Module(VhtProbeAp);
 
 class VhtProbeSta : public Ieee80211MgmtSta
 {
@@ -208,6 +229,9 @@ class VhtAssociationTest : public cSimpleModule
             ASSERT(mac("sta[1]")->delivered == 2);
             ASSERT(mac("ap")->legacySent >= 1);
             ASSERT(mac("ap")->responses >= 2 && mac("sta[0]")->requests >= 1 && mac("sta[1]")->requests >= 1);
+            auto mgmt = check_and_cast<VhtProbeAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+            ASSERT(mgmt->capabilitiesAdded >= mac("ap")->responses);
+            ASSERT(mgmt->operationAdded >= mac("ap")->responses);
             std::cout << "VHT exchange verified: qos=" << par("qos").boolValue() << " missing=" << missing << "\n";
             endSimulation();
             return;
@@ -227,9 +251,11 @@ import inet.node.wireless.AccessPoint;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 simple VhtProbeRateControl extends AarfRateControl { parameters: @class(::VhtProbeRateControl); }
 module VhtProbeMac extends Ieee80211Mac { parameters: @class(::VhtProbeMac); }
+simple VhtProbeAp extends Ieee80211MgmtAp { parameters: @class(::VhtProbeAp); }
 simple VhtProbeSta extends Ieee80211MgmtSta { parameters: @class(::VhtProbeSta); }
 simple VhtAssociationTest { parameters: @class(::VhtAssociationTest); bool qos; bool missing; }
 network VhtNetwork
@@ -270,7 +296,7 @@ record-scalar-results = false
 **.mac.*.rateControl.typename = "VhtProbeRateControl"
 *.sta[*].wlan[*].mgmt.typename = "VhtProbeSta"
 *.sta[*].wlan[*].agent.typename = "Ieee80211AgentSta"
-*.ap.wlan[*].mgmt.typename = "Ieee80211MgmtAp"
+*.ap.wlan[*].mgmt.typename = "VhtProbeAp"
 *.ap.wlan[*].mgmt.beaconInterval = 1s
 *.sta[0].wlan[*].mib.vhtRxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]
 *.sta[0].wlan[*].mib.vhtTxMcsMap = [8,8,-1,-1,-1,-1,-1,-1]
