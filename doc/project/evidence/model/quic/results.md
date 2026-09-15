@@ -42,9 +42,9 @@ Pass 2, level 3, with the two level 2 blockers closed first:
 | --- | --- | --- |
 | Rfc9000ReorderedDelivery.test | RFC9000-STR-2, at its edge | PASS |
 | Rfc9000AntiAmplification.test | RFC9000-AMP-1 | PASS |
-| Rfc9000ServerInitialSize.test | RFC9000-SIZE-1, the server half | **FAIL (unexpected)**, gap 1, a defect |
+| Rfc9000ServerInitialSize.test | RFC9000-SIZE-1, the server half | **PASS** since 2026-09-15; gap 1 is repaired, and a step of the test was wrong too |
 | Rfc9000VersionNegotiation.test | RFC9000-VER-1 | FAIL (expected), gap 2, unimplemented |
-| Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **FAIL (unexpected)**, gap 3, a defect |
+| Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **PASS** since 2026-09-15; gap 3 is repaired |
 
 Summary after pass 2: 11 tests, 8 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite
 reports FAIL. The tallies of the other suites are not repeated here: a document that quotes another
@@ -59,8 +59,8 @@ code.
 
 | Test | Class | The claim, in the model |
 | --- | --- | --- |
-| `Rfc9000ServerInitialSize.test` | **defect** | `PacketBuilder::buildClientInitialPacket` pads to exactly the size the requirement names, `createPaddingFrame(1200 - packet->getSize())` (PacketBuilder.cc:476). The padding mechanism is implemented and applied to one of the two sides RFC 9000 names. |
-| `Rfc9000UnknownFrameType.test` | **defect** | `ConnectionState.cc` dispatches a frame on its type and has a `default:` branch for one it does not know; that branch throws. |
+| `Rfc9000ServerInitialSize.test` | **repaired, and one step of the test was wrong** | `PacketBuilder::buildClientInitialPacket` padded to the size the requirement names and `buildServerInitialPacket` did not; it does now. The test could not have passed either way: it used two `once` steps on one datagram, and the server sends one, so the second step had to find a datagram the first had already taken. The size is an assertion on the filtered datagram now, which is what the assert vocabulary is for. |
+| `Rfc9000UnknownFrameType.test` | **repaired** | `ConnectionState.cc` dispatches a frame on its type and had a `default:` branch that threw. It closes the connection with FRAME_ENCODING_ERROR now, as RFC 9000 section 12.4 requires. Two further stops sat behind it: the frame loop read on past the error into bytes that are no frame header, and the datagram loop then read those bytes as a packet header. Both stop when a connection error is raised. |
 | `Rfc9000VersionNegotiation.test` | unimplemented | Nothing reads the version of a received packet and nothing builds a Version Negotiation packet. `VersionNegotiationPacketHeader` is declared in `packet/PacketHeader.msg:45`, and a search of the hand-written sources finds no use of it: a declared message type with no builder and no sender is a modelled packet format, not an implemented behavior. |
 
 Two of the passes are worth as much as the failures. The reordering check puts the buffering

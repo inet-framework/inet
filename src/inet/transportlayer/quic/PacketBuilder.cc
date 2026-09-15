@@ -492,6 +492,13 @@ QuicPacket *PacketBuilder::buildServerInitialPacket(int maxPacketSize)
         }
     }
 
+    // RFC 9000 section 14.1: a server MUST expand the payload of a UDP datagram carrying an
+    // ack-eliciting Initial packet to at least 1200 octets. The CRYPTO frame above is
+    // ack-eliciting, so this packet always needs it. buildClientInitialPacket has always
+    // padded; this one did not.
+    if (packet->getSize() < 1200)
+        packet->addFrame(createPaddingFrame(1200 - packet->getSize()));
+
     return packet;
 }
 

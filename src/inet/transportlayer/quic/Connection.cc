@@ -195,6 +195,13 @@ void Connection::processPackets(Packet *pkt)
             connectionState = newState;
             connectionState->start();
         }
+        if (connectionState->hasRaisedConnectionError()) {
+            // RFC 9000 section 12.4: a frame of an unknown type is a connection error. The
+            // rest of the datagram is not processed, and reading on would reach bytes that
+            // are not a packet header at all.
+            EV_WARN << "connection error raised, the rest of the datagram is discarded\n";
+            break;
+        }
         if (pkt->getByteLength() >= byteLengthBefore) {
             throw cRuntimeError("no packet processing happened");
         }

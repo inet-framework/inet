@@ -134,6 +134,11 @@ void ConnectionState::processFrames(Packet *pkt, PacketNumberSpace pnSpace)
     Ptr<const FrameHeader> frameHeader = nullptr;
     do {
         processFrame(pkt, pnSpace);
+        // RFC 9000 section 12.4: a frame of an unknown type is a connection error, and the
+        // rest of the packet is not processed. Reading on reaches bytes that are not a frame
+        // header, which used to stop the run a second way.
+        if (connectionErrorRaised)
+            return;
         frameHeader = nullptr;
         if (pkt->getByteLength() > 0) {
             frameHeader = staticPtrCast<const FrameHeader>(pkt->peekAtFront<Chunk>());
@@ -210,8 +215,20 @@ void ConnectionState::processFrame(Packet *pkt, PacketNumberSpace pnSpace)
         case FRAME_HEADER_TYPE_PADDING:
         case FRAME_HEADER_TYPE_PING:
             return;
-        default:
-            throw cRuntimeError("Unknown Frame Header Type");
+        default: {
+            // RFC 9000 section 12.4: an endpoint MUST treat the receipt of a frame of a type
+            // it does not understand as a connection error of type FRAME_ENCODING_ERROR.
+            // Throwing let any peer stop the run with one frame.
+            //
+            // RFC 9000 section 20.1 gives the code; the model carries no enumeration of
+            // transport error codes, so the value is named here.
+            const int FRAME_ENCODING_ERROR = 0x07;
+            EV_WARN << "Unknown QUIC frame type " << frameHeader->getFrameType()
+                    << ", closing the connection with FRAME_ENCODING_ERROR\n";
+            connectionErrorRaised = true;
+            context->sendConnectionClose(false, false, FRAME_ENCODING_ERROR);
+            return;
+        }
     }
 
 }

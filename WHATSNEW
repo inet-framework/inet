@@ -197,6 +197,21 @@ Notable backward incompatible changes are the following:
     Every TCP connection's early retransmission timeout changes, so trajectories
     and fingerprints of TCP simulations move with it.
 
+13. QUIC closes the connection on an unknown frame type, and a server pads its
+    Initial datagram
+
+    A frame of a type the model does not know threw a cRuntimeError, so any peer
+    could stop a run with one frame. RFC 9000 section 12.4 makes it a connection
+    error of type FRAME_ENCODING_ERROR, and the model now sends CONNECTION_CLOSE
+    with that code. Two further stops sat behind it: the frame loop read on past
+    the error into bytes that are no frame header, and the datagram loop then
+    read those bytes as a packet header. Both stop when a connection error is
+    raised.
+
+    PacketBuilder::buildServerInitialPacket did not pad. RFC 9000 section 14.1
+    requires a server to expand a datagram carrying an ack-eliciting Initial
+    packet to at least 1200 octets, which the client's builder has always done.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

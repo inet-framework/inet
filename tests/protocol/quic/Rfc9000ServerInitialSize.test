@@ -54,17 +54,15 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc9000_server_initial_size")
         // Observation 1: the server sends a datagram that carries an ack-eliciting Initial
         // packet. This confirms that the case the requirement names occurs in this run.
+        // Observation 2 is an assertion on the same datagram and not a second step. The
+        // server sends one such datagram, so a second step looking for another could never
+        // match: it would have to find a datagram the first step had not already taken. The
+        // filter picks the datagram the requirement is about; the assertion demands its size
+        // and fails on that datagram (RFC9000-SIZE-1, the server half).
         .once(on("server.udp").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { return ackElicitingInitial(c.event.packet); })
-                  .describe("the server's datagram carrying an ack-eliciting Initial packet")
-                  .within(1.0))
-        // Observation 2: that datagram is at least 1200 octets (RFC9000-SIZE-1, the server
-        // half).
-        .once(on("server.udp").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) {
-                      return ackElicitingInitial(c.event.packet) && c.event.packet->getByteLength() >= 1200;
-                  })
-                  .describe("that datagram expanded to at least 1200 octets")
+                  .assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() >= 1200; })
+                  .describe("the server's datagram carrying an ack-eliciting Initial packet, expanded to at least 1200 octets")
                   .within(1.0));
 }
 

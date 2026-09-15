@@ -20,6 +20,10 @@ namespace quic {
 class ConnectionState {
 public:
     ConnectionState(Connection *context);
+
+    // True when a frame of an unknown type made the connection an error. The rest of the
+    // datagram is then not processed; see RFC 9000 section 12.4.
+    bool hasRaisedConnectionError() const { return connectionErrorRaised; }
     virtual ~ConnectionState();
 
     virtual void start();
@@ -62,6 +66,9 @@ public:
 
 protected:
     Connection *context;
+    // Set when a frame of an unknown type raised a connection error. The rest of the packet
+    // is then not processed: RFC 9000 section 12.4 makes the connection an error.
+    bool connectionErrorRaised = false;
     std::string name;
     bool ackElicitingPacket;
 
