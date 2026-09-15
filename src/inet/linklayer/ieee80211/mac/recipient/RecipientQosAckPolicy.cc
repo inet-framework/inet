@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 
 #include "inet/common/ModuleAccess.h"
 
@@ -78,7 +79,7 @@ bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckRe
 //
 simtime_t RecipientQosAckPolicy::computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    simtime_t duration = header->getDurationField() - modeSet->getSifsTime() - computeAckDuration(packet, header);
+    simtime_t duration = getIeee80211OrdinaryDuration(header->getDurationField()) - modeSet->getSifsTime() - computeAckDuration(packet, header);
     return duration < 0 ? 0 : duration;
 }
 
@@ -91,7 +92,7 @@ simtime_t RecipientQosAckPolicy::computeAckDurationField(Packet *packet, const P
 //
 simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BasicBlockAckReq>& basicBlockAckReq) const
 {
-    simtime_t duration = basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
+    simtime_t duration = getIeee80211OrdinaryDuration(basicBlockAckReq->getDurationField()) - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
     // IEEE Std 802.11-2024, 9.2.5.1: a negative calculated Duration/ID is inserted as zero.
     return duration < 0 ? 0 : duration;
 }
