@@ -128,6 +128,14 @@ Notable backward compatible changes are the following:
    Those two tags now survive the measurement.
 
 
+6. Opt-in IEEE 802.11 Radiotap capture
+
+   PcapRecorder can use registered protocol-specific capture adapters to write
+   Radiotap metadata for legacy, HT and VHT SU frames. Enable
+   enableProtocolSpecificCaptureAdapters together with enableConvertingPackets.
+   Bare IEEE 802.11 (link type 105) remains the default. Typed A-MPDUs are split
+   into MPDU records, and intact imported frames retain their FCS indication.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 

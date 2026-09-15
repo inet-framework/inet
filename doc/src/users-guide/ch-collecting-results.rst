@@ -152,6 +152,39 @@ protocol work and verification rather than merely changing recorder output, so
 they are part of the simulation configuration and should be held constant when
 comparing runs.
 
+IEEE 802.11 Radiotap captures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+IEEE 802.11 captures use bare MAC frames (link type 105) by default. To include
+Radiotap metadata (link type 127), enable protocol-specific capture adapters:
+
+.. code-block:: ini
+
+   *.host.numPcapRecorders = 1
+   *.host.pcapRecorder[0].pcapFile = "wlan.pcap"
+   *.host.pcapRecorder[0].fileFormat = "pcap"
+   *.host.pcapRecorder[0].dumpProtocols = "ieee80211mac"
+   *.host.pcapRecorder[0].enableProtocolSpecificCaptureAdapters = true
+   *.host.pcapRecorder[0].enableConvertingPackets = true
+   *.host.wlan[*].mac.fcsMode = "computed"
+
+Both adapter and conversion options must be enabled. PCAPng also supports
+Radiotap; use it when a file contains multiple interfaces or link types.
+The capture length limit includes the Radiotap header.
+
+The adapter records available legacy rate and short preamble, HT MCS, VHT SU,
+channel, power and direction information. Metadata depends on the observed signal and PHY model;
+unavailable fields are omitted. HE and EHT metadata are not supported.
+FCS presence is taken from the selected frame's typed trailer or, for an intact
+MAC frame imported from a capture, its FCS indication. An explicit indication
+of absence takes precedence over a trailer. FCS indications are not applied to
+selected subranges or individual members of an aggregate.
+
+Recognized typed A-MPDUs produce one record per MPDU, without delimiters and
+padding. Inbound records include A-MPDU status. Unparseable aggregates are
+preserved as one whole-PSDU record; an analyzer may not decode that fallback as
+a MAC frame. Raw bytes are not guessed to be an aggregate.
+
 .. _ug:sec:results:recording-routing-tables:
 
 Recording Routing Tables
