@@ -28,6 +28,7 @@ import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.queue.PacketQueue;
+import inet.queueing.server.InstantServer;
 import inet.queueing.server.PacketServer;
 import inet.protocolelement.acknowledgement.Resending;
 import inet.protocolelement.acknowledgement.SendWithAcknowledge;
@@ -118,13 +119,19 @@ module WirelessInterface extends NetworkInterface
         macResolver: NextHopMacResolver { @display("p=150,250"); }
         backoff: ExponentialBackoff { @display("p=150,175"); }
         resending: Resending { @display("p=150,100"); }
+        // a relay can receive a packet while its reliable link still sends the previous one (a new
+        // packet, or a duplicate after a lost acknowledgement); the packet waits here until then
+        pendingQueue: PacketQueue { @display("p=50,40"); }
+        pendingServer: InstantServer { @display("p=150,40"); }
         receiver: PacketReceiver { @display("p=450,625"); }
         receiveAtMac: ReceiveAtMacAddress { @display("p=450,500"); }
         receiveFromMac: ReceiveFromMacAddress { @display("p=450,450"); }
         receiveProtocol: ReceiveWithProtocol { @display("p=450,400"); }
         receiveWithAck: ReceiveWithAcknowledge { @display("p=450,175"); }
     connections:
-        upperLayerIn --> resending.in;
+        upperLayerIn --> pendingQueue.in;
+        pendingQueue.out --> pendingServer.in;
+        pendingServer.out --> resending.in;
         resending.out --> backoff.in;
         backoff.out --> macResolver.in;
         macResolver.out --> sendWithAck.in;
