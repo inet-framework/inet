@@ -118,6 +118,16 @@ the wire.
 `Icmpv6PacketTooBigMsg.code`, `Icmpv6PacketTooBigMsg.MTU`. `icmpv6.type` works on every
 message.
 
+### An unknown ICMPv6 type must still dissect
+
+**Fixed on 2026-09-16.** Master's `5c7fc97b3f` taught the ICMPv6 dissector to hand MLD messages
+to the MLD dissector. It read the type byte with `peekDataAt<BytesChunk>`, and that call
+serializes the header. The serializer throws on every type it does not know, so a message of
+type 100 or 200 stopped dissecting, and the filter turned the exception into a non-match.
+`Rfc4443UnknownErrorType` and `Rfc4443UnknownInformationalType` then missed their first step,
+although the message arrived. The dissector now reads the type from a field chunk and reads
+the byte only from raw bytes.
+
 ### Capture arithmetic works; a captured unit does not
 
 **Fixed on 2026-09-14.** A capture keeps its quantity form, so `{payload} - 8B` works, and a

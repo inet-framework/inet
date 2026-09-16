@@ -22,7 +22,15 @@ void Icmpv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, 
     // MLDv2 Report (143) -- are ICMPv6 messages with their own chunk types (MldMessage /
     // Mldv2Report, which derive from Icmpv6Header). Hand them to the MLD dissector so the
     // MLD serializers run; the generic ICMPv6 header serializer cannot represent them.
-    uint8_t type = packet->peekDataAt<BytesChunk>(b(0), B(1))->getBytes()[0];
+    //
+    // Read the type from a field chunk directly. Reading it as a byte serializes the chunk,
+    // and the serializer throws on every type it does not know: a node must accept such a
+    // message (RFC 4443 section 2.4), so the dissector must not fail on one either.
+    uint8_t type;
+    if (auto header = dynamicPtrCast<const Icmpv6Header>(packet->peekAtFront()))
+        type = header->getType();
+    else
+        type = packet->peekDataAt<BytesChunk>(b(0), B(1))->getBytes()[0];
     if (type == 130 || type == 131 || type == 132 || type == 143) {
         callback.dissectPacket(packet, &Protocol::mld);
         return;
