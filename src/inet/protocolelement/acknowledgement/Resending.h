@@ -31,7 +31,7 @@ class INET_API Resending : public PacketPusherBase
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return packet == nullptr; }
-    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return packet == nullptr; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return this->packet == nullptr; }
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
