@@ -98,6 +98,20 @@ void PacketGateBase::removePacket(Packet *packet)
     PacketFlowBase::removePacket(packet);
 }
 
+Packet *PacketGateBase::findPacket(const PacketPredicate& predicate) const
+{
+    if (!isOpen())
+        return nullptr;
+    auto packet = PacketFlowBase::findPacket(predicate);
+    return packet != nullptr && canPacketFlowThrough(packet) ? packet : nullptr;
+}
+
+Packet *PacketGateBase::dequeuePacket(const PacketPredicate& predicate)
+{
+    auto packet = findPacket(predicate);
+    return packet == nullptr ? nullptr : PacketFlowBase::dequeuePacket([packet](const Packet *candidate) { return candidate == packet; });
+}
+
 void PacketGateBase::removeAllPackets()
 {
     if (isOpen())

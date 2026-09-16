@@ -1,0 +1,169 @@
+%description:
+Exercise real HCF terminal cleanup when bounded management queues drop expiry
+DELBAs for both roles and when RED rejects a pending ADDBA before enqueue.
+
+%file: TestHcfAgreementQueueDrop.cc
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class SeedOriginatorHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    void seed(MacAddress peer, Tid tid) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, tid, SequenceNumberCyclic(0), 64, true, false, 1, nextTransactionId++);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SimTime(1, SIMTIME_US));
+        agreement->calculateExpirationTime();
+        blockAckAgreements[std::make_pair(peer, tid)] = agreement;
+    }
+
+};
+
+class SeedRecipientHandler : public RecipientBlockAckAgreementHandler
+{
+  public:
+    void seed(MacAddress peer, Tid tid) {
+        auto agreement = new RecipientBlockAckAgreement(peer, tid, SequenceNumberCyclic(0), 64, SimTime(1, SIMTIME_US), nextAgreementGenerationId++);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[std::make_pair(peer, tid)] = agreement;
+    }
+};
+
+class QueueDropHcf : public Hcf
+{
+  public:
+    void prepare(MacAddress peer) {
+        Enter_Method("prepare");
+        ASSERT(originatorBlockAckAgreementHandler != nullptr);
+        delete originatorBlockAckAgreementHandler;
+        delete recipientBlockAckAgreementHandler;
+        auto originator = new SeedOriginatorHandler();
+        auto recipient = new SeedRecipientHandler();
+        originatorBlockAckAgreementHandler = originator;
+        recipientBlockAckAgreementHandler = recipient;
+        if (!par("redTest").boolValue()) {
+            for (int tid = 0; tid < 2; tid++) {
+                originator->seed(peer, tid);
+                recipient->seed(peer, tid);
+            }
+            scheduleInactivityTimer(BlockAckAgreementRole::ORIGINATOR, simTime() + SimTime(1, SIMTIME_US));
+            scheduleInactivityTimer(BlockAckAgreementRole::RECIPIENT, simTime() + SimTime(1, SIMTIME_US));
+        }
+    }
+    void checkExpired(MacAddress peer) {
+        Enter_Method("checkExpired");
+        for (int tid = 0; tid < 2; tid++) {
+            ASSERT(originatorBlockAckAgreementHandler->getAgreement(peer, tid) == nullptr);
+            ASSERT(recipientBlockAckAgreementHandler->getAgreement(tid, peer) == nullptr);
+        }
+        ASSERT(!inactivityTimer->isScheduled());
+        ASSERT(pendingFrameEligibility.empty());
+    }
+};
+Define_Module(QueueDropHcf);
+
+class HcfAgreementQueueDropTest : public cSimpleModule, public cListener
+{
+  public:
+    HcfAgreementQueueDropTest() : cSimpleModule(65536) {}
+  protected:
+    int departures = 0;
+    virtual void receiveSignal(cComponent *source, simsignal_t, cObject *, cObject *details) override {
+        if (std::string(source->getName()) == "pendingQueue") {
+            ASSERT(check_and_cast<queueing::PacketQueueRemovalDetails *>(details)->getReason() == queueing::IPacketQueue::PacketRemovalReason::DROPPED);
+            departures++;
+        }
+    }
+    virtual void activity() override {
+        const MacAddress peer("02:00:00:00:00:09");
+        auto hcf = check_and_cast<QueueDropHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        auto queueModule = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3].pendingQueue");
+        queueModule->subscribe(queueing::IPacketQueue::packetQueueDepartureSignal, this);
+        hcf->prepare(peer);
+        wait(SimTime(2, SIMTIME_US));
+        hcf->checkExpired(peer);
+        ASSERT(departures == 4);
+        queueModule->unsubscribe(queueing::IPacketQueue::packetQueueDepartureSignal, this);
+        wait(SimTime(1, SIMTIME_US));
+        std::cout << "HCF agreement queue cleanup verified.\n";
+    }
+};
+Define_Module(HcfAgreementQueueDropTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module QueueDropHcf extends Hcf {
+    parameters:
+        bool redTest = default(false);
+        @class(::inet::ieee80211::QueueDropHcf);
+}
+module AgreementPendingQueue extends CompoundPacketQueueBase {
+    parameters:
+        @class(::inet::queueing::CompoundPacketQueueBase);
+    submodules:
+        classifier: PacketClassifier { classifierClass = "inet::ieee80211::MgmtOverDataClassifier"; }
+        managementQueue: <default("PacketQueue")> like inet.queueing.contract.IPacketQueue;
+        multicastQueue: PacketQueue;
+        unicastQueue: PacketQueue;
+        prioritizer: PriorityScheduler;
+    connections:
+        in --> classifier.in;
+        classifier.out++ --> managementQueue.in;
+        classifier.out++ --> multicastQueue.in;
+        classifier.out++ --> unicastQueue.in;
+        managementQueue.out --> prioritizer.in++;
+        multicastQueue.out --> prioritizer.in++;
+        unicastQueue.out --> prioritizer.in++;
+        prioritizer.out --> out;
+}
+simple HcfAgreementQueueDropTest extends SimpleModule {
+    parameters:
+        @class(::inet::ieee80211::HcfAgreementQueueDropTest);
+}
+network HcfAgreementQueueDropNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        test: HcfAgreementQueueDropTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = HcfAgreementQueueDropNetwork
+sim-time-limit = 4us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.ap.wlan[0].mac.qosStation = true
+*.ap.wlan[0].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[0].mac.hcf.typename = "QueueDropHcf"
+*.ap.wlan[0].mac.hcf.edca.edcaf[*].pendingQueue.typename = "AgreementPendingQueue"
+*.ap.wlan[0].mac.hcf.edca.edcaf[*].pendingQueue.managementQueue.packetCapacity = 0
+*.ap.wlan[0].mac.hcf.edca.edcaf[*].pendingQueue.managementQueue.dropperClass = "inet::queueing::PacketAtCollectionEndDropper"
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+
+%contains: stdout
+HCF agreement queue cleanup verified.

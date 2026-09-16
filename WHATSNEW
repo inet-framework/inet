@@ -64,6 +64,166 @@ Notable backward incompatible changes are the following:
    counted arrivals or summed bytes reported twice the true value and now reports
    the true one.
 
+4. Packet queue extraction and lifecycle signals
+
+   IPacketQueue now supports queue-lifecycle signals and predicate-based extraction.
+   Direct C++ implementations of IPacketQueue must implement findPacket(), the
+   predicate overload of dequeuePacket(), and must emit packetQueueDeparture
+   with PacketQueueRemovalDetails exactly once whenever a packet is dequeued,
+   explicitly removed, or destructively dropped. Listeners subscribe to the queue
+   module and filter the source to exclude descendant queue emissions. Providers
+   connected to CompoundPacketQueueBase must also implement IPacketExtractor so
+   that a compound queue preserves the provider's scheduling policy when it
+   extracts a matching packet. Direct C++
+   implementations of IPacketExtractor must replace selected-pointer extraction
+   with findPacket(predicate) and dequeuePacket(predicate); predicates may be
+   evaluated repeatedly and must be stable and side-effect free throughout one
+   logical selection. WrrScheduler, LabelScheduler, and PriorityScheduler accept
+   ordinary IPassivePacketSource inputs; they require IPacketCollection only when
+   collection/aggregate access is used and IPacketExtractor only when predicate
+   extraction is used, reporting the unsupported operation lazily.
+   PriorityScheduler aggregate queries no longer return -1 when an input lacks
+   IPacketCollection; getNumPackets() and getTotalLength() now report that
+   unsupported operation with cRuntimeError. Update callers that treated -1 as
+   an unknown aggregate size, or connect collection-capable providers.
+   A-MSDU policies now receive the provider-selected anchor and frame-eligibility
+   predicate. Additional policy-selected members are removed through exact
+   predicate dequeues, preserving scheduler/flow accounting without requiring
+   collection enumeration order to match scheduling order.
+   BasicMsduAggregationPolicy conservatively considers only collection members
+   after the anchor and never bypasses an earlier blocked same-flow member.
+   IPacketBuffer::ICallback requires explicit handlePacketDropping() and
+   handlePacketDropped() implementations. The first detaches the packet; the
+   second publishes its departure after all victims of the overload operation
+   have been detached. Custom buffer owners must implement both phases. Compound
+   queues propagate destructive drops through arbitrary non-queue wrappers and
+   nested compound queues exactly once. PacketBuffer rejects packets owned by a
+   cPacketQueue whose owner cannot participate in the buffer callback contract.
+
+5. Block Ack DELBA agreement ownership
+
+   Custom IBlockAckAgreementHandlerCallback implementations must explicitly
+   implement releaseBlockAckAgreementFrames() and cancelBlockAckTeardown().
+   Custom IFrameSequenceHandler implementations must implement both
+   cancelFrameSequence() and abortFrameSequence(), preserving their deferred
+   and immediate cancellation contracts. Custom originator and recipient
+   agreement handlers must implement isDelbaPending(); recipient handlers must
+   also implement processAcknowledgedDelba(), processAbortedDelba() and
+   getPendingTeardownGenerationId(). These methods no longer supply default
+   behavior in the interfaces. The built-in implementations already provide
+   these operations.
+
+   IOriginatorBlockAckAgreementHandler::processReceivedDelba(),
+   IOriginatorBlockAckAgreementHandler::processTransmittedDelba(), and
+   IRecipientBlockAckAgreementHandler::processReceivedDelba() now return the
+   terminated agreement as a unique_ptr. Originator ADDBA response processing
+   now returns a typed outcome containing the established agreement and, when
+   local policy vetoes a successful response, its immediately terminated local
+   agreement and a best-effort initiator DELBA for Hcf to enqueue after emitting
+   the Added and Deleted signals. Such locally generated DELBAs carry
+   sender-local agreement-generation metadata (the originator reuses its ADDBA
+   transaction identity), and ordinary data continues with Normal Ack. They remain
+   eligible through the
+   final fragment; aborting one fragment cancels its siblings. After retry backoff,
+   a replacement ADDBA setup invalidates an older queued DELBA, so an unreported
+   disposal cannot suppress setup indefinitely and a delayed frame cannot
+   terminate a newer peer/TID agreement. The replacement setup reports that
+   obsolete identity so Hcf also removes all of its queued or in-progress packets.
+   Originator and recipient DELBA transmission handlers now receive the full
+   Packet so sender-local agreement-generation metadata is retained through
+   fragmentation and MAC retries. This changes
+   IRecipientBlockAckAgreementHandler::processTransmittedDelba() from accepting
+   only a DELBA header to accepting Packet*; custom handler implementations and
+   callers must migrate to the Packet form. A locally tagged DELBA carrying
+   agreement-generation metadata remains eligible across MAC retries and is
+   retired only when its final fragment is acknowledged or the teardown is
+   terminally aborted. Custom handler
+   implementations and callers must adopt processAcknowledgedDelba() and the
+   boolean processAbortedDelba() outcome; processTransmittedDelba() still returns
+   the agreement removed by an untagged DELBA, or null when none was removed.
+
+   OriginatorBlockAckAgreementPolicy now exposes the new `addbaResponseTimeout`
+   and `addbaRetryBackoff` NED parameters. C++ implementations of
+   IOriginatorBlockAckAgreementPolicy must replace computeAddbaFailureTimeout()
+   with getAddbaResponseTimeout() and implement computeAddbaRetryBackoff().
+
+6. Originator ADDBA Transactions and Eligible Frames
+
+   ADDBA response deadlines now begin at actual request transmission. Frames for a
+   pending peer/TID wait for a matching successful response or terminal failure, then
+   channel access resumes for eligible traffic. This changes affected Block Ack
+   trajectories. A-MSDU service now appears as dequeued traffic in queue counters and
+   graphical fingerprints, instead of administrative removal.
+
+7. Fragment Reassembly and Receive Lifetime
+
+   Fragmented management actions are dispatched only after their complete body is
+   reassembled. Shared fragment reassembly now expires incomplete bodies after
+   maxReceiveLifetime, whose default is 512 TUs. Late fragments can therefore be dropped
+   instead of completing an old body; affected application deliveries, forwarding
+   trajectories and fingerprints change.
+
+8. Block Ack Inactivity Timer Callbacks
+
+   Block Ack inactivity uses absolute per-agreement deadlines. The shared timer follows
+   the earliest enabled deadline and is cancelled when none remains. Agreement expiry is
+   safe when a bounded management queue drops a generated DELBA synchronously. Timers
+   and traffic may differ from runs that kept extending an inactivity interval.
+
+9. Fragment Identity Across Sequence Reuse
+
+   Receive reassembly separates fragment generations and sequence spaces. Late
+   fragments, retries and reused sequence numbers no longer combine bodies from
+   unrelated transmissions; affected receive drops and deliveries may change.
+
+10. Receive Lifetime in Block Ack Reordering
+
+   Receive lifetime now remains anchored to first reception while fragments wait in
+   Block Ack reordering. A later stage no longer gives an old incomplete body a fresh
+   lifetime, so delayed or incomplete bodies may be dropped earlier.
+
+11. Expired Agreement Quarantine and Frame Release
+
+   Expired Block Ack agreements are quarantined from data-plane use while teardown state
+   is retained. Outstanding frames are released through the normal
+   acknowledgment/recovery paths before teardown proceeds, including when callbacks
+   replace agreement state.
+
+12. Incomplete Data Released by a Block Ack Request
+
+   When a BAR releases data fragments that do not reassemble into a packet, recipient
+   processing skips data dispatch instead of dereferencing a null result.
+
+13. Recipient Block Ack Timeout Policy
+
+   Recipient Block Ack timeout selection now honors a nonzero local policy value; zero
+   inherits the request's advisory value. This corrects the previously reversed choice
+   and can change agreement expiry and subsequent traffic.
+
+14. A-MSDU Size and Fragmentation Limits
+
+   Basic A-MSDUs now include subframe headers and padding in size checks and avoid the
+   ordinary fragmentation path. Eligible members retain flow order. Aggregation,
+   transmissions and delivered traffic may change in configurations that previously
+   built oversized or fragmentable A-MSDUs.
+
+15. Serialized Management Fragment Bodies
+
+   Management fragmentation now slices the serialized body instead of repeating a
+   complete management header in each fragment. Reassembly preserves the original body
+   bytes and local transaction context.
+
+16. Malformed Peer Association IDs
+
+   Malformed peer association IDs now mark the decoded management header incorrect
+   instead of terminating the simulation during deserialization.
+
+17. Negotiated A-MSDU Support
+
+   An originator now retains the successful ADDBA response's A-MSDU support bit for the
+   agreement. Subsequent aggregation follows the negotiated response instead of the
+   request's initial capability.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
