@@ -51,6 +51,17 @@ uint32_t ethernetFcs(const uint8_t *buf, size_t bufsize, uint32_t crc = 0);
 uint32_t crc32_iso_hdlc(const uint8_t *buf, size_t bufsize, uint32_t crc = 0);
 
 /**
+ * Computes CRC-32/MPEG-2. Unlike the other CRC functions here, this one has a
+ * nonzero initial value and a zero final XOR value, so @p crc (the running CRC
+ * value, to be passed back in when computing the CRC of a concatenation in
+ * several steps) starts out as 0xffffffff instead of 0.
+ *
+ * CRC RevEng categorization:
+ * width=32 poly=0x04c11db7 init=0xffffffff refin=false refout=false xorout=0x00000000 check=0x0376e6e7 residue=0x00000000 name="CRC-32/MPEG-2"
+ */
+uint32_t crc32_mpeg2(const uint8_t *buf, size_t bufsize, uint32_t crc = 0xffffffff);
+
+/**
  * Computes CRC32C (Castagnoli), a.k.a. CRC-32/ISCSI.
  *
  * CRC RevEng categorization:
@@ -108,6 +119,12 @@ inline uint32_t crc32_iso_hdlc_bitwise(const uint8_t *buf, size_t bufsize)
     return generic_crc32(buf, bufsize, 0x04c11db7, 0xffffffff, true, true, 0xffffffff);
 }
 
+inline uint32_t crc32_mpeg2_bitwise(const uint8_t *buf, size_t bufsize)
+{
+    // width=32 poly=0x04c11db7 init=0xffffffff refin=false refout=false xorout=0x00000000 check=0x0376e6e7 residue=0x00000000 name="CRC-32/MPEG-2"
+    return generic_crc32(buf, bufsize, 0x04c11db7, 0xffffffff, false, false, 0x00000000);
+}
+
 inline uint32_t crc32c_bitwise(const uint8_t *buf, size_t bufsize)
 {
     // width=32 poly=0x1edc6f41 init=0xffffffff refin=true refout=true xorout=0xffffffff check=0xe3069283 residue=0xb798b438 name="CRC-32/ISCSI"
@@ -130,11 +147,13 @@ inline uint16_t crc16_ccitt_bitwise(const uint8_t *buf, size_t bufsize)
 inline uint16_t internetChecksum(const std::vector<uint8_t>& vec, uint32_t sum = 0) { return internetChecksum(vec.data(), vec.size(), sum); }
 inline uint32_t ethernetFcs(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return ethernetFcs(vec.data(), vec.size(), crc); }
 inline uint32_t crc32_iso_hdlc(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return crc32_iso_hdlc(vec.data(), vec.size(), crc); }
+inline uint32_t crc32_mpeg2(const std::vector<uint8_t>& vec, uint32_t crc = 0xffffffff) { return crc32_mpeg2(vec.data(), vec.size(), crc); }
 inline uint32_t crc32c(const std::vector<uint8_t>& vec, uint32_t crc = 0) { return crc32c(vec.data(), vec.size(), crc); }
 inline uint16_t crc16_ibm(const std::vector<uint8_t>& vec, uint16_t crc = 0) { return crc16_ibm(vec.data(), vec.size(), crc); }
 inline uint16_t crc16_ccitt(const std::vector<uint8_t>& vec, uint16_t crc = 0) { return crc16_ccitt(vec.data(), vec.size(), crc); }
 
 inline uint32_t crc32_iso_hdlc_bitwise(const std::vector<uint8_t>& vec) { return crc32_iso_hdlc_bitwise(vec.data(), vec.size()); }
+inline uint32_t crc32_mpeg2_bitwise(const std::vector<uint8_t>& vec) { return crc32_mpeg2_bitwise(vec.data(), vec.size()); }
 inline uint32_t crc32c_bitwise(const std::vector<uint8_t>& vec) { return crc32c_bitwise(vec.data(), vec.size()); }
 inline uint16_t crc16_ibm_bitwise(const std::vector<uint8_t>& vec) { return crc16_ibm_bitwise(vec.data(), vec.size()); }
 inline uint16_t crc16_ccitt_bitwise(const std::vector<uint8_t>& vec) { return crc16_ccitt_bitwise(vec.data(), vec.size()); }
