@@ -117,7 +117,7 @@ record-vector-results = false
 record-scalar-results = false
 
 *.ap.wlan[0].mgmt.typename = "TestIeee80211MgmtApGenericRadio"
-*.ap.wlan[0].mgmt.beaconInterval = 1ms
+*.ap.wlan[0].mgmt.beaconInterval = 1024us
 *.ap.wlan[0].opMode = "g(erp)"
 *.ap.wlan[0].bitrate = 6Mbps
 *.ap.wlan[0].radio.typename = "GenericRadio"
