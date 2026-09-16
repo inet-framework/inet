@@ -1,7 +1,8 @@
 %description:
 Verify that serialized HT discovery stores the HT Operation primary channel and
 that the production authentication and association paths tune to that cached
-channel. Legacy packet-domain discovery keeps its channelNumber unchanged.
+channel. Legacy packet-domain discovery converts the DSSS Parameter Set channel
+number to the internal channel index.
 
 %file: TestIeee80211MgmtStaDiscovery.cc
 
@@ -714,7 +715,8 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         mgmt->deliverDiscovery(legacyAddress, true, false, true, 12);
         auto legacyAp = mgmt->getCachedAp(legacyAddress);
         ASSERT(legacyAp != nullptr);
-        ASSERT(legacyAp->channel == 12);
+        // DSSS Current Channel 12 is the internal 2.4 GHz channel index 11.
+        ASSERT(legacyAp->channel == 11);
         ASSERT(!legacyAp->htCapabilitiesPresent);
         ASSERT(!legacyAp->htOperationPresent);
         int failuresBeforeLegacyResponse = htNegotiationFailures;
