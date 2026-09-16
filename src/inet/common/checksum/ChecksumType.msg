@@ -19,6 +19,8 @@ enum ChecksumType
     CHECKSUM_CRC16_CCITT = 4; // CRC-16-CCITT
     CHECKSUM_ETHERNET_FCS = 5;   // Ethernet and WiFi FCS (byte-swapped version of CRC32 a.k.a. CRC-32/ISO-HDLC)
     CHECKSUM_CRC32C = 6;      // CRC-32C (Castagnoli)
+    CHECKSUM_CRC32_ISO_HDLC = 7; // CRC32 a.k.a. CRC-32/ISO-HDLC (the non-byte-swapped sibling of the Ethernet/WiFi FCS)
+    CHECKSUM_CRC32_MPEG2 = 8; // CRC-32/MPEG-2
 }
 
 cplusplus {{

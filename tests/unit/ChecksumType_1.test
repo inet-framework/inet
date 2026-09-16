@@ -1,0 +1,54 @@
+%description:
+Test the ChecksumType enum and the functions that dispatch on it.
+
+%includes:
+#include "inet/common/checksum/ChecksumType_m.h"
+
+using namespace inet;
+
+%global:
+
+static std::vector<uint8_t> arrayFromString(const char *str)
+{
+    return std::vector<uint8_t>(str, str + strlen(str));
+}
+
+#define TEST_TYPE(name) { \
+    auto type = parseChecksumType(name); \
+    EV << name << ": type=" << (int)type \
+       << ", size=" << getChecksumSizeInBytes(type) \
+       << ", checksum=" << std::hex << computeChecksum(array, type) << std::dec << std::endl; \
+  }
+
+%activity:
+
+// Every type the enum offers must be reachable by name, have a size, and produce a checksum.
+// The input is "123456789", whose CRC is the check value published in the CRC RevEng catalog.
+auto array = arrayFromString("123456789");
+TEST_TYPE("internet");
+TEST_TYPE("ethernet-fcs");
+TEST_TYPE("crc32c");
+TEST_TYPE("crc32-iso-hdlc");
+TEST_TYPE("crc32-mpeg2");
+TEST_TYPE("crc16-ibm");
+TEST_TYPE("crc16-ccitt");
+
+try {
+    parseChecksumType("crc32-nonesuch");
+    EV << "error: no exception thrown\n";
+}
+catch (std::exception& e) {
+    EV << "caught: " << e.what() << std::endl;
+}
+
+EV << ".\n";
+
+%contains: stdout
+internet: type=1, size=2, checksum=f62a
+ethernet-fcs: type=5, size=4, checksum=2639f4cb
+crc32c: type=6, size=4, checksum=e3069283
+crc32-iso-hdlc: type=7, size=4, checksum=cbf43926
+crc32-mpeg2: type=8, size=4, checksum=376e6e7
+crc16-ibm: type=3, size=2, checksum=bb3d
+crc16-ccitt: type=4, size=2, checksum=2189
+caught: Unknown checksum type 'crc32-nonesuch', allowed ones are: internet, crc16-ibm, crc16-ccitt, ethernet-fcs, crc32c, crc32-iso-hdlc, crc32-mpeg2

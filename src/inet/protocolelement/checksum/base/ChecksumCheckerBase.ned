@@ -22,7 +22,7 @@ import inet.queueing.base.PacketFilterBase;
 simple ChecksumCheckerBase extends PacketFilterBase
 {
     parameters:
-        string checksumType @enum("internet","ethernet-fcs","crc32c","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
+        string checksumType @enum("internet","ethernet-fcs","crc32c","crc32-iso-hdlc","crc32-mpeg2","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
         @class(ChecksumCheckerBase);
         @display("i=block/checker");
 }

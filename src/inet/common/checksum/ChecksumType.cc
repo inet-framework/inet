@@ -21,12 +21,16 @@ ChecksumType parseChecksumType(const char *checksumTypeString)
         return CHECKSUM_ETHERNET_FCS;
     else if (!strcmp(checksumTypeString, "crc32c"))
         return CHECKSUM_CRC32C;
+    else if (!strcmp(checksumTypeString, "crc32-iso-hdlc"))
+        return CHECKSUM_CRC32_ISO_HDLC;
+    else if (!strcmp(checksumTypeString, "crc32-mpeg2"))
+        return CHECKSUM_CRC32_MPEG2;
     else if (!strcmp(checksumTypeString, "crc16-ibm"))
         return CHECKSUM_CRC16_IBM;
     else if (!strcmp(checksumTypeString, "crc16-ccitt"))
         return CHECKSUM_CRC16_CCITT;
     else
-        throw cRuntimeError("Unknown checksum type '%s', allowed ones are: internet, crc16-ibm, crc16-ccitt, ethernet-fcs, crc32c", checksumTypeString);
+        throw cRuntimeError("Unknown checksum type '%s', allowed ones are: internet, crc16-ibm, crc16-ccitt, ethernet-fcs, crc32c, crc32-iso-hdlc, crc32-mpeg2", checksumTypeString);
 }
 
 int getChecksumSizeInBytes(ChecksumType type)
@@ -38,6 +42,8 @@ int getChecksumSizeInBytes(ChecksumType type)
             return 2;
         case CHECKSUM_ETHERNET_FCS:
         case CHECKSUM_CRC32C:
+        case CHECKSUM_CRC32_ISO_HDLC:
+        case CHECKSUM_CRC32_MPEG2:
             return 4;
         default:
             throw cRuntimeError("Unknown checksum type: %d", type);
@@ -55,6 +61,10 @@ uint64_t computeChecksum(const unsigned char *buf, size_t bufsize, ChecksumType 
             return ethernetFcs(buf, bufsize);
         case CHECKSUM_CRC32C:
             return crc32c(buf, bufsize);
+        case CHECKSUM_CRC32_ISO_HDLC:
+            return crc32_iso_hdlc(buf, bufsize);
+        case CHECKSUM_CRC32_MPEG2:
+            return crc32_mpeg2(buf, bufsize);
         case CHECKSUM_CRC16_IBM:
             return crc16_ibm(buf, bufsize);
         case CHECKSUM_CRC16_CCITT:
