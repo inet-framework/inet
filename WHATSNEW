@@ -64,6 +64,15 @@ Notable backward incompatible changes are the following:
    counted arrivals or summed bytes reported twice the true value and now reports
    the true one.
 
+4. PCAP writer contract and PCAPng capture limits
+
+   Custom IPcapWriter implementations must implement writePacketWithPrefix(),
+   which writes capture metadata followed by the selected packet bytes. See
+   the migration guide for the signature and length semantics.
+
+   PcapngWriter now obeys finite snaplen limits while retaining the original
+   record length. A zero PCAPng snaplen remains unlimited.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -118,6 +127,14 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+
+6. Opt-in IEEE 802.11 Radiotap capture
+
+   PcapRecorder can use registered protocol-specific capture adapters to write
+   Radiotap metadata for legacy, HT and VHT SU frames. Enable
+   enableProtocolSpecificCaptureAdapters together with enableConvertingPackets.
+   Bare IEEE 802.11 (link type 105) remains the default. Typed A-MPDUs are split
+   into MPDU records, and intact imported frames retain their FCS indication.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
