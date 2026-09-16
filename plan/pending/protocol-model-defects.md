@@ -3,27 +3,40 @@
 **Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
 worktree `/home/levy/workspace/inet-protocol-model-defects`.
 
-**Where it stands:** **28 of the 30 tests pass.** Two remain, and neither is a plain defect:
+**Where it stands:** **28 of the 30 tests pass.** Two remain, and both have one cause: a
+transport checksum cannot be computed by default until every payload in the tree serializes.
 
 | Test | Why it is still open |
 | --- | --- |
-| `udp/Rfc1122ChecksumDefault` | Deferred. UDP cannot default to a computed checksum until every payload in the tree serializes; QUIC has no serializer for its packet headers. |
-| `dhcp/Rfc2131DuplicateAddressDeclined` | Gap 11, recorded as an untestable claim rather than a defect. |
+| `udp/Rfc1122ChecksumDefault` | Deferred. QUIC has no serializer for its packet headers, so a computed UDP checksum stops 10 of 11 QUIC tests. |
+| `tcp/Rfc9293ChecksumDefault` | Withdrawn on 2026-09-15. A computed TCP checksum serializes the segment, the payload loses its region tags, and the lwIP interop example stops. |
 
-Six suites have no unexpected failure left: arp, element, ethernet, ipv4, ipv6, quic, self
-and tcp.
-
-Three suites are complete, with no unexpected failure left:
+The suites, before this plan and on 2026-09-16 after the rebase onto master `b0c7a25e75`:
 
 | Suite | Then | Now |
 | --- | --- | --- |
 | arp | 13 PASS, 3 unexpected | **16 PASS** |
-| dhcp | 13 PASS, 5 expected, 8 unexpected | **20 PASS, 5 expected, 1 unexpected** |
+| dhcp | 13 PASS, 5 expected, 8 unexpected | **21 PASS, 5 expected** |
 | ipv4 | 16 PASS, 2 expected, 4 unexpected | **20 PASS, 2 expected** |
 | ipv6 | 19 PASS, 8 unexpected | **27 PASS** |
 | quic | 8 PASS, 1 expected, 2 unexpected | **10 PASS, 1 expected** |
-| tcp | 22 PASS, 2 expected, 3 unexpected | **26 PASS, 1 expected** |
+| tcp | 22 PASS, 2 expected, 3 unexpected | **25 PASS, 1 expected, 1 unexpected** |
 | udp | 10 PASS, 1 expected, 2 unexpected | **11 PASS, 1 expected, 1 unexpected** |
+
+element (43), ethernet (1) and self (21) pass in full, and wifi is 39 PASS with 35 expected.
+
+**The rebase of 2026-09-16** brought 89 master commits and one conflict-free overlap,
+`DhcpMessage.msg`. It found two things. Master's ICMPv6 dissector change `5c7fc97b3f`
+serialized a header to read its type, so an unknown type no longer dissected and both
+`Rfc4443Unknown*Type` tests missed their first step; the dissector is repaired first on this
+branch. The contract gate also showed that the probe commit gave `IArp::sendArpProbe` an
+empty body, which AR-ORG-CONTRACT-PURITY forbids; the method is pure virtual now,
+`GlobalArp` holds the empty override, and the migration guide says what an outside
+implementation must add.
+
+**A second rebase the same day**, onto `b0c7a25e75`, brought 9 more master commits. Only
+`WHATSNEW` overlapped: master added entry 4 to the same list, so the entries of this branch
+are numbered 5 to 16 now. No verdict moved.
 
 A note on counting: an earlier figure of 257 tests was wrong. It came from a verdict list
 keyed by test name, and two suites use the same name for different tests. The runner's own
@@ -101,8 +114,10 @@ side and still fails.
       it: the frame dispatcher, the frame loop and the datagram loop.
 - [x] `quic/Rfc9000ServerInitialSize` — done, and a step of the test was wrong: two `once`
       steps on one datagram, so the second could never match.
-- [x] `tcp/Rfc9293ChecksumDefault` — done. The same one-word default change is clean for
-      TCP, and it moves every TCP fingerprint.
+- [ ] `tcp/Rfc9293ChecksumDefault` — **withdrawn on 2026-09-15.** The one-word default change
+      passed the protocol suite, and the fingerprint run found what the suite could not: a
+      computed checksum serializes the segment, the copy loses its region tags, and
+      `examples/inet/nclients -c lwip__inet` stops. The same block as the UDP default.
 - [x] `tcp/Rfc6298FirstMeasurement` — done. The first measurement has RFC 6298 section 2.2's
       case of its own.
 - [x] `tcp/Rfc9293ShrunkWindowNoNewData` — **a test error, not a defect.** The model refuses
@@ -117,16 +132,17 @@ side and still fails.
       QUIC tests stop and two others fall with them. The test does not pass either way. UDP
       cannot default to a computed checksum until every payload in the tree serializes.
 
-### Group E — DHCP (8 tests, 14 gaps) — 7 of 8 DONE 2026-09-15
+### Group E — DHCP (8 tests, 14 gaps) — DONE 2026-09-15
 
 - [x] Seven defects repaired: gaps 1, 2, 3, 4, 8, 10, 13 and 14. The transaction identifier,
       three field values the server had no right to write, a domain name server option with
       no value, the silent answer to a foreign subnet, and the whole retransmission strategy.
       Repairing gap 14 also corrected a step of its test, an ordered `never` that consumed
       the window the repeated request needed.
-- [ ] `dhcp/Rfc2131DuplicateAddressDeclined` — gap 11, recorded as an **untestable claim**
-      and not a defect. It is the last DHCP failure and it may not belong in this plan at
-      all; read the gap before starting.
+- [x] `dhcp/Rfc2131DuplicateAddressDeclined` — done. Gap 11 was an **untestable claim**: the
+      decline was written and nothing could provoke it. The client now probes the granted
+      address (RFC 5227) and declines it if somebody answers, and the server marks a declined
+      address unavailable, which stopped an endless decline loop.
 
 ## Not in this plan
 
