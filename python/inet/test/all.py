@@ -64,11 +64,8 @@ def get_protocol_test_tasks(simulation_project=None, **kwargs):
     full_match = kwargs.get("full_match", False)
     test_tasks = []
     for folder in sorted(glob.glob(os.path.join(simulation_project.get_full_path(protocol_folder), "*"))):
-        # a suite may group its tests in subfolders, so look for them at any depth, but
-        # never inside the generated work folder
-        test_file_names = [test_file_name
-                           for test_file_name in glob.glob(os.path.join(folder, "**", "*.test"), recursive=True)
-                           if "/work/" not in test_file_name]
+        # a suite may group its tests in subfolders, so look for them at any depth
+        test_file_names = get_opp_test_file_names(folder)
         if not test_file_names:
             continue
         suite_name = os.path.basename(folder)

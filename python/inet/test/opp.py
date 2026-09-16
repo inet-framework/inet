@@ -124,6 +124,17 @@ class OppTestTask(TestTask):
         else:
             return self.task_result_class(self, result="FAIL", expected_result=self.expected_result, reason=f"Non-zero exit code: {subprocess_result.returncode}", stdout=stdout, stderr=stderr)
 
+def get_opp_test_file_names(test_folder):
+    """
+    Returns the .test files in the given test folder, at any depth, except the ones in the work
+    folder that opp_test generates there. A test may extract .test files into that folder too.
+    The test folder must be an absolute path.
+    """
+    work_folder = os.path.join(test_folder, "work")
+    return [test_file_name
+            for test_file_name in glob.glob(os.path.join(test_folder, "**", "*.test"), recursive=True)
+            if os.path.commonpath([test_file_name, work_folder]) != work_folder]
+
 def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, lib_folder=None, lib_name="test", **kwargs):
     """
     Returns multiple opp test tasks matching the provided filter criteria. The returned tasks can be run by
@@ -142,7 +153,7 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),
-                                           glob.glob(os.path.join(simulation_project.get_full_path(test_folder), "**", "*.test"), recursive=True)))
+                                           get_opp_test_file_names(simulation_project.get_full_path(test_folder))))
     test_tasks = list(map(create_test_task, test_file_names))
     return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, lib_folder=lib_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
 
