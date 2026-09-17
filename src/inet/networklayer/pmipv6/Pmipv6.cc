@@ -48,6 +48,14 @@ static constexpr uint8_t HANDOFF_REREGISTRATION = 5;  // nothing changed, the li
 // hold the integer number of seconds and the remaining 16 hold a fraction of a second
 // in units of 1/65536. That is not the NTP 32.32 layout, which it is easy to mistake
 // it for. The clock a gateway reads here is simulation time.
+// RFC 6275 Section 9.5.1 compares binding update sequence numbers modulo 2^16, so
+// that the counter can wrap without a later update looking older than an earlier one.
+static bool isSequenceNumberNewer(unsigned int candidate, unsigned int accepted)
+{
+    unsigned int difference = (candidate - accepted) & 0xFFFF;
+    return difference != 0 && difference < 0x8000;
+}
+
 static uint64_t timestampOf(simtime_t t)
 {
     double seconds = t.dbl();
@@ -397,7 +405,7 @@ void Pmipv6::deleteBindingCacheEntry(BindingCache::iterator it)
 }
 
 void Pmipv6::sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
-        unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress)
+        unsigned int lifetime, uint64_t timestamp, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress)
 {
     std::string mnId = pbu->getMobileNodeIdentifier();
     auto reply = new Packet("ProxyBindingAck");
@@ -414,7 +422,7 @@ void Pmipv6::sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus 
     pba->setHomeNetworkPrefixLength(pbu->getHomeNetworkPrefixLength());
     pba->setHandoffIndicator(pbu->getHandoffIndicator());
     pba->setAccessTechnologyType(pbu->getAccessTechnologyType());
-    pba->setTimestampValue(pbu->getTimestampValue());
+    pba->setTimestampValue(timestamp);
     pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(mnId.size()));
     reply->insertAtFront(pba);
     sendMobilityMessage(reply, magAddress, lmaAddress);
@@ -445,7 +453,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     // node it is about cannot be served.
     if (mnId.empty()) {
         EV_WARN << "LMA rejecting Proxy Binding Update without a mobile node identifier" << endl;
-        sendProxyBindingAcknowledgement(pbu, MISSING_MN_IDENTIFIER_OPTION, 0, magAddress, lmaAddress);
+        sendProxyBindingAcknowledgement(pbu, MISSING_MN_IDENTIFIER_OPTION, 0, pbu->getTimestampValue(), magAddress, lmaAddress);
         return;
     }
 
@@ -456,7 +464,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     if (it != bindingCache.end() && it->second.session.mnIdentifier != mnId) {
         EV_WARN << "LMA rejecting Proxy Binding Update: prefix " << hnp << "/" << hnpLen
                 << " belongs to MN '" << it->second.session.mnIdentifier << "', not to '" << mnId << "'" << endl;
-        sendProxyBindingAcknowledgement(pbu, NOT_AUTHORIZED_FOR_HOME_NETWORK_PREFIX, 0, magAddress, lmaAddress);
+        sendProxyBindingAcknowledgement(pbu, NOT_AUTHORIZED_FOR_HOME_NETWORK_PREFIX, 0, pbu->getTimestampValue(), magAddress, lmaAddress);
         return;
     }
 
@@ -489,16 +497,43 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
                 << minDelayBeforeBindingCacheEntryDelete << " before deleting it" << endl;
     }
     else {
-        // RFC 5213 Section 5.5: a Proxy Binding Update that is older than the last one
-        // accepted for this mobility session is refused. Without this, a registration
+        // RFC 5213 Section 5.5: a Proxy Binding Update that is not newer than the last
+        // one accepted for this mobility session is refused. Without this, a registration
         // delayed in the network -- from the gateway the mobile node has just left, say --
-        // would re-point the node's prefix backwards.
-        if (timestampBasedOrdering && it != bindingCache.end()
-                && pbu->getTimestampValue() <= it->second.timestamp)
+        // would re-point the node's prefix backwards. A rejection carries the anchor's own
+        // clock, not the value it was sent, so that the gateway can resynchronise, and a
+        // timestamp that merely repeats the last one is a mismatch rather than an older
+        // message.
+        if (timestampBasedOrdering && it != bindingCache.end()) {
+            uint64_t offered = pbu->getTimestampValue();
+            if (offered == it->second.timestamp) {
+                EV_WARN << "LMA rejecting Proxy Binding Update for MN '" << mnId
+                        << "': its timestamp repeats the last one accepted" << endl;
+                sendProxyBindingAcknowledgement(pbu, TIMESTAMP_MISMATCH, 0, timestampOf(simTime()), magAddress, lmaAddress);
+                return;
+            }
+            if (offered < it->second.timestamp) {
+                EV_WARN << "LMA rejecting Proxy Binding Update for MN '" << mnId
+                        << "': it is older than the last one accepted for this mobility session" << endl;
+                sendProxyBindingAcknowledgement(pbu, TIMESTAMP_LOWER_THAN_PREV_ACCEPTED, 0, timestampOf(simTime()), magAddress, lmaAddress);
+                return;
+            }
+        }
+        // With the timestamp scheme switched off, RFC 5213 Section 9.3 requires the
+        // per-session sequence number to order the messages instead. It can only order
+        // messages from one gateway: a gateway the mobile node has just moved to counts
+        // from its own zero, and how it would learn where the previous gateway had got
+        // to is, in the words of Section 5.5, "outside the scope of this document". So
+        // the comparison applies while the serving gateway stays the same, and a request
+        // from a different gateway is ordered by arrival, which is the whole reason the
+        // timestamp scheme is the default.
+        else if (!timestampBasedOrdering && it != bindingCache.end()
+                && it->second.servingMagAddress == magAddress
+                && !isSequenceNumberNewer(seq, it->second.sequenceNumber))
         {
             EV_WARN << "LMA rejecting Proxy Binding Update for MN '" << mnId
-                    << "': it is not newer than the last one accepted for this mobility session" << endl;
-            sendProxyBindingAcknowledgement(pbu, TIMESTAMP_LOWER_THAN_PREV_ACCEPTED, 0, magAddress, lmaAddress);
+                    << "': its sequence number is not newer than the last one accepted" << endl;
+            sendProxyBindingAcknowledgement(pbu, SEQUENCE_NUMBER_OUT_OF_WINDOW, 0, 0, magAddress, lmaAddress);
             return;
         }
 
@@ -559,7 +594,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
     }
 
-    sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, grantedLifetime, magAddress, lmaAddress);
+    sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, grantedLifetime, pbu->getTimestampValue(), magAddress, lmaAddress);
 }
 
 //

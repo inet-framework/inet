@@ -211,7 +211,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu);
     BindingCache::iterator lookupBindingCacheEntry(const BindingUpdate *pbu);
     void sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
-            unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
+            unsigned int lifetime, uint64_t timestamp, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
     void deleteBindingCacheEntry(BindingCache::iterator it);
 
     // MAG

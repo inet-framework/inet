@@ -71,7 +71,10 @@ simple Pmipv6 extends SimpleModule
         // Order Proxy Binding Updates by the timestamp the gateway puts in them, so that one
         // delayed in the network cannot undo a later registration. RFC 5213 Section 9.3 calls
         // this TimestampBasedApproachInUse and enables it by default. With it off, the messages
-        // carry no timestamp and the anchor accepts them in arrival order.
+        // carry no timestamp and the anchor falls back to the per-session sequence number,
+        // which can only order messages from the gateway currently serving the node: RFC 5213
+        // Section 5.5 leaves it out of scope how a gateway the node has just moved to would
+        // learn the sequence number the previous one had reached.
         bool timestampBasedOrdering = default(true);
 
         double bindingLifetime @unit(s) = default(3600s);                    // MAG: lifetime requested in Proxy Binding Updates
