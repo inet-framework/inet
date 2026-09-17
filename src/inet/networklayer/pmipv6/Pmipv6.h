@@ -96,7 +96,9 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     // Binding Cache entry up by: the mobile node's identifier, the access
     // technology it attached through, and the link-layer identifier of the
     // attached interface. Two mobile nodes on one access link differ in the
-    // third component even when the first two coincide.
+    // third component even when the first two coincide. That lookup applies when a
+    // request names no home network prefix; when it names one, Section 5.4.1.1
+    // finds the entry by the prefix instead, and that is the usual case here.
     //
     struct MobilitySessionKey {
         std::string mnIdentifier;

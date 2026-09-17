@@ -237,7 +237,7 @@ void Pmipv6::handleTimer(cMessage *timer)
             refreshProxyBinding(check_and_cast<Pmipv6Timer *>(timer)->session);
             break;
         case LMA_BINDING_EXPIRY: {
-            // RFC 6275 Section 9.5.1: a binding cache entry MUST be deleted when its
+            // RFC 6275 Section 9.6: a binding cache entry MUST be deleted when its
             // lifetime expires. RFC 5213 inherits the rule with the data structure.
             auto& session = check_and_cast<Pmipv6Timer *>(timer)->session;
             auto it = bindingCache.find(session);
@@ -366,9 +366,10 @@ Pmipv6::BindingCache::iterator Pmipv6::lookupBindingCacheEntry(const BindingUpda
                 return it;
         return bindingCache.end();
     }
-    // Section 5.4.1.2: no prefix, but the attached interface is named, so the
-    // full mobility session key applies. This is the branch that tells two
-    // mobile nodes on one access link apart.
+    // Section 5.4.1.2: no prefix, but the attached interface is named, so the full
+    // mobility session key applies. A gateway here always names the prefix, which it
+    // takes from the policy profile, so this branch is unreachable in that
+    // configuration; it is the branch a gateway with no configured prefix would need.
     if (!pbu->getMobileNodeLinkLayerIdentifier().isUnspecified()) {
         MobilitySessionKey key;
         key.mnIdentifier = pbu->getMobileNodeIdentifier();
@@ -436,7 +437,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
             << "s, handoff indicator " << (int)pbu->getHandoffIndicator() << endl;
     emit(proxyBindingUpdateReceivedSignal, (intval_t)lifetime);
 
-    // RFC 6275 Section 9.5.1: the granted lifetime may be shorter than the requested
+    // RFC 6275 Section 10.3.1: the granted lifetime may be shorter than the requested
     // one, and MUST NOT be longer.
     unsigned int grantedLifetime = std::min(lifetime, (unsigned int)maxBindingLifetime.dbl());
 
@@ -549,7 +550,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.timestamp = pbu->getTimestampValue();
         entry.expiry = simTime() + grantedLifetime;
         entry.tunnelInterfaceId = tunnelId;
-        // RFC 6275 Section 9.5.1: the entry lives exactly as long as the lifetime granted
+        // RFC 6275 Section 9.6: the entry lives exactly as long as the lifetime granted
         if (entry.expiryTimer == nullptr) {
             entry.expiryTimer = new Pmipv6Timer("bindingExpiry", LMA_BINDING_EXPIRY);
             entry.expiryTimer->session = entry.session;
