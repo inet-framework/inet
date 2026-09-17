@@ -1,24 +1,23 @@
-%# expected-result: FAIL
 %description:
-802.11n HT Operation information element in Beacon (type 8): an Ieee80211HtOperation
-chunk is present in the Beacon frame. [NOT-MODELED -- INET's Ieee80211BeaconFrame
-contains only SSID, supportedRates, beaconInterval, channelNumber, and
-handoverParameters; no HT Operation IE is generated]
+Observe the production Ieee80211BeaconFrame and assert its HtOperation element is present.
+The element is represented inside the management body, not as a standalone chunk.
 
 %file: N_HtOperationIe.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec-required assertion: Beacons from an HT AP must include the HT Operation
-// element (IEEE 802.11-2020 Section 9.4.2.57). INET omits this element entirely.
 Define_ProtocolTest(wifi_11n_ht_operation_ie)
 {
     return ProtocolTest("wifi_11n_ht_operation_ie")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 8 && Ieee80211HtOperation.length >= 0")
+                  .filterPacket("ieee80211mac.type == 8")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<ieee80211::Ieee80211BeaconFrame>(c.event);
+                      return body != nullptr && body->getHtOperationPresent();
+                  })
                   .describe("a Beacon frame containing HT Operation IE").within(2.5));
 }
 
