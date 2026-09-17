@@ -1019,6 +1019,20 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
         return;
     }
     MagBinding& binding = it->second;
+
+    // RFC 5213 Section 6.9.1.2 step 6 has the anchor return the options it received,
+    // with identical values. An acknowledgement that does not match what this gateway
+    // asked for is not an answer to it.
+    if (pba->getHomeNetworkPrefix() != binding.homeNetworkPrefix
+            || pba->getMobileNodeLinkLayerIdentifier() != binding.mnLinkLayerIdentifier
+            || pba->getAccessTechnologyType() != binding.accessTechnologyType
+            || pba->getHandoffIndicator() != binding.pendingHandoffIndicator)
+    {
+        EV_WARN << "MAG: Proxy Binding Acknowledgement for MN '" << mnId
+                << "' does not echo the options that were sent; ignoring it" << endl;
+        return;
+    }
+
     cancelAndDelete(binding.retransmitTimer);
     binding.retransmitTimer = nullptr;
     binding.retransmitInterval = initialBindingAckTimeout;
