@@ -1,6 +1,6 @@
 # Repair the regressions of the model-defects branch and record its baselines
 
-**Status:** in progress since 2026-09-17. Steps 1 to 5 are done, step 6 runs. Branch
+**Status:** in progress since 2026-09-17. Steps 1 to 6 are done; step 7 waits for the decision to push. Branch
 `topic/protocol-model-defects`, worktree `/home/levy/workspace/inet-protocol-model-defects`,
 23 commits, now on master `c3fbe79ad0` (the three master commits after `b0c7a25e75` change only CI
 files, `README.md` and a GitHub helper).
@@ -179,23 +179,25 @@ No other commit moves a changed row.
 - [x] CI's statistical suite passes at the repaired probe commit with this branch: 929 tests,
       917 PASS, 10 SKIP and 2 ERROR, all expected.
 
-### 6. Verify the head
+### 6. Verify the head — DONE 2026-09-17
 
-- [ ] Fingerprints, release and debug: all 1752 pass.
-- [ ] Module tests, debug: all 345 pass.
-- [ ] Protocol tests, debug: unchanged from 2026-09-16 (two expected checksum-default failures).
-- [ ] Statistical tests, release, in the container with the topic branch of `statistics`: all pass.
-- [ ] Gates: classification, commits, includes, NED parameters, links, seals, source seals, and
-      `check-series-builds.sh`.
-- [ ] Each source commit passes its own changed fingerprint rows (from step 3, run again on the
-      rewritten series).
+- [x] Fingerprints, release and debug: all 1752 pass.
+- [x] Module tests, debug: all 345 pass, in 49 s.
+- [x] Protocol tests, debug: unchanged from 2026-09-16 (the two checksum-default failures).
+- [x] Statistical tests, release, in the container with the topic branch of `statistics`: 917 PASS,
+      10 SKIP and 2 ERROR, all expected, and no changed file.
+- [x] Gates: classification, commits, includes, NED parameters, links, seals, source seals, and
+      `check-series-builds.sh` (all 24 commits build in debug).
+- [x] Each source commit passes its own changed fingerprint rows (from step 3, run again on the
+      rewritten series), the module suite, and its own DHCP lifecycle patterns.
 
 ### 7. Hand over
 
-- [ ] Report the result and the row groups.
+- [x] Report the result and the row groups.
 - [ ] Ask before pushing: the INET branch needs `--force-with-lease`, and the `statistics` branch is
       new.
-- [ ] Move the `ghci-statistical` worktrees back to their `origin` tips.
+- [x] Move the `ghci-statistical` worktrees back to their `origin` tips. The topic branch of
+      `statistics` stays as a local branch of that repository.
 - [ ] Move this plan and `protocol-model-defects.md` to `plan/done/` when the branch lands.
 
 ## Not in this plan
