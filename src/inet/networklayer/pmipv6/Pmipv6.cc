@@ -737,6 +737,19 @@ void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const M
             << accessInterface->getInterfaceName() << "; sending Proxy Binding Update" << endl;
 
     MagBinding& binding = magBindings[profile->mnIdentifier];
+    // A mobile node that comes back is not one that never left. Whatever the previous
+    // attachment left behind has to go, or the binding stays wedged: a deregistration
+    // still marked outstanding suppresses every later detachment and every refresh,
+    // and an access-link route left pointing at the interface the node used to be on
+    // sends its traffic out of the wrong radio.
+    binding.deregistering = false;
+    cancelAndDelete(binding.refreshTimer);
+    binding.refreshTimer = nullptr;
+    if (binding.downlinkRoute != nullptr && binding.accessInterfaceId != accessInterface->getInterfaceId()) {
+        rt6->deleteRoute(binding.downlinkRoute);
+        binding.downlinkRoute = nullptr;
+    }
+
     binding.mnIdentifier = profile->mnIdentifier;
     binding.mnLinkLayerIdentifier = stationAddress;
     binding.accessTechnologyType = ACCESS_TECHNOLOGY_IEEE_802_11;
@@ -972,6 +985,13 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
         return;
     }
     if (lifetime == 0) {
+        if (!binding.deregistering) {
+            // the mobile node came back before the anchor answered, so this
+            // acknowledgement is about a session the gateway is serving again
+            EV_INFO << "MAG: late deregistration acknowledgement for MN '" << mnId
+                    << "', which has since re-attached; keeping its binding" << endl;
+            return;
+        }
         EV_INFO << "MAG: deregistration acknowledged for MN '" << mnId << "'" << endl;
         releaseMagBinding(binding);
         return;
