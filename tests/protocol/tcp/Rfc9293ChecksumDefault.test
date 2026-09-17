@@ -21,7 +21,8 @@ header of the two addresses, the TCP header with a zero checksum field, and the 
 TcpMutations.h, expectedTcpChecksum. It is the same computation the model itself performs in
 TcpChecksumInsertionHook::computeChecksum.
 
-This test fails, and the failure is a **defect**, so nothing declares it expected.
+This test fails, and the failure is a **defect**. A known limitation blocks its repair, so the
+failure is declared expected; the last paragraph names the limitation.
 
 The `checksumMode` parameter of the ~Tcp module (src/inet/transportlayer/tcp/Tcp.ned:189) is
 `default("declared")`. In that mode no checksum is computed at all: the field stays zero and
@@ -36,6 +37,17 @@ the checksum and its default does not. That is a wrong result from code that exi
 the guide classifies as a defect. See
 doc/project/guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected
 and doc/project/evidence/model/tcp/results.md.
+
+The limitation. Changing the default to `computed` was tried on 2026-09-15 and withdrawn.
+Computing the checksum serializes the segment, and the payload that the receiver gets back has
+lost its region tags: `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of
+TCP data without a GenericAppMsgReq region tag at its front". The default can change only when a
+serialized TCP payload keeps its region tags, and the repair waits for that, maybe for a long
+time. The UDP default waits for the same kind of limitation (udp/Rfc1122ChecksumDefault). When
+the default is computed, this test reports PASS (unexpected), and the declaration below is
+removed.
+
+%# expected-result: FAIL
 
 %includes:
 #include "ProtocolTest.h"

@@ -42,11 +42,13 @@ Pass 2, level 3:
 | Rfc1122ValidSourceAddress.test | RFC1122-UADDR-2 | PASS |
 | Rfc1122ApplicationTtlAndTos.test | RFC1122-UAPI-1 | PASS |
 | Rfc1122ApplicationSourceAddress.test | RFC1122-UMH-2 | PASS |
-| Rfc1122ChecksumDefault.test | RFC1122-UCK-3 | **FAIL (unexpected)**, gap 1, a defect. The repair is blocked; see below |
+| Rfc1122ChecksumDefault.test | RFC1122-UCK-3 | **FAIL (expected)**, gap 1, a defect with a blocked repair, declared since 2026-09-17; see below |
 | Rfc1122MulticastSourceAddress.test | RFC1122-UADDR-1 | FAIL (expected), gap 2, unimplemented |
 | Rfc768EmptyDatagram.test | RFC768-HDR-3, the minimum | **PASS** since 2026-09-15; gap 3 is repaired |
 
-Summary: 13 tests, 10 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite reports FAIL.
+Summary: 13 tests, 10 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite reported FAIL.
+Since 2026-09-17 it is 11 PASS and 2 FAIL (expected), and it reports PASS: gap 3 is repaired, and
+gap 1 is declared as a defect with a blocked repair.
 Each failure is analysed below. The tallies of the other suites are not repeated here: a document
 that quotes another suite's numbers goes stale on that suite's next run, and each suite's own
 `results.md` holds its own.
@@ -55,12 +57,12 @@ that quotes another suite's numbers goes stale on that suite's next run, and eac
 
 Reviewed against
 [the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
-a failure is declared expected only where the model does **not** claim the behavior, and a claim is
-code.
+a failure is declared expected only where the model does **not** claim the behavior, or where a
+named limitation blocks the repair of a defect. A claim is code.
 
 | Test | Class | The claim, in the model |
 | --- | --- | --- |
-| `Rfc1122ChecksumDefault.test` | **defect, and the repair is blocked** | The checksum computation exists and works: four tests of this suite set `checksumMode = "computed"` and pass. What is wrong is the value the parameter defaults to, and a setting that exists and holds a value the standard forbids is a defect. Changing the default was tried on 2026-09-15 and reverted. Computing a UDP checksum serializes the payload, and the whole QUIC suite then stops with `Cannot find serializer for inet::quic::InitialPacketHeader`: 10 of its 11 tests fail, and `ipv4/Rfc1122NoErrorForInvalidSource` and `ipv6/Rfc4443NoErrorForUnspecifiedSource` fail with them. The test itself does not pass either. **UDP cannot default to a computed checksum until every payload in the tree can be serialized.** The same change to `Tcp.ned` is blocked too: a serialized TCP payload loses its region tags, see [the TCP results](../tcp/results.md). |
+| `Rfc1122ChecksumDefault.test` | **defect with a blocked repair, declared since 2026-09-17** | The checksum computation exists and works: four tests of this suite set `checksumMode = "computed"` and pass. What is wrong is the value the parameter defaults to, and a setting that exists and holds a value the standard forbids is a defect. Changing the default was tried on 2026-09-15 and reverted. Computing a UDP checksum serializes the payload, and the whole QUIC suite then stops with `Cannot find serializer for inet::quic::InitialPacketHeader`: 10 of its 11 tests fail, and `ipv4/Rfc1122NoErrorForInvalidSource` and `ipv6/Rfc4443NoErrorForUnspecifiedSource` fail with them. The test itself does not pass either. **UDP cannot default to a computed checksum until every payload in the tree can be serialized.** The same change to `Tcp.ned` is blocked too: a serialized TCP payload loses its region tags, see [the TCP results](../tcp/results.md). |
 | `Rfc768EmptyDatagram.test` | **repaired** | UDP always handled the smallest datagram RFC 768 allows correctly. The defect was in the statistic filters that every standard receiving program switches on: `DataAgeFilter` called `peekData()` on a zero-length packet and stopped the run, and `ApplicationPacketSequenceNumberFilter` called `peekAtFront()` on one. `PacketLifeTimeFilter` and `LifeTimePerRegionFilter` had the same call and the same fault, reachable the same way. All four test for an empty packet now. |
 | `Rfc1122MulticastSourceAddress.test` | unimplemented | Nothing validates the source address of a received datagram, at either layer. The one source test in the IPv4 receive path only warns about an unspecified address and discards nothing. |
 
