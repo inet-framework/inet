@@ -1,27 +1,49 @@
-%# expected-result: FAIL
 %description:
-802.11 WEP Shared-Key authentication: the 4-frame challenge-response handshake (Auth
-frame with sequence 3 = Challenge Text, then sequence 4 = final Auth). [NOT-MODELED --
-INET implements only Open System authentication; the WifiAuthOpen test confirms this.
-The Ieee80211AuthenticationFrame has no challenge text field and no WEP challenge
-processing module exists in the MAC layer]
+The modeled four-message authentication exchange: STA sends transactions 1 and 3,
+AP sends transactions 2 and 4 with successful status. This observes the dummy
+management exchange supported by numAuthSteps=4; it does not validate WEP cryptography.
 
 %file: WifiAuthSharedKey.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec assertion: shared-key auth sends Auth sequence 3 (challenge text) as the third
-// frame. Frame type 11 = ST_AUTH. seqNumber field on Ieee80211AuthenticationFrame would
-// be 3 for the challenge. INET never sends this.
 Define_ProtocolTest(wifi_auth_sharedkey)
 {
     return ProtocolTest("wifi_auth_sharedkey")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 11")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<ieee80211::Ieee80211AuthenticationFrame>(c.event);
+                      return body != nullptr && body->getSequenceNumber() == 1;
+                  })
+                  .describe("authentication transaction 1 from sta1").within(2.5))
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 11 && ieee80211mac.sequenceNumber == 3")
-                  .describe("Auth frame sequence 3 (WEP challenge text) from AP").within(2.5));
+                  .filterPacket("ieee80211mac.type == 11")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<ieee80211::Ieee80211AuthenticationFrame>(c.event);
+                      return body != nullptr && body->getSequenceNumber() == 2 &&
+                             body->getStatusCode() == ieee80211::SC_SUCCESSFUL;
+                  })
+                  .describe("authentication transaction 2 from ap").within(0.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 11")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<ieee80211::Ieee80211AuthenticationFrame>(c.event);
+                      return body != nullptr && body->getSequenceNumber() == 3 &&
+                             body->getStatusCode() == ieee80211::SC_SUCCESSFUL;
+                  })
+                  .describe("authentication transaction 3 from sta1").within(0.5))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 11")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<ieee80211::Ieee80211AuthenticationFrame>(c.event);
+                      return body != nullptr && body->getSequenceNumber() == 4 &&
+                             body->getStatusCode() == ieee80211::SC_SUCCESSFUL;
+                  })
+                  .describe("authentication transaction 4 from ap").within(0.5));
 }
 
 } // namespace protocoltest
@@ -31,6 +53,8 @@ Define_ProtocolTest(wifi_auth_sharedkey)
 
 [General]
 *.tester.testName = "wifi_auth_sharedkey"
+*.ap.wlan[*].mgmt.numAuthSteps = 4
+*.sta2.wlan[*].agent.startingTime = 2s
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
