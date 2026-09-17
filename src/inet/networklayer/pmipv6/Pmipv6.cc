@@ -41,7 +41,6 @@ Define_Module(Pmipv6);
 static constexpr uint8_t ACCESS_TECHNOLOGY_IEEE_802_11 = 4;
 
 // RFC 5213 Section 8.4: Handoff Indicator values.
-static constexpr uint8_t HANDOFF_NEW_INTERFACE = 1;   // attachment over a new interface
 static constexpr uint8_t HANDOFF_STATE_UNKNOWN = 4;   // the gateway cannot tell
 static constexpr uint8_t HANDOFF_REREGISTRATION = 5;  // nothing changed, the lifetime is being extended
 
@@ -741,8 +740,13 @@ void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const M
     binding.detached = false;
     binding.lastPresence = simTime();
     binding.retransmitInterval = initialBindingAckTimeout;
-    // RFC 5213 Section 6.9.1.1 step 4: attachment over a new interface
-    sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_NEW_INTERFACE);
+    // RFC 5213 Section 6.9.1.1 step 4 offers four values for an attachment, and step 5
+    // forbids claiming a handoff between interfaces or between gateways unless the
+    // gateway can establish that it happened. A gateway here learns of an attachment
+    // from the access link alone; nothing tells it whether the node is new to the
+    // domain or has just left another gateway. Only "handoff state unknown" is
+    // truthful, and it is also the value the standard provides for exactly this case.
+    sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_STATE_UNKNOWN);
 }
 
 void Pmipv6::handleMobileNodeDetached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
