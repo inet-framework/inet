@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair first requires resolving b-only station association in the mixed BSS before ERP protection can be assessed.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 802.11g ERP protection: when a 802.11b-only STA is present in the BSS, the AP/STA must
 use CTS-to-self (type 28) or RTS/CTS (type 27) before ERP-OFDM transmissions. [NOT-MODELED
 -- INET's MAC has no ERP protection mechanism; no CtsToSelf or erpProtection module exists;

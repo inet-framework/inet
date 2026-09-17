@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires a supported PBCC selection path and verification of its transmitter and receiver support.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Observe one of the existing compliant PBCC mode objects. The default b mode set
 contains CCK long-preamble entries only; no production selection path to PBCC is established.
 

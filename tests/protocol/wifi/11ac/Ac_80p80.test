@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires noncontiguous channel representation and end-to-end PHY observation; the current explicit testability assertion must also be replaced.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Testability gap: No two-segment channel representation is exposed by the VHT mode API; bandwidth alone cannot establish 80+80 MHz.
 The failure is an explicit missing observation, not proof that an emitted frame is wrong.
 

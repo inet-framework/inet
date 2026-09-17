@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires coordinated per-TID agreement, request/response, serializer, and acknowledgement bookkeeping.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Send two classified flows (TIDs 0 and 5), then observe a Multi-TID Block Ack.
 Frame declarations exist, but the variant is unfinished and rejected by production handlers.
 

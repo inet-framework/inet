@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires production QoS aggregation selection, transmission, receive integration, and Block Ack progress.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Observe a VHT A-MPDU subframe. Aggregation construction exists, but the production
 originator invocation is commented out and the default policy never aggregates.
 

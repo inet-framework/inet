@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires resolving greenfield mode selection/cache identity and transmitter/receiver integration.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Observe an HT greenfield transmission. PHY construction and timing code exist,
 but the built-in mode set selects mixed preambles. This exposes an integration gap.
 

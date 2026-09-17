@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires HT Control RDG representation, a production grant trigger, and TXOP handling; the current explicit testability assertion must also be replaced.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Testability gap: The MAC header exposes no HT Control RDG field; a reverse-direction grant cannot be observed.
 This explicit failure is not a measurement of protocol behavior.
 
