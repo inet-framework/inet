@@ -28,8 +28,12 @@ static constexpr int BINDING_LIFETIME_UNIT = 4;
 // Technology Type + Timestamp; a Proxy Binding Acknowledgement omits the
 // Handoff Indicator and Access Technology Type.
 static constexpr int PROXY_HNP_OPTION_SIZE = 1 + 16;            // prefix length + 128-bit prefix
-static constexpr int PROXY_BU_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + 1 + 1 + 8; // + HI + ATT + timestamp
-static constexpr int PROXY_BA_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + 8;          // + timestamp
+// Mobile Node Link-layer Identifier (RFC 5213 Section 8.6): a presence octet followed by the
+// 48-bit IEEE 802 address in the RFC 4861 Section 4.6 wire form. The presence octet carries what
+// the real option's presence or absence carries, because this block has no option headers.
+static constexpr int PROXY_MN_LL_ID_OPTION_SIZE = 1 + 6;
+static constexpr int PROXY_BU_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + PROXY_MN_LL_ID_OPTION_SIZE + 1 + 1 + 8; // + HI + ATT + timestamp
+static constexpr int PROXY_BA_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + PROXY_MN_LL_ID_OPTION_SIZE + 8;          // + timestamp
 
 static B roundUpToMobilityHeaderBoundary(int numBytes)
 {
@@ -50,6 +54,22 @@ B MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(size_t mobileNo
 
 // Writes/reads the length-prefixed Mobile Node Identifier (NAI). NAIs in the
 // model are short, so a single length octet (max 255) is sufficient.
+// Writes/reads the Mobile Node Link-layer Identifier. An unspecified address means the option is
+// absent, which RFC 5213 Section 6.9.1.1 step 7 requires when the gateway does not know it.
+static void writeMobileNodeLinkLayerIdentifier(MemoryOutputStream& stream, const MacAddress& address)
+{
+    bool present = !address.isUnspecified();
+    stream.writeByte(present ? 1 : 0);
+    stream.writeMacAddress(present ? address : MacAddress::UNSPECIFIED_ADDRESS);
+}
+
+static MacAddress readMobileNodeLinkLayerIdentifier(MemoryInputStream& stream)
+{
+    bool present = stream.readByte() != 0;
+    MacAddress address = stream.readMacAddress();
+    return present ? address : MacAddress::UNSPECIFIED_ADDRESS;
+}
+
 static void writeMobileNodeIdentifier(MemoryOutputStream& stream, const char *nai)
 {
     size_t len = strlen(nai);
@@ -164,6 +184,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
             // RFC 5213 proxy mobility options (only present when this is a Proxy Binding Update)
             if (bu->getProxyRegistrationFlag()) {
                 writeMobileNodeIdentifier(stream, bu->getMobileNodeIdentifier());
+                writeMobileNodeLinkLayerIdentifier(stream, bu->getMobileNodeLinkLayerIdentifier());
                 stream.writeByte(bu->getHomeNetworkPrefixLength());
                 stream.writeIpv6Address(bu->getHomeNetworkPrefix());
                 stream.writeByte(bu->getHandoffIndicator());
@@ -189,6 +210,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
             // RFC 5213 proxy mobility options (only present when this is a Proxy Binding Acknowledgement)
             if (ba->getProxyRegistrationFlag()) {
                 writeMobileNodeIdentifier(stream, ba->getMobileNodeIdentifier());
+                writeMobileNodeLinkLayerIdentifier(stream, ba->getMobileNodeLinkLayerIdentifier());
                 stream.writeByte(ba->getHomeNetworkPrefixLength());
                 stream.writeIpv6Address(ba->getHomeNetworkPrefix());
                 stream.writeUint64Be(ba->getTimestampValue());
@@ -292,6 +314,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             // RFC 5213 proxy mobility options (only present in a Proxy Binding Update)
             if (bu->getProxyRegistrationFlag()) {
                 bu->setMobileNodeIdentifier(readMobileNodeIdentifier(stream).c_str());
+                bu->setMobileNodeLinkLayerIdentifier(readMobileNodeLinkLayerIdentifier(stream));
                 bu->setHomeNetworkPrefixLength(stream.readByte());
                 bu->setHomeNetworkPrefix(stream.readIpv6Address());
                 bu->setHandoffIndicator(stream.readByte());
@@ -319,6 +342,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             // RFC 5213 proxy mobility options (only present in a Proxy Binding Acknowledgement)
             if (ba->getProxyRegistrationFlag()) {
                 ba->setMobileNodeIdentifier(readMobileNodeIdentifier(stream).c_str());
+                ba->setMobileNodeLinkLayerIdentifier(readMobileNodeLinkLayerIdentifier(stream));
                 ba->setHomeNetworkPrefixLength(stream.readByte());
                 ba->setHomeNetworkPrefix(stream.readIpv6Address());
                 ba->setTimestampValue(stream.readUint64Be());

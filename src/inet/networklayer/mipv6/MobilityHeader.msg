@@ -12,6 +12,7 @@
 import inet.common.INETDefs;
 import inet.common.TlvOptions;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.networklayer.ipv6.Ipv6Header;
 import inet.networklayer.ipv6.Ipv6ExtensionHeaders;
@@ -58,6 +59,7 @@ class BindingUpdate extends MobilityHeader
     //
     bool proxyRegistrationFlag = false;        // P-flag (RFC 5213 Section 8.1)
     string mobileNodeIdentifier;               // Mobile Node Identifier option (NAI), RFC 4283
+    MacAddress mobileNodeLinkLayerIdentifier;  // Mobile Node Link-layer Identifier option, RFC 5213 Section 8.6 (unspecified = option absent)
     Ipv6Address homeNetworkPrefix;             // Home Network Prefix option, RFC 5213 Section 8.3
     uint8_t homeNetworkPrefixLength = 0;
     uint8_t handoffIndicator = 0;              // Handoff Indicator option, RFC 5213 Section 8.4
@@ -116,6 +118,7 @@ class BindingAcknowledgement extends MobilityHeader
     //
     bool proxyRegistrationFlag = false;        // P-flag (RFC 5213 Section 8.1)
     string mobileNodeIdentifier;               // Mobile Node Identifier option (NAI), echoed back
+    MacAddress mobileNodeLinkLayerIdentifier;  // Mobile Node Link-layer Identifier option, echoed back (unspecified = option absent)
     Ipv6Address homeNetworkPrefix;             // Home Network Prefix option (assigned/confirmed)
     uint8_t homeNetworkPrefixLength = 0;
     uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8
