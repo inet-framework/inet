@@ -1,0 +1,227 @@
+%description:
+Production association and reassociation request/response generators populate
+Capability Information for both QoS and non-QoS stations. Check typed fields and
+serialized bytes; ESS/IBSS are reserved and remain clear (802.11-2024 9.4.1.4).
+Authenticated state is seeded: this tests frame generation, not the handshake.
+
+%file: AssociationCapabilities.cc
+#include <iostream>
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+namespace inet {
+namespace ieee80211 {
+
+static void checkCapabilityBytes(const Ptr<Ieee80211MgmtFrame>& body, bool qos)
+{
+    Packet packet("capabilities", body);
+    const auto bytes = packet.peekAllAsBytes()->getBytes();
+    ASSERT(bytes.size() >= 2);
+    ASSERT(bytes[0] == 0); // Includes reserved ESS/IBSS bits.
+    ASSERT(bytes[1] == (qos ? 2 : 0));
+}
+
+class AssociationCapabilitiesSta : public Ieee80211MgmtSta
+{
+  protected:
+    cMessage *trigger = nullptr;
+    ApInfo peer;
+    int associations = 0;
+    int reassociations = 0;
+
+    virtual void initialize(int stage) override
+    {
+        Ieee80211MgmtSta::initialize(stage);
+        if (stage == INITSTAGE_LAST) {
+            trigger = new cMessage("generateRequests");
+            scheduleAt(SimTime(1, SIMTIME_MS), trigger);
+        }
+    }
+
+    virtual void handleTimer(cMessage *message) override
+    {
+        if (message != trigger) {
+            Ieee80211MgmtSta::handleTimer(message);
+            return;
+        }
+        ASSERT(!mib->isHtOperationSupported());
+        peer.address = MacAddress("02:00:00:00:00:01");
+        peer.channel = 0;
+        peer.ssid = "test";
+        peer.isAuthenticated = true;
+        startAssociation(&peer, SimTime(1));
+        cancelAndDelete(assocTimeoutMsg);
+        assocTimeoutMsg = nullptr;
+        mib->bssStationData.isAssociated = true;
+        assocAP.address = peer.address;
+        startReassociation(&peer, SimTime(1));
+        cancelAndDelete(assocTimeoutMsg);
+        assocTimeoutMsg = nullptr;
+        mib->bssStationData.isAssociated = false;
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& address) override
+    {
+        ASSERT(address == peer.address);
+        if (subtype == ST_ASSOCIATIONREQUEST) {
+            const auto request = dynamicPtrCast<Ieee80211AssociationRequestFrame>(body);
+            ASSERT(request != nullptr);
+            ASSERT(request->getCapabilityInformation() == (mib->qos ? 0x0200 : 0));
+            associations++;
+        }
+        else {
+            ASSERT(subtype == ST_REASSOCIATIONREQUEST);
+            const auto request = dynamicPtrCast<Ieee80211ReassociationRequestFrame>(body);
+            ASSERT(request != nullptr);
+            ASSERT(request->getCapabilityInformation() == (mib->qos ? 0x0200 : 0));
+            reassociations++;
+        }
+        checkCapabilityBytes(body, mib->qos);
+    }
+
+    using cListener::finish;
+    virtual void finish() override
+    {
+        ASSERT(associations == 1 && reassociations == 1);
+        std::cout << "STA association/reassociation capability fields and bytes checked, qos=" << mib->qos << "\n";
+    }
+
+  public:
+    virtual ~AssociationCapabilitiesSta() { cancelAndDelete(trigger); }
+};
+Define_Module(AssociationCapabilitiesSta);
+
+class AssociationCapabilitiesAp : public Ieee80211MgmtAp
+{
+  protected:
+    cMessage *trigger = nullptr;
+    int associations = 0;
+    int reassociations = 0;
+
+    virtual void initialize(int stage) override
+    {
+        Ieee80211MgmtAp::initialize(stage);
+        if (stage == INITSTAGE_LAST) {
+            trigger = new cMessage("generateResponses");
+            scheduleAt(SimTime(1, SIMTIME_MS), trigger);
+        }
+    }
+
+    virtual void handleTimer(cMessage *message) override
+    {
+        if (message != trigger) {
+            Ieee80211MgmtAp::handleTimer(message);
+            return;
+        }
+        ASSERT(!mib->isHtOperationSupported());
+        for (bool reassociation : {false, true}) {
+            MacAddress address(reassociation ? "02:00:00:00:00:03" : "02:00:00:00:00:02");
+            auto& sta = staList[address];
+            sta.address = address;
+            sta.authSeqExpected = 1;
+            mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+            Ptr<Ieee80211MgmtFrame> body;
+            if (reassociation)
+                body = makeShared<Ieee80211ReassociationRequestFrame>();
+            else
+                body = makeShared<Ieee80211AssociationRequestFrame>();
+            // Fixed fields plus empty SSID and Supported Rates elements.
+            body->setChunkLength(B(reassociation ? 14 : 8));
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(reassociation ? ST_REASSOCIATIONREQUEST : ST_ASSOCIATIONREQUEST);
+            header->setTransmitterAddress(address);
+            processFrame(new Packet("request", body), header);
+            clearPendingAssociation(&sta);
+        }
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& address, uint64_t transactionId = 0) override
+    {
+        if (subtype != ST_ASSOCIATIONRESPONSE && subtype != ST_REASSOCIATIONRESPONSE) {
+            Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, address, transactionId);
+            return;
+        }
+        const auto response = dynamicPtrCast<Ieee80211AssociationResponseFrame>(body);
+        ASSERT(response != nullptr);
+        ASSERT(response->getStatusCode() == SC_SUCCESSFUL);
+        ASSERT(transactionId != 0);
+        ASSERT(response->getCapabilityInformation() == (mib->qos ? 0x0200 : 0));
+        checkCapabilityBytes(body, mib->qos);
+        if (subtype == ST_ASSOCIATIONRESPONSE)
+            associations++;
+        else
+            reassociations++;
+    }
+
+    using cListener::finish;
+    virtual void finish() override
+    {
+        ASSERT(associations == 1 && reassociations == 1);
+        std::cout << "AP association/reassociation capability fields and bytes checked, qos=" << mib->qos << "\n";
+    }
+
+  public:
+    virtual ~AssociationCapabilitiesAp() { cancelAndDelete(trigger); }
+};
+Define_Module(AssociationCapabilitiesAp);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.wireless.AccessPoint;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple AssociationCapabilitiesAp extends Ieee80211MgmtAp {
+    parameters:
+        @class(::inet::ieee80211::AssociationCapabilitiesAp);
+}
+simple AssociationCapabilitiesSta extends Ieee80211MgmtSta {
+    parameters:
+        @class(::inet::ieee80211::AssociationCapabilitiesSta);
+}
+network AssociationCapabilitiesNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap[2]: AccessPoint;
+        sta[2]: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AssociationCapabilitiesNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap[*].wlan[0].mgmt.typename = "AssociationCapabilitiesAp"
+*.sta[*].wlan[0].mgmt.typename = "AssociationCapabilitiesSta"
+*.sta[*].wlan[0].agent.startingTime = 10s
+*.ap[0].wlan[0].mac.qosStation = false
+*.sta[0].wlan[0].mac.qosStation = false
+*.ap[1].wlan[0].mac.qosStation = true
+*.sta[1].wlan[0].mac.qosStation = true
+**.opMode = "g(erp)"
+**.bitrate = 6Mbps
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+STA association/reassociation capability fields and bytes checked, qos=0
+
+%contains: stdout
+STA association/reassociation capability fields and bytes checked, qos=1
+
+%contains: stdout
+AP association/reassociation capability fields and bytes checked, qos=0
+
+%contains: stdout
+AP association/reassociation capability fields and bytes checked, qos=1

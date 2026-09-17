@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211CapabilityInformation.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 
 #include "inet/common/INETUtils.h"
@@ -14,6 +15,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211BssidReq_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
@@ -319,6 +321,8 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
 {
     auto packet = new Packet(name);
     packet->addTag<MacAddressReq>()->setDestAddress(address);
+    // IEEE Std 802.11-2024, 9.3.3.1: use the target AP, including before association.
+    packet->addTag<Ieee80211BssidReq>()->setBssid(address);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);
@@ -362,6 +366,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
 
     // create and send association request
     const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
     addHtCapabilities(body);
@@ -384,6 +389,7 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
         throw cRuntimeError("startReassociation: not authenticated with AP address='%s'", ap->address.str().c_str());
     changeChannel(ap->channel);
     const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
+    body->setCapabilityInformation((mib->qos ? CAPABILITY_QOS : 0));
     body->setCurrentAP(assocAP.address);
     body->setSSID(ap->ssid.c_str());
     setSupportedRateElements(body);
