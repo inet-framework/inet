@@ -68,6 +68,12 @@ simple Pmipv6 extends SimpleModule
         double initialBindingAckTimeout @unit(s) = default(1s);
         double maxBindingAckTimeout @unit(s) = default(32s);
 
+        // Order Proxy Binding Updates by the timestamp the gateway puts in them, so that one
+        // delayed in the network cannot undo a later registration. RFC 5213 Section 9.3 calls
+        // this TimestampBasedApproachInUse and enables it by default. With it off, the messages
+        // carry no timestamp and the anchor accepts them in arrival order.
+        bool timestampBasedOrdering = default(true);
+
         double bindingLifetime @unit(s) = default(3600s);                    // MAG: lifetime requested in Proxy Binding Updates
         double maxBindingLifetime @unit(s) = default(3600s);                 // LMA: the longest lifetime it grants; a shorter request is granted as asked
         double bindingRefreshRatio = default(0.8);                           // MAG: re-register after this fraction of the granted lifetime; 0 disables refreshing

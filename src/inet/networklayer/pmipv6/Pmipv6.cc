@@ -45,6 +45,18 @@ static constexpr uint8_t HANDOFF_NEW_INTERFACE = 1;   // attachment over a new i
 static constexpr uint8_t HANDOFF_STATE_UNKNOWN = 4;   // the gateway cannot tell
 static constexpr uint8_t HANDOFF_REREGISTRATION = 5;  // nothing changed, the lifetime is being extended
 
+// RFC 5213 Section 8.8: the Timestamp option is 64 bits wide, of which the first 48
+// hold the integer number of seconds and the remaining 16 hold a fraction of a second
+// in units of 1/65536. That is not the NTP 32.32 layout, which it is easy to mistake
+// it for. The clock a gateway reads here is simulation time.
+static uint64_t timestampOf(simtime_t t)
+{
+    double seconds = t.dbl();
+    uint64_t wholeSeconds = (uint64_t)seconds;
+    uint64_t fraction = (uint64_t)((seconds - (double)wholeSeconds) * 65536.0);
+    return (wholeSeconds << 16) | (fraction & 0xFFFF);
+}
+
 simsignal_t Pmipv6::proxyBindingUpdateSentSignal = registerSignal("proxyBindingUpdateSent");
 simsignal_t Pmipv6::proxyBindingAcknowledgementReceivedSignal = registerSignal("proxyBindingAcknowledgementReceived");
 simsignal_t Pmipv6::proxyBindingUpdateReceivedSignal = registerSignal("proxyBindingUpdateReceived");
@@ -121,6 +133,7 @@ void Pmipv6::initialize(int stage)
         if (isLma == isMag)
             throw cRuntimeError("Pmipv6: exactly one of isLocalMobilityAnchor / isMobileAccessGateway must be set");
 
+        timestampBasedOrdering = par("timestampBasedOrdering");
         detectTransmissionFailure = par("detectTransmissionFailure");
         detachDetectionTimeout = par("detachDetectionTimeout");
         presenceCheckInterval = par("presenceCheckInterval");
@@ -476,6 +489,19 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
                 << minDelayBeforeBindingCacheEntryDelete << " before deleting it" << endl;
     }
     else {
+        // RFC 5213 Section 5.5: a Proxy Binding Update that is older than the last one
+        // accepted for this mobility session is refused. Without this, a registration
+        // delayed in the network -- from the gateway the mobile node has just left, say --
+        // would re-point the node's prefix backwards.
+        if (timestampBasedOrdering && it != bindingCache.end()
+                && pbu->getTimestampValue() <= it->second.timestamp)
+        {
+            EV_WARN << "LMA rejecting Proxy Binding Update for MN '" << mnId
+                    << "': it is not newer than the last one accepted for this mobility session" << endl;
+            sendProxyBindingAcknowledgement(pbu, TIMESTAMP_LOWER_THAN_PREV_ACCEPTED, 0, magAddress, lmaAddress);
+            return;
+        }
+
         // Registration / re-registration / handover.
         int tunnelId = getOrCreateTunnel(lmaAddress, magAddress, lmaTunnelByMag);
         NetworkInterface *tunnel = ift->getInterfaceById(tunnelId);
@@ -521,6 +547,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.homeNetworkPrefixLength = hnpLen;
         entry.servingMagAddress = magAddress;
         entry.sequenceNumber = seq;
+        entry.timestamp = pbu->getTimestampValue();
         entry.expiry = simTime() + grantedLifetime;
         entry.tunnelInterfaceId = tunnelId;
         // RFC 6275 Section 9.5.1: the entry lives exactly as long as the lifetime granted
@@ -810,7 +837,7 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uin
     pbu->setHomeNetworkPrefixLength(binding.homeNetworkPrefixLength);
     pbu->setHandoffIndicator(handoffIndicator);
     pbu->setAccessTechnologyType(binding.accessTechnologyType);
-    pbu->setTimestampValue(0);         // ordered by sequence number in this model
+    pbu->setTimestampValue(timestampBasedOrdering ? timestampOf(simTime()) : 0);
     pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(binding.mnIdentifier.size()));
     packet->insertAtFront(pbu);
     emit(proxyBindingUpdateSentSignal, (intval_t)pbu->getLifetime());
