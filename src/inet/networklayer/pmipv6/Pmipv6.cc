@@ -795,6 +795,9 @@ void Pmipv6::deregisterMobileNode(MagBinding& binding)
     binding.registered = false;
     binding.deregistering = true;
     binding.sequenceNumber++;
+    // the deregistration waits INITIAL_BINDACK_TIMEOUT, not whatever interval a
+    // preceding unanswered registration had backed off to
+    binding.retransmitInterval = initialBindingAckTimeout;
     // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, the prefixes are named in
     // full rather than left all-zero, and the handoff state is unknown
     sendProxyBindingUpdate(binding, 0, HANDOFF_STATE_UNKNOWN);
