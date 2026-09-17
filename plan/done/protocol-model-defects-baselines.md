@@ -1,9 +1,9 @@
 # Repair the regressions of the model-defects branch and record its baselines
 
-**Status:** in progress since 2026-09-17. Steps 1 to 6 are done; step 7 waits for the decision to push. Branch
-`topic/protocol-model-defects`, worktree `/home/levy/workspace/inet-protocol-model-defects`,
-23 commits, now on master `c3fbe79ad0` (the three master commits after `b0c7a25e75` change only CI
-files, `README.md` and a GitHub helper).
+**Status:** done 2026-09-17. The branch `topic/protocol-model-defects` landed on master on top of
+`c3fbe79ad0` (the three master commits after `b0c7a25e75` change only CI files, `README.md` and a
+GitHub helper), and its statistical results landed on master of the statistics repository. The
+branches and the worktree are deleted.
 It continues [protocol-model-defects.md](protocol-model-defects.md).
 
 ## Why this plan exists
@@ -194,11 +194,11 @@ No other commit moves a changed row.
 ### 7. Hand over
 
 - [x] Report the result and the row groups.
-- [ ] Ask before pushing: the INET branch needs `--force-with-lease`, and the `statistics` branch is
-      new.
+- [x] Land both branches, on request. The statistics commits went to master of the statistics
+      repository first, so that CI finds them when the INET commits arrive.
 - [x] Move the `ghci-statistical` worktrees back to their `origin` tips. The topic branch of
       `statistics` stays as a local branch of that repository.
-- [ ] Move this plan and `protocol-model-defects.md` to `plan/done/` when the branch lands.
+- [x] Move this plan and `protocol-model-defects.md` to `plan/done/` when the branch lands.
 
 ## Not in this plan
 

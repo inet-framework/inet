@@ -1,7 +1,9 @@
 # Repair the defects the standards passes found
 
-**Status:** in progress. Started 2026-09-14 on `topic/protocol-model-defects`, in the
-worktree `/home/levy/workspace/inet-protocol-model-defects`.
+**Status:** done 2026-09-17, and landed on master. Started 2026-09-14 on
+`topic/protocol-model-defects`. The two findings that stay open are blocked by serialization and
+not by this work; the TCP and UDP results record them as defects. The baselines that the repairs
+move are in [protocol-model-defects-baselines.md](protocol-model-defects-baselines.md).
 
 **Where it stands:** **28 of the 30 tests pass.** Two remain, and both have one cause: a
 transport checksum cannot be computed by default until every payload in the tree serializes.
