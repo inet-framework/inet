@@ -1,7 +1,9 @@
 # Repair the regressions of the model-defects branch and record its baselines
 
-**Status:** in progress since 2026-09-17. Steps 1 and 2 are done. Branch `topic/protocol-model-defects`, worktree
-`/home/levy/workspace/inet-protocol-model-defects`, 23 commits on master `b0c7a25e75`.
+**Status:** in progress since 2026-09-17. Steps 1 to 5 are done, step 6 runs. Branch
+`topic/protocol-model-defects`, worktree `/home/levy/workspace/inet-protocol-model-defects`,
+23 commits, now on master `c3fbe79ad0` (the three master commits after `b0c7a25e75` change only CI
+files, `README.md` and a GitHub helper).
 It continues [protocol-model-defects.md](protocol-model-defects.md).
 
 ## Why this plan exists
@@ -14,7 +16,7 @@ them. The branch does not:
 | --- | --- | --- | --- |
 | fingerprint (`tests/fingerprint`, `-f tplx -f ~tNl -f ~tND`) | release | **108 of 1752 changed** | 1752 as expected (OK) |
 | module (`inet_run_module_tests`) | debug | 334 PASS, **11 FAIL** | 345 PASS |
-| statistical (`statistics` repository) | release | not run yet | — |
+| statistical (`statistics` repository) | release, in the container | **117 of 929 changed** | 917 PASS, 10 SKIP and 2 ERROR, all expected |
 
 The branch says that no fingerprint moves. That claim came from an A/B run on 2026-09-16, and the
 A/B run was wrong. The plan, the probe commit message and the evidence repeat the claim.
@@ -90,6 +92,10 @@ No other commit moves a changed row.
       `handleStopOperation()`, `handleCrashOperation()`, and the restart paths.
 - [x] Fold both into "dhcp: add: the client probes the granted address before it takes it".
       Record them in `doc/project/evidence/model/dhcp/notes.md`.
+- [x] A third defect showed up in step 3: the client probed on renewal as well, and bound the
+      address a second time. The probe is now only for an address the client begins to use,
+      after REQUESTING or REBOOTING (RFC 2131 sections 3.1 and 3.2, RFC 5227 section 2.1). The
+      repaired probe commit was measured again in step 3.
 - [x] Check: without the repair both tests stop with an error. With it, `DHCP_2` passes, and
       `DHCP_lifecycle_1` runs to the end but needs new expected output (step 4): the probe wait
       moves the binding by 1 s, onto the 1-s marks of its scenario, so the client now stops
@@ -105,35 +111,73 @@ No other commit moves a changed row.
       by default" that the withdrawal had left above `default("declared")`, and it corrects the
       UDP sentence that said the TCP change had landed. Its message is still the old one.
 
-### 3. Measure every source commit
+### 3. Measure every source commit — DONE 2026-09-17
 
-- [ ] Run the three suites at the new head to get the changed sets: fingerprints (release, all
-      rows), module tests (debug, all), statistics (release, container, all). Record each set.
-- [ ] Run the statistical suite in the container at the base as a control. Every configuration
-      must pass, or its result is noted as outside this branch.
-- [ ] For each source commit, in order, in a detached checkout: build release and debug, run the
-      changed fingerprint rows, the changed module tests, and `update_statistical_test_results`
-      for the changed configurations in the container. Save the outputs by commit subject.
-- [ ] Explain each row group from the diff of its commit. A group without an explanation stops
-      the plan: it is a regression, and it is repaired before any baseline is written.
+- [x] The changed sets at the head: 108 fingerprints (the same rows and values as before steps 1
+      and 2), 10 module tests (the 7 TCP tests and the 3 DHCP lifecycle tests; `DHCP_2` passes
+      now), and 117 statistical results.
+- [x] The container control at the base: 929 tests, 917 PASS, 10 SKIP and 2 ERROR, all expected.
+- [x] Every source commit measured. What each one moves:
 
-### 4. Rewrite the series with its baselines
+      | Commit | Fingerprints | Statistics | Module tests |
+      | --- | --- | --- | --- |
+      | icmpv6: an error report for an unregistered protocol is dropped | 3 (GPSR IPv6) | — | — |
+      | icmp: no error report about a link-layer broadcast or multicast | the same 3 again | 3 (GPSR IPv6) | — |
+      | tcp: the first round-trip measurement (RFC 6298) | 57 | 85 | 7 TCP |
+      | quic: unknown frame, padded server Initial | 42 | 23 | — |
+      | dhcp: seven defects | 6 | 6 | `DHCP_lifecycle_2`, `_3` |
+      | dhcp: the address probe | the same 6 again | 5 | `DHCP_lifecycle_1`, `_2`, `_3` |
 
-- [ ] For each commit that moves a recorded value, add to that commit:
+      No other source commit moves a value.
+- [x] Every group is explained. The GPSR rows needed a run with the log: before the ICMPv6
+      commit, `Ipv6` dropped 27 reports about protocol 0 (the Hop-by-Hop header of GPSR) with a
+      warning, and `Icmpv6` now drops them itself, one event earlier. Before the ICMP commit the
+      nodes sent 36 Destination Unreachable reports about datagrams in link-layer broadcast or
+      multicast frames, and none is sent now. Every row of the RFC 6298 group runs TCP (BGP runs
+      over TCP), every row of the QUIC group is a QUIC scenario, and every row of the DHCP groups
+      runs a DHCP client.
+
+      Facts that cost time:
+      - `opp_repl` runs in the container with three additions in the driver
+        (`ghci/update_stats.py` in the scratch folder): an explicit
+        `import IPython.terminal.interactiveshell`, an explicit load of the bundled `omnetpp.opp`
+        and `inet.opp`, and `run_unbounded=True`. Without the last one it skips the 21 QUIC
+        configurations, which have no time limit and which INET's runner does run. The driver
+        reproduced the stored QUIC values ("KEEP") at a commit before the QUIC change, and CI's
+        runner accepted the files it wrote.
+      - `inet_run_module_tests` ignores `--exclude-filter`; a negative lookahead in `-f` works.
+      - A failing `%contains-regex` with many `.*` lines backtracks for 10 to 20 minutes.
+        `opp_test` also removes trailing blanks from the text and reads `_defaults.ini`, which sets
+        `cmdenv-log-prefix = ""`. A fast line-by-line matcher with the same meaning checked the new
+        patterns.
+      - `opp_test` stops at the first failing `%contains` block, so the files of later blocks are
+        left over from the previous run.
+
+### 4. Rewrite the series with its baselines — DONE 2026-09-17
+
+- [x] For each commit that moves a recorded value, add to that commit:
   - the changed rows of `tests/fingerprint/*.csv`,
   - the new `%contains` blocks of the module tests that it changes,
   - the obligations in its `Change:` trailer,
   - a paragraph per row group: which behavior moved and why the new values are correct.
-- [ ] Remove every "no fingerprint moves" claim: the probe commit message, the plan commit
+- [x] Remove every "no fingerprint moves" claim: the probe commit message, the plan commit
       message, `protocol-model-defects.md`, and the evidence.
-- [ ] Correct the base in `protocol-model-defects.md`: `b0c7a25e75`, not `d402df789c`.
+- [x] Correct the base in `protocol-model-defects.md`: `b0c7a25e75`, not `d402df789c`.
+- [x] Done in one scripted rebase onto `c3fbe79ad0` and one message rewrite. Every "Baselines:" line
+      now states the measured result, and the suite counts after the fold are corrected. The
+      new expected outputs match their own commit and fail on the commit before. The plan
+      commits between the fold and the head keep the status text they had; they were written
+      when the TCP checksum default still counted as passing.
 
-### 5. Commit the statistics
+### 5. Commit the statistics — DONE 2026-09-17
 
-- [ ] Create `topic/protocol-model-defects` in the `statistics` repository from its `origin/master`,
+- [x] Create `topic/protocol-model-defects` in the `statistics` repository from its `origin/master`,
       in the worktree `ghci-statistical/inet/statistics`.
-- [ ] One commit for each INET commit that changes statistics, with the updated `.sca` files of that
+- [x] One commit for each INET commit that changes statistics, with the updated `.sca` files of that
       commit only. The message names the INET commit and explains each group, as in step 4.
+      Five commits: icmp (3 files), tcp (85), quic (23), dhcp seven defects (6), dhcp probe (5).
+- [x] CI's statistical suite passes at the repaired probe commit with this branch: 929 tests,
+      917 PASS, 10 SKIP and 2 ERROR, all expected.
 
 ### 6. Verify the head
 
