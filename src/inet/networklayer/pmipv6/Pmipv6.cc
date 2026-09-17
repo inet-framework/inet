@@ -651,7 +651,14 @@ void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         auto packet = dynamic_cast<Packet *>(obj);
         if (accessInterface == nullptr || packet == nullptr)
             return;
-        const auto& header = packet->peekAtFront<ieee80211::Ieee80211DataOrMgmtHeader>();
+        // other medium access control modules emit this signal too, carrying their own
+        // frame formats, and an access gateway's radio need not be 802.11
+        const auto& header = packet->peekAtFront<ieee80211::Ieee80211DataOrMgmtHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+        if (header == nullptr) {
+            EV_DETAIL << "Link break on " << accessInterface->getInterfaceName()
+                      << " reported for a frame this module cannot read; ignoring it" << endl;
+            return;
+        }
         handleMobileNodeDetached(accessInterface, header->getReceiverAddress());
     }
     else if (signalID == packetReceivedFromLowerSignal) {
