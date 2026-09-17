@@ -1,35 +1,80 @@
-%# expected-result: FAIL
 %description:
-802.11 Deauthentication: the AP or STA sends a Deauthentication frame (type 12) when
-tearing down the session. [NOT-MODELED -- INET's Ieee80211MgmtAp/Sta do not send
-Deauthentication frames during normal simulation teardown; teardown happens by process
-destruction, not by a proper 802.11 deauth exchange; no trigger exists to fire Deauth
-within the simulation time limit]
+After successful association, issue the station deauthentication primitive and
+verify the addressed frame, leaving reason, and delivery to AP management.
 
 %file: WifiDeauth.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
 
 namespace inet {
 namespace protocoltest {
+using namespace ieee80211;
 
-// 12 = ST_DEAUTHENTICATION. INET's mgmt layer never sends this frame during a
-// normal simulation run; teardown is silent.
+// Test stimulus only: all protocol state transitions remain in production management.
+class WifiDeauthAgent : public Ieee80211AgentSta
+{
+  protected:
+    bool triggered = false;
+    virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *response) override
+    {
+        Ieee80211AgentSta::processAssociateConfirm(response);
+        if (response->getResultCode() == PRC_SUCCESS && !triggered) {
+            triggered = true;
+            sendDeauthenticateRequest(response->getAddress(), RC_DEAUTH_MS_LEAVING);
+        }
+    }
+};
+Define_Module(WifiDeauthAgent);
+
 Define_ProtocolTest(wifi_deauth)
 {
     return ProtocolTest("wifi_deauth")
-        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+        .once(on("sta1.wlan[0].agent").signal("acceptConfirm").filterValue(PR_ASSOCIATE_CONFIRM)
+                  .describe("initial association completed").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 12")
-                  .describe("a Deauthentication frame from the AP").within(2.5));
+                  .assertEvent([](const MatchContext& c) {
+                      auto header = c.event.packet->peekAtFront<Ieee80211MgmtHeader>();
+                      auto body = managementBody<Ieee80211DeauthenticationFrame>(c.event);
+                      return header->getReceiverAddress() == MacAddress("02:00:00:00:00:01") &&
+                             body && body->getReasonCode() == RC_DEAUTH_MS_LEAVING;
+                  }).describe("STA deauthentication to the associated AP with leaving reason").within(0.5))
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 12")
+                  .describe("deauthentication received by AP MAC").within(0.5))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 8")
+                  .assertEvent([](const MatchContext& c) {
+                      auto mib = check_and_cast<Ieee80211Mib *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mib"));
+                      auto it = mib->bssAccessPointData.stations.find(MacAddress("02:00:00:00:00:03"));
+                      return it != mib->bssAccessPointData.stations.end() && it->second == Ieee80211Mib::NOT_AUTHENTICATED;
+                  }).describe("AP cleared the station authentication state").within(0.5));
 }
 
 } // namespace protocoltest
 } // namespace inet
 
-%inifile: test.ini
+%file: WifiDeauth.ned
+@namespace(inet::protocoltest);
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+simple WifiDeauthAgent extends Ieee80211AgentSta
+{
+    parameters:
+        @class(WifiDeauthAgent);
+}
 
+%inifile: test.ini
 [General]
 *.tester.testName = "wifi_deauth"
+*.sta1.wlan[*].address = "02:00:00:00:00:03"
+*.sta1.wlan[*].agent.typename = "WifiDeauthAgent"
+*.sta1.wlan[*].agent.defaultSsid = "first"
+*.sta2.wlan[*].agent.startingTime = 2s
+*.ap.wlan[*].mgmt.ssid = "first"
+*.ap.wlan[*].address = "02:00:00:00:00:01"
+*.sta1.wlan[*].agent.startingTime = 0s
+*.sta1.wlan[*].agent.channelsToScan = "0"
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
