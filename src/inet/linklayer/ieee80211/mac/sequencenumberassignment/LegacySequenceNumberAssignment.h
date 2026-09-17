@@ -17,7 +17,8 @@ namespace ieee80211 {
 class INET_API LegacySequenceNumberAssignment : public ISequenceNumberAssignment
 {
   protected:
-    SequenceNumberCyclic lastSeqNum = SequenceNumberCyclic(0);
+    // Store the predecessor so the first increment emits sequence number 0.
+    SequenceNumberCyclic lastSeqNum = SequenceNumberCyclic(4095);
 
   public:
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;

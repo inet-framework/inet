@@ -14,6 +14,7 @@ namespace ieee80211 {
 // A non-QoS STA shall assign sequence numbers to management frames and data frames (QoS subfield of the
 // Subtype field is equal to 0) from a single modulo-4096 counter, starting at 0 and incrementing by 1, for each
 // MSDU or MMPDU.
+// IEEE Std 802.11-2024, 10.3.2.14.2 and Table 10-5 (SNS1/TR1).
 //
 void LegacySequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
@@ -24,4 +25,3 @@ void LegacySequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211Dat
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
