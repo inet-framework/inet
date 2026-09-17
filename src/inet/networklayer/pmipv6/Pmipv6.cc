@@ -100,6 +100,8 @@ std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding)
 Pmipv6::~Pmipv6()
 {
     cancelAndDelete(presenceCheckTimer);
+    for (auto& element : bindingCache)
+        cancelAndDelete(element.second.deleteTimer);
 }
 
 void Pmipv6::initialize(int stage)
@@ -115,6 +117,7 @@ void Pmipv6::initialize(int stage)
         detectTransmissionFailure = par("detectTransmissionFailure");
         detachDetectionTimeout = par("detachDetectionTimeout");
         presenceCheckInterval = par("presenceCheckInterval");
+        minDelayBeforeBindingCacheEntryDelete = par("minDelayBeforeBindingCacheEntryDelete");
         bindingLifetime = par("bindingLifetime");
         advValidLifetime = par("homeNetworkPrefixAdvValidLifetime");
         advPreferredLifetime = par("homeNetworkPrefixAdvPreferredLifetime");
@@ -190,6 +193,20 @@ void Pmipv6::handleTimer(cMessage *timer)
             checkMobileNodePresence();
             scheduleAfter(presenceCheckInterval, timer);
             break;
+        case LMA_BINDING_DELETE: {
+            // RFC 5213 Section 5.3.5 step 2: the wait ended without the mobile node
+            // reappearing anywhere, so the mobility session is over
+            auto& session = check_and_cast<Pmipv6Timer *>(timer)->session;
+            auto it = bindingCache.find(session);
+            if (it != bindingCache.end()) {
+                EV_INFO << "LMA removed binding for MN '" << session.mnIdentifier
+                        << "'; the deletion delay expired without a new registration" << endl;
+                it->second.deleteTimer = nullptr;
+                deleteBindingCacheEntry(it);
+            }
+            delete timer;
+            break;
+        }
         default:
             throw cRuntimeError("Pmipv6: unknown timer '%s' of kind %d", timer->getName(), timer->getKind());
     }
@@ -325,6 +342,15 @@ Pmipv6::BindingCache::iterator Pmipv6::lookupBindingCacheEntry(const BindingUpda
     return bindingCache.end();
 }
 
+void Pmipv6::deleteBindingCacheEntry(BindingCache::iterator it)
+{
+    if (it->second.downlinkRoute)
+        rt6->deleteRoute(it->second.downlinkRoute);
+    cancelAndDelete(it->second.deleteTimer);
+    bindingCache.erase(it);
+    emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
+}
+
 void Pmipv6::sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
         unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress)
 {
@@ -385,18 +411,30 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     }
 
     if (lifetime == 0) {
-        // Deregistration. Only tear down if the request comes from the MAG that
-        // currently serves the mobile node; otherwise this is a stale request
-        // from a previous MAG after the node has already moved (handover race).
-        if (it != bindingCache.end() && it->second.servingMagAddress == magAddress) {
-            if (it->second.downlinkRoute)
-                rt6->deleteRoute(it->second.downlinkRoute);
-            bindingCache.erase(it);
-            emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
-            EV_INFO << "LMA removed binding for MN '" << mnId << "'" << endl;
+        // RFC 5213 Section 5.3.5 step 1: a deregistration is only honoured from the
+        // gateway currently serving the node. Anything else is a stale request from a
+        // previous gateway after the node has already moved, and is ignored outright,
+        // without an acknowledgement.
+        if (it == bindingCache.end() || it->second.servingMagAddress != magAddress) {
+            EV_INFO << "LMA ignoring deregistration for MN '" << mnId << "' from " << magAddress
+                    << ", which is not the gateway currently serving it" << endl;
+            return;
         }
-        else
-            EV_INFO << "LMA ignoring stale deregistration for MN '" << mnId << "'" << endl;
+        BindingCacheEntry& entry = it->second;
+        // Section 5.3.5 step 2: stop forwarding the mobile node's traffic at once -- the
+        // anchor is not on the data path, so removing the prefix route is what drops it --
+        // but hold the entry, because the node may be re-registering elsewhere right now.
+        if (entry.downlinkRoute) {
+            rt6->deleteRoute(entry.downlinkRoute);
+            entry.downlinkRoute = nullptr;
+        }
+        if (entry.deleteTimer == nullptr) {
+            entry.deleteTimer = new Pmipv6Timer("bindingDelete", LMA_BINDING_DELETE);
+            entry.deleteTimer->session = entry.session;
+        }
+        rescheduleAfter(minDelayBeforeBindingCacheEntryDelete, entry.deleteTimer);
+        EV_INFO << "LMA accepted deregistration for MN '" << mnId << "'; holding the binding for "
+                << minDelayBeforeBindingCacheEntryDelete << " before deleting it" << endl;
     }
     else {
         // Registration / re-registration / handover.
@@ -412,11 +450,22 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         BindingCacheEntry& entry = it->second;
         entry.session = key;
 
-        bool retargeted = entry.downlinkRoute && entry.tunnelInterfaceId != tunnelId;
+        // Section 5.3.5 step 2: a registration arriving while the entry is being held
+        // ends the wait -- the mobility session continues rather than being replaced.
+        if (entry.deleteTimer != nullptr) {
+            cancelAndDelete(entry.deleteTimer);
+            entry.deleteTimer = nullptr;
+            EV_INFO << "LMA: MN '" << mnId << "' re-registered within the deletion delay; keeping its binding" << endl;
+        }
+
+        // Section 5.3.4: the mobile node is now reached through a different gateway, so
+        // its prefix route moves to that gateway's tunnel.
+        bool retargeted = entry.tunnelInterfaceId != -1 && entry.tunnelInterfaceId != tunnelId;
         if (retargeted) {
-            // mobile node moved to a different MAG: re-point its prefix route
-            rt6->deleteRoute(entry.downlinkRoute);
-            entry.downlinkRoute = nullptr;
+            if (entry.downlinkRoute) {
+                rt6->deleteRoute(entry.downlinkRoute);
+                entry.downlinkRoute = nullptr;
+            }
             emit(homeNetworkPrefixReanchoredSignal, (intval_t)1);
             EV_INFO << "LMA handover: re-pointing prefix " << hnp << "/" << hnpLen
                     << " toward MAG " << magAddress << endl;
@@ -811,11 +860,13 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(presenceCheckTimer);
+    for (auto& element : bindingCache)
+        cancelEvent(element.second.deleteTimer);
 }
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(presenceCheckTimer);
+    handleStopOperation(operation);
 }
 
 } // namespace inet

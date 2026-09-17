@@ -57,6 +57,11 @@ simple Pmipv6 extends SimpleModule
         double detachDetectionTimeout @unit(s) = default(0s);
         double presenceCheckInterval @unit(s) = default(1s); // MAG: how often detachDetectionTimeout is evaluated
 
+        // LMA: how long a binding cache entry survives a deregistration, so that a mobile node
+        // that reappears at another gateway keeps its mobility session (RFC 5213 Section 9.1
+        // names this MinDelayBeforeBCEDelete and gives it 10000 ms)
+        double minDelayBeforeBindingCacheEntryDelete @unit(s) = default(10s);
+
         double bindingLifetime @unit(s) = default(3600s);                    // lifetime requested in Proxy Binding Updates
         double homeNetworkPrefixAdvValidLifetime @unit(s) = default(3600s);  // MAG: valid lifetime of the advertised home network prefix
         double homeNetworkPrefixAdvPreferredLifetime @unit(s) = default(1800s); // MAG: preferred lifetime of the advertised home network prefix

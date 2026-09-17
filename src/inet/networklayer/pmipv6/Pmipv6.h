@@ -72,6 +72,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     bool detectTransmissionFailure = false;
     simtime_t detachDetectionTimeout;
     simtime_t presenceCheckInterval;
+    simtime_t minDelayBeforeBindingCacheEntryDelete;
     simtime_t bindingLifetime;
     simtime_t advValidLifetime;
     simtime_t advPreferredLifetime;
@@ -108,6 +109,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
 
     enum TimerKind {
         MAG_PRESENCE_CHECK = 1, // one per gateway: evaluates detachDetectionTimeout
+        LMA_BINDING_DELETE,     // one per deregistered binding: the deletion delay
     };
 
     struct BindingCacheEntry {
@@ -119,6 +121,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         simtime_t expiry;
         int tunnelInterfaceId = -1;    // LMA's tunnel to the serving MAG
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> tunnel
+        Pmipv6Timer *deleteTimer = nullptr; // running while a deregistration is being held
     };
 
   protected:
@@ -191,6 +194,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     BindingCache::iterator lookupBindingCacheEntry(const BindingUpdate *pbu);
     void sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
             unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
+    void deleteBindingCacheEntry(BindingCache::iterator it);
 
     // MAG
     void parseMobileNodeProfiles();
