@@ -1,9 +1,6 @@
-%# expected-result: FAIL
 %description:
-802.11ac 80+80 MHz non-contiguous channel: a VHT data frame uses 80+80 MHz bandwidth.
-[NOT-MODELED -- INET's VHT mode set contains only 20/40/80/160 MHz contiguous-channel
-entries; there are no 80+80 MHz mode objects and no Ieee80211VhtMode::BAND_80PLUS80MHZ
-enum value; 80+80 MHz is structurally absent from the PHY layer]
+Testability gap: No two-segment channel representation is exposed by the VHT mode API; bandwidth alone cannot establish 80+80 MHz.
+The failure is an explicit missing observation, not proof that an emitted frame is wrong.
 
 %file: Ac_80p80.cc
 
@@ -15,20 +12,13 @@ namespace protocoltest {
 
 using namespace inet::units::values;
 
-// Spec assertion: a VHT frame uses 80+80 MHz (total 160 MHz non-contiguous bandwidth).
-// INET's isVht() checks dataMode->getBandwidth(); 80+80 MHz would require a dedicated
-// bandwidth enum that doesn't exist. We assert MHz(160) as a proxy (closest real mode),
-// but even that would only match contiguous 160 MHz. The test FAILs because no 80+80 mode
-// is ever selected.
 Define_ProtocolTest(wifi_11ac_80p80)
 {
     return ProtocolTest("wifi_11ac_80p80")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 40")
-                  .filterEvent([](const MatchContext& c) {
-                      // 80+80 MHz is not representable; assert a non-contiguous mode
-                      // which INET cannot produce.
-                      return false;
+                  .assertEvent([](const MatchContext&) -> bool {
+                      throw cRuntimeError("TESTABILITY GAP: No two-segment channel representation is exposed by the VHT mode API; bandwidth alone cannot establish 80+80 MHz");
                   })
                   .describe("a VHT data frame using 80+80 MHz non-contiguous channel")
                   .within(2.5));

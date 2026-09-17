@@ -1,24 +1,21 @@
 %# expected-result: FAIL
 %description:
-802.11ac VHT Capabilities information element in Association Request / VHT Operation IE
-in Beacon: an Ieee80211VhtCapabilities chunk appears in management frames. [NOT-MODELED
--- same gap as HT IEs: INET's Ieee80211MgmtFrame.msg has no VHT Capabilities or VHT
-Operation element fields; these chunks do not exist anywhere in the INET source]
+Observe a Beacon containing VHT Operation (element ID 192) in its management body.
+This checks element presence, not VHT Capabilities or the completeness of VHT negotiation.
 
 %file: Ac_VhtIe.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec assertion: a Beacon from a VHT AP must include the VHT Operation element
-// (IEEE 802.11-2020 Section 9.4.2.160). INET never generates this chunk.
 Define_ProtocolTest(wifi_11ac_vht_ie)
 {
     return ProtocolTest("wifi_11ac_vht_ie")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 8 && Ieee80211VhtOperation.length >= 0")
+                  .filterPacket("ieee80211mac.type == 8")
+                  .filterEvent([](const MatchContext& c) { return hasManagementElement(c.event, 192); })
                   .describe("a Beacon frame containing VHT Operation IE").within(2.5));
 }
 

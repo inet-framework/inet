@@ -1,4 +1,3 @@
-%# expected-result: FAIL
 %description:
 802.11g ERP protection: when a 802.11b-only STA is present in the BSS, the AP/STA must
 use CTS-to-self (type 28) or RTS/CTS (type 27) before ERP-OFDM transmissions. [NOT-MODELED
@@ -18,6 +17,8 @@ namespace protocoltest {
 Define_ProtocolTest(wifi_11g_erp_protection)
 {
     return ProtocolTest("wifi_11g_erp_protection")
+        .once(on("sta2.wlan[0].agent").signal("acceptConfirm").filterValue(4)
+                  .describe("non-ERP station associated").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 28 || ieee80211mac.type == 27")
                   .describe("CTS-to-self or RTS for ERP protection before a data frame")
@@ -32,7 +33,9 @@ Define_ProtocolTest(wifi_11g_erp_protection)
 [General]
 *.tester.testName = "wifi_11g_erp_protection"
 # Mixed mode: AP supports both 11b and 11g; this should trigger ERP protection.
-*.sta*.wlan[*].opMode = "g(mixed)"
+*.sta1.wlan[*].opMode = "g(mixed)"
+*.sta2.wlan[*].opMode = "b"
+*.sta1.wlan[*].bitrate = 54Mbps
 *.ap.wlan[*].opMode = "g(mixed)"
 **.bandName = "2.4 GHz"
 **.wlan[*].radio.antenna.numAntennas = 1

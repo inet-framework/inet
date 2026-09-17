@@ -1,8 +1,6 @@
-%# expected-result: FAIL
 %description:
-802.11b PBCC (Packet Binary Convolutional Coding) at 5.5 or 11 Mbps. [NOT-MODELED --
-INET defines hrDsssDataMode5_5MbpsPbccLongPreamble mode objects but the rate selection
-never chooses PBCC; no NED parameter selects PBCC over CCK at the same bitrate]
+Observe one of the existing compliant PBCC mode objects. The default b mode set
+contains CCK long-preamble entries only; no production selection path to PBCC is established.
 
 %file: B_Pbcc.cc
 
@@ -15,9 +13,6 @@ namespace protocoltest {
 
 using namespace inet::physicallayer;
 
-// Spec-required assertion: a data frame uses the PBCC coding scheme.
-// INET's HrDsss mode set contains PBCC mode objects, but rate selection always picks
-// CCK for a given bitrate; PBCC is never selected in practice.
 Define_ProtocolTest(wifi_11b_pbcc)
 {
     return ProtocolTest("wifi_11b_pbcc")
@@ -26,15 +21,9 @@ Define_ProtocolTest(wifi_11b_pbcc)
                   .filterEvent([](const MatchContext& c) {
                       auto m = dynamic_cast<const Ieee80211HrDsssMode *>(txMode(c.event));
                       if (!m) return false;
-                      // PBCC data modes have "Pbcc" in the class name (no direct API);
-                      // check that the mode is not CCK by comparing modulation type string.
-                      // A PBCC data mode's getModulation() returns an Ieee80211HrDsssDataMode
-                      // with modulationScheme == PBCC; no public enum exposes this, so we
-                      // assert by net bitrate that only PBCC achieves: 5.5 Mbps PBCC is
-                      // distinct from 5.5 Mbps CCK only by the mode object identity, which we
-                      // cannot distinguish at runtime without a dedicated accessor. We assert
-                      // false to represent "not observable": the test correctly FAILs.
-                      return false;
+                      return m == &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsPbccLongPreamble ||
+                             m == &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsPbccLongPreamble ||
+                             m == &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsPbccShortPreamble;
                   })
                   .describe("a data frame transmitted with PBCC coding").within(2.5));
 }

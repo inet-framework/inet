@@ -1,6 +1,6 @@
-%# expected-result: FAIL
 %description:
-802.11ac Multi-TID Block Ack frame. [NOT-MODELED -- Ieee80211MultiTidBlockAck is marked TODO unimplemented in INET]
+Send two classified flows (TIDs 0 and 5), then observe a Multi-TID Block Ack.
+Frame declarations exist, but the variant is unfinished and rejected by production handlers.
 
 %file: Ac_MultiTidBa.cc
 
@@ -12,19 +12,22 @@ namespace protocoltest {
 
 using namespace inet::ieee80211;
 
-// Multi-TID Block Ack allows acknowledging frames from multiple TIDs in a
-// single BlockAck frame. Ieee80211MultiTidBlockAck is declared in INET but
-// its body is marked "TODO unimplemented". This test will FAIL as NOT-MODELED.
 Define_ProtocolTest(wifi_11ac_multi_tid_ba)
 {
     return ProtocolTest("wifi_11ac_multi_tid_ba")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("Ieee80211DataHeader.tid == 0")
+                  .describe("BE flow reaches the MAC with TID 0").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("Ieee80211DataHeader.tid == 5")
+                  .describe("VI flow reaches the MAC with TID 5").within(0.5))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
                   .filterEvent([](const MatchContext& c) {
                       if (!c.event.packet) return false;
                       auto ba = c.event.packet->peekAtFront<Ieee80211MultiTidBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
                       return ba != nullptr;
                   })
-                  .describe("a Multi-TID BlockAck received at sta1").within(2.5));
+                  .describe("a Multi-TID BlockAck received at sta1").within(1.0));
 }
 
 } // namespace protocoltest
@@ -34,20 +37,27 @@ Define_ProtocolTest(wifi_11ac_multi_tid_ba)
 
 [General]
 *.tester.testName = "wifi_11ac_multi_tid_ba"
+*.sta1.numApps = 2
+*.sta1.wlan[*].classifier.udpPortUpMap = "5000 BE 5001 VI"
+*.sta1.app[1].typename = "UdpBasicApp"
+*.sta1.app[1].destAddresses = "sta2"
+*.sta1.app[1].destPort = 5001
+*.sta1.app[1].messageLength = 1000B
+*.sta1.app[1].startTime = 1s
+*.sta1.app[1].sendInterval = 2ms
+*.sta2.numApps = 2
+*.sta2.app[1].typename = "UdpSink"
+*.sta2.app[1].localPort = 5001
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
-*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].sendInterval = 2ms
 include ../../ini/_ac.ini
-include ../../ini/_base.ini
-# Override radio settings after base.ini (last value wins in omnetpp ini):
 **.wlan[*].radio.receiver.energyDetection = -105dBm
-**.wlan[*].radio.receiver.sensitivity = -105dBm
-**.wlan[*].radio.receiver.snirThreshold = 0dB
-**.wlan[*].radio.transmitter.power = 0.12mW
 **.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
 **.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_11ac_multi_tid_ba: PASS

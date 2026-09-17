@@ -1,23 +1,21 @@
 %# expected-result: FAIL
 %description:
-802.11ac VHT Group ID Management action frame. [NOT-MODELED -- INET does not implement VHT group ID management]
+Observe the specific management action for Ac_GroupIdMgmt. Match the generic action
+wire representation, not a nonexistent specialized C++ chunk. See the Wi-Fi audit
+evidence for the missing feature and stimulus limitations.
 
 %file: Ac_GroupIdMgmt.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// VHT Group ID Management is sent by an AP to assign group IDs to STAs
-// for MU-MIMO operation. INET does not implement MU-MIMO or group ID management.
-// The specific frame chunk class Ieee80211VhtGroupIdManagementActionFrame
-// does not exist in INET. This test will FAIL as NOT-MODELED.
 Define_ProtocolTest(wifi_11ac_group_id_mgmt)
 {
     return ProtocolTest("wifi_11ac_group_id_mgmt")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("Ieee80211VhtGroupIdManagementActionFrame.membershipStatusArray >= 0")
+                  .filterEvent([](const MatchContext& c) { return isManagementAction(c.event, 21, 1); })
                   .describe("a VHT Group ID Management action frame from AP").within(2.0));
 }
 
