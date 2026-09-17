@@ -65,7 +65,6 @@ Define_ProtocolTestProgram()
                       auto dhcp = dhcpOf(c.event.packet);
                       if (dhcp == nullptr || dhcp->getOptions().getMessageType() != DHCPRELEASE)
                           return false;
-                      const DhcpOptions& o = dhcp->getOptions();
                       // observation 4: a unicast to the server identifier
                       bool unicast = ipv4Destination(c.event.packet) == quad(serverIdentifier)
                               && !isLinkBroadcast(c.event.packet);

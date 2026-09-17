@@ -68,6 +68,9 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     bool finishing = false;                        // true once finish() runs (no scheduling allowed)
 
   protected:
+    // The module's finish() would hide the listener's finish(cComponent *, simsignal_t).
+    using cListener::finish;
+
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
