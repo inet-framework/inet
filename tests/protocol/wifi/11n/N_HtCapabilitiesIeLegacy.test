@@ -1,0 +1,76 @@
+%description:
+An Association Request from a legacy STA must not carry an HT Capabilities
+information element.  The fixture keeps the AP and sta1 in n(mixed-2.4Ghz) mode,
+while sta2 is explicitly g(mixed), so the negative observation reaches the same
+production management serializer with the HT capability gate disabled.
+
+%file: N_HtCapabilitiesIeLegacy.cc
+
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+#include <cstddef>
+#include <cstdint>
+
+namespace inet {
+namespace protocoltest {
+
+static bool hasHtCapabilitiesInModel(const Packet *packet)
+{
+    const auto& macHeader = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+    const auto& body = packet->peekAt<ieee80211::Ieee80211AssociationRequestFrame>(macHeader->getChunkLength());
+    return body->getHtCapabilitiesPresent();
+}
+
+static bool hasHtCapabilitiesElementOnWire(const Packet *packet)
+{
+    const auto bytes = packet->peekAllAsBytes()->getBytes();
+    const auto& macHeader = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+    const size_t headerLength = macHeader->getChunkLength().get<B>();
+    constexpr size_t fixedAssociationRequestLength = 4; // Capability + Listen Interval
+    constexpr size_t fcsLength = 4;
+    ASSERT(headerLength + fixedAssociationRequestLength + fcsLength <= bytes.size());
+    size_t offset = headerLength + fixedAssociationRequestLength;
+    const size_t bodyEnd = bytes.size() - fcsLength;
+    while (offset + 2 <= bodyEnd) {
+        const uint8_t elementId = bytes[offset++];
+        const size_t length = bytes[offset++];
+        ASSERT(offset + length <= bodyEnd);
+        if (elementId == 45)
+            return true;
+        offset += length;
+    }
+    ASSERT(offset == bodyEnd);
+    return false;
+}
+
+Define_ProtocolTest(wifi_11n_ht_capabilities_ie_legacy)
+{
+    return ProtocolTest("wifi_11n_ht_capabilities_ie_legacy")
+        .once(on("sta2.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 0")
+                  .assertPacket("Ieee80211AssociationRequestFrame.htCapabilitiesPresent == false")
+                  .assertEvent([](const MatchContext& c) { return !hasHtCapabilitiesInModel(c.event.packet) && !hasHtCapabilitiesElementOnWire(c.event.packet); })
+                  .describe("a legacy Association Request without HT Capabilities")
+                  .within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_ht_capabilities_ie_legacy"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+# Make only the observed STA legacy-capable.  The AP and sta1 remain HT-capable,
+# which makes this a negative fixture for the same Association Request path.
+*.sta2.wlan[0].opMode = "g(mixed)"
+*.sta2.wlan[0].mac.modeSet = "g(mixed)"
+*.sta2.wlan[0].radio.opMode = "g(mixed)"
+*.sta2.wlan[0].mac.fcsMode = "computed"
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_ht_capabilities_ie_legacy: PASS

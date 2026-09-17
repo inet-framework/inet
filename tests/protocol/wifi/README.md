@@ -30,7 +30,7 @@ Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
 
 ```sh
 . /home/levy/workspace/omnetpp/setenv -q
-./run-tests.sh                       # all 74 tests
+./run-tests.sh                       # all 75 tests
 ./run-tests.sh 11n/N_BlockAck.test   # a subset
 ```
 
@@ -64,7 +64,7 @@ ignores `%#` lines — the opp_repl wrapper reads it). The wrapper then reports 
 Only `(unexpected)` outcomes fail the run (non-zero exit); expected PASS and expected FAIL are
 both green.
 
-**Today: 39 CONFORMS (expected PASS) + 35 NOT-MODELED (expected FAIL), 0 DEVIATES across 74
+**Today: 42 CONFORMS (expected PASS) + 33 NOT-MODELED (expected FAIL), 0 DEVIATES across 75
 tests — all results as expected, run exits 0.**
 
 ## Conformance matrix
@@ -152,14 +152,26 @@ be satisfied without changing the shared harness.
 | `N_CompressedBa` | Compressed Block Ack bitmap | R | ✅ |
 | `N_RtsCts` | HCF RTS/CTS | R | ✅ |
 | `N_Ampdu` | A-MPDU aggregation | R | ⛔ policy returns nullptr |
-| `N_HtCapabilitiesIe` | HT Capabilities IE in AssocReq | R | ⛔ no IE in mgmt frame |
-| `N_HtOperationIe` | HT Operation IE in Beacon | R | ⛔ no IE in mgmt frame |
+| `N_HtCapabilitiesIe` | HT Capabilities IE in AssocReq | R | ✅ typed body, MCS 0 and wire IE |
+| `N_HtCapabilitiesIeLegacy` | Legacy AssocReq omits HT Capabilities | R | ✅ typed body and wire absence |
+| `N_HtOperationIe` | HT Operation IE in Beacon | R | ✅ typed body and wire primary channel |
 | `N_Smps` | SM Power Save action frame | O | ⛔ |
 | `N_Greenfield` | HT greenfield preamble | O | ⛔ always MIXED |
 | `N_StbcCap` | HT STBC | O | ⛔ `getSTBC()` hardcoded 0 |
 | `N_LdpcCap` | HT LDPC | O | ⛔ LDPC absent |
 | `N_2040Coex` | 20/40 BSS Coexistence | O | ⛔ |
 | `N_ReverseDirection` | Reverse Direction Grant (RDG) | O | ⛔ no HT Control field |
+
+The three HT management-element cases above pass in debug mode on the audit implementation
+based on `7287f347aaca36e557c708d6930a6f5a450b2833`:
+
+```sh
+inet_run_protocol_tests -m debug -f '(N_HtCapabilitiesIe|N_HtCapabilitiesIeLegacy|N_HtOperationIe)\.test'
+```
+
+The selectors observe the first relevant production frame and assert the element separately,
+so an omitted element fails the assertion instead of being filtered out. This verifies these
+frames and fields, not every capability-negotiation procedure.
 
 ### 11ac (WiFi 5 — VHT)
 | Test | Feature | R/O | |
@@ -185,9 +197,9 @@ be satisfied without changing the shared harness.
   aggregation-policy module exist, but `BasicMpduAggregationPolicy::computeAggregateFrames()`
   returns `nullptr`, so no A-MPDU is ever emitted — a *required* 802.11ac feature (all VHT data
   is meant to ride in A-MPDUs). The most significant gap. (A-MSDU *is* modeled.)
-- **No HT/VHT management Information Elements** (`N_HtCapabilitiesIe`, `N_HtOperationIe`,
-  `Ac_VhtIe`): Beacon/AssociationRequest carry no HT/VHT Capabilities or Operation elements, so
-  capability negotiation is not modeled — notable for real-device interoperability.
+- **VHT management Information Elements** (`Ac_VhtIe`) remain a separately tracked gap.
+  HT Capabilities and HT Operation are modeled and checked in generated management frames;
+  their test results do not establish VHT support.
 - **ERP protection absent** (`G_ErpProtection`): `g(mixed)` never emits CTS-to-self/RTS before
   ERP-OFDM data when legacy STAs are present.
 - **STBC hardcoded off** in both HT and VHT signal modes (`getSTBC()` ≡ 0); **LDPC absent**.
