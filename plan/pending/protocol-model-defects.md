@@ -67,6 +67,12 @@ is the most common blocking finding in the audit reports.
 Every commit here answers it. Where a baseline moves, the run that produced the new value is
 named. A repair whose baselines are not yet run says `?` and does not pretend.
 
+**The answer, measured on 2026-09-17: fingerprints and statistical results move, and so
+does the expected output of nine module tests.** An A/B run on 2026-09-16 reported that
+nothing moves, and it was wrong. [protocol-model-defects-baselines.md](protocol-model-defects-baselines.md)
+holds the measurement, and each commit that moves a recorded value carries the new value and
+the reason.
+
 ## The order
 
 By how clear the defect is, not by protocol.
