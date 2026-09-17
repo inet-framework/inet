@@ -17,6 +17,8 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -46,6 +48,7 @@ simsignal_t Pmipv6::proxyBindingUpdateSentSignal = registerSignal("proxyBindingU
 simsignal_t Pmipv6::proxyBindingAcknowledgementReceivedSignal = registerSignal("proxyBindingAcknowledgementReceived");
 simsignal_t Pmipv6::proxyBindingUpdateReceivedSignal = registerSignal("proxyBindingUpdateReceived");
 simsignal_t Pmipv6::homeNetworkPrefixReanchoredSignal = registerSignal("homeNetworkPrefixReanchored");
+simsignal_t Pmipv6::mobileNodeDetachedSignal = registerSignal("mobileNodeDetached");
 simsignal_t Pmipv6::bindingCacheSizeSignal = registerSignal("bindingCacheSize");
 
 bool Pmipv6::MobilitySessionKey::operator<(const MobilitySessionKey& other) const
@@ -96,6 +99,7 @@ std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding)
 
 Pmipv6::~Pmipv6()
 {
+    cancelAndDelete(presenceCheckTimer);
 }
 
 void Pmipv6::initialize(int stage)
@@ -108,6 +112,9 @@ void Pmipv6::initialize(int stage)
         if (isLma == isMag)
             throw cRuntimeError("Pmipv6: exactly one of isLocalMobilityAnchor / isMobileAccessGateway must be set");
 
+        detectTransmissionFailure = par("detectTransmissionFailure");
+        detachDetectionTimeout = par("detachDetectionTimeout");
+        presenceCheckInterval = par("presenceCheckInterval");
         bindingLifetime = par("bindingLifetime");
         advValidLifetime = par("homeNetworkPrefixAdvValidLifetime");
         advPreferredLifetime = par("homeNetworkPrefixAdvPreferredLifetime");
@@ -123,6 +130,13 @@ void Pmipv6::initialize(int stage)
             // detect mobile nodes attaching to / leaving this access gateway's links
             host->subscribe(l2ApAssociatedSignal, this);
             host->subscribe(l2ApDisassociatedSignal, this);
+            if (detectTransmissionFailure)
+                host->subscribe(linkBrokenSignal, this);
+            if (detachDetectionTimeout > 0) {
+                // only then does the gateway need to know when it last heard from a node
+                host->subscribe(packetReceivedFromLowerSignal, this);
+                presenceCheckTimer = new cMessage("presenceCheck", MAG_PRESENCE_CHECK);
+            }
         }
 
         if (isLma) {
@@ -143,13 +157,15 @@ void Pmipv6::initialize(int stage)
         registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
         if (isLma)
             emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
+        if (presenceCheckTimer)
+            scheduleAfter(presenceCheckInterval, presenceCheckTimer);
     }
 }
 
 void Pmipv6::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
-        throw cRuntimeError("Pmipv6: unexpected self-message");
+        handleTimer(msg);
     else if (auto packet = dynamic_cast<Packet *>(msg)) {
         auto protocolTag = packet->findTag<PacketProtocolTag>();
         if (protocolTag && protocolTag->getProtocol() == &Protocol::mobileipv6)
@@ -165,6 +181,18 @@ void Pmipv6::handleMessageWhenUp(cMessage *msg)
     }
     else
         throw cRuntimeError("Pmipv6: unknown message '%s'", msg->getName());
+}
+
+void Pmipv6::handleTimer(cMessage *timer)
+{
+    switch (timer->getKind()) {
+        case MAG_PRESENCE_CHECK:
+            checkMobileNodePresence();
+            scheduleAfter(presenceCheckInterval, timer);
+            break;
+        default:
+            throw cRuntimeError("Pmipv6: unknown timer '%s' of kind %d", timer->getName(), timer->getKind());
+    }
 }
 
 void Pmipv6::processMobilityMessage(Packet *packet)
@@ -495,6 +523,66 @@ void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         else
             handleMobileNodeDetached(accessInterface, notification->getStaAddress());
     }
+    else if (signalID == linkBrokenSignal) {
+        // the access link gave up on a frame addressed to a station: RFC 5213
+        // Section 6.13 lists a link-layer event as one way to learn that a
+        // mobile node is no longer on the connected link
+        NetworkInterface *accessInterface = getContainingNicModule(check_and_cast<cModule *>(source));
+        auto packet = dynamic_cast<Packet *>(obj);
+        if (accessInterface == nullptr || packet == nullptr)
+            return;
+        const auto& header = packet->peekAtFront<ieee80211::Ieee80211DataOrMgmtHeader>();
+        handleMobileNodeDetached(accessInterface, header->getReceiverAddress());
+    }
+    else if (signalID == packetReceivedFromLowerSignal) {
+        // anything arriving from a station is evidence that it is still there
+        auto packet = dynamic_cast<Packet *>(obj);
+        if (packet == nullptr)
+            return;
+        auto interfaceInd = packet->findTag<InterfaceInd>();
+        auto macAddressInd = packet->findTag<MacAddressInd>();
+        if (interfaceInd != nullptr && macAddressInd != nullptr)
+            noteMobileNodePresence(interfaceInd->getInterfaceId(), macAddressInd->getSrcAddress());
+    }
+}
+
+//
+// RFC 5213 Section 6.13 requires the gateway to know whether a mobile node is
+// still on the connected link, both before it extends a binding and before it
+// retransmits an unanswered Proxy Binding Update. This is that question, asked
+// in one place, rather than a one-shot reaction to a detachment event.
+//
+bool Pmipv6::isMobileNodePresent(const MagBinding& binding) const
+{
+    if (binding.detached)
+        return false;
+    if (detachDetectionTimeout > 0)
+        return simTime() - binding.lastPresence <= detachDetectionTimeout;
+    return true;
+}
+
+void Pmipv6::noteMobileNodePresence(int accessInterfaceId, const MacAddress& stationAddress)
+{
+    if (MagBinding *binding = findBinding(accessInterfaceId, stationAddress))
+        binding->lastPresence = simTime();
+}
+
+void Pmipv6::checkMobileNodePresence()
+{
+    std::vector<std::string> gone;
+    for (auto& element : magBindings) {
+        MagBinding& binding = element.second;
+        if (!binding.deregistering && !isMobileNodePresent(binding))
+            gone.push_back(element.first);
+    }
+    for (const auto& mnIdentifier : gone) {
+        MagBinding& binding = magBindings[mnIdentifier];
+        EV_INFO << "MAG: nothing heard from mobile node '" << binding.mnIdentifier << "' ("
+                << binding.mnLinkLayerIdentifier << ") for " << detachDetectionTimeout
+                << "; treating it as detached" << endl;
+        binding.detached = true;
+        deregisterMobileNode(binding);
+    }
 }
 
 void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
@@ -536,27 +624,69 @@ void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const M
 void Pmipv6::handleMobileNodeDetached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
 {
     MagBinding *binding = findBinding(accessInterface->getInterfaceId(), stationAddress);
-    if (binding == nullptr)
+    if (binding == nullptr || binding->deregistering)
         return;
-    EV_INFO << "MAG: mobile node '" << binding->mnIdentifier << "' (" << stationAddress << ") detached from "
-            << accessInterface->getInterfaceName() << "; deregistering" << endl;
+    EV_INFO << "MAG: mobile node '" << binding->mnIdentifier << "' (" << stationAddress
+            << ") is no longer on " << accessInterface->getInterfaceName() << endl;
+    binding->detached = true;
+    deregisterMobileNode(*binding);
+}
+
+//
+// RFC 5213 Section 6.9.1.4: stop serving the mobile node's home network prefix
+// on the access link and tell the anchor, with a Proxy Binding Update whose
+// lifetime is zero. The binding is kept until the anchor answers, because the
+// acknowledgement is what releases the rest of the state.
+//
+void Pmipv6::deregisterMobileNode(MagBinding& binding)
+{
+    emit(mobileNodeDetachedSignal, (intval_t)1);
+    EV_INFO << "MAG: deregistering mobile node '" << binding.mnIdentifier << "'" << endl;
     // stop advertising the prefix and remove the local delivery route
-    if (auto ipv6Data = accessInterface->findProtocolDataForUpdate<Ipv6InterfaceData>()) {
-        for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
-            if (ipv6Data->getAdvPrefix(i).prefix == binding->homeNetworkPrefix) {
-                ipv6Data->removeAdvPrefix(i);
-                break;
+    if (NetworkInterface *accessInterface = ift->getInterfaceById(binding.accessInterfaceId)) {
+        if (auto ipv6Data = accessInterface->findProtocolDataForUpdate<Ipv6InterfaceData>()) {
+            for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
+                if (ipv6Data->getAdvPrefix(i).prefix == binding.homeNetworkPrefix) {
+                    ipv6Data->removeAdvPrefix(i);
+                    break;
+                }
             }
         }
     }
-    if (binding->downlinkRoute) {
-        rt6->deleteRoute(binding->downlinkRoute);
-        binding->downlinkRoute = nullptr;
+    if (binding.downlinkRoute) {
+        rt6->deleteRoute(binding.downlinkRoute);
+        binding.downlinkRoute = nullptr;
     }
-    binding->sequenceNumber++;
-    // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, and the handoff state is unknown
-    sendProxyBindingUpdate(*binding, 0, HANDOFF_STATE_UNKNOWN);
-    magBindings.erase(binding->mnIdentifier);
+    binding.registered = false;
+    binding.deregistering = true;
+    binding.sequenceNumber++;
+    // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, the prefixes are named in
+    // full rather than left all-zero, and the handoff state is unknown
+    sendProxyBindingUpdate(binding, 0, HANDOFF_STATE_UNKNOWN);
+}
+
+//
+// RFC 5213 Section 6.9.1.4 cleanup: drop the Binding Update List entry, and with
+// it the tunnel to the anchor once no mobile node is using that tunnel any more.
+//
+void Pmipv6::releaseMagBinding(MagBinding& binding)
+{
+    std::string mnIdentifier = binding.mnIdentifier;
+    if (binding.downlinkRoute) {
+        rt6->deleteRoute(binding.downlinkRoute);
+        binding.downlinkRoute = nullptr;
+    }
+    magBindings.erase(mnIdentifier);
+    if (magBindings.empty() && magTunnelId != -1) {
+        if (magUplinkRoute) {
+            rt6->deleteRoute(magUplinkRoute);
+            magUplinkRoute = nullptr;
+        }
+        if (NetworkInterface *tunnel = ift->getInterfaceById(magTunnelId))
+            rt6->deleteTunnelNetworkInterface(tunnel);
+        EV_INFO << "MAG: removed the tunnel to the LMA; no mobile node is using it" << endl;
+        magTunnelId = -1;
+    }
 }
 
 void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator)
@@ -623,6 +753,7 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
     }
     if (lifetime == 0) {
         EV_INFO << "MAG: deregistration acknowledged for MN '" << mnId << "'" << endl;
+        releaseMagBinding(binding);
         return;
     }
 
@@ -679,10 +810,12 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
 
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 {
+    cancelEvent(presenceCheckTimer);
 }
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)
 {
+    cancelEvent(presenceCheckTimer);
 }
 
 } // namespace inet

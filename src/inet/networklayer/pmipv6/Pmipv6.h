@@ -55,6 +55,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     static simsignal_t proxyBindingAcknowledgementReceivedSignal;
     static simsignal_t proxyBindingUpdateReceivedSignal;
     static simsignal_t homeNetworkPrefixReanchoredSignal;
+    static simsignal_t mobileNodeDetachedSignal;
     static simsignal_t bindingCacheSizeSignal;
 
     // role
@@ -68,6 +69,9 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
 
     // configuration
     Ipv6Address localMobilityAnchorAddress; // MAG: the LMA to register with
+    bool detectTransmissionFailure = false;
+    simtime_t detachDetectionTimeout;
+    simtime_t presenceCheckInterval;
     simtime_t bindingLifetime;
     simtime_t advValidLifetime;
     simtime_t advPreferredLifetime;
@@ -93,6 +97,17 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         uint8_t accessTechnologyType = 0;
         MacAddress mnLinkLayerIdentifier; // unspecified = not known
         bool operator<(const MobilitySessionKey& other) const;
+    };
+
+    // Self-messages carry the mobility session they belong to; the kind says what to do.
+    class INET_API Pmipv6Timer : public cMessage {
+      public:
+        MobilitySessionKey session;
+        Pmipv6Timer(const char *name, short kind) : cMessage(name, kind) {}
+    };
+
+    enum TimerKind {
+        MAG_PRESENCE_CHECK = 1, // one per gateway: evaluates detachDetectionTimeout
     };
 
     struct BindingCacheEntry {
@@ -135,12 +150,16 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         int accessInterfaceId = -1;       // RFC 5213 Section 6.1 calls this the if-id
         unsigned int sequenceNumber = 0;
         bool registered = false;
+        bool deregistering = false;   // a lifetime-0 Proxy Binding Update is outstanding
+        bool detached = false;        // the access link reported the node gone
+        simtime_t lastPresence;       // when the gateway last had evidence of the node
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
     };
 
   protected:
     std::vector<MobileNodeProfile> mobileNodeProfiles;
     std::map<std::string, MagBinding> magBindings; // key: MN identifier
+    cMessage *presenceCheckTimer = nullptr;
     int magTunnelId = -1;                 // MAG's (shared) tunnel to the LMA
     Ipv6Route *magUplinkRoute = nullptr;  // default route -> tunnel (mobile node uplink)
 
@@ -148,6 +167,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void handleTimer(cMessage *timer);
     using cListener::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
@@ -178,6 +198,11 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void handleMobileNodeDetached(NetworkInterface *accessInterface, const MacAddress& stationAddress);
     const MobileNodeProfile *findProfile(NetworkInterface *accessInterface, const MacAddress& stationAddress) const;
     MagBinding *findBinding(int accessInterfaceId, const MacAddress& stationAddress);
+    bool isMobileNodePresent(const MagBinding& binding) const;
+    void noteMobileNodePresence(int accessInterfaceId, const MacAddress& stationAddress);
+    void checkMobileNodePresence();
+    void deregisterMobileNode(MagBinding& binding);
+    void releaseMagBinding(MagBinding& binding);
     void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator);
     void processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba);
     void ensureMagTunnel();
