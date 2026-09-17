@@ -1154,22 +1154,64 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
 // Lifecycle
 //
 
+//
+// A gateway or anchor that is shut down or crashes stops serving every mobility
+// session it held: its timers go, and so do the routes and the prefix advertisements
+// it installed. Nothing is restored on a restart, because a mobility session is
+// re-established by the mobile node attaching again, which is the only event that
+// tells the network where the node is.
+//
+// The tunnel interfaces are the exception, and deliberately so: they are submodules
+// of the node, and deleting one while the lifecycle operation is walking that node's
+// submodules aborts the simulation. They are released on the ordinary deregistration
+// paths, which do not run inside a lifecycle operation.
+//
+void Pmipv6::releaseAllState(bool deleteTunnels)
+{
+    if (presenceCheckTimer != nullptr)
+        cancelEvent(presenceCheckTimer);
+    for (auto it = bindingCache.begin(); it != bindingCache.end(); ) {
+        cancelAndDelete(it->second.deleteTimer);
+        cancelAndDelete(it->second.expiryTimer);
+        if (it->second.downlinkRoute)
+            rt6->deleteRoute(it->second.downlinkRoute);
+        it = bindingCache.erase(it);
+    }
+    if (deleteTunnels) {
+        for (const auto& element : lmaTunnelByMag) {
+            if (NetworkInterface *tunnel = ift->getInterfaceById(element.second))
+                rt6->deleteTunnelNetworkInterface(tunnel);
+        }
+        lmaTunnelByMag.clear();
+    }
+    if (isLma)
+        emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
+
+    for (auto it = magBindings.begin(); it != magBindings.end(); ) {
+        cancelAndDelete(it->second.retransmitTimer);
+        cancelAndDelete(it->second.refreshTimer);
+        withdrawHomeNetworkPrefix(it->second);
+        it = magBindings.erase(it);
+    }
+    if (magUplinkRoute) {
+        rt6->deleteRoute(magUplinkRoute);
+        magUplinkRoute = nullptr;
+    }
+    if (deleteTunnels && magTunnelId != -1) {
+        if (NetworkInterface *tunnel = ift->getInterfaceById(magTunnelId))
+            rt6->deleteTunnelNetworkInterface(tunnel);
+        magTunnelId = -1;
+    }
+}
+
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(presenceCheckTimer);
-    for (auto& element : bindingCache) {
-        cancelEvent(element.second.deleteTimer);
-        cancelEvent(element.second.expiryTimer);
-    }
-    for (auto& element : magBindings) {
-        cancelEvent(element.second.retransmitTimer);
-        cancelEvent(element.second.refreshTimer);
-    }
+    releaseAllState(false);
 }
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)
 {
-    handleStopOperation(operation);
+    releaseAllState(false);
 }
 
 } // namespace inet
