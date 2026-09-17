@@ -10,7 +10,6 @@ import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ipv6.StandardHost6;
 import inet.node.pmipv6.LocalMobilityAnchor;
 import inet.node.pmipv6.MobileAccessGateway;
-import inet.node.mipv6.WirelessHost6;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -65,9 +64,10 @@ network Pmipv6Network
             parameters:
                 @display("p=550,260");
         }
-        mn: WirelessHost6 {
+        mn: StandardHost6 {
             parameters:
-                @display("p=250,400");
+                numWlanInterfaces = 1;
+                @display("p=250,400;i=device/wifilaptop");
         }
 
     connections allowunconnected:
