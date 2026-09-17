@@ -43,6 +43,7 @@ static constexpr uint8_t ACCESS_TECHNOLOGY_IEEE_802_11 = 4;
 // RFC 5213 Section 8.4: Handoff Indicator values.
 static constexpr uint8_t HANDOFF_NEW_INTERFACE = 1;   // attachment over a new interface
 static constexpr uint8_t HANDOFF_STATE_UNKNOWN = 4;   // the gateway cannot tell
+static constexpr uint8_t HANDOFF_REREGISTRATION = 5;  // nothing changed, the lifetime is being extended
 
 simsignal_t Pmipv6::proxyBindingUpdateSentSignal = registerSignal("proxyBindingUpdateSent");
 simsignal_t Pmipv6::proxyBindingAcknowledgementReceivedSignal = registerSignal("proxyBindingAcknowledgementReceived");
@@ -100,10 +101,14 @@ std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding)
 Pmipv6::~Pmipv6()
 {
     cancelAndDelete(presenceCheckTimer);
-    for (auto& element : bindingCache)
+    for (auto& element : bindingCache) {
         cancelAndDelete(element.second.deleteTimer);
-    for (auto& element : magBindings)
+        cancelAndDelete(element.second.expiryTimer);
+    }
+    for (auto& element : magBindings) {
         cancelAndDelete(element.second.retransmitTimer);
+        cancelAndDelete(element.second.refreshTimer);
+    }
 }
 
 void Pmipv6::initialize(int stage)
@@ -123,6 +128,8 @@ void Pmipv6::initialize(int stage)
         maxBindingAckTimeout = par("maxBindingAckTimeout");
         minDelayBeforeBindingCacheEntryDelete = par("minDelayBeforeBindingCacheEntryDelete");
         bindingLifetime = par("bindingLifetime");
+        maxBindingLifetime = par("maxBindingLifetime");
+        bindingRefreshRatio = par("bindingRefreshRatio");
         advValidLifetime = par("homeNetworkPrefixAdvValidLifetime");
         advPreferredLifetime = par("homeNetworkPrefixAdvPreferredLifetime");
         const char *lma = par("localMobilityAnchorAddress");
@@ -214,6 +221,23 @@ void Pmipv6::handleTimer(cMessage *timer)
         case MAG_BINDING_RETRANSMIT:
             retransmitProxyBindingUpdate(check_and_cast<Pmipv6Timer *>(timer)->session);
             break;
+        case MAG_BINDING_REFRESH:
+            refreshProxyBinding(check_and_cast<Pmipv6Timer *>(timer)->session);
+            break;
+        case LMA_BINDING_EXPIRY: {
+            // RFC 6275 Section 9.5.1: a binding cache entry MUST be deleted when its
+            // lifetime expires. RFC 5213 inherits the rule with the data structure.
+            auto& session = check_and_cast<Pmipv6Timer *>(timer)->session;
+            auto it = bindingCache.find(session);
+            if (it != bindingCache.end()) {
+                EV_INFO << "LMA removed binding for MN '" << session.mnIdentifier
+                        << "'; its lifetime expired without a re-registration" << endl;
+                it->second.expiryTimer = nullptr;
+                deleteBindingCacheEntry(it);
+            }
+            delete timer;
+            break;
+        }
         default:
             throw cRuntimeError("Pmipv6: unknown timer '%s' of kind %d", timer->getName(), timer->getKind());
     }
@@ -354,6 +378,7 @@ void Pmipv6::deleteBindingCacheEntry(BindingCache::iterator it)
     if (it->second.downlinkRoute)
         rt6->deleteRoute(it->second.downlinkRoute);
     cancelAndDelete(it->second.deleteTimer);
+    cancelAndDelete(it->second.expiryTimer);
     bindingCache.erase(it);
     emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
 }
@@ -395,8 +420,13 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
 
     EV_INFO << "LMA received Proxy Binding Update from MAG " << magAddress << " for MN '" << mnId
             << "' at " << pbu->getMobileNodeLinkLayerIdentifier()
-            << " prefix " << hnp << "/" << hnpLen << " lifetime " << lifetime << "s" << endl;
+            << " prefix " << hnp << "/" << hnpLen << " lifetime " << lifetime
+            << "s, handoff indicator " << (int)pbu->getHandoffIndicator() << endl;
     emit(proxyBindingUpdateReceivedSignal, (intval_t)lifetime);
+
+    // RFC 6275 Section 9.5.1: the granted lifetime may be shorter than the requested
+    // one, and MUST NOT be longer.
+    unsigned int grantedLifetime = std::min(lifetime, (unsigned int)maxBindingLifetime.dbl());
 
     // RFC 5213 Section 5.3.1 step 4: a request that does not say which mobile
     // node it is about cannot be served.
@@ -435,6 +465,8 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
             rt6->deleteRoute(entry.downlinkRoute);
             entry.downlinkRoute = nullptr;
         }
+        cancelAndDelete(entry.expiryTimer);
+        entry.expiryTimer = nullptr;
         if (entry.deleteTimer == nullptr) {
             entry.deleteTimer = new Pmipv6Timer("bindingDelete", LMA_BINDING_DELETE);
             entry.deleteTimer->session = entry.session;
@@ -489,12 +521,18 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.homeNetworkPrefixLength = hnpLen;
         entry.servingMagAddress = magAddress;
         entry.sequenceNumber = seq;
-        entry.expiry = simTime() + lifetime;
+        entry.expiry = simTime() + grantedLifetime;
         entry.tunnelInterfaceId = tunnelId;
+        // RFC 6275 Section 9.5.1: the entry lives exactly as long as the lifetime granted
+        if (entry.expiryTimer == nullptr) {
+            entry.expiryTimer = new Pmipv6Timer("bindingExpiry", LMA_BINDING_EXPIRY);
+            entry.expiryTimer->session = entry.session;
+        }
+        rescheduleAfter(SimTime(grantedLifetime, SIMTIME_S), entry.expiryTimer);
         emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
     }
 
-    sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, lifetime, magAddress, lmaAddress);
+    sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, grantedLifetime, magAddress, lmaAddress);
 }
 
 //
@@ -733,6 +771,8 @@ void Pmipv6::releaseMagBinding(MagBinding& binding)
     std::string mnIdentifier = binding.mnIdentifier;
     cancelAndDelete(binding.retransmitTimer);
     binding.retransmitTimer = nullptr;
+    cancelAndDelete(binding.refreshTimer);
+    binding.refreshTimer = nullptr;
     if (binding.downlinkRoute) {
         rt6->deleteRoute(binding.downlinkRoute);
         binding.downlinkRoute = nullptr;
@@ -823,6 +863,34 @@ void Pmipv6::retransmitProxyBindingUpdate(const MobilitySessionKey& session)
     sendProxyBindingUpdate(binding, binding.pendingLifetime, binding.pendingHandoffIndicator);
 }
 
+//
+// RFC 5213 Section 6.9.1.3: extending a binding is an ordinary Proxy Binding
+// Update with the same options and a handoff indicator saying nothing changed.
+// Section 6.13 forbids extending it at all for a node whose presence the
+// gateway cannot confirm, so the presence check comes first and a node that has
+// gone is deregistered instead.
+//
+void Pmipv6::refreshProxyBinding(const MobilitySessionKey& session)
+{
+    auto it = magBindings.find(session.mnIdentifier);
+    if (it == magBindings.end())
+        return;
+    MagBinding& binding = it->second;
+    if (binding.deregistering)
+        return;
+    if (!isMobileNodePresent(binding)) {
+        EV_INFO << "MAG: cannot confirm that mobile node '" << binding.mnIdentifier
+                << "' is still attached; deregistering it instead of extending its binding" << endl;
+        binding.detached = true;
+        deregisterMobileNode(binding);
+        return;
+    }
+    EV_INFO << "MAG: extending the binding of MN '" << binding.mnIdentifier << "'" << endl;
+    binding.sequenceNumber++;
+    binding.retransmitInterval = initialBindingAckTimeout;
+    sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_REREGISTRATION);
+}
+
 void Pmipv6::ensureMagTunnel()
 {
     if (magTunnelId != -1)
@@ -868,7 +936,20 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
     }
 
     EV_INFO << "MAG: binding accepted for MN '" << mnId << "' prefix " << binding.homeNetworkPrefix
-            << "/" << binding.homeNetworkPrefixLength << endl;
+            << "/" << binding.homeNetworkPrefixLength << " for " << lifetime << "s" << endl;
+
+    // RFC 6275 Section 11.7.3: extend the binding well before it runs out, so that
+    // network delay does not cost the mobile node its session.
+    simtime_t refreshAfter = lifetime * bindingRefreshRatio;
+    if (refreshAfter > 0) {
+        if (binding.refreshTimer == nullptr) {
+            binding.refreshTimer = new Pmipv6Timer("bindingRefresh", MAG_BINDING_REFRESH);
+            binding.refreshTimer->session.mnIdentifier = binding.mnIdentifier;
+            binding.refreshTimer->session.accessTechnologyType = binding.accessTechnologyType;
+            binding.refreshTimer->session.mnLinkLayerIdentifier = binding.mnLinkLayerIdentifier;
+        }
+        rescheduleAfter(refreshAfter, binding.refreshTimer);
+    }
 
     ensureMagTunnel();
 
@@ -921,10 +1002,14 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(presenceCheckTimer);
-    for (auto& element : bindingCache)
+    for (auto& element : bindingCache) {
         cancelEvent(element.second.deleteTimer);
-    for (auto& element : magBindings)
+        cancelEvent(element.second.expiryTimer);
+    }
+    for (auto& element : magBindings) {
         cancelEvent(element.second.retransmitTimer);
+        cancelEvent(element.second.refreshTimer);
+    }
 }
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)

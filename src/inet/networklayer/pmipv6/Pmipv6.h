@@ -76,6 +76,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     simtime_t maxBindingAckTimeout;
     simtime_t minDelayBeforeBindingCacheEntryDelete;
     simtime_t bindingLifetime;
+    simtime_t maxBindingLifetime;
+    double bindingRefreshRatio = 0;
     simtime_t advValidLifetime;
     simtime_t advPreferredLifetime;
 
@@ -113,6 +115,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         MAG_PRESENCE_CHECK = 1, // one per gateway: evaluates detachDetectionTimeout
         LMA_BINDING_DELETE,     // one per deregistered binding: the deletion delay
         MAG_BINDING_RETRANSMIT, // one per binding: an unanswered Proxy Binding Update
+        MAG_BINDING_REFRESH,    // one per binding: time to re-register before the lifetime runs out
+        LMA_BINDING_EXPIRY,     // one per binding: the granted lifetime ran out
     };
 
     struct BindingCacheEntry {
@@ -125,6 +129,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         int tunnelInterfaceId = -1;    // LMA's tunnel to the serving MAG
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> tunnel
         Pmipv6Timer *deleteTimer = nullptr; // running while a deregistration is being held
+        Pmipv6Timer *expiryTimer = nullptr; // running for the granted lifetime
     };
 
   protected:
@@ -162,6 +167,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
         // the Proxy Binding Update awaiting an acknowledgement, and its back-off
         Pmipv6Timer *retransmitTimer = nullptr;
+        Pmipv6Timer *refreshTimer = nullptr;
         simtime_t retransmitInterval;
         simtime_t pendingLifetime;
         uint8_t pendingHandoffIndicator = 0;
@@ -216,6 +222,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void deregisterMobileNode(MagBinding& binding);
     void releaseMagBinding(MagBinding& binding);
     void retransmitProxyBindingUpdate(const MobilitySessionKey& session);
+    void refreshProxyBinding(const MobilitySessionKey& session);
     void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator);
     void processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba);
     void ensureMagTunnel();

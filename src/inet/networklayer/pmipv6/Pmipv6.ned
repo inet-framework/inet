@@ -68,7 +68,9 @@ simple Pmipv6 extends SimpleModule
         double initialBindingAckTimeout @unit(s) = default(1s);
         double maxBindingAckTimeout @unit(s) = default(32s);
 
-        double bindingLifetime @unit(s) = default(3600s);                    // lifetime requested in Proxy Binding Updates
+        double bindingLifetime @unit(s) = default(3600s);                    // MAG: lifetime requested in Proxy Binding Updates
+        double maxBindingLifetime @unit(s) = default(3600s);                 // LMA: the longest lifetime it grants; a shorter request is granted as asked
+        double bindingRefreshRatio = default(0.8);                           // MAG: re-register after this fraction of the granted lifetime; 0 disables refreshing
         double homeNetworkPrefixAdvValidLifetime @unit(s) = default(3600s);  // MAG: valid lifetime of the advertised home network prefix
         double homeNetworkPrefixAdvPreferredLifetime @unit(s) = default(1800s); // MAG: preferred lifetime of the advertised home network prefix
         @display("i=block/network2");
