@@ -11,10 +11,10 @@
 [![Test: packet](https://github.com/inet-framework/inet/actions/workflows/packet-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/packet-tests.yml)
 [![Test: protocol](https://github.com/inet-framework/inet/actions/workflows/protocol-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/protocol-tests.yml)
 [![Test: queueing](https://github.com/inet-framework/inet/actions/workflows/queueing-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/queueing-tests.yml)
-<!-- [![Test: speed](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml) -->
 [![Test: statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
 [![Test: unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
 [![Test: validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)
+<!-- [![Test: speed](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml) -->
 
 INET Framework for OMNEST/OMNeT++
 =================================
