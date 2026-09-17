@@ -26,7 +26,7 @@ class INET_API Ieee80211VhtInterleaving : public IInterleaving
     const Hz bandwidth;
 
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211HTInterleaving"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211VhtInterleaving"; }
     Ieee80211VhtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
 };
 
