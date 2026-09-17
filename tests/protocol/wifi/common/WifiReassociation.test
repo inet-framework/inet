@@ -1,34 +1,103 @@
-%# expected-result: FAIL
 %description:
-802.11 Reassociation: when a STA roams to a new AP it sends a Reassociation Request
-(type 2) and receives a Reassociation Response (type 3). [NOT-MODELED -- INET's
-Ieee80211MgmtSta does not implement roaming or reassociation; the simulation uses a
-single AP and STAs never reassociate; ReassocReq/Resp frames (types 2/3) are never sent]
+Associate with AP A, authenticate with AP B, then request reassociation through
+the existing station-agent primitives and verify the request, response and completion.
 
 %file: WifiReassociation.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
 
 namespace inet {
 namespace protocoltest {
+using namespace ieee80211;
 
-// 2 = ST_REASSOC_REQUEST, 3 = ST_REASSOC_RESPONSE.
-// INET does not trigger reassociation in normal operation.
+// Test stimulus only: all protocol state transitions remain in production management.
+class WifiReassociationAgent : public Ieee80211AgentSta
+{
+  protected:
+    bool triggered = false;
+    virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *response) override
+    {
+        Ieee80211AgentSta::processAssociateConfirm(response);
+        if (response->getResultCode() == PRC_SUCCESS && !triggered) {
+            triggered = true;
+            sendAuthenticateRequest(MacAddress("02:00:00:00:00:02"));
+        }
+    }
+    virtual void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *response) override
+    {
+        if (triggered) {
+            if (response->getResultCode() != PRC_SUCCESS)
+                throw cRuntimeError("Target AP authentication failed");
+            sendReassociateRequest(response->getAddress());
+        }
+        else
+            Ieee80211AgentSta::processAuthenticateConfirm(response);
+    }
+};
+Define_Module(WifiReassociationAgent);
+
 Define_ProtocolTest(wifi_reassociation)
 {
     return ProtocolTest("wifi_reassociation")
+        .once(on("sta1.wlan[0].agent").signal("acceptConfirm").filterValue(PR_ASSOCIATE_CONFIRM)
+                  .describe("initial association completed").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 2")
-                  .describe("a Reassociation Request from sta1").within(2.5));
+                  .assertEvent([](const MatchContext& c) {
+                      auto header = c.event.packet->peekAtFront<Ieee80211MgmtHeader>();
+                      auto body = managementBody<Ieee80211ReassociationRequestFrame>(c.event);
+                      return header->getReceiverAddress() == MacAddress("02:00:00:00:00:02") &&
+                             body && body->getCurrentAP() == MacAddress("02:00:00:00:00:01");
+                  }).describe("reassociation request to AP B naming AP A").within(0.5))
+        .once(on("ap2.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 3")
+                  .assertEvent([](const MatchContext& c) {
+                      auto body = managementBody<Ieee80211ReassociationResponseFrame>(c.event);
+                      return body && body->getStatusCode() == SC_SUCCESSFUL;
+                  }).describe("successful reassociation response from AP B").within(0.5))
+        .once(on("sta1.wlan[0].agent").signal("acceptConfirm").filterValue(PR_REASSOCIATE_CONFIRM)
+                  .describe("reassociation completed").within(0.5));
 }
 
 } // namespace protocoltest
 } // namespace inet
 
-%inifile: test.ini
+%file: WifiReassociation.ned
+@namespace(inet::protocoltest);
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+simple WifiReassociationAgent extends Ieee80211AgentSta
+{
+    parameters:
+        @class(WifiReassociationAgent);
+}
+import inet.protocoltest.wifi.WifiInfraNetwork;
+import inet.node.wireless.AccessPoint;
+network ReassociationNetwork extends WifiInfraNetwork
+{
+    submodules:
+        ap2: AccessPoint;
+}
 
+%inifile: test.ini
 [General]
 *.tester.testName = "wifi_reassociation"
+*.sta1.wlan[*].agent.typename = "WifiReassociationAgent"
+*.sta1.wlan[*].agent.defaultSsid = "first"
+*.sta2.wlan[*].agent.startingTime = 2s
+*.ap.wlan[*].mgmt.ssid = "first"
+*.ap.wlan[*].address = "02:00:00:00:00:01"
+*.sta1.wlan[*].agent.startingTime = 0s
+*.sta1.wlan[*].agent.channelsToScan = "0"
+network = ReassociationNetwork
+*.ap2.mobility.initFromDisplayString = false
+*.ap2.mobility.initialX = 320m
+*.ap2.mobility.initialY = 150m
+*.ap2.mobility.initialZ = 0m
+*.ap2.wlan[*].mgmt.ssid = "second"
+*.ap2.wlan[*].address = "02:00:00:00:00:02"
+*.ap2.wlan[*].opMode = "g(erp)"
+*.ap2.wlan[*].mac.qosStation = false
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
