@@ -72,6 +72,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     bool detectTransmissionFailure = false;
     simtime_t detachDetectionTimeout;
     simtime_t presenceCheckInterval;
+    simtime_t initialBindingAckTimeout;
+    simtime_t maxBindingAckTimeout;
     simtime_t minDelayBeforeBindingCacheEntryDelete;
     simtime_t bindingLifetime;
     simtime_t advValidLifetime;
@@ -110,6 +112,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     enum TimerKind {
         MAG_PRESENCE_CHECK = 1, // one per gateway: evaluates detachDetectionTimeout
         LMA_BINDING_DELETE,     // one per deregistered binding: the deletion delay
+        MAG_BINDING_RETRANSMIT, // one per binding: an unanswered Proxy Binding Update
     };
 
     struct BindingCacheEntry {
@@ -157,6 +160,11 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         bool detached = false;        // the access link reported the node gone
         simtime_t lastPresence;       // when the gateway last had evidence of the node
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
+        // the Proxy Binding Update awaiting an acknowledgement, and its back-off
+        Pmipv6Timer *retransmitTimer = nullptr;
+        simtime_t retransmitInterval;
+        simtime_t pendingLifetime;
+        uint8_t pendingHandoffIndicator = 0;
     };
 
   protected:
@@ -207,6 +215,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void checkMobileNodePresence();
     void deregisterMobileNode(MagBinding& binding);
     void releaseMagBinding(MagBinding& binding);
+    void retransmitProxyBindingUpdate(const MobilitySessionKey& session);
     void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator);
     void processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba);
     void ensureMagTunnel();

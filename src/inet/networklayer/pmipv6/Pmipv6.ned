@@ -62,6 +62,12 @@ simple Pmipv6 extends SimpleModule
         // names this MinDelayBeforeBCEDelete and gives it 10000 ms)
         double minDelayBeforeBindingCacheEntryDelete @unit(s) = default(10s);
 
+        // MAG: retransmission of an unanswered Proxy Binding Update. RFC 5213 Section 6.9.4
+        // takes these from Mobile IPv6 (RFC 6275 Section 12), where INITIAL_BINDACK_TIMEOUT is
+        // 1 s and MAX_BINDACK_TIMEOUT is 32 s, and doubles the interval after each attempt.
+        double initialBindingAckTimeout @unit(s) = default(1s);
+        double maxBindingAckTimeout @unit(s) = default(32s);
+
         double bindingLifetime @unit(s) = default(3600s);                    // lifetime requested in Proxy Binding Updates
         double homeNetworkPrefixAdvValidLifetime @unit(s) = default(3600s);  // MAG: valid lifetime of the advertised home network prefix
         double homeNetworkPrefixAdvPreferredLifetime @unit(s) = default(1800s); // MAG: preferred lifetime of the advertised home network prefix
