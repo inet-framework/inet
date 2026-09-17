@@ -121,6 +121,8 @@ class BindingAcknowledgement extends MobilityHeader
     MacAddress mobileNodeLinkLayerIdentifier;  // Mobile Node Link-layer Identifier option, echoed back (unspecified = option absent)
     Ipv6Address homeNetworkPrefix;             // Home Network Prefix option (assigned/confirmed)
     uint8_t homeNetworkPrefixLength = 0;
+    uint8_t handoffIndicator = 0;              // Handoff Indicator option, echoed back
+    uint8_t accessTechnologyType = 0;          // Access Technology Type option, echoed back
     uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8
 }
 

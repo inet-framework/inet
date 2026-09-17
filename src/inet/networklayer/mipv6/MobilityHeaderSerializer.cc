@@ -25,15 +25,14 @@ static constexpr int BINDING_LIFETIME_UNIT = 4;
 // (this is a simulation model, not strict on-wire TLV typing): the Mobile Node
 // Identifier is length-prefixed, the others are fixed size. A Proxy Binding
 // Update carries MN-Id + Home Network Prefix + Handoff Indicator + Access
-// Technology Type + Timestamp; a Proxy Binding Acknowledgement omits the
-// Handoff Indicator and Access Technology Type.
+// Technology Type + Timestamp; a Proxy Binding Acknowledgement echoes the same set.
 static constexpr int PROXY_HNP_OPTION_SIZE = 1 + 16;            // prefix length + 128-bit prefix
 // Mobile Node Link-layer Identifier (RFC 5213 Section 8.6): a presence octet followed by the
 // 48-bit IEEE 802 address in the RFC 4861 Section 4.6 wire form. The presence octet carries what
 // the real option's presence or absence carries, because this block has no option headers.
 static constexpr int PROXY_MN_LL_ID_OPTION_SIZE = 1 + 6;
 static constexpr int PROXY_BU_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + PROXY_MN_LL_ID_OPTION_SIZE + 1 + 1 + 8; // + HI + ATT + timestamp
-static constexpr int PROXY_BA_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + PROXY_MN_LL_ID_OPTION_SIZE + 8;          // + timestamp
+static constexpr int PROXY_BA_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + PROXY_MN_LL_ID_OPTION_SIZE + 1 + 1 + 8; // + HI + ATT + timestamp
 
 static B roundUpToMobilityHeaderBoundary(int numBytes)
 {
@@ -213,6 +212,8 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
                 writeMobileNodeLinkLayerIdentifier(stream, ba->getMobileNodeLinkLayerIdentifier());
                 stream.writeByte(ba->getHomeNetworkPrefixLength());
                 stream.writeIpv6Address(ba->getHomeNetworkPrefix());
+                stream.writeByte(ba->getHandoffIndicator());
+                stream.writeByte(ba->getAccessTechnologyType());
                 stream.writeUint64Be(ba->getTimestampValue());
             }
             // Mobility options: write remaining bytes as padding
@@ -345,6 +346,8 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
                 ba->setMobileNodeLinkLayerIdentifier(readMobileNodeLinkLayerIdentifier(stream));
                 ba->setHomeNetworkPrefixLength(stream.readByte());
                 ba->setHomeNetworkPrefix(stream.readIpv6Address());
+                ba->setHandoffIndicator(stream.readByte());
+                ba->setAccessTechnologyType(stream.readByte());
                 ba->setTimestampValue(stream.readUint64Be());
             }
             // Skip remaining mobility options
