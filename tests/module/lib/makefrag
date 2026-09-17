@@ -1,0 +1,3 @@
+# The warning set of src/makefrag: this library includes INET headers, so it hides the same
+# warnings that the INET build hides.
+CFLAGS += -Wno-overloaded-virtual

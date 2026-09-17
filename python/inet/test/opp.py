@@ -21,6 +21,13 @@ from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 
+# A test program includes INET headers, so it is compiled with the warning set of src/makefrag.
+# opp_makemake includes a file named makefrag from the directory it generates the Makefile in.
+_test_program_makefrag = """\
+# Written by python/inet/test/opp.py: the warning set of src/makefrag.
+CFLAGS += -Wno-overloaded-virtual
+"""
+
 if importlib.util.find_spec("omnetpp.test"):
     from omnetpp.test import *
 
@@ -89,6 +96,8 @@ class OppTestTask(TestTask):
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
+        with open(os.path.join(test_directory, "makefrag"), "w") as f:
+            f.write(_test_program_makefrag)
         args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}"]
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:

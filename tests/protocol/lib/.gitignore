@@ -1,8 +1,8 @@
 # The Makefile is in git: it uses relative paths, and a fresh checkout needs it to
 # build the library before the tests run. Regenerate it with the command in its header
 # whenever a source file is added or removed.
+# makefrag is in git as well: it holds the compiler flags of the library.
 # generated / machine-specific build artifacts
-makefrag
 out/
 *.so
 *_m.cc
