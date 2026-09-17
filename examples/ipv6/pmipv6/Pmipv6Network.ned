@@ -16,8 +16,8 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 channel ethernetline extends ned.DatarateChannel
 {
     parameters:
-        delay = 0.1us;
-        datarate = 100Mbps;
+        delay = default(0.1us);
+        datarate = default(100Mbps);
 }
 
 //
@@ -32,16 +32,16 @@ channel ethernetline extends ned.DatarateChannel
 network Pmipv6Network
 {
     parameters:
-        **.mgmt.numChannels = 5;
+        **.mgmt.numChannels = default(5);
         **.ipv6.configurator.networkConfiguratorModule = "configurator";
         @display("bgb=800,500");
 
     submodules:
         configurator: Ipv6NetworkConfigurator {
             parameters:
-                config = xmldoc("config.xml");
+                config = default(xmldoc("config.xml"));
                 // the mobile node autoconfigures its (home) address via SLAAC from the MAG's RA
-                assignAddressesToHosts = false;
+                assignAddressesToHosts = default(false);
                 @display("p=80,60;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
@@ -66,7 +66,7 @@ network Pmipv6Network
         }
         mn: StandardHost6 {
             parameters:
-                numWlanInterfaces = 1;
+                numWlanInterfaces = default(1);
                 @display("p=250,400;i=device/wifilaptop");
         }
 
