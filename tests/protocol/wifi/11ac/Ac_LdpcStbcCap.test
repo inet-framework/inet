@@ -1,9 +1,7 @@
 %# expected-result: FAIL
 %description:
-802.11ac LDPC and STBC capabilities: a VHT frame is transmitted with either STBC
-(getSTBC() > 0 in the signal mode) or LDPC coding. [NOT-MODELED -- INET's VHT signal
-mode hardcodes getSTBC() = 0 (inheriting the HT limitation), and LDPC is entirely absent
-from the physicallayer tree; neither capability is supported in INET's VHT implementation]
+Observe VHT STBC transmission. The historical filename is retained, but LDPC is
+checked separately by Ac_Ldpc. Ieee80211VhtSignalMode explicitly excludes STBC.
 
 %file: Ac_LdpcStbcCap.cc
 
@@ -28,7 +26,7 @@ Define_ProtocolTest(wifi_11ac_ldpc_stbc_cap)
                       // getSTBC() hardcoded to 0; no LDPC API exists.
                       return m != nullptr && m->getPreambleMode()->getSignalMode()->getSTBC() > 0;
                   })
-                  .describe("a VHT data frame with STBC or LDPC encoding").within(2.5));
+                  .describe("a VHT data frame with STBC encoding").within(2.5));
 }
 
 } // namespace protocoltest
@@ -39,11 +37,8 @@ Define_ProtocolTest(wifi_11ac_ldpc_stbc_cap)
 [General]
 *.tester.testName = "wifi_11ac_ldpc_stbc_cap"
 include ../../ini/_ac.ini
-include ../../ini/_base.ini
 **.wlan[*].radio.receiver.energyDetection = -105dBm
-**.wlan[*].radio.receiver.sensitivity = -105dBm
-**.wlan[*].radio.receiver.snirThreshold = 0dB
-**.wlan[*].radio.transmitter.power = 0.12mW
+include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_11ac_ldpc_stbc_cap: PASS

@@ -1,9 +1,8 @@
 %# expected-result: FAIL
 %description:
-802.11e U-APSD (Unscheduled Automatic Power Save Delivery): a QoS-Null or QoS data
-frame triggers a service period delivering buffered frames from the AP. [NOT-MODELED --
-INET has no U-APSD implementation; no uapsd, triggerEnabled, or apsd parameter or module
-exists anywhere in the ieee80211 source tree]
+Observe a QoS data frame ending a service period (EOSP). The real EOSP field
+exists; no U-APSD buffering/trigger procedure is established by the current model.
+This is a presence probe, not a complete U-APSD exchange test.
 
 %file: WifiQosUapsd.cc
 
@@ -12,14 +11,11 @@ exists anywhere in the ieee80211 source tree]
 namespace inet {
 namespace protocoltest {
 
-// Spec assertion: the AP sends a QoS-Null (or a buffered frame) in response to a
-// U-APSD trigger frame. INET has no such mechanism.
-// ST_DATA_WITH_QOS = 40; a QoS-Null would be 40 with zero payload.
 Define_ProtocolTest(wifi_qos_uapsd)
 {
     return ProtocolTest("wifi_qos_uapsd")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 40 && Ieee80211UapsdTrigger.length >= 0")
+                  .filterPacket("Ieee80211DataHeader.eosp == true")
                   .describe("AP delivers buffered frame in U-APSD service period").within(2.5));
 }
 
@@ -31,11 +27,8 @@ Define_ProtocolTest(wifi_qos_uapsd)
 [General]
 *.tester.testName = "wifi_qos_uapsd"
 include ../../ini/_n.ini
-include ../../ini/_base.ini
 **.wlan[*].radio.receiver.energyDetection = -105dBm
-**.wlan[*].radio.receiver.sensitivity = -105dBm
-**.wlan[*].radio.receiver.snirThreshold = 0dB
-**.wlan[*].radio.transmitter.power = 0.12mW
+include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_qos_uapsd: PASS

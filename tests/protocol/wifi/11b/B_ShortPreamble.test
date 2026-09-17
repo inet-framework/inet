@@ -1,9 +1,6 @@
-%# expected-result: FAIL
 %description:
-802.11b HR/DSSS short preamble: a transmitted frame uses a short-preamble HR/DSSS mode.
-[NOT-MODELED -- short preamble is encoded in the PHY mode object but there is no MAC-layer
-NED parameter to select it; INET's rate selection always picks the long-preamble mode at any
-given bitrate, so getShortPreamble() is not exercised from above the PHY]
+Observe an HR/DSSS short-preamble transmission. PHY objects exist, but the
+default b mode set contains long-preamble entries only. This exposes a selection gap.
 
 %file: B_ShortPreamble.cc
 
@@ -16,10 +13,6 @@ namespace protocoltest {
 
 using namespace inet::physicallayer;
 
-// The spec-required assertion: a data frame is transmitted with the short-preamble
-// HR/DSSS mode (preamble == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT).
-// INET's rate selection module always picks the long-preamble variant at a given bitrate;
-// no NED parameter overrides the preamble type, so this will never match.
 Define_ProtocolTest(wifi_11b_short_preamble)
 {
     return ProtocolTest("wifi_11b_short_preamble")

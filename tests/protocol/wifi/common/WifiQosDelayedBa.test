@@ -1,38 +1,49 @@
-%# expected-result: FAIL
 %description:
-802.11e Delayed Block Ack: a Block Ack Request (type 24) elicits an ACK frame (type 29)
-immediately followed by a Block Ack (type 25) after a SIFS+PIFS delay — the delayed
-BA policy. [NOT-MODELED -- INET implements only the Immediate Block Ack policy;
-N_BlockAck and N_CompressedBa confirm immediate BA; no delayed-BA policy module or
-DelayedBlockAck enum value is used in the BlockAck originator/recipient code]
+Negotiate delayed Block Ack explicitly, send a BAR, then observe its immediate ACK
+and the later Block Ack response. A later TXOP is not a fixed SIFS+PIFS delay.
+The model exposes delayed policy negotiation but recipient handling is unfinished.
 
 %file: WifiQosDelayedBa.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec assertion: after a BAReq (type 24) the recipient sends an ACK (type 29) and
-// then defers the BA (type 25) by a PIFS interval. INET always replies immediately.
-// We assert that BA (25) arrives after more than SIFS+PIFS ≈ 50 µs from BAReq,
-// which INET's immediate BA never satisfies.
 Define_ProtocolTest(wifi_qos_delayed_ba)
 {
     return ProtocolTest("wifi_qos_delayed_ba")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && c.event.packet->peekAtFront<ieee80211::Ieee80211AddbaRequest>(b(-1), Chunk::PF_ALLOW_NULLPTR) != nullptr;
+                  }).assertEvent([](const MatchContext& c) {
+                      return !c.event.packet->peekAtFront<ieee80211::Ieee80211AddbaRequest>()->getBlockAckPolicy();
+                  }).describe("ADDBA requests delayed policy").within(2.5))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && c.event.packet->peekAtFront<ieee80211::Ieee80211AddbaResponse>(b(-1), Chunk::PF_ALLOW_NULLPTR) != nullptr;
+                  }).assertEvent([](const MatchContext& c) {
+                      auto response = c.event.packet->peekAtFront<ieee80211::Ieee80211AddbaResponse>();
+                      return !response->getBlockAckPolicy() && response->getStatusCode() == ieee80211::SC_SUCCESSFUL;
+                  }).describe("ADDBA accepts delayed policy").within(0.1))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 24")
+                  .capture("originator", [](const PacketEvent& e) { return cValue(e.packet->peekAtFront<ieee80211::Ieee80211BlockAckReq>()->getTransmitterAddress().str().c_str()); })
                   .describe("BlockAckReq from sta1").within(2.5))
-        // In delayed BA, an ACK comes first (immediate ACK of the BAReq frame itself).
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
-                  .filterPacket("ieee80211mac.type == 29")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto h = c.event.packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+                      return (h->getType() == ieee80211::ST_ACK || h->getType() == ieee80211::ST_BLOCKACK) &&
+                             h->getReceiverAddress() == MacAddress(c.get("originator").stringValue());
+                  })
+                  .assertEvent([](const MatchContext& c) {
+                      return c.event.packet->peekAtFront<ieee80211::Ieee80211MacHeader>()->getType() == ieee80211::ST_ACK;
+                  })
                   .describe("immediate ACK of the BAReq (delayed BA)").within(0.01))
-        // Then the BA arrives after PIFS (>= 25 µs additional wait).
-        // INET's immediate BA skips the ACK step and sends BA directly, so the outer
-        // ACK step above already fails in INET's implementation.
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
                   .filterPacket("ieee80211mac.type == 25")
-                  .describe("delayed Block Ack after PIFS").within(0.002));
+                  .describe("Block Ack in a later TXOP").within(0.1));
 }
 
 } // namespace protocoltest
@@ -42,20 +53,19 @@ Define_ProtocolTest(wifi_qos_delayed_ba)
 
 [General]
 *.tester.testName = "wifi_qos_delayed_ba"
+**.hcf.originatorBlockAckAgreementPolicy.delayedAckPolicySupported = true
+**.hcf.recipientBlockAckAgreementPolicy.delayedAckPolicySupported = true
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 0.1ms
 include ../../ini/_n.ini
-include ../../ini/_base.ini
 **.wlan[*].radio.receiver.energyDetection = -105dBm
-**.wlan[*].radio.receiver.sensitivity = -105dBm
-**.wlan[*].radio.receiver.snirThreshold = 0dB
-**.wlan[*].radio.transmitter.power = 0.12mW
 **.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
 **.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_qos_delayed_ba: PASS

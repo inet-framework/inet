@@ -1,24 +1,21 @@
 %# expected-result: FAIL
 %description:
-802.11k Radio Resource Management: a Measurement Request action frame (type 13,
-category Radio Measurement) is sent from AP to STA. [NOT-MODELED -- INET has no
-802.11k RRM module; no Measurement Request/Report action frames are generated;
-WifiDfsChannelSwitch already confirms amendments are absent]
+Observe the specific management action for WifiRrmMeasurement. Match the generic action
+wire representation, not a nonexistent specialized C++ chunk. See the Wi-Fi audit
+evidence for the missing feature and stimulus limitations.
 
 %file: WifiRrmMeasurement.cc
 
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Spec assertion: AP sends a Measurement Request action frame (type 13).
-// INET has no RRM implementation.
 Define_ProtocolTest(wifi_rrm_measurement)
 {
     return ProtocolTest("wifi_rrm_measurement")
         .once(on("ap.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 13 && Ieee80211MeasurementRequest.length >= 0")
+                  .filterEvent([](const MatchContext& c) { return isManagementAction(c.event, 5, 0); })
                   .describe("a Measurement Request action frame from AP").within(2.5));
 }
 

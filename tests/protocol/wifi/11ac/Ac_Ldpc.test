@@ -1,25 +1,25 @@
 %description:
-Testability gap: No LDPC transmit-code discriminator is exposed by the HT mode API; this test cannot establish the coding obligation.
+Testability gap: No LDPC transmit-code discriminator is exposed by the VHT mode API; this test cannot establish the coding obligation.
 The failure is an explicit missing observation, not proof that an emitted frame is wrong.
 
-%file: N_LdpcCap.cc
+%file: Ac_Ldpc.cc
 
 #include "ProtocolTest.h"
 #include "WifiTestSupport.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 namespace inet {
 namespace protocoltest {
 
 using namespace inet::physicallayer;
 
-Define_ProtocolTest(wifi_11n_ldpc_cap)
+Define_ProtocolTest(wifi_11ac_ldpc)
 {
-    return ProtocolTest("wifi_11n_ldpc_cap")
+    return ProtocolTest("wifi_11ac_ldpc")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 40")
                   .assertEvent([](const MatchContext&) -> bool {
-                      throw cRuntimeError("TESTABILITY GAP: No LDPC transmit-code discriminator is exposed by the HT mode API; this test cannot establish the coding obligation");
+                      throw cRuntimeError("TESTABILITY GAP: No LDPC transmit-code discriminator is exposed by the VHT mode API; this test cannot establish the coding obligation");
                   })
                   .describe("QoS data frame transmitted with LDPC channel coding").within(2.5));
 }
@@ -30,10 +30,10 @@ Define_ProtocolTest(wifi_11n_ldpc_cap)
 %inifile: test.ini
 
 [General]
-*.tester.testName = "wifi_11n_ldpc_cap"
-include ../../ini/_n.ini
+*.tester.testName = "wifi_11ac_ldpc"
+include ../../ini/_ac.ini
 **.wlan[*].radio.receiver.energyDetection = -105dBm
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_ldpc_cap: PASS
+PROTOCOLTEST wifi_11ac_ldpc: PASS
