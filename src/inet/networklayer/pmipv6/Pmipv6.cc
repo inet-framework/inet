@@ -396,12 +396,38 @@ Pmipv6::BindingCache::iterator Pmipv6::lookupBindingCacheEntry(const BindingUpda
 
 void Pmipv6::deleteBindingCacheEntry(BindingCache::iterator it)
 {
+    int tunnelInterfaceId = it->second.tunnelInterfaceId;
     if (it->second.downlinkRoute)
         rt6->deleteRoute(it->second.downlinkRoute);
     cancelAndDelete(it->second.deleteTimer);
     cancelAndDelete(it->second.expiryTimer);
     bindingCache.erase(it);
     emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
+    releaseLmaTunnelIfUnused(tunnelInterfaceId);
+}
+
+//
+// RFC 5213 Section 5.3.4 step 2 and Section 5.6.1: the tunnel to a gateway exists for
+// the mobile nodes reached through it, and goes when the last of them does.
+//
+void Pmipv6::releaseLmaTunnelIfUnused(int tunnelInterfaceId)
+{
+    if (tunnelInterfaceId == -1)
+        return;
+    for (const auto& element : bindingCache)
+        if (element.second.tunnelInterfaceId == tunnelInterfaceId)
+            return;
+    for (auto it = lmaTunnelByMag.begin(); it != lmaTunnelByMag.end(); ++it) {
+        if (it->second == tunnelInterfaceId) {
+            lmaTunnelByMag.erase(it);
+            break;
+        }
+    }
+    if (NetworkInterface *tunnel = ift->getInterfaceById(tunnelInterfaceId)) {
+        EV_INFO << "LMA removed the tunnel on interface id " << tunnelInterfaceId
+                << "; no mobile node is reached through it" << endl;
+        rt6->deleteTunnelNetworkInterface(tunnel);
+    }
 }
 
 void Pmipv6::sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
@@ -584,7 +610,10 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.sequenceNumber = seq;
         entry.timestamp = pbu->getTimestampValue();
         entry.expiry = simTime() + grantedLifetime;
+        int previousTunnelId = entry.tunnelInterfaceId;
         entry.tunnelInterfaceId = tunnelId;
+        if (previousTunnelId != -1 && previousTunnelId != tunnelId)
+            releaseLmaTunnelIfUnused(previousTunnelId);
         // RFC 6275 Section 9.6: the entry lives exactly as long as the lifetime granted
         if (entry.expiryTimer == nullptr) {
             entry.expiryTimer = new Pmipv6Timer("bindingExpiry", LMA_BINDING_EXPIRY);

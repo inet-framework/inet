@@ -213,6 +213,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
             unsigned int lifetime, uint64_t timestamp, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
     void deleteBindingCacheEntry(BindingCache::iterator it);
+    void releaseLmaTunnelIfUnused(int tunnelInterfaceId);
 
     // MAG
     void parseMobileNodeProfiles();
