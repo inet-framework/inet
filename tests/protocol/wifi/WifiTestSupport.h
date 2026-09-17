@@ -15,6 +15,7 @@
 #define __INET_PROTOCOLTEST_WIFI_WIFITESTSUPPORT_H
 
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
@@ -37,6 +38,45 @@ inline const IIeee80211Mode *txMode(const PacketEvent& e)
         return nullptr;
     auto req = e.packet->findTag<Ieee80211ModeReq>();
     return req != nullptr ? req->getMode() : nullptr;
+}
+
+// MAC observation signals carry the management header before its typed body.
+template<typename T>
+inline Ptr<const T> managementBody(const PacketEvent& event)
+{
+    if (!event.packet)
+        return nullptr;
+    auto header = event.packet->peekAtFront<ieee80211::Ieee80211MgmtHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+    return header ? event.packet->peekAt<T>(header->getChunkLength(), b(-1), Chunk::PF_ALLOW_NULLPTR) : nullptr;
+}
+
+// Unsupported management elements are preserved as complete Element ID/Length/body TLVs.
+inline bool hasManagementElement(const PacketEvent& event, uint8_t id)
+{
+    auto body = managementBody<ieee80211::Ieee80211MgmtFrame>(event);
+    if (!body)
+        return false;
+    size_t size = body->getUnmodelledElementsArraySize();
+    for (size_t i = 0; i + 2 <= size; ) {
+        size_t length = body->getUnmodelledElements(i + 1);
+        if (length > size - i - 2)
+            return false;
+        if (body->getUnmodelledElements(i) == id)
+            return true;
+        i += 2 + length;
+    }
+    return false;
+}
+
+// Non-Block-Ack actions use the generic wire-preserving action header.
+inline bool isManagementAction(const PacketEvent& event, uint8_t category, uint8_t action)
+{
+    if (!event.packet)
+        return false;
+    auto header = event.packet->peekAtFront<ieee80211::Ieee80211ActionFrameOther>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+    return header && header->getType() == ieee80211::ST_ACTION &&
+           header->getCategory() == category && header->getActionBodyArraySize() >= 2 &&
+           header->getActionBody(0) == category && header->getActionBody(1) == action;
 }
 
 // --- per-PHY-family predicates (the dynamic_cast is what the string engine cannot do) ---
