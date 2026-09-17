@@ -8,7 +8,9 @@
 [![Test: feature](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml)
 [![Test: fingerprint](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml)
 [![Test: module](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml)
-[![Test: other](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml)
+[![Test: packet](https://github.com/inet-framework/inet/actions/workflows/packet-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/packet-tests.yml)
+[![Test: protocol](https://github.com/inet-framework/inet/actions/workflows/protocol-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/protocol-tests.yml)
+[![Test: queueing](https://github.com/inet-framework/inet/actions/workflows/queueing-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/queueing-tests.yml)
 <!-- [![Test: speed](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml) -->
 [![Test: statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
 [![Test: unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)

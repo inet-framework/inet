@@ -29,8 +29,14 @@ def start_fingerprint_tests_github_workflow():
 def start_module_tests_github_workflow():
     dispatch_workflow("module-tests.yml")
 
-def start_other_tests_github_workflow():
-    dispatch_workflow("other-tests.yml")
+def start_packet_tests_github_workflow():
+    dispatch_workflow("packet-tests.yml")
+
+def start_protocol_tests_github_workflow():
+    dispatch_workflow("protocol-tests.yml")
+
+def start_queueing_tests_github_workflow():
+    dispatch_workflow("queueing-tests.yml")
 
 def start_statistical_tests_github_workflow():
     dispatch_workflow("statistical-tests.yml")
@@ -46,7 +52,9 @@ def start_all_tests_github_workflows():
     start_feature_tests_github_workflow()
     start_fingerprint_tests_github_workflow()
     start_module_tests_github_workflow()
-    start_other_tests_github_workflow()
+    start_packet_tests_github_workflow()
+    start_protocol_tests_github_workflow()
+    start_queueing_tests_github_workflow()
     start_statistical_tests_github_workflow()
     start_unit_tests_github_workflow()
     start_validation_tests_github_workflow()

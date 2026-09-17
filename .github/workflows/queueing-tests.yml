@@ -1,4 +1,4 @@
-name: "Test: protocol"
+name: "Test: queueing"
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     # nothing
 
 jobs:
-  protocol-tests:
+  queueing-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -58,6 +58,6 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
-          echo "::group::Running protocol tests"
-          inet_run_protocol_tests
+          echo "::group::Running queueing tests"
+          inet_run_queueing_tests
           echo "::endgroup::"
