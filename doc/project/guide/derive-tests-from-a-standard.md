@@ -82,13 +82,14 @@ A failing test is the point of the exercise and not an accident of it. A test th
 written and that fails is the **most valuable** result this workflow produces: it is the one
 output that tells somebody what to fix. So it is written, it is kept, and it fails.
 
-Three cases, and they cover everything:
+Four cases, and they cover everything:
 
 | The state of the model | What to write | The verdict it carries |
 | --- | --- | --- |
 | it claims the behavior, and the test can be written | the faithful test | it fails, and nothing declares the failure expected |
 | it claims the behavior, and the test **cannot** be written because something needed to test against is missing | the test, failing unconditionally, with the missing part named in its description | it fails, and nothing declares the failure expected |
 | it does **not** claim the behavior | the faithful test | it fails, and the failure **is** declared expected |
+| it claims the behavior and gets it wrong, and a known limitation blocks the repair | the faithful test, with the limitation named in its description | it fails, and the failure **is** declared expected |
 
 **The middle row is the one that is easy to get wrong.** When a check cannot be built — the
 stimulus is unreachable, a node type does not exist, a field the check must set has no
@@ -97,8 +98,8 @@ that fails and says why, in its own description, in one sentence a reader can ac
 part is a finding about the model and about the tooling, and a test is where a finding lives. A
 note in a document is not a finding; nothing fails when it goes stale.
 
-The third row is the only licence to declare a failure expected, and "does not claim" is
-narrow. It holds when the model **says** it does not support the behavior — a `TODO`, a stated
+The third and the fourth row are the only licences to declare a failure expected, and "does not
+claim" is narrow. It holds when the model **says** it does not support the behavior — a `TODO`, a stated
 limitation in the release notes, a document it never names — or when it has made **no effort**:
 no code path, no function, no field. It does not hold merely because a mechanism is incomplete.
 A half-written mechanism is a claim.
@@ -106,7 +107,16 @@ A half-written mechanism is a claim.
 Claiming a protocol is not claiming every feature of it. A model whose documentation says
 "implements RFC 2131" has not thereby claimed each of the five messages that document defines;
 the code decides, one behavior at a time. Read the question narrowly, about the behavior the
-check tests, and the three rows stay decidable.
+check tests, and the rows stay decidable.
+
+**The fourth row is for a defect that cannot be repaired soon.** A plain failure says that
+somebody means to fix the defect soon, so the suite stays red until then. A defect whose repair
+waits for something else, maybe for a long time, would keep the suite red for that long, and a
+red suite hides every new regression. Such a defect is declared, and the limitation is named
+where the declaration is: the description of the test says what is wrong, what blocks the
+repair, and where the evidence records it. A declaration without that text is not allowed. When
+the limitation goes and the test passes, the run reports `PASS (unexpected)`, and the
+declaration goes too.
 
 ### What this principle rules out
 
@@ -117,7 +127,7 @@ check tests, and the three rows stay decidable.
 - **A verdict of `untested` on a statement whose test exists and fails.** The test failed; the
   statement is not established. Say that, and say which observation the failure kept the check
   from reaching. A reader who sees `untested` reasonably concludes that nobody wrote a test.
-- **A declared expected failure over a defect.** See
+- **A declared expected failure over a defect whose limitation is not named.** See
   [the class of a failure](#the-class-of-a-failure-and-when-to-declare-it-expected) in step 7.
 
 ## Levels of depth
@@ -466,8 +476,9 @@ Translate the English document into a self-contained `opp_test` file in
 - When a mapping is imperfect (for example, a window that cannot cover an instant), write
   the deviation into the `%description` and into `results.md` (step 7). Do not
   silently weaken the English expectation.
-- When the faithful assertion fails because the model lacks a feature, keep the assertion
-  and declare `%# expected-result: FAIL` (see AUTHORING.md). Never invert the assertion.
+- When the faithful assertion fails because the model lacks a feature, or because a named
+  limitation blocks the repair of a defect, keep the assertion and declare
+  `%# expected-result: FAIL` (see AUTHORING.md). Never invert the assertion.
 - Check the printed program (`printDescription = true`) against the English document. The
   two texts must tell the same story.
 - Expression pitfalls (a wrong expression is a silent non-match, and the step times out):
@@ -556,7 +567,7 @@ Three documents carry the run record: `results.md`, `coverage.md` and `conforman
 
 ### The class of a failure, and when to declare it expected
 
-Every failure falls in one of five classes, and the class decides what you do about it. The
+Every failure falls in one of six classes, and the class decides what you do about it. The
 classes follow from [the third principle](#principle-a-claimed-feature-gets-a-test); this is that
 principle applied to a run.
 
@@ -565,22 +576,31 @@ principle applied to a run.
 | **test error** | the check is right and the program does not implement it | fix the test |
 | **specification misread** | the check asks for something the standard does not say | fix the catalog and the check document |
 | **defect** | the model claims the behavior and gets it wrong | keep the faithful test, **declare nothing**, file the gap |
+| **defect with a blocked repair** | a defect, and a known limitation keeps its repair away for a long time | keep the faithful test, declare `%# expected-result: FAIL`, name the limitation in the description of the test, file the gap |
 | **untestable claim** | the model claims the behavior and the check cannot be built | keep the test failing, name the missing part in its description, **declare nothing**, file the gap against the tooling as well |
 | **unimplemented feature** | the model does not claim the behavior | keep the faithful test, declare `%# expected-result: FAIL`, file the gap |
 
-Only the last row declares anything. Three of the five classes end in a failure the run reports,
+Two rows declare a failure expected: a defect with a blocked repair, and an unimplemented
+feature. Three of the six classes end in a failure the run reports,
 and that is the normal, intended outcome of a deep pass against a model that was not written
 against these checks.
 
-An expected-result declaration means one thing only: *this feature is known to be unimplemented,
-so the failure is not a regression*. That is the wording of
+An expected-result declaration means one of two things: *this feature is known to be
+unimplemented*, or *this defect is known, and a named limitation blocks its repair*. Either way
+the failure is not a regression. That is the wording of
 [`AUTHORING.md`](../../../tests/protocol/lib/AUTHORING.md), in its section on declaring an
 expected result, and it is the whole of what the declaration is for.
 
-**Never declare a defect as an expected failure.** A defect must make the suite red and keep it
-red until somebody fixes it. Declaring one turns the suite green over a bug and hides it, which is
-the opposite of what a suite is for, and it is worse than having no test at all: the test now
-states that the wrong behavior is the intended one.
+**Never declare a defect as an expected failure unless a named limitation blocks its repair.** A
+defect that is to be fixed soon must make the suite red and keep it red until somebody fixes it.
+Declaring one turns the suite green over a bug and hides it, which is the opposite of what a suite
+is for, and it is worse than having no test at all: the test now states that the wrong behavior
+is the intended one.
+
+A defect with a blocked repair is the one exception, for the reason the
+[principle](#principle-a-claimed-feature-gets-a-test) gives. Its declaration is honest only with
+its text: the description of the test names the defect, the limitation that blocks the repair,
+and the evidence that records both, next to the declaration.
 
 The line is decidable, and this is where to draw it:
 
@@ -636,7 +656,7 @@ defect usually sits inside a feature that otherwise works, which the matrix then
 Record in `results.md`:
 
 - the run record, and the verdict of every test;
-- for each failure, its class, from the four of [the section above](#the-class-of-a-failure-and-when-to-declare-it-expected);
+- for each failure, its class, from the six of [the section above](#the-class-of-a-failure-and-when-to-declare-it-expected);
 - the simulation model analysis: where the model implements the checked behavior, with
   file and line references. This is the first artifact that may reference code;
 - sharpening candidates for the next pass.
