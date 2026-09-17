@@ -33,6 +33,37 @@ namespace inet {
 
 Define_Module(Pmipv6);
 
+simsignal_t Pmipv6::proxyBindingUpdateSentSignal = registerSignal("proxyBindingUpdateSent");
+simsignal_t Pmipv6::proxyBindingAcknowledgementReceivedSignal = registerSignal("proxyBindingAcknowledgementReceived");
+simsignal_t Pmipv6::proxyBindingUpdateReceivedSignal = registerSignal("proxyBindingUpdateReceived");
+simsignal_t Pmipv6::homeNetworkPrefixReanchoredSignal = registerSignal("homeNetworkPrefixReanchored");
+simsignal_t Pmipv6::bindingCacheSizeSignal = registerSignal("bindingCacheSize");
+
+std::ostream& operator<<(std::ostream& os, const Pmipv6::BindingCacheEntry& entry)
+{
+    return os << "prefix " << entry.homeNetworkPrefix << "/" << entry.homeNetworkPrefixLength
+              << ", serving gateway " << entry.servingMagAddress
+              << ", tunnel interface id " << entry.tunnelInterfaceId
+              << ", sequence " << entry.sequenceNumber
+              << ", expires at " << entry.expiry;
+}
+
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MobileNodeProfile& profile)
+{
+    return os << "'" << profile.mnIdentifier << "'"
+              << ", prefix " << profile.homeNetworkPrefix << "/" << profile.homeNetworkPrefixLength
+              << ", access interface "
+              << (profile.accessInterfaceName.empty() ? std::string("(any)") : profile.accessInterfaceName);
+}
+
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding)
+{
+    return os << "prefix " << binding.homeNetworkPrefix << "/" << binding.homeNetworkPrefixLength
+              << ", access interface id " << binding.accessInterfaceId
+              << ", sequence " << binding.sequenceNumber
+              << (binding.registered ? ", registered" : ", registration pending");
+}
+
 Pmipv6::~Pmipv6()
 {
 }
@@ -64,7 +95,15 @@ void Pmipv6::initialize(int stage)
             host->subscribe(l2ApDisassociatedSignal, this);
         }
 
-        WATCH(magTunnelId);
+        if (isLma) {
+            WATCH_MAP(bindingCache);
+            WATCH_MAP(lmaTunnelByMag);
+        }
+        else {
+            WATCH_VECTOR(mobileNodeProfiles);
+            WATCH_MAP(magBindings);
+            WATCH(magTunnelId);
+        }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
@@ -72,6 +111,8 @@ void Pmipv6::initialize(int stage)
         // (both LMA and MAG are routers; forwarding is enabled by the node type)
         // receive Mobility Header messages (Proxy Binding Updates / Acknowledgements)
         registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
+        if (isLma)
+            emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
     }
 }
 
@@ -85,7 +126,7 @@ void Pmipv6::handleMessageWhenUp(cMessage *msg)
             processMobilityMessage(packet);
         else {
             EV_WARN << "Discarding unexpected packet " << packet->getName() << endl;
-            delete packet;
+            dropPacket(packet, NO_PROTOCOL_FOUND);
         }
     }
     else if (auto indication = dynamic_cast<Indication *>(msg)) {
@@ -98,20 +139,25 @@ void Pmipv6::handleMessageWhenUp(cMessage *msg)
 
 void Pmipv6::processMobilityMessage(Packet *packet)
 {
+    bool accepted = false;
     auto mh = packet->peekAtFront<MobilityHeader>();
     switch (mh->getMobilityHeaderType()) {
         case BINDING_UPDATE: {
             auto bu = packet->peekAtFront<BindingUpdate>();
-            if (isLma && bu->getProxyRegistrationFlag())
+            if (isLma && bu->getProxyRegistrationFlag()) {
                 processProxyBindingUpdate(packet, bu.get());
+                accepted = true;
+            }
             else
                 EV_WARN << "Ignoring Binding Update (not a Proxy Binding Update for an LMA)" << endl;
             break;
         }
         case BINDING_ACKNOWLEDGEMENT: {
             auto ba = packet->peekAtFront<BindingAcknowledgement>();
-            if (isMag && ba->getProxyRegistrationFlag())
+            if (isMag && ba->getProxyRegistrationFlag()) {
                 processProxyBindingAcknowledgement(packet, ba.get());
+                accepted = true;
+            }
             else
                 EV_WARN << "Ignoring Binding Acknowledgement (not a Proxy Binding Acknowledgement for a MAG)" << endl;
             break;
@@ -119,6 +165,10 @@ void Pmipv6::processMobilityMessage(Packet *packet)
         default:
             EV_WARN << "Ignoring unsupported Mobility Header type " << mh->getMobilityHeaderType() << endl;
             break;
+    }
+    if (!accepted) {
+        dropPacket(packet, NOT_ADDRESSED_TO_US);
+        return;
     }
     delete packet;
 }
@@ -135,6 +185,14 @@ void Pmipv6::sendMobilityMessage(Packet *packet, const Ipv6Address& destAddress,
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(64);
     send(packet, "toIPv6");
+}
+
+void Pmipv6::dropPacket(Packet *packet, PacketDropReason reason)
+{
+    PacketDropDetails details;
+    details.setReason(reason);
+    emit(packetDroppedSignal, packet, &details);
+    delete packet;
 }
 
 Ipv6Address Pmipv6::getEgressAddressFor(const Ipv6Address& destination)
@@ -188,6 +246,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
 
     EV_INFO << "LMA received Proxy Binding Update from MAG " << magAddress << " for MN '" << mnId
             << "' prefix " << hnp << "/" << hnpLen << " lifetime " << lifetime << "s" << endl;
+    emit(proxyBindingUpdateReceivedSignal, (intval_t)lifetime);
 
     BaStatus status = BINDING_UPDATE_ACCEPTED;
     auto it = bindingCache.find(mnId);
@@ -200,6 +259,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
             if (it->second.downlinkRoute)
                 rt6->deleteRoute(it->second.downlinkRoute);
             bindingCache.erase(it);
+            emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
             EV_INFO << "LMA removed binding for MN '" << mnId << "'" << endl;
         }
         else
@@ -216,6 +276,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
             // mobile node moved to a different MAG: re-point its prefix route
             rt6->deleteRoute(entry.downlinkRoute);
             entry.downlinkRoute = nullptr;
+            emit(homeNetworkPrefixReanchoredSignal, (intval_t)1);
             EV_INFO << "LMA handover: re-pointing prefix " << hnp << "/" << hnpLen
                     << " toward MAG " << magAddress << endl;
         }
@@ -233,6 +294,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.sequenceNumber = seq;
         entry.expiry = simTime() + lifetime;
         entry.tunnelInterfaceId = tunnelId;
+        emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
     }
 
     // Send the Proxy Binding Acknowledgement back to the MAG.
@@ -376,6 +438,7 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
     pbu->setTimestampValue(0);         // ordered by sequence number in this model
     pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(binding.mnIdentifier.size()));
     packet->insertAtFront(pbu);
+    emit(proxyBindingUpdateSentSignal, (intval_t)pbu->getLifetime());
     sendMobilityMessage(packet, localMobilityAnchorAddress, magAddress);
 }
 
@@ -401,6 +464,7 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
     std::string mnId = pba->getMobileNodeIdentifier();
     BaStatus status = pba->getStatus();
     unsigned int lifetime = pba->getLifetime();
+    emit(proxyBindingAcknowledgementReceivedSignal, (intval_t)lifetime);
 
     auto it = magBindings.find(mnId);
     if (it == magBindings.end()) {

@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -49,6 +50,13 @@ class BindingAcknowledgement;
 class INET_API Pmipv6 : public OperationalBase, protected cListener
 {
   protected:
+    // signals
+    static simsignal_t proxyBindingUpdateSentSignal;
+    static simsignal_t proxyBindingAcknowledgementReceivedSignal;
+    static simsignal_t proxyBindingUpdateReceivedSignal;
+    static simsignal_t homeNetworkPrefixReanchoredSignal;
+    static simsignal_t bindingCacheSizeSignal;
+
     // role
     bool isLma = false;
     bool isMag = false;
@@ -67,9 +75,12 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     //
     // LMA state: the Binding Cache, keyed by Mobile Node Identifier (NAI).
     // Embedded here (rather than a separate module) for simplicity; it can be
-    // promoted to a sibling module like the MIPv6 BindingCache if inspection
-    // beyond the WATCH below is needed.
+    // promoted to a sibling module like the MIPv6 BindingCache if it ever needs
+    // more than the watches registered in initialize(). This struct and the two
+    // MAG ones below are public so that the ostream operators those watches use
+    // can name them.
     //
+  public:
     struct BindingCacheEntry {
         Ipv6Address homeNetworkPrefix;
         int homeNetworkPrefixLength = 0;
@@ -79,6 +90,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         int tunnelInterfaceId = -1;    // LMA's tunnel to the serving MAG
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> tunnel
     };
+
+  protected:
     std::map<std::string, BindingCacheEntry> bindingCache; // key: MN identifier
     std::map<Ipv6Address, int> lmaTunnelByMag;             // serving MAG address -> tunnel interface id (shared by all its MNs)
 
@@ -87,13 +100,13 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     //
     // A mobile-node policy profile, configured per access interface. The MAG
     // looks one up when a mobile node attaches to an access link.
+  public:
     struct MobileNodeProfile {
         std::string accessInterfaceName; // empty = match any access interface
         std::string mnIdentifier;
         Ipv6Address homeNetworkPrefix;
         int homeNetworkPrefixLength = 64;
     };
-    std::vector<MobileNodeProfile> mobileNodeProfiles;
 
     // an active binding the MAG maintains for a currently-attached mobile node
     struct MagBinding {
@@ -105,6 +118,9 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         bool registered = false;
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
     };
+
+  protected:
+    std::vector<MobileNodeProfile> mobileNodeProfiles;
     std::map<std::string, MagBinding> magBindings; // key: MN identifier
     int magTunnelId = -1;                 // MAG's (shared) tunnel to the LMA
     Ipv6Route *magUplinkRoute = nullptr;  // default route -> tunnel (mobile node uplink)
@@ -127,6 +143,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     // common
     void processMobilityMessage(Packet *packet);
     void sendMobilityMessage(Packet *packet, const Ipv6Address& destAddress, const Ipv6Address& srcAddress);
+    void dropPacket(Packet *packet, PacketDropReason reason);
     Ipv6Address getEgressAddressFor(const Ipv6Address& destination);
     int getOrCreateTunnel(const Ipv6Address& localEndpoint, const Ipv6Address& remoteEndpoint, std::map<Ipv6Address, int>& tunnelMap);
 
@@ -145,6 +162,10 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
   public:
     virtual ~Pmipv6();
 };
+
+std::ostream& operator<<(std::ostream& os, const Pmipv6::BindingCacheEntry& entry);
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MobileNodeProfile& profile);
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding);
 
 } // namespace inet
 

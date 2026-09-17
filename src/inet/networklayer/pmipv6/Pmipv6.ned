@@ -50,7 +50,20 @@ simple Pmipv6 extends SimpleModule
         double homeNetworkPrefixAdvValidLifetime @unit(s) = default(3600s);  // MAG: valid lifetime of the advertised home network prefix
         double homeNetworkPrefixAdvPreferredLifetime @unit(s) = default(1800s); // MAG: preferred lifetime of the advertised home network prefix
         @display("i=block/network2");
-        @signal[packetDropped](type=cPacket);
+
+        @signal[proxyBindingUpdateSent](type=long);              // MAG: emits the requested binding lifetime in seconds (0 = deregistration)
+        @signal[proxyBindingAcknowledgementReceived](type=long); // MAG: emits the granted binding lifetime in seconds (0 = deregistration acknowledged)
+        @signal[proxyBindingUpdateReceived](type=long);          // LMA: emits the requested binding lifetime in seconds (0 = deregistration)
+        @signal[homeNetworkPrefixReanchored](type=long);         // LMA: emits value=1 when a mobile node's home network prefix is re-pointed to another gateway
+        @signal[bindingCacheSize](type=long);                    // LMA: emits the number of binding cache entries after a binding is created, refreshed or removed
+        @signal[packetDropped](type=inet::Packet);
+
+        @statistic[proxyBindingUpdateSent](title="Proxy Binding Updates sent"; record=count,vector; interpolationmode=none);
+        @statistic[proxyBindingAcknowledgementReceived](title="Proxy Binding Acknowledgements received"; record=count,vector; interpolationmode=none);
+        @statistic[proxyBindingUpdateReceived](title="Proxy Binding Updates received"; record=count,vector; interpolationmode=none);
+        @statistic[homeNetworkPrefixReanchored](title="home network prefix re-anchored to another gateway"; record=count,vector; interpolationmode=none);
+        @statistic[bindingCacheSize](title="binding cache entries"; record=vector,max; interpolationmode=sample-hold);
+        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input fromIPv6;
         output toIPv6;
