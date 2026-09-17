@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires coordinated delayed response, acknowledgement, timeout, and TXOP handling after accepted delayed-policy negotiation.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Negotiate delayed Block Ack explicitly, send a BAR, then observe its immediate ACK
 and the later Block Ack response. A later TXOP is not a fixed SIFS+PIFS delay.
 The model exposes delayed policy negotiation but recipient handling is unfinished.

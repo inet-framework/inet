@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires MU user/group allocation, scheduling, and receiver observations; the current explicit testability assertion must also be replaced.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Testability gap: The VHT PHY header exposes no group ID or multi-user allocation; MU-MIMO transmission cannot be observed.
 This explicit failure is not a measurement of protocol behavior.
 

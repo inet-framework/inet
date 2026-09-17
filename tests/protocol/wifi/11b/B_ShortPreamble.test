@@ -1,4 +1,10 @@
+%# expected-result: FAIL
 %description:
+Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
+Repair requires explicit short-preamble selection and compatible transmitter/receiver behavior.
+Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
+This declaration records unresolved work, not supported behavior.
+
 Observe an HR/DSSS short-preamble transmission. PHY objects exist, but the
 default b mode set contains long-preamble entries only. This exposes a selection gap.
 
