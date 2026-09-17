@@ -1,44 +1,79 @@
-%# expected-result: FAIL
 %description:
-802.11 DCF retransmission: when a frame is not acknowledged, the MAC retransmits with
-the Retry bit set (ieee80211mac.retry == true). [NOT-MODELED-ASSERTABLE]
-
-INET does implement the retry bit — the Ieee80211MacHeader.retry field is set and
-BasicRecoveryProcedure.doRetry() is called. However, reliably triggering a retry without
-modifying the shared NED (no PacketTap module in WifiInfraNetwork) is not deterministic:
-the radio settings that cause ACKs to be dropped also prevent association from completing,
-and there is no per-frame-type radio filtering in ini. A PacketTap injector could solve
-this, but adding it would modify the harness (forbidden). Therefore this test is marked
-NOT-MODELED-ASSERTABLE and expected to FAIL at the deadline.
+Send one unicast application packet after association. A test-only MAC receiver drops
+one addressed ACK after 1s and emits proof of the fault. Production DCF must retransmit
+the same sequence/fragment with Retry set, and the destination must deliver only once.
 
 %file: WifiRetransmission.cc
-
-#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
 namespace inet {
 namespace protocoltest {
+using namespace ieee80211;
 
-// 32 = ST_DATA, 40 = ST_DATA_WITH_QOS.
-// The Retry bit (ieee80211mac.retry) is set on retransmissions by BasicRecoveryProcedure.
-// Without a PacketTap to selectively drop ACKs, we cannot deterministically trigger
-// retry; the test will miss its deadline.
+class OneAckLossMac : public Ieee80211Mac
+{
+  protected:
+    bool suppressed = false;
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!suppressed && simTime() >= SimTime(1) && header->getType() == ST_ACK &&
+                header->getReceiverAddress() == mib->address) {
+            suppressed = true;
+            emit(registerSignal("ackSuppressed"), 1L);
+            delete packet;
+            return;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(OneAckLossMac);
+
 Define_ProtocolTest(wifi_retransmission)
 {
     return ProtocolTest("wifi_retransmission")
+        .meanwhile(exactlyTimes(1, on("sta2.udp").signal("packetSentToUpper")
+                  .describe("one delivery from UDP to the application despite MAC retry").within(2.5)))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("(ieee80211mac.type == 32 || ieee80211mac.type == 40) && ieee80211mac.retry == true")
-                  .describe("a retransmitted data frame with Retry bit set").within(2.5));
+                  .filterPacket("ieee80211mac.type == 32")
+                  .assertEvent([](const MatchContext& c) { return !c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry(); })
+                  .capture("sequence", [](const PacketEvent& e) { return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get()); })
+                  .capture("fragment", [](const PacketEvent& e) { return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber()); })
+                  .describe("original data frame").within(2))
+        .once(on("sta1.wlan[0].mac").signal("ackSuppressed").filterValue(1)
+                  .describe("exactly one addressed ACK deliberately suppressed").within(0.1))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 32")
+                  .assertEvent([](const MatchContext& c) {
+                      auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                      return header->getRetry() && header->getSequenceNumber().get() == c.get("sequence").intValue() &&
+                             header->getFragmentNumber() == c.get("fragment").intValue();
+                  }).describe("same sequence and fragment retransmitted with Retry set").within(0.1));
 }
-
 } // namespace protocoltest
 } // namespace inet
 
-%inifile: test.ini
+%file: WifiRetransmission.ned
+@namespace(inet::protocoltest);
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+module OneAckLossMac extends Ieee80211Mac
+{
+    parameters:
+        @class(OneAckLossMac);
+        @signal[ackSuppressed](type=long);
+}
 
+%inifile: test.ini
 [General]
 *.tester.testName = "wifi_retransmission"
+*.sta1.wlan[*].mac.typename = "OneAckLossMac"
+*.sta1.app[0].stopTime = 1.001s
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_retransmission: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 1 packets
