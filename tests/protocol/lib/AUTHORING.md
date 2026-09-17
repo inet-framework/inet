@@ -346,14 +346,16 @@ library, one folder per subject:
 | [`../arp/`](../arp), [`../ipv4/`](../ipv4), [`../ipv6/`](../ipv6), [`../ethernet/`](../ethernet) | one folder per protocol |
 | [`../wifi/`](../wifi) | the IEEE 802.11 conformance suite (its own runner) |
 
-Build the library, then run a suite:
+Before running, follow the
+[INET library freshness and build-mode guidance](../../../doc/project/guide/run-the-gates.md#keep-the-tested-library-current).
+The runner builds the applicable test support library and generated executables automatically.
+Run from the repository root, selecting the suite and test files for focused development:
 
 ```sh
-cd tests/protocol/lib
-./build.sh
-inet_run_protocol_tests                      # every suite
-inet_run_protocol_tests -w self              # one suite (the folder name)
-inet_run_protocol_tests -w ipv               # every suite whose folder matches
+inet_run_protocol_tests -p inet -m debug -w '<suite-regex>' -f '<test-path-regex>'
+inet_run_protocol_tests -p inet -m debug -w self  # one suite (the folder name)
+inet_run_protocol_tests -p inet -m debug -w ipv   # every suite whose folder matches
+inet_run_protocol_tests -p inet -m debug          # every suite
 ```
 
 The runner finds the suites itself: every direct subfolder of `tests/protocol` that holds

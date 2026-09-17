@@ -38,11 +38,29 @@ doc/project/enforcement/check-architecture.sh src/inet/<affected-subtree>
 # Use the category runner's explicit selector for unit, module, protocol and other tests.
 ```
 
+For protocol cases, follow the suite and test-file selection and build instructions in
+[AUTHORING.md](../../../tests/protocol/lib/AUTHORING.md#10-running-tests).
+For recorded statistical results, select
+the related simulation directories/configurations with
+`inet_run_statistical_tests -m debug -w '<simulation-directory-regex>' -c '<config-regex>'`.
+Use release mode when reproducing the statistical CI workflow, and report that mode explicitly.
+
 Keep the working directory, exact build and test commands, configuration, run and seed where
 applicable, filter, exit status and artifact paths. An unfiltered category or repository-wide suite
 may add integration coverage, but it cannot replace a directly related case. If no such case exists,
 report the coverage gap instead of broadening the command until something green appears
 ([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
+
+A dry run previews selection; it supplies no executed-test evidence. Report a zero-case selection
+as not run. Distinguish observed passes, declared expected failures, unexpected outcomes and setup
+errors even when the runner exits successfully. For protocol expectations, use the failure classes
+in [derive-tests-from-a-standard.md](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
+
+Statistical comparisons also record the baseline repository revision and local changes. For a
+base-versus-feature comparison, use the same baseline revision and environment on both sides;
+advancing the baseline during the comparison changes the experiment. Diagnose missing baselines
+separately from changed simulation results. Changes to recorded expectations follow
+[change-a-baseline.md](change-a-baseline.md).
 
 ## Before every push
 

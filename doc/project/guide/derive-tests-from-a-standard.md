@@ -482,14 +482,15 @@ Translate the English document into a self-contained `opp_test` file in
 ## Step 7 — run and analyze (`model/<proto>/results.md`)
 
 Source the `setenv` script of OMNeT++ and then the one of INET; the runner is not on the
-path otherwise. Build the framework library once per INET build, then run the suite:
+path otherwise. Follow [run-the-gates.md](run-the-gates.md) for matching library freshness and
+focused test selection. For an explicitly requested complete IPv4 suite:
 
 ```sh
-cd tests/protocol/lib && ./build.sh
-inet_run_protocol_tests -p inet -w ipv4
+inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipv4$'
 ```
 
-(`-p inet` skips the project discovery; discovery crashes on a `~/.omnetpp` directory.)
+`-p inet` selects the project explicitly. The normal runner invocation builds the applicable
+shared protocol-test support library automatically.
 
 ### The run record
 

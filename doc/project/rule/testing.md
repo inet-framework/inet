@@ -42,7 +42,7 @@ Every test rule in document order.
 | --- | --- |
 | [TR-DETERMINISTIC](#tr-deterministic) | The same seed gives the same trajectory, on every platform and every thread count |
 | [TR-NO-AMBIENT](#tr-no-ambient) | A model draws only from its own random number generators |
-| [TR-SELF-CONTAINED](#tr-self-contained) | A test depends on nothing outside its own directory |
+| [TR-SELF-CONTAINED](#tr-self-contained) | A test uses declared inputs and infrastructure, independently of other tests |
 
 **CI**
 
@@ -65,13 +65,16 @@ Every test rule in document order.
 | a protocol interaction follows this sequence | `protocol` |
 | a serializer round-trips | `unit`, plus the fingerprint `D` ingredient |
 | a datapath element chains correctly | `queueing` |
-| a statistic has this distribution | `statistical` |
+| recorded simulation statistics remain unchanged | `statistical` result regression |
+| a statistic has this distribution | `statistical` with an explicit distributional check and justified repetitions |
 | the model matches the real world or an analytical result | `validation` |
 | a feature builds alone | `features` |
 | nothing else changed | `fingerprint` |
 
 A test in the wrong category is persuasive and empty. A module test cannot establish a distribution,
 and a statistical test cannot establish that a field is encoded correctly.
+The limits of the statistical runner's evidence are described in
+[test-anatomy.md](../design/test-anatomy.md#the-recorded-expectations).
 
 *Enforced at T4 — agent review: does the test type match the claim?*
 
@@ -217,11 +220,18 @@ in the run, so a refactor that "cannot change behavior" does.
 
 ### TR-SELF-CONTAINED
 
-**A test depends on nothing outside its own directory, and leaves nothing behind.**
+**A test uses only its declared inputs and test infrastructure, and does not depend on another
+test's execution.**
 
 No file from another test's output, no fixed absolute path, no network, and no dependence on the
 order the suite happens to run in. A test that passes only after its neighbour has run is a test that
 will fail alone, in parallel, and on the machine of whoever is trying to reproduce a defect.
+
+Declared infrastructure includes the matching INET build, shared suite fixtures and support
+libraries, and a separately provisioned statistical baseline checkout. Provision these before
+execution and record their versions; test execution must not fetch an unspecified network input.
+Generated work directories, logs and comparison diagnostics may be retained as evidence, but must
+not become undeclared inputs to later tests.
 
 *Enforced at T2 — the suite runs in parallel and in isolation.*
 

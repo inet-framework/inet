@@ -20,7 +20,7 @@ test in the wrong category is persuasive and empty
 | `queueing` | datapath elements chain and transfer correctly | end-to-end behavior |
 | `packet` | the chunk algebra holds | how a protocol uses it |
 | `networks` | a pre-assembled network builds and runs | that its results are right |
-| `statistical` | a measured quantity has this distribution | which mechanism produced it |
+| `statistical` | recorded simulation statistics match their baseline; a distribution only when the test explicitly checks it | distributional validity from baseline equality alone, or which mechanism produced a difference |
 | `validation` | the model agrees with the real world or an analytical result | that nothing else changed |
 | `fingerprint` | **nothing else changed** | whether the behavior is correct |
 | `speed` | a run costs this much time | correctness of any kind |
@@ -64,6 +64,14 @@ The fourth is the one most often left out, and it is the one that decides whethe
 maintained. A baseline with no reason is a number that the next person will regenerate.
 
 ## The recorded expectations
+
+The Python `inet_run_statistical_tests` runner compares recorded scalar results, including results
+converted from vectors, with the separate `statistics` baseline checkout. Its default selection is
+run 0. Equality is regression evidence for those recorded results, not a hypothesis test or evidence
+from independent repetitions. The legacy R-based `.test` checks under `tests/statistical/` are a
+different harness; their assertions determine what they establish. For a distributional claim,
+define the experiment and uncertainty under
+[analyze-simulation-results.md](../guide/analyze-simulation-results.md).
 
 Three categories compare against a recorded value rather than an assertion: `fingerprint`,
 `statistical` and any `.test` with an expected output. All three are claims that *these values are

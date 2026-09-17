@@ -95,6 +95,13 @@ A second copy of the repository map is a copy that nobody updates, and an agent 
 last year's structure. These files say where to look and what to read first; the rules stay where
 they are owned.
 
+Agent skills may supply tool invocation recipes, implementation discovery, filter semantics and
+diagnostic artifact handling. They discover project obligations through the active checkout's
+project map and cite their owners; they do not maintain independent copies of build-mode policy,
+test acceptance criteria, evidence requirements or baseline approval rules. Contributor decisions
+and procedures must remain usable without an installed skill. Published model and API mechanisms
+remain in `doc/src/` under [DR-TWO-ROOTS](#dr-two-roots).
+
 *Enforced at T3 — a size and content check on the pointer files.*
 
 ## The shape of a document
