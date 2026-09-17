@@ -17,6 +17,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -33,11 +34,36 @@ namespace inet {
 
 Define_Module(Pmipv6);
 
+// RFC 5213 Section 8.5: Access Technology Type values. Only the one this model
+// can observe is named here.
+static constexpr uint8_t ACCESS_TECHNOLOGY_IEEE_802_11 = 4;
+
+// RFC 5213 Section 8.4: Handoff Indicator values.
+static constexpr uint8_t HANDOFF_NEW_INTERFACE = 1;   // attachment over a new interface
+static constexpr uint8_t HANDOFF_STATE_UNKNOWN = 4;   // the gateway cannot tell
+
 simsignal_t Pmipv6::proxyBindingUpdateSentSignal = registerSignal("proxyBindingUpdateSent");
 simsignal_t Pmipv6::proxyBindingAcknowledgementReceivedSignal = registerSignal("proxyBindingAcknowledgementReceived");
 simsignal_t Pmipv6::proxyBindingUpdateReceivedSignal = registerSignal("proxyBindingUpdateReceived");
 simsignal_t Pmipv6::homeNetworkPrefixReanchoredSignal = registerSignal("homeNetworkPrefixReanchored");
 simsignal_t Pmipv6::bindingCacheSizeSignal = registerSignal("bindingCacheSize");
+
+bool Pmipv6::MobilitySessionKey::operator<(const MobilitySessionKey& other) const
+{
+    if (mnIdentifier != other.mnIdentifier)
+        return mnIdentifier < other.mnIdentifier;
+    if (accessTechnologyType != other.accessTechnologyType)
+        return accessTechnologyType < other.accessTechnologyType;
+    return mnLinkLayerIdentifier.compareTo(other.mnLinkLayerIdentifier) < 0;
+}
+
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MobilitySessionKey& key)
+{
+    os << "'" << key.mnIdentifier << "'";
+    if (!key.mnLinkLayerIdentifier.isUnspecified())
+        os << " at " << key.mnLinkLayerIdentifier;
+    return os << ", access technology " << (int)key.accessTechnologyType;
+}
 
 std::ostream& operator<<(std::ostream& os, const Pmipv6::BindingCacheEntry& entry)
 {
@@ -51,6 +77,8 @@ std::ostream& operator<<(std::ostream& os, const Pmipv6::BindingCacheEntry& entr
 std::ostream& operator<<(std::ostream& os, const Pmipv6::MobileNodeProfile& profile)
 {
     return os << "'" << profile.mnIdentifier << "'"
+              << ", link-layer address "
+              << (profile.linkLayerAddress.isUnspecified() ? std::string("(any)") : profile.linkLayerAddress.str())
               << ", prefix " << profile.homeNetworkPrefix << "/" << profile.homeNetworkPrefixLength
               << ", access interface "
               << (profile.accessInterfaceName.empty() ? std::string("(any)") : profile.accessInterfaceName);
@@ -58,6 +86,8 @@ std::ostream& operator<<(std::ostream& os, const Pmipv6::MobileNodeProfile& prof
 
 std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding)
 {
+    if (!binding.mnLinkLayerIdentifier.isUnspecified())
+        os << "at " << binding.mnLinkLayerIdentifier << ", ";
     return os << "prefix " << binding.homeNetworkPrefix << "/" << binding.homeNetworkPrefixLength
               << ", access interface id " << binding.accessInterfaceId
               << ", sequence " << binding.sequenceNumber
@@ -233,6 +263,64 @@ int Pmipv6::getOrCreateTunnel(const Ipv6Address& localEndpoint, const Ipv6Addres
 // Local Mobility Anchor
 //
 
+//
+// RFC 5213 Section 5.4.1: locating the Binding Cache entry for a request is a
+// chain of three branches, tried in the order the section specifies, and which
+// one applies is decided by the options the request carries.
+//
+Pmipv6::BindingCache::iterator Pmipv6::lookupBindingCacheEntry(const BindingUpdate *pbu)
+{
+    // Section 5.4.1.1: the request names a real home network prefix, so the
+    // prefix locates the entry regardless of who is asking.
+    if (!pbu->getHomeNetworkPrefix().isUnspecified()) {
+        for (auto it = bindingCache.begin(); it != bindingCache.end(); ++it)
+            if (it->second.homeNetworkPrefix == pbu->getHomeNetworkPrefix())
+                return it;
+        return bindingCache.end();
+    }
+    // Section 5.4.1.2: no prefix, but the attached interface is named, so the
+    // full mobility session key applies. This is the branch that tells two
+    // mobile nodes on one access link apart.
+    if (!pbu->getMobileNodeLinkLayerIdentifier().isUnspecified()) {
+        MobilitySessionKey key;
+        key.mnIdentifier = pbu->getMobileNodeIdentifier();
+        key.accessTechnologyType = pbu->getAccessTechnologyType();
+        key.mnLinkLayerIdentifier = pbu->getMobileNodeLinkLayerIdentifier();
+        return bindingCache.find(key);
+    }
+    // Section 5.4.1.3: neither, so only the mobile node's identifier is left.
+    // (Only this section's lookup key is implemented; its multihoming rules,
+    // which decide between several sessions of one node, are not.)
+    for (auto it = bindingCache.begin(); it != bindingCache.end(); ++it)
+        if (it->second.session.mnIdentifier == pbu->getMobileNodeIdentifier())
+            return it;
+    return bindingCache.end();
+}
+
+void Pmipv6::sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
+        unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress)
+{
+    std::string mnId = pbu->getMobileNodeIdentifier();
+    auto reply = new Packet("ProxyBindingAck");
+    const auto& pba = makeShared<BindingAcknowledgement>();
+    pba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
+    pba->setProxyRegistrationFlag(true);
+    pba->setStatus(status);
+    pba->setSequenceNumber(pbu->getSequence());
+    pba->setLifetime(lifetime);
+    // RFC 5213 Section 6.9.1.2 step 6: return the received options unchanged
+    pba->setMobileNodeIdentifier(mnId.c_str());
+    pba->setMobileNodeLinkLayerIdentifier(pbu->getMobileNodeLinkLayerIdentifier());
+    pba->setHomeNetworkPrefix(pbu->getHomeNetworkPrefix());
+    pba->setHomeNetworkPrefixLength(pbu->getHomeNetworkPrefixLength());
+    pba->setHandoffIndicator(pbu->getHandoffIndicator());
+    pba->setAccessTechnologyType(pbu->getAccessTechnologyType());
+    pba->setTimestampValue(pbu->getTimestampValue());
+    pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(mnId.size()));
+    reply->insertAtFront(pba);
+    sendMobilityMessage(reply, magAddress, lmaAddress);
+}
+
 void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
 {
     auto addresses = packet->getTag<L3AddressInd>();
@@ -245,11 +333,28 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     unsigned int lifetime = pbu->getLifetime();
 
     EV_INFO << "LMA received Proxy Binding Update from MAG " << magAddress << " for MN '" << mnId
-            << "' prefix " << hnp << "/" << hnpLen << " lifetime " << lifetime << "s" << endl;
+            << "' at " << pbu->getMobileNodeLinkLayerIdentifier()
+            << " prefix " << hnp << "/" << hnpLen << " lifetime " << lifetime << "s" << endl;
     emit(proxyBindingUpdateReceivedSignal, (intval_t)lifetime);
 
-    BaStatus status = BINDING_UPDATE_ACCEPTED;
-    auto it = bindingCache.find(mnId);
+    // RFC 5213 Section 5.3.1 step 4: a request that does not say which mobile
+    // node it is about cannot be served.
+    if (mnId.empty()) {
+        EV_WARN << "LMA rejecting Proxy Binding Update without a mobile node identifier" << endl;
+        sendProxyBindingAcknowledgement(pbu, MISSING_MN_IDENTIFIER_OPTION, 0, magAddress, lmaAddress);
+        return;
+    }
+
+    auto it = lookupBindingCacheEntry(pbu);
+
+    // RFC 5213 Section 5.4.1.1 step 3: a home network prefix belongs to one
+    // mobile node, so a request that names another node's prefix is refused.
+    if (it != bindingCache.end() && it->second.session.mnIdentifier != mnId) {
+        EV_WARN << "LMA rejecting Proxy Binding Update: prefix " << hnp << "/" << hnpLen
+                << " belongs to MN '" << it->second.session.mnIdentifier << "', not to '" << mnId << "'" << endl;
+        sendProxyBindingAcknowledgement(pbu, NOT_AUTHORIZED_FOR_HOME_NETWORK_PREFIX, 0, magAddress, lmaAddress);
+        return;
+    }
 
     if (lifetime == 0) {
         // Deregistration. Only tear down if the request comes from the MAG that
@@ -270,7 +375,15 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         int tunnelId = getOrCreateTunnel(lmaAddress, magAddress, lmaTunnelByMag);
         NetworkInterface *tunnel = ift->getInterfaceById(tunnelId);
 
-        BindingCacheEntry& entry = bindingCache[mnId];
+        MobilitySessionKey key;
+        key.mnIdentifier = mnId;
+        key.accessTechnologyType = pbu->getAccessTechnologyType();
+        key.mnLinkLayerIdentifier = pbu->getMobileNodeLinkLayerIdentifier();
+        if (it == bindingCache.end())
+            it = bindingCache.insert({ key, BindingCacheEntry() }).first;
+        BindingCacheEntry& entry = it->second;
+        entry.session = key;
+
         bool retargeted = entry.downlinkRoute && entry.tunnelInterfaceId != tunnelId;
         if (retargeted) {
             // mobile node moved to a different MAG: re-point its prefix route
@@ -297,20 +410,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
     }
 
-    // Send the Proxy Binding Acknowledgement back to the MAG.
-    auto reply = new Packet("ProxyBindingAck");
-    const auto& pba = makeShared<BindingAcknowledgement>();
-    pba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
-    pba->setProxyRegistrationFlag(true);
-    pba->setStatus(status);
-    pba->setSequenceNumber(seq);
-    pba->setLifetime(lifetime);
-    pba->setMobileNodeIdentifier(mnId.c_str());
-    pba->setHomeNetworkPrefix(hnp);
-    pba->setHomeNetworkPrefixLength(hnpLen);
-    pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(mnId.size()));
-    reply->insertAtFront(pba);
-    sendMobilityMessage(reply, magAddress, lmaAddress);
+    sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, lifetime, magAddress, lmaAddress);
 }
 
 //
@@ -324,6 +424,8 @@ void Pmipv6::parseMobileNodeProfiles()
         return;
     for (cXMLElement *child : root->getChildrenByTagName("mobileNode")) {
         MobileNodeProfile profile;
+        if (const char *lla = child->getAttribute("linkLayerAddress"))
+            profile.linkLayerAddress = MacAddress(lla);
         if (const char *ai = child->getAttribute("accessInterface"))
             profile.accessInterfaceName = ai;
         const char *id = child->getAttribute("id");
@@ -338,17 +440,37 @@ void Pmipv6::parseMobileNodeProfiles()
     }
 }
 
-const Pmipv6::MobileNodeProfile *Pmipv6::findProfileForInterface(NetworkInterface *accessInterface) const
+//
+// RFC 5213 Section 6.2: a policy profile belongs to a mobile node, so the
+// station that attached selects it. A profile without a link-layer address
+// matches any station on a matching access interface, which keeps a
+// single-mobile-node configuration working without naming the station;
+// with more than one station on a link, such a profile is ambiguous and the
+// caller refuses the attachment rather than serving two nodes as one.
+//
+const Pmipv6::MobileNodeProfile *Pmipv6::findProfile(NetworkInterface *accessInterface, const MacAddress& stationAddress) const
 {
     const char *name = accessInterface->getInterfaceName();
-    const MobileNodeProfile *wildcard = nullptr;
+    const MobileNodeProfile *anyStation = nullptr;
     for (const auto& profile : mobileNodeProfiles) {
-        if (profile.accessInterfaceName == name)
+        if (!profile.accessInterfaceName.empty() && profile.accessInterfaceName != name)
+            continue;
+        if (profile.linkLayerAddress == stationAddress)
             return &profile;
-        if (profile.accessInterfaceName.empty() && wildcard == nullptr)
-            wildcard = &profile;
+        if (profile.linkLayerAddress.isUnspecified() && anyStation == nullptr)
+            anyStation = &profile;
     }
-    return wildcard;
+    return anyStation;
+}
+
+Pmipv6::MagBinding *Pmipv6::findBinding(int accessInterfaceId, const MacAddress& stationAddress)
+{
+    for (auto& element : magBindings) {
+        MagBinding& binding = element.second;
+        if (binding.accessInterfaceId == accessInterfaceId && binding.mnLinkLayerIdentifier == stationAddress)
+            return &binding;
+    }
+    return nullptr;
 }
 
 void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -360,63 +482,84 @@ void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         NetworkInterface *accessInterface = getContainingNicModule(check_and_cast<cModule *>(source));
         if (accessInterface == nullptr)
             return;
+        // the notification names the station, which is how the gateway learns
+        // which mobile node attached rather than merely that one did
+        auto notification = dynamic_cast<ieee80211::Ieee80211MgmtAp::NotificationInfoSta *>(obj);
+        if (notification == nullptr) {
+            EV_WARN << "Attachment notification on " << accessInterface->getInterfaceName()
+                    << " does not name a station; ignoring it" << endl;
+            return;
+        }
         if (signalID == l2ApAssociatedSignal)
-            handleMobileNodeAttached(accessInterface);
+            handleMobileNodeAttached(accessInterface, notification->getStaAddress());
         else
-            handleMobileNodeDetached(accessInterface);
+            handleMobileNodeDetached(accessInterface, notification->getStaAddress());
     }
 }
 
-void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface)
+void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
 {
-    const MobileNodeProfile *profile = findProfileForInterface(accessInterface);
+    // RFC 5213 Section 6.9.1.1 step 1: identify the mobile node first; only then
+    // is there anything to register.
+    const MobileNodeProfile *profile = findProfile(accessInterface, stationAddress);
     if (profile == nullptr) {
-        EV_DETAIL << "No mobile-node profile for access interface " << accessInterface->getInterfaceName()
-                  << "; ignoring attachment" << endl;
+        EV_DETAIL << "No mobile-node profile for station " << stationAddress << " on "
+                  << accessInterface->getInterfaceName() << "; ignoring attachment" << endl;
         return;
     }
-    EV_INFO << "MAG: mobile node '" << profile->mnIdentifier << "' attached on "
+
+    auto existing = magBindings.find(profile->mnIdentifier);
+    if (existing != magBindings.end() && existing->second.mnLinkLayerIdentifier != stationAddress) {
+        EV_WARN << "Station " << stationAddress << " on " << accessInterface->getInterfaceName()
+                << " resolves to mobile node '" << profile->mnIdentifier << "', which is already served for station "
+                << existing->second.mnLinkLayerIdentifier
+                << "; give the two stations separate profiles. Ignoring attachment" << endl;
+        return;
+    }
+
+    EV_INFO << "MAG: mobile node '" << profile->mnIdentifier << "' (" << stationAddress << ") attached on "
             << accessInterface->getInterfaceName() << "; sending Proxy Binding Update" << endl;
 
     MagBinding& binding = magBindings[profile->mnIdentifier];
     binding.mnIdentifier = profile->mnIdentifier;
+    binding.mnLinkLayerIdentifier = stationAddress;
+    binding.accessTechnologyType = ACCESS_TECHNOLOGY_IEEE_802_11;
     binding.homeNetworkPrefix = profile->homeNetworkPrefix;
     binding.homeNetworkPrefixLength = profile->homeNetworkPrefixLength;
     binding.accessInterfaceId = accessInterface->getInterfaceId();
     binding.sequenceNumber++;
     binding.registered = false;
-    sendProxyBindingUpdate(binding, bindingLifetime);
+    // RFC 5213 Section 6.9.1.1 step 4: attachment over a new interface
+    sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_NEW_INTERFACE);
 }
 
-void Pmipv6::handleMobileNodeDetached(NetworkInterface *accessInterface)
+void Pmipv6::handleMobileNodeDetached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
 {
-    for (auto& kv : magBindings) {
-        MagBinding& binding = kv.second;
-        if (binding.accessInterfaceId == accessInterface->getInterfaceId()) {
-            EV_INFO << "MAG: mobile node '" << binding.mnIdentifier << "' detached from "
-                    << accessInterface->getInterfaceName() << "; deregistering" << endl;
-            // stop advertising the prefix and remove the local delivery route
-            if (auto ipv6Data = accessInterface->findProtocolDataForUpdate<Ipv6InterfaceData>()) {
-                for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
-                    if (ipv6Data->getAdvPrefix(i).prefix == binding.homeNetworkPrefix) {
-                        ipv6Data->removeAdvPrefix(i);
-                        break;
-                    }
-                }
+    MagBinding *binding = findBinding(accessInterface->getInterfaceId(), stationAddress);
+    if (binding == nullptr)
+        return;
+    EV_INFO << "MAG: mobile node '" << binding->mnIdentifier << "' (" << stationAddress << ") detached from "
+            << accessInterface->getInterfaceName() << "; deregistering" << endl;
+    // stop advertising the prefix and remove the local delivery route
+    if (auto ipv6Data = accessInterface->findProtocolDataForUpdate<Ipv6InterfaceData>()) {
+        for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
+            if (ipv6Data->getAdvPrefix(i).prefix == binding->homeNetworkPrefix) {
+                ipv6Data->removeAdvPrefix(i);
+                break;
             }
-            if (binding.downlinkRoute) {
-                rt6->deleteRoute(binding.downlinkRoute);
-                binding.downlinkRoute = nullptr;
-            }
-            binding.sequenceNumber++;
-            sendProxyBindingUpdate(binding, 0); // lifetime 0 = deregistration
-            magBindings.erase(kv.first);
-            return;
         }
     }
+    if (binding->downlinkRoute) {
+        rt6->deleteRoute(binding->downlinkRoute);
+        binding->downlinkRoute = nullptr;
+    }
+    binding->sequenceNumber++;
+    // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, and the handoff state is unknown
+    sendProxyBindingUpdate(*binding, 0, HANDOFF_STATE_UNKNOWN);
+    magBindings.erase(binding->mnIdentifier);
 }
 
-void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
+void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator)
 {
     if (localMobilityAnchorAddress.isUnspecified())
         throw cRuntimeError("Pmipv6 MAG: localMobilityAnchorAddress is not configured");
@@ -431,10 +574,11 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
     pbu->setLifetime(lifetime.dbl() < 0 ? 0 : (unsigned int)lifetime.dbl());
     pbu->setSequence(binding.sequenceNumber);
     pbu->setMobileNodeIdentifier(binding.mnIdentifier.c_str());
+    pbu->setMobileNodeLinkLayerIdentifier(binding.mnLinkLayerIdentifier);
     pbu->setHomeNetworkPrefix(binding.homeNetworkPrefix);
     pbu->setHomeNetworkPrefixLength(binding.homeNetworkPrefixLength);
-    pbu->setHandoffIndicator(1);       // attachment over a new interface
-    pbu->setAccessTechnologyType(4);   // IEEE 802.11 (RFC 5213 access technology type)
+    pbu->setHandoffIndicator(handoffIndicator);
+    pbu->setAccessTechnologyType(binding.accessTechnologyType);
     pbu->setTimestampValue(0);         // ordered by sequence number in this model
     pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(binding.mnIdentifier.size()));
     packet->insertAtFront(pbu);

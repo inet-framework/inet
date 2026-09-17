@@ -15,6 +15,8 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/Simsignals.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -25,8 +27,6 @@ class IInterfaceTable;
 class Ipv6RoutingTable;
 class Ipv6Route;
 class Ipv6NeighbourDiscovery;
-class BindingUpdate;
-class BindingAcknowledgement;
 
 /**
  * Implements Proxy Mobile IPv6 (RFC 5213): network-based mobility management in
@@ -81,7 +81,22 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     // can name them.
     //
   public:
+    //
+    // A mobility session is named by the tuple RFC 5213 Section 5.4.1.2 looks a
+    // Binding Cache entry up by: the mobile node's identifier, the access
+    // technology it attached through, and the link-layer identifier of the
+    // attached interface. Two mobile nodes on one access link differ in the
+    // third component even when the first two coincide.
+    //
+    struct MobilitySessionKey {
+        std::string mnIdentifier;
+        uint8_t accessTechnologyType = 0;
+        MacAddress mnLinkLayerIdentifier; // unspecified = not known
+        bool operator<(const MobilitySessionKey& other) const;
+    };
+
     struct BindingCacheEntry {
+        MobilitySessionKey session;
         Ipv6Address homeNetworkPrefix;
         int homeNetworkPrefixLength = 0;
         Ipv6Address servingMagAddress; // the Proxy care-of address (serving MAG)
@@ -92,7 +107,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     };
 
   protected:
-    std::map<std::string, BindingCacheEntry> bindingCache; // key: MN identifier
+    typedef std::map<MobilitySessionKey, BindingCacheEntry> BindingCache;
+    BindingCache bindingCache;
     std::map<Ipv6Address, int> lmaTunnelByMag;             // serving MAG address -> tunnel interface id (shared by all its MNs)
 
     //
@@ -102,6 +118,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     // looks one up when a mobile node attaches to an access link.
   public:
     struct MobileNodeProfile {
+        MacAddress linkLayerAddress;     // unspecified = match any station
         std::string accessInterfaceName; // empty = match any access interface
         std::string mnIdentifier;
         Ipv6Address homeNetworkPrefix;
@@ -111,9 +128,11 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     // an active binding the MAG maintains for a currently-attached mobile node
     struct MagBinding {
         std::string mnIdentifier;
+        MacAddress mnLinkLayerIdentifier; // the attached interface of the mobile node
+        uint8_t accessTechnologyType = 0;
         Ipv6Address homeNetworkPrefix;
         int homeNetworkPrefixLength = 0;
-        int accessInterfaceId = -1;
+        int accessInterfaceId = -1;       // RFC 5213 Section 6.1 calls this the if-id
         unsigned int sequenceNumber = 0;
         bool registered = false;
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
@@ -149,13 +168,17 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
 
     // LMA
     void processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu);
+    BindingCache::iterator lookupBindingCacheEntry(const BindingUpdate *pbu);
+    void sendProxyBindingAcknowledgement(const BindingUpdate *pbu, BaStatus status,
+            unsigned int lifetime, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
 
     // MAG
     void parseMobileNodeProfiles();
-    void handleMobileNodeAttached(NetworkInterface *accessInterface);
-    void handleMobileNodeDetached(NetworkInterface *accessInterface);
-    const MobileNodeProfile *findProfileForInterface(NetworkInterface *accessInterface) const;
-    void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime);
+    void handleMobileNodeAttached(NetworkInterface *accessInterface, const MacAddress& stationAddress);
+    void handleMobileNodeDetached(NetworkInterface *accessInterface, const MacAddress& stationAddress);
+    const MobileNodeProfile *findProfile(NetworkInterface *accessInterface, const MacAddress& stationAddress) const;
+    MagBinding *findBinding(int accessInterfaceId, const MacAddress& stationAddress);
+    void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator);
     void processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba);
     void ensureMagTunnel();
 
@@ -163,6 +186,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     virtual ~Pmipv6();
 };
 
+std::ostream& operator<<(std::ostream& os, const Pmipv6::MobilitySessionKey& key);
 std::ostream& operator<<(std::ostream& os, const Pmipv6::BindingCacheEntry& entry);
 std::ostream& operator<<(std::ostream& os, const Pmipv6::MobileNodeProfile& profile);
 std::ostream& operator<<(std::ostream& os, const Pmipv6::MagBinding& binding);
