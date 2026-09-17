@@ -791,7 +791,24 @@ void Pmipv6::deregisterMobileNode(MagBinding& binding)
 {
     emit(mobileNodeDetachedSignal, (intval_t)1);
     EV_INFO << "MAG: deregistering mobile node '" << binding.mnIdentifier << "'" << endl;
-    // stop advertising the prefix and remove the local delivery route
+    withdrawHomeNetworkPrefix(binding);
+    binding.registered = false;
+    binding.deregistering = true;
+    binding.sequenceNumber++;
+    // the deregistration waits INITIAL_BINDACK_TIMEOUT, not whatever interval a
+    // preceding unanswered registration had backed off to
+    binding.retransmitInterval = initialBindingAckTimeout;
+    // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, the prefixes are named in
+    // full rather than left all-zero, and the handoff state is unknown
+    sendProxyBindingUpdate(binding, 0, HANDOFF_STATE_UNKNOWN);
+}
+
+//
+// Stop emulating the mobile node's home network on the access link: the prefix leaves
+// the Router Advertisements and the route that delivered its traffic goes.
+//
+void Pmipv6::withdrawHomeNetworkPrefix(MagBinding& binding)
+{
     if (NetworkInterface *accessInterface = ift->getInterfaceById(binding.accessInterfaceId)) {
         if (auto ipv6Data = accessInterface->findProtocolDataForUpdate<Ipv6InterfaceData>()) {
             for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
@@ -806,15 +823,6 @@ void Pmipv6::deregisterMobileNode(MagBinding& binding)
         rt6->deleteRoute(binding.downlinkRoute);
         binding.downlinkRoute = nullptr;
     }
-    binding.registered = false;
-    binding.deregistering = true;
-    binding.sequenceNumber++;
-    // the deregistration waits INITIAL_BINDACK_TIMEOUT, not whatever interval a
-    // preceding unanswered registration had backed off to
-    binding.retransmitInterval = initialBindingAckTimeout;
-    // RFC 5213 Section 6.9.1.4: lifetime 0 deregisters, the prefixes are named in
-    // full rather than left all-zero, and the handoff state is unknown
-    sendProxyBindingUpdate(binding, 0, HANDOFF_STATE_UNKNOWN);
 }
 
 //
@@ -981,7 +989,14 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
     binding.retransmitInterval = initialBindingAckTimeout;
 
     if (status != BINDING_UPDATE_ACCEPTED) {
-        EV_WARN << "MAG: Proxy Binding Update for MN '" << mnId << "' rejected (status " << status << ")" << endl;
+        // RFC 5213 Section 6.9.1.2 step 11 and Section 6.9.2 step 2: with the
+        // registration refused the gateway must not go on emulating the node's home
+        // network. A re-registration that is refused leaves state from the registration
+        // before it, and that state has to go too.
+        EV_WARN << "MAG: Proxy Binding Update for MN '" << mnId << "' rejected (status " << status
+                << "); withdrawing its home network prefix" << endl;
+        withdrawHomeNetworkPrefix(binding);
+        releaseMagBinding(binding);
         return;
     }
     if (lifetime == 0) {

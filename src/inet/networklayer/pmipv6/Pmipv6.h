@@ -225,6 +225,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void checkMobileNodePresence();
     void deregisterMobileNode(MagBinding& binding);
     void releaseMagBinding(MagBinding& binding);
+    void withdrawHomeNetworkPrefix(MagBinding& binding);
     void retransmitProxyBindingUpdate(const MobilitySessionKey& session);
     void refreshProxyBinding(const MobilitySessionKey& session);
     void sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime, uint8_t handoffIndicator);
