@@ -219,8 +219,9 @@ void Pmipv6::initialize(int stage)
                         "would be skipped. Set accessInterfaces to the gateway's access links.",
                         par("accessInterfaces").stringValue(), names.c_str());
         }
-        if (isLma)
-            emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
+        // both roles emit it once, so a gateway records a flat zero rather than nothing at
+        // all: a statistic with no data at all reads as nan, which looks like a fault
+        emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
     }
 }
 
