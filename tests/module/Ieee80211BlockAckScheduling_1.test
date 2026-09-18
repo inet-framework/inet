@@ -42,7 +42,11 @@ class SchedulingRecipient : public Hcf {
         auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
         auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
         auto channel = transmitter->getChannel();
-        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
+        {
+                Ieee80211HtOperation operation;
+                operation.primaryChannel = channel->getChannelNumber();
+                mib->commitBss("test", mib->address, channel->getBand(), operation.primaryChannel, &operation);
+            }
     }
     void checkOrderedReceipt() {
         Enter_Method("checkOrderedReceipt");
@@ -51,7 +55,7 @@ class SchedulingRecipient : public Hcf {
         recipientBlockAckAgreementHandler = agreements;
         orderedReceipt = true;
         publishPrimaryChannel();
-        mib->setPeerHtCapabilities(MacAddress("02:00:00:00:00:01"), mib->localHtCapabilities, mib->getHtOperation());
+        mib->setPeerHtCapabilities(MacAddress("02:00:00:00:00:01"), mib->getLocalHtCapabilities());
         agreements->accept(MacAddress("02:00:00:00:00:01"), BlockAckVariant::COMPRESSED, 100);
         for (int sequence : {100, 102, 101}) {
             auto data = makeShared<Ieee80211DataHeader>();
@@ -88,7 +92,7 @@ class SchedulingRecipient : public Hcf {
         recipientBlockAckAgreementHandler = agreements;
         if (std::string(par("blockAckVariant").stringValue()) == "compressed") {
             publishPrimaryChannel();
-            mib->setPeerHtCapabilities(MacAddress("02:00:00:00:00:01"), mib->localHtCapabilities, mib->getHtOperation());
+            mib->setPeerHtCapabilities(MacAddress("02:00:00:00:00:01"), mib->getLocalHtCapabilities());
         }
         agreements->accept(MacAddress("02:00:00:00:00:01"), std::string(par("blockAckVariant").stringValue()) == "compressed" ? BlockAckVariant::COMPRESSED : BlockAckVariant::BASIC);
         subscribe(blockAckAgreementDeletedSignal, this);
@@ -232,9 +236,13 @@ class SchedulingHcf : public Hcf {
             auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
             auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
             auto channel = transmitter->getChannel();
-            mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
-            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
-            mib->setPeerHtCapabilities(other, mib->localHtCapabilities, mib->getHtOperation());
+            {
+                Ieee80211HtOperation operation;
+                operation.primaryChannel = channel->getChannelNumber();
+                mib->commitBss("test", mib->address, channel->getBand(), operation.primaryChannel, &operation);
+            }
+            mib->setPeerHtCapabilities(peer, mib->getLocalHtCapabilities());
+            mib->setPeerHtCapabilities(other, mib->getLocalHtCapabilities());
         }
         agreements->accept(peer, window());
         if (compressed() && scenario() == 0)

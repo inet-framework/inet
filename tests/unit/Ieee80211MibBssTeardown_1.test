@@ -55,9 +55,16 @@ record-scalar-results = false
 using namespace Ieee80211MibBssTeardown_1;
 
 auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-mib->setPrimaryChannel(1);
-mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
-const auto capabilities = mib->localHtCapabilities;
+Ieee80211HtCapabilities localProfile;
+localProfile.supportedChannelWidths.insert(MHz(20));
+for (int mcs = 0; mcs < 8; mcs++)
+    localProfile.rxMcsSupported[mcs] = true;
+mib->installLocalHtCapabilities(localProfile, true);
+Ieee80211HtOperation localOperation;
+localOperation.primaryChannel = 1;
+mib->commitBss("test", mib->address, nullptr, 1, &localOperation);
+mib->publishStateChange();
+const auto capabilities = mib->getLocalHtCapabilities();
 const auto operation = mib->getHtOperation();
 const MacAddress first("02:00:00:00:00:01");
 const MacAddress other("02:00:00:00:00:02");
@@ -77,7 +84,7 @@ auto clear = [&](bool bulk) {
 };
 auto checkLocal = [&]() {
     ASSERT(mib->getLocalRateSet() == rates);
-    ASSERT(mib->localHtCapabilities == capabilities);
+    ASSERT(mib->getLocalHtCapabilities() == capabilities);
     ASSERT(mib->getHtOperation() == operation);
 };
 
@@ -89,10 +96,10 @@ for (bool bulk : {false, true}) {
                 mib->clearBssAndAllPeerStates();
                 mib->setBssRateSet(hasBss ? rates : Ieee80211RateSetState());
                 if (hasHt)
-                    mib->setPeerHtCapabilities(first, capabilities, operation);
+                    mib->setPeerHtCapabilities(first, capabilities);
                 if (hasRates)
                     mib->installBssAndPeerRateSets(mib->getBssRateSet(), first, rates);
-                mib->setPeerHtCapabilities(other, capabilities, operation);
+                mib->setPeerHtCapabilities(other, capabilities);
                 mib->installBssAndPeerRateSets(mib->getBssRateSet(), other, rates);
                 observer.check = [&]() {
                     ASSERT(mib->findPeerHtState(first) == nullptr);
@@ -122,7 +129,7 @@ for (bool bulk : {false, true}) {
 
 for (bool bulk : {false, true}) {
     mib->clearBssAndAllPeerStates();
-    mib->setPeerHtCapabilities(first, capabilities, operation);
+    mib->setPeerHtCapabilities(first, capabilities);
     mib->installBssAndPeerRateSets(rates, first, rates);
     bool replaced = false;
     observer.check = [&]() {
@@ -133,7 +140,7 @@ for (bool bulk : {false, true}) {
         ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
         checkLocal();
         replaced = true;
-        mib->setPeerHtCapabilities(first, capabilities, operation);
+        mib->setPeerHtCapabilities(first, capabilities);
         mib->installBssAndPeerRateSets(rates, first, rates);
     };
     clear(bulk);
@@ -145,13 +152,13 @@ for (bool bulk : {false, true}) {
 }
 
 observer.check = nullptr;
-mib->bssAccessPointData.stations[first] = Ieee80211Mib::ASSOCIATED;
+mib->setPeerAssociationStatus(first, Ieee80211Mib::ASSOCIATED);
 mib->allocateAssociationId(first);
 mib->reserveAssociationId(other);
-mib->installBssAndPeerState(rates, first, rates, &capabilities, operation);
+mib->installBssAndPeerState(rates, first, rates, &capabilities);
 observer.check = [&]() {
-    ASSERT(mib->bssAccessPointData.stations.empty());
-    ASSERT(mib->bssAccessPointData.associationIds.empty());
+    ASSERT(mib->getBssAccessPointData().stations.empty());
+    ASSERT(mib->getBssAccessPointData().associationIds.empty());
     ASSERT(mib->findPeerHtState(first) == nullptr);
     ASSERT(mib->findPeerRateSet(first) == nullptr);
     ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());

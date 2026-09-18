@@ -21,6 +21,7 @@ import inet.common.SimpleModule;
 simple QosRateSelection extends SimpleModule
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(QosRateSelection);
         string rateControlModule;
         string mibModule = default("^.^.^.mib");

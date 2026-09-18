@@ -1,0 +1,202 @@
+%description:
+Explicit catalog dependency with a replacement MAC provider outside any interface,
+missing-provider diagnostics, and prepared legacy/HT ad hoc lifecycle state.
+The external-upper composition replaces only its TAP endpoint before initialization;
+no external OS device is opened and no real-time packet I/O is claimed.
+
+%file: ConfigurationContracts.cc
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/emulation/common/ExtInterface.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class OfflineTap : public cSimpleModule
+{
+  protected:
+    virtual void handleMessage(cMessage *message) override { delete message; }
+};
+Define_Module(OfflineTap);
+
+// Keep the production external-upper NED, interface class, MAC, management,
+// PHY and parameter routing. Replace only the OS endpoint before child init.
+class OfflineExtUpper : public ExtInterface
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            auto *tap = getSubmodule("tap");
+            auto *fromLlc = tap->gate("lowerLayerIn")->getPreviousGate();
+            auto *toClassifier = tap->gate("lowerLayerOut")->getNextGate();
+            fromLlc->disconnect();
+            tap->gate("lowerLayerOut")->disconnect();
+            tap->deleteModule();
+            auto *offline = cModuleType::get("OfflineTap")->create("tap", this);
+            offline->finalizeParameters();
+            offline->buildInside();
+            fromLlc->connectTo(offline->gate("lowerLayerIn"));
+            offline->gate("lowerLayerOut")->connectTo(toClassifier);
+        }
+        ExtInterface::initialize(stage);
+    }
+};
+Define_Module(OfflineExtUpper);
+
+class TestCatalogProvider : public cSimpleModule, public IIeee80211MacConfiguration
+{
+  protected:
+    const Ieee80211ModeSet *catalog = nullptr;
+    virtual void initialize() override { catalog = Ieee80211ModeSet::getModeSet("g(mixed)"); }
+  public:
+    virtual const Ieee80211ModeSet *getConfiguredModeSet() const override { return catalog; }
+    virtual void prepareLocalCapabilities() override { throw cRuntimeError("Catalog-only consumer must not prepare HT"); }
+};
+Define_Module(TestCatalogProvider);
+
+class TestCatalogConsumer : public ModeSetModuleBase
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (par("missing")) {
+            if (stage == INITSTAGE_LOCAL) {
+                bool rejected = false;
+                try { ModeSetModuleBase::initialize(stage); }
+                catch (const cRuntimeError& e) { rejected = std::string(e.what()).find("absent") != std::string::npos; }
+                ASSERT(rejected);
+                std::cout << "Missing explicit catalog provider rejected.\n";
+            }
+            return;
+        }
+        ModeSetModuleBase::initialize(stage);
+        if (stage == INITSTAGE_LINK_LAYER) {
+            ASSERT(modeSet == Ieee80211ModeSet::getModeSet("g(mixed)"));
+            std::cout << "Standalone consumer queried replacement provider after LOCAL.\n";
+        }
+    }
+};
+Define_Module(TestCatalogConsumer);
+
+class TestAdhocState : public cSimpleModule
+{
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+            check(true);
+            auto *rateControl = check_and_cast<IRateControl *>(getModuleByPath("^.ht.wlan[0].mac.dcf.rateControl"));
+            auto *rate = rateControl->getRate(MacAddress("02:00:00:00:00:09"));
+            ASSERT(rate->getDataMode()->getNetBitrate() == Mbps(65));
+            std::cout << "Onoe initial rate is prepared before first network-configuration query.\n";
+            auto *external = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.external.wlan[0].mib"));
+            ASSERT(external->hasPreparedLocalCapabilities() && external->isLocalHtCapable());
+            ASSERT(external->hasActiveBss() && !external->hasHtOperation());
+            std::cout << "External-upper production dependency routing prepared with an offline TAP endpoint.\n";
+            scheduleAt(SimTime(1500, SIMTIME_NS), new cMessage("down"));
+            scheduleAt(SimTime(2500, SIMTIME_NS), new cMessage("restarted"));
+        }
+    }
+    void check(bool active)
+    {
+        for (const char *name : {"^.legacy.wlan[0].mib", "^.ht.wlan[0].mib"}) {
+            auto *mib = check_and_cast<Ieee80211Mib *>(getModuleByPath(name));
+            ASSERT(mib->hasPreparedLocalCapabilities());
+            ASSERT(mib->isLocalHtCapable() == (std::string(name).find(".ht.") != std::string::npos));
+            ASSERT(mib->hasActiveBss() == active);
+            ASSERT(!mib->hasHtOperation());
+            ASSERT(!mib->hasPrimaryChannel());
+        }
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        bool restarted = std::string(message->getName()) == "restarted";
+        check(restarted);
+        if (restarted)
+            std::cout << "Legacy and HT ad hoc state cleared and restored without fabricated HT operation.\n";
+        delete message;
+    }
+};
+Define_Module(TestAdhocState);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.emulation.linklayer.ieee80211.ExtUpperIeee80211Interface;
+import inet.common.scenario.ScenarioManager;
+import inet.node.inet.AdhocHost;
+import inet.linklayer.ieee80211.mac.contract.IIeee80211MacConfiguration;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple OfflineTap { parameters: @class(::OfflineTap); gates: input lowerLayerIn; output lowerLayerOut; }
+module OfflineExtUpper extends ExtUpperIeee80211Interface { parameters: @class(::OfflineExtUpper); }
+simple TestCatalogProvider like IIeee80211MacConfiguration { parameters: @class(::TestCatalogProvider); }
+simple TestCatalogConsumer extends SimpleModule {
+    parameters:
+        @class(::TestCatalogConsumer);
+        string modeSetModule;
+        bool missing = default(false);
+}
+simple TestAdhocState extends SimpleModule { parameters: @class(::TestAdhocState); }
+network ConfigurationContracts {
+    submodules:
+        consumer: TestCatalogConsumer { parameters: modeSetModule = "^.provider"; }
+        missing: TestCatalogConsumer { parameters: modeSetModule = "^.absent"; missing = true; }
+        provider: TestCatalogProvider;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        scenarioManager: ScenarioManager;
+        legacy: AdhocHost;
+        ht: AdhocHost;
+        external: AdhocHost;
+        observer: TestAdhocState;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ConfigurationContracts
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3us
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+**.hasStatus = true
+**.ipv4.configurator.networkConfiguratorModule = ""
+*.external.wlan[0].typename = "OfflineExtUpper"
+*.external.wlan[0].device = "offline-test"
+*.external.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.external.wlan[0].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.external.wlan[0].agent.typename = ""
+*.ht.wlan[0].mac.dcf.rateControl.typename = "OnoeRateControl"
+*.ht.wlan[0].mac.dcf.rateControl.initialRate = 65Mbps
+*.ht.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.legacy.wlan[0].opMode = "g(mixed)"
+**.radio.bandName = "2.4 GHz"
+**.radio.channelNumber = 6
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: scenario.xml
+<scenario>
+    <at t="1us"><crash module="legacy"/><crash module="ht"/></at>
+    <at t="2us"><startup module="legacy"/><startup module="ht"/></at>
+</scenario>
+
+%contains: stdout
+Missing explicit catalog provider rejected.
+%contains: stdout
+Standalone consumer queried replacement provider after LOCAL.
+%contains: stdout
+Legacy and HT ad hoc state cleared and restored without fabricated HT operation.
+
+%contains: stdout
+External-upper production dependency routing prepared with an offline TAP endpoint.
+
+%contains: stdout
+Onoe initial rate is prepared before first network-configuration query.

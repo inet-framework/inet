@@ -14,7 +14,7 @@ Define_Module(OriginatorAckPolicy);
 
 void OriginatorAckPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         ackTimeout = par("ackTimeout");

@@ -47,8 +47,8 @@ Define_ProtocolTest(wifi_deauth)
                   .filterPacket("ieee80211mac.type == 8")
                   .assertEvent([](const MatchContext& c) {
                       auto mib = check_and_cast<Ieee80211Mib *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mib"));
-                      auto it = mib->bssAccessPointData.stations.find(MacAddress("02:00:00:00:00:03"));
-                      return it != mib->bssAccessPointData.stations.end() && it->second == Ieee80211Mib::NOT_AUTHENTICATED;
+                      auto it = mib->getBssAccessPointData().stations.find(MacAddress("02:00:00:00:00:03"));
+                      return it != mib->getBssAccessPointData().stations.end() && it->second == Ieee80211Mib::NOT_AUTHENTICATED;
                   }).describe("AP cleared the station authentication state").within(0.5));
 }
 

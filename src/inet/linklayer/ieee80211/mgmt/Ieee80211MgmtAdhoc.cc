@@ -21,6 +21,13 @@ void Ieee80211MgmtAdhoc::initialize(int stage)
     }
 }
 
+void Ieee80211MgmtAdhoc::prepareLocalOperation()
+{
+    // This no-beacon abstraction has no learned BSS channel/HT operation or
+    // accepted peer advertisements. Keep that absence distinct from local HT support.
+    mib->commitBss("", MacAddress::UNSPECIFIED_ADDRESS, nullptr, -1, nullptr);
+}
+
 void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
 {
     ASSERT(false);

@@ -40,7 +40,7 @@ Define_Module(Hcf);
 
 void Hcf::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *configuredVariant = par("blockAckVariant").stringValue();
         if (!strcmp(configuredVariant, "basic"))
@@ -90,7 +90,7 @@ void Hcf::initialize(int stage)
                     throw cRuntimeError("Compressed Block Ack does not support delayedAckPolicySupported in %s.originatorBlockAckAgreementPolicy", getFullPath().c_str());
                 if (recipientBlockAckAgreementPolicy && recipientBlockAckAgreementPolicy->delayedBlockAckPolicySupported())
                     throw cRuntimeError("Compressed Block Ack does not support delayedAckPolicySupported in %s.recipientBlockAckAgreementPolicy", getFullPath().c_str());
-                if (!mib->isHtOperationSupported())
+                if (!mib->isLocalHtCapable())
                     EV_WARN << "Compressed Block Ack has no usable local HT support; DATA uses Normal Ack. Set blockAckVariant = basic for Basic compatibility.\n";
             }
         }
@@ -282,7 +282,7 @@ void Hcf::handleMessage(cMessage *msg)
 
 void Hcf::refreshDisplay() const
 {
-    ModeSetListener::refreshDisplay();
+    ModeSetModuleBase::refreshDisplay();
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();
         getDisplayString().setTagArg("tt", 0, ("Fs: " + history).c_str());
@@ -344,8 +344,6 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
         }
     }
-    else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -382,10 +380,10 @@ void Hcf::scheduleAddbaResponseTimer()
 bool Hcf::isProfileAllowed(MacAddress peer, bool originator) const
 {
     auto state = mib->findPeerHtState(peer);
-    bool peerHt = state && state->valid && (originator ? state->negotiatedCapabilities.localTxPeerRx.valid :
-        state->negotiatedCapabilities.localRxPeerTx.valid);
-    return originator ? originatorBlockAckAgreementPolicy->isProfileAllowed(blockAckVariant, mib->isHtOperationSupported(), peerHt) :
-        recipientBlockAckAgreementPolicy->isProfileAllowed(blockAckVariant, mib->isHtOperationSupported(), peerHt);
+    bool peerHt = state && state->valid && state->negotiatedCapabilities && (originator ? state->negotiatedCapabilities->localTxPeerRx.valid :
+        state->negotiatedCapabilities->localRxPeerTx.valid);
+    return originator ? originatorBlockAckAgreementPolicy->isProfileAllowed(blockAckVariant, mib->isLocalHtCapable(), peerHt) :
+        recipientBlockAckAgreementPolicy->isProfileAllowed(blockAckVariant, mib->isLocalHtCapable(), peerHt);
 }
 
 bool Hcf::hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const
@@ -1845,8 +1843,10 @@ bool Hcf::validatePreparedData(const PreparedDataTransmission& prepared, simtime
         !isFrameEligible(prepared.frame, true) || edca->getLifetimeHandler()->isExpired(prepared.frame, start))
         return false;
     auto peer = mib->findPeerHtState(header->getReceiverAddress());
-    if (!isPeerCompatibleMode(modeSet, peer, prepared.dataMode) ||
-        (prepared.rtsMode && !isPeerCompatibleMode(modeSet, peer, prepared.rtsMode)))
+    if (!isPeerCompatibleMode(modeSet, peer, prepared.dataMode,
+            mib->hasHtOperation() ? &mib->getHtOperation() : nullptr, mib->relationshipAllowsHt(header->getReceiverAddress())) ||
+        (prepared.rtsMode && !isPeerCompatibleMode(modeSet, peer, prepared.rtsMode,
+            mib->hasHtOperation() ? &mib->getHtOperation() : nullptr, mib->relationshipAllowsHt(header->getReceiverAddress()))))
         return false;
     if (originatorAckPolicy->computeAckPolicy(prepared.frame, header, agreement) != header->getAckPolicy())
         return false;

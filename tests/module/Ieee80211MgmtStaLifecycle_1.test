@@ -46,7 +46,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         ASSERT(apList.empty());
         ASSERT(assocTimeoutMsg == nullptr);
         ASSERT(!reassociationInProgress);
-        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(!mib->getBssStationData().isAssociated);
         ASSERT(assocAP.address.isUnspecified());
         ASSERT(assocAP.beaconTimeoutMsg == nullptr);
     }
@@ -86,7 +86,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     {
         Enter_Method("startReassociationPhase");
         assertCleanEntryState();
-        ASSERT(mib->isHtOperationSupported());
+        ASSERT(mib->isLocalHtCapable());
 
         const auto currentAddress = getCurrentAccessPointAddress();
         auto targetAp = addAccessPoint(getTargetAccessPointAddress(), true);
@@ -94,9 +94,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         // This is the coherent state produced by a successful Association
         // Response: an associated AP, negotiated peer HT state, and beacon
         // timeout. startReassociation() then enters the real pending path.
-        mib->bssData.ssid = "lifecycle-ssid";
-        mib->bssData.bssid = currentAddress;
-        mib->bssStationData.isAssociated = true;
+        mib->setAssociated(true);
         assocAP = AssociatedApInfo();
         assocAP.channel = 6;
         assocAP.address = currentAddress;
@@ -109,7 +107,8 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         Ieee80211HtOperation operation;
         operation.primaryChannel = 6;
         operation.basicMcsSupported[0] = true;
-        mib->setPeerHtCapabilities(currentAddress, mib->localHtCapabilities, operation);
+        mib->commitBss("lifecycle-ssid", currentAddress, nullptr, 6, &operation);
+        mib->setPeerHtCapabilities(currentAddress, mib->getLocalHtCapabilities());
         startReassociation(targetAp, timerDelay);
     }
 
@@ -125,13 +124,13 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
     bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
     bool hasCurrentPeerHtState() const { return mib->findPeerHtState(getCurrentAccessPointAddress()) != nullptr; }
-    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool isAssociated() const { return mib->getBssStationData().isAssociated; }
     bool isReassociationPending() const { return reassociationInProgress; }
     bool isScanningNow() const { return isScanning; }
     bool isApListEmpty() const { return apList.empty(); }
     MacAddress getAssociatedAddress() const { return assocAP.address; }
-    const std::string& getCachedSsid() const { return mib->bssData.ssid; }
-    MacAddress getCachedBssid() const { return mib->bssData.bssid; }
+    const std::string& getCachedSsid() const { return mib->getBssData().ssid; }
+    MacAddress getCachedBssid() const { return mib->getBssData().bssid; }
 };
 
 Define_Module(TestIeee80211MgmtSta);

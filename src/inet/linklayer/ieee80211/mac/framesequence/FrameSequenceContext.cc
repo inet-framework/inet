@@ -27,7 +27,7 @@ void PreparedDataTransmission::setRtsPrediction(Packet *packet)
         take(rtsPrediction.get());
 }
 
-FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQoSContext, QoSContext *qosContext) :
+FrameSequenceContext::FrameSequenceContext(MacAddress address, const Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQoSContext, QoSContext *qosContext) :
     address(address),
     modeSet(modeSet),
     inProgressFrames(inProgressFrames),

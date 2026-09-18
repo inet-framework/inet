@@ -54,9 +54,16 @@ record-scalar-results = false
 using namespace Ieee80211MibPeerTeardown_1;
 
 auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-mib->setPrimaryChannel(1);
-mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
-const auto capabilities = mib->localHtCapabilities;
+Ieee80211HtCapabilities localProfile;
+localProfile.supportedChannelWidths.insert(MHz(20));
+for (int mcs = 0; mcs < 8; mcs++)
+    localProfile.rxMcsSupported[mcs] = true;
+mib->installLocalHtCapabilities(localProfile, true);
+Ieee80211HtOperation localOperation;
+localOperation.primaryChannel = 1;
+mib->commitBss("test", mib->address, nullptr, 1, &localOperation);
+mib->publishStateChange();
+const auto capabilities = mib->getLocalHtCapabilities();
 const auto operation = mib->getHtOperation();
 const MacAddress first("02:00:00:00:00:01");
 const MacAddress second("02:00:00:00:00:02");
@@ -70,16 +77,16 @@ mib->setBssRateSet(rates);
 
 auto installPeer = [&](const MacAddress& address, bool hasHt, bool hasRates) {
     mib->allocateAssociationId(address);
-    mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+    mib->setPeerAssociationStatus(address, Ieee80211Mib::ASSOCIATED);
     if (hasHt)
-        mib->setPeerHtCapabilities(address, capabilities, operation);
+        mib->setPeerHtCapabilities(address, capabilities);
     if (hasRates)
         mib->installBssAndPeerRateSets(rates, address, rates);
 };
 auto checkLocalState = [&]() {
     ASSERT(mib->getLocalRateSet() == rates);
     ASSERT(mib->getBssRateSet() == rates);
-    ASSERT(mib->localHtCapabilities == capabilities);
+    ASSERT(mib->getLocalHtCapabilities() == capabilities);
     ASSERT(mib->getHtOperation() == operation);
 };
 
@@ -92,10 +99,10 @@ for (bool hasHt : {true, false}) {
         installPeer(first, hasHt, hasRates);
         installPeer(second, true, true);
         observer.checkState = [&]() {
-            ASSERT(mib->bssAccessPointData.associationIds.count(first) == 0);
+            ASSERT(mib->getBssAccessPointData().associationIds.count(first) == 0);
             ASSERT(mib->findPeerHtState(first) == nullptr);
             ASSERT(mib->findPeerRateSet(first) == nullptr);
-            ASSERT(mib->bssAccessPointData.associationIds.count(second) == 1);
+            ASSERT(mib->getBssAccessPointData().associationIds.count(second) == 1);
             ASSERT(mib->findPeerHtState(second) != nullptr);
             ASSERT(mib->findPeerRateSet(second) != nullptr);
             checkLocalState();
@@ -113,8 +120,8 @@ for (bool hasHt : {true, false}) {
         installPeer(first, hasHt, hasRates);
         installPeer(second, hasHt, hasRates);
         observer.checkState = [&]() {
-            ASSERT(mib->bssAccessPointData.stations.empty());
-            ASSERT(mib->bssAccessPointData.associationIds.empty());
+            ASSERT(mib->getBssAccessPointData().stations.empty());
+            ASSERT(mib->getBssAccessPointData().associationIds.empty());
             for (const auto& address : {first, second}) {
                 ASSERT(mib->findPeerHtState(address) == nullptr);
                 ASSERT(mib->findPeerRateSet(address) == nullptr);
@@ -130,7 +137,7 @@ for (bool hasHt : {true, false}) {
     }
 }
 
-// Standalone methods still notify and remove only their own kind of state.
+// Standalone HT mutations publish at the owner's explicit completion boundary.
 for (bool bulk : {false, true}) {
     installPeer(first, true, true);
     observer.checkState = [&]() {
@@ -142,6 +149,7 @@ for (bool bulk : {false, true}) {
         mib->clearPeerHtCapabilities();
     else
         mib->removePeerHtCapabilities(first);
+    mib->publishStateChange();
     ASSERT(observer.notifications == before + 1);
     observer.checkState = [&]() {
         ASSERT(mib->findPeerHtState(first) == nullptr);
@@ -163,7 +171,7 @@ for (bool bulk : {false, true}) {
     observer.checkState = [&]() {
         if (replacementInstalled)
             return;
-        ASSERT(mib->bssAccessPointData.associationIds.count(first) == 0);
+        ASSERT(mib->getBssAccessPointData().associationIds.count(first) == 0);
         ASSERT(mib->findPeerHtState(first) == nullptr);
         ASSERT(mib->findPeerRateSet(first) == nullptr);
         replacementInstalled = true;
@@ -174,7 +182,7 @@ for (bool bulk : {false, true}) {
     else
         mib->releaseAssociationId(first);
     ASSERT(replacementInstalled);
-    ASSERT(mib->bssAccessPointData.associationIds.count(first) == 1);
+    ASSERT(mib->getBssAccessPointData().associationIds.count(first) == 1);
     ASSERT(mib->findPeerHtState(first) != nullptr);
     ASSERT(mib->findPeerRateSet(first) != nullptr);
     ASSERT(*mib->findPeerRateSet(first) == rates);

@@ -86,7 +86,7 @@ class INET_API FrameSequenceContext : public cObject
   protected:
     simtime_t startTime = simTime();
     MacAddress address = MacAddress::UNSPECIFIED_ADDRESS;
-    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     InProgressFrames *inProgressFrames = nullptr;
     std::vector<IFrameSequenceStep *> steps;
 
@@ -97,7 +97,7 @@ class INET_API FrameSequenceContext : public cObject
     QoSContext *qosContext = nullptr;
 
   public:
-    FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
+    FrameSequenceContext(MacAddress address, const physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
     virtual ~FrameSequenceContext();
 
     virtual simtime_t getDuration() const { return simTime() - startTime; }
