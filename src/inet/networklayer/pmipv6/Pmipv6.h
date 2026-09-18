@@ -187,7 +187,6 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
     std::map<std::string, MagBinding> magBindings; // key: MN identifier
     cMessage *presenceCheckTimer = nullptr;
     int magTunnelId = -1;                 // MAG's (shared) tunnel to the LMA
-    Ipv6Route *magUplinkRoute = nullptr;  // default route -> tunnel (mobile node uplink)
 
   protected:
     virtual void initialize(int stage) override;

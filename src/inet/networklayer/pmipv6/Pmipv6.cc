@@ -975,11 +975,7 @@ void Pmipv6::releaseMagBinding(MagBinding& binding)
     }
     magBindings.erase(mnIdentifier);
     if (magBindings.empty() && magTunnelId != -1) {
-        if (magUplinkRoute) {
-            rt6->deleteRoute(magUplinkRoute);
-            magUplinkRoute = nullptr;
-        }
-        if (NetworkInterface *tunnel = ift->getInterfaceById(magTunnelId))
+        if (NetworkInterface *tunnel = ift->findInterfaceById(magTunnelId))
             rt6->deleteTunnelNetworkInterface(tunnel);
         EV_INFO << "MAG: removed the tunnel to the LMA; no mobile node is using it" << endl;
         magTunnelId = -1;
@@ -1209,14 +1205,8 @@ void Pmipv6::ensureMagTunnel()
     Ipv6Address magAddress = getEgressAddressFor(localMobilityAnchorAddress);
     NetworkInterface *tunnel = rt6->createTunnelNetworkInterface(magAddress, localMobilityAnchorAddress);
     magTunnelId = tunnel->getInterfaceId();
-    // route mobile-node uplink traffic (everything not on-link) into the tunnel to the LMA
-    magUplinkRoute = new Ipv6Route(Ipv6Address::UNSPECIFIED_ADDRESS, 0, IRoute::MANUAL);
-    magUplinkRoute->setInterface(tunnel);
-    magUplinkRoute->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
-    magUplinkRoute->setMetric(256);
-    rt6->addRoute(magUplinkRoute);
     EV_INFO << "MAG: created tunnel " << magAddress << " -> " << localMobilityAnchorAddress
-            << " and default route into it (interface id " << magTunnelId << ")" << endl;
+            << " (interface id " << magTunnelId << ")" << endl;
 }
 
 void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba)
@@ -1391,12 +1381,8 @@ void Pmipv6::releaseAllState(bool deleteTunnels)
         withdrawHomeNetworkPrefix(it->second);
         it = magBindings.erase(it);
     }
-    if (magUplinkRoute) {
-        rt6->deleteRoute(magUplinkRoute);
-        magUplinkRoute = nullptr;
-    }
     if (deleteTunnels && magTunnelId != -1) {
-        if (NetworkInterface *tunnel = ift->getInterfaceById(magTunnelId))
+        if (NetworkInterface *tunnel = ift->findInterfaceById(magTunnelId))
             rt6->deleteTunnelNetworkInterface(tunnel);
         magTunnelId = -1;
     }
