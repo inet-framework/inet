@@ -72,6 +72,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
     // configuration
     Ipv6Address localMobilityAnchorAddress; // MAG: the LMA to register with
     PatternMatcher accessInterfaceMatcher;
+    int accessTechnologyType = 0;
     bool timestampBasedOrdering = true;
     bool detectTransmissionFailure = false;
     simtime_t presenceProbeDelay;

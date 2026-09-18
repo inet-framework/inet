@@ -59,6 +59,12 @@ simple Pmipv6 extends SimpleModule
         // on IEEE 802.11 this is the access point giving up on a frame after its retry limit.
         bool detectTransmissionFailure = default(true);
 
+        // MAG: the access technology the gateway reports to the anchor, from the registry in
+        // RFC 5213 Section 8.5. The default, 4, is IEEE 802.11a/b/g, which is what
+        // ~MobileAccessGateway's access radios are; a gateway built on another access
+        // technology sets this, and the anchor keys a mobility session partly on it.
+        int accessTechnologyType = default(4);
+
         // MAG: when nothing has been seen from a mobile node for this long, ask it whether it is
         // still there rather than assume either way -- a Neighbour Solicitation to its link-local
         // address, which RFC 5213 Section 6.13 names as one of the ways a gateway may detect that

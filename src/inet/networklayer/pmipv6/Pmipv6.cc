@@ -38,10 +38,6 @@ namespace inet {
 
 Define_Module(Pmipv6);
 
-// RFC 5213 Section 8.5: Access Technology Type values. Only the one this model
-// can observe is named here.
-static constexpr uint8_t ACCESS_TECHNOLOGY_IEEE_802_11 = 4;
-
 // RFC 5213 Section 8.4: Handoff Indicator values.
 static constexpr uint8_t HANDOFF_STATE_UNKNOWN = 4;   // the gateway cannot tell
 static constexpr uint8_t HANDOFF_REREGISTRATION = 5;  // nothing changed, the lifetime is being extended
@@ -142,6 +138,7 @@ void Pmipv6::initialize(int stage)
         if (isLma == isMag)
             throw cRuntimeError("Pmipv6: exactly one of isLocalMobilityAnchor / isMobileAccessGateway must be set");
 
+        accessTechnologyType = par("accessTechnologyType");
         timestampBasedOrdering = par("timestampBasedOrdering");
         detectTransmissionFailure = par("detectTransmissionFailure");
         presenceProbeDelay = par("presenceProbeDelay");
@@ -915,7 +912,7 @@ void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const M
     // detection to the link-layer events.
     binding.mnLinkLocalAddress = Ipv6Address::formLinkLocalAddress(stationAddress.formInterfaceIdentifier());
     binding.probeDeadline = 0;
-    binding.accessTechnologyType = ACCESS_TECHNOLOGY_IEEE_802_11;
+    binding.accessTechnologyType = accessTechnologyType;
     binding.homeNetworkPrefix = profile->homeNetworkPrefix;
     binding.homeNetworkPrefixLength = profile->homeNetworkPrefixLength;
     binding.accessInterfaceId = accessInterface->getInterfaceId();
