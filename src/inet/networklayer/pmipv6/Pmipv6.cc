@@ -604,16 +604,16 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         key.mnIdentifier = mnId;
         key.accessTechnologyType = pbu->getAccessTechnologyType();
         key.mnLinkLayerIdentifier = pbu->getMobileNodeLinkLayerIdentifier();
-        if (it == bindingCache.end())
+        if (it == bindingCache.end()) {
             it = bindingCache.insert({ key, BindingCacheEntry() }).first;
+            // The session is the map key, so it is copied once here and never written
+            // again: the anchor's two timers find their entry by this field, and a
+            // later registration that differed in any component of it -- a node that
+            // reattached through another access technology, say -- would leave them
+            // looking up a key the map does not have.
+            it->second.session = it->first;
+        }
         BindingCacheEntry& entry = it->second;
-        // The session is the map key, so it is set when the entry is created and never
-        // again: the anchor's two timers find their entry by this field, and a later
-        // registration that differed in any component of it -- a node that reattached
-        // through another access technology, say -- would leave them looking up a key
-        // the map does not have.
-        if (entry.session.mnIdentifier.empty())
-            entry.session = it->first;
 
         // Section 5.3.5 step 2: a registration arriving while the entry is being held
         // ends the wait -- the mobility session continues rather than being replaced.
