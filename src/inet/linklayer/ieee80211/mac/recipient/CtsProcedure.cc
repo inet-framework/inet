@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 
 namespace inet {
@@ -18,6 +19,7 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
     if (ctsPolicy->isCtsNeeded(rtsFrame)) {
         auto ctsFrame = buildCts(rtsFrame);
         auto duration = ctsPolicy->computeCtsDurationField(rtsPacket, rtsFrame);
+        duration = normalizeIeee80211Duration(duration);
         ctsFrame->setDurationField(duration);
         auto ctsPacket = new Packet("CTS", ctsFrame);
         EV_DEBUG << "Duration for " << ctsPacket->getName() << " is set to " << duration << " s.\n";

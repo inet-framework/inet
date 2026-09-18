@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
@@ -185,7 +186,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
     // variants -- not just plain Data (ST_DATA) and QoS-Data (ST_DATA_WITH_QOS).
     if (macHeader->getFrameType() == 2) {
         auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(chunk);
-        stream.writeUint16Le(dataHeader->getDurationField().inUnit(SIMTIME_US));
+        stream.writeUint16Le(ieee80211::encodeIeee80211Duration(dataHeader->getDurationField()));
         stream.writeMacAddress(dataHeader->getReceiverAddress());
         stream.writeMacAddress(dataHeader->getTransmitterAddress());
         stream.writeMacAddress(dataHeader->getAddress3());
@@ -222,7 +223,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         case ST_ACTION:
         case ST_NOACKACTION: {
             auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(chunk);
-            stream.writeUint16Le(mgmtHeader->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(mgmtHeader->getDurationField()));
             stream.writeMacAddress(mgmtHeader->getReceiverAddress());
             stream.writeMacAddress(mgmtHeader->getTransmitterAddress());
             stream.writeMacAddress(mgmtHeader->getAddress3());
@@ -298,7 +299,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         }
         case ST_RTS: {
             auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(chunk);
-            stream.writeUint16Le(rtsFrame->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(rtsFrame->getDurationField()));
             stream.writeMacAddress(rtsFrame->getReceiverAddress());
             stream.writeMacAddress(rtsFrame->getTransmitterAddress());
             if (stream.getLength() - startPos != rtsFrame->getChunkLength())
@@ -308,7 +309,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         }
         case ST_CTS: {
             auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(chunk);
-            stream.writeUint16Le(ctsFrame->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(ctsFrame->getDurationField()));
             stream.writeMacAddress(ctsFrame->getReceiverAddress());
             if (stream.getLength() - startPos != ctsFrame->getChunkLength())
                 throw cRuntimeError("Cannot serialize the Ieee80211CtsFrame: chunkLength is %d B, does not match the %d B of serialized fields",
@@ -317,7 +318,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         }
         case ST_ACK: {
             auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(chunk);
-            stream.writeUint16Le(ackFrame->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(ackFrame->getDurationField()));
             stream.writeMacAddress(ackFrame->getReceiverAddress());
             if (stream.getLength() - startPos != ackFrame->getChunkLength())
                 throw cRuntimeError("Cannot serialize the Ieee80211AckFrame: chunkLength is %d B, does not match the %d B of serialized fields",
@@ -326,7 +327,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         }
         case ST_BLOCKACK_REQ: {
             auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(chunk);
-            stream.writeUint16Le(blockAckReq->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(blockAckReq->getDurationField()));
             stream.writeMacAddress(blockAckReq->getReceiverAddress());
             stream.writeMacAddress(blockAckReq->getTransmitterAddress());
             bool multiTid = blockAckReq->getMultiTid();
@@ -362,7 +363,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
         }
         case ST_BLOCKACK: {
             auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(chunk);
-            stream.writeUint16Le(blockAck->getDurationField().inUnit(SIMTIME_US));
+            stream.writeUint16Le(ieee80211::encodeIeee80211Duration(blockAck->getDurationField()));
             stream.writeMacAddress(blockAck->getReceiverAddress());
             stream.writeMacAddress(blockAck->getTransmitterAddress());
             bool multiTid = blockAck->getMultiTid();
