@@ -201,8 +201,6 @@ void Pmipv6::initialize(int stage)
         }
         if (isLma)
             emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
-        if (presenceCheckTimer)
-            scheduleAfter(presenceCheckInterval, presenceCheckTimer);
     }
 }
 
@@ -1386,6 +1384,16 @@ void Pmipv6::releaseAllState(bool deleteTunnels)
             rt6->deleteTunnelNetworkInterface(tunnel);
         magTunnelId = -1;
     }
+}
+
+void Pmipv6::handleStartOperation(LifecycleOperation *operation)
+{
+    // The periodic presence check is armed here rather than in initialize(), because
+    // this runs again when a node that was shut down is started. Arming it in
+    // initialize() meant a gateway that had been stopped and started never asked about
+    // a mobile node again.
+    if (presenceCheckTimer != nullptr && !presenceCheckTimer->isScheduled())
+        scheduleAfter(presenceCheckInterval, presenceCheckTimer);
 }
 
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
