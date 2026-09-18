@@ -290,9 +290,10 @@ Notable backward incompatible changes are the following:
     without accepting the HT operation advertised by an HT access point.
 
     Custom WLAN modules must replace ModeSetListener and modesetChanged with
-    an explicit modeSetModule provider, and replace direct MIB BSS/profile
-    writes with the owner APIs. Custom HT PHY contributors use typed capability
-    interfaces. The migration guide describes these source and wiring changes.
+    an explicit modeSetModule using IIeee80211ModeSetProvider, and replace
+    direct MIB BSS/profile writes with the owner APIs. Custom HT PHY contributors
+    use typed capability interfaces. The migration guide describes these source
+    and wiring changes.
     The selected legacy QoS and non-QoS ad hoc fingerprints remain unchanged;
     no recorded fingerprint baseline was updated.
 

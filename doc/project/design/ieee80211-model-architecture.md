@@ -93,10 +93,11 @@ Concrete signals declare their source/scope, change condition, payload, and life
 it creates no second writable authority. Commands, queries, and required coordination use typed
 calls or protocol messages, rather than notifications.
 
-**Implemented HT contracts.** `IIeee80211MacConfiguration` exposes the configured catalog after
-`LOCAL` and an idempotent `prepareLocalCapabilities()` operation after PHY readiness. MAC consumers
-resolve their `modeSetModule` dependency through `ModeSetModuleBase` at `LINK_LAYER`; the MAC NED
-provides the default descendant path. Management uses `macModule`. `LINK_LAYER` depends explicitly
+**Implemented HT contracts.** `IIeee80211ModeSetProvider` exposes the configured catalog after
+`LOCAL`. `IIeee80211MacConfiguration` extends it with an idempotent `prepareLocalCapabilities()`
+operation after PHY readiness. MAC consumers resolve their `modeSetModule` dependency through the
+narrow provider in `ModeSetModuleBase` at `LINK_LAYER`; the MAC NED provides the default descendant
+path. Management uses `macModule`. `LINK_LAYER` depends explicitly
 on both `PHYSICAL_LAYER` and `NETWORK_INTERFACE_CONFIGURATION`, so addresses and contribution inputs
 are available before simplified association. Its AP preparation/install/removal calls use
 `IIeee80211BssProvider`; no remote `LAST` callback is required.
