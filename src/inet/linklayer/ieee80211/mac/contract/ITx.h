@@ -34,6 +34,9 @@ class INET_API ITx
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
     virtual void radioTransmissionFinished() = 0;
+
+    // Includes a frame waiting for its inter-frame space, as well as on-air transmission.
+    virtual bool isTransmissionPending() const = 0;
 };
 
 } // namespace ieee80211
