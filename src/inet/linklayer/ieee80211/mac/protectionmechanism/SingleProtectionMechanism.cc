@@ -114,7 +114,8 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
     bool groupAddressed = dataOrMgmtHeader->getReceiverAddress().isMulticast();
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader)) {
         mgmtFrame = true;
-        mgmtFrameWithNoAck = false; // FIXME ack policy?
+        // IEEE Std 802.11-2024, 9.2.5.2: reserve no response for Action No Ack.
+        mgmtFrameWithNoAck = dataOrMgmtHeader->getType() == ST_NOACKACTION;
     }
     bool nonQoSData = dataOrMgmtHeader->getType() == ST_DATA;
     bool individuallyAddressedDataWithNormalAck = false;
@@ -123,7 +124,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
         individuallyAddressedDataWithNormalAck = !groupAddressed && dataHeader->getAckPolicy() == AckPolicy::NORMAL_ACK;
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataHeader->getAckPolicy() == AckPolicy::NO_ACK || dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
-    if (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck) {
+    if ((mgmtFrame && !mgmtFrameWithNoAck) || nonQoSData || individuallyAddressedDataWithNormalAck) {
         simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
         if (txop->isFinalFragment(dataOrMgmtHeader)) {
             return ackFrameDuration + modeSet->getSifsTime();

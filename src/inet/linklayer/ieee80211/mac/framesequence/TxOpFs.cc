@@ -31,7 +31,7 @@ TxOpFs::TxOpFs() :
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isBlockAckReqRtsCtsNeeded)),
                                       new BlockAckReqBlockAckFs()}),
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isRtsCtsNeeded)),
-                                      new AlternativesFs({new ManagementAckFs(),
+                                      new AlternativesFs({new ManagementAckFs(), new ManagementFs(),
                                                           /* TODO DATA + QAP*/},
                                                          ALTERNATIVESFS_SELECTOR(selectMgmtOrDataQap))})},
                    ALTERNATIVESFS_SELECTOR(selectTxOpSequence))
@@ -40,7 +40,8 @@ TxOpFs::TxOpFs() :
 
 int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    return 0;
+    auto header = context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MgmtHeader>();
+    return context->getQoSContext()->ackPolicy->isAckNeeded(header) ? 0 : 1;
 }
 
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
