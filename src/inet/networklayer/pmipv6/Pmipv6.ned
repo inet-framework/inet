@@ -38,6 +38,12 @@ simple Pmipv6 extends SimpleModule
         // MAG: the address of the LMA to register mobile nodes with
         string localMobilityAnchorAddress = default("");
 
+        // MAG: which of this gateway's interfaces are access links, as a name pattern. This is
+        // configuration and not a consequence of who is attached: RFC 5213 Section 6.10.5's
+        // check on where a packet came from has to hold before the first mobile node
+        // registers and after the last one leaves, not only in between.
+        string accessInterfaces = default("wlan*");
+
         // MAG: mobile-node policy profiles, one per access interface, e.g.
         //   <mobileNodes>
         //     <mobileNode accessInterface="wlan0" id="mn1@example.com"

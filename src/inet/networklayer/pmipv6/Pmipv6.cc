@@ -162,6 +162,7 @@ void Pmipv6::initialize(int stage)
         rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
 
         if (isMag) {
+            accessInterfaceMatcher.setPattern(par("accessInterfaces"), false, true, true);
             parseMobileNodeProfiles();
             // detect mobile nodes attaching to / leaving this access gateway's links
             host->subscribe(l2ApAssociatedSignal, this);
@@ -1076,6 +1077,19 @@ void Pmipv6::refreshProxyBinding(const MobilitySessionKey& session)
     sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_REREGISTRATION);
 }
 
+//
+// Which of this gateway's interfaces are access links. It has to be configuration
+// rather than a look at the current bindings: RFC 5213 Section 6.10.5 says what a
+// gateway may forward off an access link, and that is as true of a link with nobody
+// registered on it as of a busy one. Deciding it from the bindings would leave the
+// link open before the first mobile node registers and again after the last one goes.
+//
+bool Pmipv6::isAccessInterface(int interfaceId) const
+{
+    const NetworkInterface *ie = ift->findInterfaceById(interfaceId);
+    return ie != nullptr && accessInterfaceMatcher.matches(ie->getInterfaceName());
+}
+
 Pmipv6::MagBinding *Pmipv6::findBindingForSource(int accessInterfaceId, const Ipv6Address& sourceAddress)
 {
     for (auto& element : magBindings) {
@@ -1112,13 +1126,9 @@ INetfilter::IHook::Result Pmipv6::datagramPreRoutingHook(Packet *datagram)
         return ACCEPT;
     int arrivalInterfaceId = interfaceInd->getInterfaceId();
 
-    // only the access links this gateway serves are subject to any of this; the
-    // backhaul, the tunnel and everything else route as they always did
-    bool isAccessLink = false;
-    for (const auto& element : magBindings)
-        if (element.second.accessInterfaceId == arrivalInterfaceId)
-            isAccessLink = true;
-    if (!isAccessLink)
+    // only this gateway's access links are subject to any of this; the backhaul, the
+    // tunnel and everything else route as they always did
+    if (!isAccessInterface(arrivalInterfaceId))
         return ACCEPT;
 
     const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();

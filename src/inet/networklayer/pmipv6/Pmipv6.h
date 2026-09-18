@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/PatternMatcher.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
@@ -70,6 +71,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
 
     // configuration
     Ipv6Address localMobilityAnchorAddress; // MAG: the LMA to register with
+    PatternMatcher accessInterfaceMatcher;
     bool timestampBasedOrdering = true;
     bool detectTransmissionFailure = false;
     simtime_t presenceProbeDelay;
@@ -229,6 +231,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; }
     MagBinding *findBindingForSource(int accessInterfaceId, const Ipv6Address& sourceAddress);
+    bool isAccessInterface(int interfaceId) const;
 
     // MAG
     void parseMobileNodeProfiles();
