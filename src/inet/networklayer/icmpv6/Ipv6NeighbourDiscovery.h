@@ -106,12 +106,16 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      * The answer, when it comes, is an ordinary Neighbour Advertisement: a caller
      * learns of it by whatever means it already watches the link with, or by
      * asking again afterwards. A neighbour that does not answer has its cache
-     * entry discarded when the solicitations run out, and -- this is Neighbour
-     * Unreachability Detection, with its ordinary consequences -- a neighbour that
-     * is also a default router leaves the Default Router List with it, per RFC
-     * 4861 Section 6.3.5. Probing a router therefore has a side effect on routing,
-     * which is correct but is not what a caller asking "is this host still here"
-     * may expect.
+     * entry discarded when the solicitations run out.
+     *
+     * A neighbour that is a default router is NOT probed, and zero is returned. The
+     * discard above removes such a neighbour from the Default Router List as well,
+     * which changes where the node sends everything, and that is too large a
+     * consequence to attach to the question "is this host still here". It is also a
+     * path worth not spreading: it removes the router without purging the
+     * Destination Cache entries that name it, where the lifetime-expiry path does
+     * both. A caller that genuinely wants to test a router's reachability has the
+     * ordinary traffic-driven route to it.
      *
      * Unlike resolveNeighbour(), this does something when there is no cache entry
      * at all, which is the position a caller with no traffic for the neighbour is

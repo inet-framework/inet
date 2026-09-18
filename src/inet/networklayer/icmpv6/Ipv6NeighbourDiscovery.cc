@@ -395,6 +395,14 @@ simtime_t Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& 
             + ipv6Data->_getMaxUnicastSolicit() * ipv6Data->_getRetransTimer();
 
     Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
+    if (nce != nullptr && nce->isDefaultRouter()) {
+        // Losing this exchange would take the router out of the Default Router List
+        // along with its cache entry, which is a routing change rather than an answer
+        // about one host, and it would do so without purging the Destination Cache
+        // entries naming it. Not this method's business.
+        EV_DETAIL << "Not probing " << neighbour << ": it is a default router" << endl;
+        return SIMTIME_ZERO;
+    }
     if (nce == nullptr) {
         // nothing is known about this neighbour, so ask: address resolution is the
         // same solicitation exchange, and the only one available without a
