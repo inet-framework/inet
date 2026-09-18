@@ -71,7 +71,7 @@ for (int ds = 0; ds < 4; ds++) {
     auto header = makeShared<Ieee80211DsssPhyHeader>();
     header->setSignal(0x0A);
     header->setService(0x04);
-    header->setLengthField(B(0x1234));
+    header->setPlcpLength(0x1234);
     header->setFcs(0xABCD);
 
     auto packet = new Packet("dsss", header);
