@@ -809,8 +809,10 @@ void Pmipv6::noteMobileNodePresence(int accessInterfaceId, const MacAddress& sta
 //
 // So when a node has been quiet for presenceProbeDelay, the gateway asks. A node
 // that is there answers the solicitation and is seen again through the ordinary
-// evidence path; a node that does not answer within presenceProbeTimeout has
-// gone.
+// evidence path; a node that does not answer has gone. How long to wait for the
+// answer is not configured here and must not be: Neighbour Discovery reports how
+// long its own exchange can take, because that depends on constants of the access
+// link, and a number written down here would have to track them.
 //
 void Pmipv6::checkMobileNodePresence()
 {

@@ -44,12 +44,14 @@ simple Pmipv6 extends SimpleModule
         // registers and after the last one leaves, not only in between.
         string accessInterfaces = default("wlan*");
 
-        // MAG: mobile-node policy profiles, one per access interface, e.g.
+        // MAG: mobile-node policy profiles, one per mobile node, e.g.
         //   <mobileNodes>
-        //     <mobileNode accessInterface="wlan0" id="mn1@example.com"
+        //     <mobileNode linkLayerAddress="0A:AA:00:00:00:0B" id="mn1@example.com"
         //                 homeNetworkPrefix="2001:db8:1::" prefixLength="64"/>
         //   </mobileNodes>
-        // (accessInterface may be omitted to match any access interface)
+        // linkLayerAddress is how the gateway recognises which node has attached; a profile
+        // without one matches any station, which only works while there is one. accessInterface
+        // may be added to confine a profile to one access link, and may be omitted.
         xml mobileNodeProfiles = default(xml("<mobileNodes/>"));
 
         // MAG: treat a link-layer transmission failure toward a mobile node as evidence that it
