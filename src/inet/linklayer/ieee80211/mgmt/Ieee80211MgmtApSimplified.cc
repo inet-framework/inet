@@ -13,6 +13,13 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MgmtApSimplified);
 
+void Ieee80211MgmtApSimplified::initialize(int stage)
+{
+    Ieee80211MgmtApBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        mib->bssAccessPointData.requireAssociatedTransmitter = false;
+}
+
 // FIXME add sequence number handling
 
 void Ieee80211MgmtApSimplified::handleTimer(cMessage *msg)
