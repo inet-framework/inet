@@ -57,7 +57,7 @@ Concrete signals declare their source/scope, change condition, payload, and life
 it creates no second writable authority. Commands, queries, and required coordination use typed
 calls or protocol messages, rather than notifications.
 
-**Implemented HT contracts.** `IIeee80211MacConfiguration` supplies the configured catalog after `LOCAL`. Its `prepareLocalCapabilities()` method prepares capabilities after the PHY is ready. MAC consumers resolve `modeSetModule` through `ModeSetModuleBase` at `LINK_LAYER`. The MAC NED supplies the default path for its descendants. Management uses `macModule`.
+**Implemented HT contracts.** `IIeee80211ModeSetProvider` supplies the configured catalog after `LOCAL`. `IIeee80211MacConfiguration` extends that contract with `prepareLocalCapabilities()`. This method prepares capabilities after the PHY is ready. MAC consumers resolve `modeSetModule` through `ModeSetModuleBase` at `LINK_LAYER`. The MAC NED supplies the default path for its descendants. Management uses `macModule`.
 
 `LINK_LAYER` depends on `PHYSICAL_LAYER` and `NETWORK_INTERFACE_CONFIGURATION`. These dependencies make addresses and capability inputs available before simplified association. The simplified STA calls the AP through `IIeee80211BssProvider`. The AP owns its BSS preparation and peer changes. The STA supplies its rate state with its peer capabilities.
 
