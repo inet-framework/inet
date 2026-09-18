@@ -87,11 +87,11 @@ class BasicCompatibilityMac : public Ieee80211Mac {
         bool fragment = false;
         for (const auto& [peer, ht] : peerStates)
             std::cout << "BASIC-PEER " << getFullPath() << " local=" << getAddress()
-                    << " peer=" << peer << " localHt=" << mib->isHtOperationSupported() << " peerHt=" << ht << "\n";
+                    << " peer=" << peer << " localHt=" << mib->isLocalHtCapable() << " peerHt=" << ht << "\n";
         for (const auto& [key, exchange] : exchanges) {
             std::cout << "BASIC-HOP " << getFullPath() << " local=" << getAddress()
                     << " peer=" << key.first << " tid=" << key.second
-                    << " localHt=" << mib->isHtOperationSupported() << " peerHt=" << exchange.peerHt
+                    << " localHt=" << mib->isLocalHtCapable() << " peerHt=" << exchange.peerHt
                     << " addba=" << exchange.acceptedAddba << " data=" << exchange.data
                     << " fragments=" << exchange.fragments << " bar=" << exchange.bar
                     << " positive=" << exchange.positiveResponses << " fragmentBits=" << exchange.fragmentResponses << "\n";

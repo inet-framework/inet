@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
 simple OriginatorAckPolicy extends SimpleModule like IOriginatorAckPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(OriginatorAckPolicy);
         string rateSelectionModule;
         double ackTimeout @unit(s) = default(-1s);

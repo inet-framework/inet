@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
 simple OriginatorBlockAckAgreementPolicy extends SimpleModule like IOriginatorBlockAckAgreementPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(OriginatorBlockAckAgreementPolicy);
         string originatorAckPolicyModule;
 

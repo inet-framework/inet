@@ -74,12 +74,17 @@ class RecipientNavMac : public Ieee80211Mac {
     void prepareCompressedPeer() {
         Enter_Method("prepareCompressedPeer");
         const MacAddress peer("02:00:00:00:00:02");
-        ASSERT(mib->isHtOperationSupported() && mib->localHtCapabilitiesValid);
+        ASSERT(mib->isLocalHtCapable());
         auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getParentModule()->getSubmodule("radio"));
         auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
         auto channel = transmitter->getChannel();
-        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
-        mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        {
+            Ieee80211HtOperation acceptedOperation;
+            acceptedOperation.primaryChannel = channel->getChannelNumber();
+            mib->commitBss(mib->getBssData().ssid, mib->getBssData().bssid, channel->getBand(),
+                    acceptedOperation.primaryChannel, &acceptedOperation);
+        }
+        mib->setPeerHtCapabilities(peer, mib->getLocalHtCapabilities());
         ASSERT(mib->findPeerHtState(peer) && mib->findPeerHtState(peer)->valid);
     }
     void injectBlockAckRequest(bool compressed = false) {
@@ -111,7 +116,7 @@ class RecipientNavMac : public Ieee80211Mac {
         header->setReceiverAddress(getAddress());
         auto packet = new Packet("received-block-ack-exchange", header);
         packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
-            physicallayer::Ieee80211ModeSet::getModeSet(mib->isHtOperationSupported() ? "n(mixed-2.4Ghz)" : "a")->getMode(bps(6000000)));
+            physicallayer::Ieee80211ModeSet::getModeSet(mib->isLocalHtCapable() ? "n(mixed-2.4Ghz)" : "a")->getMode(bps(6000000)));
         auto trailer = makeShared<Ieee80211MacTrailer>();
         trailer->setFcsMode(FCS_DECLARED_CORRECT);
         packet->insertAtBack(trailer);
