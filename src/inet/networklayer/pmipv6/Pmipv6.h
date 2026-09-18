@@ -17,6 +17,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -47,7 +48,7 @@ class Ipv6NeighbourDiscovery;
  * The mobile node itself runs no mobility software: it is a plain IPv6 host that
  * performs stateless address autoconfiguration from the prefix the MAG advertises.
  */
-class INET_API Pmipv6 : public OperationalBase, protected cListener
+class INET_API Pmipv6 : public OperationalBase, protected cListener, public NetfilterBase::HookBase
 {
   protected:
     // signals
@@ -218,6 +219,17 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
             unsigned int lifetime, uint64_t timestamp, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
     void deleteBindingCacheEntry(BindingCache::iterator it);
     void releaseLmaTunnelIfUnused(int tunnelInterfaceId);
+
+    // MAG: the data path. RFC 5213 Section 6.10.5 makes two decisions about a packet
+    // the gateway forwards off an access link, and both turn on the packet's SOURCE:
+    // whether the gateway serves the mobile node it came from, and if so that it goes
+    // to the anchor rather than wherever its destination lies.
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; }
+    MagBinding *findBindingForSource(int accessInterfaceId, const Ipv6Address& sourceAddress);
 
     // MAG
     void parseMobileNodeProfiles();

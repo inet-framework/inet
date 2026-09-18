@@ -28,6 +28,8 @@
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
 #include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
@@ -190,6 +192,13 @@ void Pmipv6::initialize(int stage)
         // (both LMA and MAG are routers; forwarding is enabled by the node type)
         // receive Mobility Header messages (Proxy Binding Updates / Acknowledgements)
         registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
+        if (isMag) {
+            // RFC 5213 Section 6.10.5: the gateway decides what to do with a mobile
+            // node's packets by their source, which no route can express, so it has to
+            // see them before they are routed
+            auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.ipv6"));
+            ipv6->registerHook(0, this);
+        }
         if (isLma)
             emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
         if (presenceCheckTimer)
@@ -1055,6 +1064,82 @@ void Pmipv6::refreshProxyBinding(const MobilitySessionKey& session)
     binding.sequenceNumber++;
     binding.retransmitInterval = initialBindingAckTimeout;
     sendProxyBindingUpdate(binding, bindingLifetime, HANDOFF_REREGISTRATION);
+}
+
+Pmipv6::MagBinding *Pmipv6::findBindingForSource(int accessInterfaceId, const Ipv6Address& sourceAddress)
+{
+    for (auto& element : magBindings) {
+        MagBinding& binding = element.second;
+        if (binding.accessInterfaceId == accessInterfaceId
+                && sourceAddress.matches(binding.homeNetworkPrefix, binding.homeNetworkPrefixLength))
+            return &binding;
+    }
+    return nullptr;
+}
+
+//
+// RFC 5213 Section 6.10.5. A packet a gateway forwards off an access link gets two
+// decisions, and both are about where it came FROM, not where it is going:
+//
+//   - it must come from a mobile node this gateway is serving, or it is not forwarded
+//     at all. Without that check the access link is an open relay: anything attached
+//     to the radio can source a packet and have it routed.
+//
+//   - and it goes to the mobile node's anchor, through the tunnel, whatever its
+//     destination. That is what "reverse tunnelling" is, and it is why a route cannot
+//     express it: IPv6 forwarding chooses an interface from the destination, so the
+//     default route into the tunnel only ever wins for destinations no other route
+//     covers -- which, with an address configurator running, is none of them.
+//
+// This is why the gateway registers a pre-routing hook rather than installing more
+// routes. The hook nominates the tunnel as the output interface and lets the ordinary
+// routing take it from there.
+//
+INetfilter::IHook::Result Pmipv6::datagramPreRoutingHook(Packet *datagram)
+{
+    auto interfaceInd = datagram->findTag<InterfaceInd>();
+    if (interfaceInd == nullptr)
+        return ACCEPT;
+    int arrivalInterfaceId = interfaceInd->getInterfaceId();
+
+    // only the access links this gateway serves are subject to any of this; the
+    // backhaul, the tunnel and everything else route as they always did
+    bool isAccessLink = false;
+    for (const auto& element : magBindings)
+        if (element.second.accessInterfaceId == arrivalInterfaceId)
+            isAccessLink = true;
+    if (!isAccessLink)
+        return ACCEPT;
+
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    Ipv6Address source = ipv6Header->getSourceAddress().toIpv6();
+    Ipv6Address destination = ipv6Header->getDestinationAddress().toIpv6();
+
+    // Neighbour and Router Discovery live on the link and are addressed to it, so they
+    // are not traffic the gateway forwards anywhere and none of this applies to them.
+    if (source.isUnspecified() || source.isLinkLocal() || destination.isLinkLocal()
+            || destination.isMulticast())
+        return ACCEPT;
+
+    MagBinding *binding = findBindingForSource(arrivalInterfaceId, source);
+    if (binding == nullptr) {
+        EV_WARN << "Dropping a packet from " << source << " on "
+                << ift->getInterfaceById(arrivalInterfaceId)->getInterfaceName()
+                << ": no mobile node served here owns that address" << endl;
+        emit(packetDroppedSignal, datagram);
+        return DROP;
+    }
+    if (!binding->registered || magTunnelId == -1) {
+        EV_WARN << "Dropping a packet from mobile node '" << binding->mnIdentifier
+                << "': its registration is not complete" << endl;
+        emit(packetDroppedSignal, datagram);
+        return DROP;
+    }
+
+    EV_DETAIL << "Reverse-tunnelling a packet from mobile node '" << binding->mnIdentifier
+              << "' to " << destination << endl;
+    datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(magTunnelId);
+    return ACCEPT;
 }
 
 void Pmipv6::ensureMagTunnel()
