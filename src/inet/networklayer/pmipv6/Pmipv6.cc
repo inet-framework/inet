@@ -198,6 +198,26 @@ void Pmipv6::initialize(int stage)
             // see them before they are routed
             auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.ipv6"));
             ipv6->registerHook(0, this);
+
+            // A gateway whose access links are not named by the pattern loses both of
+            // Section 6.10.5's checks and its reverse tunnelling, and does so with no
+            // symptom at all: mobile nodes keep working and uninvited ones are served.
+            // Refuse to start rather than run without the protections.
+            std::string names;
+            int matched = 0;
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                const NetworkInterface *ie = ift->getInterface(i);
+                if (ie->isLoopback())
+                    continue;
+                names += std::string(names.empty() ? "" : ", ") + ie->getInterfaceName();
+                if (accessInterfaceMatcher.matches(ie->getInterfaceName()))
+                    matched++;
+            }
+            if (matched == 0)
+                throw cRuntimeError("Pmipv6 MAG: accessInterfaces is \"%s\" and matches none of this "
+                        "node's interfaces (%s). Every check this module makes on an access link "
+                        "would be skipped. Set accessInterfaces to the gateway's access links.",
+                        par("accessInterfaces").stringValue(), names.c_str());
         }
         if (isLma)
             emit(bindingCacheSizeSignal, (intval_t)bindingCache.size()); // so the recorded series starts at zero
@@ -835,6 +855,15 @@ void Pmipv6::checkMobileNodePresence()
 
 void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const MacAddress& stationAddress)
 {
+    // A node attaching on a link the gateway does not count as an access link would be
+    // served with none of Section 6.10.5's checks applied to its traffic, which is the
+    // silent half of the same misconfiguration the constructor refuses to start with.
+    if (!isAccessInterface(accessInterface->getInterfaceId()))
+        throw cRuntimeError("Pmipv6 MAG: a mobile node attached on '%s', which accessInterfaces "
+                "(\"%s\") does not name, so this module would serve it without checking where its "
+                "packets come from. Add the interface to accessInterfaces.",
+                accessInterface->getInterfaceName(), par("accessInterfaces").stringValue());
+
     // RFC 5213 Section 6.9.1.1 step 1: identify the mobile node first; only then
     // is there anything to register.
     const MobileNodeProfile *profile = findProfile(accessInterface, stationAddress);
