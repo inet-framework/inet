@@ -84,30 +84,40 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     virtual void reachabilityConfirmed(const Ipv6Address& neighbour, int interfaceId);
 
     /**
-     * Public method, to be invoked by a module that needs to know whether a
-     * neighbour is still on the link and has no traffic of its own to find out
-     * with.
+     * Public method, for a module that needs to know whether a neighbour is still
+     * on the link and has no traffic of its own to find out with.
      *
-     * It asks: Neighbour Unreachability Detection for a neighbour whose link-layer
-     * address is known, address resolution for one that is not. Both send Neighbour
-     * Solicitations, so a neighbour that is there answers, and the caller sees the
-     * answer by whatever means it already watches the link with. A neighbour that is
-     * not there leaves its cache entry to be discarded when the solicitations run
-     * out.
+     * It does not deliver an answer, and it does not deliver one quickly. What it
+     * does is start the standard exchange and tell the caller how long that
+     * exchange can take:
      *
-     * It asks even when the cache says the neighbour is reachable, and that is the
-     * point. A cached reachable state can be up to ReachableTime old -- an hour with
-     * the usual Router Advertisement -- and a caller that asks this question wants
-     * evidence from now, not a recollection. An exchange already in progress is left
-     * to finish rather than restarted.
+     *  - for a neighbour with no cache entry, address resolution, whose first
+     *    Neighbour Solicitation goes out at once;
+     *  - for a neighbour with one, Neighbour Unreachability Detection, which by
+     *    RFC 4861 Section 7.3.3 first waits DelayFirstProbeTime -- five seconds
+     *    with the usual constants -- and only then sends anything.
      *
-     * Unlike resolveNeighbour(), this does something when there is no cache entry at
-     * all, which is the position a caller with no traffic for the neighbour is in.
-     * It reports no result, because there is none yet, and it does not decide when to
-     * give up: how long to wait before concluding a neighbour has gone depends on what
-     * the caller is doing and belongs to the caller.
+     * That delay is the reason this returns a value rather than nothing. The
+     * return is an upper bound on the time until the exchange has concluded one
+     * way or the other, computed from the interface's own constants, and a caller
+     * that treats silence as absence before it elapses will be wrong about a
+     * neighbour that is present. Zero means nothing was started.
+     *
+     * The answer, when it comes, is an ordinary Neighbour Advertisement: a caller
+     * learns of it by whatever means it already watches the link with, or by
+     * asking again afterwards. A neighbour that does not answer has its cache
+     * entry discarded when the solicitations run out, and -- this is Neighbour
+     * Unreachability Detection, with its ordinary consequences -- a neighbour that
+     * is also a default router leaves the Default Router List with it, per RFC
+     * 4861 Section 6.3.5. Probing a router therefore has a side effect on routing,
+     * which is correct but is not what a caller asking "is this host still here"
+     * may expect.
+     *
+     * Unlike resolveNeighbour(), this does something when there is no cache entry
+     * at all, which is the position a caller with no traffic for the neighbour is
+     * in.
      */
-    virtual void probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId);
+    virtual simtime_t probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId);
 
   protected:
 

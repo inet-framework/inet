@@ -377,14 +377,22 @@ const MacAddress& Ipv6NeighbourDiscovery::resolveNeighbour(const Ipv6Address& ne
     return nce->macAddress;
 }
 
-void Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId)
+simtime_t Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId)
 {
     Enter_Method("probeNeighbourReachability(%s,if=%d)", neighbour.str().c_str(), interfaceId);
 
-    NetworkInterface *ie = ift->getInterfaceById(interfaceId);
-    // solicitations for a link-local target go out from this interface's own
-    // link-local address, which it always has once its own detection finished
-    Ipv6Address sourceAddress = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
+    NetworkInterface *ie = ift->findInterfaceById(interfaceId);
+    if (ie == nullptr)
+        return SIMTIME_ZERO; // the interface is gone; there is nothing to ask over
+    const auto *ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+    if (ipv6Data == nullptr)
+        return SIMTIME_ZERO;
+
+    // How long each of the two exchanges can take, from this interface's own
+    // constants rather than from any assumption about their values.
+    simtime_t addressResolutionBound = ipv6Data->_getMaxMulticastSolicit() * ipv6Data->_getRetransTimer();
+    simtime_t unreachabilityDetectionBound = ipv6Data->_getDelayFirstProbeTime()
+            + ipv6Data->_getMaxUnicastSolicit() * ipv6Data->_getRetransTimer();
 
     Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
     if (nce == nullptr) {
@@ -392,8 +400,8 @@ void Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& neigh
         // same solicitation exchange, and the only one available without a
         // link-layer address to probe
         nce = neighbourCache.addNeighbour(neighbour, interfaceId);
-        initiateAddressResolution(sourceAddress, nce);
-        return;
+        initiateAddressResolution(ipv6Data->getLinkLocalAddress(), nce);
+        return addressResolutionBound;
     }
 
     switch (nce->reachabilityState) {
@@ -401,14 +409,17 @@ void Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& neigh
         case Ipv6NeighbourCache::STALE:
             // ask again even if the entry says reachable: that state may be as old as
             // ReachableTime, and the caller wants evidence from now
+            if (nce->nudTimeoutEvent != nullptr)
+                return unreachabilityDetectionBound; // already running; do not start a second
             nce->reachabilityState = Ipv6NeighbourCache::STALE;
             initiateNeighbourUnreachabilityDetection(nce);
-            return;
+            return unreachabilityDetectionBound;
 
         default:
-            // INCOMPLETE, DELAY or PROBE: an exchange is already running, and
-            // starting a second one would only re-arm its timer
-            return;
+            // INCOMPLETE, DELAY or PROBE: an exchange is already running, and starting
+            // a second one would only re-arm its timer. The bound is the longer of the
+            // two, because how far along it is is not visible from here.
+            return std::max(addressResolutionBound, unreachabilityDetectionBound);
     }
 }
 
