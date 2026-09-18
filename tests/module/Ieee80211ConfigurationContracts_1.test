@@ -45,14 +45,13 @@ class OfflineExtUpper : public ExtInterface
 };
 Define_Module(OfflineExtUpper);
 
-class TestCatalogProvider : public cSimpleModule, public IIeee80211MacConfiguration
+class TestCatalogProvider : public cSimpleModule, public IIeee80211ModeSetProvider
 {
   protected:
     const Ieee80211ModeSet *catalog = nullptr;
     virtual void initialize() override { catalog = Ieee80211ModeSet::getModeSet("g(mixed)"); }
   public:
     virtual const Ieee80211ModeSet *getConfiguredModeSet() const override { return catalog; }
-    virtual void prepareLocalCapabilities() override { throw cRuntimeError("Catalog-only consumer must not prepare HT"); }
 };
 Define_Module(TestCatalogProvider);
 
@@ -127,11 +126,11 @@ import inet.common.SimpleModule;
 import inet.emulation.linklayer.ieee80211.ExtUpperIeee80211Interface;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.AdhocHost;
-import inet.linklayer.ieee80211.mac.contract.IIeee80211MacConfiguration;
+import inet.linklayer.ieee80211.mac.contract.IIeee80211ModeSetProvider;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 simple OfflineTap { parameters: @class(::OfflineTap); gates: input lowerLayerIn; output lowerLayerOut; }
 module OfflineExtUpper extends ExtUpperIeee80211Interface { parameters: @class(::OfflineExtUpper); }
-simple TestCatalogProvider like IIeee80211MacConfiguration { parameters: @class(::TestCatalogProvider); }
+simple TestCatalogProvider like IIeee80211ModeSetProvider { parameters: @class(::TestCatalogProvider); }
 simple TestCatalogConsumer extends SimpleModule {
     parameters:
         @class(::TestCatalogConsumer);
