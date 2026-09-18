@@ -1052,6 +1052,26 @@ void Pmipv6::retransmitProxyBindingUpdate(const MobilitySessionKey& session)
         releaseMagBinding(binding);
         return;
     }
+    // RFC 5213 Section 6.9.4 step 2 makes confirming the node still attached a
+    // precondition of retransmitting, and while a registration is outstanding the
+    // gateway has no traffic for the node, so nothing refreshes what it knows. Reading
+    // the flag would mean answering the question with whatever was true at attachment.
+    // Ask instead, and wait for the answer before trying again -- whether this call
+    // started the question or the periodic check did.
+    if (presenceProbeDelay > 0 && simTime() - binding.lastPresence > presenceProbeDelay) {
+        if (binding.probeDeadline == 0) {
+            simtime_t answerBy = ipv6nd->probeNeighbourReachability(binding.mnLinkLocalAddress,
+                    binding.accessInterfaceId);
+            if (answerBy > SIMTIME_ZERO)
+                binding.probeDeadline = simTime() + answerBy;
+        }
+        if (binding.probeDeadline > simTime()) {
+            EV_DETAIL << "MAG: deferring the retransmission for MN '" << binding.mnIdentifier
+                      << "' until it has confirmed it is still attached" << endl;
+            rescheduleAt(binding.probeDeadline, binding.retransmitTimer);
+            return;
+        }
+    }
     binding.retransmitInterval = std::min(binding.retransmitInterval * 2, maxBindingAckTimeout);
     binding.sequenceNumber++; // Section 6.9.4 step 4: strictly greater than the previous attempt
     EV_INFO << "MAG: no acknowledgement for MN '" << binding.mnIdentifier << "'; sending the Proxy Binding Update again"
