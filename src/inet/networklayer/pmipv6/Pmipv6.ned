@@ -57,8 +57,12 @@ simple Pmipv6 extends SimpleModule
         // a node has gone. A node that is present but idle answers and stays registered. 0
         // disables probing, leaving detection to the link-layer events above.
         double presenceProbeDelay @unit(s) = default(5s);
-        double presenceProbeTimeout @unit(s) = default(2s);  // MAG: how long the answer may take before the node counts as gone
-        double presenceCheckInterval @unit(s) = default(1s); // MAG: how often the two above are evaluated
+        // How long the gateway then waits for the answer is NOT configured here: Neighbour
+        // Discovery is asked how long its own exchange can take, because that depends on
+        // constants of the access link -- notably DelayFirstProbeTime, which is five seconds
+        // and elapses before a solicitation is sent at all. A number chosen here would have
+        // to track those, and a wrong one declares a present node absent.
+        double presenceCheckInterval @unit(s) = default(1s); // MAG: how often presenceProbeDelay is evaluated
 
         // LMA: how long a binding cache entry survives a deregistration, so that a mobile node
         // that reappears at another gateway keeps its mobility session (RFC 5213 Section 9.1

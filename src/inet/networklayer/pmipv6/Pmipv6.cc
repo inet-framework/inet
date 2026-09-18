@@ -145,7 +145,6 @@ void Pmipv6::initialize(int stage)
         timestampBasedOrdering = par("timestampBasedOrdering");
         detectTransmissionFailure = par("detectTransmissionFailure");
         presenceProbeDelay = par("presenceProbeDelay");
-        presenceProbeTimeout = par("presenceProbeTimeout");
         presenceCheckInterval = par("presenceCheckInterval");
         initialBindingAckTimeout = par("initialBindingAckTimeout");
         maxBindingAckTimeout = par("maxBindingAckTimeout");
@@ -796,10 +795,21 @@ void Pmipv6::checkMobileNodePresence()
             continue;
         }
         if (binding.probeDeadline == 0) {
-            EV_DETAIL << "MAG: nothing heard from mobile node '" << binding.mnIdentifier
-                      << "' for " << presenceProbeDelay << "; asking whether it is still there" << endl;
-            ipv6nd->probeNeighbourReachability(binding.mnLinkLocalAddress, binding.accessInterfaceId);
-            binding.probeDeadline = simTime() + presenceProbeTimeout;
+            // Ask, and wait as long as the answer can take. Neighbour Discovery
+            // reports that, because it depends on the access link's own constants:
+            // an exchange for a neighbour it already knows about begins with a
+            // five-second delay before any solicitation is sent, and a deadline
+            // chosen here would have to know that.
+            simtime_t answerBy = ipv6nd->probeNeighbourReachability(binding.mnLinkLocalAddress,
+                    binding.accessInterfaceId);
+            if (answerBy <= SIMTIME_ZERO) {
+                EV_WARN << "MAG: cannot ask whether mobile node '" << binding.mnIdentifier
+                        << "' is still there; leaving its binding alone" << endl;
+                continue;
+            }
+            EV_DETAIL << "MAG: nothing heard from mobile node '" << binding.mnIdentifier << "' for "
+                      << presenceProbeDelay << "; asking, and allowing " << answerBy << " for an answer" << endl;
+            binding.probeDeadline = simTime() + answerBy;
         }
         else if (simTime() >= binding.probeDeadline)
             gone.push_back(element.first);
@@ -807,7 +817,7 @@ void Pmipv6::checkMobileNodePresence()
     for (const auto& mnIdentifier : gone) {
         MagBinding& binding = magBindings[mnIdentifier];
         EV_INFO << "MAG: mobile node '" << binding.mnIdentifier << "' (" << binding.mnLinkLayerIdentifier
-                << ") did not answer within " << presenceProbeTimeout << "; treating it as detached" << endl;
+                << ") did not answer; treating it as detached" << endl;
         binding.detached = true;
         binding.probeDeadline = 0;
         deregisterMobileNode(binding);

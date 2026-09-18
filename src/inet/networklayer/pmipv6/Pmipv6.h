@@ -73,7 +73,6 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
     bool timestampBasedOrdering = true;
     bool detectTransmissionFailure = false;
     simtime_t presenceProbeDelay;
-    simtime_t presenceProbeTimeout;
     simtime_t presenceCheckInterval;
     simtime_t initialBindingAckTimeout;
     simtime_t maxBindingAckTimeout;
