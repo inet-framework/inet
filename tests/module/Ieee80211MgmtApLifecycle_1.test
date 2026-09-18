@@ -69,9 +69,9 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         rates.numRates = 1;
         rates.rate[0] = 6;
         body->setSupportedRates(rates);
-        if (mib->isHtOperationSupported()) {
+        if (mib->isLocalHtCapable()) {
             body->setHtCapabilitiesPresent(true);
-            body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
+            body->setHtCapabilities(makeHtCapabilitiesElement(mib->getLocalHtCapabilities()));
         }
         body->setChunkLength(B(100));
         packet->insertAtBack(body);
@@ -103,18 +103,18 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
     bool hasStation(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.stations.find(address) != mib->bssAccessPointData.stations.end();
+        return mib->getBssAccessPointData().stations.find(address) != mib->getBssAccessPointData().stations.end();
     }
 
     Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
     {
-        auto it = mib->bssAccessPointData.stations.find(address);
-        return it == mib->bssAccessPointData.stations.end() ? Ieee80211Mib::NOT_AUTHENTICATED : it->second;
+        auto it = mib->getBssAccessPointData().stations.find(address);
+        return it == mib->getBssAccessPointData().stations.end() ? Ieee80211Mib::NOT_AUTHENTICATED : it->second;
     }
 
     bool hasCommittedAid(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+        return mib->getBssAccessPointData().associationIds.find(address) != mib->getBssAccessPointData().associationIds.end();
     }
 
     bool hasPeerHtState(const MacAddress& address) const
@@ -159,11 +159,17 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule
         wait(SimTime(15, SIMTIME_US)); // wait until t=15us (AP is down)
 
         // Verify AP teardown: stations, AIDs, and peer HT states are completely cleared
-        ASSERT(mib->bssAccessPointData.stations.empty());
-        ASSERT(mib->bssAccessPointData.associationIds.empty());
+        ASSERT(mib->getBssAccessPointData().stations.empty());
+        ASSERT(mib->getBssAccessPointData().associationIds.empty());
         ASSERT(mgmt->isStaListEmpty());
         ASSERT(!mgmt->hasPeerHtState(staAddress));
         std::cout << "AP lifecycle teardown cleared all station, AID, and peer HT states.\n";
+
+        ASSERT(!mib->hasActiveBss() && !mib->hasHtOperation());
+        bool rejectedPreparation = false;
+        try { mgmt->prepareBss(); }
+        catch (const cRuntimeError&) { rejectedPreparation = true; }
+        ASSERT(rejectedPreparation && !mib->hasActiveBss());
 
         // 3. AP is restarted at t=20us via ScenarioManager
         wait(SimTime(10, SIMTIME_US)); // wait until t=25us (AP is restarted and up)

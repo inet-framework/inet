@@ -47,18 +47,22 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         associationConfirms++;
     }
 
+    Ieee80211HtOperation testOperation;
+
     void setPrimaryChannelForTest(int channel)
     {
         Enter_Method("setPrimaryChannelForTest");
-        mib->setPrimaryChannel(channel);
+        testOperation.primaryChannel = channel;
     }
 
     void enable40MhzLocalCapabilities()
     {
         Enter_Method("enable40MhzLocalCapabilities");
-        mib->localHtCapabilities.supportedChannelWidths.insert(MHz(40));
-        mib->localHtCapabilities.shortGi20 = true;
-        mib->localHtCapabilities.shortGi40 = true;
+        auto capabilities = mib->getLocalHtCapabilities();
+        capabilities.supportedChannelWidths.insert(MHz(40));
+        capabilities.shortGi20 = true;
+        capabilities.shortGi40 = true;
+        mib->installLocalHtCapabilities(capabilities, true);
     }
 
     const ApInfo *getCachedAp(const MacAddress& address) const
@@ -66,7 +70,7 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         return const_cast<TestIeee80211MgmtStaBeaconUpdate *>(this)->lookupAP(address);
     }
 
-    bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
+    bool isAssociatedForTest() const { return mib->getBssStationData().isAssociated; }
     const AssociatedApInfo& getAssocApForTest() const { return assocAP; }
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
     const Ieee80211Mib::PeerHtState *getPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address); }
@@ -82,7 +86,7 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
             apList.push_back(ApInfo());
             ap = &apList.back();
             ap->address = address;
-            ap->channel = mib->getHtOperation().primaryChannel;
+            ap->channel = testOperation.primaryChannel;
             ap->ssid = "test-bss";
             ap->beaconInterval = SimTime(100, SIMTIME_MS);
         }
@@ -109,8 +113,8 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         rates.rate[0] = 6;
         body->setSupportedRates(rates);
 
-        auto capabilities = mib->localHtCapabilities;
-        auto operation = mib->getHtOperation();
+        Ieee80211HtCapabilities capabilities;
+        auto operation = testOperation;
         operation.operatingChannelWidth = MHz(responseOperatingChannelWidth);
         operation.secondaryChannelOffset = responseSecondaryChannelOffset;
         capabilities.supportedChannelWidths.insert(MHz(20));
@@ -130,7 +134,7 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         body->setChunkLength(B(9) + getHtMgmtElementsLength(body));
         auto packet = new Packet("AssociationResponse");
         packet->insertAtBack(body);
-        int channelNumber = mib->getHtOperation().primaryChannel;
+        int channelNumber = testOperation.primaryChannel;
         physicallayer::Ieee80211Channel channel(band, channelNumber);
         packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
         auto header = makeShared<Ieee80211MgmtHeader>();
@@ -152,7 +156,7 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         Enter_Method("deliverBeaconFrame");
         auto body = makeShared<Ieee80211BeaconFrame>();
         body->setSSID("test-bss");
-        int primaryChannel = mib->getHtOperation().primaryChannel;
+        int primaryChannel = testOperation.primaryChannel;
         body->setChannelNumber(primaryChannel);
         body->setBeaconInterval(beaconInterval);
         Ieee80211SupportedRatesElement rates;
@@ -163,8 +167,8 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         if (htPresent) {
             Ieee80211HtCapabilities capabilities;
             capabilities.supportedChannelWidths.insert(MHz(20));
-            if (operatingChannelWidth == 40)
-                capabilities.supportedChannelWidths.insert(MHz(40));
+            // Capability stays 20/40 MHz when only BSS operation narrows.
+            capabilities.supportedChannelWidths.insert(MHz(40));
             capabilities.shortGi20 = shortGi20;
             capabilities.shortGi40 = shortGi40;
             int maxMcs = -1;
@@ -218,7 +222,7 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         Enter_Method("deliverProbeResponseFrame");
         auto body = makeShared<Ieee80211ProbeResponseFrame>();
         body->setSSID("test-bss");
-        int primaryChannel = mib->getHtOperation().primaryChannel;
+        int primaryChannel = testOperation.primaryChannel;
         body->setChannelNumber(primaryChannel);
         body->setBeaconInterval(SimTime(100, SIMTIME_MS));
         Ieee80211SupportedRatesElement rates;
@@ -263,6 +267,38 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
 
 Define_Module(TestIeee80211MgmtStaBeaconUpdate);
 
+// Synchronous observer checks the production commit boundary, including the
+// owning management module's timer and accepted snapshot, without retaining borrows.
+class BssCommitObserver : public cListener
+{
+  public:
+    TestIeee80211MgmtStaBeaconUpdate *management;
+    int notifications = 0;
+    explicit BssCommitObserver(TestIeee80211MgmtStaBeaconUpdate *management) : management(management) {}
+    virtual void receiveSignal(cComponent *source, simsignal_t, bool active, cObject *) override
+    {
+        auto *mib = check_and_cast<Ieee80211Mib *>(source);
+        notifications++;
+        ASSERT(active && mib->hasActiveBss());
+        ASSERT(mib->getBssStationData().isAssociated);
+        const auto& accepted = management->getAssocApForTest();
+        ASSERT(mib->getBssData().bssid == accepted.address);
+        ASSERT(mib->getBssData().ssid == accepted.ssid);
+        ASSERT(mib->getOperationBand() != nullptr);
+        ASSERT(mib->requirePrimaryChannel() == accepted.channel);
+        ASSERT(mib->hasHtOperation() == accepted.htOperationPresent);
+        if (mib->hasHtOperation())
+            ASSERT(mib->getHtOperation() == accepted.htOperation);
+        ASSERT(management->hasBeaconTimeoutForTest());
+        ASSERT(management->getBeaconTimeoutArrivalForTest() == simTime() + 3.5 * accepted.beaconInterval);
+        // The documented notification contract rejects nested state mutations.
+        bool rejected = false;
+        try { mib->clearBss(); }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected && mib->hasActiveBss());
+    }
+};
+
 class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
 {
   public:
@@ -272,6 +308,7 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
     virtual void activity() override
     {
         auto mgmt = check_and_cast<TestIeee80211MgmtStaBeaconUpdate *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
         auto dcfRateSelection = check_and_cast<RateSelection *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateSelection"));
         auto qosRateSelection = check_and_cast<QosRateSelection *>(getModuleByPath("^.sta.wlan[0].mac.hcf.rateSelection"));
         const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
@@ -296,6 +333,9 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
             }
         };
 
+        BssCommitObserver first(mgmt), second(mgmt);
+        staMib->subscribe(Ieee80211Mib::bssStateChangedSignal, &first);
+        staMib->subscribe(Ieee80211Mib::bssStateChangedSignal, &second);
         mgmt->setPrimaryChannelForTest(6);
         mgmt->enable40MhzLocalCapabilities();
 
@@ -318,6 +358,8 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         // Verify rate selection selects 40 MHz Short GI MCS 7 (150 Mbps)
         checkUnicastMode(MHz(40), true, 7);
 
+        auto initialCache = mgmt->getPeerHtState(apAddress)->negotiatedCapabilities;
+
         // 3. Subsequent Beacon from associated AP switches HT Operation to 20 MHz
         wait(SimTime(1, SIMTIME_US));
         mgmt->deliverBeaconFrame(apAddress, true, 20, 0, true, true);
@@ -325,9 +367,24 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->hasPeerHtState(apAddress));
         ASSERT(mgmt->getAssocApForTest().htOperation.operatingChannelWidth == MHz(20));
         ASSERT(mgmt->getAssocApForTest().htOperation.secondaryChannelOffset == 0);
-        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.operation.operatingChannelWidth == MHz(20));
+        ASSERT(staMib->getHtOperation().operatingChannelWidth == MHz(20));
+        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities == initialCache);
         // Rate selection must demote to 20 MHz Short GI MCS 7; cannot retain obsolete 40 MHz constraint
         checkUnicastMode(MHz(20), true, 7);
+
+        ASSERT(first.notifications == 2 && second.notifications == 2);
+        // Equal accepted information refreshes liveness, without rederivation or publication.
+        auto deadlineBeforeEqual = mgmt->getBeaconTimeoutArrivalForTest();
+        wait(SimTime(1, SIMTIME_US));
+        mgmt->deliverBeaconFrame(apAddress, true, 20, 0, true, true);
+        ASSERT(mgmt->getBeaconTimeoutArrivalForTest() > deadlineBeforeEqual);
+        ASSERT(first.notifications == 2 && second.notifications == 2);
+        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities == initialCache);
+        // Reverse registration order for the remaining changed and rejected inputs.
+        staMib->unsubscribe(Ieee80211Mib::bssStateChangedSignal, &first);
+        staMib->unsubscribe(Ieee80211Mib::bssStateChangedSignal, &second);
+        staMib->subscribe(Ieee80211Mib::bssStateChangedSignal, &second);
+        staMib->subscribe(Ieee80211Mib::bssStateChangedSignal, &first);
 
         // 4. Subsequent Beacon disables Short Guard Interval (20 MHz, Long GI)
         wait(SimTime(1, SIMTIME_US));
@@ -335,7 +392,8 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->isAssociatedForTest());
         ASSERT(mgmt->hasPeerHtState(apAddress));
         ASSERT(!mgmt->getAssocApForTest().htCapabilities.shortGi20);
-        ASSERT(!mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.localTxPeerRx.receiverShortGi20);
+        ASSERT(!mgmt->getPeerHtState(apAddress)->negotiatedCapabilities->localTxPeerRx.receiverShortGi20);
+        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities != initialCache);
         // Rate selection must demote to 20 MHz Long GI MCS 7; cannot retain obsolete Short GI constraint
         checkUnicastMode(MHz(20), false, 7);
 
@@ -346,8 +404,9 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->hasPeerHtState(apAddress));
         ASSERT(mgmt->getAssocApForTest().htCapabilities.rxMcsSupported[0]);
         ASSERT(!mgmt->getAssocApForTest().htCapabilities.rxMcsSupported[7]);
-        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.localTxPeerRx.supportedMcs[0]);
-        ASSERT(!mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.localTxPeerRx.supportedMcs[7]);
+        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities->localTxPeerRx.supportedMcs[0]);
+        ASSERT(!mgmt->getPeerHtState(apAddress)->negotiatedCapabilities->localTxPeerRx.supportedMcs[7]);
+        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities != initialCache);
         // Rate selection must demote to MCS 0; cannot retain obsolete MCS 7 constraint
         checkUnicastMode(MHz(20), false, 0);
 
@@ -372,10 +431,19 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->hasBeaconTimeoutForTest());
         ASSERT(mgmt->getAssocApForTest().htOperationPresent);
         ASSERT(mgmt->getAssocApForTest().htOperation.basicMcsSupported[32]);
-        // MIB peer HT state remains absent because Basic MCS is unsupported
+        // Accepted capabilities remain cached, but HT is ineligible because Basic MCS is unsupported
         ASSERT(!mgmt->hasPeerHtState(apAddress));
         // Rate selection remains on legacy mode
         checkUnicastMode(MHz(20), false, -1);
+
+        // A Basic-MCS-only recovery retains accepted capability knowledge.
+        auto temporarilyIneligibleCache = staMib->findPeerCapabilities(apAddress)->negotiatedCapabilities;
+        wait(SimTime(1, SIMTIME_US));
+        mgmt->deliverBeaconFrame(apAddress, true, 20, 0, true, false,
+                {0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 4, 5, 6, 7});
+        ASSERT(mgmt->hasPeerHtState(apAddress));
+        ASSERT(staMib->findPeerCapabilities(apAddress)->negotiatedCapabilities == temporarilyIneligibleCache);
+        checkUnicastMode(MHz(20), true, 7);
 
         // 8. Subsequent Beacon restores full 40 MHz Short GI HT advertisement + updates beacon interval
         wait(SimTime(1, SIMTIME_US));
@@ -392,6 +460,8 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->getBeaconTimeoutArrivalForTest() == simTime() + 3.5 * newBeaconInterval);
         // Rate selection restores 40 MHz Short GI MCS 7 (150 Mbps)
         checkUnicastMode(MHz(40), true, 7);
+
+        int notificationsBeforeRejected = first.notifications;
 
         // 9. Subsequent malformed Beacon (invalid secondaryChannelOffset = 2) is rejected
         wait(SimTime(1, SIMTIME_US));
@@ -411,9 +481,14 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         // Cached AP list has the probe response, but assocAP and MIB peer HT state retain 40 MHz SGI
         ASSERT(mgmt->getCachedAp(apAddress)->htOperation.operatingChannelWidth == MHz(20));
         ASSERT(mgmt->getAssocApForTest().htOperation.operatingChannelWidth == MHz(40));
-        ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+        ASSERT(staMib->getHtOperation().operatingChannelWidth == MHz(40));
         checkUnicastMode(MHz(40), true, 7);
 
+        ASSERT(first.notifications == notificationsBeforeRejected);
+        ASSERT(first.notifications == second.notifications);
+        staMib->unsubscribe(Ieee80211Mib::bssStateChangedSignal, &first);
+        staMib->unsubscribe(Ieee80211Mib::bssStateChangedSignal, &second);
+        std::cout << "Atomic BSS observers, equal-beacon liveness, and reentrancy contract verified.\n";
         std::cout << "Subsequent Beacon updates authoritative associated-AP snapshot and MIB peer HT state.\n";
         std::cout << "Unicast rate selection follows dynamic channel-width, guard-interval, and MCS updates.\n";
         std::cout << "Legacy and unusable HT updates preserve association while falling back to legacy modes.\n";
@@ -502,3 +577,6 @@ Unicast rate selection follows dynamic channel-width, guard-interval, and MCS up
 
 %contains: stdout
 Legacy and unusable HT updates preserve association while falling back to legacy modes.
+
+%contains: stdout
+Atomic BSS observers, equal-beacon liveness, and reentrancy contract verified.
