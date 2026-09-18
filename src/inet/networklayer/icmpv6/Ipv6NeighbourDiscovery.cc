@@ -377,6 +377,41 @@ const MacAddress& Ipv6NeighbourDiscovery::resolveNeighbour(const Ipv6Address& ne
     return nce->macAddress;
 }
 
+void Ipv6NeighbourDiscovery::probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId)
+{
+    Enter_Method("probeNeighbourReachability(%s,if=%d)", neighbour.str().c_str(), interfaceId);
+
+    NetworkInterface *ie = ift->getInterfaceById(interfaceId);
+    // solicitations for a link-local target go out from this interface's own
+    // link-local address, which it always has once its own detection finished
+    Ipv6Address sourceAddress = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
+
+    Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
+    if (nce == nullptr) {
+        // nothing is known about this neighbour, so ask: address resolution is the
+        // same solicitation exchange, and the only one available without a
+        // link-layer address to probe
+        nce = neighbourCache.addNeighbour(neighbour, interfaceId);
+        initiateAddressResolution(sourceAddress, nce);
+        return;
+    }
+
+    switch (nce->reachabilityState) {
+        case Ipv6NeighbourCache::REACHABLE:
+        case Ipv6NeighbourCache::STALE:
+            // ask again even if the entry says reachable: that state may be as old as
+            // ReachableTime, and the caller wants evidence from now
+            nce->reachabilityState = Ipv6NeighbourCache::STALE;
+            initiateNeighbourUnreachabilityDetection(nce);
+            return;
+
+        default:
+            // INCOMPLETE, DELAY or PROBE: an exchange is already running, and
+            // starting a second one would only re-arm its timer
+            return;
+    }
+}
+
 void Ipv6NeighbourDiscovery::reachabilityConfirmed(const Ipv6Address& neighbour, int interfaceId)
 {
     Enter_Method("reachabilityConfirmed(%s,if=%d)", neighbour.str().c_str(), interfaceId);

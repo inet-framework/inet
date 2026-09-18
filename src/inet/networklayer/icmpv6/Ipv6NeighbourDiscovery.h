@@ -83,6 +83,32 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      */
     virtual void reachabilityConfirmed(const Ipv6Address& neighbour, int interfaceId);
 
+    /**
+     * Public method, to be invoked by a module that needs to know whether a
+     * neighbour is still on the link and has no traffic of its own to find out
+     * with.
+     *
+     * It asks: Neighbour Unreachability Detection for a neighbour whose link-layer
+     * address is known, address resolution for one that is not. Both send Neighbour
+     * Solicitations, so a neighbour that is there answers, and the caller sees the
+     * answer by whatever means it already watches the link with. A neighbour that is
+     * not there leaves its cache entry to be discarded when the solicitations run
+     * out.
+     *
+     * It asks even when the cache says the neighbour is reachable, and that is the
+     * point. A cached reachable state can be up to ReachableTime old -- an hour with
+     * the usual Router Advertisement -- and a caller that asks this question wants
+     * evidence from now, not a recollection. An exchange already in progress is left
+     * to finish rather than restarted.
+     *
+     * Unlike resolveNeighbour(), this does something when there is no cache entry at
+     * all, which is the position a caller with no traffic for the neighbour is in.
+     * It reports no result, because there is none yet, and it does not decide when to
+     * give up: how long to wait before concluding a neighbour has gone depends on what
+     * the caller is doing and belongs to the caller.
+     */
+    virtual void probeNeighbourReachability(const Ipv6Address& neighbour, int interfaceId);
+
   protected:
 
     // Packets awaiting Address Resolution or Next-Hop Determination.
