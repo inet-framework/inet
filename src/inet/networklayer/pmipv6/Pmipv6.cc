@@ -142,7 +142,8 @@ void Pmipv6::initialize(int stage)
 
         timestampBasedOrdering = par("timestampBasedOrdering");
         detectTransmissionFailure = par("detectTransmissionFailure");
-        detachDetectionTimeout = par("detachDetectionTimeout");
+        presenceProbeDelay = par("presenceProbeDelay");
+        presenceProbeTimeout = par("presenceProbeTimeout");
         presenceCheckInterval = par("presenceCheckInterval");
         initialBindingAckTimeout = par("initialBindingAckTimeout");
         maxBindingAckTimeout = par("maxBindingAckTimeout");
@@ -166,7 +167,7 @@ void Pmipv6::initialize(int stage)
             host->subscribe(l2ApDisassociatedSignal, this);
             if (detectTransmissionFailure)
                 host->subscribe(linkBrokenSignal, this);
-            if (detachDetectionTimeout > 0) {
+            if (presenceProbeDelay > 0) {
                 // only then does the gateway need to know when it last heard from a node
                 host->subscribe(packetReceivedFromLowerSignal, this);
                 presenceCheckTimer = new cMessage("presenceCheck", MAG_PRESENCE_CHECK);
@@ -744,35 +745,62 @@ void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 // retransmits an unanswered Proxy Binding Update. This is that question, asked
 // in one place, rather than a one-shot reaction to a detachment event.
 //
+// The answer is whatever the last evidence said. Silence is not evidence, which
+// is why nothing here times out: a node that has gone quiet is asked (see
+// checkMobileNodePresence) and only an unanswered question makes it absent.
+//
 bool Pmipv6::isMobileNodePresent(const MagBinding& binding) const
 {
-    if (binding.detached)
-        return false;
-    if (detachDetectionTimeout > 0)
-        return simTime() - binding.lastPresence <= detachDetectionTimeout;
-    return true;
+    return !binding.detached;
 }
 
 void Pmipv6::noteMobileNodePresence(int accessInterfaceId, const MacAddress& stationAddress)
 {
-    if (MagBinding *binding = findBinding(accessInterfaceId, stationAddress))
+    if (MagBinding *binding = findBinding(accessInterfaceId, stationAddress)) {
         binding->lastPresence = simTime();
+        binding->probeDeadline = 0; // it spoke, so whatever was asked is answered
+    }
 }
 
+//
+// RFC 5213 Section 6.13 leaves the detection method to the access technology and
+// names four acceptable classes, one of which is an IPv6 Neighbour Unreachability
+// Detection event. That is the one used here, and it is used because it is the
+// only one that produces evidence on demand: waiting for a mobile node to say
+// something of its own accord cannot distinguish an idle node from a departed
+// one, and a gateway with nothing to send it never finds out either way.
+//
+// So when a node has been quiet for presenceProbeDelay, the gateway asks. A node
+// that is there answers the solicitation and is seen again through the ordinary
+// evidence path; a node that does not answer within presenceProbeTimeout has
+// gone.
+//
 void Pmipv6::checkMobileNodePresence()
 {
     std::vector<std::string> gone;
     for (auto& element : magBindings) {
         MagBinding& binding = element.second;
-        if (!binding.deregistering && !isMobileNodePresent(binding))
+        if (binding.deregistering || binding.detached)
+            continue;
+        if (simTime() - binding.lastPresence <= presenceProbeDelay) {
+            binding.probeDeadline = 0;
+            continue;
+        }
+        if (binding.probeDeadline == 0) {
+            EV_DETAIL << "MAG: nothing heard from mobile node '" << binding.mnIdentifier
+                      << "' for " << presenceProbeDelay << "; asking whether it is still there" << endl;
+            ipv6nd->probeNeighbourReachability(binding.mnLinkLocalAddress, binding.accessInterfaceId);
+            binding.probeDeadline = simTime() + presenceProbeTimeout;
+        }
+        else if (simTime() >= binding.probeDeadline)
             gone.push_back(element.first);
     }
     for (const auto& mnIdentifier : gone) {
         MagBinding& binding = magBindings[mnIdentifier];
-        EV_INFO << "MAG: nothing heard from mobile node '" << binding.mnIdentifier << "' ("
-                << binding.mnLinkLayerIdentifier << ") for " << detachDetectionTimeout
-                << "; treating it as detached" << endl;
+        EV_INFO << "MAG: mobile node '" << binding.mnIdentifier << "' (" << binding.mnLinkLayerIdentifier
+                << ") did not answer within " << presenceProbeTimeout << "; treating it as detached" << endl;
         binding.detached = true;
+        binding.probeDeadline = 0;
         deregisterMobileNode(binding);
     }
 }
@@ -816,6 +844,17 @@ void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface, const M
 
     binding.mnIdentifier = profile->mnIdentifier;
     binding.mnLinkLayerIdentifier = stationAddress;
+    // The address a presence probe asks about. A mobile node's link-local address is
+    // formed from its interface's link-layer address by the same rule the node itself
+    // uses, so the gateway can name it without ever having been told it.
+    //
+    // LIMITATION: that rule is the one INET's own IPv6 host follows. A node that forms
+    // its link-local address some other way -- a stable privacy identifier, or one
+    // configured by hand -- would not answer to this address, and the gateway would
+    // conclude it had gone. Such a node needs presenceProbeDelay set to 0, leaving
+    // detection to the link-layer events.
+    binding.mnLinkLocalAddress = Ipv6Address::formLinkLocalAddress(stationAddress.formInterfaceIdentifier());
+    binding.probeDeadline = 0;
     binding.accessTechnologyType = ACCESS_TECHNOLOGY_IEEE_802_11;
     binding.homeNetworkPrefix = profile->homeNetworkPrefix;
     binding.homeNetworkPrefixLength = profile->homeNetworkPrefixLength;

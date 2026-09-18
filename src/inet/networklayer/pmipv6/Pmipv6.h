@@ -71,7 +71,8 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     Ipv6Address localMobilityAnchorAddress; // MAG: the LMA to register with
     bool timestampBasedOrdering = true;
     bool detectTransmissionFailure = false;
-    simtime_t detachDetectionTimeout;
+    simtime_t presenceProbeDelay;
+    simtime_t presenceProbeTimeout;
     simtime_t presenceCheckInterval;
     simtime_t initialBindingAckTimeout;
     simtime_t maxBindingAckTimeout;
@@ -159,6 +160,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     struct MagBinding {
         std::string mnIdentifier;
         MacAddress mnLinkLayerIdentifier; // the attached interface of the mobile node
+        Ipv6Address mnLinkLocalAddress;   // derived from it, and what a presence probe asks
         uint8_t accessTechnologyType = 0;
         Ipv6Address homeNetworkPrefix;
         int homeNetworkPrefixLength = 0;
@@ -168,6 +170,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         bool deregistering = false;   // a lifetime-0 Proxy Binding Update is outstanding
         bool detached = false;        // the access link reported the node gone
         simtime_t lastPresence;       // when the gateway last had evidence of the node
+        simtime_t probeDeadline;      // non-zero while a presence probe is outstanding
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> access interface
         // the Proxy Binding Update awaiting an acknowledgement, and its back-off
         Pmipv6Timer *retransmitTimer = nullptr;

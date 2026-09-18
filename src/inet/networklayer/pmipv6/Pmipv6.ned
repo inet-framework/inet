@@ -51,11 +51,14 @@ simple Pmipv6 extends SimpleModule
         // on IEEE 802.11 this is the access point giving up on a frame after its retry limit.
         bool detectTransmissionFailure = default(true);
 
-        // MAG: conclude that a mobile node has left when nothing has been seen from it for this
-        // long. 0 disables this backstop, leaving detection to the link-layer events above; a
-        // mobile node that is present but silent for longer than this is deregistered.
-        double detachDetectionTimeout @unit(s) = default(0s);
-        double presenceCheckInterval @unit(s) = default(1s); // MAG: how often detachDetectionTimeout is evaluated
+        // MAG: when nothing has been seen from a mobile node for this long, ask it whether it is
+        // still there rather than assume either way -- a Neighbour Solicitation to its link-local
+        // address, which RFC 5213 Section 6.13 names as one of the ways a gateway may detect that
+        // a node has gone. A node that is present but idle answers and stays registered. 0
+        // disables probing, leaving detection to the link-layer events above.
+        double presenceProbeDelay @unit(s) = default(5s);
+        double presenceProbeTimeout @unit(s) = default(2s);  // MAG: how long the answer may take before the node counts as gone
+        double presenceCheckInterval @unit(s) = default(1s); // MAG: how often the two above are evaluated
 
         // LMA: how long a binding cache entry survives a deregistration, so that a mobile node
         // that reappears at another gateway keeps its mobility session (RFC 5213 Section 9.1
