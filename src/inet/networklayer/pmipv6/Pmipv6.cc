@@ -217,6 +217,7 @@ void Pmipv6::handleMessageWhenUp(cMessage *msg)
         else {
             EV_WARN << "Discarding unexpected packet " << packet->getName() << endl;
             dropPacket(packet, NO_PROTOCOL_FOUND);
+            delete packet;
         }
     }
     else if (auto indication = dynamic_cast<Indication *>(msg)) {
@@ -302,10 +303,8 @@ void Pmipv6::processMobilityMessage(Packet *packet)
             EV_WARN << "Ignoring unsupported Mobility Header type " << mh->getMobilityHeaderType() << endl;
             break;
     }
-    if (!accepted) {
+    if (!accepted)
         dropPacket(packet, NOT_ADDRESSED_TO_US);
-        return;
-    }
     delete packet;
 }
 
@@ -328,7 +327,12 @@ void Pmipv6::dropPacket(Packet *packet, PacketDropReason reason)
     PacketDropDetails details;
     details.setReason(reason);
     emit(packetDroppedSignal, packet, &details);
-    delete packet;
+}
+
+const char *Pmipv6::accessInterfaceName(int interfaceId) const
+{
+    const NetworkInterface *ie = ift->findInterfaceById(interfaceId);
+    return ie != nullptr ? ie->getInterfaceName() : "(gone)";
 }
 
 Ipv6Address Pmipv6::getEgressAddressFor(const Ipv6Address& destination)
@@ -1135,24 +1139,34 @@ INetfilter::IHook::Result Pmipv6::datagramPreRoutingHook(Packet *datagram)
     Ipv6Address source = ipv6Header->getSourceAddress().toIpv6();
     Ipv6Address destination = ipv6Header->getDestinationAddress().toIpv6();
 
-    // Neighbour and Router Discovery live on the link and are addressed to it, so they
-    // are not traffic the gateway forwards anywhere and none of this applies to them.
-    if (source.isUnspecified() || source.isLinkLocal() || destination.isLinkLocal()
-            || destination.isMulticast())
+    // Anything addressed to the link itself, or to this gateway, is not traffic the
+    // gateway forwards anywhere: Neighbour and Router Discovery, and the Duplicate
+    // Address Detection the mobile node runs before it has an address at all. None of
+    // what follows applies to it.
+    if (destination.isLinkLocal() || destination.isMulticast() || rt6->isLocalAddress(destination))
         return ACCEPT;
+
+    // RFC 5213 Section 6.10.5 names this case: a packet the gateway would forward, with
+    // a link-local source address, is not forwarded. INET's own guard on that path
+    // tests the destination, so nothing downstream would have caught it.
+    if (source.isLinkLocal() || source.isUnspecified()) {
+        EV_WARN << "Dropping a packet from " << source << " on " << accessInterfaceName(arrivalInterfaceId)
+                << ": a link-local source address is not forwarded off an access link" << endl;
+        dropPacket(datagram, NOT_ADDRESSED_TO_US);
+        return DROP;
+    }
 
     MagBinding *binding = findBindingForSource(arrivalInterfaceId, source);
     if (binding == nullptr) {
-        EV_WARN << "Dropping a packet from " << source << " on "
-                << ift->getInterfaceById(arrivalInterfaceId)->getInterfaceName()
+        EV_WARN << "Dropping a packet from " << source << " on " << accessInterfaceName(arrivalInterfaceId)
                 << ": no mobile node served here owns that address" << endl;
-        emit(packetDroppedSignal, datagram);
+        dropPacket(datagram, NOT_ADDRESSED_TO_US);
         return DROP;
     }
     if (!binding->registered || magTunnelId == -1) {
         EV_WARN << "Dropping a packet from mobile node '" << binding->mnIdentifier
                 << "': its registration is not complete" << endl;
-        emit(packetDroppedSignal, datagram);
+        dropPacket(datagram, NO_ROUTE_FOUND);
         return DROP;
     }
 

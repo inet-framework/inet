@@ -232,6 +232,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
     virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; }
     MagBinding *findBindingForSource(int accessInterfaceId, const Ipv6Address& sourceAddress);
     bool isAccessInterface(int interfaceId) const;
+    const char *accessInterfaceName(int interfaceId) const;
 
     // MAG
     void parseMobileNodeProfiles();
