@@ -1207,6 +1207,20 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
     }
     MagBinding& binding = it->second;
 
+    // RFC 6275 Section 11.7.3: an acknowledgement answers one Proxy Binding Update, and
+    // says which by echoing its sequence number. Without that test a registration's
+    // acknowledgement arriving after the node has gone is taken as an answer to the
+    // deregistration that followed it -- cancelling its retransmission, re-installing
+    // the route and the prefix, and leaving a binding nothing can ever remove. The
+    // gateway increments the sequence number on every message precisely so the two are
+    // distinguishable; nothing was reading it.
+    if (pba->getSequenceNumber() != binding.sequenceNumber) {
+        EV_WARN << "MAG: Proxy Binding Acknowledgement for MN '" << mnId << "' answers sequence "
+                << pba->getSequenceNumber() << ", not the outstanding " << binding.sequenceNumber
+                << "; ignoring it" << endl;
+        return;
+    }
+
     // RFC 5213 Section 6.9.1.2 step 6 has the anchor return the options it received,
     // with identical values. An acknowledgement that does not match what this gateway
     // asked for is not an answer to it.
