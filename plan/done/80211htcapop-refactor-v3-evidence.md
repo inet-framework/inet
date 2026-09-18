@@ -1,5 +1,10 @@
 # HT capability/BSS refactor V3: implementation evidence
 
+This is historical evidence for the tree identified below. Fresh verification of the current
+branch plus the Devin-comment fixes is recorded in
+[HT/GI Devin comment closure](ht-gi-devin-comment-closure.md), including exact tree identity,
+focused reruns, and the corrected discovery-test assertion.
+
 Date: 2026-09-18. Baseline: `98117c3257b2e11661d2baf685c18911c8639b24`.
 Tested implementation: the uncommitted working tree following that baseline. No commits, recorded
 fingerprints, generated fingerprint expectations, or sealed packet-core sources were changed.
