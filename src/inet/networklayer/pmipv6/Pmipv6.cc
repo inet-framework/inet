@@ -1097,6 +1097,10 @@ void Pmipv6::retransmitProxyBindingUpdate(const MobilitySessionKey& session)
             rescheduleAt(binding.probeDeadline, binding.retransmitTimer);
             return;
         }
+        // the question has run out of time and the node is still here as far as anything
+        // else can tell, so the deadline has been consumed: leaving it set would stop the
+        // periodic check ever asking again
+        binding.probeDeadline = 0;
     }
     binding.retransmitInterval = std::min(binding.retransmitInterval * 2, maxBindingAckTimeout);
     binding.sequenceNumber++; // Section 6.9.4 step 4: strictly greater than the previous attempt
