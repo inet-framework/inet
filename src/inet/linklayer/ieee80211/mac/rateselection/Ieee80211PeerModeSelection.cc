@@ -49,12 +49,12 @@ static const IIeee80211Mode *getLegacyFallback(const Ieee80211ModeSet *modeSet,
 // a receiver-supported MCS/rate and CH_BANDWIDTH permitted by the BSS HT
 // Operation. The directional negotiated state is the model's source of the
 // receiver's capability advertisement.
-static bool isCompatibleHtMode(const IIeee80211Mode *mode, const Ieee80211Mib::PeerHtState *peerHtState)
+static bool isCompatibleHtMode(const IIeee80211Mode *mode, const Ieee80211Mib::PeerHtState *peerHtState, const Ieee80211HtOperation& operation)
 {
     if (mode == nullptr || peerHtState == nullptr || !peerHtState->valid)
         return false;
 
-    const auto& negotiated = peerHtState->negotiatedCapabilities;
+    const auto& negotiated = *peerHtState->negotiatedCapabilities;
     const auto& receiverCapabilities = negotiated.localTxPeerRx;
     if (!receiverCapabilities.valid)
         return false;
@@ -65,7 +65,7 @@ static bool isCompatibleHtMode(const IIeee80211Mode *mode, const Ieee80211Mib::P
 
     auto bandwidth = mode->getDataMode()->getBandwidth();
     if (receiverCapabilities.supportedChannelWidths.count(bandwidth) == 0 ||
-            bandwidth > negotiated.operation.operatingChannelWidth)
+            bandwidth > operation.operatingChannelWidth)
         return false;
 
     // IEEE Std 802.11-2024, 10.17 and Table 9-224: a short guard interval
@@ -105,7 +105,8 @@ static bool isBetterHtMode(const IIeee80211Mode *candidate, const IIeee80211Mode
 } // namespace
 
 const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
-        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode, const MacAddress& peerAddress)
+        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode, const MacAddress& peerAddress,
+        const Ieee80211HtOperation *operation, bool htEligible)
 {
     if (mode == nullptr || mode->getHtMcsIndex() < 0)
         return mode;
@@ -115,9 +116,10 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         throw cRuntimeError("HT mode '%s' is not contained in IEEE 802.11 mode set '%s'",
                 mode->getName(), modeSet->getName());
 
-    if (peerHtState == nullptr || !peerHtState->valid || !peerHtState->negotiatedCapabilities.localTxPeerRx.valid)
+    if (!htEligible || operation == nullptr || peerHtState == nullptr || !peerHtState->valid ||
+            !peerHtState->negotiatedCapabilities || !peerHtState->negotiatedCapabilities->localTxPeerRx.valid)
         return getLegacyFallback(modeSet, mode, peerAddress);
-    if (isCompatibleHtMode(mode, peerHtState))
+    if (isCompatibleHtMode(mode, peerHtState, *operation))
         return mode;
 
     auto candidateBitrate = mode->getDataMode()->getNetBitrate();
@@ -126,7 +128,7 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         const auto *candidate = modeSet->getMode(i);
         if (candidate->getHtMcsIndex() < 0 ||
                 candidate->getDataMode()->getNetBitrate() > candidateBitrate ||
-                !isCompatibleHtMode(candidate, peerHtState))
+                !isCompatibleHtMode(candidate, peerHtState, *operation))
             continue;
         if (bestMode == nullptr || isBetterHtMode(candidate, bestMode))
             bestMode = candidate;

@@ -9,7 +9,7 @@
 #define __INET_DCF_H
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Dcaf.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsProcedure.h"
@@ -37,7 +37,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Distributed Coordination Function.
  */
-class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetListener
+class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetModuleBase, public cListener
 {
   protected:
     Ieee80211Mac *mac = nullptr;

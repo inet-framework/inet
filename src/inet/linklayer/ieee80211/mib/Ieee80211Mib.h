@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211MIB_H
 #define __INET_IEEE80211MIB_H
 
+#include <memory>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
@@ -24,6 +26,8 @@ namespace ieee80211 {
 class INET_API Ieee80211Mib : public SimpleModule
 {
   public:
+    static simsignal_t bssStateChangedSignal;
+
     enum Mode {
         INFRASTRUCTURE,
         INDEPENDENT,
@@ -63,8 +67,7 @@ class INET_API Ieee80211Mib : public SimpleModule
       public:
         bool valid = false;
         Ieee80211HtCapabilities advertisedCapabilities;
-        Ieee80211NegotiatedHtCapabilities negotiatedCapabilities;
-        uint64_t generation = 0;
+        std::shared_ptr<const Ieee80211NegotiatedHtCapabilities> negotiatedCapabilities;
     };
 
   public:
@@ -72,6 +75,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     Mode mode = static_cast<Mode>(-1);
     bool qos = false;
 
+  private:
     BssData bssData;
     BssStationData bssStationData;
     BssAccessPointData bssAccessPointData;
@@ -82,8 +86,15 @@ class INET_API Ieee80211Mib : public SimpleModule
 
   private:
     Ieee80211HtOperation htOperation;
-    int configuredSecondaryChannelOffset = 0;
+    bool localCapabilitiesPrepared = false;
     bool primaryChannelAvailable = false;
+    bool bssActive = false;
+    bool htOperationPresent = false;
+    const physicallayer::IIeee80211Band *operationBand = nullptr;
+    bool stateChangePending = false;
+    bool publishingStateChange = false;
+
+    void checkStateMutation() const;
     std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
 
@@ -91,6 +102,15 @@ class INET_API Ieee80211Mib : public SimpleModule
     virtual void initialize(int stage) override;
 
   public:
+    const BssData& getBssData() const { return bssData; }
+    const BssStationData& getBssStationData() const { return bssStationData; }
+    const BssAccessPointData& getBssAccessPointData() const { return bssAccessPointData; }
+    const Ieee80211HtCapabilities& getLocalHtCapabilities() const { return localHtCapabilities; }
+    void configureBssRole(BssStationType stationType, const std::string& ssid = "");
+    void setAssociated(bool associated);
+    BssMemberStatus getPeerAssociationStatus(const MacAddress& address) const;
+    void setPeerAssociationStatus(const MacAddress& address, BssMemberStatus status);
+    void removePeerAssociation(const MacAddress& address);
     static const char *getModeStr(Ieee80211Mib::Mode mode);
     static const char *getStationTypeStr(Ieee80211Mib::BssStationType stationType);
     std::string getSsidStr() const;
@@ -100,16 +120,26 @@ class INET_API Ieee80211Mib : public SimpleModule
     short allocateAssociationId(const MacAddress& address);
     void releaseAssociationId(const MacAddress& address);
     void clearAssociationIds();
-    void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
-            const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit);
-    bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
+    // Initialization/preparation only. A changed profile requires inactive BSS and no peers.
+    void installLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported);
+    bool hasPreparedLocalCapabilities() const { return localCapabilitiesPrepared; }
+    bool isLocalHtCapable() const { return localHtCapabilitiesValid; }
+    bool hasActiveBss() const { return bssActive; }
+    bool hasHtOperation() const { return bssActive && htOperationPresent; }
+    const physicallayer::IIeee80211Band *getOperationBand() const { return operationBand; }
+    void commitBss(const std::string& ssid, const MacAddress& bssid, const physicallayer::IIeee80211Band *band,
+            int channel, const Ieee80211HtOperation *operation);
+    void clearBss();
+    // Management publishes only after its required transaction/timer bookkeeping.
+    // Synchronous observers may query state; nested mutation is rejected.
+    void publishStateChange();
     bool hasPrimaryChannel() const { return primaryChannelAvailable; }
     int requirePrimaryChannel() const;
-    void setPrimaryChannel(int primaryChannel);
-    void setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band);
     const Ieee80211HtOperation& getHtOperation() const;
+    bool relationshipAllowsHt(const MacAddress& address) const;
+    const PeerHtState *findPeerCapabilities(const MacAddress& address) const;
     const PeerHtState *findPeerHtState(const MacAddress& address) const;
-    void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);
+    void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities);
     void removePeerHtCapabilities(const MacAddress& address);
     void clearPeerHtCapabilities();
 };

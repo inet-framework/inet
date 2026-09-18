@@ -1,13 +1,16 @@
 %description:
 Verify simplified station BSS identity is visible to automatic network
-configuration while negotiated HT peer state is installed only at the last
+configuration together with negotiated HT peer state, before the last
 initialization stage. Verify shutdown removes the AP-side association and HT
 peer state and startup restores both. Verify crash performs the same cleanup,
-and remains safe when the recorded AP can no longer be resolved.
+and remains safe when the recorded AP can no longer be resolved. Legacy stations
+associated with HT APs retain BSS identity/channel without accepting HT operation,
+in both declaration orders and across shutdown/crash/restart.
 
 %file: TestInitializationObserver.cc
 
 #include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mgmt/contract/IIeee80211BssProvider.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -28,9 +31,38 @@ class TestInitializationObserver : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    void checkLegacyStations(bool associated)
+    {
+        for (const char *name : {"^.legacyFirst.wlan[0].mib", "^.legacySecond.wlan[0].mib"}) {
+            auto *sta = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath(name));
+            auto *ap = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+            ASSERT(sta->hasPreparedLocalCapabilities() && !sta->isLocalHtCapable());
+            ASSERT(ap->isLocalHtCapable() && ap->hasHtOperation());
+            ASSERT(sta->hasActiveBss() == associated);
+            ASSERT(sta->getBssStationData().isAssociated == associated);
+            ASSERT(!sta->hasHtOperation());
+            ASSERT(!sta->relationshipAllowsHt(ap->address));
+            ASSERT(!ap->relationshipAllowsHt(sta->address));
+            ASSERT(sta->findPeerCapabilities(ap->address) == nullptr);
+            ASSERT(ap->findPeerCapabilities(sta->address) == nullptr);
+            if (associated) {
+                ASSERT(sta->getBssData().bssid == ap->address);
+                ASSERT(sta->getBssData().ssid == ap->getBssData().ssid);
+                ASSERT(sta->hasPrimaryChannel() && sta->requirePrimaryChannel() == 6);
+                ASSERT(sta->getOperationBand() == ap->getOperationBand());
+                ASSERT(ap->getPeerAssociationStatus(sta->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            }
+            else {
+                ASSERT(!sta->hasPrimaryChannel());
+                ASSERT(ap->getBssAccessPointData().stations.count(sta->address) == 0);
+            }
+        }
+    }
+
     virtual void initialize(int stage) override
     {
         if (stage == INITSTAGE_NETWORK_CONFIGURATION || stage == INITSTAGE_LAST) {
+            checkLegacyStations(true);
             auto configurator = check_and_cast<TestIpv4NetworkConfigurator *>(getModuleByPath("^.configurator"));
             auto apInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.ap.wlan[0]"));
             auto staInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.sta.wlan[0]"));
@@ -41,22 +73,33 @@ class TestInitializationObserver : public cSimpleModule
             ASSERT(apMib->hasPrimaryChannel());
             ASSERT(apMib->requirePrimaryChannel() == 6);
             if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
-                ASSERT(apMib->bssData.ssid == "review-ssid");
-                ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
+                ASSERT(apMib->getBssData().ssid == "review-ssid");
+                ASSERT(staMib->getBssData().ssid == apMib->getBssData().ssid);
                 ASSERT(configurator->getTestWirelessId(apInterface) == configurator->getTestWirelessId(staInterface));
                 ASSERT(!staMib->address.isUnspecified());
-                ASSERT(apMib->bssAccessPointData.stations.find(MacAddress::UNSPECIFIED_ADDRESS) == apMib->bssAccessPointData.stations.end());
-                ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
-                ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
-                ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
+                ASSERT(apMib->getBssAccessPointData().stations.find(MacAddress::UNSPECIFIED_ADDRESS) == apMib->getBssAccessPointData().stations.end());
+                ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+                ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
+                ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+                auto *apFirst = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath("^.apFirst.wlan[0].mib"));
+                auto *staSecond = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath("^.staSecond.wlan[0].mib"));
+                ASSERT(staSecond->getBssData().ssid == apFirst->getBssData().ssid);
+                ASSERT(staSecond->findPeerHtState(apFirst->address) != nullptr);
+                ASSERT(apFirst->findPeerHtState(staSecond->address) != nullptr);
+                auto cache = apMib->findPeerHtState(staMib->address)->negotiatedCapabilities;
+                auto *provider = check_and_cast<ieee80211::IIeee80211BssProvider *>(apInterface->getSubmodule("mgmt"));
+                provider->prepareBss();
+                provider->prepareBss();
+                ASSERT(apMib->findPeerHtState(staMib->address)->negotiatedCapabilities == cache);
+                std::cout << "Both declaration orders and repeated BSS preparation verified.\n";
                 std::cout << "Simplified STA wireless identity available during network configuration.\n";
             }
             else {
                 ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
                 ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
-                ASSERT(apMib->findPeerHtState(staMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
-                ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
-                std::cout << "Simplified STA HT peer state installed at last initialization stage.\n";
+                ASSERT(apMib->getHtOperation().primaryChannel == 6);
+                ASSERT(staMib->getHtOperation().primaryChannel == 6);
+                std::cout << "Simplified STA HT peer state remains ready at last initialization stage.\n";
                 scheduleAt(SimTime(1500, SIMTIME_NS), new cMessage("checkShutdown"));
                 scheduleAt(SimTime(2500, SIMTIME_NS), new cMessage("checkShutdownRestart"));
                 scheduleAt(SimTime(3500, SIMTIME_NS), new cMessage("checkResolvableCrash"));
@@ -73,53 +116,58 @@ class TestInitializationObserver : public cSimpleModule
         auto staInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.sta.wlan[0]"));
         auto apMib = check_and_cast<ieee80211::Ieee80211Mib *>(apInterface->getSubmodule("mib"));
         auto staMib = check_and_cast<ieee80211::Ieee80211Mib *>(staInterface->getSubmodule("mib"));
+        checkLegacyStations(strcmp(message->getName(), "checkShutdown") != 0 &&
+                strcmp(message->getName(), "checkResolvableCrash") != 0);
         if (!strcmp(message->getName(), "checkShutdown")) {
-            ASSERT(!staMib->bssStationData.isAssociated);
-            ASSERT(apMib->bssAccessPointData.stations.find(staMib->address) == apMib->bssAccessPointData.stations.end());
+            ASSERT(!staMib->getBssStationData().isAssociated);
+            ASSERT(apMib->getBssAccessPointData().stations.find(staMib->address) == apMib->getBssAccessPointData().stations.end());
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
             std::cout << "Simplified STA AP-side association and HT peer state removed after shutdown.\n";
         }
         else if (!strcmp(message->getName(), "checkShutdownRestart")) {
-            ASSERT(staMib->bssStationData.isAssociated);
-            ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
-            ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(staMib->getBssStationData().isAssociated);
+            ASSERT(staMib->getBssData().ssid == apMib->getBssData().ssid);
+            ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
             std::cout << "Simplified STA association and HT peer state restored after shutdown restart.\n";
         }
         else if (!strcmp(message->getName(), "checkResolvableCrash")) {
-            ASSERT(!staMib->bssStationData.isAssociated);
-            ASSERT(apMib->bssAccessPointData.stations.find(staMib->address) == apMib->bssAccessPointData.stations.end());
+            ASSERT(!staMib->getBssStationData().isAssociated);
+            ASSERT(apMib->getBssAccessPointData().stations.find(staMib->address) == apMib->getBssAccessPointData().stations.end());
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
             std::cout << "Simplified STA AP-side association and HT peer state removed after resolvable crash.\n";
         }
         else if (!strcmp(message->getName(), "checkCrashRestart")) {
-            ASSERT(staMib->bssStationData.isAssociated);
-            ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
-            ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(staMib->getBssStationData().isAssociated);
+            ASSERT(staMib->getBssData().ssid == apMib->getBssData().ssid);
+            ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
             std::cout << "Simplified STA association and HT peer state restored after crash restart.\n";
         }
         else if (!strcmp(message->getName(), "prepareMissingApCrash")) {
-            ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
-            staMib->bssData.bssid = MacAddress("02:00:00:00:00:ff");
-            ASSERT(staMib->bssData.bssid != apMib->address);
-            ASSERT(L3AddressResolver().findHostWithAddress(staMib->bssData.bssid) == nullptr);
+            auto operation = staMib->getHtOperation();
+            staMib->commitBss(staMib->getBssData().ssid, MacAddress("02:00:00:00:00:ff"),
+                    staMib->getOperationBand(), operation.primaryChannel, &operation);
+            ASSERT(staMib->getBssData().bssid != apMib->address);
+            ASSERT(L3AddressResolver().findHostWithAddress(staMib->getBssData().bssid) == nullptr);
             std::cout << "Simplified STA recorded BSSID made unresolvable before crash.\n";
         }
         else if (!strcmp(message->getName(), "checkMissingApCrash")) {
-            ASSERT(!staMib->bssStationData.isAssociated);
-            ASSERT(staMib->bssData.bssid == MacAddress("02:00:00:00:00:ff"));
-            ASSERT(L3AddressResolver().findHostWithAddress(staMib->bssData.bssid) == nullptr);
+            ASSERT(!staMib->getBssStationData().isAssociated);
+            ASSERT(staMib->getBssData().bssid == MacAddress("02:00:00:00:00:ff"));
+            ASSERT(L3AddressResolver().findHostWithAddress(staMib->getBssData().bssid) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
-            ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
             std::cout << "Simplified STA crash tolerated missing AP lookup and cleared local HT peer state.\n";
+            std::cout << "Legacy STAs preserve non-HT operation across both declaration orders and lifecycle transitions.\n";
         }
         else
             ASSERT(false);
@@ -158,6 +206,21 @@ network Ieee80211MgmtStaSimplifiedInitializationTestNetwork
         radioMedium: Ieee80211ScalarRadioMedium;
         configurator: TestIpv4NetworkConfigurator;
         scenarioManager: ScenarioManager;
+        legacyFirst: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        apFirst: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+                wlan[*].agent.typename = "";
+        }
+        staSecond: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
         sta: WirelessHost {
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
@@ -166,6 +229,11 @@ network Ieee80211MgmtStaSimplifiedInitializationTestNetwork
         ap: AccessPoint {
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+                wlan[*].agent.typename = "";
+        }
+        legacySecond: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
                 wlan[*].agent.typename = "";
         }
         observer: TestInitializationObserver;
@@ -181,11 +249,18 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 
+*.apFirst.wlan[0].address = "02:00:00:00:00:02"
+*.apFirst.wlan[0].mgmt.ssid = "ap-first"
+*.apFirst.wlan[0].radio.channelNumber = 6
+*.staSecond.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:02"
 *.ap.wlan[0].address = "02:00:00:00:00:01"
 *.sta.wlan[0].address = "auto"
 *.ap.wlan[0].mgmt.ssid = "review-ssid"
 *.ap.wlan[0].radio.channelNumber = 6
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.legacy*.wlan[0].opMode = "g(mixed)"
+*.legacy*.wlan[0].bitrate = 54Mbps
+*.legacy*.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
@@ -205,15 +280,23 @@ record-scalar-results = false
 <scenario>
     <at t="1us">
         <shutdown module="sta"/>
+        <shutdown module="legacyFirst"/>
+        <shutdown module="legacySecond"/>
     </at>
     <at t="2us">
         <startup module="sta"/>
+        <startup module="legacyFirst"/>
+        <startup module="legacySecond"/>
     </at>
     <at t="3us">
         <crash module="sta"/>
+        <crash module="legacyFirst"/>
+        <crash module="legacySecond"/>
     </at>
     <at t="4us">
         <startup module="sta"/>
+        <startup module="legacyFirst"/>
+        <startup module="legacySecond"/>
     </at>
     <at t="6us">
         <crash module="sta"/>
@@ -224,7 +307,7 @@ record-scalar-results = false
 Simplified STA wireless identity available during network configuration.
 
 %contains: stdout
-Simplified STA HT peer state installed at last initialization stage.
+Simplified STA HT peer state remains ready at last initialization stage.
 
 %contains: stdout
 Simplified STA AP-side association and HT peer state removed after shutdown.
@@ -243,3 +326,9 @@ Simplified STA recorded BSSID made unresolvable before crash.
 
 %contains: stdout
 Simplified STA crash tolerated missing AP lookup and cleared local HT peer state.
+
+%contains: stdout
+Both declaration orders and repeated BSS preparation verified.
+
+%contains: stdout
+Legacy STAs preserve non-HT operation across both declaration orders and lifecycle transitions.

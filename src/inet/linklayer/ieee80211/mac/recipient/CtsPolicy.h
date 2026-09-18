@@ -8,7 +8,7 @@
 #ifndef __INET_CTSPOLICY_H
 #define __INET_CTSPOLICY_H
 
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -16,7 +16,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API CtsPolicy : public ModeSetListener, public ICtsPolicy
+class INET_API CtsPolicy : public ModeSetModuleBase, public ICtsPolicy
 {
   protected:
     IRateSelection *rateSelection = nullptr;
