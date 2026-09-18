@@ -33,7 +33,7 @@ class TestIeee80211MgmtApHcf : public Ieee80211MgmtAp
     {
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     short submitAssociationRequest(const MacAddress& address)
@@ -70,12 +70,12 @@ class TestIeee80211MgmtApHcf : public Ieee80211MgmtAp
 
     bool hasCommittedAssociationId(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+        return mib->getBssAccessPointData().associationIds.find(address) != mib->getBssAccessPointData().associationIds.end();
     }
 
     Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.stations.at(address);
+        return mib->getBssAccessPointData().stations.at(address);
     }
 
   protected:

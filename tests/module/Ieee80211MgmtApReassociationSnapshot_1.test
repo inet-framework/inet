@@ -41,7 +41,7 @@ class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
     {
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     void submitReassociationRequest(const MacAddress& address)
@@ -56,7 +56,7 @@ class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
         rates.rate[0] = 1;
         body->setSupportedRates(rates);
         body->setHtCapabilitiesPresent(true);
-        body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
+        body->setHtCapabilities(makeHtCapabilitiesElement(mib->getLocalHtCapabilities()));
         body->setChunkLength(B(1));
         packet->insertAtBack(body);
         auto header = makeShared<Ieee80211MgmtHeader>();
@@ -93,6 +93,30 @@ class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
 
 Define_Module(Ieee80211MgmtApReassociationSnapshotAp);
 
+class ApCommitObserver : public cListener
+{
+  public:
+    Ieee80211MgmtApReassociationSnapshotAp *management;
+    MacAddress peer;
+    int notifications = 0;
+    bool expectPending = true;
+    ApCommitObserver(Ieee80211MgmtApReassociationSnapshotAp *management, const MacAddress& peer) : management(management), peer(peer) {}
+    virtual void receiveSignal(cComponent *source, simsignal_t, bool active, cObject *) override
+    {
+        auto *mib = check_and_cast<Ieee80211Mib *>(source);
+        notifications++;
+        ASSERT(active && mib->hasHtOperation());
+        ASSERT(mib->getOperationBand() != nullptr);
+        ASSERT(mib->requirePrimaryChannel() == mib->getHtOperation().primaryChannel);
+        ASSERT(management->hasPendingAssociation(peer) == expectPending);
+        if (!expectPending) {
+            ASSERT(mib->getPeerAssociationStatus(peer) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(mib->getBssAccessPointData().associationIds.at(peer) > 0);
+            ASSERT(mib->findPeerHtState(peer) != nullptr);
+        }
+    }
+};
+
 class Ieee80211MgmtApReassociationSnapshotTest : public cSimpleModule
 {
   public:
@@ -111,15 +135,28 @@ class Ieee80211MgmtApReassociationSnapshotTest : public cSimpleModule
         ASSERT(mgmt->getAdvertisedPrimaryChannel() == 7);
         ASSERT(mib->requirePrimaryChannel() == 6);
 
+        ApCommitObserver observer(mgmt, staAddress);
+        mib->subscribe(Ieee80211Mib::bssStateChangedSignal, &observer);
         radio->setChannelNumber(11);
         ASSERT(mib->requirePrimaryChannel() == 11);
+        observer.expectPending = false;
         mgmt->finishReassociationResponse(staAddress);
 
         ASSERT(!mgmt->hasPendingAssociation(staAddress));
-        ASSERT(mib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
         const auto *peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 11);
+        ASSERT(mib->getHtOperation().primaryChannel == 11);
+        auto previous = peerState->negotiatedCapabilities;
+        auto previousAid = mib->getBssAccessPointData().associationIds.at(staAddress);
+        mgmt->submitReassociationRequest(staAddress);
+        ASSERT(mib->findPeerHtState(staAddress)->negotiatedCapabilities == previous);
+        mgmt->finishReassociationResponse(staAddress);
+        ASSERT(mib->findPeerHtState(staAddress)->negotiatedCapabilities != previous);
+        ASSERT(mib->getBssAccessPointData().associationIds.at(staAddress) == previousAid);
+        ASSERT(observer.notifications == 3);
+        mib->unsubscribe(Ieee80211Mib::bssStateChangedSignal, &observer);
+        std::cout << "AP observers see completed transactions; equal same-address replacement creates a fresh capability cache.\n";
         std::cout << "AP reassociation reconciles committed HT Operation with current channel after channel change.\n";
     }
 };
@@ -188,3 +225,6 @@ record-scalar-results = false
 
 %contains: stdout
 AP reassociation reconciles committed HT Operation with current channel after channel change.
+
+%contains: stdout
+AP observers see completed transactions; equal same-address replacement creates a fresh capability cache.

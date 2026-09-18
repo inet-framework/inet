@@ -26,9 +26,9 @@ Define_Module(RateSelection);
 
 void RateSelection::initialize(int stage)
 {
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib.reference(this, "mibModule", true);
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
@@ -184,15 +184,6 @@ const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const
         return computeControlFrameMode(header);
 }
 
-void RateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
-    }
-}
 
 void RateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
@@ -223,7 +214,8 @@ const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& pee
 {
     if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
-    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
+    return selectPeerCompatibleMode(modeSet, mib->findPeerCapabilities(peerAddress), mode, peerAddress,
+            mib->hasHtOperation() ? &mib->getHtOperation() : nullptr, mib->relationshipAllowsHt(peerAddress));
 }
 
 } // namespace ieee80211

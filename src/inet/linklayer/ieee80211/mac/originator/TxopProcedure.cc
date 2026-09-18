@@ -20,7 +20,7 @@ Define_Module(TxopProcedure);
 
 void TxopProcedure::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         limit = par("txopLimit");
         WATCH(start);
