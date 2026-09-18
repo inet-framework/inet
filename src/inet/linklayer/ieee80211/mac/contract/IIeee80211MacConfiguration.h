@@ -8,19 +8,16 @@
 #ifndef INET_IIEEE80211MACCONFIGURATION_H
 #define INET_IIEEE80211MACCONFIGURATION_H
 
-#include "inet/common/INETDefs.h"
-
-namespace inet::physicallayer { class Ieee80211ModeSet; }
+#include "inet/linklayer/ieee80211/mac/contract/IIeee80211ModeSetProvider.h"
 
 namespace inet::ieee80211 {
-/** Configured catalog is ready after LOCAL; explicit preparation requires PHY readiness.
+/** MAC configuration extends catalog access with preparation after PHY readiness.
  * Repeated preparation preserves protocol and algorithm state.
  */
-class INET_API IIeee80211MacConfiguration
+class INET_API IIeee80211MacConfiguration : public IIeee80211ModeSetProvider
 {
   public:
     virtual ~IIeee80211MacConfiguration() = default;
-    [[nodiscard]] virtual const physicallayer::Ieee80211ModeSet *getConfiguredModeSet() const = 0;
     virtual void prepareLocalCapabilities() = 0;
 };
 } // namespace inet::ieee80211

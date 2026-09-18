@@ -1,7 +1,9 @@
 IEEE 802.11 Capability and BSS State Ownership
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Custom modules must replace ``ModeSetListener`` and ``modesetChanged`` with the configured catalog from ``IIeee80211MacConfiguration``. Catalog consumers must derive from ``ModeSetModuleBase``. Declare a ``modeSetModule`` NED parameter. Call the base initialization before you use ``modeSet`` at ``INITSTAGE_LINK_LAYER``. Keep ``NUM_INIT_STAGES``. The MAC supplies the default path for its descendants. Standalone consumers must specify a module that implements the C++ and NED configuration contracts.
+Custom modules must replace ``ModeSetListener`` and ``modesetChanged`` with the configured catalog from ``IIeee80211ModeSetProvider``. Catalog consumers must derive from ``ModeSetModuleBase``. Declare a ``modeSetModule`` NED parameter. Call the base initialization before you use ``modeSet`` at ``INITSTAGE_LINK_LAYER``. Keep ``NUM_INIT_STAGES``. The MAC supplies the default path for its descendants. Standalone consumers must specify a module that implements the C++ and NED mode-set provider contracts.
+
+Management uses ``IIeee80211MacConfiguration``. This contract extends the mode-set provider with capability preparation. A catalog-only provider does not require that operation.
 
 Move algorithm initialization from the old signal callback to ``INITSTAGE_LINK_LAYER``. Catalog queries must preserve algorithm state.
 
