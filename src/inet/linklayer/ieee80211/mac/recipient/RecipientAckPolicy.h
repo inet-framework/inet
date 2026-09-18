@@ -8,14 +8,14 @@
 #ifndef __INET_RECIPIENTACKPOLICY_H
 #define __INET_RECIPIENTACKPOLICY_H
 
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientAckPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RecipientAckPolicy : public ModeSetListener, public IRecipientAckPolicy
+class INET_API RecipientAckPolicy : public ModeSetModuleBase, public IRecipientAckPolicy
 {
   protected:
     IRateSelection *rateSelection = nullptr;

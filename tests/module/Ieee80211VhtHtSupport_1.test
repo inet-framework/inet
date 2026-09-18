@@ -232,8 +232,8 @@ class VhtHtTest : public cSimpleModule, public cListener {
         delete packet;
     }
     static void checkLocal(Ieee80211Mib *mib, int antennas) {
-        ASSERT(mib->localHtCapabilitiesValid);
-        const auto& caps = mib->localHtCapabilities;
+        ASSERT(mib->isLocalHtCapable());
+        const auto& caps = mib->getLocalHtCapabilities();
         ASSERT(caps.supportedChannelWidths.count(MHz(20)) == 1);
         ASSERT(caps.supportedChannelWidths.count(MHz(40)) == 0);
         ASSERT(caps.shortGi20 && !caps.shortGi40);
@@ -280,8 +280,8 @@ class VhtHtTest : public cSimpleModule, public cListener {
         wait(SimTime(40, SIMTIME_MS));
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
         auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
-        ASSERT(staMib->bssStationData.isAssociated);
-        ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(staMib->getBssStationData().isAssociated);
+        ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
         checkLocal(staMib, scenario() >= 2 ? 2 : 1);
         checkLocal(apMib, scenario() >= 3 ? 2 : 1);
         ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
@@ -410,10 +410,10 @@ class VhtHtTest : public cSimpleModule, public cListener {
         if (scenario() == 1) {
             auto mgmt = check_and_cast<VhtHtSimplified *>(getModuleByPath("^.sta.wlan[0].mgmt"));
             mgmt->stopForTest();
-            ASSERT(!staMib->bssStationData.isAssociated);
+            ASSERT(!staMib->getBssStationData().isAssociated);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
-            ASSERT(apMib->bssAccessPointData.stations.count(staMib->address) == 0);
+            ASSERT(apMib->getBssAccessPointData().stations.count(staMib->address) == 0);
         }
         std::cout << "VHT HT scenario " << scenario() << " passed.\n";
     }

@@ -28,6 +28,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 module Dcf extends Module like IDcf
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         string rxModule;
         string txModule;
         string mibModule = default("^.^.mib");

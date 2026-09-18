@@ -24,20 +24,20 @@ mib.cancelAssociationIdReservation(first);
 ASSERT(mib.reserveAssociationId(third) == 1);
 
 ASSERT(mib.commitAssociationId(second) == 2);
-ASSERT(mib.bssAccessPointData.associationIds.at(second) == 2);
+ASSERT(mib.getBssAccessPointData().associationIds.at(second) == 2);
 mib.cancelAssociationIdReservation(second);
-ASSERT(mib.bssAccessPointData.associationIds.at(second) == 2);
+ASSERT(mib.getBssAccessPointData().associationIds.at(second) == 2);
 
 ASSERT(mib.commitAssociationId(third) == 1);
 mib.releaseAssociationId(second);
-ASSERT(mib.bssAccessPointData.associationIds.count(second) == 0);
+ASSERT(mib.getBssAccessPointData().associationIds.count(second) == 0);
 ASSERT(mib.allocateAssociationId(fourth) == 2);
 
 mib.reserveAssociationId(first);
-mib.bssAccessPointData.stations[first] = Ieee80211Mib::ASSOCIATED;
+mib.setPeerAssociationStatus(first, Ieee80211Mib::ASSOCIATED);
 mib.clearAssociationIds();
-ASSERT(mib.bssAccessPointData.stations.empty());
-ASSERT(mib.bssAccessPointData.associationIds.empty());
+ASSERT(mib.getBssAccessPointData().stations.empty());
+ASSERT(mib.getBssAccessPointData().associationIds.empty());
 ASSERT(mib.reserveAssociationId(second) == 1);
 
 EV << "Association ID ownership checks passed.\n";

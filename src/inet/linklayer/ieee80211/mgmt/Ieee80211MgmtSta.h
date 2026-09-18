@@ -72,6 +72,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     //
     struct ApInfo : public cObject {
         int channel; // internal zero-based radio channel index
+        const physicallayer::IIeee80211Band *band = nullptr;
         MacAddress address; // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
@@ -214,7 +215,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     virtual void disassociate();
 
     /** Utility function: clear the existing association without touching a pending transition. */
-    virtual void clearCurrentAssociation();
+    virtual void clearCurrentAssociation(bool publish = true);
 
     /** Processes a peer-initiated termination of the current association. */
     virtual bool terminateCurrentAssociationFromPeer(const MacAddress& address);
