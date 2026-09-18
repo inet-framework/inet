@@ -50,6 +50,17 @@ Use the inventory to select callers, configurations, generated consumers, standa
 tests. A changed file can participate in several contracts, and a contract can span several artifact
 kinds.
 
+For IEEE 802.11 state and component communication, use the
+[model architecture](../design/ieee80211-model-architecture.md) to assess the affected contracts.
+For each new or changed state item, identify its **kind, decision authority, writer, readers,
+lifetime, and dependencies**. For each notification, identify the **completed fact and independent
+consumer**. Check evidence at the affected transition, including cleanup and consistent reads.
+
+A new store, interface, cache, or signal needs a concrete responsibility and consumer. If the change
+requires a different architectural contract, assess its justification and the corresponding design
+document update explicitly. Do not accept an incidental implementation choice as an unexplained
+change to the architecture, or require new abstractions solely for possible future uses.
+
 ## 3. Perform an independent correctness pass
 
 Review the changed contract before running the rule checklist. Trace, as applicable:
