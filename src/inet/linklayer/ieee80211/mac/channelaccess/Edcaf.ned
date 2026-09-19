@@ -22,6 +22,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 module Edcaf extends Module
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         string rxModule;
         string collisionControllerModule;
         string originatorMacDataServiceModule;

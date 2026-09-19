@@ -1,0 +1,176 @@
+%description:
+Verify IEEE 802.11-2024 9.4.2.156/157 byte encodings, directional MCS maps,
+operation decoding, duplicate/truncated elements and subtype restrictions.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static Ptr<Ieee80211AssociationResponseFrame> response()
+{
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setAid(1);
+    frame->setStatusCode(SC_SUCCESSFUL);
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 6;
+    frame->setSupportedRates(rates);
+    Ieee80211VhtCapabilities cap;
+    cap.rxMaxMcs = {9, 8, 7, -1, -1, -1, -1, -1};
+    cap.txMaxMcs = {7, -1, -1, -1, -1, -1, -1, -1};
+    cap.supported160Mhz = true;
+    cap.shortGi80 = true;
+    cap.rxHighestLongGiRateMbps = 1234;
+    cap.txHighestLongGiRateMbps = 567;
+    setVhtCapabilities(frame, cap);
+    Ieee80211VhtOperation op;
+    setVhtOperation(frame, op);
+    frame->setChunkLength(B(30));
+    return frame;
+}
+static std::vector<uint8_t> bytes(const Ptr<const Ieee80211MgmtFrame>& frame)
+{
+    Packet packet("wire", frame);
+    return packet.peekAllAsBytes()->getBytes();
+}
+static Ptr<const Ieee80211AssociationResponseFrame> decode(const std::vector<uint8_t>& data)
+{
+    Packet packet("wire", makeShared<BytesChunk>(data));
+    return packet.popAtFront<Ieee80211AssociationResponseFrame>(B(data.size()), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+}
+
+template<typename T>
+static void checkSubtype(int baseLength, bool operationAllowed)
+{
+    // IEEE Std 802.11-2024, Tables 9-62 and 9-64 through 9-69.
+    // Exercise the codec's subtype permissions independently of advertisement policy.
+    auto reference = response();
+    for (bool ht : {false, true}) {
+        for (bool vht : {false, true}) {
+            auto frame = makeShared<T>();
+            Ieee80211SupportedRatesElement rates;
+            rates.numRates = 1;
+            rates.rate[0] = 6;
+            frame->setSupportedRates(rates);
+            if (auto response = dynamicPtrCast<Ieee80211AssociationResponseFrame>(frame)) {
+                response->setStatusCode(SC_SUCCESSFUL);
+                response->setAid(1);
+            }
+            if (auto beacon = dynamicPtrCast<Ieee80211BeaconFrame>(frame))
+                beacon->setBeaconInterval(SimTime(102400, SIMTIME_US));
+            frame->setHtCapabilitiesPresent(ht);
+            frame->setVhtCapabilities(reference->getVhtCapabilities());
+            frame->setVhtOperation(reference->getVhtOperation());
+            frame->setVhtCapabilitiesPresent(vht);
+            frame->setVhtOperationPresent(vht && operationAllowed);
+            frame->setChunkLength(B(baseLength + (ht ? 28 : 0) + (vht ? 14 : 0) + (vht && operationAllowed ? 7 : 0)));
+            auto encoded = bytes(frame);
+            Packet packet("subtype", makeShared<BytesChunk>(encoded));
+            auto decoded = packet.popAtFront<T>(B(encoded.size()));
+            ASSERT(!decoded->isIncorrect());
+            ASSERT(decoded->getHtCapabilitiesPresent() == ht);
+            ASSERT(decoded->getVhtCapabilitiesPresent() == vht);
+            ASSERT(decoded->getVhtOperationPresent() == (vht && operationAllowed));
+            if (!operationAllowed) {
+                // A well-formed VHT Operation IE is forbidden in a request,
+                // even when the same request accepts VHT Capabilities.
+                encoded.insert(encoded.end(), {192, 5, 0, 0, 0, 0xfc, 0xff});
+                Packet malformed("forbidden-operation", makeShared<BytesChunk>(encoded));
+                ASSERT(malformed.popAtFront<T>(B(encoded.size()), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+            }
+        }
+    }
+    if (!operationAllowed) {
+        auto forbidden = makeShared<T>();
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        forbidden->setSupportedRates(rates);
+        forbidden->setVhtOperation(reference->getVhtOperation());
+        forbidden->setVhtOperationPresent(true);
+        forbidden->setChunkLength(B(baseLength + 7));
+        bool rejected = false;
+        try { bytes(forbidden); } catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+    }
+}
+%activity:
+checkSubtype<Ieee80211BeaconFrame>(17, true);
+checkSubtype<Ieee80211ProbeResponseFrame>(17, true);
+checkSubtype<Ieee80211AssociationResponseFrame>(9, true);
+checkSubtype<Ieee80211ReassociationResponseFrame>(9, true);
+checkSubtype<Ieee80211ProbeRequestFrame>(5, false);
+checkSubtype<Ieee80211AssociationRequestFrame>(9, false);
+checkSubtype<Ieee80211ReassociationRequestFrame>(15, false);
+auto original = response();
+auto data = bytes(original);
+ASSERT(data.size() == 30);
+ASSERT(data[9] == 191 && data[10] == 12);
+ASSERT(data[11] == 0x24 && data[12] == 0 && data[13] == 0 && data[14] == 0);
+ASSERT(data[15] == 0xc6 && data[16] == 0xff); // Rx: MCS9,8,7,unsupported
+ASSERT(data[17] == 0xd2 && data[18] == 0x04);
+ASSERT(data[19] == 0xfc && data[20] == 0xff); // Tx: MCS7,unsupported
+ASSERT(data[21] == 0x37 && data[22] == 0x02);
+ASSERT(data[23] == 192 && data[24] == 5);
+ASSERT(data[25] == 0 && data[26] == 0 && data[27] == 0);
+ASSERT(data[28] == 0xfc && data[29] == 0xff);
+auto decoded = decode(data);
+ASSERT(!decoded->isIncorrect());
+Ieee80211VhtCapabilities cap;
+Ieee80211VhtOperation op;
+ASSERT(decodeVhtCapabilities(decoded, cap));
+ASSERT(cap.rxMaxMcs[0] == 9 && cap.rxMaxMcs[1] == 8 && cap.rxMaxMcs[2] == 7);
+ASSERT(cap.txMaxMcs[0] == 7 && cap.txMaxMcs[1] == -1);
+ASSERT(cap.rxHighestLongGiRateMbps == 1234 && cap.txHighestLongGiRateMbps == 567);
+ASSERT(cap.shortGi80 && !cap.shortGi20 && !cap.shortGi40 && !cap.shortGi160);
+ASSERT(decodeVhtOperation(decoded, op) && op.channelWidth == MHz(20));
+auto fresh = response();
+fresh->setVhtCapabilities(decoded->getVhtCapabilities());
+fresh->setVhtOperation(decoded->getVhtOperation());
+ASSERT(bytes(fresh) == data);
+for (int idOffset : {9, 23}) {
+    auto duplicate = data;
+    duplicate.insert(duplicate.end(), data.begin() + idOffset, data.begin() + idOffset + data[idOffset + 1] + 2);
+    ASSERT(decode(duplicate)->isIncorrect());
+    auto wrongLength = data;
+    wrongLength[idOffset + 1]--;
+    ASSERT(decode(wrongLength)->isIncorrect());
+}
+for (size_t length = 10; length < data.size(); length++) {
+    if (length == 23)
+        continue; // complete capability IE without optional operation
+    auto truncated = data;
+    truncated.resize(length);
+    ASSERT(decode(truncated)->isIncomplete());
+}
+auto invalidWidth = data;
+invalidWidth[11] |= 12;
+ASSERT(decode(invalidWidth)->isIncorrect());
+auto frame = response();
+auto element = frame->getVhtOperation();
+element.channelWidth = 1;
+element.centerFrequencySegment0 = 42;
+frame->setVhtOperation(element);
+ASSERT(decodeVhtOperation(frame, op) && op.channelWidth == MHz(80));
+element.centerFrequencySegment1 = 50;
+frame->setVhtOperation(element);
+ASSERT(decodeVhtOperation(frame, op) && op.channelWidth == MHz(160));
+element.centerFrequencySegment1 = 106;
+frame->setVhtOperation(element);
+ASSERT(!decodeVhtOperation(frame, op)); // 80+80 is outside this implementation
+
+auto forbidden = makeShared<Ieee80211DeauthenticationFrame>();
+forbidden->setVhtCapabilitiesPresent(true);
+forbidden->setVhtCapabilities(original->getVhtCapabilities());
+forbidden->setChunkLength(B(16));
+bool rejected = false;
+try { bytes(forbidden); } catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+std::cout << "VHT management wire contract verified.\n";
+
+%contains: stdout
+VHT management wire contract verified.

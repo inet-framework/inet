@@ -10,7 +10,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/common/StationRetryCounters.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
@@ -28,8 +28,11 @@ namespace ieee80211 {
 /**
  * Implements IEEE 802.11 Enhanced Distributed Channel Access Function.
  */
-class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetListener
+class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetModuleBase
 {
+  public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IContention *contention = nullptr;
     IChannelAccess::ICallback *callback = nullptr;
@@ -61,7 +64,6 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual AccessCategory getAccessCategory(const char *ac);
     virtual int getAifsNumber(AccessCategory ac);

@@ -8,14 +8,14 @@
 #ifndef __INET_RTSPOLICY_H
 #define __INET_RTSPOLICY_H
 
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RtsPolicy : public ModeSetListener, public IRtsPolicy
+class INET_API RtsPolicy : public ModeSetModuleBase, public IRtsPolicy
 {
   protected:
     int rtsThreshold = -1;

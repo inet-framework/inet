@@ -14,11 +14,13 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IIeee80211MacConfiguration.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 
@@ -28,14 +30,20 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     // configuration
     ModuleRefByPar<Ieee80211Mib> mib;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     NetworkInterface *myIface = nullptr;
-    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    ModuleRefByPar<IIeee80211MacConfiguration> configurationProvider;
+    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    bool configurationPrepared = false;
     Ieee80211SupportedRatesElement supportedRates;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 
@@ -46,7 +54,8 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    void prepareConfiguration();
+    void updateSupportedRates();
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -82,7 +91,14 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
         return length;
     }
 
+    /** Adds local VHT capabilities; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    /** Adds local VHT operation; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
     /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    Ieee80211HtOperation computeLocalHtOperation(int primaryChannel, const physicallayer::IIeee80211Band *band) const;
+    virtual void prepareLocalOperation();
+
     virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
     virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const;
 
@@ -109,7 +125,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER; }
 
-    virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
+    void handleStartOperation(LifecycleOperation *operation) override { start(); mib->publishStateChange(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
     virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
 
@@ -124,4 +140,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-

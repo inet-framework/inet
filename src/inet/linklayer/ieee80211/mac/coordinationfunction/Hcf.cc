@@ -33,7 +33,7 @@ Define_Module(Hcf);
 
 void Hcf::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startRxTimer = new cMessage("startRxTimeout");
@@ -113,7 +113,7 @@ void Hcf::handleMessage(cMessage *msg)
 
 void Hcf::refreshDisplay() const
 {
-    ModeSetListener::refreshDisplay();
+    ModeSetModuleBase::refreshDisplay();
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();
         getDisplayString().setTagArg("tt", 0, ("Fs: " + history).c_str());
@@ -165,8 +165,6 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
         }
     }
-    else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)

@@ -73,11 +73,11 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     void setAssociated(const MacAddress& address)
     {
         Enter_Method("setAssociated");
-        if (mib->bssStationData.isAssociated)
+        if (mib->getBssStationData().isAssociated)
             clearCurrentAssociation();
         ensureAccessPoint(address);
-        mib->bssData.bssid = address;
-        mib->bssStationData.isAssociated = true;
+        mib->commitBss("SSID", address, nullptr, -1, nullptr);
+        mib->setAssociated(true);
         assocAP = AssociatedApInfo();
         assocAP.address = address;
         assocAP.channel = 1;
@@ -99,7 +99,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     void beginPendingReassociation(const MacAddress& targetAddress)
     {
         Enter_Method("beginPendingReassociation");
-        ASSERT(mib->bssStationData.isAssociated);
+        ASSERT(mib->getBssStationData().isAssociated);
         ASSERT(assocTimeoutMsg == nullptr);
         auto target = ensureAccessPoint(targetAddress);
         assocTimeoutMsg = new cMessage("assocTimeout", 2);
@@ -127,7 +127,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         processAssociationResponse(packet, header, true);
     }
 
-    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool isAssociated() const { return mib->getBssStationData().isAssociated; }
     MacAddress getAssociatedAddress() const { return assocAP.address; }
     bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
     bool hasPendingReassociation() const { return assocTimeoutMsg != nullptr && reassociationInProgress; }
@@ -182,7 +182,7 @@ class CompletionListener : public cListener
         acceptSeen = true;
         acceptCount++;
         events.push_back("accept");
-        callbackStateValid = callbackStateValid && agent->getPreviousAp() == expectedAddress && mib->bssStationData.isAssociated;
+        callbackStateValid = callbackStateValid && agent->getPreviousAp() == expectedAddress && mib->getBssStationData().isAssociated;
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
@@ -197,7 +197,7 @@ class CompletionListener : public cListener
         }
         else
             return;
-        callbackStateValid = callbackStateValid && acceptSeen && agent->getPreviousAp() == expectedAddress && mib->bssStationData.isAssociated;
+        callbackStateValid = callbackStateValid && acceptSeen && agent->getPreviousAp() == expectedAddress && mib->getBssStationData().isAssociated;
     }
 };
 

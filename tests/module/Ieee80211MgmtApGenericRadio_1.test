@@ -24,7 +24,7 @@ class TestIeee80211MgmtApGenericRadio : public Ieee80211MgmtAp
     {
         Ieee80211MgmtAp::initialize(stage);
         if (stage == INITSTAGE_LAST) {
-            ASSERT(!mib->isHtOperationSupported());
+            ASSERT(!mib->isLocalHtCapable());
             ASSERT(!mib->hasPrimaryChannel());
             probeTimer = new cMessage("injectProbe");
             scheduleAt(SimTime(2, SIMTIME_MS), probeTimer);

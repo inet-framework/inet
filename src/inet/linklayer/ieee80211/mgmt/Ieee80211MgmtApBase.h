@@ -10,6 +10,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/linklayer/ieee80211/mgmt/contract/IIeee80211BssProvider.h"
 
 namespace inet {
 
@@ -27,10 +28,16 @@ namespace ieee80211 {
  * with utility functions that are useful for implementing AP functionality.
  *
  */
-class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase, public IIeee80211BssProvider
 {
+  public:
+    void prepareBss() override;
+    void installSimplifiedPeer(const MacAddress& address, const Ieee80211HtCapabilities *capabilities) override;
+    void removeSimplifiedPeer(const MacAddress& address) override;
+
   protected:
     cModule *radio = nullptr;
+    int radioChannel = -1;
     const physicallayer::IIeee80211Band *radioBand = nullptr; // Immutable band observed via radioChannelChanged
 
     const physicallayer::IIeee80211Band *getHtOperationBand() const;
@@ -38,6 +45,7 @@ class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
+    void prepareLocalOperation() override;
     using Ieee80211MgmtBase::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 };

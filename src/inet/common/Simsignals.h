@@ -32,6 +32,7 @@ extern INET_API simsignal_t // admin
 
     modesetChangedSignal,
 
+
     interpacketGapStartedSignal,
     interpacketGapEndedSignal,
 
@@ -152,4 +153,3 @@ void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *deta
 } // namespace inet
 
 #endif
-

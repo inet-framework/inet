@@ -105,8 +105,8 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         rates.numRates = 1;
         rates.rate[0] = 6;
         body->setSupportedRates(rates);
-        setHtCapabilities(body, mib->localHtCapabilities);
-        setHtOperation(body, &physicallayer::Ieee80211CompliantBands::band2_4GHz, mib->getHtOperation());
+        setHtCapabilities(body, mib->getLocalHtCapabilities());
+        setHtOperation(body, &physicallayer::Ieee80211CompliantBands::band2_4GHz, getTestOperation());
         if (malformedCapabilities) {
             auto capabilities = body->getHtCapabilities();
             capabilities.maxAmpduLengthExponent = 4;
@@ -122,7 +122,7 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         packet->insertAtBack(body);
         packet->addTag<SignalPowerInd>()->setPower(mW(1));
         const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
-        physicallayer::Ieee80211Channel channel(band, mib->getHtOperation().primaryChannel);
+        physicallayer::Ieee80211Channel channel(band, getTestOperation().primaryChannel);
         if (channelIndicationPresent)
             packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
         auto header = makeShared<Ieee80211MgmtHeader>();
@@ -242,8 +242,8 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         rates.rate[0] = 6;
         body->setSupportedRates(rates);
         if (htForm != ResponseHtForm::LEGACY) {
-            auto capabilities = mib->localHtCapabilities;
-            auto operation = mib->getHtOperation();
+            auto capabilities = mib->getLocalHtCapabilities();
+            auto operation = getTestOperation();
             if (responsePrimaryChannel >= 0)
                 operation.primaryChannel = responsePrimaryChannel;
             if (responseOperatingChannelWidth == 20)
@@ -281,7 +281,7 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         auto packet = new Packet("AssociationResponse");
         packet->insertAtBack(body);
         const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
-        int channelNumber = responsePrimaryChannel >= 0 ? responsePrimaryChannel : mib->getHtOperation().primaryChannel;
+        int channelNumber = responsePrimaryChannel >= 0 ? responsePrimaryChannel : getTestOperation().primaryChannel;
         physicallayer::Ieee80211Channel channel(band, channelNumber);
         if (channelIndicationPresent)
             packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
@@ -294,13 +294,13 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     {
         Enter_Method("resetAssociationState");
         cancelPendingAssociation();
-        if (mib->bssStationData.isAssociated)
+        if (mib->getBssStationData().isAssociated)
             clearCurrentAssociation();
     }
 
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
 
-    bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
+    bool isAssociatedForTest() const { return mib->getBssStationData().isAssociated; }
     const MacAddress& getAssociatedAddressForTest() const { return assocAP.address; }
     bool hasBeaconTimeoutForTest() const { return assocAP.beaconTimeoutMsg != nullptr; }
     simtime_t getBeaconTimeoutArrivalForTest() const { return assocAP.beaconTimeoutMsg->getArrivalTime(); }
@@ -312,13 +312,17 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     void setLegacyForTest()
     {
         Enter_Method("setLegacyForTest");
-        mib->localHtCapabilitiesValid = false;
+        mib->clearBss();
+        mib->installLocalHtCapabilities(Ieee80211HtCapabilities(), false);
     }
+
+    Ieee80211HtOperation testOperation;
+    const Ieee80211HtOperation& getTestOperation() const { return testOperation; }
 
     void setPrimaryChannelForTest(int channel)
     {
         Enter_Method("setPrimaryChannelForTest");
-        mib->setPrimaryChannel(channel);
+        testOperation.primaryChannel = channel;
     }
 
   protected:
@@ -445,7 +449,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // reassociation to another AP keeps the current association and
         // restores the current AP's channel before reporting failure.
         mgmt->finishAuthenticationForTest(probeAddress);
-        staMib->setPeerHtCapabilities(probeAddress, staMib->localHtCapabilities, staMib->getHtOperation());
+        staMib->setPeerHtCapabilities(probeAddress, staMib->getLocalHtCapabilities());
         mgmt->clearChangedChannelsForTest();
         mgmt->startReassociationForTest(probeAddress);
         mgmt->deliverResponse(probeAddress, true, SC_DATARATE_UNSUP, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
@@ -462,7 +466,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->reassociationConfirms == 1);
         ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
 
-        staMib->setPeerHtCapabilities(probeAddress, staMib->localHtCapabilities, staMib->getHtOperation());
+        staMib->setPeerHtCapabilities(probeAddress, staMib->getLocalHtCapabilities());
         mgmt->clearChangedChannelsForTest();
         mgmt->startReassociationForTest(probeAddress);
         mgmt->deliverReassociationTimeoutForTest();
@@ -500,16 +504,16 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         Ieee80211HtOperation sparseOperation;
         sparseOperation.operatingChannelWidth = MHz(20);
         sparseOperation.basicMcsSupported[0] = true;
-        staMib->setPeerHtCapabilities(address, sparsePeer, sparseOperation);
+        staMib->setPeerHtCapabilities(address, sparsePeer);
         const auto *dcfSparseMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
         const auto *qosSparseMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
         ASSERT(dcfSparseMode == qosSparseMode);
         ASSERT(dcfSparseMode->getHtMcsIndex() == 0);
         ASSERT(dcfSparseMode->getDataMode()->getBandwidth() == MHz(20));
 
-        // The invalid/absent negotiated state is a legacy-only unicast
-        // condition, while group-addressed traffic keeps its existing HT
-        // selection policy.
+        // Invalid/absent negotiated state forces legacy unicast. Group traffic
+        // independently uses the nonempty basic legacy set (IEEE Std
+        // 802.11-2024, 10.6.5.4), regardless of this peer's negotiated state.
         staMib->removePeerHtCapabilities(address);
         const auto *dcfLegacyMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
         const auto *qosLegacyMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
@@ -539,9 +543,11 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         multicastHeader->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
         const auto *dcfMulticastMode = dcfRateSelection->computeMode(&ratePacket, multicastHeader);
         const auto *qosMulticastMode = qosRateSelection->computeMode(&ratePacket, multicastHeader, nullptr);
-        ASSERT(dcfMulticastMode->getHtMcsIndex() >= 0);
-        ASSERT(qosMulticastMode->getHtMcsIndex() >= 0);
-        staMib->setPeerHtCapabilities(address, staMib->localHtCapabilities, staMib->getHtOperation());
+        ASSERT(dcfMulticastMode == modeSet->getMode(Mbps(24)));
+        ASSERT(qosMulticastMode == dcfMulticastMode);
+        ASSERT(dcfMulticastMode->getHtMcsIndex() < 0);
+        ASSERT(modeSet->getIsMandatory(dcfMulticastMode));
+        staMib->setPeerHtCapabilities(address, staMib->getLocalHtCapabilities());
         ASSERT(dcfRateSelection->computeMode(&ratePacket, dataHeader)->getHtMcsIndex() >= 0);
         ASSERT(qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr)->getHtMcsIndex() >= 0);
 

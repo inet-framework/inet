@@ -25,7 +25,7 @@ Define_Module(Dcf);
 
 void Dcf::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
         startRxTimer = new cMessage("startRxTimeout");
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
@@ -132,8 +132,6 @@ void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
         }
     }
-    else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

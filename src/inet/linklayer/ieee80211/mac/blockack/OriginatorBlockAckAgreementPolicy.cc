@@ -17,7 +17,7 @@ Define_Module(OriginatorBlockAckAgreementPolicy);
 
 void OriginatorBlockAckAgreementPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         ackPolicy = check_and_cast<IOriginatorQoSAckPolicy *>(getModuleByPath(par("originatorAckPolicyModule")));
         delayedAckPolicySupported = par("delayedAckPolicySupported");

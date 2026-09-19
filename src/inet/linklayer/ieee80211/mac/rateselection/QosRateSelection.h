@@ -9,7 +9,7 @@
 #define __INET_QOSRATESELECTION_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
@@ -30,13 +30,15 @@ namespace ieee80211 {
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames
  */
-class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListener
+class INET_API QosRateSelection : public IQosRateSelection, public ModeSetModuleBase
 {
+  public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
 
-    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
     // originator frame modes
@@ -58,7 +60,7 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void updateModes();
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
@@ -92,4 +94,3 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
 } /* namespace inet */
 
 #endif
-
