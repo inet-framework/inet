@@ -214,7 +214,7 @@ class TestIeee80211MgmtApCancellation : public Ieee80211MgmtAp
         auto& sta = staList[address];
         sta.address = address;
         sta.authSeqExpected = 1;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     void submitAssociationRequest(const MacAddress& address)
@@ -280,12 +280,12 @@ class TestIeee80211MgmtApCancellation : public Ieee80211MgmtAp
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
     bool hasCommittedAssociationId(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+        return mib->getBssAccessPointData().associationIds.find(address) != mib->getBssAccessPointData().associationIds.end();
     }
 
     Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
     {
-        return mib->bssAccessPointData.stations.at(address);
+        return mib->getPeerAssociationStatus(address);
     }
 
   protected:
