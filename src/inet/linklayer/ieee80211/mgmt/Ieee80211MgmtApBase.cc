@@ -21,7 +21,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
 namespace inet {
 
@@ -83,6 +82,11 @@ void Ieee80211MgmtApBase::prepareLocalOperation()
         const auto *band = getHtOperationBand();
         band->getStandardChannelNumber(channel);
         auto operation = computeLocalHtOperation(channel, band);
+        const auto *radioContract = check_and_cast<const physicallayer::IIeee80211Radio *>(radio);
+        if (!radioContract->isHtChannelWidthSupported(MHz(40))) {
+            operation.secondaryChannelOffset = 0;
+            operation.operatingChannelWidth = MHz(20);
+        }
         mib->commitBss(mib->getBssData().ssid, mib->address, band, channel, &operation);
     }
     else {

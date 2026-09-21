@@ -67,7 +67,10 @@ class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio, pu
   public:
     Ieee80211Radio();
 
-class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio, public IIeee80211CcaProvider
+    virtual const Ieee80211CcaSnapshot& getCcaSnapshot() const override { return *ccaSnapshot; }
+
+    // Update behavioral consumers before publishing the new mode set.
+    // Failures are fatal simulation errors; these setters do not roll back.
     // Behavioral consumers implement IIeee80211ModeSetListener.
     virtual const Ieee80211Channel *getChannel() const override;
     virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;

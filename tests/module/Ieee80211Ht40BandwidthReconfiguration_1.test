@@ -1,5 +1,5 @@
 %description:
-Verify rejected combined HT40-to-legacy commands restore radio, PHY, and participant state without publication, followed by a successful bandwidth-only HT20 transition and AP beacon generation.
+Verify invalid combined HT40 commands are rejected before mutation, followed by a successful bandwidth-only HT20 transition and AP beacon generation. Failures after coordinator begin are fatal and covered by Ieee80211ModeSetFailure_1.
 
 %file: Test.cc
 #include <vector>
@@ -61,24 +61,6 @@ class CcaCheckingReceiver : public physicallayer::Ieee80211Receiver
 };
 Define_Module(CcaCheckingReceiver);
 
-class RejectingParticipant : public cListener, public physicallayer::IIeee80211ModeSetListener
-{
-  public:
-    const physicallayer::Ieee80211ModeSet *state = nullptr;
-    bool applied = false;
-    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return state; }
-    virtual std::function<void()> saveModeSetState() override
-    {
-        return [this, oldState = state]() { state = oldState; };
-    }
-    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *target) override
-    {
-        state = target;
-        applied = true;
-        throw cRuntimeError("test participant rejection");
-    }
-};
-
 class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
 {
   public:
@@ -98,21 +80,16 @@ class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
         auto oldChannelNumber = getChannel()->getChannelNumber();
         auto oldOffset = getChannel()->getSecondaryChannelOffset();
         auto oldTimer = receptionTimer;
-        RejectingParticipant participant;
-        participant.state = oldModeSet;
         subscribe(radioChannelChangedSignal, this);
         subscribe(listeningChangedSignal, this);
-        // Reject at mode mapping, fixed-rate selection, HT width validation,
-        // and finally a participant after all built-in consumers have applied.
-        for (int probe : {0, 1, 2, 3}) {
-            if (probe == 3)
-                getSimulation()->getSystemModule()->subscribe(modesetChangedSignal, &participant);
+        // These validation failures precede the fatal coordinator boundary.
+        for (int probe : {0, 2}) {
             auto message = new cMessage("rejectedConfigure", physicallayer::RADIO_C_CONFIGURE);
             auto command = new physicallayer::Ieee80211ConfigureRadioCommand();
             auto target = physicallayer::Ieee80211ModeSet::getModeSet(probe >= 2 ? "n(mixed-2.4Ghz)" : "g(mixed)");
             command->setOpMode(target->getName());
             command->setBandwidth(probe == 3 ? MHz(40) : MHz(20));
-            command->setChannelNumber(oldChannelNumber + 1);
+            command->setChannelNumber(probe == 2 ? -2 : oldChannelNumber + 1);
             if (probe != 0)
                 command->setMode(target->getMode(Mbps(24)));
             message->setControlInfo(command);
@@ -120,7 +97,7 @@ class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
             try { handleUpperCommand(message); }
             catch (const cRuntimeError& error) {
                 const char *expected[] = {"Cannot map current mode", "Unknown mode for bitrate range",
-                    "40 MHz HT operation requires", "test participant rejection"};
+                    "Invalid target 802.11 channel number", "test participant rejection"};
                 ASSERT(std::string(error.what()).find(expected[probe]) != std::string::npos);
                 rejected = true;
                 delete message;
@@ -135,15 +112,12 @@ class ConfiguringRadio : public physicallayer::Ieee80211Radio, public cListener
             ASSERT(htSecondaryChannelOffset == oldOffset && band == oldBand && opMode == oldOpMode);
             ASSERT(modeSet == oldModeSet && tx->getModeSet() == oldModeSet && rx->getModeSet() == oldModeSet);
             ASSERT(tx->getMode() == oldMode && receptionTimer == oldTimer);
-            ASSERT(participant.state == oldModeSet);
             for (cComponent *component = this; component != nullptr; component = component->getParentModule())
                 for (auto listener : component->getLocalSignalListeners(modesetChangedSignal))
                     if (auto consumer = dynamic_cast<physicallayer::IIeee80211ModeSetListener *>(listener))
                         ASSERT(consumer->getModeSet() == oldModeSet);
             ASSERT(notifications == 0);
         }
-        ASSERT(participant.applied);
-        getSimulation()->getSystemModule()->unsubscribe(modesetChangedSignal, &participant);
         unsubscribe(radioChannelChangedSignal, this);
         unsubscribe(listeningChangedSignal, this);
     }

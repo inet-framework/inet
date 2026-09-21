@@ -107,7 +107,9 @@ void Ieee80211Radio::initialize(int stage)
     if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const char *bandName = par("bandName");
         setBand(*bandName ? Ieee80211CompliantBands::getBand(bandName) : nullptr);
-        setModeSet(*opMode.c_str() ? Ieee80211ModeSet::getModeSet(opMode.c_str()) : nullptr);
+        // PHY submodules prepare their mode sets during local initialization.
+        // The coordinator is available only for runtime reconfiguration.
+        modeSet = check_and_cast<const Ieee80211Receiver *>(receiver)->getModeSet();
         htSecondaryChannelOffset = Ieee80211Channel::parseSecondaryChannelOffset(par("htSecondaryChannelOffset"));
         Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
         Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
