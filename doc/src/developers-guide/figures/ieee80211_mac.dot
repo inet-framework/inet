@@ -1,0 +1,36 @@
+digraph g {
+  newrank=true; rankdir="TB"; nodesep=0.25; ranksep=0.5
+  node [shape=box, fontsize=10, fontname="Helvetica"]
+  edge [fontsize=9, fontname="Helvetica"]
+
+  llc [label="llc", shape=plaintext]
+  mgmt [label="mgmt", shape=plaintext]
+  subgraph cluster_mac {
+    label="mac (Ieee80211Mac)"; fontsize=10; fontname="Helvetica"
+    macmod [label="frame codec and dispatcher", style=bold]
+    cf [label="coordination function\n(dcf or hcf)"]
+    ds [label="ds"]
+    tx [label="tx"]
+    rx [label="rx"]
+  }
+  radio [label="radio", shape=plaintext]
+
+  { rank=same; llc; mgmt }
+  { rank=same; cf; ds }
+  { rank=same; tx; rx }
+
+  llc -> macmod [label="packets", dir=both]
+  mgmt -> macmod [label="frame bodies,\ncommands", dir=both]
+  macmod -> cf [label="ICoordination-\nFunction"]
+  cf -> macmod [label="sendUpFrame", style=dashed]
+  macmod -> ds [label="IDs"]
+  ds -> macmod [label="send up,\nre-inject", style=dashed]
+  cf -> tx [label="ITx"]
+  tx -> cf [label="transmission\ncomplete", style=dashed]
+  macmod -> rx [label="IRx"]
+  rx -> cf [label="IContention", style=dashed]
+  tx -> rx [label="NAV"]
+  tx -> macmod [label="sendDownFrame", constraint=false]
+  rx -> radio [style=invis]
+  macmod -> radio [label="frames, commands;\npackets, state signals", dir=both, constraint=false]
+}
