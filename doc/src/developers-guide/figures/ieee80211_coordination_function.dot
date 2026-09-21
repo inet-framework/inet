@@ -1,0 +1,44 @@
+digraph g {
+  newrank=true; rankdir="TB"; nodesep=0.3; ranksep=0.4
+  node [shape=box, fontsize=10, fontname="Helvetica"]
+  edge [fontsize=9, fontname="Helvetica"]
+
+  cf [label="coordination function\n(Dcf, Hcf)", style=bold]
+
+  helpers [shape=plaintext, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td port="rate">rate selection,<br/>rate control</td></tr><tr><td port="prot">protection<br/>mechanism</td></tr><tr><td port="rec">recovery<br/>procedure</td></tr></table>>]
+
+  ca [label="channel access\n(Dcaf, Edcaf)"]
+  contention [label="contention"]
+
+  handler [label="frame sequence\nhandler"]
+  sequence [label="frame sequence\n(DcfFs, HcfFs)"]
+  inprogress [label="in-progress\nframes"]
+  dataservice [label="originator\ndata service"]
+  queue [label="pending queue"]
+  ackhandler [label="ack handler"]
+
+  recipient [label="recipient\ndata service"]
+  procedures [label="procedures\n(RTS, CTS, ACK,\nblock ack)"]
+  policies [label="policies"]
+
+  { rank=same; helpers; ca; handler; recipient }
+  { rank=same; contention; sequence; procedures }
+  { rank=same; inprogress; policies }
+  { rank=same; dataservice; ackhandler }
+
+  cf -> helpers [label="mode, duration,\noutcome"]
+  helpers:rec -> ca [label="cw"]
+  cf -> ca [label="request,\ngranted", dir=both]
+  ca -> contention [label="start,\ngranted", dir=both]
+  cf -> handler [label="start, step\nevents", dir=both]
+  handler -> sequence [label="next step"]
+  sequence -> inprogress [label="frame to\ntransmit"]
+  inprogress -> dataservice [label="extract"]
+  dataservice -> queue [label="dequeue"]
+  inprogress -> ackhandler [label="eligible?"]
+  sequence -> policies [label="RTS? ack\npolicy?"]
+  cf -> recipient [label="frames", dir=both]
+  recipient -> procedures [style=invis]
+  cf -> procedures [label="RTS, data;\nresponse", dir=both, constraint=false]
+  procedures -> policies [label="CTS? ACK?"]
+}
