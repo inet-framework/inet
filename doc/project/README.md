@@ -72,6 +72,7 @@ In the order of the chain.
 | [design/repository-layout.md](design/repository-layout.md) | reference | — | Where does everything live? |
 | [design/node-anatomy.md](design/node-anatomy.md) | design | — | What is a network node made of? |
 | [design/protocol-anatomy.md](design/protocol-anatomy.md) | design | — | What does one protocol need, across all four artifact kinds? |
+| [design/ieee80211-anatomy.md](design/ieee80211-anatomy.md) | design | — | What is the IEEE 802.11 model made of, and how do its parts communicate? |
 | [design/ieee80211-model-architecture.md](design/ieee80211-model-architecture.md) | design | — | Who owns IEEE 802.11 catalog, capability, control, and status, and how do they change? |
 | [design/packet-anatomy.md](design/packet-anatomy.md) | design | — | What is a packet made of? |
 | [design/test-anatomy.md](design/test-anatomy.md) | design | — | What can each of the twelve test categories establish? |
