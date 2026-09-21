@@ -92,7 +92,7 @@ class TestRateSelectionAccessor : public ieee80211::RateSelection
     }
     static const Ieee80211ModeSet *getModeSet(const ieee80211::RateSelection *rs) { return static_cast<const TestRateSelectionAccessor *>(rs)->modeSet; }
     static void applyModeSet(ieee80211::RateSelection *rs, const Ieee80211ModeSet *ms) {
-        static_cast<TestRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+        rs->applyModeSet(ms);
     }
 };
 
@@ -108,7 +108,7 @@ class TestQosRateSelectionAccessor : public ieee80211::QosRateSelection
     }
     static const Ieee80211ModeSet *getModeSet(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->modeSet; }
     static void applyModeSet(ieee80211::QosRateSelection *rs, const Ieee80211ModeSet *ms) {
-        static_cast<TestQosRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+        rs->applyModeSet(ms);
     }
 };
 

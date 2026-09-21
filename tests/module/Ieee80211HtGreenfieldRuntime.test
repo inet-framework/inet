@@ -75,7 +75,7 @@ Define_Module(HtPreambleCheckingRadio);
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.AdhocHost;
+import inet.examples.wireless.lan80211.Lan80211;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
 
@@ -85,14 +85,10 @@ module HtPreambleCheckingRadio extends Ieee80211Radio
         @class(HtPreambleCheckingRadio);
 }
 
-network TestHtGreenfield
+network TestHtGreenfield extends Lan80211
 {
     parameters:
-        int numHosts = default(2);
-    submodules:
-        configurator: Ipv4NetworkConfigurator;
-        radioMedium: Ieee80211ScalarRadioMedium;
-        host[numHosts]: AdhocHost;
+        numHosts = default(2);
 }
 
 %inifile: omnetpp.ini

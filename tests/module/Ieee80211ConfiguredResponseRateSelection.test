@@ -7,6 +7,7 @@ non-HT rates and configured HT CTS rates use exact HT-mixed counterparts.
 #include <iostream>
 
 #include "inet/common/InitStages.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -120,11 +121,11 @@ class ConfiguredResponseProbe : public cSimpleModule
         assertHtMixedResponse("Configured DCF CTS MCS 0 override for MCS 7", dcfRateSelection->computeResponseCtsFrameMode(&greenfieldMcs7Packet, nullptr));
         assertHtMixedResponse("Configured CTS MCS 0 override for MCS 7", qosRateSelection->computeResponseCtsFrameMode(&greenfieldMcs7Packet, nullptr));
 
-        // Exercise the actual signal path with a compatible mode-set transition.
+        // Exercise the coordinated radio mode-set transition.
         // The configured data cache must bind to the exact profile object while
         // the configured response operations remain usable after each refresh.
-        auto wlan = check_and_cast<cModule *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0]"));
-        wlan->emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")));
+        auto radio = check_and_cast<Ieee80211Radio *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0].radio"));
+        radio->setModeSet(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"));
         ASSERT(dcfRateSelection->computeMode(&dataPacket, dataHeader) == mixedSourceMode);
         ASSERT(qosRateSelection->computeMode(&dataPacket, dataHeader, nullptr) == mixedSourceMode);
         assertHtMixedResponse("Rebound DCF CTS mixed", dcfRateSelection->computeResponseCtsFrameMode(&mixedPacket, nullptr));
@@ -132,7 +133,7 @@ class ConfiguredResponseProbe : public cSimpleModule
         assertNonHtResponse("Rebound DCF ACK mixed", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
         assertNonHtResponse("Rebound QoS ACK mixed", qosRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
         assertNonHtResponse("Rebound QoS BlockAck mixed", qosRateSelection->computeResponseBlockAckFrameMode(nullptr, basicBlockAckReq));
-        wlan->emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)")));
+        radio->setModeSet(Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)"));
         ASSERT(dcfRateSelection->computeMode(&dataPacket, dataHeader) == sourceMode);
         ASSERT(qosRateSelection->computeMode(&dataPacket, dataHeader, nullptr) == sourceMode);
         assertHtMixedResponse("Rebound DCF CTS Greenfield", dcfRateSelection->computeResponseCtsFrameMode(&packet, nullptr));

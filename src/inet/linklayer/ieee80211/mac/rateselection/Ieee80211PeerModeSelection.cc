@@ -26,7 +26,7 @@ const IIeee80211Mode *selectGroupAddressedMode(const Ieee80211ModeSet *modeSet, 
         if (!modeSet->getIsMandatory(candidate))
             continue;
         hasMandatoryLegacyMode = true;
-        if (candidate->getDataMode()->getNetBitrate() > requestedMode->getDataMode()->getNetBitrate())
+        if (requestedMode != nullptr && candidate->getDataMode()->getNetBitrate() > requestedMode->getDataMode()->getNetBitrate())
             continue;
         if (candidate == resolvedMode)
             return candidate;

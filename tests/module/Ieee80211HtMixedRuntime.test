@@ -79,7 +79,7 @@ Define_Module(HtMixedCheckingRadio);
 
 %file: test.ned
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.AdhocHost;
+import inet.examples.wireless.lan80211.Lan80211;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -89,12 +89,10 @@ module HtMixedCheckingRadio extends Ieee80211Radio
         @class(HtMixedCheckingRadio);
 }
 
-network TestHtMixedRuntime
+network TestHtMixedRuntime extends Lan80211
 {
-    submodules:
-        configurator: Ipv4NetworkConfigurator;
-        radioMedium: Ieee80211ScalarRadioMedium;
-        host[2]: AdhocHost;
+    parameters:
+        numHosts = default(2);
 }
 
 %inifile: omnetpp.ini

@@ -1,6 +1,6 @@
 %description:
 Group selection preserves an equivalent external basic legacy mode, while
-retaining active-catalog identity and the existing fastest-basic fallback.
+retaining active-catalog identity and bounding fallback by the requested rate.
 
 %includes:
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
@@ -32,14 +32,20 @@ ASSERT(basic.findCompatibleMode(&externalSix) == six);
 ASSERT(selectGroupAddressedMode(&basic, &externalSix) == six);
 ASSERT(selectGroupAddressedMode(&basic, six) == six);
 ASSERT(selectGroupAddressedMode(&basic, twelve) == twelve);
-ASSERT(selectGroupAddressedMode(&basic, nine) == twentyFour);
+ASSERT(selectGroupAddressedMode(&basic, nine) == six);
 ASSERT(selectGroupAddressedMode(&basic, catalog->getMode(Mbps(54))) == twentyFour);
 ASSERT(selectGroupAddressedMode(&basic, nullptr) == twentyFour);
 // A compatible non-basic or non-operational entry must not become a basic rate.
 GroupModeSet optional({{false, six, true}, {true, twentyFour, true}}, twentyFour);
-ASSERT(selectGroupAddressedMode(&optional, &externalSix) == twentyFour);
+bool optionalRejected = false;
+try { selectGroupAddressedMode(&optional, &externalSix); }
+catch (const cRuntimeError&) { optionalRejected = true; }
+ASSERT(optionalRejected);
 GroupModeSet nonOperational({{true, six, false}, {true, twentyFour, true}}, twentyFour);
-ASSERT(selectGroupAddressedMode(&nonOperational, &externalSix) == twentyFour);
+bool nonOperationalRejected = false;
+try { selectGroupAddressedMode(&nonOperational, &externalSix); }
+catch (const cRuntimeError&) { nonOperationalRejected = true; }
+ASSERT(nonOperationalRejected);
 // Exact membership wins even if an earlier equal tuple has different eligibility.
 GroupModeSet duplicate({{false, &externalSix, true}, {true, six, true}, {true, twentyFour, true}}, six);
 ASSERT(selectGroupAddressedMode(&duplicate, six) == six);

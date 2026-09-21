@@ -39,6 +39,14 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
     return nullptr;
 }
 
+// The catalog owns the borrowed preamble; each fixture owns its custom data mode.
+class TupleTestHtMode : public Ieee80211HtMode
+{
+  public:
+    using Ieee80211HtMode::Ieee80211HtMode;
+    ~TupleTestHtMode() override { preambleMode = nullptr; }
+};
+
 // Synthetic data rates isolate exact tuple matching from public lookup tolerance.
 class CustomBitrateDataMode : public Ieee80211HtDataMode
 {
@@ -124,12 +132,14 @@ for (int mcsIndex = 0; mcsIndex < 32; mcsIndex++) {
         }
     }
 }
-// No preamble is needed: these synthetic modes exercise only tuple lookup.
+// Borrow a complete catalog preamble for the control-response tables.
+const auto *basePreamble = check_and_cast<const Ieee80211HtMode *>(
+        findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getPreambleMode();
 const auto *baseData = check_and_cast<const Ieee80211HtDataMode *>(
         findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)->getDataMode());
-Ieee80211HtMode source("source", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
-Ieee80211HtMode nearby("nearby", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6.04)), Ieee80211HtMode::BAND_2_4GHZ);
-Ieee80211HtMode equal("equal", nullptr, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
+TupleTestHtMode source("source", basePreamble, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
+TupleTestHtMode nearby("nearby", basePreamble, new CustomBitrateDataMode(*baseData, Mbps(6.04)), Ieee80211HtMode::BAND_2_4GHZ);
+TupleTestHtMode equal("equal", basePreamble, new CustomBitrateDataMode(*baseData, Mbps(6)), Ieee80211HtMode::BAND_2_4GHZ);
 SparseModeSet nearbySet({{true, &nearby}, {true, htModeSet->getMode(Mbps(1)), true}}, &nearby, false);
 ASSERT(nearbySet.findCompatibleMode(&source) == nullptr);
 ASSERT(nearbySet.findMode(Mbps(6), MHz(20), 1, 800e-9) == &nearby);
