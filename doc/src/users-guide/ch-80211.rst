@@ -8,234 +8,911 @@ The 802.11 Model
 Overview
 --------
 
-IEEE 802.11 a.k.a. WiFi is the most widely used and universal wireless
-networking standard. Specifications are updated every few years, adding
-more features and ever-increasing bit rates.
+IEEE 802.11, also known as Wi-Fi, is the most widely used wireless LAN
+standard. INET contains a detailed model of it. The model covers:
 
-In INET, nodes become WiFi-enabled by adding an :ned:`Ieee80211Interface`
-to them. (As mentioned earlier, :ned:`WirelessHost` and :ned:`AdhocHost`
-already contain one in their default configuration.) APs are represented
-with the :ned:`AccessPoint` node type. WiFi networks require a matching
-transmission medium module to be present in the network, which is
-usually an :ned:`Ieee80211ScalarRadioMedium`.
+-  the PHY modes of 802.11a, 802.11b, 802.11g, 802.11n, 802.11ac and
+   802.11p, at packet level, with an optional bit-level OFDM variant;
 
-The operation mode (infrastructure vs ad hoc) is determined by the
-ingredients of the wireless interface. The :ned:`Ieee80211Interface` has the
-following submodules (incomplete list):
+-  medium access with DCF (Distributed Coordination Function), and with
+   EDCA (Enhanced Distributed Channel Access) for QoS stations;
 
-#. *management*: performs association/disassociation with access points,
-   channel scanning, beaconing
+-  infrastructure mode, with access points and stations that scan,
+   authenticate, associate and hand over, and ad hoc mode;
 
-#. *agent*: initiates actions such as channel scanning and connecting to
-   and disconnecting from access points
+-  RTS/CTS protection, fragmentation, A-MSDU aggregation, block
+   acknowledgement, and adaptive rate control.
 
-#. *MAC*: transmits and receives frames according to the IEEE 802.11
-   medium access procedure
+A node becomes Wi-Fi capable when it contains an :ned:`Ieee80211Interface`.
+:ned:`WirelessHost`, :ned:`AdhocHost` and :ned:`AccessPoint` contain one by
+default. A Wi-Fi network also needs one radio medium module, usually an
+:ned:`Ieee80211ScalarRadioMedium`.
 
-#. *PHY*: represents the radio
+The ini fragment below configures a small infrastructure network with one
+access point and some hosts. The stations find the access point by its SSID,
+authenticate, and associate. Nothing else is needed.
 
-The management component has several implementations which differ in
-their role and level of detail:
+.. code-block:: ini
 
--  :ned:`Ieee80211MgmtAdhoc`: for ad hoc mode stations
+   *.radioMedium.typename = "Ieee80211ScalarRadioMedium"
+   *.accessPoint.wlan[0].mgmt.ssid = "office"
+   *.host[*].wlan[0].agent.defaultSsid = "office"
+   **.wlan[0].opMode = "g(mixed)"
 
--  :ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`: for
-   infrastructure mode stations
+An :ned:`Ieee80211Interface` has seven submodules. A user replaces or
+configures them from the ini file:
 
--  :ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`: for access
-   points
+.. list-table::
+   :header-rows: 1
+   :widths: 14 30 56
 
-The "simplified" ones assume that stations are statically associated with
-an access point for the entire duration of the simulation (the
-scan-authenticate-associate process is not simulated), so they cannot be
-used e.g. in experiments involving handover.
+   * - Submodule
+     - Default type
+     - Role
+   * - ``mac``
+     - :ned:`Ieee80211Mac`
+     - Transmits and receives frames with the CSMA/CA procedure of the
+       standard. Holds the channel access, acknowledgement, retry, RTS/CTS,
+       fragmentation, aggregation and rate selection settings.
+   * - ``radio``
+     - :ned:`Ieee80211Radio`
+     - The physical layer: PHY mode, band, channel, transmit power, receiver
+       sensitivity, error model.
+   * - ``mgmt``
+     - :ned:`Ieee80211MgmtSta`
+     - The management plane: beacons, scan, authentication, association.
+       Variants exist for access points, ad hoc mode, and simplified use.
+   * - ``agent``
+     - :ned:`Ieee80211AgentSta`
+     - Decides when a station scans, which access point it joins, and when it
+       re-scans. Only present in a station with full management.
+   * - ``llc``
+     - :ned:`Ieee80211LlcLpd`
+     - Encapsulates the network layer packet. :ned:`Ieee80211LlcEpd` is the
+       default for 802.11p, and :ned:`Ieee80211Portal` is used in an access
+       point.
+   * - ``classifier``
+     - :ned:`OmittedIeee8021dQosClassifier`
+     - Assigns a user priority to the packets that the node sends, for QoS stations. Omitted
+       by default.
+   * - ``mib``
+     - :ned:`Ieee80211Mib`
+     - Holds the shared state of the interface: address, BSS, association,
+       HT settings. Not replaceable.
 
-The :ned:`Ieee80211MgmtSta` does not take any action by itself, it
-requires an agent (:ned:`Ieee80211AgentSta` or a custom one) to initiate
-actions.
+Three parameters of the interface set the most common things:
 
-The following sections examine the above components.
+-  :par:`opMode` selects the PHY mode and the set of bit rates. The values
+   are ``"a"``, ``"b"``, ``"g(erp)"``, ``"g(mixed)"``, ``"n(mixed-2.4Ghz)"``,
+   ``"ac"`` and ``"p"``. The default is ``"g(mixed)"``. The value goes to the
+   MAC and to the radio.
+
+-  :par:`bitrate` sets the bit rate of data frames. The default, ``-1bps``,
+   means the fastest mandatory rate of the PHY mode, for example 24 Mbps for
+   802.11g. See :ref:`ug:sec:80211:rate`.
+
+-  :par:`address` is the MAC address. The default, ``"auto"``, makes INET
+   generate one.
+
+.. _ug:sec:80211:nodes:
+
+Nodes
+-----
+
+Three node types come with a Wi-Fi interface:
+
+-  :ned:`WirelessHost` extends :ned:`StandardHost` with one
+   :ned:`Ieee80211Interface`, named ``wlan[0]``. The interface is a station
+   in infrastructure mode: it has :ned:`Ieee80211MgmtSta` and
+   :ned:`Ieee80211AgentSta`.
+
+-  :ned:`AdhocHost` extends :ned:`WirelessHost`. Its interface uses
+   :ned:`Ieee80211MgmtAdhoc` and has no agent. Packet forwarding is on, so
+   the node can be a router in a multi-hop network.
+
+-  :ned:`AccessPoint` has one :ned:`Ieee80211Interface` with
+   :ned:`Ieee80211MgmtAp` and :ned:`Ieee80211Portal`, and no agent. It also
+   has Ethernet ports (``eth[]``) and a relay unit that bridges frames
+   between the wireless and the wired side. Its :par:`wlan[*].protocol`
+   parameter is ``"ethernetmac"``, so the relay unit treats the wireless
+   interface like an Ethernet port.
+
+Every node that extends :ned:`StandardHost` can get Wi-Fi interfaces with
+the :par:`numWlanInterfaces` parameter; they appear as ``wlan[0]``,
+``wlan[1]`` and so on. The antenna of each radio follows the mobility module
+of the node (see :doc:`ch-mobility`).
+
+The radio medium module represents the shared channel. One instance serves
+the whole network. For 802.11 use :ned:`Ieee80211ScalarRadioMedium`, or
+:ned:`Ieee80211DimensionalRadioMedium` when signals must vary over frequency
+or time, for example to model cross-talk between adjacent channels. See
+:ref:`ug:sec:80211:physical-layer` and :doc:`ch-transmission-medium`.
+
+.. _ug:sec:80211:operation-modes:
+
+Operation Modes
+---------------
+
+The management submodule decides how an interface behaves. The table shows
+the variants and when to use them.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - Management module
+     - Role
+     - Behaviour
+   * - :ned:`Ieee80211MgmtSta`
+     - station
+     - Full station: scans channels, authenticates, associates, watches for
+       beacons. Needs an agent. Supports handover.
+   * - :ned:`Ieee80211MgmtAp`
+     - access point
+     - Full access point: sends beacons, answers probe requests, handles
+       authentication and association, keeps the station list.
+   * - :ned:`Ieee80211MgmtStaSimplified`
+     - station
+     - No management frames. The station is associated with the access point
+       named in :par:`accessPointAddress` from the start.
+   * - :ned:`Ieee80211MgmtApSimplified`
+     - access point
+     - No management frames. Every station counts as associated.
+   * - :ned:`Ieee80211MgmtAdhoc`
+     - ad hoc
+     - No management frames at all. Data frames go directly between nodes.
+
+Infrastructure mode
+~~~~~~~~~~~~~~~~~~~
+
+In infrastructure mode a station joins an access point before it can send
+data. With :ned:`Ieee80211MgmtSta` and :ned:`Ieee80211AgentSta` the join
+runs as follows:
+
+#. The agent starts a scan at :par:`startingTime`. When that parameter is
+   negative (the default), the start time is random within
+   :par:`maxChannelTime`.
+
+#. The station visits every channel in the scan list. In an active scan it
+   sends a probe request on each channel and listens for
+   :par:`minChannelTime`, or :par:`maxChannelTime` when the channel is busy.
+   In a passive scan it listens for :par:`maxChannelTime` and waits for
+   beacons.
+
+#. The agent picks the access point with the strongest received signal. When
+   :par:`defaultSsid` is not empty, only access points with that SSID count.
+
+#. The station authenticates and associates with that access point. The
+   access point decides the number of authentication steps with
+   :par:`numAuthSteps`: 2 for open system authentication, 4 for shared key.
+   Cryptography is not modeled.
+
+#. The access point sends a beacon every :par:`beaconInterval`. When the
+   station misses beacons for 3.5 beacon intervals, it treats the access
+   point as lost and starts a new scan. This is how a station in motion hands
+   over to another access point.
+
+An access point never changes its channel. Set the channel of its radio with
+:par:`channelNumber`. The station scans channels ``0`` to
+:par:`numChannels` - 1 of its management module, or the channels listed in
+the :par:`channelsToScan` parameter of the agent. The default of
+:par:`numChannels` is 1, so set it when the access points use other
+channels.
+
+.. code-block:: ini
+
+   *.ap1.wlan[0].mgmt.ssid = "AP1"
+   *.ap2.wlan[0].mgmt.ssid = "AP2"
+   *.ap*.wlan[0].mgmt.beaconInterval = 100ms
+   *.ap1.wlan[0].radio.channelNumber = 2
+   *.ap2.wlan[0].radio.channelNumber = 3
+   *.host.wlan[0].mgmt.numChannels = 5
+   *.host.wlan[0].agent.activeScan = true
+   *.host.wlan[0].agent.channelsToScan = ""   # empty means all
+   *.host.wlan[0].agent.defaultSsid = ""      # empty means any SSID
+
+The station management module emits the ``l2Associated`` and
+``l2BeaconLost`` signals, and the agent emits ``l2Disassociated``. The
+access point emits ``l2ApAssociated`` and ``l2ApDisassociated``. Other
+modules react to them: the DHCP client requests a new lease after an
+association, and :ned:`Ieee80211Visualizer` shows the membership of each
+node (see :ref:`ug:sec:visualization:ieee-80211-network-membership`).
+
+Simplified infrastructure mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the join procedure is not of interest, use the simplified management
+modules. They send no management frames, so the simulation is faster and
+has no start-up delay. Every station must name its access point with
+:par:`accessPointAddress`, and the access point must use
+:ned:`Ieee80211MgmtApSimplified`. Handover is not possible. The station
+writes itself into the station list of the access point, so both sides must
+use the simplified variants.
+
+.. code-block:: ini
+
+   *.accessPoint.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+   *.accessPoint.wlan[0].address = "10:00:00:00:00:00"
+   *.host[*].wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+   *.host[*].wlan[0].mgmt.accessPointAddress = "10:00:00:00:00:00"
+   *.host[*].wlan[0].agent.typename = ""
+
+Ad hoc mode
+~~~~~~~~~~~
+
+In ad hoc mode every node sends data frames directly to every other node.
+:ned:`Ieee80211MgmtAdhoc` sends no beacons and no other management frames.
+All nodes must use the same channel. :ned:`AdhocHost` is configured this
+way. For another node type, set the management module and remove the agent:
+
+.. code-block:: ini
+
+   *.host[*].wlan[0].mgmt.typename = "Ieee80211MgmtAdhoc"
+   *.host[*].wlan[0].agent.typename = ""
+
+Multi-hop ad hoc networks need a routing protocol; see
+:doc:`ch-adhoc-routing`.
+
+.. _ug:sec:80211:management:
+
+Management and Agent Parameters
+-------------------------------
+
+The parameters of :ned:`Ieee80211MgmtAp`:
+
+-  :par:`ssid`: the network name in beacons and probe responses. The default
+   is ``"SSID"``.
+
+-  :par:`beaconInterval`: the time between beacons, rounded down to whole
+   time units of 1024 µs. The default is 100 ms.
+
+-  :par:`numAuthSteps`: 2 or 4. The default is 4.
+
+The parameters of :ned:`Ieee80211MgmtSta`:
+
+-  :par:`numChannels`: the number of channels that a scan visits when the
+   agent gives no channel list. The default is 1.
+
+The parameter of :ned:`Ieee80211MgmtStaSimplified`:
+
+-  :par:`accessPointAddress`: the MAC address of the access point.
+
+.. _ug:sec:80211:agent:
+
+Agent
+~~~~~
+
+The parameters of :ned:`Ieee80211AgentSta`:
+
+-  :par:`activeScan`: ``true`` for an active scan with probe requests,
+   ``false`` for a passive scan. The default is ``true``.
+
+-  :par:`channelsToScan`: a space-separated list of channel numbers. The
+   default, an empty string, means all channels of the station.
+
+-  :par:`probeDelay`, :par:`minChannelTime`, :par:`maxChannelTime`: the
+   durations of the scan steps. The defaults are 100 ms, 150 ms and 300 ms.
+
+-  :par:`authenticationTimeout`, :par:`associationTimeout`: how long the
+   station waits for a reply. The default is 5 s each.
+
+-  :par:`startingTime`: when the first scan starts. The default, ``-1s``,
+   means a random time within :par:`maxChannelTime`.
+
+-  :par:`defaultSsid`: the only SSID the station joins. The default, an
+   empty string, accepts any SSID.
+
+The agent records the primitives it sends and the confirmations it accepts
+or drops in the ``sentRequest``, ``acceptConfirm`` and ``dropConfirm``
+statistics.
 
 .. _ug:sec:80211:mac:
 
 MAC
 ---
 
-The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The
-structure of the implementation closely follows the architecture described in
-the standard, IEEE 802.11-2012 Part 11: Wireless LAN Medium Access Control (MAC)
-and Physical Layer (PHY) Specifications.
+:ned:`Ieee80211Mac` transmits and receives frames with the CSMA/CA procedure
+of the standard. Its structure follows the architecture of IEEE Std
+802.11-2024: the MAC is a compound module, and each function of the standard
+is a submodule with its own parameters. The parameters of the MAC itself:
 
-The :ned:`Ieee80211Mac` performs transmission of frames according to the
-CSMA/CA protocol. Data and management frames are received from the upper
-layers and transmitted using the :ned:`Ieee80211Radio`.
+-  :par:`qosStation`: ``true`` makes the interface a QoS station with EDCA.
+   The default is ``false``.
 
-The :ned:`Ieee80211Mac` was designed with modularity in mind to facilitate
-experimentation with new policies, features, and algorithms within the MAC
-layer. Individual components can be easily replaced with custom
-implementations. Policies, which are most likely to be experimented with,
-are extracted into their own modules.
+-  :par:`modeSet`: the PHY mode. The interface sets it from :par:`opMode`.
 
-The new model also separates the following components from the 802.11 standard
-into modules:
+-  :par:`fcsMode`: ``"declared"`` or ``"computed"``. With ``"declared"`` a
+   frame carries a flag instead of a real checksum. The default is
+   ``"declared"``.
 
--  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions
-   control the medium access as specified by the standard.
+-  :par:`initialRadioMode`: the radio mode at start. The default is
+   ``"receiver"``.
 
--  Channel access method as specified by the standard: :ned:`Edca`
+-  :par:`mtu`: the largest payload. The default is 2304 bytes.
 
--  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access
-   function controls channel ownership, etc.
+The MAC has two coordination functions. ``mac.dcf`` is the DCF and
+serves a non-QoS station. ``mac.hcf`` exists only when :par:`qosStation` is
+true, is the EDCA, and then serves every frame of the station. Most
+parameters exist in both, under different paths:
 
--  MAC data services: :ned:`OriginatorMacDataService`,
-   :ned:`RecipientMacDataService`, :ned:`OriginatorQosMacDataService`,
-   :ned:`RecipientQosMacDataService`. The MAC data services are implemented as
-   compound modules, which combine functions related to transforming data frames
-   (sequence numbering, duplicate removal, frame reordering, fragmentation,
-   aggregation).
+.. list-table::
+   :header-rows: 1
+   :widths: 24 38 38
 
--  Aggregation and deaggregation (C++ class in MAC data services): These classes
-   implement aggregation and deaggregation according to the policy modules (see
-   below).
+   * - Setting
+     - Non-QoS station (``mac.dcf``)
+     - QoS station (``mac.hcf``)
+   * - contention window
+     - ``channelAccess.cwMin``, ``.cwMax``, ``.difsn``
+     - ``edca.edcaf[*].cwMin``, ``.cwMax``, ``.aifsn``
+   * - transmit queue
+     - ``channelAccess.pendingQueue.packetCapacity``
+     - ``edca.edcaf[*].pendingQueue.packetCapacity``
+   * - retry limits
+     - ``recoveryProcedure.shortRetryLimit``, ``.longRetryLimit``
+     - ``edca.edcaf[*].recoveryProcedure.shortRetryLimit``, ``.longRetryLimit``
+   * - RTS/CTS
+     - ``rtsPolicy.rtsThreshold``
+     - ``rtsPolicy.rtsThreshold``
+   * - fragmentation
+     - ``originatorMacDataService.fragmentationPolicy.fragmentationThreshold``
+     - ``originatorMacDataService.fragmentationPolicy.fragmentationThreshold``
+   * - A-MSDU aggregation
+     - not available
+     - ``originatorMacDataService.msduAggregationPolicy.*``
+   * - block acknowledgement
+     - not available
+     - ``isBlockAckSupported`` and the two agreement policies
+   * - bit rates
+     - ``rateSelection.*``
+     - ``rateSelection.*``
+   * - rate control
+     - ``rateControl.typename``
+     - ``rateControl.typename``
 
--  Fragmentation and defragmentation (C++ classes in MAC data services): These
-   classes carry out the task of fragmentation and defragmentation according to
-   the policy modules (see below).
+A pattern such as ``**.mac.*.rateControl.typename`` covers both.
 
--  Block ACK agreements and frame reordering (C++ classes): These classes carry
-   out the task according to the policy modules (see below).
+.. _ug:sec:80211:channel-access:
 
--  Frame exchange sequences (implemented as C++ classes in coordination
-   functions, like :ned:`Hcf`): These classes strictly follow the standard
-   specifying the valid frame sequences.
+Channel access
+~~~~~~~~~~~~~~
 
--  TXOP procedure (:ned:`TxopProcedure`): This module implements the
-   transmission opportunity behavior of the standard.
+A station listens before it transmits. When the channel is busy, it waits
+until the channel is free, then waits an inter-frame space, then a random
+backoff. The backoff is a number of slots between 0 and the contention
+window. The contention window starts at ``cwMin``, doubles after each failed
+transmission, and returns to ``cwMin`` after a success.
 
--  Duplicate removal (C++ class in RecipientMacDataService): This class removes
-   duplicate received frames based on sequence numbers.
+The slot time, the inter-frame spaces and the contention window limits come
+from the PHY mode. OFDM modes use a 9 µs slot and ``cwMin`` 15; DSSS modes
+use a 20 µs slot and ``cwMin`` 31. The ``"g(mixed)"`` mode uses the DSSS slot
+time for compatibility with 802.11b stations. Use ``"g(erp)"`` for a pure
+802.11g network with the short slot.
 
--  Rate selection: :ned:`QosRateSelection`. This module controls the data rate
-   for all kinds of frames, including management and control frames.
+For a non-QoS station, the parameters are on ``mac.dcf.channelAccess``:
 
--  Rate control: :ned:`AarfRateControl`, :ned:`OnoeRateControl`. These modules
-   determine the optimal data rate for data frames.
+-  :par:`cwMin`, :par:`cwMax`: the contention window limits. The default,
+   ``-1``, takes the values of the PHY mode.
 
--  Protection mechanism: :ned:`OriginatorProtectionMechanism`. This module
-   provides channel allocation for frame exchange sequences.
+-  :par:`difsn`: the DIFS in slots. The default, ``-1``, means SIFS plus
+   two slots.
 
--  Recovery procedure: :ned:`NonQosRecoveryProcedure`,
-   :ned:`QosRecoveryProcedure`. These modules determine what to do in case of
-   frame exchange failure.
+The contention module has two more parameters:
 
--  Contention: :ned:`Contention`. The contention module implements
-   contention-based channel access, using defer, backoff, etc.
+-  :par:`initialChannelBusy`: assume the channel was busy before the
+   simulation started. The default is ``true``.
 
--  :ned:`PendingQueue`: This module is a queue containing frames received from
-     higher layers, waiting for transmission unchanged.
+-  :par:`backoffOptimization`: let a station that finds the channel idle
+   for long enough transmit at once. The default is ``true``.
 
--  :ned:`InProgressFrames`: This modules is a queue containing frames waiting
-     for transmission that have been processed by the MAC data service.
+Frames wait in ``pendingQueue``. Its :par:`packetCapacity` is 100 by default;
+``-1`` means no limit. Management frames go before data frames. A full queue
+drops the new packet and counts it in the ``packetDropQueueOverflow``
+statistic.
 
--  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame
-   transmission/reception.
+.. code-block:: ini
 
-The MAC model has the following replaceable built-in policy submodules by default:
+   **.wlan[*].mac.dcf.channelAccess.cwMin = 7
+   **.wlan[*].mac.dcf.channelAccess.pendingQueue.packetCapacity = 14
 
-.. -  :ned:`OriginatorAckPolicy` and :ned:`RecipientAckPolicy`
+.. _ug:sec:80211:qos:
 
-.. -  :ned:`RtsPolicy` and :ned:`CtsPolicy`
+QoS and EDCA
+~~~~~~~~~~~~
 
-.. -  :ned:`OriginatorBlockAckAgreementPolicy` and :ned:`RecipientBlockAckAgreementPolicy`
+A QoS station (:par:`qosStation` = ``true``) uses EDCA. Each
+packet that the station sends carries a user priority from 0 to 7. The priority maps to one of
+four access categories, and each category contends for the channel on its
+own, with its own queue, inter-frame space and contention window:
 
-.. -  :ned:`BasicMsduAggregationPolicy`
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 14 46
 
-.. -  :ned:`BasicFragmentationPolicy`
+   * - Access category
+     - User priorities
+     - Index
+     - Defaults (AIFSN, CWmin, CWmax)
+   * - ``AC_BK`` background
+     - 1, 2
+     - ``edcaf[0]``
+     - 7, aCWmin, aCWmax
+   * - ``AC_BE`` best effort
+     - 0, 3
+     - ``edcaf[1]``
+     - 3, aCWmin, aCWmax
+   * - ``AC_VI`` video
+     - 4, 5
+     - ``edcaf[2]``
+     - 2, (aCWmin+1)/2-1, aCWmin
+   * - ``AC_VO`` voice
+     - 6, 7
+     - ``edcaf[3]``
+     - 2, (aCWmin+1)/4-1, (aCWmin+1)/2-1
 
-.. , with the default modules in parentheses:
+The classifier submodule assigns the user priority. The default classifier
+is omitted, so every packet has priority 0 and goes to ``AC_BE``. Replace it
+to get differentiated traffic:
 
--  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`):
-   controls the type of acknowledgment used per-frame (none, normal,
-   block-ack)
+-  :ned:`QosClassifier` maps by IP protocol and by UDP or TCP port. Its
+   :par:`ipProtocolUpMap`, :par:`udpPortUpMap`, :par:`tcpPortUpMap` and
+   :par:`defaultUp` parameters hold the maps, for example
+   ``"21 BK 80 BE 4000 VI 5000 VO"``.
 
--  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which
-   frames are protected by the RTS/CTS mechanism
+-  :ned:`ExampleQosClassifier` uses a fixed map by transport protocol and
+   port.
 
--  Originator and recipient block ACK agreement policies (e.g.
-   :ned:`OriginatorBlockAckAgreementPolicy`,
-   :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of
-   agreements are made
+-  :ned:`RandomQosClassifier` assigns random priorities, for tests.
 
--  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls
-   which frames are aggregated into an A-MSDU and when
+The per-category parameters are on ``mac.hcf.edca.edcaf[i]``: :par:`aifsn`,
+:par:`cwMin`, :par:`cwMax`, and ``pendingQueue.packetCapacity``. A value of
+``-1`` takes the default of the standard for that category. The parameter
+:par:`txopLimit` on ``edcaf[i].txopProcedure`` bounds a transmit
+opportunity: the time in which the station may send several frames after
+one channel access. The default, ``-1s``, takes the value of the standard:
+0 for background and best effort (one frame per access), and a few
+milliseconds for video and voice. When two categories of the same station
+reach the end of their backoff at the same time, the higher category
+transmits and the lower one counts a failed attempt. Management frames use
+``AC_VO``.
 
--  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when
-   and how fragmentation occurs
+.. code-block:: ini
 
-.. For example, many of these modules are located in the *hcf* submodule of the MAC:
+   **.wlan[*].mac.qosStation = true
+   **.wlan[*].classifier.typename = "QosClassifier"
+   **.wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.packetCapacity = -1
+   **.wlan[*].mac.hcf.edca.edcaf[3].txopLimit = 3ms
 
-   .. figure:: figures/hcf.png
-      :align: center
+.. _ug:sec:80211:ack:
+
+Acknowledgement and retransmission
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every unicast data and management frame is acknowledged. Group-addressed
+frames are not. When the acknowledgement does not arrive, the station
+retransmits the frame with the retry bit set. The recovery procedure counts
+retries per frame: a short retry counter for frames below the RTS
+threshold, a long retry counter for frames at or above it. When the counter
+reaches :par:`shortRetryLimit` (default 7) or :par:`longRetryLimit`
+(default 4), the frame is dropped. The drop appears in the
+``packetDropRetryLimitReached`` statistic and in the ``linkBroken`` signal.
+
+The recovery procedure is ``mac.dcf.recoveryProcedure`` in a non-QoS
+station. A QoS station has one per access category,
+``mac.hcf.edca.edcaf[i].recoveryProcedure``, plus
+``mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure`` for management frames.
+
+The acknowledgement timeout is on the originator ACK policy
+(``originatorAckPolicy.ackTimeout``). The default, ``-1s``, takes the
+value of the standard: SIFS plus one slot plus the receive start delay of
+the PHY.
+
+.. _ug:sec:80211:rtscts:
+
+RTS/CTS
+~~~~~~~
+
+A station protects a long frame with an RTS/CTS exchange. The
+:par:`rtsThreshold` parameter of ``rtsPolicy`` sets the smallest frame that
+gets protection. The default is 2346 bytes, which is larger than any frame,
+so protection is off by default. A small value protects every frame, which
+helps against hidden nodes at the cost of overhead. The CTS timeout,
+:par:`ctsTimeout`, takes the value of the standard when ``-1s``.
+
+.. code-block:: ini
+
+   **.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 500B
+
+.. _ug:sec:80211:fragmentation:
+
+Fragmentation
+~~~~~~~~~~~~~
+
+A frame longer than :par:`fragmentationThreshold` is split into fragments,
+and each fragment is acknowledged on its own. The parameter is on
+``originatorMacDataService.fragmentationPolicy`` of ``mac.dcf`` or
+``mac.hcf``. The default is 1500 bytes. In a QoS station the policy can be
+removed with ``fragmentationPolicy.typename = ""``, which turns
+fragmentation off.
+
+.. code-block:: ini
+
+   **.wlan[*].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 250B
+
+.. _ug:sec:80211:aggregation:
+
+Aggregation
+~~~~~~~~~~~
+
+A QoS station can combine several packets that go to the same receiver
+with the same priority into one A-MSDU frame. The policy submodule
+``mac.hcf.originatorMacDataService.msduAggregationPolicy`` controls it. The
+default policy is :ned:`BasicMsduAggregationPolicy` with these parameters:
+
+-  :par:`maxAMsduSize`: the largest A-MSDU in bytes. The default is 4065.
+
+-  :par:`subframeNumThreshold`: the smallest number of packets that makes
+   an A-MSDU. The default, ``-1``, means no check.
+
+-  :par:`aggregationLengthThreshold`: the smallest aggregated payload that
+   makes an A-MSDU. The default, ``-1``, means no check.
+
+Set ``msduAggregationPolicy.typename = ""`` to turn aggregation off. A-MSDU
+aggregation needs packets in the queue; it has an effect only when the
+traffic source is faster than the channel. A-MPDU aggregation is not
+available: the ``mpduAggregationPolicy`` slot exists, but the default policy
+never aggregates, and the MAC does not build A-MPDU frames.
+
+.. code-block:: ini
+
+   **.wlan[*].mac.qosStation = true
+   **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 3000
+
+.. _ug:sec:80211:blockack:
+
+Block acknowledgement
+~~~~~~~~~~~~~~~~~~~~~
+
+With block acknowledgement a QoS station sends several frames and then asks
+for one Block Ack frame that acknowledges all of them. Set
+:par:`isBlockAckSupported` on ``mac.hcf`` to ``true`` on both sides. The
+station then sets up an agreement with its peer automatically (with ADDBA
+frames) when it sends a QoS data frame shorter than
+:par:`maxBlockAckPolicyFrameLength` (default 1000 bytes). After that, the
+frames of that traffic class go out without an immediate acknowledgement,
+and the station sends a Block Ack Request after :par:`blockAckReqThreshold`
+(default 5) unacknowledged frames. Both parameters are on
+``mac.hcf.originatorAckPolicy``.
+
+The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and
+``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size
+(:par:`maximumAllowedBufferSize`, default 64), the A-MSDU support
+(:par:`aMsduSupported`, default ``true``) and the inactivity timeout
+(:par:`blockAckTimeoutValue`, default ``0s``, which means no timeout). Only
+the basic Block Ack variant is modeled.
+
+.. code-block:: ini
+
+   **.wlan[*].mac.qosStation = true
+   **.wlan[*].mac.hcf.isBlockAckSupported = true
+   **.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 10
+
+.. _ug:sec:80211:rate:
+
+Bit rate selection and rate control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The PHY mode gives the set of bit rates, or MCS values for 802.11n and
+802.11ac. The rate selection submodule, ``rateSelection`` under ``mac.dcf``
+or ``mac.hcf``, picks one rate for each frame. Its parameters:
+
+-  :par:`dataFrameBitrate`: the rate of unicast data frames. The interface
+   parameter :par:`bitrate` sets it. The default, ``-1bps``, means the
+   fastest mandatory rate.
+
+-  :par:`multicastFrameBitrate`, :par:`mgmtFrameBitrate`,
+   :par:`controlFrameBitrate`: the rates of group-addressed data,
+   management and control frames. The default is the fastest mandatory rate.
+
+-  :par:`responseAckFrameBitrate`, :par:`responseCtsFrameBitrate`, and in
+   a QoS station :par:`responseBlockAckFrameBitrate`: the rates of response
+   frames. The default follows the rule of the standard: a mandatory rate
+   not faster than the frame that is answered.
+
+-  :par:`dataFrameBandwidth`, :par:`dataFrameNumSpatialStreams`: with
+   802.11n and 802.11ac, the channel width and the number of spatial
+   streams that select the MCS together with the bit rate.
+
+-  :par:`dataFrameBitratePerReceiver`: a map from peer interface paths to
+   rates, for example ``{"host1.wlan[0]": 6Mbps, "host2.wlan[0]": 54Mbps}``.
+   A unicast data frame to a listed receiver uses that rate.
+
+A station adapts its data rate to the channel when it has a rate control
+module. The slot is empty by default. Set ``rateControl.typename`` to one of:
+
+-  :ned:`ArfRateControl`: Auto Rate Fallback. The rate goes up after
+   :par:`increaseThreshold` successes (default 10) or after
+   :par:`interval` (default 50 ms), and down after :par:`decreaseThreshold`
+   failures (default 2).
+
+-  :ned:`AarfRateControl`: Adaptive ARF. Like ARF, but the success threshold
+   grows by :par:`increaseThresholdFactor` (default 2) after a failed probe,
+   up to :par:`maxIncreaseThreshold` (default 50).
+
+-  :ned:`OnoeRateControl`: a credit-based algorithm that decides once per
+   :par:`interval` (default 1 s).
+
+Each keeps one rate per receiver and starts at :par:`initialRate`, which
+defaults to the fastest mandatory rate. The chosen rates appear in the
+``datarateChanged`` statistic of the rate control module and in the
+``datarateSelected`` statistic of the coordination function.
+
+.. code-block:: ini
+
+   **.wlan[*].bitrate = 54Mbps
+   # or, adaptive:
+   **.wlan[*].mac.*.rateControl.typename = "AarfRateControl"
+
+.. _ug:sec:80211:statistics:
+
+Statistics
+~~~~~~~~~~
+
+The MAC and its submodules record the usual packet counts and some
+802.11-specific values. The most useful ones:
+
+-  On ``mac``: ``packetSentToLower``, ``packetReceivedFromLower``,
+   ``packetSentToUpper``, ``packetReceivedFromUpper``; ``frameAcked``,
+   ``frameRetryLimitReached``, ``frameDroppedBeforeTx``; and the drop
+   counts ``packetDropIncorrectlyReceived``, ``packetDropNotAddressedToUs``,
+   ``packetDropQueueOverflow``, ``packetDropRetryLimitReached``,
+   ``packetDropDuplicateDetected``.
+
+-  On ``mac.dcf`` and ``mac.hcf``: ``packetSentToPeer`` and
+   ``packetReceivedFromPeer``, each also split into unicast, multicast,
+   broadcast, with retry and without retry; ``frameSequenceFinished``,
+   ``frameSequenceDuration``, ``frameSequenceActive``; ``datarateSelected``.
+   ``mac.hcf`` adds ``edcaCollisionDetected`` and the block ack agreement
+   counts.
+
+-  On the contention modules: ``backoffPeriodGenerated``, ``backoffActive``,
+   ``channelAccessGranted``, ``stateChanged``. On ``edcaf[i]``:
+   ``channelOwnershipChanged``; on its ``txopProcedure``: ``txopDuration``,
+   ``txopActive``.
+
+-  On ``mac.rx``: ``nav``, the network allocation vector.
+
+-  On the queues: ``queueLength``, ``queueingTime`` and the queue drops.
+
+See :doc:`ch-collecting-results` for how to record them.
 
 .. _ug:sec:80211:physical-layer:
 
 Physical Layer
 --------------
 
-*The physical layer* modules (:ned:`Ieee80211Radio`) deal with modeling
-transmission and reception of frames. They model the characteristics of
-the radio channel and determine if a frame was received correctly (that
-is, it did not suffer bit errors due to low signal power or interference
-in the radio channel). Frames received correctly are passed up to the
-MAC.
+:ned:`Ieee80211Radio` is the physical layer of the interface. It sends a
+frame as a signal with a PHY header, a duration and a power, and it decides
+for each received signal whether the frame arrived without error. The
+decision uses the signal to noise and interference ratio and an error model
+of the PHY mode. Frames received with errors are dropped in the MAC and
+counted in ``packetDropIncorrectlyReceived``.
 
-On the physical layer, one can choose from several radios with different
-levels of detail. The various radio types (with the matching
-transmission medium types in parentheses) are:
+Radio variants
+~~~~~~~~~~~~~~
 
--  :ned:`Ieee80211ScalarRadio` (:ned:`Ieee80211ScalarRadioMedium`)
+The radio type selects the level of detail of the signal representation.
+Each radio type needs the radio medium type that matches it.
 
--  :ned:`Ieee80211DimensionalRadio`
-   (:ned:`Ieee80211DimensionalRadioMedium`)
+.. list-table::
+   :header-rows: 1
+   :widths: 34 34 32
 
--  :ned:`Ieee80211UnitDiskRadio` (:ned:`UnitDiskRadioMedium`)
+   * - Radio
+     - Radio medium
+     - Signal representation
+   * - :ned:`Ieee80211Radio`, :ned:`Ieee80211ScalarRadio`
+     - :ned:`Ieee80211ScalarRadioMedium`
+     - one power value per signal; the usual choice
+   * - :ned:`Ieee80211DimensionalRadio`
+     - :ned:`Ieee80211DimensionalRadioMedium`
+     - power over frequency and time; needed for partial channel overlap
+   * - :ned:`Ieee80211UnitDiskRadio`
+     - :ned:`UnitDiskRadioMedium`
+     - fixed communication range, no error model
+   * - :ned:`Ieee80211OfdmRadio`
+     - :ned:`Ieee80211ScalarRadioMedium` or :ned:`Ieee80211DimensionalRadioMedium`
+     - bit-level OFDM for 802.11a and 802.11g: encoder, interleaver and
+       modulator are simulated; slow
 
-.. _ug:sec:80211:management:
+See :doc:`ch-physicallayer` for the signal representations, and
+:doc:`ch-transmission-medium` for path loss, obstacle loss, propagation and
+background noise.
 
-Management
-----------
+PHY modes, bands and channels
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*The management layer* exchanges management frames via the MAC with its
-peer management entities in other STAs and APs. Beacon, Probe
-Request/Response, Authentication, Association Request/Response, etc
-frames are generated and interpreted by management entities and
-transmitted/received via the MAC layer. During scanning, it is the
-management entity that periodically switches channels and collects
-information from received beacons and probe responses.
+The :par:`opMode` parameter selects the PHY mode. The band must match the
+mode; the interface does not set it. Set :par:`bandName` on the radio for
+5 GHz and 5.9 GHz modes.
 
-The management layer has several implementations which differ in their
-role (STA/AP/ad-hoc) and level of detail: :ned:`Ieee80211MgmtAdhoc`,
-:ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`,
-:ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`. The
-..Simplified ones differ from the others in that they do not simulate the
-scan-authenticate-associate process, so they cannot be used in
-experiments involving handover.
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 16 48
 
-.. _ug:sec:80211:agent:
+   * - ``opMode``
+     - PHY
+     - Band
+     - Rates
+   * - ``"b"``
+     - DSSS, HR/DSSS
+     - ``"2.4 GHz"``
+     - 1, 2, 5.5, 11 Mbps, all mandatory
+   * - ``"g(mixed)"``
+     - DSSS plus ERP-OFDM
+     - ``"2.4 GHz"``
+     - the rates of b and g; DSSS slot time; the default mode
+   * - ``"g(erp)"``
+     - ERP-OFDM only
+     - ``"2.4 GHz"``
+     - 6 to 54 Mbps; mandatory 6, 12, 24; short slot
+   * - ``"a"``
+     - OFDM
+     - ``"5 GHz"``
+     - 6 to 54 Mbps; mandatory 6, 12, 24
+   * - ``"n(mixed-2.4Ghz)"``
+     - HT plus the 2.4 GHz legacy rates
+     - ``"2.4 GHz"``
+     - MCS 0 to 31 at 20 MHz, with long and short guard interval
+   * - ``"ac"``
+     - VHT
+     - ``"5 GHz (20 MHz)"``
+     - VHT MCS at 20 MHz
+   * - ``"p"``
+     - OFDM with 10 MHz channels
+     - ``"5.9 GHz"``
+     - 3 to 27 Mbps; mandatory 3, 6, 12
 
-Agent
------
+:par:`channelNumber` is an index into the band, from 0. In the 2.4 GHz band
+index 0 is 2412 MHz and index 13 is 2484 MHz, so the index is the channel
+number of the standard minus one. The arithmetic bands (``"5 GHz"``,
+``"5.9 GHz"``) count channels from the start of the band in steps of the
+channel spacing. Radios on different channels do not hear each other in the
+scalar model. Only the dimensional model computes the partial overlap of
+adjacent channels.
 
-The agent is what instructs the management layer to perform scanning,
-authentication, and association. The management layer itself just carries
-out these commands by performing the scanning, authentication, and
-association procedures and reports back the results to the agent.
+Channel widths above 20 MHz are not modeled at packet level: 802.11n and
+802.11ac stations always use 20 MHz channels, and the number of spatial
+streams is bounded by the antenna count of the radio.
 
-The agent component is currently only needed with the
-:ned:`Ieee80211MgmtSta` module. The management entities in other NIC
-variants do not have as much freedom and do not require an agent.
+.. code-block:: ini
 
-:ned:`Ieee80211MgmtSta` requires an :ned:`Ieee80211AgentSta` or a custom
-agent. By modifying or replacing the agent, one can alter the dynamic
-behavior of STAs in the network, for example, implementing different
-handover strategies.
+   **.wlan[*].opMode = "a"
+   **.wlan[*].radio.bandName = "5 GHz"
+   **.wlan[*].radio.channelNumber = 8
+   **.wlan[*].bitrate = 24Mbps
+
+Radio parameters
+~~~~~~~~~~~~~~~~
+
+The parameters that a user sets most often:
+
+-  ``transmitter.power``: the transmit power. The default is 20 mW.
+
+-  ``receiver.sensitivity``: below this power a signal is not received.
+   The default is -85 dBm.
+
+-  ``receiver.energyDetection``: below this power the channel counts as
+   free. The default is -85 dBm.
+
+-  ``receiver.snirThreshold``: below this signal to noise and interference
+   ratio a reception fails before the error model runs. The default is 4 dB.
+
+-  ``receiver.errorModel.typename``: the error model. The default is
+   :ned:`Ieee80211NistErrorModel`. :ned:`Ieee80211YansErrorModel` uses the
+   curves of the ns-3 YANS model. :ned:`Ieee80211BerTableErrorModel` reads a
+   table from the file in :par:`berTableFile`. The unit disk radio has no
+   error model.
+
+-  :par:`switchingTimes`: the time to switch between the radio modes, as a
+   matrix. The default is zero everywhere.
+
+-  ``antenna.typename``: the antenna model. The default is
+   :ned:`IsotropicAntenna`. See :doc:`ch-physicallayer`.
+
+-  ``energyConsumer.typename``: :ned:`Ieee80211StateBasedEpEnergyConsumer`
+   or :ned:`Ieee80211StateBasedCcEnergyConsumer` charge an energy source by
+   radio state, with default values of a typical Wi-Fi transceiver. The
+   :par:`energySourceModule` parameter of the interface names the source.
+   See :doc:`ch-power`.
+
+-  :par:`displayCommunicationRange`, :par:`displayInterferenceRange`: draw
+   the ranges around the node in the GUI.
+
+The radio medium of 802.11 sets a background noise of -110 dBm and computes
+its range limits for 2.4 GHz. For a 5 GHz network set
+``mediumLimitCache.centerFrequency`` on the medium, or the range limits are
+too large.
+
+.. code-block:: ini
+
+   *.radioMedium.typename = "Ieee80211ScalarRadioMedium"
+   *.radioMedium.backgroundNoise.power = -100dBm
+   **.wlan[*].radio.transmitter.power = 2mW
+   **.wlan[*].radio.receiver.sensitivity = -90dBm
+   **.wlan[*].radio.receiver.snirThreshold = 4dB
+   **.wlan[*].radio.receiver.errorModel.typename = "Ieee80211YansErrorModel"
+
+.. _ug:sec:80211:llc:
+
+LLC, Portal and Classifier
+--------------------------
+
+The ``llc`` submodule sits between the network layer and the MAC.
+:ned:`Ieee80211LlcLpd`, the default, adds an IEEE 802.2 LLC/SNAP header.
+:ned:`Ieee80211LlcEpd` adds an EtherType header instead, and is the default
+for 802.11p. :ned:`Ieee80211Portal` is the LLC of an access point: it
+converts between 802.11 frames and Ethernet frames, so the relay unit of the
+access point can bridge them. Its :par:`fcsMode` parameter applies to the
+Ethernet frames it builds.
+
+The ``classifier`` submodule is on the transmit path only. It is omitted by
+default. See :ref:`ug:sec:80211:qos` for the classifier types.
+
+.. _ug:sec:80211:limitations:
+
+Limitations
+-----------
+
+The model does not contain:
+
+-  PCF and HCCA, the polled channel access methods. The module
+   :ned:`Hcca` exists as a placeholder.
+
+-  A-MPDU aggregation, the MSDU lifetime limit, and self-CTS protection.
+
+-  Compressed and multi-TID block acknowledgement.
+
+-  Channel widths above 20 MHz for 802.11n and 802.11ac.
+
+-  Security: authentication frames are exchanged, but no keys or
+   encryption are modeled.
+
+-  Power save mode, mesh networks, and 802.11ax and later amendments.
+
+-  Beacons in ad hoc mode.
+
+Two behaviours differ from a real device. Management frames of a QoS
+station always use the voice access category. And when a node is shut down
+or crashes (see :doc:`ch-lifecycle`), the MAC keeps its queued frames and
+its timers; only the management module and the radio reset.
+
+.. _ug:sec:80211:examples:
+
+Examples and Showcases
+----------------------
+
+The folders ``examples/wireless/`` and ``showcases/wireless/`` contain
+ready-made simulations. Good starting points are:
+
+-  ``examples/wireless/lan80211``: an infrastructure network with DCF.
+
+-  ``examples/wireless/handover``: a station that moves between two access
+   points.
+
+-  ``examples/wireless/hosttohost``: the simplified management modules.
+
+-  ``examples/wireless/qos``: EDCA, RTS/CTS, aggregation and block
+   acknowledgement, one configuration each.
+
+-  ``examples/wireless/ratecontrol``, ``examples/wireless/hiddennode``,
+   ``examples/wireless/multiradio``, ``examples/wireless/lan80211ac``,
+   ``examples/wireless/ieee80211levelofdetail``.
+
+-  ``showcases/wireless/throughput``, ``qos``, ``txop``, ``blockack``,
+   ``aggregation``, ``fragmentation``, ``ratecontrol``, ``handover``,
+   ``hiddennode``, ``multiradio``, ``crosstalk``, ``errorrate`` and
+   ``pathloss``, each with a page that explains the results.
+
+-  ``tutorials/wireless/``: a step-by-step tutorial that starts with a unit
+   disk radio and ends with a full 802.11 network.
