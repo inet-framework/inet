@@ -1,0 +1,30 @@
+digraph g {
+  fontsize=10; rankdir="TB"
+  node [shape=box, fontsize=10, fontname="Helvetica"]
+  edge [fontsize=9, fontname="Helvetica"]
+
+  upper [label="network layer", shape=plaintext]
+  classifier [label="classifier\n(egress only)"]
+  llc [label="llc"]
+  agent [label="agent"]
+  mgmt [label="mgmt"]
+  mib [label="mib\n(shared state)", shape=note]
+  mac [label="mac"]
+  radio [label="radio"]
+  medium [label="radio medium", shape=plaintext]
+
+  upper -> classifier [label="packet"]
+  classifier -> llc
+  llc -> mac [label="packet + tags", dir=both]
+  llc -> upper [label="packet"]
+  agent -> mgmt [label="MLME primitives", dir=both]
+  mgmt -> mac [label="management frame bodies,\nradio commands", dir=both]
+  mac -> radio [label="MAC frames,\nradio commands"]
+  radio -> mac [label="packets + indications"]
+  radio -> mac [label="state signals", style=dashed]
+  radio -> medium [label="WirelessSignal", dir=both]
+  mib -> mac [style=dotted, arrowhead=none]
+  mib -> mgmt [style=dotted, arrowhead=none]
+  mib -> agent [style=dotted, arrowhead=none]
+  { rank=same; agent; mgmt; mib }
+}
