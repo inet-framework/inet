@@ -17,7 +17,7 @@ class SeedOriginatorHandler : public OriginatorBlockAckAgreementHandler
     Packet *request(MacAddress peer, Tid tid, IOriginatorBlockAckAgreementPolicy *policy) {
         auto header = buildAddbaRequest(peer, tid, SequenceNumberCyclic(1), policy);
         auto id = nextTransactionId++;
-        createAgreement(header, id);
+        createAgreement(header, id, policy);
         auto packet = new Packet("ADDBA", header);
         packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(id);
         return packet;

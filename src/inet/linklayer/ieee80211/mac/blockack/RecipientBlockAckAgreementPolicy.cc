@@ -14,7 +14,7 @@ Define_Module(RecipientBlockAckAgreementPolicy);
 
 void RecipientBlockAckAgreementPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         localCompressedBlockAckSupported = par("localCompressedBlockAckSupported");
         for (const auto& address : cStringTokenizer(par("compressedBlockAckPeerAddresses")).asVector())

@@ -18,7 +18,7 @@ static std::vector<uint8_t> actionBytes(const std::vector<uint8_t>& body)
         0x02, 0, 0, 0, 0, 1,
         0x02, 0, 0, 0, 0, 2,
         0x02, 0, 0, 0, 0, 3,
-        0x37, 0x12
+        0x30, 0x12
     };
     bytes.insert(bytes.end(), body.begin(), body.end());
     return bytes;
@@ -32,7 +32,7 @@ static Ptr<T> makeAction()
     header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
     header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
     header->setAddress3(MacAddress("02:00:00:00:00:03"));
-    header->setFragmentNumber(7);
+    header->setFragmentNumber(0);
     header->setSequenceNumber(SequenceNumberCyclic(0x123));
     return header;
 }
@@ -54,7 +54,7 @@ static Ptr<const T> checkAction(const Ptr<T>& header, const std::vector<uint8_t>
     ASSERT(parsed->getReceiverAddress() == header->getReceiverAddress());
     ASSERT(parsed->getTransmitterAddress() == header->getTransmitterAddress());
     ASSERT(parsed->getAddress3() == header->getAddress3());
-    ASSERT(parsed->getFragmentNumber() == 7);
+    ASSERT(parsed->getFragmentNumber() == 0);
     ASSERT(parsed->getSequenceNumber() == SequenceNumberCyclic(0x123));
     ASSERT(parsed->getCategory() == 3);
     ASSERT(parsed->getBlockAckAction() == header->getBlockAckAction());
