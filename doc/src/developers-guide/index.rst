@@ -15,5 +15,6 @@ Release: |release|
    ch-packets
    ch-tags
    ch-sockets
+   ch-80211
    ch-testing
    ch-authors-guide
