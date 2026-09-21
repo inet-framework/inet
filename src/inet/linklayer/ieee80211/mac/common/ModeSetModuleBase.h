@@ -12,10 +12,15 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ieee80211/mac/contract/IIeee80211ModeSetProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 namespace inet::ieee80211 {
 /** Base for modules with a declared, configuration-lifetime catalog dependency. */
-class INET_API ModeSetModuleBase : public SimpleModule
+class INET_API ModeSetModuleBase : public SimpleModule, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    void applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet) override;
+
   protected:
     ModuleRefByPar<IIeee80211ModeSetProvider> modeSetProvider;
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;

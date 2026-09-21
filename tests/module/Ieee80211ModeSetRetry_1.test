@@ -1,0 +1,307 @@
+%description:
+DCF and HCF recompute retained HT mode requests after a coordinated legacy
+transition. Drop exactly one data frame or RTS at the recipient, retain the real
+queued MPDU through the timeout, then transmit and acknowledge it in g(mixed).
+Peer capabilities are seeded; this tests MAC reconfiguration, not association.
+
+%file: ModeSetRetry.cc
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class RetryProbeMac : public Ieee80211Mac
+{
+  public:
+    bool blocked = false;
+    bool switched = false;
+    int htDataAttempts = 0;
+    int legacyDataAttempts = 0;
+    int rtsAttempts = 0;
+    int delivered = 0;
+    long dataTreeId = -1;
+    int sequence = -1;
+    InProgressFrames *retainedQueue = nullptr;
+    Packet *retainedFrame = nullptr;
+
+    virtual void sendDownFrame(Packet *packet) override
+    {
+        if (par("sender")) {
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+                auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+                if (!switched) {
+                    ASSERT(mode->getHtMcsIndex() >= 0);
+                    ASSERT(!data->getRetry());
+                    htDataAttempts++;
+                }
+                else {
+                    ASSERT(Ieee80211ModeSet::getModeSet("g(mixed)")->containsMode(mode));
+                    ASSERT(mode->getHtMcsIndex() < 0);
+                    ASSERT(packet->getTreeId() == dataTreeId);
+                    ASSERT(retainedQueue->getLength() == 1 && retainedQueue->getFrames(0) == retainedFrame);
+                    ASSERT(retainedFrame->getTag<Ieee80211ModeReq>()->getMode() == mode);
+                    ASSERT(data->getSequenceNumber().get() == sequence);
+                    if (!par("protection"))
+                        ASSERT(data->getRetry());
+                    legacyDataAttempts++;
+                }
+            }
+            else if (header->getType() == ST_RTS)
+                rtsAttempts++;
+        }
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+
+    virtual void sendUpFrame(Packet *packet) override
+    {
+        // End the fixture at the MAC service boundary after normal recipient
+        // processing and ACK scheduling; no synthetic LLC payload is decoded.
+        delivered++;
+        delete packet;
+    }
+
+  protected:
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        bool target = par("protection") ? header->getType() == ST_RTS :
+                dynamicPtrCast<const Ieee80211DataHeader>(header) != nullptr;
+        if (!par("sender") && !blocked && target) {
+            blocked = true;
+            std::cout << "Controlled first reception loss\n";
+            delete packet;
+        }
+        else
+            Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(RetryProbeMac);
+
+class ModeSetRetryTest : public cSimpleModule, public cListener
+{
+    using cListener::finish;
+    RetryProbeMac *sender = nullptr;
+    RetryProbeMac *receiver = nullptr;
+    InProgressFrames *queue = nullptr;
+    Packet *retained = nullptr;
+    opp_component_ptr<cModule> coordination;
+    cMessage *action = nullptr;
+    int phase = 0;
+    int sequences = 0;
+    int acknowledgments = 0;
+
+    int retryCount()
+    {
+        auto header = retained->peekAtFront<Ieee80211DataHeader>();
+        if (par("qos"))
+            return check_and_cast<QosRecoveryProcedure *>(queue->getParentModule()->getSubmodule("recoveryProcedure"))->getRetryCount(retained, header);
+        return check_and_cast<NonQosRecoveryProcedure *>(coordination->getSubmodule("recoveryProcedure"))->getRetryCount(retained, header);
+    }
+
+    Ieee80211Radio *radio(RetryProbeMac *mac)
+    {
+        return check_and_cast<Ieee80211Radio *>(mac->getParentModule()->getSubmodule("radio"));
+    }
+
+  protected:
+    virtual void initialize() override
+    {
+        sender = check_and_cast<RetryProbeMac *>(getModuleByPath("^.host[0].wlan[0].mac"));
+        receiver = check_and_cast<RetryProbeMac *>(getModuleByPath("^.host[1].wlan[0].mac"));
+        coordination = sender->getSubmodule(par("qos") ? "hcf" : "dcf");
+        coordination->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
+        coordination->subscribe(packetReceivedFromPeerSignal, this);
+        action = new cMessage("fixture action");
+        scheduleAt(SimTime(1, SIMTIME_MS), action);
+    }
+
+    virtual void receiveSignal(cComponent *, simsignal_t signal, cObject *value, cObject *) override
+    {
+        Enter_Method_Silent();
+        if (signal == packetReceivedFromPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK)
+                acknowledgments++;
+            return;
+        }
+        auto context = check_and_cast<FrameSequenceContext *>(value);
+        queue = context->getInProgressFrames();
+        sequences++;
+        ASSERT(sequences <= 2);
+        if (phase == 1) {
+            ASSERT(receiver->blocked);
+            ASSERT(queue->getLength() == 1);
+            retained = queue->getFrames(0);
+            ASSERT(retained->getTag<Ieee80211ModeReq>()->getMode()->getHtMcsIndex() >= 0);
+            ASSERT(sender->dataTreeId == retained->getTreeId());
+            sender->retainedQueue = queue;
+            sender->retainedFrame = retained;
+            if (!par("protection"))
+                ASSERT(retryCount() == 1);
+            sender->sequence = retained->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get();
+            ASSERT(sender->htDataAttempts == (par("protection") ? 0 : 1));
+            ASSERT(sender->rtsAttempts == (par("protection") ? 1 : 0));
+            phase = 2;
+        }
+        else {
+            ASSERT(phase == 3);
+            ASSERT(queue->getLength() == 0); // The real ACK handler removed it.
+            retained = nullptr;
+            sender->retainedFrame = nullptr;
+            phase = 4;
+        }
+        scheduleAt(simTime(), action); // Run after frame-sequence cleanup.
+    }
+
+    virtual void handleMessage(cMessage *) override
+    {
+        if (phase == 0) {
+            auto senderMib = check_and_cast<Ieee80211Mib *>(sender->getParentModule()->getSubmodule("mib"));
+            auto receiverMib = check_and_cast<Ieee80211Mib *>(receiver->getParentModule()->getSubmodule("mib"));
+            // Install the explicit test relationship; ad hoc initialization itself
+            // intentionally does not invent an accepted HT operation or peer.
+            for (auto mac : {sender, receiver}) {
+                auto mib = check_and_cast<Ieee80211Mib *>(mac->getParentModule()->getSubmodule("mib"));
+                Ieee80211HtOperation operation;
+                operation.primaryChannel = 6;
+                operation.operatingChannelWidth = MHz(20);
+                mib->commitBss("retry-test", sender->getAddress(), radio(mac)->getChannel()->getBand(), 6, &operation);
+            }
+            for (auto mac : {sender, receiver})
+                radio(mac)->setMode(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getMode(Mbps(24)));
+            senderMib->setPeerHtCapabilities(receiver->getAddress(), receiverMib->getLocalHtCapabilities());
+            receiverMib->setPeerHtCapabilities(sender->getAddress(), senderMib->getLocalHtCapabilities());
+            auto packet = new Packet("retained-data");
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(par("qos") ? ST_DATA_WITH_QOS : ST_DATA);
+            header->setChunkLength(DATAFRAME_HEADER_MINLENGTH + (par("qos") ? QOSCONTROL_PART_LENGTH : b(0)));
+            header->setTid(0);
+            header->setReceiverAddress(receiver->getAddress());
+            header->setTransmitterAddress(sender->getAddress());
+            header->setAddress3(receiver->getAddress());
+            packet->insertAtBack(header);
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+            auto trailer = makeShared<Ieee80211MacTrailer>();
+            trailer->setFcsMode(FCS_DECLARED_CORRECT);
+            packet->insertAtBack(trailer);
+            sender->dataTreeId = packet->getTreeId();
+            phase = 1;
+            sender->processUpperFrame(packet, header);
+        }
+        else if (phase == 2) {
+            ASSERT(queue->getLength() == 1 && queue->getFrames(0) == retained);
+            auto oldMode = retained->getTag<Ieee80211ModeReq>()->getMode();
+            for (auto mac : {sender, receiver}) {
+                ASSERT(radio(mac)->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING);
+                ASSERT(radio(mac)->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
+                radio(mac)->setModeSet(Ieee80211ModeSet::getModeSet("g(mixed)"));
+            }
+            ASSERT(retained->getTag<Ieee80211ModeReq>()->getMode() == oldMode);
+            if (!par("protection"))
+                ASSERT(retryCount() == 1);
+            sender->switched = true;
+            phase = 3;
+            std::cout << "Retained HT request survives transition until reselection\n";
+        }
+        else {
+            ASSERT(phase == 4 && sequences == 2);
+            ASSERT(receiver->delivered == 1 && acknowledgments == 1);
+            ASSERT(sender->legacyDataAttempts == 1);
+            ASSERT(sender->rtsAttempts == (par("protection") ? 2 : 0));
+            std::cout << "Retained frame transmitted and acknowledged in new mode set: qos="
+                      << par("qos").boolValue() << " protection=" << par("protection").boolValue() << "\n";
+            endSimulation();
+        }
+    }
+
+    virtual void finish() override { ASSERT(phase == 4); }
+
+  public:
+    virtual ~ModeSetRetryTest()
+    {
+        if (coordination) {
+            coordination->unsubscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
+            coordination->unsubscribe(packetReceivedFromPeerSignal, this);
+        }
+        cancelAndDelete(action);
+    }
+};
+Define_Module(ModeSetRetryTest);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module RetryProbeMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::RetryProbeMac);
+        bool sender;
+        bool protection;
+}
+simple ModeSetRetryTest
+{
+    parameters:
+        @class(::ModeSetRetryTest);
+        bool qos;
+        bool protection;
+}
+network RetryNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host[2]: WirelessHost;
+        test: ModeSetRetryTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RetryNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 20ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.test.qos = ${qos=false,true}
+*.test.protection = ${protection=false,true}
+**.mobility.initFromDisplayString = false
+*.host[0].mobility.initialX = 10m
+*.host[1].mobility.initialX = 11m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].agent.typename = ""
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 6
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.antenna.numAntennas = 1
+**.wlan[*].mac.typename = "RetryProbeMac"
+*.host[0].wlan[*].mac.sender = true
+*.host[1].wlan[*].mac.sender = false
+**.mac.protection = ${protection}
+**.mac.qosStation = ${qos}
+**.mac.*.rateControl.typename = "AarfRateControl"
+**.mac.*.rtsPolicy.rtsThreshold = ${protection} ? 0B : 10000B
+
+%file: check.py
+from pathlib import Path
+text = Path("test.out").read_text()
+for qos in (0, 1):
+    for protection in (0, 1):
+        assert text.count(f"Retained frame transmitted and acknowledged in new mode set: qos={qos} protection={protection}") == 1
+assert text.count("Controlled first reception loss") == 4
+assert text.count("Retained HT request survives transition until reselection") == 4
+
+%postrun-command: python3 check.py

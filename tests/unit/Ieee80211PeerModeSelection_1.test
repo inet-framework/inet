@@ -32,7 +32,7 @@ struct TestPeer : Ieee80211Mib::PeerHtState {
 };
 
 static TestPeer makePeerState(std::initializer_list<int> mcsIndexes,
-        std::initializer_list<Hz> bandwidths, Hz operatingChannelWidth, bool shortGi20 = false, bool shortGi40 = false)
+        std::initializer_list<Hz> bandwidths, Hz operatingChannelWidth, bool shortGi20 = false, bool shortGi40 = false, bool greenfield = false)
 {
     TestPeer state;
     auto capabilities = std::make_shared<Ieee80211NegotiatedHtCapabilities>();
@@ -46,6 +46,7 @@ static TestPeer makePeerState(std::initializer_list<int> mcsIndexes,
         receiverCapabilities.supportedChannelWidths.insert(bandwidth);
     receiverCapabilities.receiverShortGi20 = shortGi20;
     receiverCapabilities.receiverShortGi40 = shortGi40;
+    receiverCapabilities.receiverGreenfield = greenfield;
     state.operation.operatingChannelWidth = operatingChannelWidth;
     return state;
 }
@@ -88,6 +89,32 @@ const auto *modeOutsideSet = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80
         Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED,
         Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
 ASSERT(!modeSet->containsMode(modeOutsideSet));
+
+// Group-addressed configured optional rates are upper bounds over the basic
+// legacy set (modeled by mandatory legacy operational modes).
+for (const char *profile : {"a", "g(mixed)"}) {
+    const auto *groupSet = Ieee80211ModeSet::getModeSet(profile);
+    for (int rate : {6, 9, 12, 18, 24}) {
+        const auto *requested = groupSet->getMode(Mbps(rate));
+        auto expected = Mbps(rate == 9 ? 6 : rate == 18 ? 12 : rate);
+        const auto *selected = selectGroupAddressedMode(groupSet, requested);
+        ASSERT(selected->getDataMode()->getNetBitrate() == expected);
+        if (rate != 9 && rate != 18)
+            ASSERT(selected == requested);
+    }
+}
+const auto *legacySet = Ieee80211ModeSet::getModeSet("a");
+const auto *six = legacySet->getMode(Mbps(6));
+const auto *nine = legacySet->getMode(Mbps(9));
+Ieee80211ModeSet aboveBound("aboveBound", {{true, nine, true}}, nine, Ieee80211ModeSet::PhyType::OFDM);
+bool groupBoundRejected = false;
+try { selectGroupAddressedMode(&aboveBound, six); }
+catch (const cRuntimeError& error) {
+    groupBoundRejected = error.getFormattedMessage().find("No mandatory legacy mode at or below") != std::string::npos;
+}
+ASSERT(groupBoundRejected);
+Ieee80211ModeSet noMandatory("noMandatory", {{false, nine, true}}, nine, Ieee80211ModeSet::PhyType::OFDM);
+ASSERT(selectGroupAddressedMode(&noMandatory, nine) == nine);
 
 const MacAddress peer("02:00:00:00:00:01");
 
@@ -146,6 +173,10 @@ const auto *shortGiFallback = selectForTest(modeSet, &shortGiDisabledPeer, mcs8S
 ASSERT(shortGiFallback == mcs8Long);
 ASSERT(!shortGiFallback->isHtShortGuardInterval());
 
+auto shortGiDisabledOnlyMcs0Peer = makePeerState({0}, {MHz(20)}, MHz(20));
+const auto *shortGiMcs0Fallback = selectForTest(modeSet, &shortGiDisabledOnlyMcs0Peer, mcs8Short, peer);
+ASSERT(shortGiMcs0Fallback == mcs0Long);
+
 auto compatiblePeer = makePeerState({2}, {MHz(20)}, MHz(40));
 ASSERT(selectForTest(modeSet, &compatiblePeer, mcs2Long, peer) == mcs2Long);
 
@@ -182,6 +213,47 @@ const auto *secondSelection = selectForTest(modeSet, &deterministicPeer, mcs8Sho
 ASSERT(firstSelection == secondSelection);
 ASSERT(firstSelection->getHtMcsIndex() == 8);
 ASSERT(!firstSelection->isHtShortGuardInterval());
+
+// Greenfield mode set supports HT-mixed control responses (e.g. CTS) per
+// IEEE 802.11-2024 10.6.6.5.7 even though HT-mixed modes are not selectable entries.
+const auto *greenfieldModeSet = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)");
+const auto *htMixedCtsMode = mcs0Long; // htMcs0BW20MHz mixed format
+ASSERT(!greenfieldModeSet->containsMode(htMixedCtsMode));
+ASSERT(greenfieldModeSet->supportsMode(htMixedCtsMode));
+auto greenfieldPeer = makePeerState({0}, {MHz(20)}, MHz(20));
+const auto *greenfieldCtsSelection = selectForTest(greenfieldModeSet, &greenfieldPeer, htMixedCtsMode, peer);
+ASSERT(greenfieldCtsSelection == htMixedCtsMode);
+
+bool outsideGreenfieldModeRejected = false;
+try {
+    selectForTest(greenfieldModeSet, &greenfieldPeer, modeOutsideSet, peer);
+}
+catch (const cRuntimeError&) {
+    outsideGreenfieldModeRejected = true;
+}
+ASSERT(outsideGreenfieldModeRejected);
+
+const auto *mcs0Greenfield = findHtMode(greenfieldModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(mcs0Greenfield != nullptr);
+ASSERT(mcs0Greenfield->isHtGreenfield());
+
+// When destination advertises Greenfield reception, HT-Greenfield candidate mode is selected.
+auto greenfieldCapablePeer = makePeerState({0}, {MHz(20)}, MHz(20), false, false, true);
+const auto *greenfieldSelection = selectForTest(greenfieldModeSet, &greenfieldCapablePeer, mcs0Greenfield, peer);
+ASSERT(greenfieldSelection == mcs0Greenfield);
+ASSERT(greenfieldSelection->isHtGreenfield());
+
+// When destination did not advertise Greenfield reception, isCompatibleHtMode rejects Greenfield mode,
+// falling back to the legal HT-mixed equivalent mode.
+auto mixedOnlyDestinationPeer = makePeerState({0}, {MHz(20)}, MHz(20), false, false, false);
+const auto *mixedFallbackSelection = selectForTest(greenfieldModeSet, &mixedOnlyDestinationPeer, mcs0Greenfield, peer);
+ASSERT(mixedFallbackSelection == htMixedCtsMode);
+ASSERT(!mixedFallbackSelection->isHtGreenfield());
+
+// HT-mixed mode candidates remain unaffected regardless of Greenfield receiver capability.
+const auto *mixedCandidateSelection = selectForTest(modeSet, &mixedOnlyDestinationPeer, mcs0Long, peer);
+ASSERT(mixedCandidateSelection == mcs0Long);
+ASSERT(!mixedCandidateSelection->isHtGreenfield());
 
 EV << "Peer-compatible HT mode selection checks verified.\n";
 

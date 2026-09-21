@@ -13,6 +13,7 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211VhtCapabilities.h"
 
 namespace inet {
 
@@ -70,6 +71,11 @@ class INET_API Ieee80211Mib : public SimpleModule
         std::shared_ptr<const Ieee80211NegotiatedHtCapabilities> negotiatedCapabilities;
     };
 
+    struct PeerVhtState {
+        Ieee80211VhtCapabilities advertisedCapabilities;
+        Ieee80211VhtOperation operation;
+    };
+
   public:
     MacAddress address;
     Mode mode = static_cast<Mode>(-1);
@@ -83,6 +89,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     // This is a deliberately model-backed subset, not a full Annex C HT MIB implementation.
     bool localHtCapabilitiesValid = false;
     Ieee80211HtCapabilities localHtCapabilities;
+    uint64_t vhtCapabilityGeneration = 0;
+    bool localVhtCapabilitiesValid = false;
+    Ieee80211VhtCapabilities localVhtCapabilities;
+    Ieee80211VhtOperation localVhtOperation;
 
   private:
     Ieee80211HtOperation htOperation;
@@ -97,6 +107,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     void checkStateMutation() const;
     std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
+    std::map<MacAddress, PeerVhtState> peerVhtStates;
 
   protected:
     virtual void initialize(int stage) override;
@@ -122,6 +133,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearAssociationIds();
     // Initialization/preparation only. A changed profile requires inactive BSS and no peers.
     void installLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported);
+    // Explicit coordinated reconfiguration; ordinary preparation remains guarded.
+    void reconfigureLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported);
     bool hasPreparedLocalCapabilities() const { return localCapabilitiesPrepared; }
     bool isLocalHtCapable() const { return localHtCapabilitiesValid; }
     bool hasActiveBss() const { return bssActive; }
@@ -142,6 +155,16 @@ class INET_API Ieee80211Mib : public SimpleModule
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities);
     void removePeerHtCapabilities(const MacAddress& address);
     void clearPeerHtCapabilities();
+    void installLocalVhtCapabilities(const Ieee80211VhtCapabilities& capabilities, bool supported);
+    const Ieee80211VhtCapabilities& getLocalVhtCapabilities() const { return localVhtCapabilities; }
+    const Ieee80211VhtOperation& getLocalVhtOperation() const { return localVhtOperation; }
+    uint64_t getVhtCapabilityGeneration() const { return vhtCapabilityGeneration; }
+    bool isVhtOperationSupported() const { return localVhtCapabilitiesValid; }
+    const PeerVhtState *findPeerVhtState(const MacAddress& address) const;
+    void setPeerVhtCapabilities(const MacAddress& address, const Ieee80211VhtCapabilities& capabilities, const Ieee80211VhtOperation& operation);
+    void removePeerVhtCapabilities(const MacAddress& address);
+    void removePeerCapabilities(const MacAddress& address);
+    void clearPeerCapabilities();
 };
 
 } // namespace ieee80211

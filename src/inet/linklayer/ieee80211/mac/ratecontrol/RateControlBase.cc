@@ -62,7 +62,13 @@ void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, cons
     }
 }
 
+void RateControlBase::applyModeSet(const Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<Ieee80211ModeSet *>(newModeSet);
+    getInitialMode(); // Validate fixed initial rates even before the first peer is used.
+    resetRateControl();
+}
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

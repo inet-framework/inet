@@ -20,6 +20,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 
@@ -29,8 +30,12 @@ namespace ieee80211 {
  * Abstract base class for 802.11 infrastructure mode management components.
  *
  */
-class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
+class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener, public physicallayer::IIeee80211ModeSetListener
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     // configuration
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -50,6 +55,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     void prepareConfiguration();
+    void updateSupportedRates();
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -85,6 +91,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
         return length;
     }
 
+    /** Adds local VHT capabilities; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    /** Adds local VHT operation; subclasses may customize advertisements in inherited frame builders. */
+    virtual void addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
     /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
     Ieee80211HtOperation computeLocalHtOperation(int primaryChannel, const physicallayer::IIeee80211Band *band) const;
     virtual void prepareLocalOperation();
@@ -130,4 +140,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-

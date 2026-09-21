@@ -118,3 +118,18 @@ operation. The current ad hoc no-beacon abstraction likewise has no learned chan
 accepted peer advertisements. Stop/crash clears operational relationships while retaining prepared
 configuration. Physical AP channel context is retained by management for restart; STA operation is
 learned from accepted management information, independently of scan tuning.
+
+**Runtime catalog reconfiguration.** The MAC simple module implements the typed
+`IIeee80211ModeSetCoordinator` contract. The radio resolves its coordinator through
+`modeSetCoordinatorModule`; the containing interface only supplies default wiring.
+Consumers register through their declared catalog/configuration provider when it supports
+coordination. A read-only replacement provider need not implement that optional runtime role.
+
+An explicit changed-catalog transaction refreshes the MAC-assembled capability profile,
+then management's local operation and dependent algorithms. HT compatibility results are
+replaced only when capability inputs change; accepted peer knowledge remains relationship-scoped
+and selection still checks eligibility and current operation. Reapplying the same catalog
+does not reset algorithms. Ordinary preparation and stop/restart retain their existing contracts.
+The MAC publishes `modesetChanged` only after a changed runtime catalog is applied; initialization
+uses typed queries without a catalog notification. Membership changes and reentrant transitions
+are rejected during application/publication. Failures after PHY mutation are fatal, without rollback.

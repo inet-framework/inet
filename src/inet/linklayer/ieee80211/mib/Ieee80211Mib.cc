@@ -8,7 +8,6 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 #include <algorithm>
-
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -78,6 +77,8 @@ void Ieee80211Mib::commitBss(const std::string& ssid, const MacAddress& bssid, c
 void Ieee80211Mib::clearBss()
 {
     checkStateMutation();
+    stateChangePending |= !peerVhtStates.empty();
+    peerVhtStates.clear();
     stateChangePending |= bssActive || !peerHtStates.empty() || !bssAccessPointData.stations.empty() ||
             !bssAccessPointData.associationIds.empty();
     bssActive = false;
@@ -179,6 +180,23 @@ const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerCapabilities(const MacAdd
     return it == peerHtStates.end() || !it->second.valid ? nullptr : &it->second;
 }
 
+void Ieee80211Mib::reconfigureLocalHtCapabilities(const Ieee80211HtCapabilities& capabilities, bool htSupported)
+{
+    checkStateMutation();
+    if (!localCapabilitiesPrepared)
+        throw cRuntimeError("Cannot reconfigure unprepared local HT capabilities");
+    if (localHtCapabilities == capabilities && localHtCapabilitiesValid == htSupported)
+        return;
+    localHtCapabilities = capabilities;
+    localHtCapabilitiesValid = htSupported;
+    for (auto& entry : peerHtStates) {
+        if (entry.second.valid)
+            entry.second.negotiatedCapabilities = std::make_shared<const Ieee80211NegotiatedHtCapabilities>(
+                    negotiateHtCapabilities(localHtCapabilities, entry.second.advertisedCapabilities));
+    }
+    stateChangePending = true;
+}
+
 bool Ieee80211Mib::relationshipAllowsHt(const MacAddress& address) const
 {
     const auto *peer = findPeerCapabilities(address);
@@ -224,6 +242,60 @@ void Ieee80211Mib::clearPeerHtCapabilities()
     checkStateMutation();
     stateChangePending |= !peerHtStates.empty();
     peerHtStates.clear();
+}
+
+void Ieee80211Mib::installLocalVhtCapabilities(const Ieee80211VhtCapabilities& capabilities, bool supported)
+{
+    checkStateMutation();
+    if (localVhtCapabilitiesValid == supported && localVhtCapabilities == capabilities)
+        return;
+    localVhtCapabilities = capabilities;
+    localVhtCapabilitiesValid = supported;
+    ++vhtCapabilityGeneration;
+    // Pending response snapshots are invalidated by the generation change.
+    // A newly configured local VHT profile requires fresh peer negotiation.
+    peerVhtStates.clear();
+    stateChangePending = true;
+}
+
+const Ieee80211Mib::PeerVhtState *Ieee80211Mib::findPeerVhtState(const MacAddress& address) const
+{
+    auto it = peerVhtStates.find(address);
+    return it == peerVhtStates.end() ? nullptr : &it->second;
+}
+
+void Ieee80211Mib::setPeerVhtCapabilities(const MacAddress& address, const Ieee80211VhtCapabilities& capabilities, const Ieee80211VhtOperation& operation)
+{
+    checkStateMutation();
+    if (!localVhtCapabilitiesValid || !isValidVhtMcsMap(capabilities.rxMaxMcs) || !isValidVhtMcsMap(capabilities.txMaxMcs) ||
+            !supportsBasicVhtMcsSet(localVhtCapabilities, operation) || !supportsBasicVhtMcsSet(capabilities, operation)) {
+        removePeerVhtCapabilities(address);
+        return;
+    }
+    auto it = peerVhtStates.find(address);
+    if (it != peerVhtStates.end() && it->second.advertisedCapabilities == capabilities && it->second.operation == operation)
+        return;
+    peerVhtStates[address] = {capabilities, operation};
+    stateChangePending = true;
+}
+
+void Ieee80211Mib::removePeerVhtCapabilities(const MacAddress& address)
+{
+    checkStateMutation();
+    stateChangePending |= peerVhtStates.erase(address) != 0;
+}
+
+void Ieee80211Mib::removePeerCapabilities(const MacAddress& address)
+{
+    removePeerHtCapabilities(address);
+    removePeerVhtCapabilities(address);
+}
+
+void Ieee80211Mib::clearPeerCapabilities()
+{
+    clearPeerHtCapabilities();
+    stateChangePending |= !peerVhtStates.empty();
+    peerVhtStates.clear();
 }
 
 std::string Ieee80211Mib::getSsidStr() const
@@ -317,7 +389,7 @@ void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
     checkStateMutation();
     associationIdReservations.erase(address);
     stateChangePending |= bssAccessPointData.associationIds.erase(address) != 0;
-    removePeerHtCapabilities(address);
+    removePeerCapabilities(address);
 }
 
 void Ieee80211Mib::clearAssociationIds()
@@ -327,7 +399,7 @@ void Ieee80211Mib::clearAssociationIds()
     bssAccessPointData.stations.clear();
     associationIdReservations.clear();
     bssAccessPointData.associationIds.clear();
-    clearPeerHtCapabilities();
+    clearPeerCapabilities();
 }
 
 } // namespace ieee80211

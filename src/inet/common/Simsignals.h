@@ -30,6 +30,8 @@ extern INET_API simsignal_t // admin
 
     linkBrokenSignal, // used for manet link layer feedback
 
+    modesetChangedSignal,
+
 
     interpacketGapStartedSignal,
     interpacketGapEndedSignal,
@@ -151,4 +153,3 @@ void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *deta
 } // namespace inet
 
 #endif
-

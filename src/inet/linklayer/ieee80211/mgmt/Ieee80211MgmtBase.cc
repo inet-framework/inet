@@ -9,12 +9,14 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -35,6 +37,8 @@ void Ieee80211MgmtBase::initialize(int stage)
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
         configurationProvider.reference(this, "macModule", true);
+        if (auto coordinator = dynamic_cast<IIeee80211ModeSetCoordinator *>(configurationProvider.get()))
+            coordinator->registerModeSetConsumer(this, IIeee80211ModeSetCoordinator::MANAGEMENT_STATE);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
@@ -55,6 +59,20 @@ void Ieee80211MgmtBase::prepareConfiguration()
     if (modeSet == nullptr)
         throw cRuntimeError("Configured IEEE 802.11 mode catalog is unavailable");
     configurationPrepared = true;
+    updateSupportedRates();
+}
+
+void Ieee80211MgmtBase::applyModeSet(const Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = newModeSet;
+    updateSupportedRates();
+    if (isUp() && mib->hasActiveBss())
+        prepareLocalOperation();
+}
+
+void Ieee80211MgmtBase::updateSupportedRates()
+{
     supportedRates = Ieee80211SupportedRatesElement();
     extendedSupportedRates = Ieee80211ExtendedSupportedRatesElement();
     int rateIndex = 0;
@@ -111,6 +129,18 @@ Ieee80211HtOperation Ieee80211MgmtBase::computeLocalHtOperation(int primaryChann
 void Ieee80211MgmtBase::prepareLocalOperation()
 {
 
+}
+
+void Ieee80211MgmtBase::addVhtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtCapabilities(frame, mib->getLocalVhtCapabilities());
+}
+
+void Ieee80211MgmtBase::addVhtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const
+{
+    if (mib->isVhtOperationSupported())
+        setVhtOperation(frame, mib->getLocalVhtOperation());
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
@@ -240,4 +270,3 @@ void Ieee80211MgmtBase::stop()
 } // namespace ieee80211
 
 } // namespace inet
-

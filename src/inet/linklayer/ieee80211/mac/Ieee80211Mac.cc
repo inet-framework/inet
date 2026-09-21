@@ -11,6 +11,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -26,6 +27,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211ReceiverCapabilities.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -58,6 +60,7 @@ void Ieee80211Mac::initialize(int stage)
         fcsMode = parseFcsMode(par("fcsMode"));
         mib.reference(this, "mibModule", true);
         mib->qos = par("qosStation");
+        radio = check_and_cast<IRadio *>(gate("lowerLayerOut")->getNextGate()->getOwnerModule());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
@@ -81,6 +84,8 @@ void Ieee80211Mac::initialize(int stage)
         if (mib->qos && !hcf)
             throw cRuntimeError("Missing hcf module, required for QoS");
     }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+        modeSetInitialized = true;
 }
 
 void Ieee80211Mac::prepareLocalCapabilities()
@@ -88,8 +93,17 @@ void Ieee80211Mac::prepareLocalCapabilities()
     Enter_Method("prepareLocalCapabilities");
     if (mib->hasPreparedLocalCapabilities())
         return;
+    updateLocalHtCapabilities();
+}
+
+void Ieee80211Mac::updateLocalHtCapabilities(bool reconfiguration)
+{
+    updateLocalVhtCapabilities();
     if (!modeSet->isHtOperationSupported()) {
-        mib->installLocalHtCapabilities(Ieee80211HtCapabilities(), false);
+        if (reconfiguration)
+            mib->reconfigureLocalHtCapabilities(Ieee80211HtCapabilities(), false);
+        else
+            mib->installLocalHtCapabilities(Ieee80211HtCapabilities(), false);
         return;
     }
     auto *configuredRadio = check_and_cast<IRadio *>(gate("lowerLayerOut")->getNextGate()->getOwnerModule());
@@ -129,6 +143,7 @@ void Ieee80211Mac::prepareLocalCapabilities()
     // The equal-case Tx MCS set is represented by the maximum MCS index per
     // spatial-stream group. Rebuild it from the filtered Rx bitmap; MCS 32 is
     // not part of this map's MCS 0..31 NSS encoding.
+    localHtCapabilities.greenfield = modeSet->isHtGreenfieldSupported();
     localHtCapabilities.txMcsNss = Ieee80211HtMcsNssMap();
     for (int mcs = 0; mcs < 32; mcs++) {
         if (localHtCapabilities.rxMcsSupported[mcs]) {
@@ -142,7 +157,57 @@ void Ieee80211Mac::prepareLocalCapabilities()
     if (localHtCapabilities.maxAmpduLengthExponent < 0 || localHtCapabilities.maxAmpduLengthExponent > 3)
         throw cRuntimeError("htMaxAmpduLengthExponent must be between 0 and 3");
 
-    mib->installLocalHtCapabilities(localHtCapabilities, true);
+    if (reconfiguration)
+        mib->reconfigureLocalHtCapabilities(localHtCapabilities, true);
+    else
+        mib->installLocalHtCapabilities(localHtCapabilities, true);
+}
+
+void Ieee80211Mac::updateLocalVhtCapabilities()
+{
+    Ieee80211VhtCapabilities localVhtCapabilities;
+    bool supported = modeSet != nullptr && modeSet->getPhyType() == Ieee80211ModeSet::PhyType::VHT && mib->par("vhtSupported");
+    if (!supported) {
+        mib->installLocalVhtCapabilities(localVhtCapabilities, false);
+        return;
+    }
+    int spatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(), modeSet->getMaximumNumberOfSpatialStreams());
+    // Advertised maps are bounded by the actual long-GI primary-20 catalog,
+    // as well as the configured directional and antenna limits.
+    std::array<std::array<bool, 10>, 8> catalogMcs = {};
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        auto mode = modeSet->getMode(i);
+        auto data = mode->getDataMode();
+        int mcs = mode->getVhtMcsIndex();
+        int nss = data->getNumberOfSpatialStreams();
+        if (mcs >= 0 && mcs <= 9 && nss >= 1 && nss <= 8 && data->getBandwidth() == MHz(20) &&
+                data->getGuardInterval() == SimTime(800, SIMTIME_NS))
+            catalogMcs[nss - 1][mcs] = true;
+    }
+    auto readMap = [&](const char *parameter, std::array<int, 8>& map) {
+        auto values = check_and_cast<cValueArray *>(mib->par(parameter).objectValue());
+        if (values->size() != 8)
+            throw cRuntimeError("%s requires eight per-NSS MCS maxima", parameter);
+        for (int i = 0; i < 8; i++) {
+            int value = values->get(i).intValue();
+            if (value != -1 && value != 7 && value != 8 && value != 9)
+                throw cRuntimeError("%s entries must be -1, 7, 8 or 9", parameter);
+            int maximum = -1;
+            for (int mcs = 0; mcs <= value && catalogMcs[i][mcs]; mcs++)
+                if (mcs >= 7)
+                    maximum = mcs;
+            map[i] = i < spatialStreamLimit ? maximum : -1;
+        }
+        if (!isValidVhtMcsMap(map))
+            throw cRuntimeError("%s and the VHT catalog must support MCS 0 through 7 at one spatial stream", parameter);
+    };
+    readMap("vhtRxMcsMap", localVhtCapabilities.rxMaxMcs);
+    readMap("vhtTxMcsMap", localVhtCapabilities.txMaxMcs);
+    // Intentional limitation of the current packet-level primary-channel PHY:
+    // management operates the existing VHT-only profile at 20 MHz. Its catalog
+    // is broader, but does not establish primary/secondary channel support.
+    // No HT SGI negotiation is claimed by that profile, so 20 MHz uses long GI.
+    mib->installLocalVhtCapabilities(localVhtCapabilities, true);
 }
 
 void Ieee80211Mac::initializeRadioMode()
@@ -392,6 +457,83 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
     else if (signalID == IRadio::receivedSignalPartChangedSignal) {
         rx->receivedSignalPartChanged(static_cast<IRadioSignal::SignalPart>(value));
     }
+}
+
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    // Mode-set application uses the coordinator contract, not notifications.
+}
+
+void Ieee80211Mac::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    updateLocalHtCapabilities(true);
+}
+
+void Ieee80211Mac::registerModeSetConsumer(cModule *consumer, Phase phase)
+{
+    Enter_Method_Silent();
+    if (changingModeSet || modeSetInitialized)
+        throw cRuntimeError("Mode-set consumers must register before initialization completes");
+    if (consumer == nullptr || consumer == this || getContainingNicModule(consumer) != getContainingNicModule(this) ||
+            dynamic_cast<physicallayer::IIeee80211ModeSetListener *>(consumer) == nullptr)
+        throw cRuntimeError("Mode-set consumer must implement the transition contract");
+    if (phase != MANAGEMENT_STATE && phase != DERIVED_STATE)
+        throw cRuntimeError("Invalid mode-set consumer phase");
+    auto result = modeSetConsumers.emplace(consumer->getId(), phase);
+    if (!result.second && result.first->second != phase)
+        throw cRuntimeError("Mode-set consumer registered in two phases");
+}
+
+void Ieee80211Mac::unregisterModeSetConsumer(cModule *consumer)
+{
+    Enter_Method_Silent();
+    if (changingModeSet)
+        throw cRuntimeError("Cannot detach a mode-set consumer during a transition");
+    if (consumer == nullptr)
+        throw cRuntimeError("Cannot detach a null mode-set consumer");
+    if (getContainingNicModule(consumer) != getContainingNicModule(this))
+        throw cRuntimeError("Cannot detach a mode-set consumer from another interface");
+    modeSetConsumers.erase(consumer->getId());
+}
+
+void Ieee80211Mac::beginModeSetChange(const Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    if (changingModeSet)
+        throw cRuntimeError("Reentrant interface mode-set change");
+    if (!modeSetInitialized || !mib->hasPreparedLocalCapabilities())
+        throw cRuntimeError("Cannot reconfigure before mode-set initialization completes");
+    if (newModeSet == nullptr)
+        throw cRuntimeError("Cannot clear the mode set of an IEEE 802.11 interface");
+    if (std::none_of(modeSetConsumers.begin(), modeSetConsumers.end(), [](const auto& entry) { return entry.second == MANAGEMENT_STATE; }))
+        throw cRuntimeError("Required management mode-set consumer is not registered");
+    for (const auto& entry : modeSetConsumers)
+        if (getSimulation()->getModule(entry.first) == nullptr)
+            throw cRuntimeError("Mode-set consumer was deleted without unregistering");
+    pendingModeSet = newModeSet;
+    changingModeSet = true;
+}
+
+void Ieee80211Mac::completeModeSetChange(const Ieee80211ModeSet *newModeSet)
+{
+    Enter_Method_Silent();
+    if (!changingModeSet || pendingModeSet != newModeSet)
+        throw cRuntimeError("Mode-set completion does not match the pending transition");
+    if (modeSet != newModeSet) {
+        applyModeSet(newModeSet);
+        for (auto phase : {MANAGEMENT_STATE, DERIVED_STATE})
+            for (const auto& entry : modeSetConsumers)
+                if (entry.second == phase)
+                    check_and_cast<physicallayer::IIeee80211ModeSetListener *>(
+                            getSimulation()->getModule(entry.first))->applyModeSet(newModeSet);
+        mib->publishStateChange();
+        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+    }
+    pendingModeSet = nullptr;
+    changingModeSet = false;
 }
 
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)

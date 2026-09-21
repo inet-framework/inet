@@ -22,7 +22,8 @@ void TxopProcedure::initialize(int stage)
 {
     ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        limit = par("txopLimit");
+        configuredLimit = par("txopLimit");
+        limit = configuredLimit;
         WATCH(start);
         WATCH(protectionMechanism);
     }
@@ -78,9 +79,12 @@ void TxopProcedure::startTxop(AccessCategory ac)
     Enter_Method("startTxop");
     if (start != -1)
         throw cRuntimeError("Txop is already running");
-    if (limit == -1) {
+    // Resolve the default for each new TXOP; a mode change must not alter
+    // the limit of a TXOP already in progress or a configured override.
+    if (configuredLimit == -1)
         limit = getTxopLimit(modeSet->getPhyType(), ac).get<s>();
-    }
+    else
+        limit = configuredLimit;
     // The STA selects between single and multiple protection when it transmits the first frame of a TXOP.
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
     protectionMechanism = selectProtectionMechanism(ac);

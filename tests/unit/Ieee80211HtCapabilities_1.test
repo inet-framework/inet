@@ -20,6 +20,7 @@ local.rxMcsSupported[2] = true;
 local.rxMcsSupported[3] = true;
 local.txMcsNss.maxMcsPerNss[0] = 3;
 local.ldpc = true;
+local.greenfield = true;
 local.shortGi20 = true;
 local.maxAmpduLengthExponent = 1;
 
@@ -47,6 +48,8 @@ ASSERT(!negotiated.localRxPeerTx.supportedMcs[1]);
 ASSERT(negotiated.localRxPeerTx.supportedMcs[2]);
 ASSERT(!negotiated.localTxPeerRx.receiverLdpc);
 ASSERT(negotiated.localRxPeerTx.receiverLdpc);
+ASSERT(!negotiated.localTxPeerRx.receiverGreenfield);
+ASSERT(negotiated.localRxPeerTx.receiverGreenfield);
 ASSERT(negotiated.localTxPeerRx.receiverMaxAmpduLengthExponent == 3);
 ASSERT(negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent == 1);
 

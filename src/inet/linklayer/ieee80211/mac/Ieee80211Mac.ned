@@ -80,7 +80,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac, IIeee80211MacCon
 {
     parameters:
         string mibModule;
-        string modeSet @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
+        string modeSet @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","n(greenfield-2.4Ghz)","p","ac") = default("g(mixed)");
         string fcsMode @enum("declared","computed") = default("declared");
         string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("receiver");
 
@@ -94,6 +94,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac, IIeee80211MacCon
 
         @display("i=block/layer");
         @class(Ieee80211Mac);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet); // Completed runtime transition; observational only
         @signal[linkBroken](type=inet::Packet); // TODO this signal is only present for the statistic to pass the signal check, to be removed
         @signal[frameTransmissionOutcome](type=inet::Packet);
         @statistic[packetSentToUpper](title="packets sent to upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -137,4 +138,3 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac, IIeee80211MacCon
                 @display("p=250,200");
         }
 }
-
