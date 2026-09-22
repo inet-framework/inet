@@ -108,7 +108,7 @@ The catalog, one row per cell:
    * - PHY, management
      - radio configuration; modes, bands, channels
      - The PLME: applies a command that sets the PHY mode, the band or the
-       channel. The catalog of modes gives every part its timing.
+       channel. The catalog of modes gives every part its time constants.
    * - medium, data
      - radio medium
      - Delivers a transmission to every radio that can receive it, with
@@ -200,109 +200,95 @@ modes, cite IEEE Std 802.11-2024. This chapter cites the 2024 revision. The
 clause numbers differ between revisions: HCF is clause 9.19 in 2012 and
 clause 10.23 in 2024, and PCF exists only in the older revisions.
 
-.. _dg:sec:80211:programming-interface:
+.. _dg:sec:80211:amendments:
 
-The programming interface
--------------------------
+The amendments and the code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A module outside the interface talks to the 802.11 model through packets,
-commands, primitives and signals. It never calls a C++ method of the model.
-
-**Data packets.** A packet enters on ``upperLayerIn`` of the interface with
-a ``MacAddressReq`` tag (the destination) and a ``PacketProtocolTag`` (the
-payload protocol). A ``UserPriorityReq`` tag, when present, selects the
-access category of a QoS station. The LLC encapsulates the packet, and the
-MAC builds the 802.11 header from the tags and from the MIB. A received
-packet leaves on ``upperLayerOut`` with ``MacAddressInd``, ``InterfaceInd``,
-``PacketProtocolTag`` and, for a QoS frame, ``UserPriorityInd``. See
-:doc:`ch-tags` for the tag mechanism.
-
-**Management frames.** A management module sends the *body* of a management
-frame on the ``mgmtIn`` gate of the MAC with three tags: ``MacAddressReq``
-(the receiver), ``Ieee80211SubtypeReq`` (the frame subtype) and
-``PacketProtocolTag`` set to ``Protocol::ieee80211Mgmt``. The MAC adds the
-header, the trailer and the transmitter address. A received management frame
-comes back on ``mgmtOut`` with its header popped.
-
-**Radio commands.** A ``Request`` message with kind ``RADIO_C_CONFIGURE``
-and an ``Ieee80211ConfigureRadioCommand`` control info changes the PHY mode,
-the mode set, the band, the channel or the bit rate of the radio. The
-management module sends it on its ``macOut`` gate. The MAC forwards it to
-the radio, and it holds the command while the medium is busy, so a channel
-change never cuts a frame exchange. The MAC uses the base class
-``ConfigureRadioCommand`` for its own radio mode switches.
-
-**MLME primitives.** The agent and the management module exchange the
-primitives of the MLME SAP as ``cMessage`` objects with a control info from
-``Ieee80211Primitives.msg``. Each request has a confirm with a result code.
-The table omits the ``Ieee80211Prim_`` prefix of the class names.
+No class of the model carries an amendment letter. The code names the
+families: ``Ofdm``, ``Dsss``, ``Erp``, ``Ht``, ``Vht``, ``Qos``. An amendment
+also cuts across the cells: 802.11e touches the MAC data plane, the
+management frames and the classifier. The table maps the letters to the code.
 
 .. list-table::
    :header-rows: 1
-   :widths: 30 30 40
+   :widths: 12 26 16 28 18
 
-   * - Request
-     - Confirm
-     - Fields
-   * - ``ScanRequest``
-     - ``ScanConfirm``
-     - BSS type, BSSID, SSID, active or passive, probe delay, channel list,
-       minimum and maximum channel time; the confirm carries the list of
-       BSS descriptions with their received power
-   * - ``AuthenticateRequest``
-     - ``AuthenticateConfirm``
-     - address, timeout
-   * - ``AssociateRequest``, ``ReassociateRequest``
-     - ``AssociateConfirm``, ``ReassociateConfirm``
-     - address, timeout
-   * - ``DeauthenticateRequest``, ``DisassociateRequest``
+   * - Amendment
+     - Adds
+     - Name in the code
+     - Parts
+     - Status
+   * - base
+     - DCF, PCF, fragmentation, RTS/CTS, multirate support, the management
+       procedures
      - none
-     - address, reason code
+     - :ned:`Dcf`, the data services, the management modules
+     - modeled; PCF a placeholder
+   * - a
+     - the OFDM PHY in the 5 GHz band
+     - ``Ofdm``
+     - the OFDM mode classes; mode set ``a``
+     - modeled
+   * - b
+     - the HR/DSSS PHY
+     - ``Dsss``, ``HrDsss``
+     - the DSSS mode classes; mode set ``b``
+     - modeled
+   * - g
+     - the ERP-OFDM PHY in the 2.4 GHz band
+     - ``Erp``
+     - the ERP mode classes; mode sets ``g(erp)``, ``g(mixed)``
+     - modeled
+   * - e
+     - QoS: EDCA, TXOP, block acknowledgement, HCCA
+     - ``Qos``, ``Edca``, ``Hcf``, ``BlockAck``
+     - :ned:`Hcf`, :ned:`Edca`, :ned:`Edcaf`, the TXOP procedure, the QoS
+       data services and policies, the block ack handlers and procedures,
+       the classifier
+     - modeled; HCCA a placeholder
+   * - n
+     - the HT PHY, A-MSDU and A-MPDU aggregation, compressed block ack,
+       40 MHz channels
+     - ``Ht``, ``Msdu``, ``Mpdu``
+     - the HT mode classes; mode set ``n(mixed-2.4Ghz)``; the aggregation
+       classes; the HT elements of the MIB and of the management frames
+     - partial: 20 MHz only, A-MPDU not wired, compressed block ack absent
+   * - ac
+     - the VHT PHY
+     - ``Vht``
+     - the VHT mode classes; mode set ``ac``
+     - partial: 20 MHz only
+   * - p
+     - 10 MHz channels at 5.9 GHz, operation outside a BSS
+     - ``p``, ``Epd``
+     - mode set ``p``; :ned:`Ieee80211LlcEpd`
+     - modeled
+   * - i, k, r, s, w, ax and later
+     - security, measurement, fast BSS transition, mesh, protected
+       management frames, high efficiency
+     - none; ``Mcf`` for mesh
+     - :ned:`Mcf` is an empty placeholder
+     - not modeled
 
-The result codes are ``PRC_SUCCESS``, ``PRC_INVALID_PARAMETERS``,
-``PRC_TIMEOUT``, ``PRC_TOO_MANY_SIMULTANEOUS_REQUESTS`` and ``PRC_REFUSED``.
-A custom agent implements the ``IIeee80211Agent`` NED interface and speaks
-these primitives; it needs no other knowledge of the management module.
+The EPD encapsulation that the model pairs with 802.11p comes from IEEE Std
+802, not from the amendment.
 
-**Packets between the MAC and the radio.** The MAC tags a frame with
-``Ieee80211ModeReq`` (the PHY mode the rate selection chose) and, when
-needed, ``Ieee80211ChannelReq``. The radio delivers a received frame with
-``Ieee80211ModeInd``, ``Ieee80211ChannelInd``, ``SignalPowerInd``,
-``SnirInd``, ``SignalTimeInd`` and ``ErrorRateInd``. A frame that the error
-model rejected arrives with its bit error flag set; the MAC drops it. The
-protocol identifiers are ``Protocol::ieee80211Mac`` for a MAC frame and one
-``Protocol::ieee80211*Phy`` value per PHY family for a frame with a PHY
-header.
+.. _dg:sec:80211:parts:
 
-**Signals.** The model publishes facts, and any module may subscribe:
+The parts, cell by cell
+-----------------------
 
--  ``l2Associated``, ``l2BeaconLost`` from the station management;
-   ``l2Disassociated``, ``l2AssociatedNewAp``, ``l2AssociatedOldAp`` from
-   the agent; ``l2ApAssociated``, ``l2ApDisassociated`` from the access
-   point. The payload is the network interface, or a notification object
-   with the addresses.
-
--  ``frameTransmissionOutcome`` from the coordination function, with a
-   ``FrameTransmissionDetails`` object: acknowledged, retry limit reached,
-   or dropped before transmission. The access point uses it to commit an
-   association only after the acknowledged response.
-
--  ``modesetChanged`` from the MAC, with the ``Ieee80211ModeSet`` pointer.
-   Every part that needs the PHY time constants subscribes to it on the interface
-   module.
-
--  ``radioModeChanged``, ``receptionStateChanged``,
-   ``transmissionStateChanged``, ``receivedSignalPartChanged``,
-   ``transmittedSignalPartChanged`` and ``radioChannelChanged`` from the
-   radio.
-
--  ``packetDropped`` with a ``PacketDropDetails`` reason from every part
-   that drops a frame, and the statistics signals of each part.
+This part walks the grid. The data plane comes first, from the top down, in
+the order a frame takes: the interface, the LLC, the MAC with its five
+functions, the PHY, the medium. The management plane follows. The two parts
+across layers come last. Every section names the contract of each part; the
+contracts view in the next part lists all contracts in one place.
 
 .. _dg:sec:80211:interface:
 
 The network interface
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 :ned:`Ieee80211Interface` is a composition. It names seven slots, wires
 them, and fans out the parameters that more than one slot needs
@@ -312,8 +298,6 @@ entry, the address, and the up or down state.
 
 .. graphviz:: figures/ieee80211_interface.dot
    :align: center
-
-The slots and their contracts:
 
 .. list-table::
    :header-rows: 1
@@ -353,49 +337,45 @@ through the LLC and the MAC. Management frame bodies go between the
 management module and the MAC on their own gate pair. Radio commands go from
 the management module through the MAC to the radio.
 
-The MIB is the one shared object. A part that needs its state holds a
-pointer that it resolves from its ``mibModule`` parameter, which the
-interface sets. The management module writes the mode, the station type, the
-BSS data, the association flag and the station table. The MAC writes the
-address and the local HT capabilities. Everyone else reads.
+.. _dg:sec:80211:llc:
 
-Means of communication
-~~~~~~~~~~~~~~~~~~~~~~
+The LLC
+~~~~~~~
 
-Inside the interface the parts use a fixed set of mechanisms. A developer
-who adds a part chooses from this set.
+The LLC cell holds the classifier and the LLC. Both sit on the data plane
+between the network layer and the MAC.
 
--  **A packet or a command on a gate** crosses a layer boundary: LLC to
-   MAC, management to MAC, MAC to radio.
+.. list-table::
+   :header-rows: 1
+   :widths: 26 20 54
 
--  **A direct C++ call through a contract interface** joins parts that must
-   act in the same instant. The caller finds the callee in one of three ways
-   only: as its own submodule, by a module path parameter that the parent
-   NED sets (``*.rxModule = "^.rx"``), or as the neighbour of one of its
-   gates. A part never searches the module tree for a peer.
+   * - Part
+     - Variant of
+     - What it does
+   * - :ned:`Ieee80211LlcLpd`
+     - LLC, the default
+     - Adds an IEEE 802.2 LLC/SNAP header; the SNAP form carries the
+       EtherType.
+   * - :ned:`Ieee80211LlcEpd`
+     - LLC, for 802.11p
+     - Adds an EtherType header.
+   * - :ned:`Ieee80211Portal`
+     - LLC, in an access point
+     - Converts between 802.11 frames and Ethernet frames, so that the relay
+       unit of the access point can bridge them.
+   * - :ned:`QosClassifier` and the other classifiers
+     - classifier
+     - Maps a packet to a user priority and adds the ``UserPriorityReq`` tag.
+       Omitted by default.
 
--  **A callback interface** returns a result later. The service interface
-   declares a nested ``ICallback``; the client implements it and passes
-   ``this`` with the request. Channel grants, transmission completions, frame
-   sequence events and control responses all use this form.
-
--  **A signal** publishes a fact that happened. A subscriber may react; the
-   emitter does not depend on it. Signals cross module boundaries where a
-   direct call would create a dependency in the wrong direction: radio state
-   to MAC, mode set to the MAC parts, channel change to the access point
-   management, association events to the node.
-
--  **A shared object** holds state that several parts read: the MIB, the
-   mode set, and inside a coordination function the pending queue and the
-   in-progress frames.
-
--  **A self-message** is the only way to wait. Every part owns the timers it
-   needs.
+The LLC variants share the one-method contract ``IIeee80211Llc``. Nothing on
+the wire says which LLC encapsulated a frame, so the MAC records it in an
+``LlcProtocolTag``.
 
 .. _dg:sec:80211:mac:
 
 The MAC
--------
+~~~~~~~
 
 :ned:`Ieee80211Mac` is a compound module with an active C++ class. The
 class is the frame codec and the dispatcher; the submodules do the protocol.
@@ -450,9 +430,6 @@ The coordination function asks for the switch when it starts and ends a
 transmission, so that the mode change is part of the frame exchange and not
 a side effect of a signal.
 
-The coordination function
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
 A coordination function is the unit that a developer replaces to change how
 the station accesses the medium and exchanges frames. Its contract towards
 the MAC is ``ICoordinationFunction``: ``processUpperFrame``,
@@ -460,126 +437,196 @@ the MAC is ``ICoordinationFunction``: ``processUpperFrame``,
 it implements the callback interfaces ``IChannelAccess::ICallback``,
 ``ITx::ICallback``, ``IFrameSequenceHandler::ICallback`` and
 ``IProcedureCallback``. Everything below this line is inside one
-coordination function.
+coordination function, and it divides along the five functions of the data
+plane. The figure shows the parts in five bands; only the calls between the
+bands are drawn, and the sections say who calls whom inside a band.
 
 .. graphviz:: figures/ieee80211_coordination_function.dot
    :align: center
 
-**Channel access** (``IChannelAccess``) decides *when* the station may
-transmit. It owns the pending queue, the in-progress frames and the
-contention window of one access function. :ned:`Dcaf` is the single access
-function of DCF. :ned:`Edca` holds one :ned:`Edcaf` per access category plus
-a collision controller that settles an internal collision in favour of the
-higher category. The **contention** (``IContention``) is the state machine
-that waits for a free medium, an inter-frame space and a backoff. It learns
-the medium state from ``rx`` and reports the grant through
-``IContention::ICallback``. The channel access reports the grant to the
-coordination function through ``IChannelAccess::ICallback``. The contention
-window changes only on request of the recovery procedure.
+Two patterns run through all five bands. A *policy* answers a question and
+holds no frame state: is an ACK needed, is an RTS needed, may this RTS be
+answered with a CTS, which ack policy applies, when is a block ack agreement
+wanted. Every policy is a replaceable module typed by an ``I...Policy``
+interface. The policies are a concept of this model, not of the standard: the
+standard states the rules, and the model separates each rule into a slot so
+that an experiment can replace it. A *procedure* builds the frames of one
+mechanism and keeps the state of that mechanism: the RTS, CTS and recipient
+ACK procedures, and the block ack agreement handlers and procedures. A
+procedure is a C++ object owned by the coordination function, and it hands a
+frame to send back to the coordination function through
+``IProcedureCallback``.
 
-**Frame exchange** decides *what* the station sends and expects once it has
-the channel. A frame exchange is a grammar of steps: a transmit step sends a
+Access
+^^^^^^
+
+Access decides *when* the station may transmit.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 42 36
+
+   * - Part
+     - Responsibility
+     - DCF and EDCA
+   * - channel access (``IChannelAccess``)
+     - Owns the pending queue, the in-progress frames and the contention
+       window of one access function. Reports the grant to the coordination
+       function through ``IChannelAccess::ICallback``.
+     - :ned:`Dcaf` is the single access function of DCF. :ned:`Edca` holds one
+       :ned:`Edcaf` per access category.
+   * - contention (``IContention``)
+     - The state machine that waits for a free medium, an inter-frame space
+       and a backoff. It learns the medium state from ``rx`` and reports the
+       grant through ``IContention::ICallback``.
+     - One per access function.
+   * - collision controller
+     - Settles an internal collision between two access categories in favour
+       of the higher one (``IEdcaCollisionController``).
+     - EDCA only.
+   * - TXOP procedure
+     - The transmit opportunity: its start, its limit per access category,
+       and the time left, which bounds a frame exchange.
+     - EDCA only, one per access category.
+   * - the NAV and the medium state
+     - The recipient side of access: ``rx`` keeps the NAV from the duration
+       fields it receives and derives the medium state.
+     - Shared by all access functions.
+
+The contention window changes only on request of the recovery procedure,
+through the ``ICwCalculator`` callback that the channel access implements.
+
+Exchange
+^^^^^^^^
+
+Exchange decides *what* the station sends and expects once it has the
+channel. A frame exchange is a grammar of steps: a transmit step sends a
 frame, a receive step waits for a frame of an expected type within a
 timeout. The combinators ``SequentialFs``, ``AlternativesFs``,
-``RepeatingFs`` and ``OptionalFs`` compose primitive sequences (data,
-management, RTS, CTS, fragment with ACK, block ack request with block ack)
-into ``DcfFs``, ``HcfFs`` and ``TxOpFs``. The ``FrameSequenceHandler`` runs
-one sequence at a time: it asks the sequence for the next step, transmits
-through ``ITx`` or arms the receive timer, and reports each accepted or
-rejected step to the coordination function. A ``FrameSequenceContext``
-carries what one exchange needs: the in-progress frames, the policies, and
-for a QoS station the TXOP procedure. This form maps the frame exchange
+``RepeatingFs`` and ``OptionalFs`` compose primitive sequences into
+``DcfFs``, ``HcfFs`` and ``TxOpFs``. This form maps the frame exchange
 sequences of Annex G to code one step at a time, and it keeps retransmission
 out of the sequence: a failed step ends the sequence, and the recovery
 procedure decides what happens to the frame.
 
-**Data services** transform frames as the MAC data plane of clause 5.1.5
-prescribes. The originator service (``IOriginatorMacDataService``) takes
-packets from the pending queue and produces the frames to transmit: A-MSDU
-aggregation, sequence number assignment, fragmentation, A-MPDU aggregation,
-in this order. The recipient service (``IRecipientMacDataService``) reverses
-it: A-MPDU deaggregation, duplicate removal, block ack reordering,
-defragmentation, A-MSDU deaggregation. Each step that has a decision to make
-gets it from a policy (``IFragmentationPolicy``, ``IMsduAggregationPolicy``,
-``IMpduAggregationPolicy``). The in-progress frames pull from the originator
-service only when they hold no frame that may be transmitted, so the queue
-keeps packets in their original form as long as possible.
+.. list-table::
+   :header-rows: 1
+   :widths: 24 40 36
 
-**Policies and procedures** are the two kinds of helper. A *policy*
-answers a question and holds no frame state: is an ACK needed, is an RTS
-needed, may this RTS be answered with a CTS, which ack policy applies, when
-is a block ack agreement wanted. Every policy is a replaceable module typed
-by an ``I...Policy`` interface. A *procedure* builds the frames of one
-mechanism and keeps the state of that mechanism: the RTS, CTS and recipient
-ACK procedures, and the block ack agreement handlers and procedures. A
-procedure is a C++ object owned by the coordination function, and it hands
-a frame to send back to the coordination function through
-``IProcedureCallback``.
+   * - Part
+     - Responsibility
+     - DCF and EDCA
+   * - frame sequence handler
+     - Runs one sequence at a time (``IFrameSequenceHandler``): asks the
+       sequence for the next step,
+       transmits through ``ITx`` or arms the receive timer, and reports each
+       accepted or rejected step to the coordination function through its
+       callback.
+     - One per coordination function.
+   * - frame sequences (``IFrameSequence``)
+     - The grammar. The primitive sequences are data, management, RTS, CTS,
+       fragment with ACK, last fragment with ACK, block ack request with
+       block ack.
+     - ``DcfFs``: RTS/CTS, fragments, ACKs. ``HcfFs`` repeats ``TxOpFs``
+       rounds within the TXOP: data with ACK, data under block ack, block ack
+       request, management with ACK.
+   * - frame sequence context
+     - What one exchange needs: the in-progress frames, the policies, the
+       procedures, and for a QoS station the TXOP procedure.
+     - Built by the coordination function per grant.
+   * - the procedures
+     - Build an RTS for a pending frame; answer a received RTS with a CTS
+       and a received frame with an ACK; build and answer a block ack
+       request.
+     - The block ack procedures exist in EDCA only.
 
-**Acknowledgement and recovery.** The ack handler owns the acknowledgement
-status of every in-progress frame, keyed by sequence control and, in QoS,
-by receiver and TID. The in-progress frames ask it which frame may be
-transmitted next. The recovery procedure owns the retry counters, short and
-long, per frame and per station; it decides when the retry limit is reached
-and asks the channel access to double or reset the contention window. The
-coordination function connects them: on an acknowledgement it resets and
-drops the frame, on a failure it counts and either marks the retry bit or
-drops the frame.
+Transformation
+^^^^^^^^^^^^^^
 
-**Rate selection and rate control.** The rate selection picks the PHY mode
-of every transmitted frame and of every response frame, from the
-configured bit rates, the mode set, the peer's capabilities in the MIB, and
-the optional rate control. Rate control (``IRateControl``) adapts the data
-rate per receiver from the success and failure feedback that the
-coordination function gives it. The **protection mechanism** computes the
-duration field of every frame from the same rate selection, so that the NAV
-of the other stations covers the rest of the exchange.
-
-Ownership of state
-~~~~~~~~~~~~~~~~~~
-
-Every piece of mutable protocol state has exactly one owner. The table is
-the reference for a developer who adds a feature.
+Transformation turns MSDUs into MPDUs and back, as the MAC data plane of
+clause 5.1.5 prescribes. The originator service
+(``IOriginatorMacDataService``) takes packets from the pending queue and
+produces the frames to transmit. The recipient service
+(``IRecipientMacDataService``) reverses the steps. The in-progress frames
+pull from the originator service only when they hold no frame that may be
+transmitted, so the queue keeps packets in their original form as long as
+possible.
 
 .. list-table::
    :header-rows: 1
-   :widths: 40 60
+   :widths: 30 35 35
 
-   * - State
-     - Owner
-   * - packets not yet processed
-     - the pending queue of the channel access
-   * - frames under transmission
-     - the in-progress frames of the channel access
-   * - acknowledgement status per frame
-     - the ack handler
-   * - retry counters per frame and per station
-     - the recovery procedure
-   * - contention window
-     - the channel access (``ICwCalculator``)
-   * - backoff and inter-frame space
-     - the contention
-   * - NAV
-     - ``rx``
-   * - sequence numbers
-     - the originator data service
-   * - reassembly and reorder buffers
-     - the recipient data service
-   * - block ack agreements
-     - the originator and recipient agreement handlers
-   * - TXOP start and limit
-     - the TXOP procedure of the access category
-   * - association, BSS, station table
-     - the MIB, written by the management module
-   * - address, local HT capabilities
-     - the MIB, written by the MAC
-   * - PHY mode set
-     - the MAC; published by signal, cached by the listeners
-   * - channel, band, mode of the radio
-     - the radio
+   * - Step, in order
+     - Originator
+     - Recipient, in reverse order
+   * - aggregation of MSDUs
+     - A-MSDU, by ``IMsduAggregationPolicy`` (EDCA)
+     - A-MSDU deaggregation
+   * - sequence number
+     - per receiver and TID in EDCA, one counter in DCF
+     - duplicate removal per transmitter, and per TID in EDCA
+   * - fragmentation
+     - by ``IFragmentationPolicy``
+     - reassembly
+   * - reordering
+     - none
+     - block ack reordering per agreement (EDCA)
+   * - aggregation of MPDUs
+     - A-MPDU, by ``IMpduAggregationPolicy`` (EDCA)
+     - A-MPDU deaggregation
+
+Reliability
+^^^^^^^^^^^
+
+Reliability answers: did the frame arrive, and what if not?
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 40 36
+
+   * - Part
+     - Responsibility
+     - DCF and EDCA
+   * - ack handler (``IAckHandler``)
+     - Owns the acknowledgement status of every in-progress frame. The
+       in-progress frames ask it which frame may be transmitted next.
+     - Keyed by sequence control in DCF; by receiver, TID and sequence
+       control in EDCA, one per access category.
+   * - recovery procedure
+     - Owns the retry counters, short and long, per frame and per station
+       (``IRecoveryProcedure``).
+       Decides when the retry limit is reached, and asks the channel access
+       to double or reset the contention window.
+     - One in DCF. One per access category in EDCA, plus one shared for
+       management frames.
+   * - block ack agreement handlers and procedures
+     - Set up, keep and tear down the agreements per peer and TID, on both
+       sides; build and answer the block ack request.
+     - EDCA only.
+   * - the ack, RTS, CTS and agreement policies
+     - Whether an ACK is needed, the timeouts, whether an RTS protects a
+       frame, whether a CTS answers, whether an agreement is wanted.
+     - Non-QoS and QoS variants of each.
+
+The coordination function connects them: on an acknowledgement it resets the
+counters and drops the frame, on a failure it counts and either marks the
+retry bit or drops the frame.
+
+Rate and protection
+^^^^^^^^^^^^^^^^^^^
+
+The rate selection (``IRateSelection``, ``IQosRateSelection``) picks the PHY
+mode of every transmitted frame and of every response frame, from the
+configured bit rates, the mode set, the peer's capabilities in the MIB, and
+the optional rate control. Rate control (``IRateControl``) adapts the data
+rate per receiver from the success and failure feedback that the
+coordination function gives it. The protection mechanism computes the
+duration field of every frame from the same rate selection, so that the NAV
+of the other stations covers the rest of the exchange. EDCA adds the block
+ack response rate and a TXOP-aware rule for control frames.
 
 A frame's journey
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 On the transmit side: the LLC hands a packet to the MAC; the MAC builds the
 data frame and gives it to the coordination function; the coordination
@@ -599,64 +646,26 @@ frames; the coordination function sends each complete frame up; the MAC
 decapsulates it and passes a management frame to the management module and
 a data frame to ``ds``, which passes it up or forwards it.
 
-.. _dg:sec:80211:mgmt:
-
-Management and agent
---------------------
-
-The management module is the MLME. It runs the procedures of the standard:
-scan, authentication, association, reassociation, beacons, and the beacon
-timeout. It owns every timer of these procedures. It builds management frame
-bodies and reads received ones. It writes the results into the MIB:
-``mode``, ``bssStationData``, ``bssData`` and, on an access point, the
-station table and the association identifiers. It emits the association
-signals. It never decides *whether* to scan or *which* access point to join.
-
-The agent is the station management entity. It decides, and it drives the
-management module with the MLME primitives: scan, then authenticate with the
-chosen access point, then associate; and scan again when the beacon is lost.
-A different join strategy, a handover policy or a scripted behaviour is a
-different agent, and the management module does not change.
-
-An access point has no agent: its management module answers requests and
-never starts a procedure. It reserves an association identifier when it
-builds a response and commits it only when the coordination function
-reports the response as acknowledged, through ``frameTransmissionOutcome``.
-The station table in the MIB is what ``ds`` and the MAC consult to forward
-or drop a frame.
-
-The five management variants share the ``IIeee80211Mgmt`` contract: the
-gates to the MAC and to the agent, and the MIB fields above. The simplified
-variants meet the contract without frames: the station writes itself as
-associated into its own MIB and into the MIB of its access point, and the
-access point treats every station as associated. The ad hoc variant sets
-the independent mode and nothing else. A new variant must keep the MIB
-fields true, because the MAC and ``ds`` act on them.
-
-The management module runs its procedures through the MAC like any other
-client: frame bodies on the management gates, radio commands for the channel
-changes of a scan, and the ``receptionStateChanged`` signal of the radio to
-detect a busy channel during an active scan.
-
 .. _dg:sec:80211:phy:
 
 The physical layer
-------------------
+~~~~~~~~~~~~~~~~~~
 
-:ned:`Ieee80211Radio` builds on the flat radio of the generic framework, which the
-:doc:`chapter on the physical layer <ch-physicallayer>` describes. The generic
-framework gives the radio modes, the
-transmission and reception timers, the medium, the propagation and path
-loss models, the analog signal representations and the reception decision.
-The 802.11 model adds five things.
+:ned:`Ieee80211Radio` builds on the flat radio of the generic framework, which
+the :doc:`chapter on the physical layer <ch-physicallayer>` describes. The
+generic framework gives the radio modes, the transmission and reception
+timers, the medium, the propagation and path loss models, the analog signal
+representations and the reception decision. The 802.11 model adds five
+things.
 
 -  **Modes and mode sets.** ``IIeee80211Mode`` describes one PHY mode:
    its preamble, header and data submodes with their bit rates and
    durations, and the time constants of the PHY, such as slot time, SIFS,
    CCA time and receive start delay. ``Ieee80211ModeSet`` is the immutable
    table of modes of one operation mode, with the mandatory flag of each. The
-   MAC takes its time constants from the reference mode of the set, and it publishes
-   the set with ``modesetChanged`` so that every part uses the same one.
+   MAC takes its time constants from the reference mode of the set, and it
+   publishes the set with ``modesetChanged`` so that every part uses the same
+   one.
 
 -  **Bands and channels.** ``IIeee80211Band`` maps a channel index to a
    center frequency; ``Ieee80211Channel`` is a band with an index. The
@@ -679,26 +688,485 @@ The 802.11 model adds five things.
    and :ned:`Ieee80211YansErrorModel` give the curves;
    :ned:`Ieee80211BerTableErrorModel` reads them from a file.
 
-The radio handles ``Ieee80211ConfigureRadioCommand``: mode set, mode, band,
-channel and channel number, in that order, then the generic fields. Every
-change reaches both the transmitter and the receiver, and the radio
-publishes ``radioChannelChanged`` and ``listeningChanged``.
+The variants follow the two patterns of the PHY: fidelity and family.
 
-The radio variants differ only in the analog representation of the signal
-(unit disk, scalar, dimensional). :ned:`Ieee80211OfdmRadio` replaces the
-transmitter and the receiver with the layered OFDM chain, which simulates
-encoder, interleaver, modulator and their inverses at a selectable level of
-detail; it still produces an ``Ieee80211Transmission`` and it still speaks
-the same tags to the MAC.
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
 
-.. _dg:sec:80211:init-lifecycle:
+   * - Axis
+     - Variants
+   * - fidelity
+     - :ned:`Ieee80211UnitDiskRadio` (range only, no error model),
+       :ned:`Ieee80211ScalarRadio` (one power per signal),
+       :ned:`Ieee80211DimensionalRadio` (power over time and frequency),
+       :ned:`Ieee80211OfdmRadio` (bit level: encoder, interleaver, modulator
+       and their inverses). All produce an ``Ieee80211Transmission`` and
+       speak the same tags to the MAC.
+   * - family
+     - DSSS, HR/DSSS, OFDM, ERP-OFDM, HT, VHT, each a mode class family and a
+       PHY header class; FHSS and IR exist but no mode set uses them.
 
-Initialization and lifecycle
-----------------------------
+.. _dg:sec:80211:medium:
 
-INET orders initialization by named stages. The file
+The medium
+~~~~~~~~~~
+
+The radio medium is one module per network, shared by every radio. A radio
+registers with it at the physical-layer stage and finds it through the
+``radioMediumModule`` parameter. To transmit, the radio calls
+``transmitPacket``; the medium sends a ``WirelessSignal`` by ``sendDirect``
+to the ``radioIn`` gate of every radio that can receive it. During a
+reception the radio asks the medium whether the reception is attempted and
+successful, and the medium asks the receiver. :ned:`Ieee80211RadioMedium`
+adds no code; it sets 802.11 defaults for the background noise and the
+range limits.
+
+.. _dg:sec:80211:mgmt:
+
+The management module
+~~~~~~~~~~~~~~~~~~~~~
+
+The management module is the MLME. It runs the procedures of the standard:
+scan, authentication, association, reassociation, beacons, and the beacon
+timeout. It owns every timer of these procedures. It builds management frame
+bodies and reads received ones. It writes the results into the MIB:
+``mode``, ``bssStationData``, ``bssData`` and, on an access point, the
+station table and the association identifiers. It emits the association
+signals. It never decides *whether* to scan or *which* access point to join.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - Variant
+     - Role
+     - Procedures it runs
+   * - :ned:`Ieee80211MgmtSta`
+     - station
+     - scan, authentication, association, reassociation, beacon timeout;
+       needs an agent
+   * - :ned:`Ieee80211MgmtAp`
+     - access point
+     - beacons, probe responses, authentication, association, the station
+       table and the association identifiers
+   * - :ned:`Ieee80211MgmtStaSimplified`, :ned:`Ieee80211MgmtApSimplified`
+     - station, access point
+     - none; the station writes itself as associated into its own MIB and
+       into the MIB of its access point
+   * - :ned:`Ieee80211MgmtAdhoc`
+     - ad hoc
+     - none; sets the independent mode
+
+An access point never starts a procedure. It reserves an association
+identifier when it builds a response and commits it only when the
+coordination function reports the response as acknowledged, through
+``frameTransmissionOutcome``. The station table in the MIB is what ``ds``
+and the MAC consult to forward or drop a frame.
+
+The five variants share the ``IIeee80211Mgmt`` contract: the gates to the
+MAC and to the agent, and the MIB fields above. A new variant must keep the
+MIB fields true, because the MAC and ``ds`` act on them. The management
+module runs its procedures through the MAC like any other client: frame
+bodies on the management gates, radio commands for the channel changes of a
+scan, and the ``receptionStateChanged`` signal of the radio to detect a busy
+channel during an active scan.
+
+.. _dg:sec:80211:agent:
+
+The agent
+~~~~~~~~~
+
+The agent is the station management entity. It decides, and it drives the
+management module with the MLME primitives: scan, then authenticate with the
+chosen access point, then associate; and scan again when the beacon is lost.
+A different join strategy, a handover policy or a scripted behaviour is a
+different agent, and the management module does not change. The agent
+speaks the primitives only; it needs no other knowledge of the management
+module.
+
+.. _dg:sec:80211:plme:
+
+Radio configuration
+~~~~~~~~~~~~~~~~~~~
+
+The PLME of the model is the command interface of the radio. A
+``Request`` message with kind ``RADIO_C_CONFIGURE`` and an
+``Ieee80211ConfigureRadioCommand`` control info changes the PHY mode, the
+mode set, the band, the channel or the bit rate. The management module sends
+it on its ``macOut`` gate for the channel changes of a scan. The MAC forwards
+it to the radio, and it holds the command while the medium is busy, so a
+channel change never cuts a frame exchange. The radio applies the fields in
+order, pushes every change to both the transmitter and the receiver, and
+publishes ``radioChannelChanged``, which the access point management uses
+to keep the primary channel in the MIB. The MAC uses the base class
+``ConfigureRadioCommand`` for its own radio mode switches.
+
+.. _dg:sec:80211:mib:
+
+The MIB
+~~~~~~~
+
+The MIB is the one shared object of the interface. A part that needs its
+state holds a pointer that it resolves from its ``mibModule`` parameter,
+which the interface sets. Half of its fields are public and written
+directly: the management module writes the mode, the station type, the BSS
+data, the association flag and the station table; the MAC writes the address
+and the local HT capabilities. The other half is private and changes only
+through the MIB's own operations: the HT operation, the primary channel, the
+association identifiers and the peer HT states. Everyone else reads. The
+state view in the next part gives every field with its owner, its writers,
+its readers and its lifetime.
+
+.. _dg:sec:80211:views:
+
+The views
+---------
+
+Five properties hold in every cell. Each gets one view: state, communication,
+time, observation, and contracts.
+
+.. _dg:sec:80211:state:
+
+State
+~~~~~
+
+The project's model architecture for 802.11 (``doc/project/design/ieee80211-model-architecture.md``)
+gives state four meanings. The guide uses them to classify the data of the
+model.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 44 40
+
+   * - Kind
+     - Meaning
+     - In this model
+   * - catalog
+     - immutable definitions: modes, rates, time constants
+     - the mode set and the mode classes; the bands
+   * - capability
+     - what the configured implementation can transmit and receive
+     - the local HT capabilities; the supported rate elements
+   * - control
+     - a chosen policy, an enabled feature, an operation parameter
+     - the mode, the station type, the QoS flag, the BSS data of an access
+       point, the channel and band of the radio, the TXOP limit
+   * - status
+     - what has happened, been learned, or is in effect now
+     - the association flag, the station table, the peer HT states, the
+       radio and medium state, the NAV, the queues, the ack status, the
+       retry counters, the contention window, the agreements
+
+**Shared data.** A datum is shared when a module other than its owner reads
+it or writes it. The table gives the owner, the writers, the readers and the
+lifetime of every shared datum. Where a non-owner writes, it does so through
+a method or a public field of the owner; the code has no other way.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 14 13 19 20 14
+
+   * - Datum
+     - Kind
+     - Owner
+     - Writers
+     - Readers
+     - Lifetime
+   * - MIB: address, mode, QoS flag, station type
+     - control
+     - MIB
+     - the MAC (address, QoS flag); the management module (mode, type)
+     - MAC, ``ds``, ``rx``, ``tx``, the coordination functions, management
+     - set at init
+   * - MIB: BSS data (SSID, BSSID)
+     - control (AP), status (station)
+     - MIB
+     - management
+     - MAC, ``ds``, the network configurator
+     - AP: init; station: per association
+   * - MIB: association flag
+     - status
+     - MIB
+     - station management
+     - ``ds``, MAC, agent, station management
+     - per association
+   * - MIB: station table
+     - status
+     - MIB
+     - AP management; the simplified station writes the AP's MIB
+     - ``ds``, MAC, AP management
+     - per association
+   * - MIB: association identifiers and reservations
+     - status, control
+     - MIB, through its methods
+     - AP management: reserve, commit, release
+     - MIB
+     - per association; a reservation per response exchange
+   * - MIB: local HT capabilities
+     - capability
+     - MIB
+     - the MIB, on request of the MAC at init
+     - management
+     - set at init
+   * - MIB: HT operation, primary channel
+     - control, status
+     - MIB, private
+     - the MIB, on the radio's channel signal and at init
+     - AP management, management base
+     - on a channel change
+   * - MIB: peer HT states
+     - status; cached compatibility
+     - MIB, private
+     - the MIB, on request of management
+     - rate selection
+     - per association
+   * - the mode set catalog
+     - catalog
+     - a static table
+     - none
+     - MAC, radio
+     - immutable
+   * - the MAC's mode set, and every listener's cached pointer
+     - catalog
+     - MAC; each listener
+     - MAC at init; the listeners from one signal
+     - every listener
+     - set at init
+   * - supported rate elements
+     - capability
+     - management base
+     - from the mode set signal
+     - the management variants
+     - set at init
+   * - transmitter and receiver: mode set, mode, band, channel
+     - catalog, control
+     - transmitter, receiver
+     - the radio, on a configure command
+     - transmitter, receiver, MAC at init
+     - on command
+   * - tuned channel and band
+     - status
+     - radio
+     - radio
+     - AP management, by signal
+     - on change
+   * - radio mode
+     - status
+     - radio
+     - radio
+     - the MAC reads it directly
+     - on change
+   * - ``rx``: reception state, transmission state, signal part
+     - status
+     - ``rx``
+     - ``rx``, from the radio signals relayed by the MAC
+     - ``rx``, the coordination functions
+     - per frame
+   * - ``rx``: medium free
+     - status
+     - ``rx``
+     - ``rx``
+     - MAC, the CTS policies; pushed to every contention
+     - per frame
+   * - NAV
+     - status
+     - ``rx``
+     - ``rx``, on a received frame and on ``tx``'s request
+     - ``rx``
+     - per frame
+   * - pending queues
+     - status
+     - the queue of each channel access
+     - the coordination function enqueues; the in-progress frames dequeue
+     - the coordination function
+     - per frame
+   * - in-progress frames
+     - status
+     - in-progress frames
+     - its methods, called by the coordination function and the handler
+     - the coordination function, the frame sequences
+     - per frame
+   * - frame sequence context
+     - status
+     - the handler
+     - built by the coordination function
+     - the frame sequences
+     - per exchange
+   * - ack status maps
+     - status
+     - the ack handlers
+     - its methods, called by the coordination function and the in-progress
+       frames
+     - the same
+     - per frame
+   * - contention window
+     - status
+     - channel access
+     - its methods, on request of the recovery procedure
+     - recovery procedure, coordination function
+     - on outcome
+   * - station retry counters
+     - status
+     - ``dcf``; each ``edcaf``
+     - the non-QoS recovery procedure, on an object it does not own
+     - the same
+     - on outcome
+   * - per-frame retry counters
+     - status
+     - the recovery procedures
+     - its methods
+     - the coordination function, through accessors
+     - per frame
+   * - block ack agreements
+     - status
+     - the two handlers
+     - the handlers, driven by ``hcf``
+     - ack policy, frame sequences, recipient data service, procedures
+     - per agreement
+   * - block ack record
+     - status
+     - the recipient agreement
+     - block ack reordering writes; the recipient procedure reads
+     - the same
+     - per frame
+   * - TXOP: start, limit
+     - status, control
+     - TXOP procedure
+     - ``hcf`` starts and ends it
+     - frame sequences, rate selection, protection
+     - per exchange
+   * - interface entry: address, MTU, state
+     - control, status
+     - the interface module
+     - address: nobody in the tree; MTU: MAC; state: the MAC base class
+     - MAC; rate selection reads the interfaces of peers
+     - set at init; state on lifecycle
+
+**Private data.** Everything else belongs to one module and is not a
+concern of the architecture. The management module keeps its scan results,
+its access point list and its pending transactions; the agent its
+parameters and the previous access point; the rate control its per-receiver
+state, of which only the chosen mode crosses to the rate selection; the MAC
+its FCS mode and the held radio command; ``tx`` its frame and its timer; the
+contention its timers and its backoff.
+
+.. _dg:sec:80211:communication:
+
+Communication
+~~~~~~~~~~~~~
+
+Inside the interface the parts use a fixed set of mechanisms. A developer
+who adds a part chooses from this set.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Means
+     - Used for
+   * - a packet or a command on a gate
+     - crosses a layer boundary: LLC to MAC, management to MAC, MAC to
+       radio
+   * - a direct C++ call through a contract interface
+     - joins parts that must act in the same instant: everything inside the
+       MAC and the radio
+   * - a callback interface
+     - returns a result later: channel grants, transmission completions,
+       frame sequence events, control responses
+   * - a signal
+     - publishes a fact that happened; a subscriber may react, the emitter
+       does not depend on it: radio state to the MAC, the mode set to the
+       MAC parts, the channel change to the access point management,
+       association events to the node
+   * - a shared object
+     - holds state that several parts read: the MIB, the mode set, the
+       pending queue and the in-progress frames of a coordination function
+   * - a self-message
+     - the only way to wait; every part owns the timers it needs
+
+**How a part finds a peer.** The caller finds the callee in one of three ways
+only: as its own submodule; by a module path parameter that the parent NED
+sets, such as ``*.rxModule = "^.rx"``; or as the neighbour of one of its
+gates. A part never searches the module tree for a peer, and a part never
+asks a sibling for a pointer to a third module.
+
+**The programming interface.** A module outside the interface talks to the
+802.11 model through packets, commands and primitives. It never calls a C++
+method of the model.
+
+-  **Data packets.** A packet enters on ``upperLayerIn`` with a
+   ``MacAddressReq`` tag (the destination) and a ``PacketProtocolTag`` (the
+   payload protocol). A ``UserPriorityReq`` tag, when present, selects the
+   access category of a QoS station. A received packet leaves on
+   ``upperLayerOut`` with ``MacAddressInd``, ``InterfaceInd``,
+   ``PacketProtocolTag`` and, for a QoS frame, ``UserPriorityInd``. See
+   :doc:`ch-tags` for the tag mechanism.
+
+-  **Management frames.** A management module sends the *body* of a
+   management frame on the ``mgmtIn`` gate of the MAC with three tags:
+   ``MacAddressReq`` (the receiver), ``Ieee80211SubtypeReq`` (the frame
+   subtype) and ``PacketProtocolTag`` set to ``Protocol::ieee80211Mgmt``. The
+   MAC adds the header, the trailer and the transmitter address. A received
+   management frame comes back on ``mgmtOut`` with its header popped.
+
+-  **Radio commands.** The ``Ieee80211ConfigureRadioCommand`` of the
+   radio configuration section, on the ``macOut`` gate of the management
+   module.
+
+-  **MLME primitives.** The agent and the management module exchange the
+   primitives of the MLME SAP as ``cMessage`` objects with a control info
+   from ``Ieee80211Primitives.msg``. Each request has a confirm with a result
+   code. The table omits the ``Ieee80211Prim_`` prefix of the class names.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Request
+     - Confirm
+     - Fields
+   * - ``ScanRequest``
+     - ``ScanConfirm``
+     - BSS type, BSSID, SSID, active or passive, probe delay, channel list,
+       minimum and maximum channel time; the confirm carries the list of
+       BSS descriptions with their received power
+   * - ``AuthenticateRequest``
+     - ``AuthenticateConfirm``
+     - address, timeout
+   * - ``AssociateRequest``, ``ReassociateRequest``
+     - ``AssociateConfirm``, ``ReassociateConfirm``
+     - address, timeout
+   * - ``DeauthenticateRequest``, ``DisassociateRequest``
+     - none
+     - address, reason code
+
+The result codes are ``PRC_SUCCESS``, ``PRC_INVALID_PARAMETERS``,
+``PRC_TIMEOUT``, ``PRC_TOO_MANY_SIMULTANEOUS_REQUESTS`` and ``PRC_REFUSED``.
+
+-  **Packets between the MAC and the radio.** The MAC tags a frame with
+   ``Ieee80211ModeReq`` (the PHY mode the rate selection chose) and, when
+   needed, ``Ieee80211ChannelReq``. The radio delivers a received frame with
+   ``Ieee80211ModeInd``, ``Ieee80211ChannelInd``, ``SignalPowerInd``,
+   ``SnirInd``, ``SignalTimeInd`` and ``ErrorRateInd``. A frame that the error
+   model rejected arrives with its bit error flag set; the MAC drops it. The
+   protocol identifiers are ``Protocol::ieee80211Mac`` for a MAC frame and
+   one ``Protocol::ieee80211*Phy`` value per PHY family for a frame with a
+   PHY header.
+
+.. _dg:sec:80211:time:
+
+Time
+~~~~
+
+The two planes run on two time scales. The data plane acts in microseconds:
+slot times, inter-frame spaces, ACK timeouts, frame durations. The
+management plane acts in seconds: beacon intervals, scan times, association
+timeouts. Every timer of the model belongs to the part that waits on it.
+
+**Initialization.** INET orders initialization by named stages. The file
 ``src/inet/common/InitStages.cc`` defines the stages and their order. The
-802.11 parts use them as follows. The table omits the ``INITSTAGE_`` prefix
+802.11 parts use them as follows; the table omits the ``INITSTAGE_`` prefix
 of the names.
 
 .. list-table::
@@ -732,10 +1200,11 @@ start of a part is part of its initialization: a module that extends
 ``OperationalBase`` calls its ``handleStartOperation`` at its own
 initialization stage when the node is up.
 
-The lifecycle operations reach the parts that extend ``OperationalBase``:
-the interface, the MAC, the management module and the radio. The
-:doc:`User's Guide chapter on node failures </users-guide/ch-lifecycle>` says
-how a scenario starts, stops and crashes a node. The contract per operation:
+**Lifecycle.** The lifecycle operations reach the parts that extend
+``OperationalBase``: the interface, the MAC, the management module and the
+radio. The :doc:`User's Guide chapter on node failures </users-guide/ch-lifecycle>`
+says how a scenario starts, stops and crashes a node. The contract per
+operation:
 
 -  **Start.** The radio applies its initial mode. The management module
    starts its procedures: an access point schedules its beacon, a station
@@ -755,32 +1224,285 @@ The parts inside the MAC have no lifecycle hooks of their own; the MAC is
 responsible for their reset. The agent restarts its scan on a start
 operation.
 
+.. _dg:sec:80211:observation:
+
+Observation
+~~~~~~~~~~~
+
+The model publishes facts with signals, and any module may subscribe. Some
+signals change the behaviour of a listener inside or outside the model; the
+reader must know these.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 20 48
+
+   * - Signal
+     - Emitter
+     - Listener that acts, and the effect
+   * - ``receptionStateChanged``, ``transmissionStateChanged``,
+       ``receivedSignalPartChanged``
+     - radio
+     - the MAC relays them to ``rx`` and ``tx``: medium free, NAV,
+       transmission complete
+   * - ``modesetChanged``
+     - MAC
+     - every mode set listener: time constants and mode tables
+   * - ``radioChannelChanged``
+     - radio
+     - the AP management: the primary channel in the MIB
+   * - ``frameTransmissionOutcome``, with a ``FrameTransmissionDetails``:
+       acknowledged, retry limit reached, dropped before transmission
+     - the coordination function
+     - the AP management: commits the association identifier after the
+       acknowledged response
+   * - ``packetDropped`` on a pending queue
+     - the queue
+     - the coordination function: reports the outcome of a management frame
+   * - ``l2BeaconLost``
+     - station management
+     - the agent: a new scan
+   * - ``l2Associated``; ``l2ApAssociated``, ``l2ApDisassociated``;
+       ``l2Disassociated``
+     - station management; AP management; the agent
+     - the DHCP client, the IPv6 neighbour discovery, the mobility
+       protocols, the visualizers, outside the model
+   * - the five radio state signals
+     - radio
+     - the energy consumers: the power state
+
+All other signals of the model feed ``@statistic`` declarations only:
+``packetSentToPeer``, ``packetReceivedFromPeer``, ``linkBroken``,
+``frameSequenceStarted`` and ``frameSequenceFinished``, ``datarateSelected``,
+``channelOwnershipChanged``, ``backoffStarted`` and ``backoffStopped``,
+``contentionWindowChanged``, ``navChanged``, ``txopStarted`` and
+``txopEnded``, ``edcaCollisionDetected``, ``blockAckAgreementAdded`` and
+``blockAckAgreementDeleted``, the fragmentation and aggregation signals, and
+the generic ``packetSentToUpper`` and ``packetReceivedFromLower`` family.
+A signal of this kind carries a completed fact and never a request.
+
+.. _dg:sec:80211:contracts:
+
+Contracts
+~~~~~~~~~
+
+The model has 53 C++ interfaces, and 58 with the nested ones. Every one of
+them stands for one of four things.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 40 42
+
+   * - Kind
+     - Stands for
+     - Members
+   * - standard concept
+     - a thing the standard names
+     - the coordination function, the channel access, the contention, the
+       frame sequence, the data services, fragmentation, aggregation,
+       sequence numbers, duplicate removal, lifetime, the RTS, CTS and ACK
+       procedures, the block ack handlers and procedures, the ack handler,
+       the recovery procedure, rate selection, the modes, the bands, the
+       LLC, the distribution service
+   * - model decision
+     - a choice the standard leaves open, separated so that it can be
+       replaced
+     - every policy, the rate control, the classifier
+   * - process boundary
+     - the split of the 2015 design between channel access, frame exchange,
+       transmission and reception
+     - ``ITx``, ``IRx``, ``IFrameSequenceHandler``
+   * - callback
+     - the way a mechanism reports to its owner
+     - the nested ``ICallback`` of the channel access, the contention,
+       ``ITx`` and the handler; ``IProcedureCallback``;
+       ``IBlockAckAgreementHandlerCallback``; ``ICwCalculator``
+
+The fourth kind is the only technical one, and every member of it is a
+callback: it runs from the mechanism to its owner, and it is nested in, or
+paired with, the service interface it serves. The collision controller and
+the contention have a slot although they stand for rules of the standard;
+the slot exists for experiments. The table lists every interface by cell
+and function.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 36 12 28 24
+
+   * - Interface
+     - Kind
+     - Implementations
+     - NED slot
+   * - ``ICoordinationFunction``
+     - standard
+     - ``Dcf``, ``Hcf``; ``Pcf``, ``Mcf`` placeholders
+     - ``dcf`` (``IDcf``), ``hcf`` (``IHcf``)
+   * - ``IChannelAccess``, with ``ICallback``
+     - standard, callback
+     - ``Dcaf``, ``Edcaf``; ``Hcca`` placeholder
+     - none
+   * - ``IContention``, with ``ICallback``
+     - standard, callback
+     - ``Contention``
+     - ``contention`` of ``Dcaf`` and ``Edcaf``
+   * - ``IEdcaCollisionController``
+     - standard
+     - one class
+     - in ``Edca``; the NED name differs
+   * - ``IFrameSequence``
+     - standard
+     - four combinators, eleven primitives
+     - none
+   * - ``IFrameSequenceHandler``, with ``ICallback``
+     - boundary, callback
+     - ``FrameSequenceHandler``
+     - none
+   * - ``ITx``, with ``ICallback``; ``IRx``
+     - boundary, callback
+     - ``Tx``; ``Rx``
+     - ``tx``; ``rx``
+   * - ``IDs``
+     - standard
+     - ``Ds``
+     - ``ds``
+   * - ``IOriginatorMacDataService``
+     - standard
+     - non-QoS and QoS
+     - none
+   * - ``IRecipientMacDataService``, ``IRecipientQosMacDataService``
+     - standard
+     - one each
+     - none
+   * - ``IFragmentation``, ``IDefragmentation``, ``IReassembly``
+     - standard
+     - one each
+     - none
+   * - the four aggregation and deaggregation interfaces
+     - standard
+     - one each
+     - none
+   * - ``ISequenceNumberAssignment``, ``IDuplicateRemoval``
+     - standard
+     - non-QoS and QoS
+     - none
+   * - ``ITransmitLifetimeHandler``
+     - standard
+     - DCF and EDCA, never created
+     - none
+   * - ``IRtsProcedure``, ``ICtsProcedure``, ``IRecipientAckProcedure``
+     - standard
+     - one each
+     - none
+   * - the two block ack agreement handlers, the two block ack procedures
+     - standard
+     - one each
+     - none
+   * - ``IAckHandler``
+     - standard
+     - non-QoS and QoS
+     - none
+   * - ``IRecoveryProcedure``, with ``ICwCalculator``
+     - standard, callback
+     - non-QoS and QoS; the calculator: ``Dcaf``, ``Edcaf``
+     - none
+   * - ``IRateSelection``, ``IQosRateSelection``
+     - standard
+     - one each
+     - none; the slot is a fixed type
+   * - ``IRateControl``
+     - decision
+     - ``RateControlBase``: AARF, ARF, Onoe
+     - ``rateControl``
+   * - the ack policies (originator and recipient, non-QoS and QoS)
+     - decision
+     - one each
+     - one slot each
+   * - ``IRtsPolicy``, ``ICtsPolicy``
+     - decision
+     - non-QoS and QoS
+     - one slot each
+   * - ``IFragmentationPolicy``, the two aggregation policies
+     - decision
+     - one each
+     - one slot each
+   * - the two block ack agreement policies
+     - decision
+     - one each
+     - one slot each
+   * - ``IProcedureCallback``
+     - callback
+     - ``Dcf``, ``Hcf``
+     - none
+   * - the block ack agreement handler callback
+     - callback
+     - ``Hcf``
+     - none
+   * - ``IIeee80211Llc``
+     - standard
+     - LPD, EPD, portal
+     - ``llc``
+   * - ``IIeee80211Mode`` with its three submodes; ``IIeee80211Band``
+     - standard
+     - one base each, seven PHY families
+     - none
+
+Three facts about the contracts as they are today. Four interfaces are
+never called through their C++ type: ``ICoordinationFunction``, ``IDs``,
+``IIeee80211Llc`` and ``IRecoveryProcedure``; the first two are reached
+through NED slots and gates, and the MAC holds the concrete ``Dcf`` and
+``Hcf``. Twenty-two interfaces have one implementation and no slot; all of
+them name a mechanism of the standard or a PHY concept, and they stay. Four
+NED interface names differ from their C++ names: ``ICollisionController``
+against ``IEdcaCollisionController``, ``IDcf`` and ``IHcf`` against
+``ICoordinationFunction``, and ``IOriginatorQosAckPolicy`` against
+``IOriginatorQoSAckPolicy``.
+
 .. _dg:sec:80211:extension-points:
 
 Extension points
 ----------------
 
-Each row names the contract to implement, the slot that takes the
-implementation, and what the implementation may rely on.
+The slots follow the two patterns that create them. A decision is replaced;
+a variant is added.
+
+Decisions to replace
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
-   :widths: 24 30 46
+   :widths: 24 34 42
 
-   * - To add
+   * - To replace
      - Implement, and plug into
      - Notes
-   * - a policy (ACK, RTS, CTS, fragmentation, aggregation, block ack
-       agreement)
+   * - a policy: ACK, RTS, CTS, fragmentation, aggregation, block ack
+       agreement
      - the ``I...Policy`` C++ interface and NED interface that match; the
        policy slot of ``dcf`` or ``hcf``
      - A policy answers questions and keeps no frame state. It may read the
        mode set and ask the rate selection.
-   * - a rate control algorithm
+   * - the rate control algorithm
      - ``IRateControl``, best through ``RateControlBase``; the
        ``rateControl`` slot
      - It receives success and failure per frame and returns a mode per
        receiver. It resets on ``modesetChanged``.
+   * - the classifier
+     - ``IIeee8021dQosClassifier``; the ``classifier`` slot
+     - It adds a ``UserPriorityReq`` tag.
+   * - the agent
+     - ``IIeee80211Agent`` (gates); the ``agent`` slot
+     - It speaks the MLME primitives only.
+
+Variants to add
+~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 34 42
+
+   * - To add
+     - Implement, and plug into
+     - Notes
    * - a frame exchange
      - ``IFrameSequence``, composed from the combinators and the primitive
        sequences
@@ -789,7 +1511,7 @@ implementation, and what the implementation may rely on.
        handler.
    * - a coordination function
      - ``ICoordinationFunction`` plus the four callback interfaces; the
-       ``dcf`` or ``hcf`` slot (``IDcf``, ``IHcf``)
+       ``dcf`` or ``hcf`` slot
      - It may reuse the channel access, the data services, the policies and
        the frame sequence handler as submodules or objects.
    * - a channel access or a contention
@@ -801,16 +1523,10 @@ implementation, and what the implementation may rely on.
      - ``IIeee80211Mgmt`` (gates), ``Ieee80211MgmtBase`` (dispatch); the
        ``mgmt`` slot
      - It must maintain the MIB fields that the MAC and ``ds`` read.
-   * - an agent
-     - ``IIeee80211Agent`` (gates); the ``agent`` slot
-     - It speaks the MLME primitives only.
    * - an LLC
      - ``IIeee80211Llc`` (gates and ``getProtocol()``); the ``llc`` slot
      - It sets ``PacketProtocolTag`` on the way down and the protocol tags of
        the network layer on the way up.
-   * - a classifier
-     - ``IIeee8021dQosClassifier``; the ``classifier`` slot
-     - It adds a ``UserPriorityReq`` tag.
    * - a PHY mode or amendment
      - an ``IIeee80211Mode`` family, an entry in ``Ieee80211ModeSet``, a PHY
        header chunk with its serializer, and error model support
@@ -822,14 +1538,29 @@ implementation, and what the implementation may rely on.
      - It gives the success rate of the header and of the data part per
        submode.
 
+When a new interface is allowed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A new C++ interface must name a concept of the standard, or a decision of
+the model with at least one alternative implementation in mind. A need for
+information from another module is not a reason for an interface. The peer
+lookup rule and a contract that exists, the shared MIB, or a signal serve that
+need. A callback is nested in the interface it serves, and it never stands
+alone.
+
+The counter-example: a provider interface for the mode set. The mode set is
+a catalog datum with one owner, the MAC, and the means that exist distribute
+it. An interface that carries it would capture no concept of the model, only
+the fact that one part needs a value from another.
+
 .. _dg:sec:80211:gaps:
 
 Where the code differs from this design
 ---------------------------------------
 
 These points are known. The project document
-``doc/project/design/ieee80211-anatomy.md`` describes the code as it is, with
-file references, and it is the place to check the details.
+``doc/project/design/ieee80211-anatomy.md`` describes the code as it was at
+one commit, with file references, and it is the place to check the details.
 
 -  **Lifecycle.** The stop and crash hooks of :ned:`Ieee80211Mac` are empty.
    No part inside the MAC resets on a stop; queues, timers, agreements and
@@ -837,6 +1568,21 @@ file references, and it is the place to check the details.
 
 -  **Radio mode.** The MAC switches the radio back to receiver mode from its
    signal handler, not on request of the coordination function.
+
+-  **The coordination function slot.** The MAC holds the concrete ``Dcf``
+   and ``Hcf`` and never calls through ``ICoordinationFunction``, so a
+   coordination function of another class cannot be plugged in without a
+   change to the MAC.
+
+-  **Readiness of the mode set.** The MAC publishes the mode set by one
+   signal inside the link-layer stage, and the rate selection uses it in the
+   same stage. Whether the set is there depends on the order of the
+   siblings.
+
+-  **The shared recovery procedure of a QoS station.** Management frames use
+   one recovery procedure for all access categories. It changes the
+   contention window of the best-effort category whatever the category that
+   calls, while the retry counters follow that category.
 
 -  **A-MPDU aggregation** is present as classes and a policy slot, but the
    call in the originator data service is disabled, and the default policy
@@ -850,6 +1596,10 @@ file references, and it is the place to check the details.
    own parameter. The interface wires both from :par:`opMode`; a direct
    override of one desynchronizes them.
 
+-  **Duplicated and stale copies.** The MAC and ``rx`` both cache the
+   transmission state of the radio, and ``rx`` keeps a copy of the address
+   that no event refreshes.
+
 -  **Management frames** of a QoS station always use the voice access
    category.
 
@@ -860,3 +1610,7 @@ file references, and it is the place to check the details.
 -  **Simplified management.** The simplified access point never fills the
    station table; the simplified station compensates with a direct write
    into the access point's MIB.
+
+-  **Unused state.** The last transmitted mode maps of the rate selections,
+   the generation counter of the peer HT state, and two fields of the block
+   ack agreements are written and never read, or never written.
