@@ -1,12 +1,14 @@
 # What the IEEE 802.11 model is made of
 
-> **Kind:** design · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [node-anatomy.md](node-anatomy.md), [protocol-anatomy.md](protocol-anatomy.md), [../domain/ieee80211.md](../domain/ieee80211.md)
+> **Kind:** design · **Status:** snapshot 2026-09-21 · **Seal:** none · **Owns:** — · **Stands on:** [node-anatomy.md](node-anatomy.md), [protocol-anatomy.md](protocol-anatomy.md), [../domain/ieee80211.md](../domain/ieee80211.md)
 
 The parts of the IEEE 802.11 model, the responsibility of each part, and the means by which the
 parts communicate: at run time, during initialization, and during the start, stop and crash
-operations of a node. This is the first version. It is a map that a reader can check against the
-code. It is not a specification of what the model must do. It describes the code at commit
-`4548adeb04` (2026-09-21).
+operations of a node. It is a survey: a map of the code at commit `4548adeb04` (2026-09-21) that a
+reader can check against that code. It is not a specification of what the model must do. The
+developer's guide chapter `doc/src/developers-guide/ch-80211.rst` states the design of the model,
+and it replaces this document when that chapter is complete; until then the two are read together,
+this one for the exact calls and stages, the chapter for the intended shape.
 
 The scope is the two subtrees `src/inet/linklayer/ieee80211/` and
 `src/inet/physicallayer/wireless/ieee80211/`, plus the generic wireless parts that the 802.11 radio
