@@ -54,6 +54,7 @@ Define_InitStage_Dependency(QUEUEING, GATE_SCHEDULE_CONFIGURATION);
 
 Define_InitStage(LINK_LAYER);
 Define_InitStage_Dependency(LINK_LAYER, PHYSICAL_LAYER);
+Define_InitStage_Dependency(LINK_LAYER, NETWORK_INTERFACE_CONFIGURATION);
 
 Define_InitStage(NETWORK_CONFIGURATION);
 Define_InitStage_Dependency(NETWORK_CONFIGURATION, LINK_LAYER);

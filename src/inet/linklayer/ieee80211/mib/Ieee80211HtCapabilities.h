@@ -53,6 +53,15 @@ struct Ieee80211HtCapabilities
     bool shortGi20 = false;
     bool shortGi40 = false;
     int maxAmpduLengthExponent = 0;
+
+    bool operator==(const Ieee80211HtCapabilities& other) const
+    {
+        return supportedChannelWidths == other.supportedChannelWidths && rxMcsSupported == other.rxMcsSupported &&
+                txMcsSetDefined == other.txMcsSetDefined && txRxMcsSetNotEqual == other.txRxMcsSetNotEqual &&
+                txMaxNss == other.txMaxNss && txUnequalModulation == other.txUnequalModulation &&
+                txMcsNss.maxMcsPerNss == other.txMcsNss.maxMcsPerNss && ldpc == other.ldpc && greenfield == other.greenfield &&
+                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent;
+    }
 };
 
 /** Model-backed subset of the HT Operation element (IEEE Std 802.11-2024, 9.4.2.55). */
@@ -63,6 +72,13 @@ struct Ieee80211HtOperation
     int secondaryChannelOffset = 0;
     Ieee80211HtProtectionMode protectionMode = Ieee80211HtProtectionMode::NO_PROTECTION;
     std::array<bool, 77> basicMcsSupported = {};
+
+    bool operator==(const Ieee80211HtOperation& other) const
+    {
+        return operatingChannelWidth == other.operatingChannelWidth && primaryChannel == other.primaryChannel &&
+                secondaryChannelOffset == other.secondaryChannelOffset && protectionMode == other.protectionMode &&
+                basicMcsSupported == other.basicMcsSupported;
+    }
 };
 
 struct Ieee80211HtDirectionalCapabilities
@@ -83,16 +99,14 @@ struct Ieee80211NegotiatedHtCapabilities
     Ieee80211HtCapabilities peerAdvertisement;
     Ieee80211HtDirectionalCapabilities localTxPeerRx;
     Ieee80211HtDirectionalCapabilities localRxPeerTx;
-    Ieee80211HtOperation operation;
 };
 
 inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211HtCapabilities& local,
-        const Ieee80211HtCapabilities& peer, const Ieee80211HtOperation& operation)
+        const Ieee80211HtCapabilities& peer)
 {
     Ieee80211NegotiatedHtCapabilities negotiated;
     negotiated.localAdvertisement = local;
     negotiated.peerAdvertisement = peer;
-    negotiated.operation = operation;
     for (const auto& width : local.supportedChannelWidths)
         if (peer.supportedChannelWidths.count(width)) {
             negotiated.localTxPeerRx.supportedChannelWidths.insert(width);

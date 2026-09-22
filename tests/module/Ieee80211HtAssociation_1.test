@@ -120,27 +120,27 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         const auto& staAddress = staMib->address;
         ASSERT(apMib->requirePrimaryChannel() == 11);
         ASSERT(channelChangeTimer == nullptr);
-        ASSERT(apMib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
-        ASSERT(apMib->bssAccessPointData.associationIds.at(staAddress) != 0);
+        ASSERT(apMib->getBssAccessPointData().stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(apMib->getBssAccessPointData().associationIds.at(staAddress) != 0);
         ASSERT(apMib->findPeerHtState(staAddress) != nullptr);
         ASSERT(apMib->findPeerHtState(staAddress)->valid);
         ASSERT(associationResponseWireChannelChecked);
         ASSERT(staTunedToInternalChannelSix);
         ASSERT(apMib->hasPrimaryChannel());
         ASSERT(apMib->requirePrimaryChannel() == 11);
-        ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 11);
-        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(apMib->getHtOperation().primaryChannel == 11);
+        ASSERT(staMib->getBssStationData().isAssociated);
         // IEEE Std 802.11-2024, 9.4.2.54.2/Figure 9-456 and Table 9-224: the n(mixed-2.4Ghz)
         // profile exposes short GI for the PHY-supported 20 MHz width. The
         // mode catalog also describes 40 MHz modes, but the current packet PHY
         // cannot operate a primary/secondary compound channel and must not
         // advertise that width.
-        ASSERT(staMib->localHtCapabilities.shortGi20);
-        ASSERT(!staMib->localHtCapabilities.shortGi40);
-        ASSERT(apMib->localHtCapabilities.shortGi20);
-        ASSERT(!apMib->localHtCapabilities.shortGi40);
-        ASSERT(staMib->localHtCapabilities.supportedChannelWidths.count(MHz(20)) == 1);
-        ASSERT(staMib->localHtCapabilities.supportedChannelWidths.count(MHz(40)) == 0);
+        ASSERT(staMib->getLocalHtCapabilities().shortGi20);
+        ASSERT(!staMib->getLocalHtCapabilities().shortGi40);
+        ASSERT(apMib->getLocalHtCapabilities().shortGi20);
+        ASSERT(!apMib->getLocalHtCapabilities().shortGi40);
+        ASSERT(staMib->getLocalHtCapabilities().supportedChannelWidths.count(MHz(20)) == 1);
+        ASSERT(staMib->getLocalHtCapabilities().supportedChannelWidths.count(MHz(40)) == 0);
         // Bridge the MIB-derived capability contract to the actual management
         // frame serializer: the n(mixed-2.4Ghz) profile must advertise only
         // PHY-supported short-GI bits in HT Capabilities (IEEE Std 802.11-2024, 9.4.2.54.2,
@@ -152,7 +152,7 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         rates.numRates = 1;
         rates.rate[0] = 6;
         serializedResponse->setSupportedRates(rates);
-        setHtCapabilities(serializedResponse, staMib->localHtCapabilities);
+        setHtCapabilities(serializedResponse, staMib->getLocalHtCapabilities());
         serializedResponse->setChunkLength(B(37)); // fixed fields/rates (9) + HT Capabilities IE (28)
         Packet serializedPacket("mib-ht-capabilities", serializedResponse);
         auto serializedBytes = serializedPacket.peekAllAsBytes()->getBytes();
@@ -162,7 +162,7 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         ASSERT((serializedBytes[11] & (1 << 6)) == 0);
         ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
         ASSERT(staMib->findPeerHtState(apMib->address)->valid);
-        ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
+        ASSERT(staMib->getHtOperation().primaryChannel == 6);
         ASSERT(apAssociationNotifications == 1);
         EV << "RTS-protected association committed at AP and STA.\n";
     }

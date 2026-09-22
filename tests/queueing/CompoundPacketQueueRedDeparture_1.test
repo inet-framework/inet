@@ -1,0 +1,54 @@
+%description:
+A RED rejection at a compound queue boundary must publish a logical drop.
+%includes:
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+%global:
+using namespace inet;
+class DepartureProbe : public cListener {
+ public:
+ long droppedId = -1;
+ long departedId = -1;
+ int drops = 0;
+ int departures = 0;
+ virtual void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *details) override {
+   if (signal == packetDroppedSignal) { drops++; droppedId = check_and_cast<Packet *>(object)->getId(); }
+   if (signal == queueing::IPacketQueue::packetQueueDepartureSignal) {
+     departures++; departedId = check_and_cast<Packet *>(object)->getId();
+     ASSERT(check_and_cast<queueing::PacketQueueRemovalDetails *>(details)->getReason() == queueing::IPacketQueue::PacketRemovalReason::DROPPED);
+   }
+ }
+};
+%activity:
+auto module = cModuleType::get("DepartureRedQueue")->create("redProbe", this);
+module->finalizeParameters();
+module->buildInside();
+module->callInitialize();
+DepartureProbe listener;
+module->subscribe(packetDroppedSignal, &listener);
+module->subscribe(queueing::IPacketQueue::packetQueueDepartureSignal, &listener);
+auto queue = check_and_cast<queueing::IPacketQueue *>(module);
+queue->enqueuePacket(new Packet("first", makeShared<ByteCountChunk>(B(10))));
+queue->enqueuePacket(new Packet("second", makeShared<ByteCountChunk>(B(10))));
+EV_WARN << "RED probe: dropped=" << listener.drops << " logicalDepartures=" << listener.departures << endl;
+ASSERT(listener.drops == 1);
+ASSERT(listener.departures == 1);
+ASSERT(listener.droppedId == listener.departedId);
+module->unsubscribe(packetDroppedSignal, &listener);
+module->unsubscribe(queueing::IPacketQueue::packetQueueDepartureSignal, &listener);
+module->deleteModule();
+
+%file: redprobe.ned
+import inet.queueing.queue.RedDropperQueue;
+module DepartureRedQueue extends RedDropperQueue
+{
+    parameters:
+        @class(::inet::queueing::CompoundPacketQueueBase);
+        red.minth = 0;
+        red.maxth = 1;
+        red.packetCapacity = 1;
+        red.wq = 1;
+        red.maxp = 0;
+}

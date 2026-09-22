@@ -238,6 +238,10 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
                     break;
                 }
                 auto actionFrame = dynamicPtrCast<const Ieee80211ActionFrame>(chunk);
+                // A fragmented action MPDU uses a generic management header;
+                // its action-body slice is a separate packet chunk.
+                if (actionFrame == nullptr)
+                    break;
                 switch (actionFrame->getCategory()) {
                     case 3: {
                         stream.writeByte(actionFrame->getCategory());
@@ -503,6 +507,17 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
             actionFrame->setSequenceNumber(sequenceNumber);
             if (order)
                 stream.readUint32Be();
+            if (actionFrame->getMoreFragments() || actionFrame->getFragmentNumber() != 0) {
+                auto mgmtHeader = makeShared<Ieee80211MgmtHeader>();
+                copyBasicFields(mgmtHeader, macHeader);
+                mgmtHeader->setDurationField(actionFrame->getDurationField());
+                mgmtHeader->setReceiverAddress(actionFrame->getReceiverAddress());
+                mgmtHeader->setTransmitterAddress(actionFrame->getTransmitterAddress());
+                mgmtHeader->setAddress3(actionFrame->getAddress3());
+                mgmtHeader->setFragmentNumber(actionFrame->getFragmentNumber());
+                mgmtHeader->setSequenceNumber(actionFrame->getSequenceNumber());
+                return mgmtHeader;
+            }
             // Only the Block Ack category is modelled. For any other category or action,
             // preserve the entire action body (Category + Action + parameters) verbatim in
             // an Ieee80211ActionFrameOther so the frame round-trips without parsing it. The

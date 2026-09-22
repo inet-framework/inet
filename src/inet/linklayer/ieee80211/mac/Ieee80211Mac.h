@@ -11,10 +11,12 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
+#include "inet/linklayer/ieee80211/mac/contract/IIeee80211MacConfiguration.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/linklayer/ieee80211/mac/contract/IManagementFrameTransactionHandler.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Mcf.h"
@@ -35,7 +37,7 @@ class Ieee80211MacHeader;
  * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
  * IRx, ITx, IContention and other interface classes).
  */
-class INET_API Ieee80211Mac : public MacProtocolBase
+class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211MacConfiguration, public IManagementFrameTransactionHandler
 {
   public:
     static simsignal_t frameTransmissionOutcomeSignal;
@@ -100,12 +102,17 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
 
+    void prepareLocalCapabilities() override;
+    const physicallayer::Ieee80211ModeSet *getConfiguredModeSet() const override { return modeSet; }
+
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+
+    virtual void cancelManagementTransaction(uint64_t transactionId) override;
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
@@ -115,4 +122,3 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 } // namespace inet
 
 #endif
-

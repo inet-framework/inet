@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -16,7 +17,7 @@ Define_Module(RecipientQosAckPolicy);
 
 void RecipientQosAckPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
@@ -62,7 +63,7 @@ bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        return agreement != nullptr;
+        return agreement != nullptr && !agreement->isInactivityExpired();
         // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }

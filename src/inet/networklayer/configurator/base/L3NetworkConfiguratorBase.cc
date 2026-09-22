@@ -509,7 +509,7 @@ std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkIn
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #ifdef INET_WITH_IEEE80211
     if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
-        auto ssid = mibModule->bssData.ssid;
+        auto ssid = mibModule->getBssData().ssid;
         if (ssid.length() != 0)
             return mediumName + ":" + ssid;
     }

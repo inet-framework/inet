@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 simple CtsPolicy extends SimpleModule like ICtsPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(CtsPolicy);
         string rxModule;
         string rateSelectionModule;

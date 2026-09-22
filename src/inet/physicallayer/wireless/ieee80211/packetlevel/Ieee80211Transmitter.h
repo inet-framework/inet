@@ -9,6 +9,7 @@
 #define __INET_IEEE80211TRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211TransmitterCapabilities.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -19,7 +20,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Transmitter : public FlatTransmitterBase
+class INET_API Ieee80211Transmitter : public FlatTransmitterBase, public IIeee80211TransmitterCapabilities
 {
   protected:
     const Ieee80211ModeSet *modeSet = nullptr;
@@ -45,7 +46,7 @@ class INET_API Ieee80211Transmitter : public FlatTransmitterBase
     virtual void setChannelNumber(int channelNumber);
 
     virtual const Ieee80211Channel *getChannel() const { return channel; }
-    virtual bool isHtChannelWidthSupported(Hz channelWidth) const;
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
 };

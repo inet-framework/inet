@@ -24,7 +24,8 @@ INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleMode(
         const physicallayer::Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState,
         const physicallayer::IIeee80211Mode *mode,
-        const MacAddress& peerAddress);
+        const MacAddress& peerAddress,
+        const Ieee80211HtOperation *operation, bool htEligible);
 
 } // namespace ieee80211
 } // namespace inet

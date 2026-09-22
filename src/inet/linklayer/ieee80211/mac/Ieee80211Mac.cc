@@ -27,9 +27,9 @@
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211ReceiverCapabilities.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211TransmitterCapabilities.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -71,21 +71,7 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
-                modeSet->getMaximumNumberOfSpatialStreams());
-        std::set<Hz> operationalChannelWidths;
-        if (modeSet->isHtOperationSupported()) {
-            const auto *transmitter = dynamic_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
-            const auto *receiver = dynamic_cast<const Ieee80211Receiver *>(radio->getReceiver());
-            if (transmitter == nullptr || receiver == nullptr)
-                throw cRuntimeError("HT operation requires Ieee80211Transmitter and Ieee80211Receiver");
-            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
-                if (transmitter->isHtChannelWidthSupported(channelWidth) &&
-                        receiver->isHtChannelWidthSupported(channelWidth))
-                    operationalChannelWidths.insert(channelWidth);
-        }
-        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
-        emit(modesetChangedSignal, modeSet);
+        prepareLocalCapabilities();
         if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -95,6 +81,68 @@ void Ieee80211Mac::initialize(int stage)
         if (mib->qos && !hcf)
             throw cRuntimeError("Missing hcf module, required for QoS");
     }
+}
+
+void Ieee80211Mac::prepareLocalCapabilities()
+{
+    Enter_Method("prepareLocalCapabilities");
+    if (mib->hasPreparedLocalCapabilities())
+        return;
+    if (!modeSet->isHtOperationSupported()) {
+        mib->installLocalHtCapabilities(Ieee80211HtCapabilities(), false);
+        return;
+    }
+    auto *configuredRadio = check_and_cast<IRadio *>(gate("lowerLayerOut")->getNextGate()->getOwnerModule());
+    const auto *transmitter = dynamic_cast<const IIeee80211TransmitterCapabilities *>(configuredRadio->getTransmitter());
+    const auto *receiver = dynamic_cast<const IIeee80211ReceiverCapabilities *>(configuredRadio->getReceiver());
+    if (transmitter == nullptr || receiver == nullptr)
+        throw cRuntimeError("HT operation requires transmitter and receiver capability providers");
+    int operationalHtSpatialStreamLimit = std::min(configuredRadio->getAntenna()->getNumAntennas(),
+            modeSet->getMaximumNumberOfSpatialStreams());
+    std::set<Hz> operationalChannelWidths;
+    for (auto width : modeSet->getHtSupportedChannelWidths())
+        if (transmitter->isHtChannelWidthSupported(width) && receiver->isHtChannelWidthSupported(width))
+            operationalChannelWidths.insert(width);
+    Ieee80211HtCapabilities localHtCapabilities;
+    if (operationalHtSpatialStreamLimit <= 0)
+        throw cRuntimeError("HT operation requires a positive operational spatial-stream limit");
+
+    // IEEE Std 802.11-2024, 9.4.2.54.4 and 9.4.2.55: advertise exactly the
+    // HT modes from the authoritative mode set, while advertised channel
+    // widths are restricted to those the configured transmitter and receiver
+    // can actually operate. In particular, do not infer dense MCS blocks or HT
+    // widths from legacy/VHT modes that happen to share the set.
+    for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+        if (operationalChannelWidths.count(channelWidth) != 0)
+            localHtCapabilities.supportedChannelWidths.insert(channelWidth);
+    localHtCapabilities.shortGi20 = localHtCapabilities.supportedChannelWidths.count(MHz(20)) != 0 &&
+            modeSet->isHtShortGuardIntervalSupported(MHz(20)) && receiver->isHtShortGuardIntervalSupported(MHz(20));
+    localHtCapabilities.shortGi40 = localHtCapabilities.supportedChannelWidths.count(MHz(40)) != 0 &&
+            modeSet->isHtShortGuardIntervalSupported(MHz(40)) && receiver->isHtShortGuardIntervalSupported(MHz(40));
+    for (int index = 0; index < modeSet->getNumModes(); index++) {
+        const auto *mode = modeSet->getMode(index);
+        int mcs = mode->getHtMcsIndex();
+        if (mcs >= 0 && mcs < 77 && operationalChannelWidths.count(mode->getDataMode()->getBandwidth()) != 0 &&
+                mode->getDataMode()->getNumberOfSpatialStreams() <= operationalHtSpatialStreamLimit)
+            localHtCapabilities.rxMcsSupported[mcs] = true;
+    }
+    // The equal-case Tx MCS set is represented by the maximum MCS index per
+    // spatial-stream group. Rebuild it from the filtered Rx bitmap; MCS 32 is
+    // not part of this map's MCS 0..31 NSS encoding.
+    localHtCapabilities.txMcsNss = Ieee80211HtMcsNssMap();
+    for (int mcs = 0; mcs < 32; mcs++) {
+        if (localHtCapabilities.rxMcsSupported[mcs]) {
+            int nss = mcs / 8;
+            localHtCapabilities.txMcsNss.maxMcsPerNss[nss] = std::max(localHtCapabilities.txMcsNss.maxMcsPerNss[nss], mcs % 8);
+        }
+    }
+    if (localHtCapabilities.supportedChannelWidths.empty())
+        throw cRuntimeError("HT operation mode set '%s' does not provide an HT channel width", modeSet->getName());
+    localHtCapabilities.maxAmpduLengthExponent = mib->par("htMaxAmpduLengthExponent");
+    if (localHtCapabilities.maxAmpduLengthExponent < 0 || localHtCapabilities.maxAmpduLengthExponent > 3)
+        throw cRuntimeError("htMaxAmpduLengthExponent must be between 0 and 3");
+
+    mib->installLocalHtCapabilities(localHtCapabilities, true);
 }
 
 void Ieee80211Mac::initializeRadioMode()
@@ -164,8 +212,8 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     const auto& header = makeShared<Ieee80211MgmtHeader>();
     header->setType((Ieee80211FrameType)packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
     header->setReceiverAddress(packet->getTag<MacAddressReq>()->getDestAddress());
-    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
-        header->setAddress3(mib->bssData.bssid);
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->getBssStationData().stationType == Ieee80211Mib::ACCESS_POINT)
+        header->setAddress3(mib->getBssData().bssid);
     packet->insertAtFront(header);
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(packet, header);
@@ -173,7 +221,7 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
 
 void Ieee80211Mac::handleUpperPacket(Packet *packet)
 {
-    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::STATION && !mib->bssStationData.isAssociated) {
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->getBssStationData().stationType == Ieee80211Mib::STATION && !mib->getBssStationData().isAssociated) {
         EV << "STA is not associated with an access point, discarding packet " << packet << "\n";
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
@@ -183,11 +231,11 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
     }
     encapsulate(packet);
     const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
-    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->getBssStationData().stationType == Ieee80211Mib::ACCESS_POINT) {
         auto receiverAddress = header->getReceiverAddress();
         if (!receiverAddress.isMulticast()) {
-            auto it = mib->bssAccessPointData.stations.find(receiverAddress);
-            if (it == mib->bssAccessPointData.stations.end() || it->second != Ieee80211Mib::ASSOCIATED) {
+            auto it = mib->getBssAccessPointData().stations.find(receiverAddress);
+            if (it == mib->getBssAccessPointData().stations.end() || it->second != Ieee80211Mib::ASSOCIATED) {
                 EV << "STA with MAC address " << receiverAddress << " not associated with this AP, dropping frame\n";
                 PacketDropDetails details;
                 details.setReason(OTHER_PACKET_DROP);
@@ -259,14 +307,14 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         header->setReceiverAddress(destAddress);
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
-        if (mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+        if (mib->getBssStationData().stationType == Ieee80211Mib::ACCESS_POINT) {
             header->setFromDS(true);
             header->setAddress3(mib->address);
             header->setReceiverAddress(destAddress);
         }
-        else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
+        else if (mib->getBssStationData().stationType == Ieee80211Mib::STATION) {
             header->setToDS(true);
-            header->setReceiverAddress(mib->bssData.bssid);
+            header->setReceiverAddress(mib->getBssData().bssid);
             header->setAddress3(destAddress);
         }
         else
@@ -300,11 +348,11 @@ void Ieee80211Mac::decapsulate(Packet *packet)
         macAddressInd->setDestAddress(header->getReceiverAddress());
     }
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
-        if (mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+        if (mib->getBssStationData().stationType == Ieee80211Mib::ACCESS_POINT) {
             macAddressInd->setSrcAddress(header->getTransmitterAddress());
             macAddressInd->setDestAddress(header->getAddress3());
         }
-        else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
+        else if (mib->getBssStationData().stationType == Ieee80211Mib::STATION) {
             macAddressInd->setSrcAddress(header->getAddress3());
             macAddressInd->setDestAddress(header->getReceiverAddress());
         }
@@ -391,6 +439,15 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
         sendDown(pendingRadioConfigMsg);
         pendingRadioConfigMsg = nullptr;
     }
+}
+
+void Ieee80211Mac::cancelManagementTransaction(uint64_t transactionId)
+{
+    Enter_Method("cancelManagementTransaction");
+    if (mib->qos)
+        hcf->cancelManagementTransaction(transactionId);
+    else
+        dcf->cancelManagementTransaction(transactionId);
 }
 
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)

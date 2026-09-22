@@ -8,7 +8,7 @@
 #ifndef __INET_SINGLEPROTECTIONMECHANISM_H
 #define __INET_SINGLEPROTECTIONMECHANISM_H
 
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
@@ -24,7 +24,7 @@ namespace ieee80211 {
 //
 //   8.2.5.2 Setting for single and multiple protection under enhanced distributed channel access (EDCA)
 //
-class INET_API SingleProtectionMechanism : public ModeSetListener
+class INET_API SingleProtectionMechanism : public ModeSetModuleBase
 {
   protected:
     IQosRateSelection *rateSelection = nullptr;

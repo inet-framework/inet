@@ -16,7 +16,7 @@ Define_Module(QosCtsPolicy);
 
 void QosCtsPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));

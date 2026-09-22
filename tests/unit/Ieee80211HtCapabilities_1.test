@@ -35,7 +35,7 @@ Ieee80211HtOperation operation;
 operation.operatingChannelWidth = MHz(20);
 operation.basicMcsSupported[0] = true;
 
-auto negotiated = negotiateHtCapabilities(local, peer, operation);
+auto negotiated = negotiateHtCapabilities(local, peer);
 ASSERT(negotiated.localTxPeerRx.valid);
 ASSERT(negotiated.localRxPeerTx.valid);
 ASSERT(negotiated.localTxPeerRx.supportedMcs[0]);
@@ -53,14 +53,14 @@ ASSERT(negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent == 1);
 // A 20 MHz-only peer may join a 20/40 MHz BSS.
 local.supportedChannelWidths.insert(MHz(40));
 operation.operatingChannelWidth = MHz(40);
-negotiated = negotiateHtCapabilities(local, peer, operation);
+negotiated = negotiateHtCapabilities(local, peer);
 ASSERT(negotiated.localTxPeerRx.valid);
 ASSERT(negotiated.localTxPeerRx.supportedChannelWidths.count(MHz(20)) == 1);
 
 // Table 9-226 permits an undefined Tx MCS set; unknown is not "cannot transmit".
 peer.txMcsSetDefined = false;
 peer.txMcsNss = Ieee80211HtMcsNssMap();
-negotiated = negotiateHtCapabilities(local, peer, operation);
+negotiated = negotiateHtCapabilities(local, peer);
 ASSERT(negotiated.localRxPeerTx.valid);
 
 operation.basicMcsSupported[1] = true;
@@ -98,7 +98,7 @@ for (bool unequalModulation : {false, true}) {
     ASSERT(unequalRoundTrip.txRxMcsSetNotEqual);
     ASSERT(unequalRoundTrip.txMaxNss == 2);
     ASSERT(unequalRoundTrip.txUnequalModulation == unequalModulation);
-    auto unequalNegotiated = negotiateHtCapabilities(local, unequal, operation);
+    auto unequalNegotiated = negotiateHtCapabilities(local, unequal);
     ASSERT(unequalNegotiated.localRxPeerTx.valid);
     ASSERT(!unequalNegotiated.localRxPeerTx.supportedMcs[0]);
 }

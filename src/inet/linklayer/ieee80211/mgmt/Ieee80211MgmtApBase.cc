@@ -34,20 +34,56 @@ void Ieee80211MgmtApBase::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib->mode = Ieee80211Mib::INFRASTRUCTURE;
-        mib->bssStationData.stationType = Ieee80211Mib::ACCESS_POINT;
-        mib->bssData.ssid = par("ssid").stdstringValue();
+        mib->configureBssRole(Ieee80211Mib::ACCESS_POINT, par("ssid").stdstringValue());
         radio = getModuleFromPar<cModule>(par("radioModule"), this);
         radio->subscribe(ieee80211RadioChannelChangedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        mib->bssData.bssid = mib->address;
-    else if (stage == INITSTAGE_LAST && mib->isHtOperationSupported()) {
-        mib->setPrimaryChannel(mib->requirePrimaryChannel(), getHtOperationBand());
-        const auto& operation = mib->getHtOperation();
-        if (operation.operatingChannelWidth == MHz(40) &&
-                !getHtOperationBand()->isHt40OperationSupported(operation.primaryChannel, operation.secondaryChannelOffset))
-            throw cRuntimeError("Invalid 40 MHz HT operation for band '%s', primary channel index %d, secondary channel offset %d",
-                    getHtOperationBand()->getName(), operation.primaryChannel, operation.secondaryChannelOffset);
+
+}
+
+void Ieee80211MgmtApBase::prepareBss()
+{
+    Enter_Method("prepareBss");
+    if (!isUp())
+        throw cRuntimeError("Cannot prepare a BSS while AP management is down");
+    prepareConfiguration();
+    prepareLocalOperation();
+}
+
+void Ieee80211MgmtApBase::installSimplifiedPeer(const MacAddress& address, const Ieee80211HtCapabilities *capabilities)
+{
+    Enter_Method("installSimplifiedPeer");
+    prepareBss();
+    // This method is the explicit no-air association completion boundary.
+    mib->setPeerAssociationStatus(address, Ieee80211Mib::ASSOCIATED);
+    if (capabilities != nullptr && mib->isLocalHtCapable())
+        mib->setPeerHtCapabilities(address, *capabilities);
+    else
+        mib->removePeerHtCapabilities(address);
+    mib->publishStateChange();
+}
+
+void Ieee80211MgmtApBase::removeSimplifiedPeer(const MacAddress& address)
+{
+    Enter_Method("removeSimplifiedPeer");
+    mib->removePeerAssociation(address);
+    mib->publishStateChange();
+}
+
+void Ieee80211MgmtApBase::prepareLocalOperation()
+{
+    if (mib->isLocalHtCapable()) {
+        int channel = radioChannel;
+        if (channel < 0)
+            throw cRuntimeError("IEEE 802.11 primary channel is unavailable");
+        const auto *band = getHtOperationBand();
+        band->getStandardChannelNumber(channel);
+        auto operation = computeLocalHtOperation(channel, band);
+        mib->commitBss(mib->getBssData().ssid, mib->address, band, channel, &operation);
+    }
+    else {
+        mib->commitBss(mib->getBssData().ssid, mib->address, radioBand,
+                radioChannel, nullptr);
     }
 }
 
@@ -59,14 +95,20 @@ void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID
         EV << "Updating AP primary channel to " << value << ".\n";
         const auto *channelDetails = dynamic_cast<const physicallayer::Ieee80211RadioChannelChangedDetails *>(details);
         const auto *band = channelDetails == nullptr ? nullptr : channelDetails->getBand();
-        if (mib->isHtOperationSupported()) {
+        if (value < 0 || value > 255)
+            throw cRuntimeError("IEEE 802.11 primary channel must be in the range 0..255");
+        if (mib->isLocalHtCapable()) {
             if (band == nullptr)
                 throw cRuntimeError("HT Operation channel conversion requires radioChannelChanged with IEEE 802.11 band details");
-            mib->setPrimaryChannel(value, band);
+            band->getStandardChannelNumber(value);
         }
-        else
-            mib->setPrimaryChannel(value);
+        // Physical context is retained while down; it does not activate a BSS.
         radioBand = band;
+        radioChannel = value;
+        if (mib->hasPreparedLocalCapabilities() && isUp()) {
+            prepareLocalOperation();
+            mib->publishStateChange();
+        }
     }
 }
 
@@ -92,7 +134,7 @@ int Ieee80211MgmtApBase::getDsssParameterSetChannel() const
         return radioBand->getStandardChannelNumber(channelIndex);
     }
     catch (const cRuntimeError&) {
-        if (mib->isHtOperationSupported())
+        if (mib->isLocalHtCapable())
             throw;
         // Modeling simplification: nonstandard legacy bands can operate without
         // a standards channel mapping. Omit DSSS rather than invent a wire value.

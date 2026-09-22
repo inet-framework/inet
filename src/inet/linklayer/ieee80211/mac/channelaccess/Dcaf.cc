@@ -21,11 +21,8 @@ Define_Module(Dcaf);
 
 void Dcaf::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        // TODO calculateTimingParameters()
+    ModeSetModuleBase::initialize(stage);
+    if (stage == INITSTAGE_LINK_LAYER) {
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
@@ -122,15 +119,6 @@ void Dcaf::expectedChannelAccess(simtime_t time)
     // don't care
 }
 
-void Dcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        calculateTimingParameters();
-    }
-}
 
 } /* namespace ieee80211 */
 } /* namespace inet */
