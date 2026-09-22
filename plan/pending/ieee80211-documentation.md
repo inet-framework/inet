@@ -351,38 +351,38 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 
 ### Step 1 — the catalog as text and figure — review checkpoint A
 
-- [ ] Write the catalog section for the developer's guide: the grid, the three patterns, the four
-      views, the second-level axes, in about 120 lines.
-- [ ] Draw the grid as a dot figure, `figures/ieee80211_catalog.dot`: layers as rows, planes as
-      columns, one node per cell with its parts. Width at most 6.5 inches.
-- [ ] Redraw the coordination function figure along the function axis, five rows, so that the
-      figure and the table of §3.4 say the same thing.
+- [x] Write the catalog section for the developer's guide: the grid, the three patterns, the four
+      views, the second-level axes, in about 120 lines. *Done 2026-09-22 as part 1, "At a glance", 150 lines.*
+- [x] Draw the grid as a dot figure, `figures/ieee80211_catalog.dot`: layers as rows, planes as
+      columns, one node per cell with its parts. Width at most 6.5 inches. *Done: 5.9 inches, as one HTML table node.*
+- [x] Redraw the coordination function figure along the function axis, five rows, so that the
+      figure and the table of §3.4 say the same thing. *Done: five dashed bands in a two-column grid, 6.6 inches wide; only the edges between bands are drawn.*
 - [ ] The user reviews the catalog before step 2 starts.
 
 ### Step 1b — the shared-data study
 
-- [ ] List every piece of shared data of the model: every MIB field; the mode set; the radio's
+- [x] List every piece of shared data of the model: every MIB field; the mode set; the radio's
       channel, band and mode; the pending queue and the in-progress frames; the ack status; the
       contention window; the NAV; the radio state as the MAC sees it; the peer HT state; the block
       ack agreements; the TXOP; the interface entry; the local HT capabilities. A datum is shared
       when a module other than its owner reads or writes it.
-- [ ] For each datum, find in the code: its kind (catalog, capability, control, status), its
+- [x] For each datum, find in the code: its kind (catalog, capability, control, status), its
       owner, every writer, every reader, and its lifetime (immutable; survives a stop; cleared by
       its owner; per relationship). Cite the file for each fact. A grep for `mib->` and for the
       pointer members of each module finds the readers and writers.
-- [ ] Mark the data whose treatment in the code departs from the upstream document, for the
+- [x] Mark the data whose treatment in the code departs from the upstream document, for the
       "where the code differs" section.
-- [ ] The result is a table in the plan's decision log first, then the state view of step 2.
+- [x] The result is a table in the plan's decision log first, then the state view of step 2. *Done 2026-09-22; §9.*
 
 ### Step 1c — the interface study
 
-- [ ] List every C++ interface of the two 802.11 subtrees, with: its kind per D-6; the clause of
+- [x] List every C++ interface of the two 802.11 subtrees, with: its kind per D-6; the clause of
       the standard when it is a standard concept; the classes that implement it, as a family
       (non-QoS and QoS, DCF and EDCA); the parts that call it; the NED slot that takes it, if any;
-      and its purpose in one line.
-- [ ] Mark every interface with one implementation and no slot. It stays if it names a concept;
-      it is a candidate for the "where the code differs" list if it does not.
-- [ ] The result is a table in the plan's decision log first, then the contracts view of step 2.
+      and its purpose in one line. *Done 2026-09-22; the condensed table is in §9.*
+- [x] Mark every interface with one implementation and no slot. It stays if it names a concept;
+      it is a candidate for the "where the code differs" list if it does not. *Done: 22, all stay.*
+- [x] The result is a table in the plan's decision log first, then the contracts view of step 2.
 
 ### Step 2 — restructure the developer's guide
 
@@ -453,3 +453,118 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 ## 9. Decision log
 
 To be filled during the implementation: the facts found and the choices made, with the date.
+
+### 2026-09-22 — step 1 done; the interface study (step 1c) done
+
+**Step 1.** Part 1 of the developer's guide, "At a glance", is written (150 lines): design goals,
+the map with the grid figure and the catalog table, the three patterns, the mapping to the
+standard. The grid figure is one HTML table node in dot, 5.9 inches wide. The coordination function
+figure has five dashed bands along the function axis in a two-column grid and only the edges between bands; 6.6 inches
+wide, legible at page width. Both guides build; the chapter has no overfull line in the PDF.
+
+**Step 1c, the interface study.** Corrections to D-6: `mac/contract/` holds 47 headers, not 51;
+with `IIeee80211Llc`, the four interfaces of `IIeee80211Mode.h` and `IIeee80211Band` there are 53
+top-level interfaces, and 58 with the five nested ones (four `ICallback`, one `ICwCalculator`).
+The kinds of D-6 hold, with one disagreement: `IEdcaCollisionController` stands for a rule of the
+standard (the higher category wins an internal collision), so it is a standard concept with a slot
+for experiments, not a model decision. `IContention` is the same case. The guide will say "almost
+every slot is on the decision side" and name these two as the exceptions.
+
+The condensed table; the full table with methods and purposes is the source for the contracts view.
+
+| Interface | Kind | Implementations | Called through the interface by | NED slot |
+| --- | --- | --- | --- | --- |
+| `ICoordinationFunction` | standard | `Dcf`, `Hcf`, `Pcf`, `Mcf` | **nobody**: the MAC holds `Dcf*` and `Hcf*` | `dcf` (`IDcf`), `hcf` (`IHcf`) |
+| `IChannelAccess` + `::ICallback` | standard + callback | `Dcaf`, `Edcaf`, `Hcca`; callback: `Dcf`, `Hcf` | `Pcf` (member); callback: `Dcaf`, `Edcaf` | none |
+| `IContention` + `::ICallback` | standard + callback | `Contention`; callback: `Dcaf`, `Edcaf` | `Rx`, `Dcaf`, `Edcaf`; callback: `Contention` | `contention` in `Dcaf`, `Edcaf` |
+| `IEdcaCollisionController` | standard (see above) | `EdcaCollisionController` | `Edcaf` | `collisionController` in `Edca`, as NED `ICollisionController` |
+| `IFrameSequence` | standard | 4 combinators, 11 primitives | `FrameSequenceHandler`, the combinators | none |
+| `IFrameSequenceHandler` + `::ICallback` | boundary + callback | `FrameSequenceHandler`; callback: `Dcf`, `Hcf` | `Dcf`, `Hcf`; callback: the handler | none |
+| `ITx` + `::ICallback` | boundary + callback | `Tx`; callback: `Dcf`, `Hcf` | `Dcf`, `Hcf`; callback: `Tx` | `tx` |
+| `IRx` | boundary | `Rx` | `Tx`, `Dcf`, `Hcf`, `CtsPolicy`, `QosCtsPolicy` | `rx` |
+| `IDs` | standard | `Ds` | nobody through the type; NED gates | `ds` |
+| `IOriginatorMacDataService` | standard | non-QoS and QoS | `Dcf`, `Hcf`, `InProgressFrames` | none |
+| `IRecipientMacDataService`, `IRecipientQosMacDataService` | standard | one each | `Dcf`; `Hcf` | none |
+| `IFragmentation`, `IDefragmentation`, `IReassembly` | standard | one each | the data services; `IDefragmentation`: nobody | none |
+| `IMsduAggregation`, `IMpduAggregation`, `IMsduDeaggregation`, `IMpduDeaggregation` | standard | one each | the QoS data services | none |
+| `ISequenceNumberAssignment`, `IDuplicateRemoval` | standard | non-QoS and QoS | the data services | none |
+| `ITransmitLifetimeHandler` | standard | DCF and EDCA | `Dcf` (never created) | none |
+| `IRtsProcedure`, `ICtsProcedure`, `IRecipientAckProcedure` | standard | one each | `Dcf`, `Hcf`, the context | none |
+| block ack handlers and procedures (4) | standard | one each | `Hcf`, the context | none |
+| `IAckHandler` | standard | non-QoS and QoS | `InProgressFrames` | none |
+| `IRecoveryProcedure` + `::ICwCalculator` | standard + callback | non-QoS and QoS; calculator: `Dcaf`, `Edcaf` | nobody through the type (only signals); calculator: the two procedures | none |
+| `IRateSelection`, `IQosRateSelection` | standard | one each | `Dcf` and the non-QoS policies; `Hcf` and the QoS policies | `IRateSelection.ned` exists, but the slot is a fixed type |
+| `IRateControl` | decision | `RateControlBase` (AARF, ARF, Onoe) | `Dcf`, `Hcf`, the rate selections | `rateControl` |
+| the policies: ack (4), RTS, CTS, fragmentation, MSDU and MPDU aggregation, block ack agreement (2) | decision | one or a non-QoS and QoS pair each | `Dcf`, `Hcf`, the context, the procedures | one slot each |
+| `IProcedureCallback`, `IBlockAckAgreementHandlerCallback` | callback | `Dcf`, `Hcf`; `Hcf` | the procedures and handlers, as a parameter | none |
+| `IIeee80211Llc` | standard | LPD, EPD, portal | nobody through the type; NED gates | `llc` |
+| `IIeee80211Mode` and its three submodes; `IIeee80211Band` | standard | one base each, seven PHY families | the mode set, the transmitter, the receiver, rate selection, the management | none |
+
+**Findings for the guide.**
+
+- Four interfaces are called by nobody through their C++ type: `ICoordinationFunction`, `IDs`,
+  `IIeee80211Llc`, `IRecoveryProcedure`. The first matters: the MAC casts its slots to the
+  concrete `Dcf` and `Hcf`, so a coordination function of another class cannot be plugged in
+  without a change to the MAC. This goes to "where the code differs".
+- 22 interfaces have one implementation and no slot. All of them name a mechanism of the standard
+  (procedures, handlers, aggregation, reassembly, the two data services of the recipient side, the
+  QoS rate selection) or a PHY concept (`IIeee80211Mode`, `IIeee80211Band`). They stay; the rule
+  of D-6 allows an interface that names a concept even with one implementation.
+- Four NED and C++ names disagree: `ICollisionController.ned` against `IEdcaCollisionController.h`;
+  `IDcf.ned` and `IHcf.ned` have no C++ counterpart, the C++ contract is `ICoordinationFunction`;
+  `IOriginatorQosAckPolicy.ned` against `IOriginatorQoSAckPolicy.h`. The guide names them in the
+  contracts view; a rename is a code change outside this plan.
+- `IRateSelection.ned` exists but no slot uses it: `Dcf` and `Hcf` wire the rate selection as a
+  fixed type.
+
+### 2026-09-22 — the shared-data study (step 1b) done
+
+The full report, with file and line citations, is in `audit/ieee80211-documentation/shared-data.md`
+at the repository root (not in git). The condensed table follows; it is the source of the state
+view of step 2.
+
+| Datum | Kind | Owner | Writers | Readers | Lifetime |
+| --- | --- | --- | --- | --- | --- |
+| MIB: address, mode, qos, stationType | control | MIB | the MAC (address, qos); the management module (mode, stationType) | MAC, `Ds`, `Rx`, `Tx`, the coordination functions, management | set at init |
+| MIB: bssData (ssid, bssid) | control on an AP, status on a station | MIB | management | MAC, `Ds`, the network configurator | AP: init; station: per relationship |
+| MIB: isAssociated | status | MIB | station management | `Ds`, MAC, agent, station management | per relationship |
+| MIB: station table | status | MIB | AP management; the simplified station writes the AP's MIB | `Ds`, MAC, AP management | per relationship |
+| MIB: association identifiers and reservations | status, control | MIB, through its methods | AP management through reserve, commit, release | MIB | per relationship; a reservation per response exchange |
+| MIB: local HT capabilities | capability | MIB | the MIB, on request of the MAC at init | management | set at init |
+| MIB: HT operation, primary channel | control, status | MIB, private | the MIB, on the radio's channel signal and at init | AP management, management base | owner, on a channel change |
+| MIB: peer HT states | status, with a derived compatibility cache | MIB, private | the MIB, on request of management | rate selection | per relationship |
+| the mode set catalog | catalog | a static table | none | MAC, radio | immutable |
+| the MAC's mode set and every cached copy | catalog | MAC; each listener | MAC at init; listeners from one signal | every listener | set at init |
+| supported rate elements | capability | management base | from the mode set signal | the management variants | set at init |
+| transmitter and receiver: mode set, mode, band, channel | catalog, control | transmitter, receiver | the radio, on a configure command, through `const_cast` | transmitter, receiver, MAC at init | on command |
+| tuned channel and band | status | radio | radio | AP management, by signal | on change |
+| radio mode | status | radio | radio | MAC reads it directly | on change |
+| Rx: reception state, transmission state, signal part | status | `Rx` | `Rx`, from the radio signals relayed by the MAC | `Rx`, coordination functions | per frame |
+| Rx: medium free | status | `Rx` | `Rx` | MAC, CTS policies; pushed to every contention | per frame |
+| NAV | status | `Rx` | `Rx`, on a received frame and on `Tx`'s request | `Rx` | per frame |
+| pending queues | status | the queue module of each channel access | the coordination function enqueues; in-progress frames dequeue | coordination function | per frame |
+| in-progress frames | status | `InProgressFrames` | its own methods, called by the coordination function, the handler | coordination function, frame sequences | per frame |
+| frame sequence context | status | the handler | built by the coordination function | the frame sequences | per exchange |
+| ack status maps | status | the ack handlers | own methods, called by the coordination function and in-progress frames | the same | per frame |
+| contention window | status | channel access | own methods, on request of the recovery procedure | recovery procedure, coordination function | on outcome |
+| station retry counters | status | `Dcf`; each `Edcaf` | the non-QoS recovery procedure, on an object it does not own | the same | on outcome |
+| per-frame retry counters | status | the recovery procedures | own methods | coordination function through accessors | per frame |
+| block ack agreements | status | the two handlers | the handlers, driven by `Hcf` | ack policy, frame sequences, recipient data service, procedures | per relationship |
+| block ack record | status | the recipient agreement | block ack reordering writes; the recipient procedure reads | same | per frame |
+| TXOP: start, limit | status, control | TXOP procedure | `Hcf` starts and ends it | frame sequences, rate selection, protection | per exchange |
+| interface entry: address, MTU, state | control, status | `NetworkInterface` | address: nobody in the tree; MTU: MAC; state: the MAC base class | MAC; rate selection reads peers' interfaces | set at init; state on lifecycle |
+
+**Departures from the upstream document that the guide will list.** The MIB has a public half
+with direct writes by the MAC and the management modules and a private half with typed operations;
+no MIB change is announced at a commit boundary, the association signals come from management
+after the write. The simplified station writes the MIB of another node. The AID reservation is a
+pending transaction in the MIB. The mode set is distributed by one signal inside the link-layer
+stage, and the rate selection uses it in the same stage, so readiness depends on sibling order. The
+radio writes its transmitter and receiver through `const_cast`. `Rx` and the MAC keep two copies of
+the transmission state, and `Rx` keeps an unrefreshed copy of the address. The frame sequence
+context hands out live handles. The recovery procedure announces the contention window change of a
+module it does not own. The shared management recovery procedure of a QoS station changes the
+contention window of the best-effort category whatever the calling category. The block ack record
+is written by the reordering and read by the procedure, not by its holder. Four data are dead:
+the last transmitted mode maps, the generation counter of the peer HT state, `numSentBaPolicyFrames`
+and `isAddbaResponseSent`.
