@@ -1,0 +1,122 @@
+%description:
+Verify exactly one departure at each exposed nested compound queue boundary for
+input RED rejection, leaf overflow, shared-buffer eviction, selective extraction,
+ordinary dequeue and explicit removal.
+
+%includes:
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/queueing/contract/PacketQueueRemovalDetails.h"
+
+%global:
+using namespace inet;
+using namespace inet::queueing;
+class BoundaryObserver : public cListener {
+  public:
+    cComponent *boundary = nullptr;
+    int drops = 0;
+    int dequeues = 0;
+    int removals = 0;
+    long droppedId = -1;
+    virtual void receiveSignal(cComponent *source, simsignal_t, cObject *object, cObject *details) override {
+        if (source != boundary)
+            return;
+        auto reason = check_and_cast<PacketQueueRemovalDetails *>(details)->getReason();
+        auto packet = check_and_cast<Packet *>(object);
+        if (reason == IPacketQueue::PacketRemovalReason::DROPPED) {
+            drops++;
+            droppedId = packet->getId();
+        }
+        else if (reason == IPacketQueue::PacketRemovalReason::DEQUEUED)
+            dequeues++;
+        else if (reason == IPacketQueue::PacketRemovalReason::REMOVED)
+            removals++;
+    }
+};
+
+%activity:
+for (const auto type : {"NestedRedDepartureQueue", "NestedLeafDepartureQueue", "NestedBufferDepartureQueue"}) {
+    auto module = cModuleType::get(type)->create("queue", this);
+    module->finalizeParameters();
+    module->buildInside();
+    module->callInitialize();
+    auto inner = module->getSubmodule("inner");
+    BoundaryObserver outerObserver, innerObserver;
+    outerObserver.boundary = module;
+    innerObserver.boundary = inner;
+    module->subscribe(IPacketQueue::packetQueueDepartureSignal, &outerObserver);
+    inner->subscribe(IPacketQueue::packetQueueDepartureSignal, &innerObserver);
+    auto queue = check_and_cast<IPacketQueue *>(module);
+    auto makePacket = []() { return new Packet("packet", makeShared<ByteCountChunk>(B(10))); };
+    queue->enqueuePacket(makePacket());
+    auto rejected = makePacket();
+    auto rejectedId = rejected->getId();
+    queue->enqueuePacket(rejected);
+    ASSERT(queue->getNumPackets() == 1);
+    ASSERT(outerObserver.drops == 1 && innerObserver.drops == 1);
+    ASSERT(outerObserver.droppedId == rejectedId && innerObserver.droppedId == rejectedId);
+    auto selected = queue->dequeuePacket([](const Packet *) { return true; });
+    take(selected);
+    delete selected;
+    wait(SimTime(1, SIMTIME_US));
+    ASSERT(outerObserver.dequeues == 1 && innerObserver.dequeues == 1);
+    queue->enqueuePacket(makePacket());
+    auto dequeued = queue->dequeuePacket();
+    take(dequeued);
+    delete dequeued;
+    wait(SimTime(1, SIMTIME_US));
+    ASSERT(outerObserver.dequeues == 2 && innerObserver.dequeues == 2);
+    queue->enqueuePacket(makePacket());
+    auto removed = queue->getPacket(0);
+    queue->removePacket(removed);
+    take(removed);
+    delete removed;
+    ASSERT(outerObserver.removals == 1 && innerObserver.removals == 1);
+    ASSERT(outerObserver.drops == 1 && innerObserver.drops == 1);
+    module->unsubscribe(IPacketQueue::packetQueueDepartureSignal, &outerObserver);
+    inner->unsubscribe(IPacketQueue::packetQueueDepartureSignal, &innerObserver);
+    module->deleteModule();
+}
+
+%file: queues.ned
+import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.queueing.queue.RedDropperQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.contract.IPacketQueue;
+import inet.queueing.buffer.PacketBuffer;
+module CompositionRedQueue extends RedDropperQueue {
+    parameters:
+        @class(::inet::queueing::CompoundPacketQueueBase);
+        red.minth = 0;
+        red.maxth = 1;
+        red.packetCapacity = 1;
+        red.wq = 1;
+        red.maxp = 0;
+}
+module NestedDepartureQueue extends CompoundPacketQueueBase {
+    parameters:
+        @class(::inet::queueing::CompoundPacketQueueBase);
+        bool useBuffer = default(false);
+    submodules:
+        buffer: PacketBuffer if useBuffer {
+            packetCapacity = 1;
+            dropperClass = "inet::queueing::PacketAtCollectionEndDropper";
+        }
+        inner: <default("PacketQueue")> like IPacketQueue;
+    connections:
+        in --> inner.in;
+        inner.out --> out;
+}
+module NestedRedDepartureQueue extends NestedDepartureQueue {
+    parameters:
+        inner.typename = "CompositionRedQueue";
+}
+module NestedLeafDepartureQueue extends NestedDepartureQueue {
+    parameters:
+        inner.packetCapacity = 1;
+        inner.dropperClass = "inet::queueing::PacketAtCollectionEndDropper";
+}
+module NestedBufferDepartureQueue extends NestedDepartureQueue {
+    parameters:
+        useBuffer = true;
+        inner.bufferModule = "^.buffer";
+}

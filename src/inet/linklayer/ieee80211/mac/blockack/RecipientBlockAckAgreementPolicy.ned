@@ -16,7 +16,10 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
 simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBlockAckAgreementPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC
         @class(RecipientBlockAckAgreementPolicy);
+        bool localCompressedBlockAckSupported = default(false); // Requires HT operation in the active mode set
+        string compressedBlockAckPeerAddresses = default(""); // Configured peer capability input, snapshotted at ADDBA acceptance
         bool delayedAckPolicySupported = default(false);
         bool aMsduSupported = default(true);
         int maximumAllowedBufferSize = default(64);

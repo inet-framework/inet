@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 simple QosRtsPolicy extends SimpleModule like IRtsPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(QosRtsPolicy);
         string rateSelectionModule;
         double ctsTimeout @unit(s) = default(-1s);

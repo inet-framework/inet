@@ -1,0 +1,364 @@
+%description:
+Validate compressed BARs before receive-window mutation and response generation,
+with configured peer capability and HT operation snapshotted at ADDBA acceptance.
+Sparse and wrapping transmit sets must never strand frames beyond bitmap offset 63.
+IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6.1 (non-HE bitmap length 64).
+
+%file: TestCompressedBlockAckValidation.cc
+#include <iostream>
+
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+static const MacAddress PEER("02:00:00:00:00:01");
+static const MacAddress LOCAL("02:00:00:00:00:02");
+
+class InspectReordering : public BlockAckReordering
+{
+  public:
+    ReceiveBuffer *getBuffer() { return receiveBuffers.at(std::make_pair(5, PEER)); }
+};
+
+class InspectDataService : public RecipientQosMacDataService
+{
+  protected:
+    virtual void initialize() override {
+        RecipientQosMacDataService::initialize();
+        delete blockAckReordering;
+        blockAckReordering = new InspectReordering();
+    }
+  public:
+    ReceiveBuffer *getBuffer() { return static_cast<InspectReordering *>(blockAckReordering)->getBuffer(); }
+};
+Define_Module(InspectDataService);
+
+class RecipientPolicy : public RecipientBlockAckAgreementPolicy
+{
+  public:
+    void configure(bool localSupport, bool peerSupport, bool ht) {
+        maximumAllowedBufferSize = 64;
+        blockAckTimeoutValue = 0;
+        localCompressedBlockAckSupported = localSupport;
+        compressedBlockAckPeerAddresses.clear();
+        if (peerSupport)
+            compressedBlockAckPeerAddresses.insert(PEER);
+        modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(ht ? "n(mixed-2.4Ghz)" : "g(mixed)"));
+    }
+};
+
+class TestRecipientAckPolicy : public RecipientQosAckPolicy
+{
+  public:
+    virtual simtime_t computeBlockAckDurationField(Packet *, const Ptr<const Ieee80211BlockAckReq>&) const override { return 0; }
+};
+
+class Callback : public IProcedureCallback
+{
+  public:
+    int responses = 0;
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override { delete packet; }
+    virtual void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        ASSERT(dynamicPtrCast<const Ieee80211CompressedBlockAck>(header) != nullptr);
+        responses++;
+        delete packet;
+    }
+};
+
+class CompressedBlockAckValidation : public SimpleModule
+{
+  protected:
+    RecipientBlockAckAgreementHandler lifetimeHandler;
+    RecipientBlockAckAgreement *lifetimeAgreement = nullptr;
+    Ptr<Ieee80211DataHeader> dataHeader(int sequence, int fragment = 0, bool more = false) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTransmitterAddress(PEER);
+        header->setReceiverAddress(LOCAL);
+        header->setTid(5);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        header->setFragmentNumber(fragment);
+        header->setMoreFragments(more);
+        return header;
+    }
+
+    void checkRecipient(bool localSupport, bool peerSupport, bool ht, int fragment) {
+        auto service = check_and_cast<InspectDataService *>(cModuleType::get("InspectDataService")->create("service", this));
+        service->callInitialize();
+        RecipientBlockAckAgreementHandler handler;
+        RecipientPolicy policy;
+        policy.configure(localSupport, peerSupport, ht);
+        Callback callback;
+        auto addba = makeShared<Ieee80211AddbaRequest>();
+        addba->setTransmitterAddress(PEER);
+        addba->setReceiverAddress(LOCAL);
+        addba->setTid(5);
+        addba->setDialogToken(1);
+        addba->setBufferSize(64);
+        addba->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        addba->setBlockAckPolicy(true);
+        addba->setBlockAckTimeoutValue(0);
+        auto agreement = handler.processReceivedAddbaRequest(addba, &policy, &callback, nullptr);
+        ASSERT(agreement != nullptr);
+        ASSERT(agreement->getIsCompressedBlockAckSupported() == (localSupport && peerSupport && ht));
+        // Subsequent policy changes do not retroactively change this agreement.
+        policy.configure(!localSupport, !peerSupport, !ht);
+        ASSERT(agreement->getIsCompressedBlockAckSupported() == (localSupport && peerSupport && ht));
+
+        auto completeHeader = dataHeader(1);
+        auto incompleteHeader = dataHeader(2, 0, true);
+        auto complete = new Packet("complete", completeHeader);
+        auto incomplete = new Packet("incomplete", incompleteHeader);
+        ASSERT(service->dataFrameReceived(complete, completeHeader, &handler).empty());
+        ASSERT(service->dataFrameReceived(incomplete, incompleteHeader, &handler).empty());
+        auto buffer = service->getBuffer();
+        auto savedBuffer = buffer->getBuffer();
+        auto savedCursor = buffer->getNextExpectedSequenceNumber();
+        auto savedStart = agreement->getStartingSequenceNumber();
+        auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+        request->setTransmitterAddress(PEER);
+        request->setReceiverAddress(LOCAL);
+        request->setTidInfo(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(3));
+        request->setFragmentNumber(fragment);
+        auto packet = new Packet("rejectedBar", request);
+        ASSERT(service->controlFrameReceived(packet, request, &handler).empty());
+        TestRecipientAckPolicy ackPolicy;
+        RecipientBlockAckProcedure procedure;
+        procedure.processReceivedBlockAckReq(packet, request, &ackPolicy, &handler, &callback);
+        ASSERT(callback.responses == 0);
+        ASSERT(buffer->getBuffer() == savedBuffer);
+        ASSERT(buffer->getLength() == 2);
+        ASSERT(buffer->getNextExpectedSequenceNumber() == savedCursor);
+        ASSERT(agreement->getStartingSequenceNumber() == savedStart);
+        ASSERT(agreement->getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(1)));
+        ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2), 0));
+        ASSERT(!agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2), 1));
+        delete packet;
+
+        if (localSupport && peerSupport && ht) {
+            auto valid = makeShared<Ieee80211CompressedBlockAckReq>(*request);
+            valid->setFragmentNumber(0);
+            auto validPacket = new Packet("validBar", valid);
+            auto released = service->controlFrameReceived(validPacket, valid, &handler);
+            ASSERT(released.size() == 1 && released.front() == complete);
+            ASSERT(buffer->getLength() == 0);
+            ASSERT(agreement->getStartingSequenceNumber() == SequenceNumberCyclic(3));
+            procedure.processReceivedBlockAckReq(validPacket, valid, &ackPolicy, &handler, &callback);
+            ASSERT(callback.responses == 1);
+            for (auto frame : released) { take(frame); delete frame; }
+            delete validPacket;
+        }
+        service->deleteModule();
+    }
+
+    void checkSparse(int start, bool timeout) {
+        OriginatorBlockAckAgreement agreement(LOCAL, 5, SequenceNumberCyclic(start), 64, false, false, 0, 1);
+        agreement.setIsAddbaResponseReceived(true);
+        agreement.setIsCompressedBlockAckSupported(true);
+        OriginatorQosAckPolicy policy;
+        policy.applyModeSet(physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"));
+        QosAckHandler handler;
+        std::vector<Packet *> frames;
+        for (int offset : {0, 63, 64, 100}) {
+            auto header = dataHeader((start + offset) % 4096);
+            frames.push_back(new Packet("outstanding", header));
+            handler.frameGotInProgress(header);
+            handler.processTransmittedDataOrMgmtFrame(header);
+        }
+        ASSERT(policy.isCompressedBlockAckReq({frames[0], frames[1]}, &agreement));
+        ASSERT(!policy.isCompressedBlockAckReq({frames[0], frames[2]}, &agreement));
+        ASSERT(!policy.isCompressedBlockAckReq({frames[0], frames[3]}, &agreement));
+        ASSERT(!policy.isCompressedBlockAckReq(frames, &agreement));
+        auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+        bar->setReceiverAddress(LOCAL);
+        bar->setTidInfo(5);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(start));
+        handler.processTransmittedBlockAckReq(bar);
+        for (int i = 0; i < 4; i++)
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) ==
+                (i < 2 ? QosAckHandler::Status::WAITING_FOR_BLOCK_ACK : QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED));
+        if (timeout)
+            handler.processFailedBlockAckReq(bar);
+        else {
+            auto ba = makeShared<Ieee80211CompressedBlockAck>();
+            ba->setTransmitterAddress(LOCAL);
+            ba->setTidInfo(5);
+            ba->setStartingSequenceNumber(SequenceNumberCyclic(start));
+            ba->setBlockAckBitmap(BitVector(std::vector<uint8_t>(8, 255)));
+            ASSERT(handler.processReceivedBlockAck(ba).size() == 2);
+        }
+        for (int i = 0; i < 4; i++) {
+            auto header = frames[i]->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(handler.getQoSDataAckStatus(header) == (i >= 2 ? QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED :
+                timeout ? QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED : QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED));
+            if (i >= 2)
+                ASSERT(handler.isOutstandingFrame(header));
+        }
+        // A later BAR can request both residual frames.
+        auto nextBar = makeShared<Ieee80211CompressedBlockAckReq>(*bar);
+        nextBar->setStartingSequenceNumber(SequenceNumberCyclic((start + 64) % 4096));
+        handler.processTransmittedBlockAckReq(nextBar);
+        for (int i : {2, 3})
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        for (auto frame : frames)
+            delete frame;
+    }
+
+    void checkSparseBasic(int start, bool timeout) {
+        QosAckHandler handler;
+        std::vector<Packet *> frames;
+        for (int offset : {0, 63, 64, 100}) {
+            auto header = dataHeader((start + offset) % 4096);
+            frames.push_back(new Packet("outstanding", header));
+            handler.frameGotInProgress(header);
+            handler.processTransmittedDataOrMgmtFrame(header);
+        }
+        auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+        bar->setReceiverAddress(LOCAL);
+        bar->setTidInfo(5);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(start));
+        handler.processTransmittedBlockAckReq(bar);
+        for (int i = 0; i < 4; i++)
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) ==
+                (i < 2 ? QosAckHandler::Status::WAITING_FOR_BLOCK_ACK : QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED));
+        if (timeout)
+            handler.processFailedBlockAckReq(bar);
+        else {
+            auto ba = makeShared<Ieee80211BasicBlockAck>();
+            ba->setTransmitterAddress(LOCAL);
+            ba->setTidInfo(5);
+            ba->setStartingSequenceNumber(SequenceNumberCyclic(start));
+            for (int i = 0; i < 64; i++)
+                ba->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 255)));
+            ASSERT(handler.processReceivedBlockAck(ba).size() == 2);
+        }
+        for (int i = 0; i < 4; i++) {
+            auto header = frames[i]->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(handler.getQoSDataAckStatus(header) == (i >= 2 ? QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED :
+                timeout ? QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED : QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED));
+            if (i >= 2)
+                ASSERT(handler.isOutstandingFrame(header));
+        }
+        // A later BAR can request both residual frames.
+        auto nextBar = makeShared<Ieee80211BasicBlockAckReq>(*bar);
+        nextBar->setStartingSequenceNumber(SequenceNumberCyclic((start + 64) % 4096));
+        handler.processTransmittedBlockAckReq(nextBar);
+        for (int i : {2, 3})
+            ASSERT(handler.getQoSDataAckStatus(frames[i]->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        for (auto frame : frames)
+            delete frame;
+    }
+
+    virtual void handleMessage(cMessage *message) override {
+        auto savedDeadline = lifetimeAgreement->getExpirationTime();
+        ASSERT(savedDeadline > simTime());
+        if (message->getKind() == 0) {
+            auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+            request->setTransmitterAddress(PEER);
+            request->setReceiverAddress(LOCAL);
+            request->setTidInfo(5);
+            request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            request->setFragmentNumber(1);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == savedDeadline);
+
+            request->setFragmentNumber(0);
+            lifetimeAgreement->setIsCompressedBlockAckSupported(false);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == savedDeadline);
+
+            lifetimeAgreement->setIsCompressedBlockAckSupported(true);
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == simTime() + SimTime(1));
+            ASSERT(lifetimeAgreement->getExpirationTime() > savedDeadline);
+            message->setKind(1);
+            scheduleAt(simTime() + SimTime(1, SIMTIME_MS), message);
+        }
+        else {
+            auto request = makeShared<Ieee80211BasicBlockAckReq>();
+            request->setTransmitterAddress(PEER);
+            request->setReceiverAddress(LOCAL);
+            request->setTidInfo(5);
+            request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            lifetimeHandler.blockAckReqReceived(request, nullptr);
+            ASSERT(lifetimeAgreement->getExpirationTime() == simTime() + SimTime(1));
+            ASSERT(lifetimeAgreement->getExpirationTime() > savedDeadline);
+            delete message;
+            std::cout << "Rejected BARs preserve inactivity deadlines; valid BARs renew them.\n";
+        }
+    }
+
+    virtual void initialize() override {
+        RecipientPolicy policy;
+        policy.configure(true, true, true);
+        Callback callback;
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(PEER);
+        request->setReceiverAddress(LOCAL);
+        request->setTid(5);
+        request->setDialogToken(1);
+        request->setBufferSize(64);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setBlockAckPolicy(true);
+        request->setBlockAckTimeoutValue(SimTime(1));
+        lifetimeAgreement = lifetimeHandler.processReceivedAddbaRequest(request, &policy, &callback, nullptr);
+        ASSERT(lifetimeAgreement->getExpirationTime() == SimTime(1));
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("checkBarLifetime"));
+        checkRecipient(true, true, true, 1);
+        checkRecipient(true, false, true, 0);
+        checkRecipient(true, true, false, 0);
+        checkRecipient(false, true, true, 0);
+        for (int start : {0, 4090}) {
+            for (bool timeout : {false, true}) {
+                checkSparse(start, timeout);
+                checkSparseBasic(start, timeout);
+            }
+        }
+        std::cout << "Compressed BAR validation preserves receive state and limits transmit state to 64 positions.\n";
+    }
+};
+Define_Module(CompressedBlockAckValidation);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+module InspectDataService extends RecipientQosMacDataService
+{
+    parameters:
+        @class(::InspectDataService);
+}
+simple CompressedBlockAckValidation extends SimpleModule
+{
+    parameters:
+        @class(::CompressedBlockAckValidation);
+}
+network TestNetwork
+{
+    submodules:
+        test: CompressedBlockAckValidation;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Compressed BAR validation preserves receive state and limits transmit state to 64 positions.
+
+%contains: stdout
+Rejected BARs preserve inactivity deadlines; valid BARs renew them.

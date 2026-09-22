@@ -16,6 +16,7 @@ import inet.linklayer.ieee80211.mac.contract.IOriginatorQosAckPolicy;
 simple OriginatorQosAckPolicy extends SimpleModule like IOriginatorQosAckPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(OriginatorQosAckPolicy);
         string rateSelectionModule;
 
@@ -26,4 +27,3 @@ simple OriginatorQosAckPolicy extends SimpleModule like IOriginatorQosAckPolicy
 
         @display("i=block/control");
 }
-

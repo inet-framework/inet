@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee80211.mac;
 
+import inet.linklayer.ieee80211.mac.contract.IIeee80211MacConfiguration;
+
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.ieee80211.IIeee80211Mac;
 import inet.linklayer.ieee80211.mac.contract.IDcf;
@@ -74,25 +76,26 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 //   which is related to power management, capability information
 //   which is related to PCF and other non-modeled features).
 //
-module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
+module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac, IIeee80211MacConfiguration
 {
     parameters:
         string mibModule;
-        string modeSet @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
+        string modeSet @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","n(greenfield-2.4Ghz)","p","ac") = default("g(mixed)");
         string fcsMode @enum("declared","computed") = default("declared");
         string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("receiver");
 
         int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);
 
+        **.modeSetModule = default(absPath("."));
         *.mibModule = default(absPath(this.mibModule));
         *.rxModule = "^.rx";
         *.txModule = "^.tx";
 
         @display("i=block/layer");
         @class(Ieee80211Mac);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet); // Completed runtime transition; observational only
         @signal[linkBroken](type=inet::Packet); // TODO this signal is only present for the statistic to pass the signal check, to be removed
-        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
         @signal[frameTransmissionOutcome](type=inet::Packet);
         @statistic[packetSentToUpper](title="packets sent to upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToLower](title="packets sent to lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -135,4 +138,3 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
                 @display("p=250,200");
         }
 }
-

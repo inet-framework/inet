@@ -9,21 +9,21 @@
 #define __INET_RATECONTROLBASE_H
 
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RateControlBase : public ModeSetListener, public IRateControl
+class INET_API RateControlBase : public ModeSetModuleBase, public IRateControl
 {
   public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
     static simsignal_t datarateChangedSignal;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // The receiver MAC address of a transmitted (or received) frame, which keys the per-station state.
     virtual MacAddress getReceiverAddress(Packet *frame) const;

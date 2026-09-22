@@ -11,6 +11,7 @@
 #include <map>
 
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IManagementFrameTransactionHandler.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 
 namespace inet {
@@ -37,6 +38,9 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         bool pendingAssociationSuccessful = false;
         uint64_t pendingAssociationTransactionId = 0;
+        bool pendingVhtCapabilitiesValid = false;
+        Ieee80211VhtCapabilities pendingVhtCapabilities;
+        uint64_t pendingVhtGeneration = 0;
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
@@ -73,6 +77,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
     uint64_t nextAssociationTransactionId = 0;
+    ModuleRefByPar<IManagementFrameTransactionHandler> managementFrameTransactionHandler;
 
   public:
     Ieee80211MgmtAp() {}
@@ -101,6 +106,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 
     virtual uint64_t createAssociationTransactionId();
     virtual void clearPendingAssociation(StaInfo *sta);
+    virtual void supersedePendingAssociation(StaInfo *sta);
 
     /** Classifies a terminal management-MPDU result using its transaction tag and fragment state. */
     static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame,

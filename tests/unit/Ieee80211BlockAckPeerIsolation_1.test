@@ -1,0 +1,85 @@
+%description:
+Basic and Compressed BARs change ACK state only for their addressed peer.
+Another peer with the same TID and sequence number remains outstanding after
+either a response or a timeout, and can subsequently request its own Block Ack.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+const MacAddress peerA("02:00:00:00:00:01");
+const MacAddress peerB("02:00:00:00:00:02");
+for (bool compressed : { false, true }) {
+    for (bool timeout : { false, true }) {
+        QosAckHandler handler;
+        auto makeData = [](MacAddress peer) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->setReceiverAddress(peer);
+            header->setTid(4);
+            header->setSequenceNumber(SequenceNumberCyclic(100));
+            header->setAckPolicy(BLOCK_ACK);
+            return header;
+        };
+        auto dataA = makeData(peerA);
+        auto dataB = makeData(peerB);
+        handler.processTransmittedDataOrMgmtFrame(dataA);
+        handler.processTransmittedDataOrMgmtFrame(dataB);
+        auto makeBar = [compressed](MacAddress peer) -> Ptr<Ieee80211BlockAckReq> {
+            if (compressed) {
+                auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+                bar->setReceiverAddress(peer);
+                bar->setTidInfo(4);
+                bar->setStartingSequenceNumber(SequenceNumberCyclic(100));
+                return bar;
+            }
+            auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+            bar->setReceiverAddress(peer);
+            bar->setTidInfo(4);
+            bar->setStartingSequenceNumber(SequenceNumberCyclic(100));
+            return bar;
+        };
+        auto barA = makeBar(peerA);
+        handler.processTransmittedBlockAckReq(barA);
+        ASSERT(handler.getQoSDataAckStatus(dataA) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        ASSERT(handler.getQoSDataAckStatus(dataB) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(handler.isOutstandingFrame(dataB));
+        if (timeout)
+            handler.processFailedBlockAckReq(barA);
+        else if (compressed) {
+            auto response = makeShared<Ieee80211CompressedBlockAck>();
+            response->setTransmitterAddress(peerA);
+            response->setTidInfo(4);
+            response->setStartingSequenceNumber(SequenceNumberCyclic(100));
+            response->setBlockAckBitmap(BitVector(std::vector<uint8_t>(8, 0)));
+            handler.processReceivedBlockAck(response);
+        }
+        else {
+            auto response = makeShared<Ieee80211BasicBlockAck>();
+            response->setTransmitterAddress(peerA);
+            response->setTidInfo(4);
+            response->setStartingSequenceNumber(SequenceNumberCyclic(100));
+            for (int i = 0; i < 64; i++)
+                response->setBlockAckBitmap(i, BitVector(0, 16));
+            handler.processReceivedBlockAck(response);
+        }
+        ASSERT(handler.getQoSDataAckStatus(dataA) == (timeout ? QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED : QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED));
+        ASSERT(handler.isEligibleToTransmit(dataA));
+        ASSERT(handler.getQoSDataAckStatus(dataB) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(handler.isOutstandingFrame(dataB));
+        auto barB = makeBar(peerB);
+        handler.processTransmittedBlockAckReq(barB);
+        ASSERT(handler.getQoSDataAckStatus(dataB) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        handler.processFailedBlockAckReq(barB);
+        ASSERT(handler.isEligibleToTransmit(dataB));
+    }
+}
+
+EV << "Block Ack peer isolation checks passed.\n";
+
+%contains: stdout
+Block Ack peer isolation checks passed.

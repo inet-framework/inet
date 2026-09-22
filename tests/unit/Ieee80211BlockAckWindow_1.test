@@ -1,0 +1,47 @@
+%description:
+Validate the shared cyclic receive-window decisions used by Block Ack records,
+receive buffers, and reordering.
+IEEE Std 802.11-2024, 10.25.6.3, 10.25.6.4, and 10.25.6.6.2.1.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/BlockAckWindow.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+{
+    const auto startingSequenceNumber = SequenceNumberCyclic(4094);
+    const int windowSize = 4;
+
+    ASSERT(BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(4094)));
+    ASSERT(BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(4095)));
+    ASSERT(BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(0)));
+    ASSERT(BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(1)));
+    ASSERT(!BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(2)));
+    ASSERT(!BlockAckWindow::isWithin(startingSequenceNumber, windowSize, SequenceNumberCyclic(2046)));
+
+    ASSERT(BlockAckWindow::isBefore(SequenceNumberCyclic(4093), startingSequenceNumber));
+    ASSERT(!BlockAckWindow::isBefore(startingSequenceNumber, startingSequenceNumber));
+    ASSERT(BlockAckWindow::isAtOrAfter(SequenceNumberCyclic(4094), startingSequenceNumber));
+    ASSERT(BlockAckWindow::isAtOrAfter(SequenceNumberCyclic(0), startingSequenceNumber));
+    ASSERT(!BlockAckWindow::isAtOrAfter(SequenceNumberCyclic(4093), startingSequenceNumber));
+
+    ASSERT(BlockAckWindow::isBeyond(startingSequenceNumber, windowSize, SequenceNumberCyclic(2)));
+    ASSERT(BlockAckWindow::isBeyond(startingSequenceNumber, windowSize, SequenceNumberCyclic(2045)));
+    ASSERT(!BlockAckWindow::isBeyond(startingSequenceNumber, windowSize, SequenceNumberCyclic(2046)));
+    ASSERT(!BlockAckWindow::isAfter(SequenceNumberCyclic(2046), startingSequenceNumber));
+    ASSERT(!BlockAckWindow::isBefore(SequenceNumberCyclic(2046), startingSequenceNumber));
+    ASSERT(!BlockAckWindow::isAtOrAfter(SequenceNumberCyclic(2046), startingSequenceNumber));
+
+    ASSERT(BlockAckWindow::getStartingSequenceNumber(SequenceNumberCyclic(2), windowSize) == SequenceNumberCyclic(4095));
+    ASSERT(BlockAckWindow::getStartingSequenceNumber(SequenceNumberCyclic(0), windowSize) == SequenceNumberCyclic(4093));
+    EV << "Shared Block Ack cyclic receive-window predicates preserve wraparound and the antipodal boundary.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+Shared Block Ack cyclic receive-window predicates preserve wraparound and the antipodal boundary.
+.
