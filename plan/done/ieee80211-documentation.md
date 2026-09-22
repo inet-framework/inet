@@ -1,8 +1,9 @@
 # The IEEE 802.11 documentation: one catalog, three documents
 
-Status: **pending review** — written 2026-09-21. Nothing of it is implemented.
-Branch: `master` in the worktree `inet-master`, head `35014ca19d`, eight commits of the group
-`ieee80211-documentation` on top of `origin/master` (`98117c3257`), not pushed.
+Status: **done** — written 2026-09-21, implemented 2026-09-22 on the branch
+`topic/ieee80211-documentation` in the worktree `inet-ieee80211-documentation`, from `master` at
+`35014ca19d` (the eight commits of the group on top of `origin/master` `98117c3257`). The series is
+one commit per file plus the plan commits; every commit carries the plan trailer and the group.
 
 ## 1. What this plan does
 
@@ -370,7 +371,7 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
       columns, one node per cell with its parts. Width at most 6.5 inches. *Done: 5.9 inches, as one HTML table node.*
 - [x] Redraw the coordination function figure along the function axis, five rows, so that the
       figure and the table of §3.4 say the same thing. *Done: five dashed bands in a two-column grid, 6.6 inches wide; only the edges between bands are drawn.*
-- [ ] The user reviews the catalog before step 2 starts.
+- [x] The user reviews the catalog before step 2 starts. *Reviewed 2026-09-22.*
 
 ### Step 1b — the shared-data study
 
@@ -430,8 +431,8 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 
 ### Step 5 — close
 
-- [ ] Run the four gates on the whole series.
-- [ ] Update this plan with the decisions made during the work (§9) and move it to `plan/done/`.
+- [x] Run the four gates on the whole series. *Commit, classification and seal gates pass; the link gate reports only the 16 pre-existing broken links of the upstream wifi results file.*
+- [x] Update this plan with the decisions made during the work (§9) and move it to `plan/done/`.
 
 ## 7. Where the current developer's guide sections go
 
