@@ -15,6 +15,14 @@ namespace inet {
 namespace ieee80211 {
 
 /**
+ * Selects the fastest mandatory legacy mode at or below the requested bitrate,
+ * preserving an exact mandatory request. Throws if mandatory legacy modes exist
+ * but none meets the bound; preserves the request if that mandatory set is empty.
+ */
+INET_API const physicallayer::IIeee80211Mode *selectGroupAddressedMode(
+        const physicallayer::Ieee80211ModeSet *modeSet, const physicallayer::IIeee80211Mode *requestedMode);
+
+/**
  * Selects a mode that is compatible with the negotiated receive capabilities
  * of a peer. Non-HT modes are returned unchanged. A null peer state denotes
  * that HT negotiation is unavailable and selects a legacy operational
@@ -24,7 +32,15 @@ INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleMode(
         const physicallayer::Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState,
         const physicallayer::IIeee80211Mode *mode,
-        const MacAddress& peerAddress);
+        const MacAddress& peerAddress,
+        const Ieee80211HtOperation *operation, bool htEligible);
+
+// VHT selection intersects local Tx and peer Rx; absent negotiation uses legacy.
+INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleVhtMode(
+        const physicallayer::Ieee80211ModeSet *modeSet,
+        const Ieee80211VhtCapabilities& local, const Ieee80211VhtOperation& localOperation,
+        const Ieee80211Mib::PeerVhtState *peer,
+        const physicallayer::IIeee80211Mode *requested);
 
 } // namespace ieee80211
 } // namespace inet

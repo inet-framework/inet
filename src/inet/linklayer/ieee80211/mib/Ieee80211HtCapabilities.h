@@ -53,6 +53,15 @@ struct Ieee80211HtCapabilities
     bool shortGi20 = false;
     bool shortGi40 = false;
     int maxAmpduLengthExponent = 0;
+
+    bool operator==(const Ieee80211HtCapabilities& other) const
+    {
+        return supportedChannelWidths == other.supportedChannelWidths && rxMcsSupported == other.rxMcsSupported &&
+                txMcsSetDefined == other.txMcsSetDefined && txRxMcsSetNotEqual == other.txRxMcsSetNotEqual &&
+                txMaxNss == other.txMaxNss && txUnequalModulation == other.txUnequalModulation &&
+                txMcsNss.maxMcsPerNss == other.txMcsNss.maxMcsPerNss && ldpc == other.ldpc && greenfield == other.greenfield &&
+                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent;
+    }
 };
 
 /** Model-backed subset of the HT Operation element (IEEE Std 802.11-2024, 9.4.2.55). */
@@ -63,6 +72,13 @@ struct Ieee80211HtOperation
     int secondaryChannelOffset = 0;
     Ieee80211HtProtectionMode protectionMode = Ieee80211HtProtectionMode::NO_PROTECTION;
     std::array<bool, 77> basicMcsSupported = {};
+
+    bool operator==(const Ieee80211HtOperation& other) const
+    {
+        return operatingChannelWidth == other.operatingChannelWidth && primaryChannel == other.primaryChannel &&
+                secondaryChannelOffset == other.secondaryChannelOffset && protectionMode == other.protectionMode &&
+                basicMcsSupported == other.basicMcsSupported;
+    }
 };
 
 struct Ieee80211HtDirectionalCapabilities
@@ -72,6 +88,7 @@ struct Ieee80211HtDirectionalCapabilities
     Ieee80211HtMcsNssMap mcsNss;
     std::array<bool, 77> supportedMcs = {};
     bool receiverLdpc = false;
+    bool receiverGreenfield = false;
     bool receiverShortGi20 = false;
     bool receiverShortGi40 = false;
     int receiverMaxAmpduLengthExponent = 0;
@@ -83,16 +100,14 @@ struct Ieee80211NegotiatedHtCapabilities
     Ieee80211HtCapabilities peerAdvertisement;
     Ieee80211HtDirectionalCapabilities localTxPeerRx;
     Ieee80211HtDirectionalCapabilities localRxPeerTx;
-    Ieee80211HtOperation operation;
 };
 
 inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211HtCapabilities& local,
-        const Ieee80211HtCapabilities& peer, const Ieee80211HtOperation& operation)
+        const Ieee80211HtCapabilities& peer)
 {
     Ieee80211NegotiatedHtCapabilities negotiated;
     negotiated.localAdvertisement = local;
     negotiated.peerAdvertisement = peer;
-    negotiated.operation = operation;
     for (const auto& width : local.supportedChannelWidths)
         if (peer.supportedChannelWidths.count(width)) {
             negotiated.localTxPeerRx.supportedChannelWidths.insert(width);
@@ -116,9 +131,11 @@ inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211
                 negotiated.localRxPeerTx.mcsNss.maxMcsPerNss[nss] = mcs;
         }
     }
-    // LDPC and short-GI bits advertise receiver capability, so they are directional.
+    // LDPC, Greenfield, and short-GI bits advertise receiver capability, so they are directional.
     negotiated.localTxPeerRx.receiverLdpc = peer.ldpc;
     negotiated.localRxPeerTx.receiverLdpc = local.ldpc;
+    negotiated.localTxPeerRx.receiverGreenfield = peer.greenfield;
+    negotiated.localRxPeerTx.receiverGreenfield = local.greenfield;
     negotiated.localTxPeerRx.receiverShortGi20 = peer.shortGi20;
     negotiated.localRxPeerTx.receiverShortGi20 = local.shortGi20;
     negotiated.localTxPeerRx.receiverShortGi40 = peer.shortGi40;

@@ -62,7 +62,7 @@ class Ieee80211MgmtApMalformedHtCapAp : public Ieee80211MgmtAp
     {
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     void submitAssociationRequest(const MacAddress& address, bool malformed, short exponent = 4)
@@ -76,7 +76,7 @@ class Ieee80211MgmtApMalformedHtCapAp : public Ieee80211MgmtAp
         rates.rate[0] = 1;
         body->setSupportedRates(rates);
         body->setHtCapabilitiesPresent(true);
-        auto elem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        auto elem = makeHtCapabilitiesElement(mib->getLocalHtCapabilities());
         if (malformed)
             elem.maxAmpduLengthExponent = exponent;
         body->setHtCapabilities(elem);
@@ -118,7 +118,7 @@ class Ieee80211MgmtApMalformedHtCapAp : public Ieee80211MgmtAp
         rates.rate[0] = 1;
         body->setSupportedRates(rates);
         body->setHtCapabilitiesPresent(true);
-        auto elem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        auto elem = makeHtCapabilitiesElement(mib->getLocalHtCapabilities());
         if (malformed)
             elem.maxAmpduLengthExponent = exponent;
         body->setHtCapabilities(elem);
@@ -180,9 +180,9 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->hasPendingAssociation(sta1));
         mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta1));
-        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta1) == nullptr);
-        ASSERT(mib->bssAccessPointData.associationIds.find(sta1) == mib->bssAccessPointData.associationIds.end());
+        ASSERT(mib->getBssAccessPointData().associationIds.find(sta1) == mib->getBssAccessPointData().associationIds.end());
         std::cout << "Malformed AssociationRequest (exponent 4) refused with SC_UNSUP_CAP.\n";
 
         // 2. Malformed AssociationRequest (exponent = -1) refused with SC_UNSUP_CAP
@@ -193,7 +193,7 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->hasPendingAssociation(sta1));
         mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta1));
-        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta1) == nullptr);
         std::cout << "Malformed AssociationRequest (exponent -1) refused with SC_UNSUP_CAP.\n";
 
@@ -204,7 +204,7 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->sentFrames.back().aid > 0);
         mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta1));
-        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta1) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mib->findPeerHtState(sta1) != nullptr);
         std::cout << "Valid AssociationRequest succeeded with SC_SUCCESSFUL.\n";
 
@@ -217,9 +217,9 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->hasPendingAssociation(sta1));
         mgmt->finishResponse(sta1, ST_REASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta1));
-        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta1) == nullptr);
-        ASSERT(mib->bssAccessPointData.associationIds.find(sta1) == mib->bssAccessPointData.associationIds.end());
+        ASSERT(mib->getBssAccessPointData().associationIds.find(sta1) == mib->getBssAccessPointData().associationIds.end());
         std::cout << "Malformed ReassociationRequest (exponent 4) refused with SC_UNSUP_CAP and cleared association.\n";
 
         // 5. Malformed ReassociationRequest (exponent = -1) from authenticated station
@@ -231,12 +231,12 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->hasPendingAssociation(sta2));
         mgmt->finishResponse(sta2, ST_REASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta2));
-        ASSERT(mib->bssAccessPointData.stations.at(sta2) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta2) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta2) == nullptr);
         std::cout << "Malformed ReassociationRequest (exponent -1) refused with SC_UNSUP_CAP.\n";
 
         // 6. Malformed AssociationRequest with contradictory Tx MCS set fields refused with SC_UNSUP_CAP
-        auto badTxElem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        auto badTxElem = makeHtCapabilitiesElement(mib->getLocalHtCapabilities());
         badTxElem.txMcsSetDefined = false;
         badTxElem.txRxMcsSetNotEqual = true;
         mgmt->submitAssociationRequestWithElement(sta1, badTxElem);
@@ -246,7 +246,7 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mgmt->hasPendingAssociation(sta1));
         mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
         ASSERT(!mgmt->hasPendingAssociation(sta1));
-        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->getBssAccessPointData().stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta1) == nullptr);
         std::cout << "Malformed AssociationRequest (contradictory Tx MCS) refused with SC_UNSUP_CAP.\n";
     }

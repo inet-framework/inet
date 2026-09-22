@@ -1,0 +1,157 @@
+%description:
+The production MAC assembles HT abilities through replaceable PHY query contracts.
+A transmitter adapter unrelated to Ieee80211Transmitter contributes different widths;
+receiver short GI remains an independent contribution. Capability installation and
+repeated preparation preserve operation. This is synthetic initialization coverage,
+not a 40 MHz PHY exchange.
+
+%file: TestHtPreparation.cc
+#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211TransmitterCapabilities.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class ContributionTransmitter : public ITransmitter, public IIeee80211TransmitterCapabilities
+{
+  public:
+    const ITransmitter *delegate = nullptr;
+    bool allow40 = false;
+    virtual W getMaxPower() const override { return delegate->getMaxPower(); }
+    virtual m getMaxCommunicationRange() const override { return delegate->getMaxCommunicationRange(); }
+    virtual m getMaxInterferenceRange() const override { return delegate->getMaxInterferenceRange(); }
+    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t time) const override
+    { return delegate->createTransmission(radio, packet, time); }
+    virtual bool isHtChannelWidthSupported(Hz width) const override
+    { return width == MHz(20) || (allow40 && width == MHz(40)); }
+};
+
+class ContributionRadio : public Ieee80211Radio
+{
+    ContributionTransmitter contribution;
+  protected:
+    virtual void initialize(int stage) override
+    {
+        Ieee80211Radio::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            contribution.delegate = transmitter;
+            contribution.allow40 = par("allow40");
+        }
+    }
+  public:
+    virtual const ITransmitter *getTransmitter() const override { return &contribution; }
+};
+Define_Module(ContributionRadio);
+
+class ContributionReceiver : public Ieee80211Receiver
+{
+  public:
+    virtual bool isHtChannelWidthSupported(Hz width) const override
+    { return width == MHz(20) || width == MHz(40); }
+    virtual bool isHtShortGuardIntervalSupported(Hz width) const override
+    { return width == MHz(20); }
+};
+Define_Module(ContributionReceiver);
+
+class HtPreparationChecker : public SimpleModule
+{
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override
+    {
+        if (stage != INITSTAGE_LAST)
+            return;
+        for (const char *name : {"^.narrow.wlan[0]", "^.wide.wlan[0]"}) {
+            auto *nic = getModuleByPath(name);
+            auto *mib = check_and_cast<Ieee80211Mib *>(nic->getSubmodule("mib"));
+            auto *mac = check_and_cast<Ieee80211Mac *>(nic->getSubmodule("mac"));
+            ASSERT(mib->hasPreparedLocalCapabilities());
+            ASSERT(mib->getLocalHtCapabilities().supportedChannelWidths.count(MHz(20)) == 1);
+            ASSERT(mib->getLocalHtCapabilities().shortGi20);
+            ASSERT(!mib->getLocalHtCapabilities().shortGi40);
+            bool wide = std::string(name).find("wide") != std::string::npos;
+            ASSERT(mib->getLocalHtCapabilities().supportedChannelWidths.count(MHz(40)) == (wide ? 1 : 0));
+            auto operation = mib->getHtOperation();
+            mac->prepareLocalCapabilities();
+            ASSERT(mib->getHtOperation().primaryChannel == operation.primaryChannel);
+            ASSERT(mib->getHtOperation().basicMcsSupported == operation.basicMcsSupported);
+        }
+        auto *storage = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.storage"));
+        Ieee80211HtOperation operation;
+        operation.primaryChannel = 6;
+        operation.protectionMode = Ieee80211HtProtectionMode::NON_HT_MIXED;
+        operation.basicMcsSupported[2] = true;
+        storage->commitBss("storage", MacAddress::UNSPECIFIED_ADDRESS, nullptr, 6, &operation);
+        Ieee80211HtCapabilities capabilities;
+        capabilities.supportedChannelWidths.insert(MHz(20));
+        capabilities.rxMcsSupported[0] = true;
+        storage->installLocalHtCapabilities(capabilities, true);
+        ASSERT(storage->getHtOperation().primaryChannel == 6);
+        ASSERT(storage->getHtOperation().protectionMode == operation.protectionMode);
+        ASSERT(storage->getHtOperation().basicMcsSupported == operation.basicMcsSupported);
+        std::cout << "Independent capability preparation and replacement contributions verified.\n";
+    }
+};
+Define_Module(HtPreparationChecker);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module ContributionRadio extends Ieee80211ScalarRadio {
+    parameters:
+        bool allow40 = default(false);
+        @class(::ContributionRadio);
+}
+module ContributionReceiver extends Ieee80211Receiver {
+    parameters:
+        @class(::ContributionReceiver);
+}
+simple HtPreparationChecker extends SimpleModule {
+    parameters:
+        @class(::HtPreparationChecker);
+}
+network HtPreparationNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        narrow: AccessPoint;
+        wide: AccessPoint;
+        storage: Ieee80211Mib;
+        checker: HtPreparationChecker;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = HtPreparationNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 0s
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].radio.typename = "ContributionRadio"
+**.wlan[*].radio.receiver.typename = "ContributionReceiver"
+*.wide.wlan[*].radio.allow40 = true
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 6
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.antenna.numAntennas = 1
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Independent capability preparation and replacement contributions verified.

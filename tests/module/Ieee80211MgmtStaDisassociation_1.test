@@ -43,10 +43,10 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     void setAssociated(const MacAddress& address)
     {
         Enter_Method("setAssociated");
-        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(!mib->getBssStationData().isAssociated);
         ensureAccessPoint(address);
-        mib->bssData.bssid = address;
-        mib->bssStationData.isAssociated = true;
+        mib->commitBss("SSID", address, nullptr, -1, nullptr);
+        mib->setAssociated(true);
         assocAP = AssociatedApInfo();
         assocAP.address = address;
         assocAP.channel = 1;
@@ -85,7 +85,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
     bool isPendingAssociationScheduled() const { return assocTimeoutMsg != nullptr && assocTimeoutMsg->isScheduled(); }
     bool isReassociationPending() const { return reassociationInProgress; }
-    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool isAssociated() const { return mib->getBssStationData().isAssociated; }
     MacAddress getAssociatedAddress() const { return assocAP.address; }
 
     void deliverDisassociation(const MacAddress& transmitter, const MacAddress& address3)
@@ -127,7 +127,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         lastAssociationAddress = ap->address;
         lastAssociationResult = resultCode;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified());
     }
 
     virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
@@ -136,7 +136,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         lastReassociationAddress = ap->address;
         lastReassociationResult = resultCode;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified());
     }
 };
 

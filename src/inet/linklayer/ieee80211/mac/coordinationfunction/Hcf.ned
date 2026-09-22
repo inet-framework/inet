@@ -28,6 +28,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 module Hcf extends Module like IHcf
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         bool isBlockAckSupported = default(false);
 
         string rxModule;

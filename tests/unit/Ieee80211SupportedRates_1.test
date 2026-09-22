@@ -412,6 +412,84 @@ assertTiming(pModeSet, SimTime(32, SIMTIME_US), SimTime(13, SIMTIME_US), SimTime
 assertTiming(nModeSet, SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
 assertTiming(acModeSet, SimTime(16, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
 
+// IEEE Std 802.11-2024, 9.4.2.2: SSID length verification (0 to 32 octets)
+for (size_t len : {size_t(0), size_t(1), size_t(32)}) {
+    std::string ssid(len, 'x');
+    auto probeReq = makeShared<Ieee80211ProbeRequestFrame>();
+    probeReq->setSSID(ssid.c_str());
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 1.0;
+    rates.basicRate[0] = true;
+    probeReq->setSupportedRates(rates);
+    probeReq->setChunkLength(B(2 + len + 3));
+
+    auto bytes = serializeFrame(probeReq);
+    auto decoded = deserializeFrame<Ieee80211ProbeRequestFrame>(bytes);
+    ASSERT(std::string(decoded->getSSID()) == ssid);
+}
+
+// 33-octet SSID exceeds standard maximum and must be rejected on serialization
+{
+    std::string overlengthSsid(33, 'x');
+    auto probeReq = makeShared<Ieee80211ProbeRequestFrame>();
+    probeReq->setSSID(overlengthSsid.c_str());
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 1.0;
+    rates.basicRate[0] = true;
+    probeReq->setSupportedRates(rates);
+    probeReq->setChunkLength(B(2 + 33 + 3));
+
+    bool overlengthRejected = false;
+    try {
+        serializeFrame(probeReq);
+    }
+    catch (const cRuntimeError&) {
+        overlengthRejected = true;
+    }
+    ASSERT(overlengthRejected);
+}
+
+// Deserializing a frame with element length = 33 must throw
+{
+    std::vector<uint8_t> rawProbeReq = {
+        0x00, 33 // Element 0 (SSID), length 33
+    };
+    for (int i = 0; i < 33; i++)
+        rawProbeReq.push_back('x');
+    rawProbeReq.push_back(0x01); // Element 1 (Supported Rates)
+    rawProbeReq.push_back(1);    // Length 1
+    rawProbeReq.push_back(0x82); // 1.0 Mbps basic
+
+    bool deserializationRejected = false;
+    try {
+        deserializeFrame<Ieee80211ProbeRequestFrame>(rawProbeReq);
+    }
+    catch (const cRuntimeError&) {
+        deserializationRejected = true;
+    }
+    ASSERT(deserializationRejected);
+}
+
+// Deserializing a truncated SSID element must throw
+{
+    std::vector<uint8_t> truncatedProbeReq = {
+        0x00, 10 // Element 0 (SSID), length 10 but only 3 payload bytes follow
+    };
+    for (int i = 0; i < 3; i++)
+        truncatedProbeReq.push_back('a');
+
+    bool truncatedRejected = false;
+    try {
+        deserializeFrame<Ieee80211ProbeRequestFrame>(truncatedProbeReq);
+    }
+    catch (const cRuntimeError&) {
+        truncatedRejected = true;
+    }
+    ASSERT(truncatedRejected);
+}
+
 EV << "Supported Rates and AID validation checks passed.\n";
 
 %contains: stdout
