@@ -417,16 +417,16 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 
 ### Step 3 — align the user's guide
 
-- [ ] Reorder its sections onto the outline of §4.2: the MAC part follows the function axis.
-- [ ] Name the cells and the functions with the same words as the developer's guide, so that a
+- [x] Reorder its sections onto the outline of §4.2: the MAC part follows the function axis.
+- [x] Name the cells and the functions with the same words as the developer's guide, so that a
       reader who moves between the guides finds the same map.
-- [ ] Keep the depth at NED and ini. Remove nothing that a user configures.
-- [ ] Build the PDF and read the chapter once.
+- [x] Keep the depth at NED and ini. Remove nothing that a user configures.
+- [x] Build the PDF and read the chapter once. *No overfull line above one point after one column change; no undefined reference.*
 
 ### Step 4 — mark the anatomy
 
-- [ ] Change the header status to `snapshot 2026-09-21` and add the retirement sentence per D-3.
-- [ ] Add a cross-reference from the anatomy's introduction to the developer's guide chapter.
+- [x] Change the header status to `snapshot 2026-09-21` and add the retirement sentence per D-3.
+- [x] Add a cross-reference from the anatomy's introduction to the developer's guide chapter.
 
 ### Step 5 — close
 
@@ -603,3 +603,13 @@ The developer's guide is restructured: 1610 lines, five parts, four figures, in 
 - "Where the code differs" grew from eight to thirteen items with the study findings: the concrete
   `Dcf` and `Hcf` pointers of the MAC, the readiness of the mode set, the shared recovery procedure
   of a QoS station, the duplicated caches, and the unused state.
+
+### 2026-09-22 — steps 3 and 4 done
+
+The user's guide keeps every section and every parameter; the MAC part changed order and names
+only: access, quality of service, frame exchange and protection, fragmentation and aggregation
+(one section from two), acknowledgement and retries, block acknowledgement, bit rates and rate
+control, statistics. One sentence names the five functions and points to the developer's guide.
+The anatomy header says `snapshot 2026-09-21`, and its introduction says that the developer's guide
+replaces it when complete. The seal gate passes; the link gate reports the 16 pre-existing broken
+links of the upstream wifi results file and none of this series.
