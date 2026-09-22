@@ -121,20 +121,30 @@ INET has two node types for the two roles: :ned:`LocalMobilityAnchor` and
 :ned:`MobileAccessGateway`, both IPv6 routers with the protocol module added.
 The gateway also turns each of its wireless interfaces into an 802.11 access
 point. The mobile node is a plain :ned:`StandardHost6` with a wireless
-interface, and it contains no mobility module. Here are the two network layers
-side by side, the mobile node's on the left and an access router's on the right:
+interface — the same host type an IPv6 host that never moves would use. Here is
+the network layer inside one of the access routers:
 
 .. figure:: media/modules.png
    :align: center
-   :width: 90%
+   :width: 100%
 
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     two Qtenv module-interior canvases, stacked vertically
+   type:     one Qtenv module-interior canvas
    config:   Pmipv6          seed: seed-set = 1
-   shows:    mn.ipv6 above and ar1.ipv6 below at the same zoom; the pmipv6
-             submodule is present in the access router, boxed, and absent from the
-             mobile node
+   shows:    the network layer inside an access router, with the pmipv6 submodule
+             boxed. The node type is MobileAccessGateway; the module pictured is
+             its ipv6 submodule, of type Ipv6NetworkLayer with hasPmipv6 = true.
+   scope:    ONE panel, the access router's. The mobile node's network layer was
+             dropped by a USER RULING, not because it could not be captured: an
+             ordinary IPv6 network layer shown to prove something is absent from
+             it is weak evidence -- it looks like every other host in INET, so a
+             reader who does not already know what to miss learns nothing from
+             it, and it was costing half the area of the page's most downscaled
+             figure. An earlier two-panel version (side by side, then stacked
+             vertically) is superseded; do not re-derive it as an improvement.
+             The anchor's network layer is the same picture again and gets a
+             sentence rather than a panel.
    launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
              --'**.displayStringTextFormat'='""'
 
@@ -153,32 +163,39 @@ side by side, the mobile node's on the left and an access router's on the right:
              changes nothing about the model. Capturing at t = 0 is the weaker
              version of the same idea -- it makes the counters read zero but
              leaves the text there.
-   window:   at t = 0, before any run_simulation call -- the layout is static and
-             the counters are all zero
-   capture:  open_inspector {object_path:"Pmipv6Showcase.mn.ipv6", type:"graphical"}
-             set_canvas_view  {module_path:"Pmipv6Showcase.mn.ipv6", zoom:1.0}
-             get_canvas_image {module_path:"Pmipv6Showcase.mn.ipv6",
-                               area:"all_elements", margin:6}   -> 954x474
-             the same three calls for Pmipv6Showcase.ar1.ipv6    -> 954x574
-             Both must report zoom_factor 1, or the panels are not comparable.
+   window:   at t = 0, before any run_simulation call -- the layout is static
+   capture:  open_inspector {object_path:"Pmipv6Showcase.ar1.ipv6", type:"graphical"}
+             set_canvas_view  {module_path:"Pmipv6Showcase.ar1.ipv6", zoom:1.0}
+             get_canvas_image {module_path:"Pmipv6Showcase.ar1.ipv6",
+                               area:"all_elements", margin:6}   -> 954x574
+             Do not raise the zoom to gain pixels: Qtenv scales positions and
+             icons with zoom but not label fonts, so a higher zoom spreads the
+             figure without making a single label larger.
              get_inspector_screenshot at the default size clips the pmipv6 icon;
              get_canvas_image does not.
-   compose:  crop each panel to x 4..764 (the right ~190 px are empty canvas and
-             are what forced the old 3.09:1 aspect and its 2.6x downscale), stack
-             mn above ar1, 12 px margin, 18 px gutter, white background, a 22 px
-             bold header over each panel, and a 3 px red rectangle around pmipv6
-             in the lower panel -> 784x1158. Ask for :width: 90%.
-   anchor:   ar1.ipv6 has exactly one submodule that mn.ipv6 does not: pmipv6, at
-             the bottom right, inside the box. If both panels have the same
-             submodules the wrong configuration was captured (NoPmipv6 has pmipv6
-             nowhere).
+   compose:  crop x 4..764 -- the right ~190 px are empty canvas, and cutting
+             there trims the tail of the two dispatcher bars and the module
+             rectangle's right border, which is the price of the legibility.
+             Pad 10 px white, then a 3 px red rectangle at (674,482)-(744,550) in
+             source coordinates around pmipv6 -> 780x594, aspect 1.31:1.
+             Ask for :width: 100%: on a ~745 px column that renders at about
+             1.05x, against 2.61x for the original side-by-side pair.
+   anchor:   the submodule set must read exactly configurator, routingTable, up,
+             icmpv6, lp, neighbourDiscovery, ipv6, pmipv6 -- eight, with pmipv6
+             inside the box. MobileAccessGateway hard-assigns ipv6.hasPmipv6 =
+             true (not a default), so no ini can remove it; and nothing in this
+             showcase's ini touches the network layer's composition, so this is
+             the stock interior of the type, not a configuration of it. If ipsec,
+             spd, sad, mipv6, buList, bindingCache or mld appear, something has
+             switched on hasIpsec, hasMipv6 or hasMld and the figure no longer
+             matches the page.
    stamp:    captured 2026-09, INET 4.7
 
-The access router's network layer contains the Proxy Mobile IPv6 module, and so
-does the anchor's. The mobile node's contains nothing of the kind: an IPv6
-module, Neighbor Discovery, and the rest of what any IPv6 host has. That
-difference is the claim of this page, and it is a property of the network's
-configuration, not of anything the node does.
+Each access router in this configuration is a :ned:`MobileAccessGateway`, and
+the Proxy Mobile IPv6 module in its network layer is what makes it one; the
+anchor carries the same module in the same place. The mobile node's network
+layer has nothing of the kind — an IPv6 module, Neighbor Discovery, and the rest
+of what any IPv6 host has.
 
 The gateway needs to know two things: where its anchor is, and which nodes it
 may serve. The first is the :par:`localMobilityAnchorAddress` parameter. The
