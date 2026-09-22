@@ -1,0 +1,508 @@
+%description:
+Exercise the live HCF lower-frame entry while a Block Ack response step is
+waiting. An ACK, CTS, data frame, or other control frame addressed to this
+station, as well as a Block Ack for another active peer, the wrong TID, or the
+wrong Basic/Compressed variant or starting sequence number, must leave the current response wait and its
+timeout armed. The matching response then completes that same frame sequence,
+while an unmatched wait ends only when its response timer expires.
+
+%file: TestIeee80211BlockAckResponseCorrelation.cc
+
+#include <iostream>
+#include <tuple>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+
+namespace inet {
+namespace ieee80211 {
+
+static const MacAddress LOCAL_ADDRESS("02:00:00:00:00:01");
+static const MacAddress PEER_ONE("02:00:00:00:00:11");
+static const MacAddress PEER_TWO("02:00:00:00:00:12");
+static constexpr Tid CURRENT_TID = 6;
+static constexpr SequenceNumber CURRENT_SSN = 700;
+
+class TestOriginatorBlockAckAgreementHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    void addEstablishedAgreement(const MacAddress& receiverAddress, Tid tid)
+    {
+        auto transactionId = receiverAddress == PEER_ONE ? 1 : 2;
+        auto agreement = new OriginatorBlockAckAgreement(receiverAddress, tid, SequenceNumberCyclic(CURRENT_SSN), 64, true, false, 1, transactionId);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(0);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[std::make_pair(receiverAddress, tid)] = agreement;
+    }
+};
+
+class TestOriginatorQosAckPolicy : public IOriginatorQoSAckPolicy
+{
+  public:
+    bool compressed = true;
+    SequenceNumber startingSequenceNumber = CURRENT_SSN;
+
+    virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>&) const override { return true; }
+    virtual AckPolicy computeAckPolicy(Packet *, const Ptr<const Ieee80211DataHeader>&, OriginatorBlockAckAgreement *) const override { return BLOCK_ACK; }
+    virtual bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *, IOriginatorBlockAckAgreementHandler *) const override { return true; }
+    virtual bool isBlockAckPolicyEligibleFrame(Packet *, const Ptr<const Ieee80211DataHeader>&) const override { return true; }
+    virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *, TxopProcedure *, IOriginatorBlockAckAgreementHandler *) const override
+    {
+        return std::make_tuple(PEER_ONE, SequenceNumberCyclic(startingSequenceNumber), CURRENT_TID);
+    }
+    virtual bool isCompressedBlockAckReq(const std::vector<Packet *>&, OriginatorBlockAckAgreement *) const override { return compressed; }
+    virtual simtime_t getAckTimeout(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return SimTime(1, SIMTIME_MS); }
+    virtual simtime_t getBlockAckTimeout(Packet *, const Ptr<const Ieee80211BlockAckReq>&) const override { return SimTime(1, SIMTIME_MS); }
+};
+
+class TestInProgressFrames : public InProgressFrames
+{
+  public:
+    virtual std::vector<Packet *> getOutstandingFrames() override { return {}; }
+};
+
+class TestEdcaf : public Edcaf
+{
+};
+
+class TestEdca : public Edca
+{
+  protected:
+    TestEdcaf *channelOwner = nullptr;
+
+  public:
+    TestEdca(TestEdcaf *channelOwner) : channelOwner(channelOwner) {}
+    virtual Edcaf *getChannelOwner() override { return channelOwner; }
+};
+
+class TestTxopProcedure : public TxopProcedure
+{
+  public:
+    virtual simtime_t getRemaining() const override { return SimTime(1, SIMTIME_MS); }
+};
+
+class TestFrameSequenceContext : public FrameSequenceContext
+{
+  public:
+    TestFrameSequenceContext(InProgressFrames *inProgressFrames, QoSContext *qosContext) :
+        FrameSequenceContext(LOCAL_ADDRESS, nullptr, inProgressFrames, nullptr, nullptr, nullptr, qosContext)
+    {
+    }
+
+    virtual simtime_t getIfs() const override { return SIMTIME_ZERO; }
+};
+
+class TestHcfBlockAckResponseCorrelation : public Hcf
+{
+  protected:
+    TestEdcaf channelOwner;
+    TestEdca testEdca;
+    MacAddress localAddress = LOCAL_ADDRESS;
+
+    virtual int numInitStages() const override { return 1; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            startRxTimer = new cMessage("startRxTimeout");
+            inactivityTimer = new cMessage("inactivityTimeout");
+            addbaResponseTimer = new cMessage("addbaResponseTimeout");
+            frameSequenceHandler = new FrameSequenceHandler();
+            edca = &testEdca;
+        }
+    }
+
+    virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const override
+    {
+        return header->getReceiverAddress() == localAddress;
+    }
+
+    virtual bool isReceptionInProgress() override { return false; }
+
+    virtual void transmitFrame(Packet *, simtime_t) override
+    {
+        transmittedFrames++;
+        // The synthetic test frame is handed to the live FrameSequenceHandler
+        // at the same boundary where Tx would report PHY-TXEND.confirm.
+        frameSequenceHandler->transmissionComplete();
+    }
+
+    virtual void originatorProcessTransmittedFrame(Packet *packet) override
+    {
+        ackHandler.processTransmittedBlockAckReq(packet->peekAtFront<Ieee80211BlockAckReq>());
+    }
+    virtual void originatorProcessReceivedFrame(Packet *packet, Packet *) override
+    {
+        acceptedResponses++;
+        ackHandler.processReceivedBlockAck(packet->peekAtFront<Ieee80211BlockAck>());
+    }
+    virtual void originatorProcessFailedFrame(Packet *packet) override
+    {
+        failedFrames++;
+        ackHandler.processFailedBlockAckReq(packet->peekAtFront<Ieee80211BlockAckReq>());
+    }
+    virtual void frameSequenceFinished() override
+    {
+        finishedSequences++;
+        lastFinishedAt = simTime();
+    }
+
+    virtual void scheduleStartRxTimer(simtime_t timeout) override
+    {
+        scheduleAfter(timeout, startRxTimer);
+    }
+
+  public:
+    QosAckHandler ackHandler;
+    int transmittedFrames = 0;
+    int acceptedResponses = 0;
+    int failedFrames = 0;
+    int finishedSequences = 0;
+    simtime_t lastFinishedAt = SIMTIME_ZERO;
+
+    TestHcfBlockAckResponseCorrelation() : testEdca(&channelOwner) {}
+
+    void startBlockAckResponseWait(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure,
+            IOriginatorBlockAckAgreementHandler *agreementHandler, InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure)
+    {
+        Enter_Method("startBlockAckResponseWait");
+        auto qosContext = new QoSContext(ackPolicy, blockAckProcedure, agreementHandler, txopProcedure);
+        auto context = new TestFrameSequenceContext(inProgressFrames, qosContext);
+        frameSequenceHandler->startFrameSequence(new BlockAckReqBlockAckFs(), context, this);
+    }
+
+    void injectBlockAck(const MacAddress& transmitterAddress, Tid tid, bool compressed, SequenceNumber startingSequenceNumber = CURRENT_SSN)
+    {
+        Enter_Method("injectBlockAck");
+        Ptr<Ieee80211BlockAck> blockAck;
+        if (compressed) {
+            auto compressedBlockAck = makeShared<Ieee80211CompressedBlockAck>();
+            compressedBlockAck->setTidInfo(tid);
+            compressedBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(startingSequenceNumber));
+            compressedBlockAck->setBlockAckBitmap(BitVector(std::vector<uint8_t>(8, 255)));
+            blockAck = compressedBlockAck;
+        }
+        else {
+            auto basicBlockAck = makeShared<Ieee80211BasicBlockAck>();
+            basicBlockAck->setTidInfo(tid);
+            basicBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(startingSequenceNumber));
+            for (int i = 0; i < 64; i++)
+                basicBlockAck->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 255)));
+            blockAck = basicBlockAck;
+        }
+        blockAck->setReceiverAddress(localAddress);
+        blockAck->setTransmitterAddress(transmitterAddress);
+        auto packet = new Packet("injectedBlockAck", blockAck);
+        Hcf::processLowerFrame(packet, blockAck);
+    }
+
+    void injectAck()
+    {
+        Enter_Method("injectAck");
+        auto ack = makeShared<Ieee80211AckFrame>();
+        ack->setReceiverAddress(localAddress);
+        auto packet = new Packet("injectedAck", ack);
+        Hcf::processLowerFrame(packet, ack);
+    }
+
+    void injectCts()
+    {
+        Enter_Method("injectCts");
+        auto cts = makeShared<Ieee80211CtsFrame>();
+        cts->setReceiverAddress(localAddress);
+        auto packet = new Packet("injectedCts", cts);
+        Hcf::processLowerFrame(packet, cts);
+    }
+
+    void injectData()
+    {
+        Enter_Method("injectData");
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setReceiverAddress(localAddress);
+        data->setTransmitterAddress(PEER_ONE);
+        data->setAddress3(LOCAL_ADDRESS);
+        data->setSequenceNumber(SequenceNumberCyclic(CURRENT_SSN));
+        auto packet = new Packet("injectedData", data);
+        Hcf::processLowerFrame(packet, data);
+    }
+
+    void injectRts()
+    {
+        Enter_Method("injectRts");
+        auto rts = makeShared<Ieee80211RtsFrame>();
+        rts->setReceiverAddress(localAddress);
+        rts->setTransmitterAddress(PEER_ONE);
+        auto packet = new Packet("injectedRts", rts);
+        Hcf::processLowerFrame(packet, rts);
+    }
+
+    bool isResponseWaitActive() const { return frameSequenceHandler->isSequenceRunning(); }
+    bool isResponseTimerScheduled() const { return startRxTimer->isScheduled(); }
+    simtime_t getResponseTimerArrival() const { return startRxTimer->getArrivalTime(); }
+    bool hasReceivedResponse() const
+    {
+        auto context = frameSequenceHandler->getContext();
+        if (context == nullptr)
+            return false;
+        auto receiveStep = dynamic_cast<IReceiveStep *>(context->getLastStep());
+        return receiveStep != nullptr && receiveStep->getReceivedFrame() != nullptr;
+    }
+};
+
+Define_Module(TestHcfBlockAckResponseCorrelation);
+
+class Ieee80211BlockAckResponseCorrelationTest : public cSimpleModule
+{
+  public:
+    Ieee80211BlockAckResponseCorrelationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto hcf = check_and_cast<TestHcfBlockAckResponseCorrelation *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        for (bool compressed : { false, true }) {
+            TestOriginatorBlockAckAgreementHandler agreementHandler;
+            agreementHandler.addEstablishedAgreement(PEER_ONE, CURRENT_TID);
+            agreementHandler.addEstablishedAgreement(PEER_TWO, CURRENT_TID);
+            ASSERT(agreementHandler.getActiveAgreement(PEER_ONE, CURRENT_TID) != nullptr);
+            ASSERT(agreementHandler.getActiveAgreement(PEER_TWO, CURRENT_TID) != nullptr);
+            TestOriginatorQosAckPolicy ackPolicy;
+            ackPolicy.compressed = compressed;
+            OriginatorBlockAckProcedure blockAckProcedure;
+            TestInProgressFrames inProgressFrames;
+            TestTxopProcedure txopProcedure;
+
+            auto expectedTransmittedFrames = hcf->transmittedFrames + 1;
+            auto expectedAcceptedResponses = hcf->acceptedResponses + 1;
+            auto expectedFailedFrames = hcf->failedFrames;
+            auto expectedFinishedSequences = hcf->finishedSequences + 1;
+            hcf->startBlockAckResponseWait(&ackPolicy, &blockAckProcedure, &agreementHandler, &inProgressFrames, &txopProcedure);
+            ASSERT(hcf->transmittedFrames == expectedTransmittedFrames);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            const auto responseDeadline = simTime() + SimTime(1, SIMTIME_MS);
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+
+            // Every frame below is addressed to this STA. HCF must leave each
+            // one outside the active BAR response step and retain its exact
+            // response deadline.
+            hcf->injectAck();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectCts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectData();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectRts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            // Block Ack frames for the wrong peer, TID, or variant must obey
+            // the same ownership and timer boundary.
+            hcf->injectBlockAck(PEER_TWO, CURRENT_TID, compressed);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectBlockAck(PEER_ONE, CURRENT_TID + 1, compressed);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectBlockAck(PEER_ONE, CURRENT_TID, !compressed);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == responseDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses - 1);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+
+            hcf->injectBlockAck(PEER_ONE, CURRENT_TID, compressed);
+            ASSERT(!hcf->isResponseWaitActive());
+            ASSERT(!hcf->isResponseTimerScheduled());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->failedFrames == expectedFailedFrames);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences);
+
+            // The next BAR advances by one, so the old response bitmap still
+            // covers these frames and would incorrectly acknowledge them.
+            ackPolicy.startingSequenceNumber = CURRENT_SSN + 1;
+            std::vector<Ptr<Ieee80211DataHeader>> waitingHeaders;
+            for (int offset : {1, 2}) {
+                auto header = makeShared<Ieee80211DataHeader>();
+                header->setType(ST_DATA_WITH_QOS);
+                header->setReceiverAddress(PEER_ONE);
+                header->setTid(CURRENT_TID);
+                header->setSequenceNumber(SequenceNumberCyclic(CURRENT_SSN + offset));
+                header->setAckPolicy(BLOCK_ACK);
+                hcf->ackHandler.frameGotInProgress(header);
+                hcf->ackHandler.processTransmittedDataOrMgmtFrame(header);
+                waitingHeaders.push_back(header);
+            }
+            // A fresh BAR wait with no matching response must stay alive
+            // through the same unrelated traffic and finish only at timeout.
+            expectedTransmittedFrames = hcf->transmittedFrames + 1;
+            expectedAcceptedResponses = hcf->acceptedResponses;
+            expectedFailedFrames = hcf->failedFrames + 1;
+            expectedFinishedSequences = hcf->finishedSequences + 1;
+            hcf->startBlockAckResponseWait(&ackPolicy, &blockAckProcedure, &agreementHandler, &inProgressFrames, &txopProcedure);
+            ASSERT(hcf->transmittedFrames == expectedTransmittedFrames);
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            const auto timeoutDeadline = simTime() + SimTime(1, SIMTIME_MS);
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+
+            hcf->injectAck();
+            hcf->injectCts();
+            hcf->injectData();
+            hcf->injectRts();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+            ASSERT(hcf->failedFrames == expectedFailedFrames - 1);
+
+            for (auto header : waitingHeaders)
+                ASSERT(hcf->ackHandler.getQoSDataAckStatus(header) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+            wait(SimTime(500, SIMTIME_US));
+            // A delayed duplicate of the first BA arrives during the second wait.
+            hcf->injectBlockAck(PEER_ONE, CURRENT_TID, compressed, CURRENT_SSN);
+            for (auto header : waitingHeaders)
+                ASSERT(hcf->ackHandler.getQoSDataAckStatus(header) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+            hcf->injectAck();
+            ASSERT(hcf->isResponseWaitActive());
+            ASSERT(hcf->isResponseTimerScheduled());
+            ASSERT(hcf->getResponseTimerArrival() == timeoutDeadline);
+            ASSERT(!hcf->hasReceivedResponse());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences - 1);
+            ASSERT(hcf->failedFrames == expectedFailedFrames - 1);
+
+            wait(SimTime(500, SIMTIME_US) + SimTime(1, SIMTIME_US));
+            ASSERT(!hcf->isResponseWaitActive());
+            ASSERT(!hcf->isResponseTimerScheduled());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses);
+            ASSERT(hcf->finishedSequences == expectedFinishedSequences);
+            ASSERT(hcf->failedFrames == expectedFailedFrames);
+            ASSERT(hcf->lastFinishedAt == timeoutDeadline);
+            for (auto header : waitingHeaders) {
+                ASSERT(hcf->ackHandler.getQoSDataAckStatus(header) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+                hcf->ackHandler.processTransmittedDataOrMgmtFrame(header);
+            }
+            // A response with the current SSN must still complete the receive
+            // step and update the same acknowledgment statuses.
+            hcf->startBlockAckResponseWait(&ackPolicy, &blockAckProcedure, &agreementHandler, &inProgressFrames, &txopProcedure);
+            hcf->injectBlockAck(PEER_ONE, CURRENT_TID, compressed, ackPolicy.startingSequenceNumber);
+            ASSERT(!hcf->isResponseWaitActive());
+            ASSERT(!hcf->isResponseTimerScheduled());
+            ASSERT(hcf->acceptedResponses == expectedAcceptedResponses + 1);
+            for (auto header : waitingHeaders) {
+                ASSERT(hcf->ackHandler.getQoSDataAckStatus(header) == QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED);
+                hcf->ackHandler.dropFrame(header);
+            }
+        }
+        std::cout << "HCF keeps BAR response waits scoped by expected type, peer, TID, SSN, and variant until match or timeout.\n";
+        endSimulation();
+    }
+};
+
+Define_Module(Ieee80211BlockAckResponseCorrelationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module TestHcfBlockAckResponseCorrelation extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::TestHcfBlockAckResponseCorrelation);
+}
+
+simple Ieee80211BlockAckResponseCorrelationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211BlockAckResponseCorrelationTest);
+}
+
+network Ieee80211BlockAckResponseCorrelationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mac.qosStation = true;
+                wlan[*].mac.hcf.typename = "TestHcfBlockAckResponseCorrelation";
+                wlan[*].mgmt.beaconInterval = 10s;
+        }
+        test: Ieee80211BlockAckResponseCorrelationTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211BlockAckResponseCorrelationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+HCF keeps BAR response waits scoped by expected type, peer, TID, SSN, and variant until match or timeout.

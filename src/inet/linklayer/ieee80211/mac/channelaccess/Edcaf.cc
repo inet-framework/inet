@@ -28,8 +28,8 @@ Edcaf::~Edcaf()
 
 void Edcaf::initialize(int stage)
 {
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
@@ -74,7 +74,8 @@ void Edcaf::calculateTimingParameters()
         cwMin = getCwMin(ac, modeSet->getCwMin());
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
-    cw = cwMin;
+    // Model reconfiguration preserves retry backoff within the new bounds.
+    cw = std::min(cwMax, std::max(cwMin, cw));
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
@@ -143,6 +144,17 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback *callback)
     EV_INFO << "Channel released.\n";
 }
 
+void Edcaf::restartChannelAccess(IChannelAccess::ICallback *callback)
+{
+    Enter_Method("restartChannelAccess");
+    ASSERT(owning && (callback == nullptr || this->callback == callback));
+    owning = false;
+    emit(channelOwnershipChangedSignal, owning);
+    // IEEE Std 802.11-2024, 11.15.9 item b): retain CW[AC], select a new
+    // random backoff, and leave retry counters and queued frames unchanged.
+    contention->startContention(cw, ifs, eifs, slotTime, this);
+}
+
 void Edcaf::requestChannel(IChannelAccess::ICallback *callback)
 {
     Enter_Method("requestChannel");
@@ -186,16 +198,14 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
     }
 }
 
-void Edcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Edcaf::applyModeSet(const physicallayer::Ieee80211ModeSet *newModeSet)
 {
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        calculateTimingParameters();
-    }
+    Enter_Method_Silent();
+    modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(newModeSet);
+    calculateTimingParameters();
+    if (contention != nullptr)
+        contention->updateTimingParameters(ifs, eifs, slotTime);
 }
 
 } // namespace ieee80211
 } // namespace inet
-

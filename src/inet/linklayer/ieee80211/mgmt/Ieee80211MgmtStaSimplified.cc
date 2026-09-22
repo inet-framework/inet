@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/linklayer/ieee80211/mgmt/contract/IIeee80211BssProvider.h"
 
 namespace inet {
 
@@ -47,14 +48,12 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib->mode = Ieee80211Mib::INFRASTRUCTURE;
-        mib->bssStationData.stationType = Ieee80211Mib::STATION;
-        mib->bssStationData.isAssociated = true;
+        mib->configureBssRole(Ieee80211Mib::STATION);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        configureAssociation();
+        if (isUp())
+            configureAssociation();
     }
-    else if (stage == INITSTAGE_LAST)
-        configureAssociation();
 }
 
 void Ieee80211MgmtStaSimplified::handleStartOperation(LifecycleOperation *operation)
@@ -68,26 +67,31 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
 {
     L3AddressResolver addressResolver;
     auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
-    mib->bssData.bssid = accessPointAddress;
     auto apMib = findAccessPointMib(accessPointAddress);
-    apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
-    mib->bssData.ssid = apMib->bssData.ssid;
-    mib->bssStationData.isAssociated = true;
+    auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apMib->getParentModule()->getSubmodule("mgmt"));
+    apManagement->prepareBss();
+    mib->commitBss(apMib->getBssData().ssid, accessPointAddress, apMib->getOperationBand(),
+            apMib->hasPrimaryChannel() ? apMib->requirePrimaryChannel() : -1,
+            mib->isLocalHtCapable() && apMib->hasHtOperation() ? &apMib->getHtOperation() : nullptr);
+    mib->setAssociated(true);
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
-    if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
-        mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->getHtOperation());
-        apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->getHtOperation());
+    if (mib->isLocalHtCapable() && apMib->isLocalHtCapable()) {
+        mib->setPeerHtCapabilities(apMib->address, apMib->getLocalHtCapabilities());
+
     }
+    apManagement->installSimplifiedPeer(mib->address, mib->isLocalHtCapable() ? &mib->getLocalHtCapabilities() : nullptr);
+    mib->publishStateChange();
 }
 
 void Ieee80211MgmtStaSimplified::stop()
 {
-    mib->bssStationData.isAssociated = false;
-    auto apMib = findAccessPointMib(mib->bssData.bssid, false);
+    auto accessPointAddress = mib->getBssData().bssid;
+    mib->clearBss();
+    auto apMib = findAccessPointMib(accessPointAddress, false);
     if (apMib != nullptr) {
-        apMib->bssAccessPointData.stations.erase(mib->address);
-        apMib->removePeerHtCapabilities(mib->address);
+        auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apMib->getParentModule()->getSubmodule("mgmt"));
+        apManagement->removeSimplifiedPeer(mib->address);
     }
     Ieee80211MgmtBase::stop();
 }

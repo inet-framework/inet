@@ -9,14 +9,14 @@
 #define __INET_TXOPPROCEDURE_H
 
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API TxopProcedure : public ModeSetListener
+class INET_API TxopProcedure : public ModeSetModuleBase
 {
   public:
     static simsignal_t txopStartedSignal;
@@ -33,6 +33,7 @@ class INET_API TxopProcedure : public ModeSetListener
 
   protected:
     simtime_t start = -1;
+    simtime_t configuredLimit = -1;
     simtime_t limit = -1;
     ProtectionMechanism protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
 

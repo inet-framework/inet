@@ -16,8 +16,8 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientQosAckPolicy;
 simple RecipientQosAckPolicy extends SimpleModule like IRecipientQosAckPolicy
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(RecipientQosAckPolicy);
         string rateSelectionModule;
         @display("i=block/control");
 }
-

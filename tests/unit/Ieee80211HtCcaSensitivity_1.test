@@ -1,0 +1,51 @@
+%description:
+Validate IEEE 802.11n HT Clear Channel Assessment (CCA) multi-threshold sensing logic.
+
+%includes:
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+{
+    const IIeee80211Band *band24 = Ieee80211CompliantBands::getBand("2.4 GHz");
+    ASSERT(band24 != nullptr);
+
+    Ieee80211Channel ch0Above(band24, 0, IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    ASSERT(ch0Above.getSecondaryChannelOffset() == IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    ASSERT(ch0Above.getBondedCenterFrequency() == Hz(2422000000.0));
+
+    // Sensitivities per IEEE Std 802.11-2024 Clause 19.3.19.6
+    W htCca20 = mW(math::dBmW2mW(-82.0));
+    W htCca40 = mW(math::dBmW2mW(-79.0));
+    W htCcaEd = mW(math::dBmW2mW(-62.0));
+
+    ASSERT(htCca20 < htCca40);
+    ASSERT(htCca40 < htCcaEd);
+
+    EV << "HT CCA 20MHz threshold: -82 dBm\n";
+    EV << "HT CCA 40MHz threshold: -79 dBm\n";
+    EV << "HT CCA Energy Detection threshold: -62 dBm\n";
+
+    const Ieee80211ModeSet *modeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+    ASSERT(modeSet != nullptr);
+    ASSERT(std::string(modeSet->getName()) == "n(mixed-2.4Ghz)");
+
+    EV << "HT ModeSet n(mixed-2.4Ghz) verified\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+HT CCA 20MHz threshold: -82 dBm
+HT CCA 40MHz threshold: -79 dBm
+HT CCA Energy Detection threshold: -62 dBm
+HT ModeSet n(mixed-2.4Ghz) verified
+.

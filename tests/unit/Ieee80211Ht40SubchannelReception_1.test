@@ -1,0 +1,74 @@
+%description:
+Validate that HT40 listening on the bonded 40 MHz channel accepts 20 MHz transmissions on either primary or secondary subchannel as well as 40 MHz bonded transmissions, and rejects out-of-band transmissions.
+
+%includes:
+#include "inet/common/Units.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceiverAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%activity:
+{
+    const IIeee80211Band *band24 = Ieee80211CompliantBands::getBand("2.4 GHz");
+    ASSERT(band24 != nullptr);
+
+    // Channel 0 (2412 MHz) HT40+ (secondary above, bonded = 2422 MHz, span = [2402, 2442] MHz)
+    Ieee80211Channel ch0Above(band24, 0, IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    Hz bondedCenter = ch0Above.getBondedCenterFrequency();
+    Hz bondedBw = MHz(40);
+
+    BandListening listening40(nullptr, 0, 1, Coord::ZERO, Coord::ZERO, bondedCenter, bondedBw);
+
+    // Primary 20 MHz signal (center 2412 MHz, span = [2402, 2422] MHz)
+    ScalarTransmissionAnalogModel primaryTxModel(0, 0, 1, ch0Above.getCenterFrequency(), MHz(20), mW(20));
+    // Secondary 20 MHz signal (center 2432 MHz, span = [2422, 2442] MHz)
+    ScalarTransmissionAnalogModel secondaryTxModel(0, 0, 1, ch0Above.getSecondaryCenterFrequency(), MHz(20), mW(20));
+    // Bonded 40 MHz signal (center 2422 MHz, span = [2402, 2442] MHz)
+    ScalarTransmissionAnalogModel bondedTxModel(0, 0, 1, bondedCenter, MHz(40), mW(20));
+    // Out-of-band 20 MHz signal on Channel 8 (center 2452 MHz, span = [2442, 2462] MHz)
+    ScalarTransmissionAnalogModel outOfBandTxModel(0, 0, 1, Hz(2452000000.0), MHz(20), mW(20));
+
+    auto isContained = [](const BandListening& l, const INarrowbandSignalAnalogModel& s) {
+        auto lMin = l.getCenterFrequency() - l.getBandwidth() / 2;
+        auto lMax = l.getCenterFrequency() + l.getBandwidth() / 2;
+        auto sMin = s.getCenterFrequency() - s.getBandwidth() / 2;
+        auto sMax = s.getCenterFrequency() + s.getBandwidth() / 2;
+        return sMin >= lMin && sMax <= lMax;
+    };
+
+    ASSERT(isContained(listening40, primaryTxModel));
+    ASSERT(isContained(listening40, secondaryTxModel));
+    ASSERT(isContained(listening40, bondedTxModel));
+    ASSERT(!isContained(listening40, outOfBandTxModel));
+
+    // Channel 4 (2432 MHz) HT40- (secondary below, bonded = 2422 MHz, span = [2402, 2442] MHz)
+    Ieee80211Channel ch4Below(band24, 4, IEEE80211_SECONDARY_CHANNEL_BELOW);
+    BandListening listening40Below(nullptr, 0, 1, Coord::ZERO, Coord::ZERO, ch4Below.getBondedCenterFrequency(), bondedBw);
+    ScalarTransmissionAnalogModel primaryTxModel4(0, 0, 1, ch4Below.getCenterFrequency(), MHz(20), mW(20));
+    ScalarTransmissionAnalogModel secondaryTxModel4(0, 0, 1, ch4Below.getSecondaryCenterFrequency(), MHz(20), mW(20));
+
+    ASSERT(isContained(listening40Below, primaryTxModel4));
+    ASSERT(isContained(listening40Below, secondaryTxModel4));
+
+    // 20 MHz listening on Channel 0 should reject 40 MHz bonded signal
+    BandListening listening20(nullptr, 0, 1, Coord::ZERO, Coord::ZERO, ch0Above.getCenterFrequency(), MHz(20));
+    ASSERT(isContained(listening20, primaryTxModel));
+    ASSERT(!isContained(listening20, bondedTxModel));
+    ASSERT(!isContained(listening20, secondaryTxModel));
+
+    EV << "HT40 subchannel containment tests PASSED.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+HT40 subchannel containment tests PASSED.
+.

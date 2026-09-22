@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211CcaProvider.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,6 +36,7 @@ class INET_API IRx
 
     // from Contention
     virtual bool isMediumFree() const = 0;
+    virtual bool isSecondaryChannelIdleFor(simtime_t interval) const = 0;
     virtual void frameTransmitted(simtime_t durationField) = 0;
 
     // from Coordination functions
@@ -42,6 +44,7 @@ class INET_API IRx
 
     // events
     virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
+    virtual void ccaStateChanged(const physicallayer::Ieee80211CcaSnapshot& snapshot) = 0;
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
     virtual bool lowerFrameReceived(Packet *packet) = 0;

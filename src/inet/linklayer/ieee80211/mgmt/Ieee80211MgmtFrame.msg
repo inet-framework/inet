@@ -61,6 +61,7 @@ enum Ieee80211ReasonCode
     RC_NONASS_CLASS3 = 7;
     RC_DIASS_MS_LEAVING = 8;
     RC_NONAUTH_ASS_REQUEST = 9;
+    RC_END_BA = 37;
     RC_MESH_PEERING_CANCELLED = 52;
     RC_MESH_MAX_PEERS = 53;
     RC_MESH_CONFIGURATION_POLICY_VIOLATION = 54;
@@ -180,6 +181,27 @@ struct Ieee80211HtOperationElement
 //
 // Frame body base class used to hide various frame body types
 //
+// IEEE Std 802.11-2024, 9.4.2.156: modeled VHT Capabilities fields.
+struct Ieee80211VhtCapabilitiesElement
+{
+    short supportedChannelWidthSet;
+    bool shortGi80;
+    bool shortGi160;
+    short rxMaxMcs[8];
+    short txMaxMcs[8];
+    short rxHighestLongGiRateMbps;
+    short txHighestLongGiRateMbps;
+}
+
+// IEEE Std 802.11-2024, 9.4.2.157: fixed five-octet VHT Operation body.
+struct Ieee80211VhtOperationElement
+{
+    short channelWidth;
+    short centerFrequencySegment0;
+    short centerFrequencySegment1;
+    short basicMaxMcs[8];
+}
+
 class Ieee80211MgmtFrame extends FieldsChunk
 {
     bool extendedSupportedRatesPresent;
@@ -188,13 +210,17 @@ class Ieee80211MgmtFrame extends FieldsChunk
     Ieee80211HtCapabilitiesElement htCapabilities;
     bool htOperationPresent;
     Ieee80211HtOperationElement htOperation;
+    bool vhtCapabilitiesPresent;
+    Ieee80211VhtCapabilitiesElement vhtCapabilities;
+    bool vhtOperationPresent;
+    Ieee80211VhtOperationElement vhtOperation;
     // Information elements this model does not represent (TIM, Country, ERP, RSN,
     // vendor-specific, ...), each kept verbatim as Element ID, Length and body, in wire
     // order. Empty for the frames the simulation builds itself.
     uint8_t unmodelledElements[];
     // One entry per element in unmodelledElements: how many of the modelled elements
     // (SSID, Supported Rates, DSSS Parameter Set, Extended Supported Rates, HT
-    // Capabilities, HT Operation) preceded it on the wire, so that it is written back
+    // Capabilities, HT Operation, VHT Capabilities, VHT Operation) preceded it on the wire, so that it is written back
     // in its place among them.
     uint8_t unmodelledElementPositions[];
 }

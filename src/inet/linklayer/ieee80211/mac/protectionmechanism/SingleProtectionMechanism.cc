@@ -18,7 +18,7 @@ Define_Module(SingleProtectionMechanism);
 
 void SingleProtectionMechanism::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
@@ -74,8 +74,12 @@ simtime_t SingleProtectionMechanism::computeBlockAckReqDurationField(Packet *pac
         simtime_t blockAckReqDurationPerId = blockAckFrameDuration + modeSet->getSifsTime();
         return blockAckReqDurationPerId;
     }
+    else if (dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        simtime_t blockAckFrameDuration = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_COMPRESSED_BLOCKACK);
+        return blockAckFrameDuration + modeSet->getSifsTime();
+    }
     else
-        throw cRuntimeError("Compressed and Multi-Tid Block Ack Requests are not supported");
+        throw cRuntimeError("Multi-Tid Block Ack Requests are not supported");
 }
 
 //
@@ -183,4 +187,3 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

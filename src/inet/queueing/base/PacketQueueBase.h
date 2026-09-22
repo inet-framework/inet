@@ -31,6 +31,8 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
     virtual void handleMessage(cMessage *message) override;
 
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
+    virtual void recordPacketDequeued(Packet *packet);
+    virtual void notifyPacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason);
 
     virtual std::string resolveDirective(char directive) const override;
 

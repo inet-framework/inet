@@ -8,7 +8,10 @@
 #ifndef __INET_IEEE80211TRANSMITTER_H
 #define __INET_IEEE80211TRANSMITTER_H
 
+#include <functional>
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211TransmitterCapabilities.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -19,7 +22,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Transmitter : public FlatTransmitterBase
+class INET_API Ieee80211Transmitter : public FlatTransmitterBase, public IIeee80211TransmitterCapabilities
 {
   protected:
     const Ieee80211ModeSet *modeSet = nullptr;
@@ -38,14 +41,25 @@ class INET_API Ieee80211Transmitter : public FlatTransmitterBase
     virtual const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const;
     virtual const Ieee80211Channel *computeTransmissionChannel(const Packet *packet) const;
 
+    // Re-selects the current mode only when bitrate, bandwidth, NSS, and GI
+    // remain compatible. Use setModeSetAndMode for an explicit transition.
+    const Ieee80211ModeSet *getModeSet() const { return modeSet; }
+    const IIeee80211Mode *getMode() const { return mode; }
+    // Resolves a catalog-only change without mutation; throws if no exact tuple exists.
+    virtual const IIeee80211Mode *computeModeForModeSet(const Ieee80211ModeSet *modeSet) const;
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    // Applies a mode set and an explicitly selected mode as one validated update.
+    virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
+    // Captures geometry for a synchronous radio configuration transaction.
+    // The returned one-shot restore callback neither throws nor emits signals.
+    std::function<void()> saveChannelState();
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int channelNumber);
 
     virtual const Ieee80211Channel *getChannel() const { return channel; }
-    virtual bool isHtChannelWidthSupported(Hz channelWidth) const;
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
 };

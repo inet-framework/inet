@@ -95,7 +95,9 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         // header, so its serializer is exercised instead of leaving the body as raw
         // bytes; unknown subtypes fall back to the generic mgmt dissector
         using namespace inet::ieee80211;
-        if (packet->getDataLength() > b(0)) {
+        if (mgmtHeader->getMoreFragments() || mgmtHeader->getFragmentNumber() != 0)
+            callback.dissectPacket(packet, nullptr);
+        else if (packet->getDataLength() > b(0)) {
             switch (mgmtHeader->getType()) {
                 case ST_BEACON: callback.visitChunk(packet->popAtFront<Ieee80211BeaconFrame>(), &Protocol::ieee80211Mgmt); break;
                 case ST_PROBEREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211ProbeRequestFrame>(), &Protocol::ieee80211Mgmt); break;

@@ -8,7 +8,7 @@
 #ifndef __INET_DCAF_H
 #define __INET_DCAF_H
 
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
@@ -17,10 +17,12 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetListener
+class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetModuleBase
 {
+  public:
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
-    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     IContention *contention = nullptr;
     IChannelAccess::ICallback *callback = nullptr;
 
@@ -43,7 +45,6 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     virtual void initialize(int stage) override;
 
     virtual void calculateTimingParameters();
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
     virtual queueing::IPacketQueue *getPendingQueue() const { return pendingQueue; }
@@ -52,6 +53,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     // IChannelAccess::ICallback
     virtual void requestChannel(IChannelAccess::ICallback *callback) override;
     virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
+    virtual void restartChannelAccess(IChannelAccess::ICallback *callback);
 
     // IContention::ICallback
     virtual void channelAccessGranted() override;

@@ -1,0 +1,101 @@
+%description:
+Every valid VHT tuple in the ac catalog has both guard intervals. Existing
+unqualified bitrate lookup and mandatory/reference selections retain their
+historical choices. The validity matrix follows IEEE 802.11-2024, 21.5,
+Tables 21-29 through 21-60, including the ten unavailable tuples.
+
+%includes:
+#include <map>
+#include <tuple>
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+class HistoricalVhtCatalog : public Ieee80211ModeSet
+{
+    static std::vector<Entry> historicalEntries(const Ieee80211ModeSet *catalog)
+    {
+        std::vector<Entry> result;
+        for (int i = 0; i < catalog->getNumModes(); i++) {
+            auto mode = catalog->getMode(i);
+            auto data = dynamic_cast<const Ieee80211VhtDataMode *>(mode->getDataMode());
+            if (data == nullptr)
+                result.push_back({true, mode, true});
+            else {
+                bool originalLong = data->getBandwidth() == MHz(20) && data->getNumberOfSpatialStreams() == 1;
+                if ((data->getGuardInterval() == SimTime(800, SIMTIME_NS)) == originalLong)
+                    result.push_back({originalLong, mode});
+            }
+        }
+        return result;
+    }
+  public:
+    HistoricalVhtCatalog(const Ieee80211ModeSet *catalog) :
+        Ieee80211ModeSet("historical-ac", historicalEntries(catalog), catalog->getReferenceMode(), PhyType::VHT) {}
+};
+
+%activity:
+auto catalog = Ieee80211ModeSet::getModeSet("ac");
+HistoricalVhtCatalog historical(catalog);
+std::map<std::tuple<int, int, int>, std::array<const IIeee80211Mode *, 2>> tuples;
+for (int i = 0; i < catalog->getNumModes(); i++) {
+    auto mode = catalog->getMode(i);
+    auto data = dynamic_cast<const Ieee80211VhtDataMode *>(mode->getDataMode());
+    if (data == nullptr) {
+        ASSERT(catalog->isMandatory(i));
+        continue;
+    }
+    ASSERT(catalog->isMandatory(i) == (data->getBandwidth() == MHz(20) &&
+            data->getNumberOfSpatialStreams() == 1 && data->getGuardInterval() == SimTime(800, SIMTIME_NS)));
+    int gi = data->getGuardInterval() == SimTime(400, SIMTIME_NS) ? 1 : 0;
+    ASSERT(data->getGuardInterval() == SimTime(gi ? 400 : 800, SIMTIME_NS));
+    auto& pair = tuples[{(int)data->getBandwidth().get<MHz>(), data->getNumberOfSpatialStreams(), (int)data->getMcsIndex()}];
+    ASSERT(pair[gi] == nullptr);
+    pair[gi] = mode;
+    auto found = catalog->getMode(data->getNetBitrate(), data->getBandwidth(), data->getNumberOfSpatialStreams(), data->getGuardInterval());
+    ASSERT(found == mode);
+}
+int valid = 0;
+for (int width : {20, 40, 80, 160}) {
+    for (int nss = 1; nss <= 8; nss++) {
+        for (int mcs = 0; mcs <= 9; mcs++) {
+            bool legal = !(width == 20 && mcs == 9 && nss != 3 && nss != 6) &&
+                    !(width == 80 && mcs == 6 && (nss == 3 || nss == 7)) &&
+                    !(width == 160 && mcs == 9 && nss == 3) &&
+                    !(width == 80 && mcs == 9 && nss == 6);
+            auto it = tuples.find({width, nss, mcs});
+            ASSERT((it != tuples.end()) == legal);
+            if (legal) {
+                valid++;
+                auto longMode = it->second[0];
+                auto shortMode = it->second[1];
+                ASSERT(longMode && shortMode);
+                ASSERT(longMode->getDataMode()->getDuration(B(1500)) > shortMode->getDataMode()->getDuration(B(1500)));
+                ASSERT(longMode->getHeaderMode()->getDuration() == shortMode->getHeaderMode()->getDuration());
+            }
+        }
+    }
+}
+ASSERT(valid == 310 && catalog->getNumModes() == 623);
+ASSERT(historical.getNumModes() == 313);
+for (int i = 0; i < historical.getNumModes(); i++) {
+    auto data = historical.getMode(i)->getDataMode();
+    auto rate = data->getNetBitrate();
+    ASSERT(catalog->getMode(rate) == historical.getMode(rate));
+    ASSERT(catalog->getMode(rate, data->getBandwidth(), data->getNumberOfSpatialStreams()) ==
+            historical.getMode(rate, data->getBandwidth(), data->getNumberOfSpatialStreams()));
+}
+ASSERT(catalog->getReferenceMode() == Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG));
+ASSERT(catalog->getFastestMode() == historical.getFastestMode());
+ASSERT(catalog->getSlowestMode() == historical.getSlowestMode());
+ASSERT(catalog->getFastestMandatoryMode() == historical.getFastestMandatoryMode());
+ASSERT(catalog->getSlowestMandatoryMode() == historical.getSlowestMandatoryMode());
+ASSERT(catalog->getLegacyOperationalModes() == historical.getLegacyOperationalModes());
+std::cout << "VHT GI catalog: 310 legal tuples, both GIs, historical selection preserved\n";
+
+%contains: stdout
+VHT GI catalog: 310 legal tuples, both GIs, historical selection preserved

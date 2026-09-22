@@ -1,0 +1,77 @@
+%description:
+Verify local-Tx/peer-Rx VHT selection over every catalog mode with asymmetric
+maps, all operational widths, GI restrictions, absent peer fallback and rate caps.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%activity:
+auto modes = Ieee80211ModeSet::getModeSet("ac");
+Ieee80211VhtCapabilities local;
+local.txMaxMcs = {8, 7, -1, -1, -1, -1, -1, -1};
+local.rxMaxMcs = {7, -1, -1, -1, -1, -1, -1, -1};
+local.supported160Mhz = true;
+local.shortGi20 = local.shortGi40 = local.shortGi80 = local.shortGi160 = true;
+Ieee80211VhtOperation operation;
+Ieee80211Mib::PeerVhtState peer;
+peer.advertisedCapabilities.rxMaxMcs = {7, 8, -1, -1, -1, -1, -1, -1};
+peer.advertisedCapabilities.txMaxMcs = {9, -1, -1, -1, -1, -1, -1, -1};
+peer.advertisedCapabilities.supported160Mhz = true;
+int checked = 0;
+for (int width : {20, 40, 80, 160}) {
+    operation.channelWidth = MHz(width);
+    peer.operation.channelWidth = MHz(width);
+    for (bool shortGi : {false, true}) {
+        auto& remote = peer.advertisedCapabilities;
+        remote.shortGi20 = remote.shortGi40 = remote.shortGi80 = remote.shortGi160 = shortGi;
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto requested = modes->getMode(i);
+            if (requested->getVhtMcsIndex() < 0)
+                continue;
+            auto selected = selectPeerCompatibleVhtMode(modes, local, operation, &peer, requested);
+            ASSERT(modes->containsMode(selected));
+            ASSERT(selected->getVhtMcsIndex() >= 0);
+            int nss = selected->getDataMode()->getNumberOfSpatialStreams();
+            ASSERT(nss <= 2);
+            ASSERT(selected->getVhtMcsIndex() <= local.txMaxMcs[nss - 1]);
+            ASSERT(selected->getVhtMcsIndex() <= remote.rxMaxMcs[nss - 1]);
+            ASSERT(selected->getDataMode()->getBandwidth() <= MHz(width));
+            ASSERT(shortGi || selected->getDataMode()->getGuardInterval() == SimTime(800, SIMTIME_NS));
+            ASSERT(selected->getDataMode()->getNetBitrate() <= requested->getDataMode()->getNetBitrate());
+            auto fallback = selectPeerCompatibleVhtMode(modes, local, operation, nullptr, requested);
+            ASSERT(fallback->getVhtMcsIndex() < 0 && fallback->getHtMcsIndex() < 0);
+            checked++;
+        }
+    }
+}
+ASSERT(checked == 4960);
+operation.channelWidth = MHz(160);
+peer.operation.channelWidth = MHz(20);
+auto requested = modes->getFastestMode();
+auto selected = selectPeerCompatibleVhtMode(modes, local, operation, &peer, requested);
+ASSERT(selected->getDataMode()->getBandwidth() == MHz(20));
+peer.advertisedCapabilities.rxHighestLongGiRateMbps = 20;
+local.txHighestLongGiRateMbps = 10;
+peer.advertisedCapabilities.shortGi20 = false;
+selected = selectPeerCompatibleVhtMode(modes, local, operation, &peer, requested);
+ASSERT(selected->getDataMode()->getNetBitrate() <= Mbps(10));
+// Table 9-315 encodes 58.5 Mb/s as 58; it must not reject that mode.
+local.txHighestLongGiRateMbps = 58;
+peer.advertisedCapabilities.rxHighestLongGiRateMbps = 58;
+const IIeee80211Mode *fractional = nullptr;
+for (int i = 0; i < modes->getNumModes(); i++) {
+    auto mode = modes->getMode(i);
+    auto data = mode->getDataMode();
+    if (mode->getVhtMcsIndex() == 6 && data->getBandwidth() == MHz(20) &&
+            data->getNumberOfSpatialStreams() == 1 && data->getGuardInterval() == SimTime(800, SIMTIME_NS))
+        fractional = mode;
+}
+ASSERT(fractional != nullptr);
+ASSERT(selectPeerCompatibleVhtMode(modes, local, operation, &peer, fractional) == fractional);
+std::cout << "VHT directional selection verified for 4960 requests.\n";
+
+%contains: stdout
+VHT directional selection verified for 4960 requests.

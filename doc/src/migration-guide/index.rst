@@ -4,6 +4,207 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Capability and BSS State Ownership
+--------------------------------------------
+
+Custom modules that used ``ModeSetListener`` or subscribed to ``modesetChanged``
+must obtain the configured catalog through ``IIeee80211ModeSetProvider``.
+For catalog consumers, derive from ``ModeSetModuleBase``, declare a
+``modeSetModule`` NED parameter, and call the base initialization before using
+``modeSet`` at ``INITSTAGE_LINK_LAYER``. Keep ``NUM_INIT_STAGES``. The built-in
+MAC supplies the descendant parameter default; standalone consumers must point
+it at a module implementing the C++ and NED mode-set provider contracts. Move
+algorithm initialization formerly performed by the signal callback to that
+initialization stage. Ordinary catalog queries must not reset algorithm state.
+Management uses ``IIeee80211MacConfiguration``, which extends the mode-set
+provider with capability preparation; catalog-only providers need not implement
+that operation.
+
+Custom transmitters and receivers that contribute HT capabilities implement
+``IIeee80211TransmitterCapabilities`` and ``IIeee80211ReceiverCapabilities``,
+respectively, in C++ and NED. Report implemented width support and, for receivers,
+short-GI support independently of the current BSS operation. The MAC's
+``prepareLocalCapabilities()`` assembles the local profile after PHY readiness;
+repeated preparation preserves active protocol state.
+
+Replace direct access to MIB BSS/profile fields with ``getBssData()``,
+``getBssStationData()``, ``getBssAccessPointData()`` and
+``getLocalHtCapabilities()`` for reads. Management owners use ``commitBss()``,
+``clearBss()`` and the association/peer methods for writes. Profile installation
+uses ``installLocalHtCapabilities()``; replacing a changed profile requires an
+inactive BSS with no peer relationships. Custom simplified AP management
+implements ``IIeee80211BssProvider`` for explicit preparation and peer
+installation/removal instead of allowing another module to modify its MIB.
+
+Subscribe to the MIB's Boolean ``bssStateChanged`` signal to observe accepted
+state transitions. Query the MIB synchronously; the signal carries no borrowed
+state object. Management calls ``publishStateChange()`` after completing the
+transition's timer and transaction bookkeeping. Observers must not mutate the
+MIB during publication or retain raw BSS/peer references across a mutation.
+Use ``hasActiveBss()`` and ``hasHtOperation()`` explicitly, and supply operation
+and HT eligibility separately from cached capabilities to peer mode selection.
+
+The old initialization signal and writable BSS/profile fields are removed
+without compatibility adapters because they permit missed initialization or
+state changes that bypass owner bookkeeping and notification. Existing custom
+implementations must migrate together with their consumers.
+
+Packet Queue Extraction and Departure Callbacks
+-----------------------------------------------
+
+Direct implementations of ``IPacketQueue`` must implement ``findPacket(predicate)`` and
+``dequeuePacket(predicate)``. Compound-queue providers must implement
+``IPacketExtractor`` for predicate selection. Select through the provider's scheduling
+policy; do not use collection index order as a replacement. Predicates may be evaluated
+repeatedly and must remain stable and free of side effects during selection.
+
+Emit ``packetQueueDeparture`` once at each logical queue boundary while the borrowed
+packet is alive. Supply ``PacketQueueRemovalDetails`` with ``DEQUEUED=0``, ``REMOVED=1``
+or ``DROPPED=2``. A prequeue filter rejection is a drop even when the leaf queue never
+owned the packet. Listeners on a compound queue must filter child-queue emissions to
+avoid handling an outcome twice.
+
+Buffer owners implementing ``IPacketBuffer::ICallback`` must explicitly implement both
+``handlePacketDropping()`` and ``handlePacketDropped()``. Detach a victim during the
+first phase; publish its departure during the second phase, after every victim in the
+overflow batch has been detached. Do not read a borrowed packet after the publisher
+deletes it.
+
+``PriorityScheduler`` aggregate queries now throw when an input lacks
+``IPacketCollection``. Replace callers that interpret ``-1`` as an unknown aggregate
+size, or provide collection-capable inputs. Predicate extraction similarly requires an
+extraction-capable provider only when that operation is used.
+
+Originator ADDBA Transactions and Eligible Frames
+-------------------------------------------------
+
+Custom ``IOriginatorBlockAckAgreementPolicy`` implementations must replace
+``computeAddbaFailureTimeout()`` with ``getAddbaResponseTimeout()`` and implement
+``computeAddbaRetryBackoff()``. Configure ``addbaResponseTimeout`` and
+``addbaRetryBackoff`` on the originator agreement policy. The response interval begins
+when the request is actually transmitted, so rejecting an unsent request must not arm
+it.
+
+Custom originator data services must implement ``setFrameEligibilityFunction()``,
+``isFrameEligible()`` and ``hasEligibleFrame()``. Keep availability queries free of
+dequeue side effects. A-MSDU policies now receive the provider-selected anchor and
+eligibility predicate; retain that anchor first and select only available, unique,
+eligible members in valid flow order. Dequeue those members through the provider,
+including scheduler accounting. Successful A-MSDU service therefore increments queue
+dequeue counters instead of administrative-removal counters.
+
+Custom originator agreement handlers must explicitly implement ``isDelbaPending()``.
+Adapt ADDBA response callers to the typed outcome and DELBA callers to ownership
+transfer through ``unique_ptr`` where declared by the interface. Do not keep an
+agreement pointer across a callback that may replace or remove it.
+
+Custom ADDBA request producers must assign a nonzero Dialog Token and preserve the local
+transaction tag through retries and fragments. Recipient responses must echo the request
+token. An originator accepts only a matching live response; a response using the old
+default token zero no longer completes a transaction.
+
+Recipient ADDBA Lifecycle
+-------------------------
+
+Update custom recipient handlers and callers to the current
+``processReceivedAddbaRequest()`` callback arguments and returned agreement. An accepted
+request establishes or replaces recipient state when the response is formed. Reset the
+receive/reordering state for a replacement agreement. Replaying a cached duplicate
+response must not establish the agreement again or reset its receive window. Use the
+returned ownership-bearing teardown result when publishing a deleted-agreement
+notification.
+
+Fragment Reassembly and Receive Lifetime
+----------------------------------------
+
+``RecipientMacDataService`` and ``RecipientQosMacDataService`` now expose
+``maxReceiveLifetime``, defaulting to ``524288us`` (512 TUs). Incomplete bodies are
+discarded when that receive lifetime expires. Models that relied on arbitrarily late
+completion will deliver fewer packets; select a deliberate lifetime for the study rather
+than treating the previous unbounded retention as a guarantee.
+
+Custom recipient services returning ``ManagementFrameReceptionResult`` must supply
+``completeHeader`` only when a complete management body is available. A duplicate
+fragment can be acknowledged without dispatching ADDBA or DELBA. Preserve local action
+context across fragmented transmission, reconstruct the complete action body, and
+dispatch its subtype only after reassembly. Fragmented on-air management headers do not
+carry a complete action body in every fragment.
+
+Management Frame Sequence Cancellation
+--------------------------------------
+
+Custom ``IFrameSequenceHandler`` implementations must explicitly implement
+``cancelFrameSequence()`` and ``abortFrameSequence()``. Preserve the distinction between
+requesting deferred cancellation and immediately aborting a sequence. Coordinate packet
+ownership with the caller: cancellation must not delete a packet still borrowed by an
+in-flight transmission or active sequence. Superseded AP management transactions must
+retire their queued siblings and terminal outcome exactly once.
+
+Generation-Aware Block Ack Teardown
+-----------------------------------
+
+Custom agreement callbacks must implement ``cancelBlockAckTeardown()``. Match the role,
+peer, TID and generation so cancellation cannot affect a replacement agreement. Preserve
+``Ieee80211BlockAckAgreementTag::generationId`` on locally generated DELBA fragments and
+retries; the role, peer and TID come from DELBA and its processing context.
+
+Recipient agreement handlers must explicitly implement ``isDelbaPending()``,
+``processAcknowledgedDelba()``, ``processAbortedDelba()`` and
+``getPendingTeardownGenerationId()``. Update ``processTransmittedDelba()``
+implementations and callers to the full ``Packet *`` form where required, so local
+generation metadata remains available. Keep teardown pending until its final fragment is
+acknowledged or the exchange terminates; do not retire a replacement generation from a
+stale completion.
+
+Block Ack Inactivity Timer Callbacks
+------------------------------------
+
+Schedule the shared Block Ack inactivity timer for the earliest enabled absolute
+agreement deadline and cancel it when no enabled deadline remains. Expiry callbacks can
+synchronously remove or replace the current agreement or a sibling. Keep
+peer/TID/generation values as the work list and relookup the live state before using it
+after a callback; incrementing a map iterator before calling out does not protect a
+removed sibling.
+
+Receive Lifetime in Block Ack Reordering
+----------------------------------------
+
+Custom receive/reordering implementations must retain the first-reception time of a
+fragmented body while it waits in a Block Ack reorder buffer. Moving fragments between
+receive stages must not restart their lifetime. Expire incomplete state and reject late
+fragments before delivering a reassembled body. ``IReassembly::purge()`` now returns
+owned packets; callers must report their final drop and delete them. Use
+``BlockAckReordering::processReceivedQoSFrameWithResult()`` to handle released frames
+and tombstoned fragments. Negative ``maxReceiveLifetime`` values are rejected; zero is a
+valid immediate-expiry setting.
+
+Expired Agreement Quarantine and Frame Release
+----------------------------------------------
+
+Custom ``IBlockAckAgreementHandlerCallback`` implementations must explicitly implement
+``releaseBlockAckAgreementFrames()`` and report whether they changed outstanding state.
+Retained teardown state is not an active data-plane agreement; use the active-agreement
+query for data transmission, acknowledgment and receive admission. Frame release may
+synchronously remove or replace an agreement, so relookup the original generation before
+generating its DELBA. If an implementation has no outstanding frames, returning false
+must be an explicit implementation decision.
+
+Recipient Block Ack Timeout Policy
+----------------------------------
+
+A nonzero recipient ``blockAckTimeoutValue`` policy overrides the advisory timeout in
+the ADDBA request. The model's zero-policy convention inherits the request timeout.
+Check configurations that previously depended on the reversed selection; the negotiated
+inactivity deadline may change.
+
+A-MSDU Size and Fragmentation Limits
+------------------------------------
+
+Basic A-MSDU selection must fit the configured limit including subframe headers and
+padding. It must not rely on ordinary MPDU fragmentation to split an oversized A-MSDU.
+Check aggregation and fragmentation thresholds together when reproducing a study that
+previously selected such aggregates.
+
 IEEE 802.11 Beacon and Probe Response Fields
 ------------------------------------------
 
@@ -59,6 +260,140 @@ RFC 5227 ARP Probe and emits ``arpAddressConflictDetected`` if somebody
 answers; :cpp:`Arp` shows how. An implementation that resolves addresses
 without packets has nobody to ask. It overrides the method with an empty body,
 as :cpp:`GlobalArp` does, and the client then takes the address.
+
+IEEE 802.11 Radio Reconfiguration and Management Hooks
+----------------------------------------------------
+
+Radio setters no longer implicitly interrupt compatible ongoing receptions.
+Changing the transmit mode alone, reapplying unchanged receiver settings, or
+changing the mode set while retaining the incoming mode preserves reception.
+An incompatible receiver configuration still aborts reception and retains
+arrival timers for normal cleanup. Custom callers should not rely on a no-op
+setter or a transmit-mode change to cancel reception.
+
+``Ieee80211MgmtBase::addVhtCapabilities()`` and ``addVhtOperation()`` are now
+virtual, like the HT advertisement helpers. Subclasses may override them to
+customize advertisements in inherited frame builders; use ``override`` on
+these declarations. Rebuild external management subclasses against the new
+header and library.
+
+Migrating IEEE 802.11 PHY Modes
+------------------------------
+
+``IIeee80211Mode::getPreambleDuration()``, ``getHeaderDuration()`` and
+``getDataDuration(b)`` are now pure virtual. Direct interface implementations
+must implement them, or inherit ``Ieee80211ModeBase`` for the previous defaults.
+Existing HT/VHT overrides retain their format-specific timing behavior.
+
+External implementations of ``IIeee80211DataMode`` must now implement the pure
+virtual guard-interval query:
+
+.. code-block:: c++
+
+   const simtime_t getGuardInterval() const override;
+
+Return the modeled guard interval in simulation time units. For a PHY without a
+guard interval, use an explicit override returning ``-1``. FHSS, DSSS, HR-DSSS,
+and IR use this value; OFDM, HT, and VHT return their modeled interval.
+
+The bitrate-based ``Ieee80211ModeSet::getMode()`` and ``findMode()`` overloads
+now take a trailing ``simtime_t guardInterval = -1`` argument. Existing ordinary
+calls can omit it. Update member-function pointer declarations to include this
+argument and supply it when invoking through a pointer. Rebuild external code
+against the changed interface.
+
+``Ieee80211Mac`` implements ``IIeee80211ModeSetCoordinator`` for explicit runtime
+catalog reconfiguration. The radio's ``modeSetCoordinatorModule`` points to the
+MAC by default; a custom composition can provide another typed coordinator.
+``ModeSetModuleBase`` registers derived-state consumers through the configured
+catalog provider when that provider also supports coordination. Read-only
+replacement providers remain usable without a coordinator. Management registers
+through ``macModule`` in ``MANAGEMENT_STATE``. Preserve base initialization and
+put required updates in ``applyModeSet()``, not notification callbacks.
+
+The MAC updates local capabilities, management updates its operation, and derived
+consumers update their state before completion is published. Ordinary preparation
+remains idempotent. Explicit profile replacement refreshes directional capability
+caches only when their inputs change; operation changes do not rebuild those
+caches. Peer information remains scoped to its relationship, with selection gated
+by current eligibility and operation. Stop/restart retains prepared configuration.
+
+Observe ``modesetChanged`` from the MAC after a changed runtime catalog has been
+applied. Initialization queries the configured catalog without a notification;
+reapplying the same catalog does not reset algorithms or publish a catalog change.
+The borrowed mode-set payload is immutable. Observers never finish the transition.
+Standalone radios without a coordinator publish their own notification. Duplicate
+registration is idempotent; late registration and membership changes during a
+transition are rejected. Detach a consumer before deleting it. Participant or
+observer exceptions remain fatal; partially applied changes cannot be resumed.
+
+Catalog-only changes now check transmitter compatibility before opening the
+coordinated transition. After catching an incompatible-mode error, callers can
+retry with ``setModeSetAndMode()`` and a valid explicit mode. Custom transmitter
+implementations can override the non-mutating ``computeModeForModeSet()`` query
+to match their catalog-only setter's resolution policy; it must reject an
+unresolvable request without changing state.
+
+HT capability assembly queries the typed transmitter and receiver contributions
+described above. Management obtains channel/band context from the PHY. Generic
+legacy radios do not require HT contribution contracts.
+
+External ``IContention`` implementations must implement the new pure virtual
+``updateTimingParameters(ifs, eifs, slotTime)`` method. On a runtime timing change,
+retain completed whole backoff slots and the remaining random draw, restart the
+applicable IFS and any unfinished slot, and update the expected grant time.
+Unchanged timing preserves the existing schedule. This application must not emit
+an intermediate mode-set notification or generate a new random backoff.
+
+Migrating VHT Catalogs and Peer Rate Selection
+----------------------------------------------
+
+The ``ac`` catalog provides both 800 ns and 400 ns GI for 310 legal VHT tuples
+at 20/40/80/160 MHz and one through eight spatial streams. IEEE 802.11-2024,
+21.5, Tables 21-29 through 21-60 exclude: 20 MHz MCS 9 except NSS 3 and 6;
+80 MHz MCS 6 at NSS 3 and 7; 80 MHz MCS 9 at NSS 6; and 160 MHz MCS 9 at NSS 3.
+The band/preamble envelope remains 5 GHz, mixed format. New variants are optional
+catalog entries; historical mandatory/basic flags, reference/default modes, and
+previously accepted unspecified-GI lookups are preserved. Explicit GI queries
+can select either variant. This catalog does not establish operational support
+for bonded primary/secondary channels.
+
+External ``IIeee80211Mode`` implementations must implement ``getVhtMcsIndex()``:
+return the VHT MCS index (0 through 9), or -1 for other PHY families.
+``Ieee80211ModeBase`` supplies the non-VHT default. VHT selection is independent
+of the HT MCS bitmap.
+
+``Ieee80211MgmtAp`` and ``Ieee80211MgmtSta`` now exchange and interpret VHT
+Capabilities and VHT Operation elements (IEEE 802.11-2024, 9.4.2.156 and
+9.4.2.157). The MIB owns committed per-peer state. The AP commits after the
+successful association/reassociation response is acknowledged; the STA commits
+after receiving a successful response with usable capability and operation
+information. Pending VHT snapshots cannot survive a local mode-set application.
+Disassociation, deauthentication, teardown, and mode-set application remove
+committed state. Authoritative beacons can refresh the associated AP's state.
+
+To restrict VHT reception or transmission, configure the corresponding map in
+:ned:`Ieee80211Mib`; that module documents the parameters and their constraints.
+For example, ``wlan[*].mib.vhtRxMcsMap = [7,-1,-1,-1,-1,-1,-1,-1]`` restricts
+reception to one stream with MCS 0 through 7 while leaving transmission
+configuration independent.
+
+Both DCF and HCF choose VHT unicast modes within local Tx and peer Rx maps,
+local/BSS operation width, GI eligibility, and the optional advertised highest
+long-GI rate limits. Selection never exceeds the requested rate. Missing or
+incompatible VHT negotiation uses a legacy operational mode. Consequently,
+``Ieee80211MgmtApSimplified``, ``Ieee80211MgmtStaSimplified``, and ad-hoc
+compositions use legacy unicast until a management implementation supplies
+valid VHT peer state. Existing VHT results, including ``lan80211ac/Ping1``, can
+change even though unspecified-GI catalog lookup is preserved.
+
+The current packet-level detailed-management support envelope is 20 MHz with
+long GI. The existing ``ac`` profile remains VHT-only and does not supply the
+HT modes required for full standards-conforming VHT operation. In particular,
+it does not negotiate HT-carried short-GI bits for 20/40 MHz. Wider catalog and
+selector tests do not claim bonded-channel operation. MU, beamforming, 80+80,
+extended NSS bandwidth signaling, and operating-mode notifications are not
+implemented by this change.
 
 Migrating ``FieldsChunkSerializer`` Subclasses
 ---------------------------------------------

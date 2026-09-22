@@ -55,7 +55,17 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 {
     // TODO check if modulation matches?
     auto narrowbandTransmission = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
-    return centerFrequency == narrowbandTransmission->getCenterFrequency() && bandwidth >= narrowbandTransmission->getBandwidth();
+    Hz listeningCenter = centerFrequency;
+    Hz listeningBandwidth = bandwidth;
+    if (auto bandListening = dynamic_cast<const BandListening *>(listening)) {
+        listeningCenter = bandListening->getCenterFrequency();
+        listeningBandwidth = bandListening->getBandwidth();
+    }
+    auto listeningMin = listeningCenter - listeningBandwidth / 2;
+    auto listeningMax = listeningCenter + listeningBandwidth / 2;
+    auto transmissionMin = narrowbandTransmission->getCenterFrequency() - narrowbandTransmission->getBandwidth() / 2;
+    auto transmissionMax = narrowbandTransmission->getCenterFrequency() + narrowbandTransmission->getBandwidth() / 2;
+    return transmissionMin >= listeningMin && transmissionMax <= listeningMax;
 }
 
 // TODO this is not purely functional, see interface comment
@@ -63,7 +73,11 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     auto narrowbandReception = check_and_cast<const INarrowbandSignalAnalogModel *>(reception->getAnalogModel());
-    if (bandListening->getCenterFrequency() != narrowbandReception->getCenterFrequency() || bandListening->getBandwidth() < narrowbandReception->getBandwidth()) {
+    auto listeningMin = bandListening->getCenterFrequency() - bandListening->getBandwidth() / 2;
+    auto listeningMax = bandListening->getCenterFrequency() + bandListening->getBandwidth() / 2;
+    auto receptionMin = narrowbandReception->getCenterFrequency() - narrowbandReception->getBandwidth() / 2;
+    auto receptionMax = narrowbandReception->getCenterFrequency() + narrowbandReception->getBandwidth() / 2;
+    if (receptionMin < listeningMin || receptionMax > listeningMax) {
         EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }

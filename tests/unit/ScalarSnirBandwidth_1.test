@@ -1,0 +1,110 @@
+%description:
+ScalarMediumAnalogModel must preserve each noise contributor's spectrum for
+ScalarSnir. A 20 MHz desired signal in a 40 MHz listening band sees all of a
+20 MHz co-channel interferer's power and half of the 40 MHz background power.
+Check min/max/mean, time variation, adjacent bands, and reception re-aggregation.
+
+%includes:
+#include <memory>
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarMediumAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Only the reception's time interval and analog model enter these computations.
+class TestReception : public IReception
+{
+  private:
+    simtime_t startTime;
+    simtime_t endTime;
+    ScalarReceptionAnalogModel analogModel;
+
+  public:
+    TestReception(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) :
+        startTime(startTime), endTime(endTime),
+        analogModel(0, 0, endTime - startTime, centerFrequency, bandwidth, power) {}
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
+    virtual const IReceptionAnalogModel *getAnalogModel() const override { return &analogModel; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream; }
+    virtual const IRadio *getReceiverRadio() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const ITransmission *getTransmission() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getPreambleStartTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getPreambleEndTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getHeaderStartTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getHeaderEndTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getDataStartTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getDataEndTime() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getDuration() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart part) const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getPreambleDuration() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getHeaderDuration() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const simtime_t getDataDuration() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const Coord& getStartPosition() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const Coord& getEndPosition() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const Quaternion& getStartOrientation() const override { throw cRuntimeError("Unused reception API"); }
+    virtual const Quaternion& getEndOrientation() const override { throw cRuntimeError("Unused reception API"); }
+};
+
+void checkSnir(const ISnir *snir, double minimum, double maximum, double mean)
+{
+    ASSERT(std::abs(snir->getMin() - minimum) < 1e-12);
+    ASSERT(std::abs(snir->getMax() - maximum) < 1e-12);
+    ASSERT(std::abs(snir->getMean() - mean) < 1e-12);
+}
+
+%activity:
+ScalarMediumAnalogModel medium;
+BandListening listening(nullptr, 0, 4, Coord::ZERO, Coord::ZERO, MHz(5200), MHz(40));
+TestReception desired(1, 3, MHz(5190), MHz(20), W(10));
+TestReception cochannel(0, 4, MHz(5190), MHz(20), W(2));
+TestReception adjacent(0, 4, MHz(5210), MHz(20), W(8));
+TestReception intermittent(2, 4, MHz(5190), MHz(20), W(2));
+auto backgroundPower = makeShared<math::Boxcar1DFunction<W, simtime_t>>(0, 4, W(4));
+
+for (const IReception *interferer : {&cochannel, &adjacent, &intermittent}) {
+    Interference interference(new ScalarNoise(0, 4, MHz(5200), MHz(40), backgroundPower),
+            new std::vector<const IReception *>{interferer});
+    std::unique_ptr<const INoise> noise(medium.computeNoise(&listening, &interference));
+    std::unique_ptr<const ISnir> snir(medium.computeSNIR(&desired, noise.get()));
+    if (interferer == &cochannel) {
+        // Desired-band noise = 2 W + 4 W * 20/40 = 4 W, not 3 W.
+        checkSnir(snir.get(), 2.5, 2.5, 2.5);
+        ASSERT(check_and_cast<const ScalarNoise *>(noise.get())->computeMaxPower(1, 3) == W(6));
+    }
+    else if (interferer == &adjacent)
+        checkSnir(snir.get(), 5, 5, 5);
+    else {
+        // Equal time at SNIR 5 and 2.5; mean SNIR is 3.75.
+        checkSnir(snir.get(), 2.5, 5, 3.75);
+        auto scalarSnir = check_and_cast<const ScalarSnir *>(snir.get());
+        ASSERT(std::abs(scalarSnir->computeMean(1, 2) - 5) < 1e-12);
+        ASSERT(std::abs(scalarSnir->computeMean(2, 3) - 2.5) < 1e-12);
+    }
+}
+
+// The other aggregation overload must also keep the individual spectra alive.
+Interference background(new ScalarNoise(0, 4, MHz(5200), MHz(40), backgroundPower),
+        new std::vector<const IReception *>);
+std::unique_ptr<const INoise> backgroundNoise(medium.computeNoise(&listening, &background));
+std::unique_ptr<const INoise> combined(medium.computeNoise(&cochannel, backgroundNoise.get()));
+backgroundNoise.reset();
+std::unique_ptr<const ISnir> combinedSnir(medium.computeSNIR(&desired, combined.get()));
+checkSnir(combinedSnir.get(), 2.5, 2.5, 2.5);
+
+// Equal listening and reception bands retain the full aggregate power.
+TestReception wideDesired(1, 3, MHz(5200), MHz(40), W(12));
+std::unique_ptr<const ISnir> wideSnir(medium.computeSNIR(&wideDesired, combined.get()));
+checkSnir(wideSnir.get(), 2, 2, 2);
+EV << "Scalar SNIR preserves per-contributor bandwidth.\n";
+
+%contains: stdout
+Scalar SNIR preserves per-contributor bandwidth.

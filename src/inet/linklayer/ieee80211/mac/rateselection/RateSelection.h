@@ -9,11 +9,12 @@
 #define __INET_RATESELECTION_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,14 +32,17 @@ namespace ieee80211 {
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames
  */
-class INET_API RateSelection : public IRateSelection, public SimpleModule, public cListener // FIXME
+class INET_API RateSelection : public IRateSelection, public ModeSetModuleBase
 {
+  public:
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
     ModuleRefByPar<Ieee80211Mib> mib;
     const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
 
-    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
     // originator frame modes
@@ -58,8 +62,7 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-
+    virtual void updateModes();
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
     // ordering; the first transmitted data frame occurs after all init stages, so this is race-free.
@@ -100,4 +103,3 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
 } // namespace inet
 
 #endif
-

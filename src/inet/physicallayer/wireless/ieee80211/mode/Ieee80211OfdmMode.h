@@ -124,6 +124,7 @@ class INET_API Ieee80211OfdmDataMode : public IIeee80211DataMode, public Ieee802
     virtual b getPaddingLength(b dataLength) const override;
     virtual b getCompleteLength(b dataLength) const override;
     virtual const simtime_t getDuration(b dataLength) const override;
+    virtual const simtime_t getGuardInterval() const override { return getGIDuration(); }
 
     const Ieee80211OfdmCode *getCode() const { return code; }
     virtual const simtime_t getSymbolInterval() const override { return Ieee80211OfdmTimingRelatedParametersBase::getSymbolInterval(); }
@@ -265,4 +266,3 @@ class INET_API Ieee80211OfdmCompliantModes
 } // namespace inet
 
 #endif
-

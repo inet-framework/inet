@@ -18,6 +18,7 @@ import inet.common.SimpleModule;
 simple TxopProcedure extends SimpleModule
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(TxopProcedure);
         double txopLimit @unit(s) = default(-1s);
         @display("i=block/timer");
