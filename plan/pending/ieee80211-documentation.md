@@ -153,6 +153,9 @@ with the concept it stands for, and part 4 states the rule for a new one.
                                                [T] the catalog: one row per cell, one sentence each
    1.4 Three patterns in every cell            [T] direction, decision, variant; one example per layer
    1.5 The model and the standard              [T] cell → clause of IEEE Std 802.11-2024
+   1.6 The amendments and the code             [T] amendment letter → what it adds, name prefix in the
+                                                   code, parts, status (modeled, partial, placeholder,
+                                                   not modeled)
 
 2. The parts, cell by cell
    Data plane, top down — the path of a frame
@@ -312,6 +315,16 @@ on a branch `topic/ieee80211-documentation` from the current `master`, merged ba
 the work continues on `master` in `inet-master`, one commit per file, as the eight commits were made.
 The plan takes the first option unless the review says otherwise.
 
+### D-7 — an amendment map — **decided 2026-09-22**
+
+No class in the tree carries an amendment letter; the code names the families (`Qos`, `Ht`,
+`Vht`, `Erp`, `Dsss`, `Ofdm`), and an amendment cuts across cells. Part 1 of the developer's guide
+gets one table, "The amendments and the code": one row per amendment (base, a, b, g, e, n, ac, p,
+and one row for the amendments the model does not contain), with what it adds, the name prefix in
+the code, the parts, and the status. Each attribution is checked against the standard text before
+it goes in: block ack and TXOP are 11e, A-MSDU and A-MPDU are 11n, EPD comes from IEEE 802 and not
+from 11p. The user's guide keeps its own PHY mode table and gets no amendment table.
+
 ### D-6 — what a C++ interface may stand for — **proposed 2026-09-22**
 
 The tree has 53 C++ interfaces: 51 in `mac/contract/`, `IIeee80211Llc`, and `IIeee80211Mode` with
@@ -396,6 +409,8 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 - [ ] Regroup the extension points by the decision and variant axes.
 - [ ] Write the contracts view from the table of step 1c, and the rule of D-6 as the last
       extension section.
+- [ ] Write the amendment table of D-7 as section 1.6 of part 1, and check every attribution
+      against the standard text.
 - [ ] Keep every `:doc:` reference with an explicit title, and keep every table free of long
       identifiers, as the PDF review of 2026-09-21 required.
 - [ ] Build both guides as PDF with the Makefile and read the chapter once in the PDF.
