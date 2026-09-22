@@ -399,21 +399,21 @@ Each step ends with a commit series that the four gates accept: `check-commits.s
 
 ### Step 2 — restructure the developer's guide
 
-- [ ] Reorder the chapter into the five parts of §4.1: at a glance; the parts; the views;
+- [x] Reorder the chapter into the five parts of §4.1: at a glance; the parts; the views;
       extension; where the code differs.
-- [ ] Rewrite each cell section along its second-level axis, with the three patterns as table
+- [x] Rewrite each cell section along its second-level axis, with the three patterns as table
       columns. The text of the current sections moves; it is not rewritten where it is right.
-- [ ] Write the state view per D-2: the four kinds in one paragraph each, then the shared-data
+- [x] Write the state view per D-2: the four kinds in one paragraph each, then the shared-data
       table from step 1b (kind, owner, writers, readers, lifetime), then one sentence per owner
       for its private data.
-- [ ] Regroup the extension points by the decision and variant axes.
-- [ ] Write the contracts view from the table of step 1c, and the rule of D-6 as the last
+- [x] Regroup the extension points by the decision and variant axes.
+- [x] Write the contracts view from the table of step 1c, and the rule of D-6 as the last
       extension section.
-- [ ] Write the amendment table of D-7 as section 1.6 of part 1, and check every attribution
-      against the standard text.
-- [ ] Keep every `:doc:` reference with an explicit title, and keep every table free of long
+- [x] Write the amendment table of D-7 as section 1.6 of part 1, and check every attribution
+      against the standard text. *Checked against the amendment list of the 2016 front matter.*
+- [x] Keep every `:doc:` reference with an explicit title, and keep every table free of long
       identifiers, as the PDF review of 2026-09-21 required.
-- [ ] Build both guides as PDF with the Makefile and read the chapter once in the PDF.
+- [x] Build both guides as PDF with the Makefile and read the chapter once in the PDF. *Done for the developer's guide: no overfull line, no undefined reference; the new pages were read.*
 
 ### Step 3 — align the user's guide
 
@@ -583,3 +583,23 @@ contention window of the best-effort category whatever the calling category. The
 is written by the reordering and read by the procedure, not by its holder. Four data are dead:
 the last transmitted mode maps, the generation counter of the peer HT state, `numSentBaPolicyFrames`
 and `isAddbaResponseSent`.
+
+### 2026-09-22 — step 2 done
+
+The developer's guide is restructured: 1610 lines, five parts, four figures, in the worktree
+`/home/levy/workspace/inet-ieee80211-documentation`. Facts and choices:
+
+- The amendment attributions were checked against the amendment list in the front matter of
+  IEEE Std 802.11-2016 (the 2024 front matter does not list them in a form that a text search
+  finds): 11e is the QoS amendment, 11n higher throughput, 11p vehicular access, 11ac VHT, 11s
+  mesh, 11i security, 11r fast BSS transition, 11k measurement, 11w protected management frames.
+  The a, b and g amendments predate that list and were taken as known.
+- The shared-data table has 29 rows and six columns; it is the densest table of the chapter and
+  prints at the limit of readability. The "Kind" column got 14 % of the width and two short cells.
+- Long interface names never sit in a narrow column: a name goes into the responsibility cell, or
+  a row is split. Nine overfull lines were removed this way.
+- The contracts table groups families into one row each (29 rows for 58 interfaces); the full
+  list stays in `audit/ieee80211-documentation/interfaces.md`.
+- "Where the code differs" grew from eight to thirteen items with the study findings: the concrete
+  `Dcf` and `Hcf` pointers of the MAC, the readiness of the mode set, the shared recovery procedure
+  of a QoS station, the duplicated caches, and the unused state.
