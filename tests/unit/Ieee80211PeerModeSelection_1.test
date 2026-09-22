@@ -27,12 +27,18 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
     return nullptr;
 }
 
-static Ieee80211Mib::PeerHtState makePeerState(std::initializer_list<int> mcsIndexes,
+struct TestPeer : Ieee80211Mib::PeerHtState {
+    Ieee80211HtOperation operation;
+};
+
+static TestPeer makePeerState(std::initializer_list<int> mcsIndexes,
         std::initializer_list<Hz> bandwidths, Hz operatingChannelWidth, bool shortGi20 = false, bool shortGi40 = false)
 {
-    Ieee80211Mib::PeerHtState state;
+    TestPeer state;
+    auto capabilities = std::make_shared<Ieee80211NegotiatedHtCapabilities>();
+    state.negotiatedCapabilities = capabilities;
     state.valid = true;
-    auto& receiverCapabilities = state.negotiatedCapabilities.localTxPeerRx;
+    auto& receiverCapabilities = capabilities->localTxPeerRx;
     receiverCapabilities.valid = true;
     for (int mcsIndex : mcsIndexes)
         receiverCapabilities.supportedMcs[mcsIndex] = true;
@@ -40,8 +46,14 @@ static Ieee80211Mib::PeerHtState makePeerState(std::initializer_list<int> mcsInd
         receiverCapabilities.supportedChannelWidths.insert(bandwidth);
     receiverCapabilities.receiverShortGi20 = shortGi20;
     receiverCapabilities.receiverShortGi40 = shortGi40;
-    state.negotiatedCapabilities.operation.operatingChannelWidth = operatingChannelWidth;
+    state.operation.operatingChannelWidth = operatingChannelWidth;
     return state;
+}
+
+static const IIeee80211Mode *selectForTest(const Ieee80211ModeSet *modeSet,
+        const TestPeer *state, const IIeee80211Mode *mode, const MacAddress& peer, bool eligible = true)
+{
+    return selectPeerCompatibleMode(modeSet, state, mode, peer, state ? &state->operation : nullptr, eligible);
 }
 
 %activity:
@@ -80,12 +92,12 @@ ASSERT(!modeSet->containsMode(modeOutsideSet));
 const MacAddress peer("02:00:00:00:00:01");
 
 auto shortGiPeer = makePeerState({8}, {MHz(20)}, MHz(20), true);
-const auto *shortGiSelection = selectPeerCompatibleMode(modeSet, &shortGiPeer, mcs8Short, peer);
+const auto *shortGiSelection = selectForTest(modeSet, &shortGiPeer, mcs8Short, peer);
 ASSERT(shortGiSelection == mcs8Short);
 ASSERT(shortGiSelection->isHtShortGuardInterval());
 ASSERT(shortGiSelection->getDataMode()->getBandwidth() == MHz(20));
 auto fortyMhzPeer = makePeerState({0}, {MHz(20), MHz(40)}, MHz(40), false, true);
-const auto *fortyMhzSelection = selectPeerCompatibleMode(modeSet, &fortyMhzPeer, mcs0_40Short, peer);
+const auto *fortyMhzSelection = selectForTest(modeSet, &fortyMhzPeer, mcs0_40Short, peer);
 ASSERT(fortyMhzSelection == mcs0_40Short);
 ASSERT(fortyMhzSelection->isHtShortGuardInterval());
 ASSERT(fortyMhzSelection->getDataMode()->getBandwidth() == MHz(40));
@@ -93,16 +105,16 @@ ASSERT(fortyMhzSelection->getDataMode()->getBandwidth() == MHz(40));
 // The complementary long-GI and short-GI variants are selectable when the
 // peer capabilities permit the corresponding exact mode.
 auto longGiMcs8Peer = makePeerState({8}, {MHz(20)}, MHz(20));
-ASSERT(selectPeerCompatibleMode(modeSet, &longGiMcs8Peer, mcs8Long, peer) == mcs8Long);
+ASSERT(selectForTest(modeSet, &longGiMcs8Peer, mcs8Long, peer) == mcs8Long);
 auto shortGiMcs0Peer = makePeerState({0}, {MHz(20)}, MHz(20), true);
-ASSERT(selectPeerCompatibleMode(modeSet, &shortGiMcs0Peer, mcs0Short, peer) == mcs0Short);
+ASSERT(selectForTest(modeSet, &shortGiMcs0Peer, mcs0Short, peer) == mcs0Short);
 auto longGiFortyPeer = makePeerState({0}, {MHz(20), MHz(40)}, MHz(40));
-ASSERT(selectPeerCompatibleMode(modeSet, &longGiFortyPeer, mcs0_40Long, peer) == mcs0_40Long);
+ASSERT(selectForTest(modeSet, &longGiFortyPeer, mcs0_40Long, peer) == mcs0_40Long);
 
 bool outsideModeRejected = false;
 try {
     auto compatiblePeer = makePeerState({0}, {MHz(20)}, MHz(20));
-    selectPeerCompatibleMode(modeSet, &compatiblePeer, modeOutsideSet, peer);
+    selectForTest(modeSet, &compatiblePeer, modeOutsideSet, peer);
 }
 catch (const cRuntimeError&) {
     outsideModeRejected = true;
@@ -112,58 +124,61 @@ ASSERT(outsideModeRejected);
 // The exact negotiated bitmap is not a contiguous maximum-MCS value: MCS 0
 // and 2 are usable while MCS 1 is not (IEEE Std 802.11-2024, 10.6.5.8).
 auto sparsePeer = makePeerState({0, 2}, {MHz(20)}, MHz(20));
-ASSERT(selectPeerCompatibleMode(modeSet, &sparsePeer, mcs2Long, peer) == mcs2Long);
-ASSERT(selectPeerCompatibleMode(modeSet, &sparsePeer, mcs1Long, peer) == mcs0Long);
+ASSERT(selectForTest(modeSet, &sparsePeer, mcs2Long, peer) == mcs2Long);
+ASSERT(selectForTest(modeSet, &sparsePeer, mcs1Long, peer) == mcs0Long);
 
 // A 20 MHz-only receiver cannot use a 40 MHz candidate, even when the BSS
 // itself permits 40 MHz operation.
 auto twentyOnlyPeer = makePeerState({0}, {MHz(20)}, MHz(40));
-const auto *twentyFallback = selectPeerCompatibleMode(modeSet, &twentyOnlyPeer, mcs0_40Short, peer);
+const auto *twentyFallback = selectForTest(modeSet, &twentyOnlyPeer, mcs0_40Short, peer);
 ASSERT(twentyFallback == mcs0Long);
 ASSERT(twentyFallback->getDataMode()->getBandwidth() == MHz(20));
 
 // The negotiated HT Operation width is an additional BSS-level limit over
 // the common capability widths.
 auto twentyOperationPeer = makePeerState({0}, {MHz(20), MHz(40)}, MHz(20));
-ASSERT(selectPeerCompatibleMode(modeSet, &twentyOperationPeer, mcs0_40Short, peer) == mcs0Long);
+ASSERT(selectForTest(modeSet, &twentyOperationPeer, mcs0_40Short, peer) == mcs0Long);
 
 // A short-GI candidate falls back to the same-MCS long-GI variant when the
 // peer did not advertise the matching receiver capability bit.
 auto shortGiDisabledPeer = makePeerState({0, 8}, {MHz(20)}, MHz(20));
-const auto *shortGiFallback = selectPeerCompatibleMode(modeSet, &shortGiDisabledPeer, mcs8Short, peer);
+const auto *shortGiFallback = selectForTest(modeSet, &shortGiDisabledPeer, mcs8Short, peer);
 ASSERT(shortGiFallback == mcs8Long);
 ASSERT(!shortGiFallback->isHtShortGuardInterval());
 
 auto compatiblePeer = makePeerState({2}, {MHz(20)}, MHz(40));
-ASSERT(selectPeerCompatibleMode(modeSet, &compatiblePeer, mcs2Long, peer) == mcs2Long);
+ASSERT(selectForTest(modeSet, &compatiblePeer, mcs2Long, peer) == mcs2Long);
 
 // Missing or invalid negotiated state keeps unicast HT selection on a legacy
 // operational fallback without increasing the caller's candidate bitrate.
 const auto *legacy12Mbps = modeSet->getMode(Mbps(12));
 const auto *legacy6Mbps = modeSet->getMode(Mbps(6));
-ASSERT(selectPeerCompatibleMode(modeSet, nullptr, mcs2Long, peer) == legacy12Mbps);
+ASSERT(selectForTest(modeSet, nullptr, mcs2Long, peer) == legacy12Mbps);
+ASSERT(selectForTest(modeSet, &compatiblePeer, mcs2Long, peer, false) == legacy12Mbps);
 auto invalidPeer = makePeerState({2}, {MHz(20)}, MHz(20));
 invalidPeer.valid = false;
-ASSERT(selectPeerCompatibleMode(modeSet, &invalidPeer, mcs2Long, peer) == legacy12Mbps);
+ASSERT(selectForTest(modeSet, &invalidPeer, mcs2Long, peer) == legacy12Mbps);
 auto invalidDirectionalPeer = makePeerState({2}, {MHz(20)}, MHz(20));
-invalidDirectionalPeer.negotiatedCapabilities.localTxPeerRx.valid = false;
-ASSERT(selectPeerCompatibleMode(modeSet, &invalidDirectionalPeer, mcs2Long, peer) == legacy12Mbps);
+auto invalidCapabilities = std::make_shared<Ieee80211NegotiatedHtCapabilities>(*invalidDirectionalPeer.negotiatedCapabilities);
+invalidCapabilities->localTxPeerRx.valid = false;
+invalidDirectionalPeer.negotiatedCapabilities = invalidCapabilities;
+ASSERT(selectForTest(modeSet, &invalidDirectionalPeer, mcs2Long, peer) == legacy12Mbps);
 
-const auto *boundedMcs0Fallback = selectPeerCompatibleMode(modeSet, nullptr, mcs0Long, peer);
+const auto *boundedMcs0Fallback = selectForTest(modeSet, nullptr, mcs0Long, peer);
 ASSERT(boundedMcs0Fallback == legacy6Mbps);
 ASSERT(boundedMcs0Fallback->getDataMode()->getNetBitrate() <= mcs0Long->getDataMode()->getNetBitrate());
 
 // If no compatible HT mode is at or below the candidate bitrate, the result
 // is legacy rather than an HT mode that violates the negotiated bitmap.
 auto noHtFallbackPeer = makePeerState({76}, {MHz(20)}, MHz(20));
-const auto *noHtFallback = selectPeerCompatibleMode(modeSet, &noHtFallbackPeer, mcs0Long, peer);
+const auto *noHtFallback = selectForTest(modeSet, &noHtFallbackPeer, mcs0Long, peer);
 ASSERT(noHtFallback == legacy6Mbps);
 ASSERT(noHtFallback->getHtMcsIndex() < 0);
 
 // Mode-set traversal and tie-breaks are stable and never depend on pointers.
 auto deterministicPeer = makePeerState({0, 2, 8}, {MHz(20)}, MHz(20));
-const auto *firstSelection = selectPeerCompatibleMode(modeSet, &deterministicPeer, mcs8Short, peer);
-const auto *secondSelection = selectPeerCompatibleMode(modeSet, &deterministicPeer, mcs8Short, peer);
+const auto *firstSelection = selectForTest(modeSet, &deterministicPeer, mcs8Short, peer);
+const auto *secondSelection = selectForTest(modeSet, &deterministicPeer, mcs8Short, peer);
 ASSERT(firstSelection == secondSelection);
 ASSERT(firstSelection->getHtMcsIndex() == 8);
 ASSERT(!firstSelection->isHtShortGuardInterval());

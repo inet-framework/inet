@@ -101,12 +101,12 @@ class Ieee80211HtAntennaRateControlTest : public cSimpleModule
 
         auto staMib = check_and_cast<Ieee80211Mib *>(staInterface->getSubmodule("mib"));
         auto apMib = check_and_cast<Ieee80211Mib *>(apInterface->getSubmodule("mib"));
-        ASSERT(staMib->bssStationData.isAssociated);
-        ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
-        ASSERT(staMib->localHtCapabilitiesValid);
-        ASSERT(apMib->localHtCapabilitiesValid);
-        checkCapabilities(staMib->localHtCapabilities);
-        checkCapabilities(apMib->localHtCapabilities);
+        ASSERT(staMib->getBssStationData().isAssociated);
+        ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(staMib->isLocalHtCapable());
+        ASSERT(apMib->isLocalHtCapable());
+        checkCapabilities(staMib->getLocalHtCapabilities());
+        checkCapabilities(apMib->getLocalHtCapabilities());
         checkBasicMcs(apMib->getHtOperation());
 
         auto staPeer = staMib->findPeerHtState(apMib->address);
@@ -114,14 +114,14 @@ class Ieee80211HtAntennaRateControlTest : public cSimpleModule
         ASSERT(staPeer != nullptr);
         ASSERT(apPeer != nullptr);
         checkCapabilities(staPeer->advertisedCapabilities);
-        checkBasicMcs(staPeer->negotiatedCapabilities.operation);
+        checkBasicMcs(staMib->getHtOperation());
         checkCapabilities(apPeer->advertisedCapabilities);
-        checkBasicMcs(apPeer->negotiatedCapabilities.operation);
+        checkBasicMcs(apMib->getHtOperation());
         for (int mcs = 8; mcs < 77; mcs++) {
-            ASSERT(!staPeer->negotiatedCapabilities.localTxPeerRx.supportedMcs[mcs]);
-            ASSERT(!staPeer->negotiatedCapabilities.localRxPeerTx.supportedMcs[mcs]);
-            ASSERT(!apPeer->negotiatedCapabilities.localTxPeerRx.supportedMcs[mcs]);
-            ASSERT(!apPeer->negotiatedCapabilities.localRxPeerTx.supportedMcs[mcs]);
+            ASSERT(!staPeer->negotiatedCapabilities->localTxPeerRx.supportedMcs[mcs]);
+            ASSERT(!staPeer->negotiatedCapabilities->localRxPeerTx.supportedMcs[mcs]);
+            ASSERT(!apPeer->negotiatedCapabilities->localTxPeerRx.supportedMcs[mcs]);
+            ASSERT(!apPeer->negotiatedCapabilities->localRxPeerTx.supportedMcs[mcs]);
         }
 
         auto rateControl = check_and_cast<RecordingAarfRateControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));

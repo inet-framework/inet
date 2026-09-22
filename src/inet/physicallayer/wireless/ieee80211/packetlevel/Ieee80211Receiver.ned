@@ -7,6 +7,8 @@
 
 package inet.physicallayer.wireless.ieee80211.packetlevel;
 
+import inet.physicallayer.wireless.ieee80211.contract.IIeee80211ReceiverCapabilities;
+
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase;
 
 
@@ -20,7 +22,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBas
 // @see ~Ieee80211Transmitter, ~Ieee80211ScalarRadio,
 // ~Ieee80211ScalarRadioMedium.
 //
-module Ieee80211Receiver extends NarrowbandReceiverBase
+module Ieee80211Receiver extends NarrowbandReceiverBase like IIeee80211ReceiverCapabilities
 {
     parameters:
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac");

@@ -16,7 +16,7 @@ Define_Module(OriginatorQosAckPolicy);
 
 void OriginatorQosAckPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");

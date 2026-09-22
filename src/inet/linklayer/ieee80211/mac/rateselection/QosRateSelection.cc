@@ -22,10 +22,11 @@ Define_Module(QosRateSelection);
 
 void QosRateSelection::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         mib.reference(this, "mibModule", true);
     if (stage == INITSTAGE_LINK_LAYER) {
+        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
@@ -270,15 +271,6 @@ const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<co
         return getPeerCompatibleMode(header->getReceiverAddress(), computeControlFrameMode(header, txopProcedure));
 }
 
-void QosRateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
-    }
-}
 
 void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
@@ -290,7 +282,8 @@ const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& 
 {
     if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
-    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
+    return selectPeerCompatibleMode(modeSet, mib->findPeerCapabilities(peerAddress), mode, peerAddress,
+            mib->hasHtOperation() ? &mib->getHtOperation() : nullptr, mib->relationshipAllowsHt(peerAddress));
 }
 
 } /* namespace ieee80211 */

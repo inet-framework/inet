@@ -307,7 +307,7 @@ void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
 {
     if (resp->getResultCode() != PRC_SUCCESS) {
         EV << "Reassociation error\n";
-        bool isAssociated = mib->bssStationData.isAssociated;
+        bool isAssociated = mib->getBssStationData().isAssociated;
         emit(dropConfirmSignal, PR_REASSOCIATE_CONFIRM);
         if (!isAssociated) {
             EV << "Going back to scanning\n";

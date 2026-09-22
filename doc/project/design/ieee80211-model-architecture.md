@@ -92,3 +92,29 @@ Concrete signals declare their source/scope, change condition, payload, and life
 [AR-COM-NOTIFY](../rule/architecture.md#ar-com-notify). An immutable borrowed snapshot is allowed;
 it creates no second writable authority. Commands, queries, and required coordination use typed
 calls or protocol messages, rather than notifications.
+
+**Implemented HT contracts.** `IIeee80211ModeSetProvider` exposes the configured catalog after
+`LOCAL`. `IIeee80211MacConfiguration` extends it with an idempotent `prepareLocalCapabilities()`
+operation after PHY readiness. MAC consumers resolve their `modeSetModule` dependency through the
+narrow provider in `ModeSetModuleBase` at `LINK_LAYER`; the MAC NED provides the default descendant
+path. Management uses `macModule`. `LINK_LAYER` depends explicitly
+on both `PHYSICAL_LAYER` and `NETWORK_INTERFACE_CONFIGURATION`, so addresses and contribution inputs
+are available before simplified association. Its AP preparation/install/removal calls use
+`IIeee80211BssProvider`; no remote `LAST` callback is required.
+
+`Ieee80211Mib` provides const BSS/profile queries and guarded mutations. Management stages a complete
+BSS/peer change, finishes its transaction and timer bookkeeping, then calls `publishStateChange()`.
+The MIB's `bssStateChanged` signal covers meaningful BSS or peer changes. Its Boolean value reports
+whether a BSS is active; observers query the current MIB for details. There is no borrowed signal
+payload. Delivery is synchronous and observational: MIB mutation during delivery throws an error.
+References into the MIB are valid only until the next corresponding mutation. A retained
+`shared_ptr<const Ieee80211NegotiatedHtCapabilities>` keeps an immutable capability result alive,
+but does not grant continued relationship eligibility.
+
+`hasPreparedLocalCapabilities()`, `isLocalHtCapable()`, `hasActiveBss()`, `hasHtOperation()`, and
+`relationshipAllowsHt(peer)` distinguish readiness, implementation support, current BSS presence,
+accepted operation presence, and permission to select HT. A legacy BSS may be active without HT
+operation. The current ad hoc no-beacon abstraction likewise has no learned channel/HT operation or
+accepted peer advertisements. Stop/crash clears operational relationships while retaining prepared
+configuration. Physical AP channel context is retained by management for restart; STA operation is
+learned from accepted management information, independently of scan tuning.
