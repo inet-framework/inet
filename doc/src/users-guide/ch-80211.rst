@@ -96,8 +96,8 @@ Three parameters of the interface set the most common things:
 
 .. _ug:sec:80211:nodes:
 
-Nodes
------
+Nodes and the medium
+--------------------
 
 Three node types come with a Wi-Fi interface:
 
@@ -372,6 +372,11 @@ parameters exist in both, under different paths:
 
 A pattern such as ``**.mac.*.rateControl.typename`` covers both.
 
+The sections below follow the five functions of the MAC, in the same order
+as the developer's guide: access, exchange, transformation, reliability, and
+rate. Quality of service is a variant of access, and block acknowledgement
+is part of reliability.
+
 .. _ug:sec:80211:channel-access:
 
 Channel access
@@ -417,8 +422,8 @@ statistic.
 
 .. _ug:sec:80211:qos:
 
-QoS and EDCA
-~~~~~~~~~~~~
+Quality of service
+~~~~~~~~~~~~~~~~~~
 
 A QoS station (:par:`qosStation` = ``true``) uses EDCA. Each
 packet that the station sends carries a user priority from 0 to 7. The priority maps to one of
@@ -483,34 +488,10 @@ transmits and the lower one counts a failed attempt. Management frames use
    **.wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.packetCapacity = -1
    **.wlan[*].mac.hcf.edca.edcaf[3].txopLimit = 3ms
 
-.. _ug:sec:80211:ack:
-
-Acknowledgement and retransmission
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Every unicast data and management frame is acknowledged. Group-addressed
-frames are not. When the acknowledgement does not arrive, the station
-retransmits the frame with the retry bit set. The recovery procedure counts
-retries per frame: a short retry counter for frames below the RTS
-threshold, a long retry counter for frames at or above it. When the counter
-reaches :par:`shortRetryLimit` (default 7) or :par:`longRetryLimit`
-(default 4), the frame is dropped. The drop appears in the
-``packetDropRetryLimitReached`` statistic and in the ``linkBroken`` signal.
-
-The recovery procedure is ``mac.dcf.recoveryProcedure`` in a non-QoS
-station. A QoS station has one per access category,
-``mac.hcf.edca.edcaf[i].recoveryProcedure``, plus
-``mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure`` for management frames.
-
-The acknowledgement timeout is on the originator ACK policy
-(``originatorAckPolicy.ackTimeout``). The default, ``-1s``, takes the
-value of the standard: SIFS plus one slot plus the receive start delay of
-the PHY.
-
 .. _ug:sec:80211:rtscts:
 
-RTS/CTS
-~~~~~~~
+Frame exchange and protection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A station protects a long frame with an RTS/CTS exchange. The
 :par:`rtsThreshold` parameter of ``rtsPolicy`` sets the smallest frame that
@@ -525,8 +506,10 @@ helps against hidden nodes at the cost of overhead. The CTS timeout,
 
 .. _ug:sec:80211:fragmentation:
 
-Fragmentation
-~~~~~~~~~~~~~
+.. _ug:sec:80211:aggregation:
+
+Fragmentation and aggregation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A frame longer than :par:`fragmentationThreshold` is split into fragments,
 and each fragment is acknowledged on its own. The parameter is on
@@ -538,11 +521,6 @@ fragmentation off.
 .. code-block:: ini
 
    **.wlan[*].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 250B
-
-.. _ug:sec:80211:aggregation:
-
-Aggregation
-~~~~~~~~~~~
 
 A QoS station can combine several packets that go to the same receiver
 with the same priority into one A-MSDU frame. The policy submodule
@@ -567,6 +545,30 @@ never aggregates, and the MAC does not build A-MPDU frames.
 
    **.wlan[*].mac.qosStation = true
    **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 3000
+
+.. _ug:sec:80211:ack:
+
+Acknowledgement and retries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every unicast data and management frame is acknowledged. Group-addressed
+frames are not. When the acknowledgement does not arrive, the station
+retransmits the frame with the retry bit set. The recovery procedure counts
+retries per frame: a short retry counter for frames below the RTS
+threshold, a long retry counter for frames at or above it. When the counter
+reaches :par:`shortRetryLimit` (default 7) or :par:`longRetryLimit`
+(default 4), the frame is dropped. The drop appears in the
+``packetDropRetryLimitReached`` statistic and in the ``linkBroken`` signal.
+
+The recovery procedure is ``mac.dcf.recoveryProcedure`` in a non-QoS
+station. A QoS station has one per access category,
+``mac.hcf.edca.edcaf[i].recoveryProcedure``, plus
+``mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure`` for management frames.
+
+The acknowledgement timeout is on the originator ACK policy
+(``originatorAckPolicy.ackTimeout``). The default, ``-1s``, takes the
+value of the standard: SIFS plus one slot plus the receive start delay of
+the PHY.
 
 .. _ug:sec:80211:blockack:
 
@@ -599,8 +601,8 @@ the basic Block Ack variant is modeled.
 
 .. _ug:sec:80211:rate:
 
-Bit rate selection and rate control
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Bit rates and rate control
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The PHY mode gives the set of bit rates, or MCS values for 802.11n and
 802.11ac. The rate selection submodule, ``rateSelection`` under ``mac.dcf``
@@ -706,7 +708,7 @@ Each radio type needs the radio medium type that matches it.
 
 .. list-table::
    :header-rows: 1
-   :widths: 34 34 32
+   :widths: 30 40 30
 
    * - Radio
      - Radio medium
