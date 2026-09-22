@@ -1,0 +1,13 @@
+<config>
+    <interface hosts="core"   towards="cn"     address="2001:db8:ff::1"/>
+    <interface hosts="core"   towards="anchor" address="2001:db8:0::1"/>
+    <interface hosts="anchor" towards="core"   address="2001:db8:0::2"/>
+    <interface hosts="core"   towards="ar1"    address="2001:db8:0:1::1"/>
+    <interface hosts="ar1"    towards="core"   address="2001:db8:0:1::2"/>
+    <interface hosts="core"   towards="ar2"    address="2001:db8:0:2::1"/>
+    <interface hosts="ar2"    towards="core"   address="2001:db8:0:2::2"/>
+
+    <!-- Each access router owns the prefix it advertises on its own wireless link. -->
+    <interface hosts="ar1" names="wlan0" address="2001:db8:1::1"/>
+    <interface hosts="ar2" names="wlan0" address="2001:db8:2::1"/>
+</config>

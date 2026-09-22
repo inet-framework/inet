@@ -1,0 +1,5 @@
+<mobileNodes>
+    <mobileNode linkLayerAddress="0A:AA:00:00:00:0B"
+                id="mn1@example.com"
+                homeNetworkPrefix="2001:db8:1::" prefixLength="64"/>
+</mobileNodes>

@@ -1,0 +1,20 @@
+<config>
+    <!-- Only the wired links are addressed here. The access routers' wireless
+         interfaces carry no configured prefix: the mobile node's home network
+         prefix is advertised by whichever access router is serving it. -->
+    <interface hosts="core"   towards="cn"     address="2001:db8:ff::1"/>
+    <interface hosts="core"   towards="anchor" address="2001:db8:0::1"/>
+    <interface hosts="anchor" towards="core"   address="2001:db8:0::2"/>
+    <interface hosts="core"   towards="ar1"    address="2001:db8:0:1::1"/>
+    <interface hosts="ar1"    towards="core"   address="2001:db8:0:1::2"/>
+    <interface hosts="core"   towards="ar2"    address="2001:db8:0:2::1"/>
+    <interface hosts="ar2"    towards="core"   address="2001:db8:0:2::2"/>
+
+    <!-- The home network prefix belongs to no interface, so no route to it can be
+         derived; the anchor advertises it into routing. The interface attribute is
+         required: without it the route is built with no output interface, is never
+         installed, and every packet for the mobile node is lost. eth1 is the
+         interface facing the anchor (see the connections in Pmipv6Showcase.ned). -->
+    <route hosts="core" destination="2001:db8:1::" prefixLength="64"
+           gateway="2001:db8:0::2" interface="eth1"/>
+</config>

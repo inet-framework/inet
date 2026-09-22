@@ -1,0 +1,1552 @@
+<?xml version='1.0' encoding='utf-8'?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/*.sca" />
+        <input pattern="results/*.vec" />
+    </inputs>
+    <charts id="2" name="">
+        <chart id="1" type="LINE" name="Replies received without Proxy Mobile IPv6" template="linechart_native" icon="icons/full/obj/linechart.png">
+            <script>
+import math
+from omnetpp.scave import results, chart, utils
+
+# get chart properties
+props = chart.get_properties()
+utils.preconfigure_plot(props)
+
+# collect parameters for query
+filter_expression = props["filter"]
+start_time = float(props["vector_start_time"] or -math.inf)
+end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
+
+# query vector data into a data frame
+try:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
+
+if df.empty:
+    raise chart.ChartScriptError("The result filter returned no data.")
+
+# apply vector operations
+df = utils.perform_vector_ops(df, props["vector_operations"])
+
+# plot
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
+
+utils.postconfigure_plot(props)
+
+# house style: the committed PNG must sit on the page background, not on a white box
+import matplotlib
+matplotlib.rcParams["savefig.transparent"] = True
+
+utils.export_image_if_needed(props)
+utils.export_data_if_needed(df, props)
+                
+
+            </script>
+            <dialogPage id="INPUT" label="Input">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang" /&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+  &lt;x:children&gt;
+    &lt;label text="Filter expression:" /&gt;
+    &lt;styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+    &lt;/styledText&gt;
+
+    &lt;composite&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" /&gt;
+      &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" /&gt;
+      &lt;x:children&gt;
+        &lt;button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" /&gt;
+        &lt;/button&gt;
+        &lt;button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/button&gt;
+      &lt;/x:children&gt;
+    &lt;/composite&gt;
+    &lt;composite&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" /&gt;
+      &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" /&gt;
+      &lt;x:children&gt;
+        &lt;group text="Crop interval"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="2" /&gt;
+          &lt;x:children&gt;
+            &lt;label text="Start time (sec):" /&gt;
+            &lt;text x:id="vector_start_time" x:style="BORDER"&gt;
+              &lt;layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+            &lt;/text&gt;
+            &lt;label text="End time (sec):" /&gt;
+            &lt;text x:id="vector_end_time" x:style="BORDER"&gt;
+              &lt;layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+            &lt;/text&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+        &lt;group text="Vector operations (one per line)"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+          &lt;x:children&gt;
+            &lt;text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops"&gt;
+              &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+            &lt;/text&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+      &lt;/x:children&gt;
+    &lt;/composite&gt;
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Lines"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Draw style:"/&gt;
+    &lt;combo x:id="drawstyle" x:id.default="auto" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="auto"/&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0="linear"/&gt;
+      &lt;add x:p0="steps-pre"/&gt;
+      &lt;add x:p0="steps-mid"/&gt;
+      &lt;add x:p0="steps-post"/&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Line color:"/&gt;
+    &lt;ColorChooser x:id="linecolor" x:id.default="" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="BEGINNING" grabExcessHorizontalSpace="false"/&gt;
+    &lt;/ColorChooser&gt;
+
+    &lt;label text="Line style:"/&gt;
+    &lt;combo x:id="linestyle" x:id.default="solid" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0="solid"/&gt;
+      &lt;add x:p0="dotted"/&gt;
+      &lt;add x:p0="dashed"/&gt;
+      &lt;add x:p0="dashdot"/&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Line width:"/&gt;
+    &lt;spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Markers"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Marker:"/&gt;
+    &lt;combo x:id="marker" x:id.default="none" x:style="BORDER"&gt;
+      &lt;add x:p0="auto"/&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0=". (dot)"/&gt;
+      &lt;add x:p0=", (point)"/&gt;
+      &lt;add x:p0="v (triangle down)"/&gt;
+      &lt;add x:p0="^ (triangle up)"/&gt;
+      &lt;add x:p0="&amp;lt; (triangle left)"/&gt;
+      &lt;add x:p0="&amp;gt; (triangle right)"/&gt;
+      &lt;add x:p0="1 (tri down)"/&gt;
+      &lt;add x:p0="2 (tri up)"/&gt;
+      &lt;add x:p0="3 (tri left)"/&gt;
+      &lt;add x:p0="4 (tri right)"/&gt;
+      &lt;add x:p0="| (vline)"/&gt;
+      &lt;add x:p0="_ (hline)"/&gt;
+      &lt;add x:p0="8 (octagon)"/&gt;
+      &lt;add x:p0="o (circle)"/&gt;
+      &lt;add x:p0="s (square)"/&gt;
+      &lt;add x:p0="p (pentagon)"/&gt;
+      &lt;add x:p0="* (star)"/&gt;
+      &lt;add x:p0="+ (plus)"/&gt;
+      &lt;add x:p0="x (cross)"/&gt;
+      &lt;add x:p0="D (diamond)"/&gt;
+      &lt;add x:p0="d (thin diamond)"/&gt;
+      &lt;!-- TODO the rest...  --&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Marker size:"/&gt;
+    &lt;spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Hints"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="1"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Title"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Plot title --&gt;
+    &lt;label text="Plot title:"/&gt;
+    &lt;text x:id="title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- X Axis { --&gt;
+    &lt;group text="X axis"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Label:"/&gt;
+    &lt;text x:id="xaxis_title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Unit:"/&gt;
+    &lt;text x:id="xaxis_unit" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Min:"/&gt;
+    &lt;text x:id="xaxis_min" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Max:"/&gt;
+    &lt;text x:id="xaxis_max" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;button x:id="xaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Y Axis { --&gt;
+    &lt;group text="Y axis"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Label:"/&gt;
+    &lt;text x:id="yaxis_title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Unit:"/&gt;
+    &lt;text x:id="yaxis_unit" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Min:"/&gt;
+    &lt;text x:id="yaxis_min" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Max:"/&gt;
+    &lt;text x:id="yaxis_max" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;button x:id="yaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Grid { --&gt;
+    &lt;group text="Grid"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Display Legend? --&gt;
+    &lt;button x:id="grid_show" x:id.default="true" text="Show grid" x:style="CHECK" x:id.isEnabler="true"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Show grid:None/Major/All --&gt;
+    &lt;label text="Density:"/&gt;
+    &lt;combo x:id="grid_density" x:id.default="Major" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="Major"/&gt;
+      &lt;add x:p0="All"/&gt;
+    &lt;/combo&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Legend { --&gt;
+    &lt;group text="Legend"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Display Legend? --&gt;
+    &lt;button x:id="legend_show" x:id.default="true" text="Show legend" x:style="CHECK" x:id.isEnabler="true" &gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Placement --&gt;
+    &lt;label text="Placement:"/&gt;
+    &lt;combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="best"/&gt;
+      &lt;add x:p0="upper right"/&gt;
+      &lt;add x:p0="upper left"/&gt;
+      &lt;add x:p0="lower left"/&gt;
+      &lt;add x:p0="lower right"/&gt;
+      &lt;add x:p0="center left"/&gt;
+      &lt;add x:p0="center right"/&gt;
+      &lt;add x:p0="lower center"/&gt;
+      &lt;add x:p0="upper center"/&gt;
+      &lt;add x:p0="center"/&gt;
+      &lt;add x:p0="outside top left"/&gt;
+      &lt;add x:p0="outside top center"/&gt;
+      &lt;add x:p0="outside top right"/&gt;
+      &lt;add x:p0="outside bottom left"/&gt;
+      &lt;add x:p0="outside bottom center"/&gt;
+      &lt;add x:p0="outside bottom right"/&gt;
+      &lt;add x:p0="outside left top"/&gt;
+      &lt;add x:p0="outside left center"/&gt;
+      &lt;add x:p0="outside left bottom"/&gt;
+      &lt;add x:p0="outside right top"/&gt;
+      &lt;add x:p0="outside right center"/&gt;
+      &lt;add x:p0="outside right bottom"/&gt;
+    &lt;/combo&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang" /&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+  &lt;x:children&gt;
+
+        &lt;group text="Legend labels"&gt;
+
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+          &lt;layout x:class="GridLayout" /&gt;
+          &lt;x:children&gt;
+            &lt;button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/&gt;
+            &lt;composite&gt;
+              &lt;layoutData x:class="GridData" horizontalIndent="30"/&gt;
+              &lt;layout x:class="GridLayout" marginHeight="0" marginBottom="5"/&gt;
+              &lt;x:children&gt;
+                &lt;button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/&gt;
+                &lt;button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/&gt;
+              &lt;/x:children&gt;
+            &lt;/composite&gt;
+
+            &lt;button x:id='legend_manual' text='Manual' x:style='RADIO'/&gt;
+            &lt;composite&gt;
+              &lt;layoutData x:class="GridData" horizontalIndent="30"/&gt;
+              &lt;layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/&gt;
+              &lt;x:children&gt;
+                &lt;label text="Format string:"/&gt;
+                &lt;text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns"&gt;
+                  &lt;layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" /&gt;
+                &lt;/text&gt;
+                &lt;label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign"&gt;
+                  &lt;layoutData x:class="GridData" horizontalSpan="2" /&gt;
+                &lt;/label&gt;
+              &lt;/x:children&gt;
+            &lt;/composite&gt;
+          &lt;/x:children&gt;
+
+        &lt;/group&gt;
+
+        &lt;group text="Label tweaking"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+          &lt;x:children&gt;
+            &lt;label x:style='WRAP' text="Enter string replacements (foo --&amp;gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:"&gt;
+              &lt;layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+            &lt;/label&gt;
+            &lt;styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns"&gt;
+              &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+            &lt;/styledText&gt;
+            &lt;label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign"&gt;
+              &lt;layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+            &lt;/label&gt;
+            &lt;!--
+            &lt;label text="Examples:"/&gt;
+            &lt;label text='- &amp;quot;/tcp/TCP/&amp;quot; ==&amp;gt; change &amp;quot;tcp&amp;quot; to &amp;quot;TCP&amp;quot;'/&gt;
+            &lt;label text='- &amp;quot;/ +/ /&amp;quot; ==&amp;gt; replace multiple spaces with one space'/&gt;
+            &lt;label text="- &amp;quot;/host\[(\d+)\]/in host \1/&amp;quot; ==&amp;gt; change &amp;quot;host[21]&amp;quot; to &amp;quot;in host 21&amp;quot; (note \1,\2 as group reference)"/&gt;
+            &lt;label text='- &amp;quot;/\//:/&amp;quot; or &amp;quot;|\|:|&amp;quot; ==&amp;gt; replace slashes with colons'/&gt;
+            --&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="ORDERING" label="Ordering">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;xswt xmlns:x='http://sweet_swt.sf.net/xswt'&gt;
+
+  &lt;import xmlns='http://sweet_swt.sf.net/xswt'&gt;
+    &lt;package name='java.lang'/&gt;
+    &lt;package name='org.eclipse.swt.widgets' /&gt;
+    &lt;package name='org.eclipse.swt.graphics' /&gt;
+    &lt;package name='org.eclipse.swt.layout' /&gt;
+    &lt;package name='org.eclipse.swt.custom' /&gt;
+    &lt;package name='org.omnetpp.common.wizard.support' /&gt;
+    &lt;package name='org.omnetpp.ned.editor.wizards.support' /&gt;
+    &lt;package name='org.omnetpp.cdt.wizard.support' /&gt;
+  &lt;/import&gt;
+
+  &lt;layout x:class='GridLayout'/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Ordering of items on the legend and on the plot"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;!-- ordering_regex_list --&gt;
+        &lt;label text='Primary ordering (one regex per line):'/&gt;
+        &lt;label text='Secondary ordering (one regex per line):'/&gt;
+        &lt;text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'&gt;
+          &lt;layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/&gt;
+        &lt;/text&gt;
+
+        &lt;!-- secondary_ordering_regex_list --&gt;
+        &lt;text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'&gt;
+          &lt;layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/&gt;
+        &lt;/text&gt;
+
+        &lt;!-- hint --&gt;
+        &lt;label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&amp;apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'&gt;
+          &lt;layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+        &lt;/label&gt;
+
+        &lt;!-- sorting --&gt;
+        &lt;button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true"&gt;
+          &lt;layoutData x:class='GridData' horizontalSpan='2'/&gt;
+        &lt;/button&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;!-- Colors { --&gt;
+    &lt;group text="Colors"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- backgroundColor --&gt;
+    &lt;label text="Background color:"/&gt;
+    &lt;ColorChooser x:id="Plot.BackgroundColor" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/ColorChooser&gt;
+
+    &lt;label text="Cycle seed:"/&gt;
+    &lt;spinner x:id="cycle_seed" x:id.default="0" selection="0" minimum="0" maximum="1000000" x:style="BORDER"/&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Fonts"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Title font --&gt;
+    &lt;label text="Title font:"/&gt;
+    &lt;FontChooser x:id="Plot.Title.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Axis title font --&gt;
+    &lt;label text="Axis title font:"/&gt;
+    &lt;FontChooser x:id="Axis.Title.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Label font --&gt;
+    &lt;label text="Label font:"/&gt;
+    &lt;FontChooser x:id="Axis.Label.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Legend font --&gt;
+    &lt;label text="Legend font:"/&gt;
+    &lt;FontChooser x:id="Legend.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Legend { --&gt;
+    &lt;group text="Legend"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;button x:id="Legend.Border" text="Border" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Options { --&gt;
+    &lt;group text="Options"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Use antialias? --&gt;
+    &lt;button x:id="Plot.Antialias" text="Use antialias" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Use caching? --&gt;
+    &lt;button x:id="Plot.Caching" text="Use caching" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+        &lt;!-- Border? --&gt;
+    &lt;button x:id="X.Label.Wrap" text="Wrap labels" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;xswt xmlns:x='http://sweet_swt.sf.net/xswt'&gt;
+  &lt;import xmlns='http://sweet_swt.sf.net/xswt'&gt;
+    &lt;package name='java.lang'/&gt;
+    &lt;package name='org.eclipse.swt.widgets' /&gt;
+    &lt;package name='org.eclipse.swt.graphics' /&gt;
+    &lt;package name='org.eclipse.swt.layout' /&gt;
+    &lt;package name='org.eclipse.swt.custom' /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class='GridLayout' numColumns='1'/&gt;
+  &lt;x:children&gt;
+    &lt;label text="Here you can further customize the plot using properties."/&gt;
+    &lt;label text="The syntax is one entry per line in the 'key : value' format; comments (#) are also accepted."/&gt;
+    &lt;label text="Content Assist available (hit Ctrl+Space)."/&gt;
+    &lt;styledText x:id="plot.properties" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="plotproperties"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/&gt;
+    &lt;/styledText&gt;
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Image export"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label text="Image file name (w/o extension):"/&gt;
+        &lt;text x:id="image_export_filename" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+        &lt;label text="Image width (inches):"/&gt;
+        &lt;text x:id="image_export_width" x:id.default="6" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+        &lt;label text="Image height (inches):"/&gt;
+        &lt;text x:id="image_export_height" x:id.default="4" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Data export"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label text="File name (w/o extension):"/&gt;
+        &lt;text x:id="data_export_filename" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <property name="filter" value="name =~ &quot;pingRxSeq:vector&quot; AND runattr:configname =~ &quot;NoPmipv6&quot;" />
+            <property name="omit_empty_vectors" value="false" />
+            <property name="simplify" value="" />
+            <property name="vector_start_time" value="" />
+            <property name="vector_end_time" value="" />
+            <property name="vector_operations" value="" />
+            <property name="drawstyle" value="auto" />
+            <property name="linecolor" value="" />
+            <property name="linestyle" value="solid" />
+            <property name="linewidth" value="2" />
+            <property name="marker" value="s" />
+            <property name="markersize" value="3" />
+            <property name="title" value="Replies received by the correspondent node, without Proxy Mobile IPv6" />
+            <property name="xaxis_title" value="Simulation time" />
+            <property name="xaxis_unit" value="" />
+            <property name="xaxis_min" value="0" />
+            <property name="xaxis_max" value="60" />
+            <property name="xaxis_log" value="false" />
+            <property name="yaxis_title" value="Received sequence number" />
+            <property name="yaxis_unit" value="" />
+            <property name="yaxis_min" value="0" />
+            <property name="yaxis_max" value="" />
+            <property name="yaxis_log" value="false" />
+            <property name="grid_show" value="true" />
+            <property name="grid_density" value="Major" />
+            <property name="legend_show" value="false" />
+            <property name="legend_placement" value="upper right" />
+            <property name="legend_automatic" value="true" />
+            <property name="legend_prefer_result_titles" value="true" />
+            <property name="legend_prefer_module_display_paths" value="true" />
+            <property name="legend_manual" value="" />
+            <property name="legend_format" value="" />
+            <property name="legend_replacements" value="" />
+            <property name="ordering_regex_list" value="" />
+            <property name="secondary_ordering_regex_list" value="" />
+            <property name="sorting" value="true" />
+            <property name="Plot.BackgroundColor" value="white" />
+            <property name="cycle_seed" value="0" />
+            <property name="Plot.Title.Font" value="Arial-regular-10" />
+            <property name="Axis.Title.Font" value="Arial-regular-8" />
+            <property name="Axis.Label.Font" value="Arial-regular-8" />
+            <property name="Legend.Font" value="Arial-regular-8" />
+            <property name="Legend.Border" value="false" />
+            <property name="Plot.Antialias" value="true" />
+            <property name="Plot.Caching" value="true" />
+            <property name="X.Label.Wrap" value="true" />
+            <property name="plot.properties" value="" />
+            <property name="image_export_filename" value="" />
+            <property name="image_export_width" value="8" />
+            <property name="image_export_height" value="6" />
+            <property name="data_export_filename" value="" />
+        </chart>
+        <chart id="3" type="LINE" name="Replies received with Proxy Mobile IPv6" template="linechart_native" icon="icons/full/obj/linechart.png">
+            <script>
+import math
+from omnetpp.scave import results, chart, utils
+
+# get chart properties
+props = chart.get_properties()
+utils.preconfigure_plot(props)
+
+# collect parameters for query
+filter_expression = props["filter"]
+start_time = float(props["vector_start_time"] or -math.inf)
+end_time = float(props["vector_end_time"] or math.inf)
+omit_empty_vectors = props["omit_empty_vectors"] == "true"
+
+# query vector data into a data frame
+try:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time, omit_empty_vectors=omit_empty_vectors)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
+
+if df.empty:
+    raise chart.ChartScriptError("The result filter returned no data.")
+
+# apply vector operations
+df = utils.perform_vector_ops(df, props["vector_operations"])
+
+# plot
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
+utils.plot_vectors(df, props, sort=False)
+
+utils.postconfigure_plot(props)
+
+# house style: the committed PNG must sit on the page background, not on a white box
+import matplotlib
+matplotlib.rcParams["savefig.transparent"] = True
+
+utils.export_image_if_needed(props)
+utils.export_data_if_needed(df, props)
+                
+
+            </script>
+            <dialogPage id="INPUT" label="Input">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang" /&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+  &lt;x:children&gt;
+    &lt;label text="Filter expression:" /&gt;
+    &lt;styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="vector"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+    &lt;/styledText&gt;
+
+    &lt;composite&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" /&gt;
+      &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" marginWidth="0" /&gt;
+      &lt;x:children&gt;
+        &lt;button x:id="omit_empty_vectors" x:style="CHECK" x:id.default="false" text="Omit empty vectors"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING" /&gt;
+        &lt;/button&gt;
+        &lt;button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="END" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/button&gt;
+      &lt;/x:children&gt;
+    &lt;/composite&gt;
+    &lt;composite&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" /&gt;
+      &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" /&gt;
+      &lt;x:children&gt;
+        &lt;group text="Crop interval"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="2" /&gt;
+          &lt;x:children&gt;
+            &lt;label text="Start time (sec):" /&gt;
+            &lt;text x:id="vector_start_time" x:style="BORDER"&gt;
+              &lt;layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+            &lt;/text&gt;
+            &lt;label text="End time (sec):" /&gt;
+            &lt;text x:id="vector_end_time" x:style="BORDER"&gt;
+              &lt;layoutData x:class="GridData" widthHint="180" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+            &lt;/text&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+        &lt;group text="Vector operations (one per line)"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+          &lt;x:children&gt;
+            &lt;text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops"&gt;
+              &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+            &lt;/text&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+      &lt;/x:children&gt;
+    &lt;/composite&gt;
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Lines"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Draw style:"/&gt;
+    &lt;combo x:id="drawstyle" x:id.default="auto" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="auto"/&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0="linear"/&gt;
+      &lt;add x:p0="steps-pre"/&gt;
+      &lt;add x:p0="steps-mid"/&gt;
+      &lt;add x:p0="steps-post"/&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Line color:"/&gt;
+    &lt;ColorChooser x:id="linecolor" x:id.default="" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="BEGINNING" grabExcessHorizontalSpace="false"/&gt;
+    &lt;/ColorChooser&gt;
+
+    &lt;label text="Line style:"/&gt;
+    &lt;combo x:id="linestyle" x:id.default="solid" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0="solid"/&gt;
+      &lt;add x:p0="dotted"/&gt;
+      &lt;add x:p0="dashed"/&gt;
+      &lt;add x:p0="dashdot"/&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Line width:"/&gt;
+    &lt;spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Markers"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Marker:"/&gt;
+    &lt;combo x:id="marker" x:id.default="none" x:style="BORDER"&gt;
+      &lt;add x:p0="auto"/&gt;
+      &lt;add x:p0="none"/&gt;
+      &lt;add x:p0=". (dot)"/&gt;
+      &lt;add x:p0=", (point)"/&gt;
+      &lt;add x:p0="v (triangle down)"/&gt;
+      &lt;add x:p0="^ (triangle up)"/&gt;
+      &lt;add x:p0="&amp;lt; (triangle left)"/&gt;
+      &lt;add x:p0="&amp;gt; (triangle right)"/&gt;
+      &lt;add x:p0="1 (tri down)"/&gt;
+      &lt;add x:p0="2 (tri up)"/&gt;
+      &lt;add x:p0="3 (tri left)"/&gt;
+      &lt;add x:p0="4 (tri right)"/&gt;
+      &lt;add x:p0="| (vline)"/&gt;
+      &lt;add x:p0="_ (hline)"/&gt;
+      &lt;add x:p0="8 (octagon)"/&gt;
+      &lt;add x:p0="o (circle)"/&gt;
+      &lt;add x:p0="s (square)"/&gt;
+      &lt;add x:p0="p (pentagon)"/&gt;
+      &lt;add x:p0="* (star)"/&gt;
+      &lt;add x:p0="+ (plus)"/&gt;
+      &lt;add x:p0="x (cross)"/&gt;
+      &lt;add x:p0="D (diamond)"/&gt;
+      &lt;add x:p0="d (thin diamond)"/&gt;
+      &lt;!-- TODO the rest...  --&gt;
+    &lt;/combo&gt;
+
+    &lt;label text="Marker size:"/&gt;
+    &lt;spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Hints"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="1"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+
+        &lt;label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line"&gt;
+          &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+        &lt;/label&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Title"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Plot title --&gt;
+    &lt;label text="Plot title:"/&gt;
+    &lt;text x:id="title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- X Axis { --&gt;
+    &lt;group text="X axis"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Label:"/&gt;
+    &lt;text x:id="xaxis_title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Unit:"/&gt;
+    &lt;text x:id="xaxis_unit" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Min:"/&gt;
+    &lt;text x:id="xaxis_min" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Max:"/&gt;
+    &lt;text x:id="xaxis_max" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;button x:id="xaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Y Axis { --&gt;
+    &lt;group text="Y axis"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;label text="Label:"/&gt;
+    &lt;text x:id="yaxis_title" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Unit:"/&gt;
+    &lt;text x:id="yaxis_unit" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Min:"/&gt;
+    &lt;text x:id="yaxis_min" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;label text="Max:"/&gt;
+    &lt;text x:id="yaxis_max" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/text&gt;
+
+    &lt;button x:id="yaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Grid { --&gt;
+    &lt;group text="Grid"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Display Legend? --&gt;
+    &lt;button x:id="grid_show" x:id.default="true" text="Show grid" x:style="CHECK" x:id.isEnabler="true"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Show grid:None/Major/All --&gt;
+    &lt;label text="Density:"/&gt;
+    &lt;combo x:id="grid_density" x:id.default="Major" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="Major"/&gt;
+      &lt;add x:p0="All"/&gt;
+    &lt;/combo&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Legend { --&gt;
+    &lt;group text="Legend"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Display Legend? --&gt;
+    &lt;button x:id="legend_show" x:id.default="true" text="Show legend" x:style="CHECK" x:id.isEnabler="true" &gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Placement --&gt;
+    &lt;label text="Placement:"/&gt;
+    &lt;combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY"&gt;
+      &lt;add x:p0="best"/&gt;
+      &lt;add x:p0="upper right"/&gt;
+      &lt;add x:p0="upper left"/&gt;
+      &lt;add x:p0="lower left"/&gt;
+      &lt;add x:p0="lower right"/&gt;
+      &lt;add x:p0="center left"/&gt;
+      &lt;add x:p0="center right"/&gt;
+      &lt;add x:p0="lower center"/&gt;
+      &lt;add x:p0="upper center"/&gt;
+      &lt;add x:p0="center"/&gt;
+      &lt;add x:p0="outside top left"/&gt;
+      &lt;add x:p0="outside top center"/&gt;
+      &lt;add x:p0="outside top right"/&gt;
+      &lt;add x:p0="outside bottom left"/&gt;
+      &lt;add x:p0="outside bottom center"/&gt;
+      &lt;add x:p0="outside bottom right"/&gt;
+      &lt;add x:p0="outside left top"/&gt;
+      &lt;add x:p0="outside left center"/&gt;
+      &lt;add x:p0="outside left bottom"/&gt;
+      &lt;add x:p0="outside right top"/&gt;
+      &lt;add x:p0="outside right center"/&gt;
+      &lt;add x:p0="outside right bottom"/&gt;
+    &lt;/combo&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang" /&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+  &lt;x:children&gt;
+
+        &lt;group text="Legend labels"&gt;
+
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" /&gt;
+          &lt;layout x:class="GridLayout" /&gt;
+          &lt;x:children&gt;
+            &lt;button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/&gt;
+            &lt;composite&gt;
+              &lt;layoutData x:class="GridData" horizontalIndent="30"/&gt;
+              &lt;layout x:class="GridLayout" marginHeight="0" marginBottom="5"/&gt;
+              &lt;x:children&gt;
+                &lt;button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/&gt;
+                &lt;button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/&gt;
+              &lt;/x:children&gt;
+            &lt;/composite&gt;
+
+            &lt;button x:id='legend_manual' text='Manual' x:style='RADIO'/&gt;
+            &lt;composite&gt;
+              &lt;layoutData x:class="GridData" horizontalIndent="30"/&gt;
+              &lt;layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/&gt;
+              &lt;x:children&gt;
+                &lt;label text="Format string:"/&gt;
+                &lt;text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns"&gt;
+                  &lt;layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" /&gt;
+                &lt;/text&gt;
+                &lt;label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign"&gt;
+                  &lt;layoutData x:class="GridData" horizontalSpan="2" /&gt;
+                &lt;/label&gt;
+              &lt;/x:children&gt;
+            &lt;/composite&gt;
+          &lt;/x:children&gt;
+
+        &lt;/group&gt;
+
+        &lt;group text="Label tweaking"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+          &lt;layout x:class="GridLayout" numColumns="1" /&gt;
+          &lt;x:children&gt;
+            &lt;label x:style='WRAP' text="Enter string replacements (foo --&amp;gt; bar) or sed-style replacements (/foo-regex/bar-regex/) to be applied to the labels, one per line:"&gt;
+              &lt;layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+            &lt;/label&gt;
+            &lt;styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="columns"&gt;
+              &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" /&gt;
+            &lt;/styledText&gt;
+            &lt;label x:style='WRAP' text="Hint: $name or ${name} inserts the content of a data frame column; use $$ to insert dollar sign"&gt;
+              &lt;layoutData x:class='GridData' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+            &lt;/label&gt;
+            &lt;!--
+            &lt;label text="Examples:"/&gt;
+            &lt;label text='- &amp;quot;/tcp/TCP/&amp;quot; ==&amp;gt; change &amp;quot;tcp&amp;quot; to &amp;quot;TCP&amp;quot;'/&gt;
+            &lt;label text='- &amp;quot;/ +/ /&amp;quot; ==&amp;gt; replace multiple spaces with one space'/&gt;
+            &lt;label text="- &amp;quot;/host\[(\d+)\]/in host \1/&amp;quot; ==&amp;gt; change &amp;quot;host[21]&amp;quot; to &amp;quot;in host 21&amp;quot; (note \1,\2 as group reference)"/&gt;
+            &lt;label text='- &amp;quot;/\//:/&amp;quot; or &amp;quot;|\|:|&amp;quot; ==&amp;gt; replace slashes with colons'/&gt;
+            --&gt;
+          &lt;/x:children&gt;
+        &lt;/group&gt;
+
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;                
+
+            </dialogPage>
+            <dialogPage id="ORDERING" label="Ordering">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;xswt xmlns:x='http://sweet_swt.sf.net/xswt'&gt;
+
+  &lt;import xmlns='http://sweet_swt.sf.net/xswt'&gt;
+    &lt;package name='java.lang'/&gt;
+    &lt;package name='org.eclipse.swt.widgets' /&gt;
+    &lt;package name='org.eclipse.swt.graphics' /&gt;
+    &lt;package name='org.eclipse.swt.layout' /&gt;
+    &lt;package name='org.eclipse.swt.custom' /&gt;
+    &lt;package name='org.omnetpp.common.wizard.support' /&gt;
+    &lt;package name='org.omnetpp.ned.editor.wizards.support' /&gt;
+    &lt;package name='org.omnetpp.cdt.wizard.support' /&gt;
+  &lt;/import&gt;
+
+  &lt;layout x:class='GridLayout'/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Ordering of items on the legend and on the plot"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;!-- ordering_regex_list --&gt;
+        &lt;label text='Primary ordering (one regex per line):'/&gt;
+        &lt;label text='Secondary ordering (one regex per line):'/&gt;
+        &lt;text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'&gt;
+          &lt;layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/&gt;
+        &lt;/text&gt;
+
+        &lt;!-- secondary_ordering_regex_list --&gt;
+        &lt;text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'&gt;
+          &lt;layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/&gt;
+        &lt;/text&gt;
+
+        &lt;!-- hint --&gt;
+        &lt;label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&amp;apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'&gt;
+          &lt;layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/&gt;
+        &lt;/label&gt;
+
+        &lt;!-- sorting --&gt;
+        &lt;button x:id='sorting' text='Use alphabetical sorting as tertiary ordering' x:style='CHECK' x:id.default="true"&gt;
+          &lt;layoutData x:class='GridData' horizontalSpan='2'/&gt;
+        &lt;/button&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;!-- Colors { --&gt;
+    &lt;group text="Colors"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- backgroundColor --&gt;
+    &lt;label text="Background color:"/&gt;
+    &lt;ColorChooser x:id="Plot.BackgroundColor" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/ColorChooser&gt;
+
+    &lt;label text="Cycle seed:"/&gt;
+    &lt;spinner x:id="cycle_seed" x:id.default="0" selection="0" minimum="0" maximum="1000000" x:style="BORDER"/&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Fonts"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Title font --&gt;
+    &lt;label text="Title font:"/&gt;
+    &lt;FontChooser x:id="Plot.Title.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Axis title font --&gt;
+    &lt;label text="Axis title font:"/&gt;
+    &lt;FontChooser x:id="Axis.Title.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Label font --&gt;
+    &lt;label text="Label font:"/&gt;
+    &lt;FontChooser x:id="Axis.Label.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- Legend font --&gt;
+    &lt;label text="Legend font:"/&gt;
+    &lt;FontChooser x:id="Legend.Font" x:style="BORDER"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+    &lt;/FontChooser&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Legend { --&gt;
+    &lt;group text="Legend"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;button x:id="Legend.Border" text="Border" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;!-- Options { --&gt;
+    &lt;group text="Options"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+    &lt;!-- Use antialias? --&gt;
+    &lt;button x:id="Plot.Antialias" text="Use antialias" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Use caching? --&gt;
+    &lt;button x:id="Plot.Caching" text="Use caching" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+        &lt;!-- Border? --&gt;
+    &lt;button x:id="X.Label.Wrap" text="Wrap labels" x:style="CHECK"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2"/&gt;
+    &lt;/button&gt;
+
+    &lt;!-- } --&gt;
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;xswt xmlns:x='http://sweet_swt.sf.net/xswt'&gt;
+  &lt;import xmlns='http://sweet_swt.sf.net/xswt'&gt;
+    &lt;package name='java.lang'/&gt;
+    &lt;package name='org.eclipse.swt.widgets' /&gt;
+    &lt;package name='org.eclipse.swt.graphics' /&gt;
+    &lt;package name='org.eclipse.swt.layout' /&gt;
+    &lt;package name='org.eclipse.swt.custom' /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class='GridLayout' numColumns='1'/&gt;
+  &lt;x:children&gt;
+    &lt;label text="Here you can further customize the plot using properties."/&gt;
+    &lt;label text="The syntax is one entry per line in the 'key : value' format; comments (#) are also accepted."/&gt;
+    &lt;label text="Content Assist available (hit Ctrl+Space)."/&gt;
+    &lt;styledText x:id="plot.properties" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="plotproperties"&gt;
+      &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/&gt;
+    &lt;/styledText&gt;
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xswt xmlns:x="http://sweet_swt.sf.net/xswt"&gt;
+
+  &lt;import xmlns="http://sweet_swt.sf.net/xswt"&gt;
+    &lt;package name="java.lang"/&gt;
+    &lt;package name="org.eclipse.swt.widgets" /&gt;
+    &lt;package name="org.eclipse.swt.graphics" /&gt;
+    &lt;package name="org.eclipse.swt.layout" /&gt;
+    &lt;package name="org.eclipse.swt.custom" /&gt;
+    &lt;package name="org.omnetpp.common.wizard.support" /&gt;
+    &lt;package name="org.omnetpp.ned.editor.wizards.support" /&gt;
+    &lt;package name="org.omnetpp.cdt.wizard.support" /&gt;
+  &lt;/import&gt;
+  &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+
+  &lt;x:children&gt;
+
+    &lt;group text="Image export"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label text="Image file name (w/o extension):"/&gt;
+        &lt;text x:id="image_export_filename" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+        &lt;label text="Image width (inches):"/&gt;
+        &lt;text x:id="image_export_width" x:id.default="6" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+        &lt;label text="Image height (inches):"/&gt;
+        &lt;text x:id="image_export_height" x:id.default="4" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+    &lt;group text="Data export"&gt;
+      &lt;layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+      &lt;layout x:class="GridLayout" numColumns="2"/&gt;
+      &lt;x:children&gt;
+
+        &lt;label text="File name (w/o extension):"/&gt;
+        &lt;text x:id="data_export_filename" x:style="BORDER"&gt;
+          &lt;layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/&gt;
+        &lt;/text&gt;
+
+      &lt;/x:children&gt;
+    &lt;/group&gt;
+
+  &lt;/x:children&gt;
+&lt;/xswt&gt;
+                
+
+            </dialogPage>
+            <property name="filter" value="name =~ &quot;pingRxSeq:vector&quot; AND runattr:configname =~ &quot;Pmipv6&quot;" />
+            <property name="omit_empty_vectors" value="false" />
+            <property name="simplify" value="" />
+            <property name="vector_start_time" value="" />
+            <property name="vector_end_time" value="" />
+            <property name="vector_operations" value="" />
+            <property name="drawstyle" value="auto" />
+            <property name="linecolor" value="" />
+            <property name="linestyle" value="solid" />
+            <property name="linewidth" value="1.5" />
+            <property name="marker" value="s" />
+            <property name="markersize" value="3" />
+            <property name="title" value="Replies received by the correspondent node, with Proxy Mobile IPv6" />
+            <property name="xaxis_title" value="Simulation time" />
+            <property name="xaxis_unit" value="" />
+            <property name="xaxis_min" value="29" />
+            <property name="xaxis_max" value="33" />
+            <property name="xaxis_log" value="false" />
+            <property name="yaxis_title" value="Received sequence number" />
+            <property name="yaxis_unit" value="" />
+            <property name="yaxis_min" value="400" />
+            <property name="yaxis_max" value="520" />
+            <property name="yaxis_log" value="false" />
+            <property name="grid_show" value="true" />
+            <property name="grid_density" value="Major" />
+            <property name="legend_show" value="false" />
+            <property name="legend_placement" value="upper right" />
+            <property name="legend_automatic" value="true" />
+            <property name="legend_prefer_result_titles" value="true" />
+            <property name="legend_prefer_module_display_paths" value="true" />
+            <property name="legend_manual" value="" />
+            <property name="legend_format" value="" />
+            <property name="legend_replacements" value="" />
+            <property name="ordering_regex_list" value="" />
+            <property name="secondary_ordering_regex_list" value="" />
+            <property name="sorting" value="true" />
+            <property name="Plot.BackgroundColor" value="white" />
+            <property name="cycle_seed" value="0" />
+            <property name="Plot.Title.Font" value="Arial-regular-10" />
+            <property name="Axis.Title.Font" value="Arial-regular-8" />
+            <property name="Axis.Label.Font" value="Arial-regular-8" />
+            <property name="Legend.Font" value="Arial-regular-8" />
+            <property name="Legend.Border" value="false" />
+            <property name="Plot.Antialias" value="true" />
+            <property name="Plot.Caching" value="true" />
+            <property name="X.Label.Wrap" value="true" />
+            <property name="plot.properties" value="" />
+            <property name="image_export_filename" value="" />
+            <property name="image_export_width" value="8" />
+            <property name="image_export_height" value="6" />
+            <property name="data_export_filename" value="" />
+        </chart>
+    </charts>
+</analysis>
