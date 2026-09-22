@@ -1,0 +1,13 @@
+digraph g {
+  rankdir="TB"
+  node [shape=plaintext, fontsize=10, fontname="Helvetica"]
+  grid [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="6">
+      <tr><td border="0"></td><td><b>Data plane</b><br/>MSDUs, frame by frame<br/>microseconds to milliseconds</td><td><b>Management plane</b><br/>the relation to a BSS<br/>seconds</td></tr>
+      <tr><td><b>across layers</b></td><td bgcolor="#f2f2f2">—</td><td>agent (the SME)<br/>MIB (shared state)</td></tr>
+      <tr><td><b>LLC</b></td><td>classifier<br/>LLC or portal</td><td bgcolor="#f2f2f2">—</td></tr>
+      <tr><td><b>MAC</b></td><td>codec and dispatcher<br/>coordination function<br/>tx, rx, ds</td><td>management module<br/>(the MLME)</td></tr>
+      <tr><td><b>PHY</b></td><td>transmitter, receiver<br/>error model, PHY header</td><td>radio configuration (the PLME)<br/>modes, bands, channels</td></tr>
+      <tr><td><b>medium</b></td><td>radio medium</td><td bgcolor="#f2f2f2">—</td></tr>
+    </table>>]
+}
