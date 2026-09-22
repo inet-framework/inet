@@ -14,10 +14,21 @@ describes the generic wireless framework that the 802.11 radio builds on.
 The chapter describes the intended design of the model. Where the code does
 not meet it yet, the last section, :ref:`dg:sec:80211:gaps`, says so.
 
+The chapter has five parts. The first gives the map of the model. The second
+walks the map, cell by cell, along the path of a frame. The third gives the
+four properties that hold in every cell: state, communication, time and
+observation. The fourth says where to plug in. The fifth says where the code
+differs from the design.
+
+.. _dg:sec:80211:glance:
+
+At a glance
+-----------
+
 .. _dg:sec:80211:goals:
 
 Design goals
-------------
+~~~~~~~~~~~~
 
 The model has two goals that pull in different directions. It must be a
 full-featured, validated model of the standard. And it must let a researcher
@@ -41,47 +52,146 @@ the rest. The architecture answers with three rules:
    The transmitter only sends one frame after an inter-frame space. This
    keeps every state machine small.
 
+.. _dg:sec:80211:map:
+
+The map
+~~~~~~~
+
+Two axes divide the model into parts. The **layer** is the position in the
+stack: LLC, MAC, PHY, and the medium below them. The **plane** is the kind of
+work. The *data plane* carries MSDUs, frame by frame, on a time scale of
+microseconds to milliseconds. The *management plane* sets up and keeps the
+relation to a BSS: scan, authentication, association and beacons, on a scale
+of seconds. The standard draws the same line between the MAC data service
+and the management entities. The code draws it too: management frames have
+their own gate pair on the MAC.
+
+Every module of the model falls into one cell of the grid.
+
+.. graphviz:: figures/ieee80211_catalog.dot
+   :align: center
+
+The catalog, one row per cell:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 28 50
+
+   * - Cell
+     - Parts
+     - What the cell does
+   * - across layers, management
+     - agent, MIB
+     - The agent is the station management entity: it decides when to scan
+       and which access point to join. The MIB is the one shared object; it
+       holds the address, the BSS, the association state and the HT
+       settings.
+   * - LLC, data
+     - classifier; LLC or portal
+     - The classifier assigns a user priority. The LLC encapsulates the
+       payload for the wireless medium; the portal converts Ethernet frames
+       in an access point.
+   * - MAC, data
+     - codec and dispatcher; coordination function; tx, rx, ds
+     - The MAC class builds and parses frames and routes them. The
+       coordination function accesses the medium and exchanges frames. ``tx``
+       sends one frame, ``rx`` checks one frame and keeps the NAV, ``ds``
+       distributes a received data frame.
+   * - MAC, management
+     - management module
+     - The MLME: runs scan, authentication, association and beacons, owns
+       their timers, and writes the result into the MIB.
+   * - PHY, data
+     - transmitter, receiver, error model, PHY header
+     - Turns a frame into a transmission with a PHY mode and back, and
+       decides whether a reception succeeded.
+   * - PHY, management
+     - radio configuration; modes, bands, channels
+     - The PLME: applies a command that sets the PHY mode, the band or the
+       channel. The catalog of modes gives every part its timing.
+   * - medium, data
+     - radio medium
+     - Delivers a transmission to every radio that can receive it, with
+       propagation, path loss and interference.
+
+.. _dg:sec:80211:patterns:
+
+Three patterns in every cell
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Three patterns repeat inside the cells. They are not parts. They explain why
+parts come in pairs and in families, and they are the columns of the tables
+in the next part.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 40 42
+
+   * - Pattern
+     - Meaning
+     - Examples
+   * - direction
+     - Every layer has an originator side and a recipient side. In the
+       management plane the station initiates and the access point responds.
+     - encapsulate and decapsulate; the originator and recipient data
+       services; ``tx`` and ``rx``; transmitter and receiver
+   * - decision and mechanism
+     - A part decides, or a part executes. Almost every replaceable slot is
+       on the decision side.
+     - the agent decides, the management module executes; a policy decides,
+       a procedure executes; rate control decides, rate selection applies
+   * - variant
+     - Parts come in families by generation or by fidelity.
+     - DCF and EDCA; the non-QoS and QoS class pairs; PHY families from DSSS
+       to VHT; radios from unit disk to bit level; full and simplified
+       management
+
+The MAC data plane divides further by **function**: access, exchange,
+transformation, reliability, and rate and protection. Each function answers
+one question, and each has an originator side, a recipient side, and a DCF
+and an EDCA variant. The section on the MAC follows this axis.
+
 .. _dg:sec:80211:reference-model:
 
-Reference model
----------------
+The model and the standard
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The model follows the reference model of the standard (IEEE Std 802.11-2024,
-clause 4.9). The table maps the entities of the standard to the parts of
+The grid follows the reference model of IEEE Std 802.11-2024 (clause 4.9).
+The table maps each cell to the clauses of the standard and to the parts of
 INET.
 
 .. list-table::
    :header-rows: 1
-   :widths: 40 60
+   :widths: 22 30 48
 
-   * - Standard
+   * - Cell
+     - Standard
      - INET
-   * - STA, AP, portal, distribution system (clause 4.3)
-     - :ned:`WirelessHost`, :ned:`AccessPoint`, :ned:`Ieee80211Portal`,
-       :ned:`Ds` and the relay unit of the access point
-   * - MAC sublayer (clause 10)
-     - :ned:`Ieee80211Mac` and its submodules
-   * - MAC data plane (clause 5.1.5)
-     - :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService` and
-       their QoS variants
-   * - DCF (clause 10.3), HCF with EDCA (clause 10.23)
-     - :ned:`Dcf`, :ned:`Hcf`
-   * - HCCA (clause 10.23.3), and PCF, which the 2024 revision no longer
-       contains
-     - slots with placeholders: :ned:`Pcf`, :ned:`Mcf`, :ned:`Hcca`
-   * - Frame exchange sequences (Annex G)
-     - the ``IFrameSequence`` classes
-   * - MLME (clause 6.3) and its SAP primitives
-     - the management modules and the ``Ieee80211Prim_*`` messages
-   * - SME, the station management entity
-     - :ned:`Ieee80211AgentSta`
-   * - PLME (clause 6.7)
-     - the command interface of the radio, ``Ieee80211ConfigureRadioCommand``
-   * - MIB
-     - :ned:`Ieee80211Mib`
-   * - PHY (clauses 15 to 21)
-     - :ned:`Ieee80211Radio`, the ``IIeee80211Mode`` classes and the PHY
-       header chunks
+   * - across layers
+     - the SME; the MIB (Annex C)
+     - :ned:`Ieee80211AgentSta`; :ned:`Ieee80211Mib`
+   * - LLC, data
+     - LLC (IEEE Std 802.2), the portal and the distribution system (clause 4.3)
+     - :ned:`Ieee80211LlcLpd`, :ned:`Ieee80211LlcEpd`, :ned:`Ieee80211Portal`, :ned:`Ds`
+   * - MAC, data
+     - MAC sublayer (clause 10); the MAC data plane (clause 5.1.5); DCF
+       (clause 10.3); HCF with EDCA (clause 10.23); frame exchange sequences
+       (Annex G)
+     - :ned:`Ieee80211Mac`; the data services; :ned:`Dcf`; :ned:`Hcf`; the
+       ``IFrameSequence`` classes
+   * - MAC, data, placeholders
+     - HCCA (clause 10.23.3); PCF, which the 2024 revision no longer contains
+     - :ned:`Hcca`, :ned:`Pcf`, :ned:`Mcf`
+   * - MAC, management
+     - MLME (clause 6.3) and its SAP primitives
+     - the management modules; the ``Ieee80211Prim_*`` messages
+   * - PHY, data
+     - PHY (clauses 15 to 21)
+     - :ned:`Ieee80211Radio`, its transmitter, receiver and error models, the
+       PHY header chunks
+   * - PHY, management
+     - PLME (clause 6.7)
+     - ``Ieee80211ConfigureRadioCommand``; the ``IIeee80211Mode`` classes
 
 The code cites two revisions. The older parts, such as the recovery procedures
 and the DSSS and OFDM mode classes, cite IEEE Std 802.11-2012. The newer
