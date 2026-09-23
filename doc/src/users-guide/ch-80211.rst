@@ -561,9 +561,16 @@ reaches :par:`shortRetryLimit` (default 7) or :par:`longRetryLimit`
 ``packetDropRetryLimitReached`` statistic and in the ``linkBroken`` signal.
 
 The recovery procedure is ``mac.dcf.recoveryProcedure`` in a non-QoS
-station. A QoS station has one per access category,
-``mac.hcf.edca.edcaf[i].recoveryProcedure``, plus
-``mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure`` for management frames.
+station. A QoS station has two per access category:
+``mac.hcf.edca.edcaf[i].recoveryProcedure`` for QoS data and
+``mac.hcf.edca.edcaf[i].mgmtAndNonQoSRecoveryProcedure`` for management
+frames. Both update that category's contention window.
+
+Use ``mac.hcf.edca.edcaf[*].mgmtAndNonQoSRecoveryProcedure`` to configure
+management recovery for all access categories, or select ``edcaf[3]`` for
+voice, the category used for management frames. Signal subscriptions and
+result paths identify the individual recovery procedure; CW samples from
+different categories are separate time series.
 
 The acknowledgement timeout is on the originator ACK policy
 (``originatorAckPolicy.ackTimeout``). The default, ``-1s``, takes the

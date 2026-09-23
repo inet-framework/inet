@@ -17,6 +17,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IEdcaCollisionController.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
@@ -38,6 +39,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     StationRetryCounters *stationRetryCounters = nullptr;
     QosAckHandler *ackHandler = nullptr;
     QosRecoveryProcedure *recoveryProcedure = nullptr;
+    NonQosRecoveryProcedure *mgmtAndNonQoSRecoveryProcedure = nullptr;
 
     // Tx Opportunity
     TxopProcedure *txopProcedure = nullptr;
@@ -77,6 +79,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     virtual StationRetryCounters *getStationRetryCounters() const { return stationRetryCounters; }
     virtual QosAckHandler *getAckHandler() const { return ackHandler; }
     virtual QosRecoveryProcedure *getRecoveryProcedure() const { return recoveryProcedure; }
+    virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const { return mgmtAndNonQoSRecoveryProcedure; }
 
     virtual TxopProcedure *getTxopProcedure() const { return txopProcedure; }
 

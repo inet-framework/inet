@@ -28,6 +28,12 @@ and uses, the initialization stages, and the lifecycle operations.
 `src/inet/physicallayer/wireless/common/`. A *module* is a NED module with a C++ class. An *object*
 is a plain C++ object that a module creates with `new` and owns. Interface names start with `I`.
 
+**2026-09-23 composition update:** this snapshot retains its historical shared
+management-recovery description. The current implementation places that procedure
+inside each EDCAF and binds it to the same EDCAF's CW. See the current
+[developer guide](../../src/developers-guide/ch-80211.rst) for composition, dispatch
+and configuration/signal migration.
+
 ## 1. The interface at a glance
 
 `Ieee80211Interface` (`src/inet/linklayer/ieee80211/Ieee80211Interface.ned`) is a compound module

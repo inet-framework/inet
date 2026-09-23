@@ -12,7 +12,6 @@
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -26,7 +25,6 @@ class INET_API Edca : public SimpleModule
     int numEdcafs = -1;
     Edcaf **edcafs = nullptr;
     EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-    NonQosRecoveryProcedure *mgmtAndNonQoSRecoveryProcedure = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -41,7 +39,6 @@ class INET_API Edca : public SimpleModule
     virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
     virtual Edcaf *getChannelOwner();
     virtual std::vector<Edcaf *> getInternallyCollidedEdcafs();
-    virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const { return mgmtAndNonQoSRecoveryProcedure; }
 
     virtual void requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
     virtual void releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);

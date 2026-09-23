@@ -9,7 +9,6 @@ package inet.linklayer.ieee80211.mac.channelaccess;
 
 import inet.common.Module;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
-import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
 //
 // Implements EDCA (Enhanced Distributed Channel Access) for IEEE 802.11.
@@ -42,12 +41,6 @@ module Edca extends Module
         collisionController: <default("EdcaCollisionController")> like ICollisionController {
             parameters:
                 @display("p=100,200");
-        }
-        mgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
-            parameters:
-                cwCalculatorModule = "^.edcaf[1]"; // Best effort
-                rtsPolicyModule = "^.^.rtsPolicy";
-                @display("p=400,200");
         }
 }
 
