@@ -351,8 +351,10 @@ Results
 Moving without Proxy Mobile IPv6
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the move itself. Watch the address label on the mobile node, and the
-arrows that mark the path of the traffic:
+Here is the move itself. Watch the address label above the mobile node, and the
+arrows that mark the path of the traffic. A second label below the node names the
+access point it is associated with, ``AR1`` or ``AR2``, and that label disappears
+while the node is associated with neither:
 
 .. video:: media/baseline-movement.mp4
    :align: center
@@ -363,12 +365,18 @@ arrows that mark the path of the traffic:
    config:   NoPmipv6        seed: seed-set = 1 (from [General])
    shows:    the mobile node drives from ar1 to ar2; the route arrows stop, the
              address label changes from 2001:db8:1:0:8aa:ff:fe00:b to
-             2001:db8:2:0:8aa:ff:fe00:b, and the arrows never come back
+             2001:db8:2:0:8aa:ff:fe00:b, the association label under the node goes
+             AR1 -> none -> AR2, and the arrows never come back
    anchors:  last echo reply at t = 30.250258 (arrows stop within a frame of it);
              re-association with ar2 at t = 31.25643; the new address is assigned
-             at t = 33.945575, which is when the label changes. If the label
-             changes more than ~0.3 s away from 33.95, the timeline moved --
-             re-derive the window before re-recording.
+             at t = 33.945575, which is when the address label changes. If the
+             address label changes more than ~0.3 s away from 33.95, the timeline
+             moved -- re-derive the window before re-recording. The association
+             label is the second thing that changes: last frame carrying AR1 at
+             t = 30.60, first frame with no association label at t = 30.70, first
+             frame reading AR2 at t = 31.30 -- the address label follows only
+             2.7 s later. Both labels must change; if only one does, the wrong
+             configuration was recorded.
    window:   express-run to 19.0 s, step one event in normal mode, wait 2 s for
              the route visualizer to fade (fadeOutMode is realTime), then record
              to 40.0 s
@@ -377,18 +385,29 @@ arrows that mark the path of the traffic:
              requests an animation speed, so without it Qtenv falls back to one
              frame per event and 21 s of simulation yields ~30 000 frames. With
              it, one frame per 0.1 s of simulation -> 210 frames in ~42 s.
+             The clamp only bites with Qtenv's own message animation switched OFF
+             (Preferences -> Animate messages, or animation_enabled=false in
+             $HOME/.config/omnetpp/.qtenvrc). With it on the clamp is ignored and
+             the sampling is ~10x finer: the handover window below was measured at
+             867 frames instead of 199 with animation on, at either clamp value.
    view:     set_canvas_view {module_path:"<root>", zoom:1.0} before recording;
              at any other zoom the crop below is wrong
-   capture:  fps=1, crop_area=with_padding; re-read crop_rect -- was
-             824x524 at (810,155) on an 1853x1010 window
+   capture:  fps=1, crop_area=with_padding; re-read crop_rect -- 824x524 on an
+             1853x1010 window, at (837,155) this time and (810,155) before. The
+             size is stable; the x offset moves with the Qtenv panel layout, so
+             take it from the start_video_recording response and not from here.
    encode:   ffmpeg -r 10 -f image2 -i frames/v2_%04d.png
-             -filter:v "crop=824:524:810:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+             -filter:v "crop=824:524:837:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
              -vcodec libx264 -pix_fmt yuv420p   -> 210 frames, 21.0 s
    post:     none
-   stamp:    recorded 2026-09, INET 4.7
+   stamp:    recorded 2026-09, re-recorded 2026-09 with the association label,
+             INET 4.7
 
-The address label changes when the node reaches the second access router, and
-the arrows never come back. Here are the echo replies the correspondent node
+The label below the node reads ``AR2`` as soon as the node associates with the
+second access point. The address label changes 2.7 s later. In between, the node
+asks the new access router for a Router Advertisement and waits for it. Then it
+runs the duplicate address check that IPv6 requires on a link it has just joined.
+The arrows never come back. Here are the echo replies the correspondent node
 received over the whole run:
 
 .. figure:: media/baseline-chart.png
@@ -451,31 +470,43 @@ Here is the same move, with Proxy Mobile IPv6 running:
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   Pmipv6          seed: seed-set = 1 (from [General])
    shows:    the same drive with the mechanism running: the route arrows stop,
-             reappear through ar2, and the address label never changes. Qtenv's
+             reappear through ar2, and the address label never changes, while the
+             association label under the node goes AR1 -> none -> AR2. Qtenv's
              own bubbles narrate it -- "Beacon lost" at t = 30.605127 and
              "Associated with AP" at t = 31.256112
    anchors:  last echo reply at t = 30.270332, first one after the gap at
              t = 31.320925 -- an interruption of 1.0506 s, about 42 frames at the
              sampling below. The address label reads 2001:db8:1:0:8aa:ff:fe00:b in
-             every frame; if it ever changes, the wrong configuration was recorded.
+             every frame; if the address label ever changes, the wrong
+             configuration was recorded. The association label is a second,
+             independent clock on the same event: last frame carrying AR1 at
+             t = 30.600, first frame with no association label at t = 30.625,
+             first frame reading AR2 at t = 31.275. Both edges sit inside the
+             reply gap above; if either falls outside it, the timeline moved.
    window:   express-run to 29.0 s, step one event in normal mode, wait 2 s for
              the route visualizer to fade, then record to 34.0 s
    anim:     playback_speed=1, min_animation_speed=0.025  (normal profile)
              Four times finer than the baseline video because this clip is five
              simulated seconds rather than twenty-one, and the interruption is the
-             whole point. Same reason for the clamp as in the baseline recipe.
+             whole point. Same reason for the clamp as in the baseline recipe,
+             including the requirement that Qtenv's message animation be off --
+             with it on this window records 867 frames whatever the clamp says.
    view:     set_canvas_view {module_path:"<root>", zoom:1.0}; same framing as the
              baseline video, so the two can be compared shot for shot
-   capture:  fps=1, crop_area=with_padding; crop_rect was 824x524 at (810,155)
+   capture:  fps=1, crop_area=with_padding; re-read crop_rect -- 824x524 at
+             (810,155) here, the same size but a different x offset than the
+             baseline video, which is a panel-layout effect and not a reframing
    encode:   ffmpeg -r 10 -f image2 -i frames/v1_%04d.png
              -filter:v "crop=824:524:810:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
              -vcodec libx264 -pix_fmt yuv420p   -> 199 frames, 19.9 s
    post:     none
-   stamp:    recorded 2026-09, INET 4.7
+   stamp:    recorded 2026-09, re-recorded 2026-09 with the association label,
+             INET 4.7
 
-The arrows stop, and then reappear through the second access router. The address
-label does not change at any point. Here are the replies from the same movement,
-around the moment of the handover:
+The arrows stop, and then reappear through the second access router. Below the
+node the label changes from ``AR1`` to ``AR2``, which is the move itself. The
+address label does not change at any point. Here are the replies from the same
+movement, around the moment of the handover:
 
 .. figure:: media/pmipv6-chart.png
    :align: center
