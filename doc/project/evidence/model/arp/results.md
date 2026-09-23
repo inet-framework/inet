@@ -7,6 +7,8 @@ workflow that may reference code.
 
 - Date: 2026-09-11 10:50 +0200
 - INET: branch `master`, commit `223ba89ce5`, tree clean
+- Trees: src `182ba10a23`, tests/protocol `e6d906c265` — the commit left master in the
+  landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
@@ -18,6 +20,9 @@ workflow that may reference code.
   inet_run_protocol_tests -p inet -w arp
   ```
 - Suite result: 16 TOTAL, 13 PASS, **3 FAIL (unexpected)**, so the suite reports FAIL.
+  This is what this pass run found. Commit `0b4f3b0777` repaired the three failures on
+  2026-09-14, and a fresh run on `master` confirms all 16 checks still pass; see
+  [`coverage.md`](coverage.md) for the later verdicts.
 
 This is the first ARP pass. It targets level 3, so it did the work of levels 1, 2 and 3
 together, and there is no earlier verdict to repeat.

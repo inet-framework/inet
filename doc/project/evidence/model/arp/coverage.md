@@ -10,13 +10,14 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-11 10:50 +0200
-- INET: branch `master`, commit `223ba89ce5`, tree clean
-- OMNeT++: 6.4.0
+- Date: 2026-09-23 18:26 +0200
+- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
-- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
-- Command: `inet_run_protocol_tests -p inet -w arp`
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/arp$'`
 - Target level: 3
 
 ## Statement coverage
@@ -42,16 +43,16 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC826-REQ-4](../../standard/rfc826/catalog.md#rfc826-req-4) | selected | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution) | Rfc826AddressResolution.test | PASS for the five fields the model has; the hardware space, the protocol space and the two lengths are the constants of gap 2 and are right for this link |
 | [RFC826-REQ-5](../../standard/rfc826/catalog.md#rfc826-req-5) | no check | — | — | a permission about a field the standard calls meaningless. The run showed all zeros in it |
 | [RFC826-REQ-6](../../standard/rfc826/catalog.md#rfc826-req-6) | selected | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution) | Rfc826AddressResolution.test | PASS |
-| [RFC826-RECV-1](../../standard/rfc826/catalog.md#rfc826-recv-1) | covered | the five checks of [input-validation](../../protocol/arp/checks/input-validation.md) | five tests | PASS in three, **FAIL** in two: gap 1 and gap 2 |
-| [RFC826-RECV-2](../../standard/rfc826/catalog.md#rfc826-recv-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **PASS** since 2026-09-14, gap 2 repaired |
-| [RFC826-RECV-3](../../standard/rfc826/catalog.md#rfc826-recv-3) | selected | [an-unknown-protocol-space](../../protocol/arp/checks/input-validation.md#an-unknown-protocol-space) | Rfc826UnknownProtocolSpace.test | **PASS** since 2026-09-14, gap 2 repaired |
+| [RFC826-RECV-1](../../standard/rfc826/catalog.md#rfc826-recv-1) | covered | the five checks of [input-validation](../../protocol/arp/checks/input-validation.md) | five tests | PASS in all five; gap 1 and gap 2 repaired by `0b4f3b0777` |
+| [RFC826-RECV-2](../../standard/rfc826/catalog.md#rfc826-recv-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | PASS. Gap 2 repaired by `0b4f3b0777` |
+| [RFC826-RECV-3](../../standard/rfc826/catalog.md#rfc826-recv-3) | selected | [an-unknown-protocol-space](../../protocol/arp/checks/input-validation.md#an-unknown-protocol-space) | Rfc826UnknownProtocolSpace.test | PASS. Gap 2 repaired by `0b4f3b0777` |
 | [RFC826-RECV-4](../../standard/rfc826/catalog.md#rfc826-recv-4) | selected | [a-newer-hardware-address](../../protocol/arp/checks/cache.md#a-newer-hardware-address) | Rfc826SupersedingHardwareAddress.test | PASS |
 | [RFC826-RECV-5](../../standard/rfc826/catalog.md#rfc826-recv-5) | selected | [a-request-for-a-third-station](../../protocol/arp/checks/input-validation.md#a-request-for-a-third-station) | Rfc826ThirdStationRequest.test | PASS for a host. A router with proxy ARP answers for an address that is not its own; see [`results.md`](results.md) |
 | [RFC826-RECV-6](../../standard/rfc826/catalog.md#rfc826-recv-6) | selected | [learning-from-a-request](../../protocol/arp/checks/reply.md#learning-from-a-request), [a-reply-fills-the-table](../../protocol/arp/checks/cache.md#a-reply-fills-the-table) | Rfc826LearningFromRequest.test, Rfc826MergeBeforeOpcode.test | PASS, from a request and from a reply |
 | [RFC826-RECV-7](../../standard/rfc826/catalog.md#rfc826-recv-7) | selected | [learning-from-a-request](../../protocol/arp/checks/reply.md#learning-from-a-request), [a-reply-fills-the-table](../../protocol/arp/checks/cache.md#a-reply-fills-the-table) | Rfc826LearningFromRequest.test, Rfc826MergeBeforeOpcode.test | PASS, both branches of the opcode question |
 | [RFC826-RECV-8](../../standard/rfc826/catalog.md#rfc826-recv-8) | selected | [reply-field-values](../../protocol/arp/checks/reply.md#reply-field-values) | Rfc826ReplyFields.test | PASS, all four address fields |
 | [RFC826-RECV-9](../../standard/rfc826/catalog.md#rfc826-recv-9) | selected | [reply-field-values](../../protocol/arp/checks/reply.md#reply-field-values) | Rfc826ReplyFields.test | PASS for "direct, not broadcast". "On the same hardware" needs a host with two interfaces |
-| [RFC826-RECV-10](../../standard/rfc826/catalog.md#rfc826-recv-10) | selected | [an-unsolicited-reply](../../protocol/arp/checks/input-validation.md#an-unsolicited-reply), [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc826UnsolicitedReply.test, Rfc5494ExperimentalOpcode.test | PASS for a reply; **FAIL** for any other opcode, gap 1 |
+| [RFC826-RECV-10](../../standard/rfc826/catalog.md#rfc826-recv-10) | selected | [an-unsolicited-reply](../../protocol/arp/checks/input-validation.md#an-unsolicited-reply), [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc826UnsolicitedReply.test, Rfc5494ExperimentalOpcode.test | PASS for a reply; PASS for any other opcode too, gap 1 repaired by `0b4f3b0777` |
 | [RFC826-RECV-11](../../standard/rfc826/catalog.md#rfc826-recv-11) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS on the sending side: the two lengths agree with the widths of the address fields. The receiving side is a permission the model cannot use, because it has no field to read |
 | [RFC826-TABLE-1](../../standard/rfc826/catalog.md#rfc826-table-1) | selected | [a-newer-hardware-address](../../protocol/arp/checks/cache.md#a-newer-hardware-address) | Rfc826SupersedingHardwareAddress.test | PASS |
 | [RFC826-TABLE-2](../../standard/rfc826/catalog.md#rfc826-table-2) | covered | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution), [reply-field-values](../../protocol/arp/checks/reply.md#reply-field-values) | Rfc826AddressResolution.test, Rfc826ReplyFields.test | PASS for a host; proxy ARP is the exception and it is level 5 |
@@ -64,16 +65,16 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC1122-AUSE-1](../../standard/rfc1122/catalog.md#rfc1122-ause-1) | selected | [address-resolution](../../protocol/arp/checks/resolution.md#address-resolution) | Rfc826AddressResolution.test | PASS |
 | [RFC1122-ANOERR-1](../../standard/rfc1122/catalog.md#rfc1122-anoerr-1) | selected | [no-destination-unreachable](../../protocol/arp/checks/no-error-report.md#no-destination-unreachable) | Rfc1122NoDestinationUnreachable.test | PASS. No ICMP message of any type in 10 s |
 | [RFC5494-NUM-1](../../standard/rfc5494/catalog.md#rfc5494-num-1) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS. Neither reserved value appears in either field |
-| [RFC5494-NUM-2](../../standard/rfc5494/catalog.md#rfc5494-num-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | **PASS** since 2026-09-14, gap 2 repaired. The value did its work: it gave the check a defined input |
-| [RFC5494-NUM-3](../../standard/rfc5494/catalog.md#rfc5494-num-3) | selected | [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc5494ExperimentalOpcode.test | **PASS** since 2026-09-14, gap 1 repaired |
+| [RFC5494-NUM-2](../../standard/rfc5494/catalog.md#rfc5494-num-2) | selected | [an-experimental-hardware-space](../../protocol/arp/checks/input-validation.md#an-experimental-hardware-space) | Rfc5494ExperimentalHardwareSpace.test | PASS. Gap 2 repaired by `0b4f3b0777`. The value did its work: it gave the check a defined input |
+| [RFC5494-NUM-3](../../standard/rfc5494/catalog.md#rfc5494-num-3) | selected | [an-experimental-opcode](../../protocol/arp/checks/input-validation.md#an-experimental-opcode) | Rfc5494ExperimentalOpcode.test | PASS. Gap 1 repaired by `0b4f3b0777` |
 | [RFC5494-NUM-4](../../standard/rfc5494/catalog.md#rfc5494-num-4) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS. The field holds 0x0800, the Ethertype of IPv4 |
 | [RFC5494-PROC-1](../../standard/rfc5494/catalog.md#rfc5494-proc-1) | no check | — | — | the statement binds IANA; no behaviour of a host follows from it |
 
 39 entries: 28 from RFC 826, 6 from the ARP part of RFC 1122, and 5 from RFC 5494. 35
-reached a test: 35 with a PASS, since the three defects were repaired on 2026-09-14. Four carry
-`no check`, each with its reason, and none of the four is mandatory: one is a `may` about a
-field the standard calls meaningless, one is overridden, one is a `should` about hardware
-that the in-scope set does not have, and one binds IANA.
+reached a test: 35 with a PASS. Three of them were defects; commit `0b4f3b0777` repaired all
+three on 2026-09-14. Four carry `no check`, each with its reason, and none of the four is
+mandatory: one is a `may` about a field the standard calls meaningless, one is overridden, one
+is a `should` about hardware that the in-scope set does not have, and one binds IANA.
 
 ## Feature support
 
@@ -86,26 +87,26 @@ when every core check that ran failed as a model gap, `untested` when no core ch
 | [ARP-F-RESOLUTION](../../protocol/arp/features.md#arp-f-resolution) | RFC826-REQ-1, REQ-4, REQ-6 and RFC1122-AUSE-1 all PASS | **supported** |
 | [ARP-F-REPLY](../../protocol/arp/features.md#arp-f-reply) | RFC826-RECV-8 and RECV-9 PASS | **supported** |
 | [ARP-F-CACHE](../../protocol/arp/features.md#arp-f-cache) | RFC826-REQ-2, RECV-4, RECV-6, RECV-7, TABLE-1 and RFC1122-ACACHE-1 all PASS | **supported** |
-| [ARP-F-INPUT-VALIDATION](../../protocol/arp/features.md#arp-f-input-validation) | RFC826-RECV-5 PASS, RECV-10 PASS for a reply and FAIL for any other opcode, RECV-2 FAIL, RECV-3 FAIL | **partial** |
+| [ARP-F-INPUT-VALIDATION](../../protocol/arp/features.md#arp-f-input-validation) | RFC826-RECV-5 PASS, RECV-10 PASS, RECV-2 PASS, RECV-3 PASS | **supported** |
 | [ARP-F-PACKET-FORMAT](../../protocol/arp/features.md#arp-f-packet-format) | RFC826-FMT-1, FMT-2, FMT-4 and RFC5494-NUM-1, NUM-4 all PASS | **supported** |
 | [ARP-F-QUEUE](../../protocol/arp/features.md#arp-f-queue) | RFC1122-AQUEUE-1 PASS | **supported** |
 | [ARP-F-FLOOD-PREVENTION](../../protocol/arp/features.md#arp-f-flood-prevention) | RFC1122-AFLOOD-1 PASS | **supported** |
 | [ARP-F-NO-ERROR-REPORT](../../protocol/arp/features.md#arp-f-no-error-report) | RFC1122-ANOERR-1 PASS | **supported** |
 | [ARP-F-GENERALIZATION](../../protocol/arp/features.md#arp-f-generalization) | RFC826-GEN-1 has no check | **untested** |
 
-Nine features: seven supported, one partial, one untested. The model does the normal
+Nine features: eight supported, one untested. The model does the normal
 exchange of ARP well, and it follows the reception algorithm of RFC 826 step by step,
 including the one step a reader is most likely to get wrong: the merge before the opcode.
 Two of the three things RFC 1122 adds are not only met but exceeded — every waiting datagram
 is saved, not only the latest, and the request rate lands exactly on the recommended one per
 second.
 
-The one partial feature is input validation, and the reason is one shape repeated three
-times: RFC 826 wants a packet the receiver cannot use to be discarded, and the model stops
-the run. Two of the four questions of the reception algorithm are answered that way
-(RFC826-RECV-2 and RECV-3, one gap), and so is the opcode question for a value that is
-neither 1 nor 2 (RFC826-RECV-10, a second gap). The two questions that a normal exchange
-reaches — the target address, and a reply — are answered correctly.
+Input validation is supported now. It was partial until commit `0b4f3b0777`: three checks
+failed in one shape repeated three times, because RFC 826 wants a packet the receiver cannot
+use to be discarded, and the model stopped the run instead. Two of the four questions of the
+reception algorithm were answered that way (RFC826-RECV-2 and RECV-3, one gap), and so was
+the opcode question for a value that is neither 1 nor 2 (RFC826-RECV-10, a second gap). The
+commit made the model discard the packet instead of stopping, and all three checks pass now.
 
 `ARP-F-GENERALIZATION` is `untested` and not `not supported`. Its one core statement is a
 `should` about hardware other than the Ethernet, and the model has no field for a second
@@ -124,7 +125,8 @@ Two bounds that this pass records for the next one:
 ## Achieved level
 
 **Level 3, reached.** Target: level 3, from
-[`standards.md`](../../protocol/arp/standards.md#target-level). Three model gaps found.
+[`standards.md`](../../protocol/arp/standards.md#target-level). Three model gaps found, and
+commit `0b4f3b0777` repaired all three.
 
 The exit criterion of level 3 is that the catalogs hold every mandatory statement of the
 in-scope documents, including each MUST NOT, and that each one has a check.
@@ -135,10 +137,13 @@ set are six: the one `must` of RFC 826 that binds a sender (RFC826-REQ-1), the t
 RFC 1122 (ACACHE-1, AFLOOD-1, AUSE-1), and its one MUST NOT (ANOERR-1); RFC 5494 has none.
 Every one of the six has a check that ran, and all six passed.
 
-**Run** — 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reported FAIL. Since 2026-09-14 all 16 pass, the three defects repaired. The three failures were defects against
-statements whose strength is `description`, which is the strength of nearly every sentence
-of RFC 826. They do not hold the level back: the criterion asks that each mandatory statement
-have a check, and each one does. They are the findings of the pass.
+**Run** — the original run: 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reported
+FAIL. Commit `0b4f3b0777` repaired the three defects on 2026-09-14. The fresh run, on
+`master` commit `28536bd0a5`, confirms it: 16 tests, 16 PASS, 0 FAIL (expected), 0 FAIL
+(unexpected). The three failures were defects against statements whose strength is
+`description`, which is the strength of nearly every sentence of RFC 826. They did not hold
+the level back: the criterion asks that each mandatory statement have a check, and each one
+does. They are the findings of the pass.
 
 A level reached with three gaps is the normal outcome and not a contradiction. The level
 measures the reach of the catalogs and of the checks; the gaps measure the model.
@@ -147,7 +152,7 @@ measures the reach of the catalogs and of the checks; the gaps measure the model
 | --- | --- | --- |
 | 1, Survey | **reached** | The standards map pins the in-scope set from the RFC-editor register and not from the model's claim; [`conformance.md`](conformance.md) maps the claim onto it and names what the claim lacks. |
 | 2, Core | **reached** | Every normal-path mandatory mechanism of RFC 826 is a feature, and every mandatory feature has a core check that ran and has a verdict. Ten checks need observation alone. |
-| 3, Edge | **reached** | Every mandatory statement of the in-scope set has a check that ran and passed. Six checks craft a packet no program can send, and three of them found a gap. |
+| 3, Edge | **reached** | Every mandatory statement of the in-scope set has a check that ran and passed. Six checks craft a packet no program can send, and three of them found a gap, repaired by `0b4f3b0777`. |
 | 4, Dynamics | not started | RFC 5227, the address conflict detection: five time constants and a defence rate. The retry timer and the cache lifetime also need a tolerance there. |
 | 5, Complete | not started | RFC 1027 and proxy ARP, RFC 903 and the reverse protocol, RFC 1868, and the other hardware types of RFC826-GEN-1. |
 
@@ -156,6 +161,7 @@ measures the reach of the catalogs and of the checks; the gaps measure the model
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-11 | **3, reached** | The first ARP pass, and it did levels 1, 2 and 3 together. RFC 826, three clauses of RFC 1122 and RFC 5494 in scope; two new catalogs with 33 entries and 6 entries added to the shared RFC 1122 catalog; 9 features; 16 checks; 16 tests, one of which replaced a demo test that named no catalog entry | 16 tests: 13 PASS and 3 undeclared FAIL naming two defects in three tests, so the suite reports FAIL; 7 features supported, 1 partial, 1 untested; 4 statements carry `no check` with a reason; see [`results.md`](results.md) |
+| — | 2026-09-23 | unchanged | Re-run only, no new check. The run record of the last pass named a commit that the landing rebase removed; this row gives the ledger a run on master. | 16 tests: 16 PASS, 0 FAIL (expected), 0 FAIL (unexpected). No verdict changed since the last pass: the three defects it found (RFC826-RECV-2, RECV-3, RECV-10, and the matching RFC5494-NUM-2 and NUM-3 entries) were already repaired by commit `0b4f3b0777` on 2026-09-14, and this run confirms all 16 checks still pass. |
 
 ## Out of scope
 
