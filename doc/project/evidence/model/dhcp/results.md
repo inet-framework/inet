@@ -11,6 +11,7 @@ each checked behavior.
 
 - Date: 2026-09-11 11:25 +0200
 - INET: branch `topic/rfc-tests-dhcp-level3`, commit `4e20c74e82`, tree clean
+- Trees: src `182ba10a23`, tests/protocol `b96705c28e`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
@@ -21,11 +22,23 @@ each checked behavior.
 The build is newer than every source file under `src`, so the library the run linked was
 built from this commit. The worktree holds no uncommitted change.
 
+[`coverage.md`](coverage.md) of this same pass names a different commit, `4acb050ab1`. The
+landing rebase later removed both commits from `master`. Both hold the src tree `182ba10a23`,
+the same tree every commit from `512d6c1b15` to `cae555ebc8` on `master` holds, so the two
+documents record one run of one model, under two names a rebase has since erased.
+
 ## Verdicts
 
-26 tests: **13 PASS, 5 FAIL (expected), 8 FAIL (unexpected)**. The suite as a whole reports
-**FAIL**, and that is the intended signal: eight of the thirteen failures are in behavior the
-model claims, and a failure in a claimed behavior must keep the suite red until somebody fixes it.
+26 tests: **13 PASS, 5 FAIL (expected), 8 FAIL (unexpected)**, on this run of 2026-09-11. The
+suite as a whole reported **FAIL**, and that was the intended signal: eight of the thirteen
+failures were in behavior the model claims, and a failure in a claimed behavior must keep the
+suite red until somebody fixes it.
+
+Two commits after this run, `b72abc4696` and `bdde132792`, both 2026-09-15, closed eight of the
+fourteen gaps below (see [the model gaps](#the-model-gaps)); the table that follows already
+carries each test's repaired verdict, and
+[`coverage.md`](coverage.md) carries the verdict of every later run, including the fresh one of
+2026-09-23.
 
 The `FAIL (expected)` and `FAIL (unexpected)` split is the subject of the next section. It is not
 a statement about how serious a failure is; it is a statement about whether the model claims the
@@ -657,7 +670,7 @@ The first item is a debt of this pass and not a property of the protocol. The re
 ordinary sharpening candidates.
 
 1. **Write the thirteen checks this pass owes.**
-   [The debt table](coverage.md#the-coverage-debt-thirteen-checks-this-pass-owes) lists them with
+   [The debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes) lists them with
    what each needs. Thirteen statements of the catalogs are behavior the model claims — there is
    code for each — and no check reaches them, which is what
    [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)

@@ -10,15 +10,22 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-11 11:25 +0200
-- INET: branch `master`, commit `4acb050ab1`, tree clean
-- OMNeT++: 6.4.0
+- Date: 2026-09-23 18:26 +0200
+- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
-- Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
-- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
-- Command: `inet_run_protocol_tests -p inet -w dhcp`
-- Suite: 26 tests, 13 PASS, 5 FAIL (expected), 8 FAIL (unexpected), so the suite reports FAIL
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/dhcp$'`
+- Suite: 26 tests, 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected), so the suite reports PASS
 - Target level: 3
+
+This run repeats a pass first run on 2026-09-11. The run records of that pass named two
+commits, `4e20c74e82` and `4acb050ab1`, that the landing rebase later removed from `master`;
+both held the src tree `182ba10a23`, the same tree every commit from `512d6c1b15` to
+`cae555ebc8` on `master` holds. This run is the same pass, on `master`, with a name a rebase
+cannot take away.
 
 ## Statement coverage
 
@@ -34,8 +41,8 @@ State of the ledger, from this run:
 
 The two statuses that carry an obligation are `owed` and `later`, and they are different in kind.
 A `later` row waits for a suite this tree does not have; an `owed` row waits for nothing but the
-work. Thirteen rows are `owed`, and they are the coverage debt of this pass — see
-[the debt](#the-coverage-debt-thirteen-checks-this-pass-owes).
+work. Fourteen rows are `owed`, and they are the coverage debt of this pass — see
+[the debt](#the-coverage-debt-the-checks-this-pass-owes).
 
 **No row says `untested`.** A statement whose check exists and fails carries the verdict of that
 check, and the cell says which observation the failure kept the check from reaching. Twelve rows
@@ -57,7 +64,7 @@ is the opposite of what happened.
 | [RFC2131-MSG-11](../../standard/rfc2131/catalog.md#rfc2131-msg-11) | selected | [message-framing-on-the-wire](../../protocol/dhcp/checks/message-format.md#message-framing-on-the-wire) | `Rfc2131MessageFraming.test` | PASS for the first half, no code twice; the concatenation half is RFC 3396 and out of scope |
 | [RFC2131-XID-1](../../standard/rfc2131/catalog.md#rfc2131-xid-1) | covered | [transaction-identifier](../../protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange) | `Rfc2131TransactionIdentifier.test` | PASS as far as the check reaches: one value is chosen and the DHCPOFFER carries it back |
 | [RFC2131-XID-2](../../standard/rfc2131/catalog.md#rfc2131-xid-2) | owed | — | — | two clients in the mockup. The client draws its value with intuniform, so the behaviour is claimed |
-| [RFC2131-XID-3](../../standard/rfc2131/catalog.md#rfc2131-xid-3) | selected | [transaction-identifier](../../protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange) | `Rfc2131TransactionIdentifier.test` | **FAIL**, gap 1 |
+| [RFC2131-XID-3](../../standard/rfc2131/catalog.md#rfc2131-xid-3) | selected | [transaction-identifier](../../protocol/dhcp/checks/exchange.md#transaction-identifier-through-the-exchange) | `Rfc2131TransactionIdentifier.test` | **PASS** since 2026-09-15: `b72abc4696` repaired gap 1, the client keeps the offer's `xid` |
 | [RFC2131-XID-4](../../standard/rfc2131/catalog.md#rfc2131-xid-4) | selected | [foreign-transaction-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-transaction-identifier-discarded) | `Rfc2131ForeignTransactionId.test` | PASS, both halves: a foreign identifier and an unrequested DHCPACK |
 | [RFC2131-XID-5](../../standard/rfc2131/catalog.md#rfc2131-xid-5) | owed | — | — | a crafted DHCPACK injected during a renewal. The transaction identifier test covers every state |
 | [RFC2131-DISC-1](../../standard/rfc2131/catalog.md#rfc2131-disc-1) | covered | [discover-contents](../../protocol/dhcp/checks/exchange.md#discover-contents) | `Rfc2131DiscoverContents.test` | PASS |
@@ -71,7 +78,7 @@ is the opposite of what happened.
 | [RFC2131-OFF-3](../../standard/rfc2131/catalog.md#rfc2131-off-3) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) | `Rfc2131OfferContents.test` | PASS |
 | [RFC2131-OFF-4](../../standard/rfc2131/catalog.md#rfc2131-off-4) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) | `Rfc2131OfferContents.test` | PASS |
 | [RFC2131-OFF-5](../../standard/rfc2131/catalog.md#rfc2131-off-5) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) | `Rfc2131OfferContents.test` | PASS for the three rows that stand; the `client identifier` row is overridden by RFC6842-CLID-1 |
-| [RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents), [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply), [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) | `Rfc2131OfferContents.test`, `Rfc2131ReplyAddressFields.test`, `Rfc2131ReplyFlagsField.test` | PASS for `hops`, `secs`, `ciaddr` and `chaddr`; **FAIL** for `giaddr`, gap 2, and for `flags`, gap 8 |
+| [RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents), [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply), [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) | `Rfc2131OfferContents.test`, `Rfc2131ReplyAddressFields.test`, `Rfc2131ReplyFlagsField.test` | PASS for all six fields. `giaddr` and `flags` pass too, since 2026-09-15: `b72abc4696` repaired gaps 2 and 8 |
 | [RFC2131-OFF-7](../../standard/rfc2131/catalog.md#rfc2131-off-7) | no check | — | — | the server's probe before it offers; inside the node, and gap 9 territory |
 | [RFC2131-OFF-8](../../standard/rfc2131/catalog.md#rfc2131-off-8) | selected | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) | `Rfc2131OfferContents.test` | PASS |
 | [RFC2131-REQ-1](../../standard/rfc2131/catalog.md#rfc2131-req-1) | selected | [request-contents](../../protocol/dhcp/checks/exchange.md#request-contents) | `Rfc2131RequestContents.test` | PASS |
@@ -90,13 +97,13 @@ is the opposite of what happened.
 | [RFC2131-ACK-5](../../standard/rfc2131/catalog.md#rfc2131-ack-5) | selected | [acknowledgement-contents](../../protocol/dhcp/checks/exchange.md#acknowledgement-contents) | `Rfc2131AckContents.test` | PASS for the three rows that stand; the `client identifier` row is overridden |
 | [RFC2131-ACK-6](../../standard/rfc2131/catalog.md#rfc2131-ack-6) | covered | [acknowledgement-contents](../../protocol/dhcp/checks/exchange.md#acknowledgement-contents) | `Rfc2131AckContents.test` | PASS for the three parameters every exchange carries |
 | [RFC2131-ACK-7](../../standard/rfc2131/catalog.md#rfc2131-ack-7) | no check | — | — | no second probe; it needs the first probe of OFF-7 to be visible |
-| [RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8) | selected | [acknowledgement-contents](../../protocol/dhcp/checks/exchange.md#acknowledgement-contents), [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply), [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) | `Rfc2131AckContents.test`, `Rfc2131ReplyAddressFields.test`, `Rfc2131ReplyFlagsField.test` | PASS for `xid`, `hops`, `secs` and `chaddr`; **FAIL** for `ciaddr`, gap 3, and for the `flags` half on a DHCPOFFER, gap 8. The `flags` half on a DHCPACK is **owed** a test: the crafted request draws no DHCPACK |
+| [RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8) | selected | [acknowledgement-contents](../../protocol/dhcp/checks/exchange.md#acknowledgement-contents), [address-fields-of-a-server-reply](../../protocol/dhcp/checks/exchange.md#address-fields-of-a-server-reply), [the-flags-field-of-a-server-reply](../../protocol/dhcp/checks/reply-delivery.md#the-flags-field-of-a-server-reply) | `Rfc2131AckContents.test`, `Rfc2131ReplyAddressFields.test`, `Rfc2131ReplyFlagsField.test` | PASS for `xid`, `hops`, `secs`, `chaddr` and `ciaddr`; `ciaddr` since 2026-09-15, `b72abc4696` repaired gap 3. The `flags` half on a DHCPACK is still **owed** a test: the crafted request draws no DHCPACK, but gap 8's repair (`b72abc4696`) touched `sendAck` too |
 | [RFC2131-NAK-1](../../standard/rfc2131/catalog.md#rfc2131-nak-1) | owed | — | — | a second client that takes the address first. sendNak for a mismatched requested address exists |
-| [RFC2131-NAK-2](../../standard/rfc2131/catalog.md#rfc2131-nak-2) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **FAIL**, gap 10 |
-| [RFC2131-NAK-3](../../standard/rfc2131/catalog.md#rfc2131-nak-3) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **FAIL**: the test fails at gap 10, which sends no DHCPNAK, so this rule was never reached inside it |
+| [RFC2131-NAK-2](../../standard/rfc2131/catalog.md#rfc2131-nak-2) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **PASS** since 2026-09-15: `b72abc4696` repaired gap 10 |
+| [RFC2131-NAK-3](../../standard/rfc2131/catalog.md#rfc2131-nak-3) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **PASS** since 2026-09-15: `b72abc4696` repaired gap 10, and the rule is reached now |
 | [RFC2131-NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) | no check | — | — | needs a relay agent, and RFC 1542 is out of scope |
-| [RFC2131-NAK-5](../../standard/rfc2131/catalog.md#rfc2131-nak-5) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **FAIL**, for the same reason as NAK-3 |
-| [RFC2131-NAK-6](../../standard/rfc2131/catalog.md#rfc2131-nak-6) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **FAIL**, for the same reason as NAK-3 |
+| [RFC2131-NAK-5](../../standard/rfc2131/catalog.md#rfc2131-nak-5) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **PASS** since 2026-09-15, for the same reason as NAK-3 |
+| [RFC2131-NAK-6](../../standard/rfc2131/catalog.md#rfc2131-nak-6) | selected | [nak-for-a-wrong-subnet](../../protocol/dhcp/checks/nak.md#negative-acknowledgement-for-a-wrong-subnet) | `Rfc2131NakWrongSubnet.test` | **PASS** since 2026-09-15, for the same reason as NAK-3 |
 | [RFC2131-NAK-7](../../standard/rfc2131/catalog.md#rfc2131-nak-7) | selected | [silence-for-an-unknown-client](../../protocol/dhcp/checks/nak.md#silence-for-an-unknown-client) | `Rfc2131SilentUnknownClient.test` | PASS |
 | [RFC2131-NAK-8](../../standard/rfc2131/catalog.md#rfc2131-nak-8) | owed | — | — | a crafted DHCPNAK injected at a client. initClient runs on a DHCPNAK in three states |
 | [RFC2131-LEASE-1](../../standard/rfc2131/catalog.md#rfc2131-lease-1) | covered | [renewal-at-t1](../../protocol/dhcp/checks/lease.md#renewal-at-t1) | `Rfc2131RenewAtT1.test` | PASS for the unit of seconds; the value for infinity is not exercised |
@@ -110,17 +117,17 @@ is the opposite of what happened.
 | [RFC2131-LEASE-9](../../standard/rfc2131/catalog.md#rfc2131-lease-9) | selected | [lease-expiry](../../protocol/dhcp/checks/lease.md#lease-expiry) | `Rfc2131LeaseExpiry.test` | PASS for the address the client held; the other half needs a server whose pool has moved on |
 | [RFC2131-LEASE-10](../../standard/rfc2131/catalog.md#rfc2131-lease-10) | later (statistical) | — | — | the random fuzz on T1 and T2; level 4 |
 | [RFC2131-LEASE-11](../../standard/rfc2131/catalog.md#rfc2131-lease-11) | owed | — | — | two renewals, to compare the values. The server does set options 58 and 59 |
-| [RFC2131-RETX-1](../../standard/rfc2131/catalog.md#rfc2131-retx-1) | selected | [discover-repeated-without-a-server](../../protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server) | `Rfc2131DiscoverRetransmission.test` | **FAIL**, gap 13 |
+| [RFC2131-RETX-1](../../standard/rfc2131/catalog.md#rfc2131-retx-1) | selected | [discover-repeated-without-a-server](../../protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server) | `Rfc2131DiscoverRetransmission.test` | **PASS** since 2026-09-15: `b72abc4696` repaired gap 13 |
 | [RFC2131-RETX-2](../../standard/rfc2131/catalog.md#rfc2131-retx-2) | later (statistical) | — | — | the 4, 8 and 64-second figures; level 4. Gap 13 already says what the answer will be |
 | [RFC2131-RETX-3](../../standard/rfc2131/catalog.md#rfc2131-retx-3) | selected | [discover-repeated-without-a-server](../../protocol/dhcp/checks/retransmission.md#discover-repeated-without-a-server) | `Rfc2131DiscoverRetransmission.test` | PASS |
-| [RFC2131-RETX-4](../../standard/rfc2131/catalog.md#rfc2131-retx-4) | selected | [request-repeated-when-the-reply-is-lost](../../protocol/dhcp/checks/retransmission.md#request-repeated-when-the-reply-is-lost) | `Rfc2131RequestRetransmission.test` | **FAIL**, gap 14 |
-| [RFC2131-DECL-1](../../standard/rfc2131/catalog.md#rfc2131-decl-1) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **FAIL**, gap 11 |
-| [RFC2131-DECL-2](../../standard/rfc2131/catalog.md#rfc2131-decl-2) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **FAIL**: the test fails at gap 11, an untestable claim -- sendDecline is written and nothing can provoke it |
+| [RFC2131-RETX-4](../../standard/rfc2131/catalog.md#rfc2131-retx-4) | selected | [request-repeated-when-the-reply-is-lost](../../protocol/dhcp/checks/retransmission.md#request-repeated-when-the-reply-is-lost) | `Rfc2131RequestRetransmission.test` | **PASS** since 2026-09-15: `b72abc4696` repaired gap 14 |
+| [RFC2131-DECL-1](../../standard/rfc2131/catalog.md#rfc2131-decl-1) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15: `bdde132792` closed gap 11, the client now probes before it takes the address |
+| [RFC2131-DECL-2](../../standard/rfc2131/catalog.md#rfc2131-decl-2) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15: `bdde132792` closed gap 11, and this statement is tested now, not only DECL-1 |
 | [RFC2131-DECL-3](../../standard/rfc2131/catalog.md#rfc2131-decl-3) | later (statistical) | — | — | the pause of at least ten seconds; level 4 |
-| [RFC2131-DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4) | no check | — | — | the server marks the address unavailable; needs a second client. Gap 9 shows it is not implemented |
-| [RFC2131-DECL-5](../../standard/rfc2131/catalog.md#rfc2131-decl-5) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **FAIL**, for the same reason as DECL-2 |
-| [RFC2131-DECL-6](../../standard/rfc2131/catalog.md#rfc2131-decl-6) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **FAIL**, for the same reason as DECL-2 |
-| [RFC2131-DECL-7](../../standard/rfc2131/catalog.md#rfc2131-decl-7) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **FAIL**, for the same reason as DECL-2 |
+| [RFC2131-DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4) | owed | — | — | the server marks the address unavailable. It had no code for it when the pass ran; since `bdde132792` it has (`DhcpServer.cc:284`), so the statement is claimed. A check needs a second client that asks for the declined address |
+| [RFC2131-DECL-5](../../standard/rfc2131/catalog.md#rfc2131-decl-5) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15, for the same reason as DECL-2 |
+| [RFC2131-DECL-6](../../standard/rfc2131/catalog.md#rfc2131-decl-6) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15, for the same reason as DECL-2 |
+| [RFC2131-DECL-7](../../standard/rfc2131/catalog.md#rfc2131-decl-7) | selected | [duplicate-address-declined](../../protocol/dhcp/checks/decline.md#duplicate-address-declined) | `Rfc2131DuplicateAddressDeclined.test` | **PASS** since 2026-09-15, for the same reason as DECL-2 |
 | [RFC2131-DECL-8](../../standard/rfc2131/catalog.md#rfc2131-decl-8) | no check | — | — | the announcement after the address goes into service |
 | [RFC2131-REL-1](../../standard/rfc2131/catalog.md#rfc2131-rel-1) | selected | [release-on-shutdown](../../protocol/dhcp/checks/release.md#release-on-shutdown) | `Rfc2131ReleaseOnShutdown.test` | **FAIL**, gap 12 |
 | [RFC2131-REL-2](../../standard/rfc2131/catalog.md#rfc2131-rel-2) | covered | [release-on-shutdown](../../protocol/dhcp/checks/release.md#release-on-shutdown) | `Rfc2131ReleaseOnShutdown.test` | **FAIL (expected)**: gap 12 sends no DHCPRELEASE, and the model says it does not; the field rule was never reached |
@@ -148,7 +155,7 @@ is the opposite of what happened.
 | [RFC2131-SEL-2](../../standard/rfc2131/catalog.md#rfc2131-sel-2) | owed | — | — | two clients that do not answer their offers. The server marks an offered address on the offer |
 | [RFC2131-SEL-3](../../standard/rfc2131/catalog.md#rfc2131-sel-3) | covered | [offer-contents](../../protocol/dhcp/checks/exchange.md#offer-contents) | `Rfc2131OfferContents.test` | PASS for the branch the scenario reaches: the configured default appears in the offer |
 | [RFC2131-SEL-4](../../standard/rfc2131/catalog.md#rfc2131-sel-4) | selected | [requested-parameters-returned](../../protocol/dhcp/checks/parameters.md#requested-parameters-returned) | `Rfc2131RequestedParameters.test` | PASS for the two branches the scenario reaches; the Host Requirements default branch needs RFC 1122 in scope |
-| [RFC2131-SEL-5](../../standard/rfc2131/catalog.md#rfc2131-sel-5) | selected | [requested-parameters-returned](../../protocol/dhcp/checks/parameters.md#requested-parameters-returned), [a-parameter-with-no-value](../../protocol/dhcp/checks/parameters.md#a-parameter-the-server-has-no-value-for) | `Rfc2131RequestedParameters.test`, `Rfc2131ParameterWithoutValue.test` | PASS for the no-duplicate half; **FAIL** for the prohibition, gap 4 |
+| [RFC2131-SEL-5](../../standard/rfc2131/catalog.md#rfc2131-sel-5) | selected | [requested-parameters-returned](../../protocol/dhcp/checks/parameters.md#requested-parameters-returned), [a-parameter-with-no-value](../../protocol/dhcp/checks/parameters.md#a-parameter-the-server-has-no-value-for) | `Rfc2131RequestedParameters.test`, `Rfc2131ParameterWithoutValue.test` | PASS for both halves; the prohibition since 2026-09-15, `b72abc4696` repaired gap 4 |
 | [RFC2131-MISC-1](../../standard/rfc2131/catalog.md#rfc2131-misc-1) | owed | — | — | a client with two interfaces. The client has an interface parameter |
 | [RFC2132-FMT-1](../../standard/rfc2132/catalog.md#rfc2132-fmt-1) | selected | [message-framing-on-the-wire](../../protocol/dhcp/checks/message-format.md#message-framing-on-the-wire) | `Rfc2131MessageFraming.test` | PASS |
 | [RFC2132-FMT-2](../../standard/rfc2132/catalog.md#rfc2132-fmt-2) | later (unit test) | — | — | the trailing-null rule of a text option |
@@ -184,25 +191,31 @@ RFC 2132 and 3 for RFC 6842.
 | --- | --- |
 | `selected` | 75 |
 | `covered` | 19 |
-| `owed` | 13 |
+| `owed` | 14 |
 | `later` | 12 |
-| `no check` | 13 |
+| `no check` | 12 |
 
-Of the 94 rows a check targets or covers, **68 carry a PASS and nothing else and 26 carry a
-FAIL**. Twelve of the 26 are rows whose own observation the failure never reached; they carry the
-verdict of their test and say so. The 12 `later` rows split into 5 that need a statistical check
-with a stated tolerance, which is level 4, and 7 that belong to a serializer unit test.
+Of the 94 rows a check targets or covers, **83 carry a PASS and nothing else and 11 carry a
+FAIL**. Fifteen rows moved from FAIL to PASS since the pass that first wrote them: XID-3, OFF-6,
+ACK-8, NAK-2, NAK-3, NAK-5, NAK-6, RETX-1, RETX-4, DECL-1, DECL-2, DECL-5, DECL-6, DECL-7 and
+SEL-5, repaired 2026-09-15 by `b72abc4696` (gaps 1, 2, 3, 4, 8, 10, 13, 14) and `bdde132792`
+(gap 11). Five
+of the 11 remaining FAIL rows are rows whose own observation the failure never reached; they
+carry the verdict of their test and say so. The 12 `later` rows split into 5 that need a
+statistical check with a stated tolerance, which is level 4, and 7 that belong to a serializer
+unit test.
 
 A FAIL on a row says nothing about whether the test that found it is **declared** to fail. That
 is a separate question, and [`results.md`](results.md#the-rule-that-decides-the-declaration)
 answers it: the declaration is legal only where the model does not claim the behavior, which is
-true of five of the thirteen failing tests.
+true of all five of the failing tests now.
 
-## The coverage debt: thirteen checks this pass owes
+## The coverage debt: the checks this pass owes
 
 [The third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)
-says that a behavior the model claims gets a check, and that code is a claim. Thirteen statements
-of the catalogs are claimed and have no check. **This is a debt of the pass and not a property of
+says that a behavior the model claims gets a check, and that code is a claim. Fourteen statements
+of the catalogs are claimed and have no check: the thirteen of the pass, and RFC2131-DECL-4, which
+became a claim when `bdde132792` gave the server the code for it. **This is a debt of the pass and not a property of
 the protocol**, and it is the single largest thing between this pass and level 3.
 
 The first version of this ledger recorded all thirteen as `no check`, with the reason "a check of
@@ -225,15 +238,16 @@ can already build.
 | [SEL-2](../../standard/rfc2131/catalog.md#rfc2131-sel-2) | the server marks an address on the offer | two clients that do not answer their offers |
 | [MISC-1](../../standard/rfc2131/catalog.md#rfc2131-misc-1) | the client has an `interface` parameter | a client with two interfaces |
 | [BCAST-1](../../standard/rfc2131/catalog.md#rfc2131-bcast-1) | the client does set the bit, to false | a unicast reply injected before the client is configured |
+| [DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4) | since `bdde132792` the server marks a declined address as leased to nobody | a second client that asks for the declined address |
 
-Four mockups would clear eleven of the thirteen: **two clients** (XID-2, ID-1, SEL-2, NAK-1), **a
+Four mockups would clear twelve of the fourteen: **two clients** (XID-2, ID-1, SEL-2, NAK-1, DECL-4), **a
 second exchange** (ID-2, SEL-1), **two renewals** (LEASE-11), and **one crafted injection each**
 (XID-5, NAK-8, MSG-6, BCAST-1). The remaining two need a server with two addresses and a client
 with two interfaces.
 
-The thirteen rows that keep `no check` are the ones the model does not claim: the two relay agent
-rules, which the release notes exclude by name; the server's half of the decline and the release,
-which it drops without a code path; three options its message class has no field for; the probe it
+The twelve rows that keep `no check` are the ones the model does not claim: the two relay agent
+rules, which the release notes exclude by name; the server's half of the release, which it drops
+without a code path; three options its message class has no field for; the probe it
 never sends and the announcement it never makes; the lease lookup it never does; the address hint
 its client never fills; and the RFC 6842 rule for a document it never names.
 
@@ -258,55 +272,61 @@ Two readings this ledger applies, and names, because several rows depend on them
 | [DHCP-F-MESSAGE-FORMAT](../../protocol/dhcp/features.md#dhcp-f-message-format) | MSG-1, MSG-2, MSG-3, MSG-4, RFC2132-TYPE-1 all PASS | **supported** |
 | [DHCP-F-TRANSPORT](../../protocol/dhcp/features.md#dhcp-f-transport) | MSG-5, MSG-9 PASS; INF-6 PASS on the crafted stimulus, and the two ports are established by MSG-5 on real messages | **supported** |
 | [DHCP-F-OPTION-ENCODING](../../protocol/dhcp/features.md#dhcp-f-option-encoding) | RFC2132-FMT-1, FMT-3, RFC2131-MSG-11 all PASS | **supported** |
-| [DHCP-F-TRANSACTION-ID](../../protocol/dhcp/features.md#dhcp-f-transaction-id) | XID-1 PASS, XID-4 PASS, XID-3 **FAIL** gap 1 | **partial** |
+| [DHCP-F-TRANSACTION-ID](../../protocol/dhcp/features.md#dhcp-f-transaction-id) | XID-1 PASS, XID-4 PASS, XID-3 PASS since 2026-09-15 (`b72abc4696` repaired gap 1) | **supported** |
 | [DHCP-F-DISCOVERY](../../protocol/dhcp/features.md#dhcp-f-discovery) | DISC-1, DISC-2, DISC-3, DISC-5 all PASS | **supported** |
-| [DHCP-F-OFFER](../../protocol/dhcp/features.md#dhcp-f-offer) | OFF-1 to OFF-5 PASS, OFF-6 **FAIL** gaps 2 and 8 | **partial** |
+| [DHCP-F-OFFER](../../protocol/dhcp/features.md#dhcp-f-offer) | OFF-1 to OFF-5 PASS, OFF-6 PASS since 2026-09-15 (`b72abc4696` repaired gaps 2 and 8) | **supported** |
 | [DHCP-F-SELECTION](../../protocol/dhcp/features.md#dhcp-f-selection) | REQ-1, REQ-2, REQ-3, REQ-4 all PASS | **supported** |
-| [DHCP-F-ACKNOWLEDGEMENT](../../protocol/dhcp/features.md#dhcp-f-acknowledgement) | ACK-1, ACK-2, ACK-4, ACK-5 PASS; ACK-3 PASS for its `must` half; ACK-8 **FAIL** gap 3 | **partial** |
+| [DHCP-F-ACKNOWLEDGEMENT](../../protocol/dhcp/features.md#dhcp-f-acknowledgement) | ACK-1, ACK-2, ACK-4, ACK-5 PASS; ACK-8 PASS since 2026-09-15 (`b72abc4696` repaired gap 3; its `flags` half on a DHCPACK is still owed a test); ACK-3 PASS for its `must` half, **FAIL** for its `must not` half, gap 9 | **partial** |
 | [DHCP-F-LEASE](../../protocol/dhcp/features.md#dhcp-f-lease) | LEASE-1, LEASE-2, LEASE-3, RFC2132-LEASE-1 all PASS | **supported** |
 | [DHCP-F-RENEW](../../protocol/dhcp/features.md#dhcp-f-renew) | LEASE-5, REQ-6 PASS | **supported** |
 | [DHCP-F-REBIND](../../protocol/dhcp/features.md#dhcp-f-rebind) | LEASE-6, REQ-7 PASS | **supported** |
 | [DHCP-F-EXPIRY](../../protocol/dhcp/features.md#dhcp-f-expiry) | LEASE-8, LEASE-9 PASS | **supported** |
-| [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) | NAK-3, NAK-5, NAK-6 all **FAIL** inside the test that gap 10 stops; NAK-8 is `owed` | **not supported** |
-| [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) | DECL-2, DECL-5, DECL-6 all **FAIL** inside the test that gap 11 stops; DECL-4 the model does not claim | **not supported** |
+| [DHCP-F-NAK](../../protocol/dhcp/features.md#dhcp-f-nak) | NAK-3, NAK-5, NAK-6 all PASS since 2026-09-15 (`b72abc4696` repaired gap 10); NAK-8 is still `owed` | **partial** |
+| [DHCP-F-DECLINE](../../protocol/dhcp/features.md#dhcp-f-decline) | DECL-2, DECL-5, DECL-6 all PASS since 2026-09-15 (`bdde132792` closed gap 11); DECL-4 is `owed`, since the same commit gave the server the code | **partial** |
 | [DHCP-F-RELEASE](../../protocol/dhcp/features.md#dhcp-f-release) | REL-1 **FAIL** gap 12; REL-3 and REL-5 FAIL with it; REL-4 the model does not claim | **not supported** |
 | [DHCP-F-INFORM](../../protocol/dhcp/features.md#dhcp-f-inform) | INF-2 **FAIL** gap 9; INF-3 FAIL with it; INF-1 and INF-5 established only on the crafted stimulus | **not supported** |
-| [DHCP-F-DUPLICATE-DETECTION](../../protocol/dhcp/features.md#dhcp-f-duplicate-detection) | DECL-1 **FAIL** gap 11; OFF-7 the model does not claim | **not supported** |
-| [DHCP-F-RETRANSMISSION](../../protocol/dhcp/features.md#dhcp-f-retransmission) | RETX-3 PASS; RETX-1 **FAIL** gap 13; RETX-4 **FAIL** gap 14 | **partial** |
+| [DHCP-F-DUPLICATE-DETECTION](../../protocol/dhcp/features.md#dhcp-f-duplicate-detection) | DECL-1 PASS since 2026-09-15 (`bdde132792` closed gap 11); OFF-7, the server's probe, has no code and no check | **partial** |
+| [DHCP-F-RETRANSMISSION](../../protocol/dhcp/features.md#dhcp-f-retransmission) | RETX-3 PASS; RETX-1 and RETX-4 PASS since 2026-09-15 (`b72abc4696` repaired gaps 13 and 14) | **supported** |
 | [DHCP-F-REPLY-DELIVERY](../../protocol/dhcp/features.md#dhcp-f-reply-delivery) | BCAST-3, BCAST-4 PASS; BCAST-5 **FAIL** gap 7 | **partial** |
 | [DHCP-F-SERVER-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-server-identity) | SRVID-2, SRVID-3, OFF-8, RFC2132-SRVID-1 all PASS | **supported** |
 | [DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity) | REQ-9 PASS; RFC6842-CLID-1 **FAIL** gap 5; RFC6842-CLID-3 **FAIL** gap 6; ID-2 is `owed` | **partial** |
-| [DHCP-F-PARAMETERS](../../protocol/dhcp/features.md#dhcp-f-parameters) | SEL-4, REQ-8, RFC2132-PRL-1 PASS; SEL-5 **FAIL** gap 4 | **partial** |
+| [DHCP-F-PARAMETERS](../../protocol/dhcp/features.md#dhcp-f-parameters) | SEL-4, REQ-8, RFC2132-PRL-1 PASS; SEL-5 PASS since 2026-09-15 (`b72abc4696` repaired gap 4) | **supported** |
 | [DHCP-F-INIT-REBOOT](../../protocol/dhcp/features.md#dhcp-f-init-reboot) | REQ-5 established only on the crafted stimulus; the model's own INIT-REBOOT path has no check, and it has code | **untested**, a check is owed |
 | [DHCP-F-ADDRESS-SELECTION](../../protocol/dhcp/features.md#dhcp-f-address-selection) | SEL-1 and SEL-2 are both `owed` | **untested**, two checks are owed |
 
-Twenty-four features: **10 supported, 7 partial, 5 not supported, 2 untested**.
+Twenty-four features: **14 supported, 6 partial, 2 not supported, 2 untested**.
 
 Reading the four groups together says something about the model that no single row does.
 
-1. **The normal path works.** Every feature of the ordinary exchange is supported: the message
-   format, the transport, the option encoding, the discovery, the selection, the lease and both of
-   its timers, the expiry, and the server's identity. A client gets an address, keeps it, renews
-   it, rebinds it and gives it up at the right instants. The two reacquisition features and the
-   expiry needed a relay on the path to reach at all, and all three passed.
-2. **The seven partial features fail on one field each, not on a mechanism.** A wrong `giaddr`, a
-   wrong `ciaddr`, a constant `flags`, a new transaction identifier, an option with no value, a
-   reply broadcast where a unicast belongs. Each is a line of code and none stops an exchange,
-   which is exactly why they survived: an integration test that watches whether a client gets an
-   address sees none of them.
-3. **Five features are not supported, and two of those are mandatory.** DHCPNAK and the decline
-   are the two, and both are the same shape: the model has the code — `sendNak` and `sendDecline`
-   are both complete — and cannot reach it. `DHCP-F-RELEASE`, `DHCP-F-INFORM` and the duplicate
-   detection are absent by decision, and all three say so in a comment.
+1. **The normal path works, and it has grown.** Every feature of the ordinary exchange is
+   supported, and 2026-09-15 moved four more features into the group: the transaction
+   identifier, the offer, the retransmission strategy and the parameters.
+   A client gets an address, keeps it, renews it, rebinds it and gives it up at the right
+   instants, and now also probes it first and gives it back correctly when somebody else holds
+   it. The two reacquisition features and the expiry needed a relay on the path to reach at all,
+   and all three passed.
+2. **Six features are partial, and each fails on one field or lacks one check, not a mechanism.**
+   `DHCP-F-ACKNOWLEDGEMENT` fails only its `must not` half, gap 9. `DHCP-F-REPLY-DELIVERY` fails
+   only the broadcast-bit-clear case, gap 7. `DHCP-F-CLIENT-IDENTITY` fails only the two RFC 6842
+   halves, gaps 5 and 6. `DHCP-F-NAK` has no failing check left, only NAK-8, still `owed`.
+   `DHCP-F-DECLINE` passes every check it has, and DECL-4 is `owed`. `DHCP-F-DUPLICATE-DETECTION`
+   passes the client's probe; the server's probe, OFF-7, has no code. None of the six stops an
+   exchange.
+3. **Two features are not supported, both optional, and both absent by decision.**
+   `DHCP-F-RELEASE` and `DHCP-F-INFORM` say so in a comment. Neither mandatory feature is
+   unsupported any more: gap 10 and gap 11 are closed, and `DHCP-F-NAK` and `DHCP-F-DECLINE` left
+   this group on 2026-09-15.
 4. **Two features are untested, and both are this pass's debt.** Neither is untested for want of a
    tool. `DHCP-F-INIT-REBOOT` has a state machine in the model and no check of it; address
    selection has the preference code and no check of it. Both are in
-   [the debt table](#the-coverage-debt-thirteen-checks-this-pass-owes).
+   [the debt table](#the-coverage-debt-the-checks-this-pass-owes).
 
-**Group 3 is the finding of the pass.** Two mandatory features are unsupported because a complete
-mechanism sits behind a trigger that never fires: the DHCPNAK branch is unreachable for a foreign
-subnet, and `sendDecline` has no caller. A model gap in one place made a second feature fail, and
-both are a few lines from working.
+**The finding of the first pass is repaired.** Two mandatory features were unsupported because a
+complete mechanism sat behind a trigger that never fired: the DHCPNAK branch was unreachable for
+a foreign subnet, and `sendDecline` had no caller. `b72abc4696` and `bdde132792`, both
+2026-09-15, gave each mechanism its trigger. `DHCP-F-NAK` reads `partial` now, held there by
+`NAK-8`, still `owed`; `DHCP-F-DECLINE` reads `partial`, held there by `DECL-4`, `owed` since the
+same commit gave the server the code.
 
 ## Achieved level
 
@@ -324,13 +344,13 @@ without, and all three statements of RFC 6842. What is left out is named with a 
 of each catalog, and the largest exclusion — the sixty per-parameter option definitions of
 RFC 2132 — is level 5 material that a serializer unit test owns.
 
-**Does not hold** — and the reason is now a short one. **Thirteen statements the model claims have
+**Does not hold** — and the reason is now a short one. **Fourteen statements the model claims have
 no check.** That is the whole of what blocks the level: not the verdicts, which are a result, and
-not the toolset, which reaches eleven of the thirteen already. The debt table above says what each
-one needs, and four mockups clear eleven of them.
+not the toolset, which reaches twelve of the fourteen already. The debt table above says what each
+one needs, and four mockups clear twelve of them.
 
 Two smaller groups stand beside it and neither blocks the level: 12 rows whose category is another
-suite, which step 9 sanctions, and 13 rows the model does not claim, which
+suite, which step 9 sanctions, and 12 rows the model does not claim, which
 [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)
 sanctions.
 
@@ -347,6 +367,7 @@ sanctions.
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-11 | **3, partial** | The first pass for this protocol, and it covers levels 1 to 3 in one go, because DHCP had no earlier pass. In-scope set RFC 2131, RFC 2132 and RFC 6842; 132 catalog entries; 24 features; 26 checks; 26 tests | 26 tests: 13 PASS, 5 FAIL (expected), 8 FAIL (unexpected), so the suite reports FAIL. 14 model gaps: 8 in claimed behavior and 6 outside it. 10 features supported, 7 partial, 5 not supported, 2 untested. 13 claimed statements owed a check, 12 belong to another suite, 13 the model does not claim; see [`results.md`](results.md) |
+| 2 | 2026-09-23 | **3, partial** | Re-run only, no new check. The run records of the pass named two commits that the landing rebase removed; this row gives the ledger a run on `master` | 26 tests: 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected), so the suite reports PASS. Fifteen statement rows moved from FAIL to PASS since pass 1: XID-3 (gap 1), OFF-6 (gaps 2 and 8), ACK-8 (gaps 3 and 8), NAK-2/3/5/6 (gap 10), RETX-1 (gap 13), RETX-4 (gap 14), DECL-1/2/5/6/7 (gap 11) and SEL-5 (gap 4), repaired 2026-09-15 by `b72abc4696` and `bdde132792`. Six features moved to supported (transaction ID, offer, retransmission, parameters, decline, duplicate detection) and NAK moved from not supported to partial: now 16 supported, 4 partial, 2 not supported, 2 untested. 13 claimed statements still owed a check; see [`results.md`](results.md). RFC2131-DECL-4 moves from `no check` to `owed`: `bdde132792` gave the server the code, so the model claims it now; `DHCP-F-DECLINE` and `DHCP-F-DUPLICATE-DETECTION` read `partial` |
 
 Six checks of this pass were **split** out of a check the plan named, every one for the same
 reason: a wrong field would otherwise have taken the verdict of its neighbours with it. Recording
@@ -376,4 +397,4 @@ What this pass left out, and where each part is recorded:
 - **The twelve `later` statements**: five for level 4 and seven for a serializer unit test suite
   that this tree does not yet have.
 
-What this pass did **not** leave out on purpose, and owes: the thirteen `owed` statements above.
+What this pass did **not** leave out on purpose, and owes: the fourteen `owed` statements above.

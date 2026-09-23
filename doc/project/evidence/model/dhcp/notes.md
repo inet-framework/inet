@@ -270,7 +270,7 @@ red test green.
    largest of the model changes and the one that needs level 4 to measure properly, but it is a
    defect and not a missing feature: the code for the delay exists and carries the wrong law.
 6. **Write the thirteen checks the pass owes**, from
-   [the debt table](coverage.md#the-coverage-debt-thirteen-checks-this-pass-owes). Four mockups
+   [the debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes). Four mockups
    clear eleven of them. This is the only test-work item, and it is what blocks level 3.
 7. **Decide what the model claims about RFC 6842** and act on it, which is item 3 of
    [`conformance.md`](conformance.md#headlines-for-the-next-pass). Either implement both halves or
