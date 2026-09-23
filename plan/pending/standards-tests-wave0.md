@@ -61,19 +61,21 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
 `check-seals.sh`, and at the end `check-commits.sh master..HEAD` and
 `check-classification.sh master..HEAD`.
 
-1. [ ] **The guide: a run record survives a rebase.** The run-record table and script of
+1. [x] **The guide: a run record survives a rebase.** Done in `97f4559eee`. The run-record table and script of
    `guide/derive-tests-from-a-standard.md` step 7 gain the `src/` and `tests/protocol/` tree
    hashes. The guide also says what a level-1 pass records instead of a run: the commit and
    the trees that the claims were read from.
-2. [ ] **TCP ledger.** Rebuild `model/tcp/coverage.md` for the in-scope set of pass 4: the 39
+2. [x] **TCP ledger.** Done in `28a483eb3d`; see the decisions below for the level. Rebuild `model/tcp/coverage.md` for the in-scope set of pass 4: the 39
    rows of RFC 6298 and RFC 5681, the 10 features of level 4, the achieved-level text and table,
    and the fresh run. Correct the pass-log sentence about the sweep. Correct the summary
    sentence of `conformance.md`. Give `results.md` the trees of its old commit.
-3. [ ] **The six other ledgers** (arp, dhcp, ipv4, ipv6, quic, udp), one commit each: the fresh
+3. [ ] **The six other ledgers** (done: arp `887770ae37`, quic `50d4d8c59a`, ipv4 `ee39dc807b`,
+   udp `8a46bf4945`, ipv6 `179975ae33`; open: dhcp) (arp, dhcp, ipv4, ipv6, quic, udp), one commit each: the fresh
    run record, each row verdict from the fresh run, the feature support by the rule of step 7,
    the conformance matrix from the new support, and the trees of the old commit in each snapshot
    document. Fix the inconsistent ARP summary line on the way.
-4. [ ] **Small debt**, one commit: the UDP `features.md` prose count; the stale "one tap
+4. [x] **Small debt**, one commit, `828c49cb46`, which also turned the 16 links of
+   `model/wifi/results.md` into `audit/` into inline paths: the UDP `features.md` prose count; the stale "one tap
    carries one rule" in `model/ipv4/notes.md`; the Mobile IPv6 entry of `AUTHORING.md`, whose
    two tests were removed on 2026-09-10.
 5. [ ] **Level 1 for the Mode B protocols**, one commit per protocol: RFC texts in
@@ -102,7 +104,8 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
    | `rtp` | RFC 3550, RFC 3551 |
 
    The level-2 in-scope set of each map comes from the register, and the target level is 1.
-   `rip` goes first and is the template for the others.
+   `rip` goes first and is the template for the others: done in `e360ca980e`. Six agents
+   write the other 16; each protocol gets its own commit after review.
 6. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
@@ -110,3 +113,18 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
 - The fresh run replaces the run record of every ledger. A `results.md` stays the record of its
   pass; it keeps its old commit and gains the trees of that commit, so a reader can find the
   same code on `master`.
+- **TCP was not at level 4.** Pass 4 recorded "4, reached" from tables that still held RFC
+  9293 only. With RFC 6298 and RFC 5681 in the in-scope set, nine mandatory statements have no
+  check (RFC6298-UPD-1, SAMP-1, GRAN-1; RFC5681-USE-1, CA-2, FR-4, SSTH-1, FR-5, ACK-1), two
+  of them named by a test that does not assert them, and TIME-WAIT has no catalog entry. The
+  ledger now says level 2 reached, level 3 partial, level 4 partial, with 18 `owed` rows.
+- **Claims that the TCP conformance document got wrong:** `Tcp.ned` names RFC 793 and RFC 2581,
+  not RFC 9293 and RFC 5681; the lost-SYN quote in `TcpBaseAlg.cc:138-140` has no RFC number;
+  `TcpBaseAlg.cc:400` cites RFC 5681 for the idle restart, which makes RFC5681-IDLE-1 claimed.
+- **ARP:** since `bdde132792` the DHCP client calls `Arp::sendArpProbe`; the claim of RFC 5227
+  no longer rests on code without a caller. `sendArpGratuitous` still has none.
+- **The refresh agents dropped the claim-scan record** of two conformance documents (ipv4, udp)
+  when they put in the new run record. The record belongs to part 1, so it was restored.
+- **A snapshot claim can go stale silently.** "Every source file that part 1 cites is identical
+  to the file at the commit above" stopped being true for QUIC after `948c8b5cb4`; the
+  sentence now names what changed.
