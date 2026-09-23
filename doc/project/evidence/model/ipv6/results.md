@@ -8,6 +8,8 @@ repeated in the table below, because every test ran again on this tree.
 
 - Date: 2026-09-10 15:18 +0200
 - INET: branch `master`, commit `0868c36c88`, tree clean
+- Trees: src `182ba10a23`, tests/protocol `e0255bd96d` — the commit left master in the
+  landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -70,7 +72,10 @@ reports FAIL.
 Since 2026-09-14 the suite is 27 tests and **all 27 pass**. Eight defects were repaired:
 the unknown informational type, the atomic fragment, the overlapping fragments, the error
 report for an unregistered protocol, the two link-layer suppression rules, the Packet Too Big
-MTU, and the payload length of a fragment. Nothing in this suite is outstanding.
+MTU, and the payload length of a fragment. Nothing in this suite is outstanding. A fresh run
+on 2026-09-23, commit `28536bd0a5`, confirms the same 27 PASS; see
+[`coverage.md`](coverage.md) for the current run record, the per-statement verdicts, and the
+feature support they now carry.
 
 ## Which failures are declared, and which are not
 
@@ -106,11 +111,11 @@ crafted tests found it. Where it fell short, which is the ordinary two-fragment 
 same function truncated the datagram silently to the first fragment's length. Every IPv6
 reassembly in the model was affected.
 
-Every FAIL is a
-model gap declared with `%# expected-result: FAIL`; each test keeps the faithful assertion
-and fails at the step, or in the way, its description predicts. Four of the eight failures
-stop the simulation: the model's answer to three crafted inputs and to one report is an
-assertion or a runtime error, not a discard. No specification misread was found.
+Every FAIL was a model gap, and none was declared expected, as the section above states;
+each test kept its faithful assertion and failed at the step, or in the way, its
+description predicted. Four of the eight failures stopped the simulation: the model's
+answer to three crafted inputs and to one report was an assertion or a runtime error, not a
+discard. No specification misread was found.
 
 ## Deviations between the English observations and the test steps
 
@@ -286,4 +291,5 @@ The verdicts above feed the support column and the achieved level of the coverag
 - **The multicast exceptions** of RFC4443-MPR-6: a Packet Too Big for a multicast packet
   needs a router that forwards multicast.
 - **Level 4:** the reassembly timer (REASM-3), the rate limit (MPR-10), congestion (DU-C),
-  and path MTU discovery once the MTU field is filled.
+  and path MTU discovery — the MTU field is filled now (`84bc80aa8b`), so a level 4 check
+  can read it.
