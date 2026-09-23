@@ -1,6 +1,6 @@
 %description:
-Exercise the HCF internal-collision recovery owner with an AC_VO management
-frame. The colliding EDCAF's station retry counters must be used, retry-limit
+Exercise injected losing-EDCAF dispatch with VO, VI and BK management frames.
+VO grows CW, VI saturates at CWmax, and BK exhausts a retry limit of one. The colliding EDCAF's station retry counters must be used, retry-limit
 drop must occur, and the typed terminal callback must be delivered exactly once.
 
 %file: TestIeee80211HcfInternalCollision.cc
@@ -16,17 +16,38 @@ namespace ieee80211 {
 class TestIeee80211HcfInternalCollision : public Hcf
 {
   public:
-    void injectVoManagementCollision(const MacAddress& receiverAddress)
+    void injectManagementCollisions(AccessCategory ac, int retryLimit, const MacAddress& receiverAddress)
     {
-        Enter_Method("injectVoManagementCollision");
+        Enter_Method("injectManagementCollisions");
+        auto edcaf = edca->getEdcaf(ac);
         auto packet = new Packet("internally-collided-management");
         auto header = makeShared<Ieee80211MgmtHeader>();
         header->setType(ST_ASSOCIATIONRESPONSE);
         header->setReceiverAddress(receiverAddress);
         packet->insertAtFront(header);
-        auto edcaf = edca->getEdcaf(AccessCategory::AC_VO);
         edcaf->getPendingQueue()->enqueuePacket(packet);
-        handleInternalCollision({edcaf});
+        int before[4], counters[4];
+        for (int i = 0; i < 4; i++) {
+            auto current = edca->getEdcaf(AccessCategory(i));
+            before[i] = current->getCw();
+            counters[i] = current->getStationRetryCounters()->getStationShortRetryCount();
+        }
+        for (int attempt = 1; attempt <= retryLimit; attempt++) {
+            handleInternalCollision({edcaf});
+            for (int i = 0; i < 4; i++) {
+                auto current = edca->getEdcaf(AccessCategory(i));
+                int expectedCw = before[i];
+                if (i == ac && attempt < retryLimit)
+                    expectedCw = std::min(2 * before[i] + 1, (int)current->par("cwMax").intValue());
+                ASSERT(current->getCw() == expectedCw);
+                ASSERT(current->getStationRetryCounters()->getStationShortRetryCount() == counters[i] + (i == ac ? attempt : 0));
+                ASSERT(current->getStationRetryCounters()->getStationLongRetryCount() == 0);
+            }
+            auto frame = edcaf->getInProgressFrames()->getLength() ? edcaf->getInProgressFrames()->getFrames(0) : packet;
+            auto frameHeader = frame->peekAtFront<Ieee80211MgmtHeader>();
+            ASSERT(edcaf->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(frame, frameHeader) == (attempt == retryLimit ? 0 : attempt));
+        }
+        ASSERT(edcaf->getInProgressFrames()->getLength() == 0);
     }
 
     int getStationShortRetryCount(AccessCategory ac) const
@@ -67,13 +88,22 @@ class Ieee80211HcfInternalCollisionTest : public cSimpleModule
         ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_BE) == 0);
         ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 0);
 
-        hcf->injectVoManagementCollision(MacAddress("02:00:00:00:00:09"));
+        hcf->injectManagementCollisions(AC_VO, 2, MacAddress("02:00:00:00:00:09"));
 
         ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_BE) == 0);
-        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 1);
+        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 2);
         ASSERT(mgmt->terminalCallbacks == 1);
         ASSERT(mgmt->lastStatus == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+        // Synthetic losing-AC dispatch, not a claim that VO loses normal priority arbitration.
+        hcf->injectManagementCollisions(AC_VI, 2, MacAddress("02:00:00:00:00:09"));
+        ASSERT(mgmt->terminalCallbacks == 2);
+        hcf->injectManagementCollisions(AC_BK, 1, MacAddress("02:00:00:00:00:09"));
+        ASSERT(mgmt->terminalCallbacks == 3);
+        ASSERT(mgmt->lastStatus == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
         std::cout << "HCF AC_VO management internal-collision retry ownership verified.\n";
+        // Injected collisions scheduled contention; stop before an empty queue
+        // can be granted the channel. Arbitration is outside this fixture.
+        endSimulation();
     }
 };
 
@@ -133,7 +163,16 @@ record-scalar-results = false
 
 *.ap.wlan[0].mgmt.beaconInterval = 10s
 *.ap.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 4096B
-*.ap.wlan[0].mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 1
+*.ap.wlan[0].mac.hcf.edca.edcaf[0].mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 1
+*.ap.wlan[0].mac.hcf.edca.edcaf[*].mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 2
+*.ap.wlan[0].mac.hcf.edca.edcaf[0].cwMin = 15
+*.ap.wlan[0].mac.hcf.edca.edcaf[0].cwMax = 31
+*.ap.wlan[0].mac.hcf.edca.edcaf[1].cwMin = 31
+*.ap.wlan[0].mac.hcf.edca.edcaf[1].cwMax = 63
+*.ap.wlan[0].mac.hcf.edca.edcaf[2].cwMin = 7
+*.ap.wlan[0].mac.hcf.edca.edcaf[2].cwMax = 7
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].cwMin = 3
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].cwMax = 15
 **.mobility.initFromDisplayString = false
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m

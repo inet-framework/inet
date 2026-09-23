@@ -597,8 +597,8 @@ Reliability answers: did the frame arrive, and what if not?
        (``IRecoveryProcedure``).
        Decides when the retry limit is reached, and asks the channel access
        to double or reset the contention window.
-     - One in DCF. One per access category in EDCA, plus one shared for
-       management frames.
+     - One in DCF. Each EDCAF has a QoS-data procedure and a separate
+       management/non-QoS procedure, both bound to that EDCAF's CW.
    * - block ack agreement handlers and procedures
      - Set up, keep and tear down the agreements per peer and TID, on both
        sides; build and answer the block ack request.
@@ -607,6 +607,20 @@ Reliability answers: did the frame arrive, and what if not?
      - Whether an ACK is needed, the timeouts, whether an RTS protects a
        frame, whether a CTS answers, whether an agreement is wanted.
      - Non-QoS and QoS variants of each.
+
+HCF selects management recovery through
+``edcaf->getMgmtAndNonQoSRecoveryProcedure()``. The internal-collision path
+selects the losing EDCAF; the exchange paths select the exchange EDCAF.
+For CTS, the preceding RTS step identifies the protected frame. Management
+ACK, CTS and multicast completion use the same local procedure as failure.
+The module hierarchy owns the procedure; the EDCAF's pointer is borrowed.
+Both recovery procedures bind their CW calculator during the last
+initialization stage, after the EDCAF initializes CW in the link-layer stage.
+
+Each ``edca.edcaf[i].mgmtAndNonQoSRecoveryProcedure`` publishes its own
+``contentionWindowChanged`` and ``retryLimitReached`` signals. Filter by
+source/AC; ancestor subscriptions receive several independent streams,
+including each procedure's initial CW sample.
 
 The coordination function connects them: on an acknowledgement it resets the
 counters and drops the frame, on a failure it counts and either marks the
@@ -1009,7 +1023,7 @@ a method or a public field of the owner; the code has no other way.
    * - station retry counters
      - status
      - ``dcf``; each ``edcaf``
-     - the non-QoS recovery procedure, on an object it does not own
+     - the local non-QoS recovery procedure, on an object it does not own
      - the same
      - on outcome
    * - per-frame retry counters
@@ -1403,7 +1417,7 @@ and function.
      - none
    * - ``IRecoveryProcedure``, with ``ICwCalculator``
      - standard, callback
-     - non-QoS and QoS; the calculator: ``Dcaf``, ``Edcaf``
+     - non-QoS and QoS; the calculator: ``Dcaf``, or the owning ``Edcaf``
      - none
    * - ``IRateSelection``, ``IQosRateSelection``
      - standard
@@ -1579,10 +1593,12 @@ one commit, with file references, and it is the place to check the details.
    same stage. Whether the set is there depends on the order of the
    siblings.
 
--  **The shared recovery procedure of a QoS station.** Management frames use
-   one recovery procedure for all access categories. It changes the
-   contention window of the best-effort category whatever the category that
-   calls, while the retry counters follow that category.
+-  **Separate recovery counter models.** Each EDCAF's QoS-data and
+   management/non-QoS procedures retain separate station-counter
+   representations and older retry/RTS-threshold rules. Per-AC ownership does
+   not imply a complete implementation of the 2024 QSRC/TXOP reset rules.
+   RTS exhaustion can also leave a short-retry entry when length-based
+   cleanup selects the long-retry map.
 
 -  **A-MPDU aggregation** is present as classes and a policy slot, but the
    call in the originator data service is disabled, and the default policy

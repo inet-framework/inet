@@ -1,0 +1,396 @@
+%description:
+Real HCF management exchanges with one deterministically suppressed ACK, followed
+by successful ACK or retry exhaustion and a fresh frame. Checks all AC windows,
+local retry cleanup, CTS and multicast dispatch, and independent QoS counters.
+The 24 runs cover seeds 0/1/2, short/long frames, retry limits 1/2 and CW saturation.
+
+%extraargs: -r 0..23
+
+%file: TestIeee80211HcfManagementRecovery.cc
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+namespace inet {
+namespace ieee80211 {
+class TestRecoveryMgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    int terminalCallbacks = 0;
+    int associationResponseCallbacks = 0;
+    FrameTransmissionStatus lastStatus = FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED;
+
+    virtual void start() override
+    {
+        // Keep beacon generation out of this focused transaction.  The HCF
+        // exchange below is then the only AP-originated management traffic.
+        Ieee80211MgmtApBase::start();
+    }
+
+    void markAuthenticated(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    short submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+        return mib->reserveAssociationId(address);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+
+  protected:
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status) override
+    {
+        terminalCallbacks++;
+        lastStatus = status;
+        if (responseFrame != nullptr) {
+            const auto& header = responseFrame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
+            const auto& mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
+            if (mgmtHeader != nullptr && (mgmtHeader->getType() == ST_ASSOCIATIONRESPONSE || mgmtHeader->getType() == ST_REASSOCIATIONRESPONSE))
+                associationResponseCallbacks++;
+        }
+        Ieee80211MgmtAp::frameTransmissionFinished(responseFrame, status);
+    }
+};
+
+Define_Module(TestRecoveryMgmtAp);
+
+
+class TestManagementRecoveryHcf : public Hcf
+{
+  public:
+    int failures = 0;
+    int acknowledgments = 0;
+    int cts = 0;
+    int groupFrames = 0;
+    int attempts = 0;
+    int before[4];
+
+    Edcaf *getAc(AccessCategory ac) { return edca->getEdcaf(ac); }
+
+    void snapshot()
+    {
+        for (int i = 0; i < 4; i++)
+            before[i] = getAc(AccessCategory(i))->getCw();
+    }
+
+    void assertOtherWindows()
+    {
+        for (int i = 0; i < 3; i++)
+            ASSERT(getAc(AccessCategory(i))->getCw() == before[i]);
+    }
+
+    // Test stimuli use the existing recovery API; the transitions under test
+    // still enter through HCF's production exchange callbacks.
+    void seedQosCounter()
+    {
+        Enter_Method("seedQosCounter");
+        auto vo = getAc(AC_VO);
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTid(6);
+        header->setSequenceNumber(SequenceNumberCyclic(100));
+        vo->getRecoveryProcedure()->ctsFrameReceived();
+        vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(header);
+    }
+
+    void assertQosCounterPreserved()
+    {
+        Enter_Method("assertQosCounterPreserved");
+        auto vo = getAc(AC_VO);
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTid(6);
+        header->setSequenceNumber(SequenceNumberCyclic(100));
+        // A second failure must reach the QoS station retry limit of two.
+        // If management CTS/multicast reset that counter, CW would grow.
+        vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(header);
+        ASSERT(vo->getCw() == vo->par("cwMin").intValue());
+    }
+
+    void sendGroup(bool management)
+    {
+        Enter_Method("sendGroup");
+        auto packet = new Packet(management ? "group-management" : "group-qos");
+        Ptr<Ieee80211DataOrMgmtHeader> header;
+        if (management) {
+            auto mgmt = makeShared<Ieee80211MgmtHeader>();
+            mgmt->setType(ST_BEACON);
+            header = mgmt;
+        }
+        else {
+            auto data = makeShared<Ieee80211DataHeader>();
+            data->setType(ST_DATA_WITH_QOS);
+            data->setTid(6);
+            data->setAckPolicy(NO_ACK);
+            header = data;
+        }
+        header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        packet->insertAtBack(header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+
+    virtual void originatorProcessTransmittedFrame(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto vo = getAc(AC_VO);
+        if (header->getType() == ST_RTS)
+            vo->getStationRetryCounters()->incrementStationShortRetryCount();
+        if (header->getType() == ST_ASSOCIATIONRESPONSE)
+            attempts++;
+        Hcf::originatorProcessTransmittedFrame(packet);
+        if (header->getReceiverAddress().isMulticast()) {
+            groupFrames++;
+            auto counters = vo->getStationRetryCounters();
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
+                ASSERT(counters->getStationShortRetryCount() == 0);
+                ASSERT(counters->getStationLongRetryCount() == 0);
+            }
+            else {
+                ASSERT(counters->getStationShortRetryCount() == 1);
+                ASSERT(counters->getStationLongRetryCount() == 1);
+            }
+        }
+        assertOtherWindows();
+    }
+
+    virtual void originatorProcessFailedFrame(Packet *packet) override
+    {
+        auto vo = getAc(AC_VO);
+        int oldCw = vo->getCw();
+        Hcf::originatorProcessFailedFrame(packet);
+        failures++;
+        bool terminal = par("retryLimit").intValue() == 1;
+        int expectedCw = terminal ? vo->par("cwMin").intValue() : std::min(2 * oldCw + 1, (int)vo->par("cwMax").intValue());
+        ASSERT(vo->getCw() == expectedCw);
+        auto header = packet->peekAtFront<Ieee80211MgmtHeader>();
+        ASSERT(vo->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(packet, header) == (terminal ? 0 : 1));
+        assertOtherWindows();
+    }
+
+    virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto vo = getAc(AC_VO);
+        if (header->getType() == ST_CTS)
+            ASSERT(vo->getStationRetryCounters()->getStationShortRetryCount() > 0);
+        Hcf::originatorProcessReceivedFrame(packet, lastTransmittedPacket);
+        if (header->getType() == ST_CTS) {
+            cts++;
+            ASSERT(vo->getStationRetryCounters()->getStationShortRetryCount() == 0);
+        }
+        if (header->getType() == ST_ACK) {
+            acknowledgments++;
+            ASSERT(vo->getCw() == vo->par("cwMin").intValue());
+            auto transmitted = lastTransmittedPacket->peekAtFront<Ieee80211MgmtHeader>();
+            ASSERT(vo->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(lastTransmittedPacket, transmitted) == 0);
+            auto counters = vo->getStationRetryCounters();
+            if (lastTransmittedPacket->getByteLength() >= rtsPolicy->getRtsThreshold())
+                ASSERT(counters->getStationLongRetryCount() == 0);
+            else
+                ASSERT(counters->getStationShortRetryCount() == 0);
+        }
+        assertOtherWindows();
+    }
+};
+Define_Module(TestManagementRecoveryHcf);
+
+class ManagementRecoveryTest : public cSimpleModule
+{
+  public:
+    ManagementRecoveryTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto hcf = check_and_cast<TestManagementRecoveryHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        auto mgmt = check_and_cast<TestRecoveryMgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto vo = hcf->getAc(AC_VO);
+        hcf->getAc(AC_BE)->incrementCw(); // distinguish an accidental BE reset
+        hcf->seedQosCounter();
+        vo->resetCw(); // initial condition only, before the exchange under test
+        hcf->snapshot();
+        bool longFrame = par("longFrame");
+        bool terminal = par("retryLimit").intValue() == 1;
+        MacAddress address("02:00:00:00:00:09");
+        mgmt->markAuthenticated(address);
+        mgmt->submitAssociationRequest(address);
+        for (int i = 0; i < 100 && mgmt->terminalCallbacks == 0; i++)
+            wait(SimTime(1, SIMTIME_MS));
+        ASSERT(mgmt->terminalCallbacks == 1);
+        ASSERT(hcf->failures == 1);
+        ASSERT(hcf->attempts == (terminal ? 1 : 2));
+        ASSERT(hcf->acknowledgments == (terminal ? 0 : 1));
+        ASSERT(hcf->cts == (longFrame ? hcf->attempts : 0));
+        ASSERT(mgmt->lastStatus == (terminal ? FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED : FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED));
+        hcf->assertQosCounterPreserved();
+
+        // A new transaction after success or discard must complete once.
+        mgmt->markAuthenticated(address);
+        mgmt->submitAssociationRequest(address);
+        for (int i = 0; i < 100 && mgmt->terminalCallbacks < 2; i++)
+            wait(SimTime(1, SIMTIME_MS));
+        ASSERT(mgmt->terminalCallbacks == 2);
+        ASSERT(mgmt->associationResponseCallbacks == 2);
+        ASSERT(!mgmt->hasPendingAssociation(address));
+        ASSERT(mgmt->lastStatus == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        ASSERT(hcf->failures == 1);
+        ASSERT(hcf->acknowledgments == (terminal ? 1 : 2));
+
+        // Multicast management resets only the local non-QoS station counters.
+        hcf->seedQosCounter();
+        auto counters = vo->getStationRetryCounters();
+        counters->resetStationShortRetryCount();
+        counters->resetStationLongRetryCount();
+        counters->incrementStationShortRetryCount();
+        counters->incrementStationLongRetryCount();
+        hcf->sendGroup(true);
+        wait(SimTime(2, SIMTIME_MS));
+        ASSERT(hcf->groupFrames == 1);
+        hcf->assertQosCounterPreserved();
+        counters->incrementStationShortRetryCount();
+        counters->incrementStationLongRetryCount();
+        hcf->seedQosCounter();
+        hcf->sendGroup(false);
+        wait(SimTime(2, SIMTIME_MS));
+        ASSERT(hcf->groupFrames == 2);
+        // Multicast QoS must clear its own station SRC; its next failure grows CW.
+        int oldCw = vo->getCw();
+        auto qosHeader = makeShared<Ieee80211DataHeader>();
+        qosHeader->setType(ST_DATA_WITH_QOS);
+        qosHeader->setTid(6);
+        qosHeader->setSequenceNumber(SequenceNumberCyclic(100));
+        vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(qosHeader);
+        ASSERT(vo->getCw() == std::min(2 * oldCw + 1, (int)vo->par("cwMax").intValue()));
+        ASSERT(hcf->failures == 1);
+        ASSERT(mgmt->terminalCallbacks == 2);
+        ASSERT(mgmt->associationResponseCallbacks == 2);
+        ASSERT(!mgmt->hasPendingAssociation(address));
+        hcf->assertOtherWindows();
+        std::cout << "Management recovery exchange and isolation verified.\n";
+    }
+};
+Define_Module(ManagementRecoveryTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestRecoveryMgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestRecoveryMgmtAp);
+}
+
+module TestManagementRecoveryHcf extends Hcf
+{
+    parameters:
+        int retryLimit;
+        @class(::inet::ieee80211::TestManagementRecoveryHcf);
+}
+
+simple ManagementRecoveryTest extends SimpleModule
+{
+    parameters:
+        bool longFrame;
+        int retryLimit;
+        @class(::inet::ieee80211::ManagementRecoveryTest);
+}
+
+network ManagementRecoveryTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestRecoveryMgmtAp";
+                wlan[*].mac.hcf.typename = "TestManagementRecoveryHcf";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].agent.typename = "";
+        }
+        test: ManagementRecoveryTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ManagementRecoveryTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+*.sta.mobility.initialX = 1m
+*.sta.mobility.initialY = 0m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+*.ap.wlan[0].mac.qosStation = true
+repeat = 3
+seed-set = ${repetition}
+*.test.longFrame = ${longFrame=false,true}
+*.test.retryLimit = ${retryLimit=1,2}
+*.ap.wlan[0].mac.hcf.retryLimit = ${retryLimit}
+*.ap.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${longFrame} ? 0B : 4096B
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].cwMin = 3
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].cwMax = ${cwMax=3,15}
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].recoveryProcedure.shortRetryLimit = 2
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = ${retryLimit}
+*.ap.wlan[0].mac.hcf.edca.edcaf[3].mgmtAndNonQoSRecoveryProcedure.longRetryLimit = ${retryLimit}
+*.sta.wlan[0].mac.actions = ${longFrame} ? (${retryLimit} == 1 ? "ABAABB" : "ABAAAABB") : (${retryLimit} == 1 ? "BABB" : "BAABB")
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+
+%contains: stdout
+Management recovery exchange and isolation verified.
