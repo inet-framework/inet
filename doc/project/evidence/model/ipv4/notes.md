@@ -161,8 +161,9 @@ the UDP header at the front of the record instead (`udpDestinationPort()` in
   recomputes the header checksum, so a rewritten field never fails for the checksum.
 - A mutator cannot read captures. Anything it needs from an earlier datagram has to come
   from a property of the model (the counter minus one) and be confirmed by a later step.
-- One tap carries one rule. Two taps in series work, and the configurator joins the whole
-  chain into one link.
+- One tap carried one rule when this pass ran. Since `660ead8e2a` (2026-09-14) a relay holds
+  a list of rules and offers a frame to them in order (AUTHORING.md §7). Two taps in series
+  still work, and the configurator joins the whole chain into one link.
 - A `delay` holds only the selected frame; other frames pass while it is held.
 - The ICMP checksum survives a type rewrite only because the model's ICMP runs in declared
   mode. In computed mode the rewrite would need a recompute that the model exposes only as a

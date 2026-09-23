@@ -522,5 +522,6 @@ module's point of view (so `packetReceivedFromUpper` reads as the mipv6 module *
 **same case at the network-interface level** (`mipv6_registration_and_ro_interface`) just swaps the
 observation point to `on("MN[0].wlan[0]").signal("packetSentToLower"/"packetReceivedFromLower")` — the
 field/cookie assertions are identical (PacketFilter's PacketDissector reaches the Mobility Header even
-through the IPv6/802.11 encapsulation). Run `Mipv6Trace` first to read the real sequence. See
-`mipv6_registration_and_ro` and `…_interface`.
+through the IPv6/802.11 encapsulation). Run `Mipv6Trace` first to read the real sequence. The two
+tests `mipv6_registration_and_ro` and `…_interface` were removed on 2026-09-10 (`81c84c31a4`),
+because no catalog entry stood behind them; the pattern stays valid for a Mobile IPv6 pass.

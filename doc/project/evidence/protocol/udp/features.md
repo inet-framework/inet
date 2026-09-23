@@ -44,9 +44,9 @@ which capabilities the standards define, so a new run must never force an edit h
 | [UDP-F-ERROR-DELIVERY](#udp-f-error-delivery) | mandatory | RFC 1122 §4.1.3.3 | RFC1122-UERR-1 |
 | [UDP-F-APP-INTERFACE](#udp-f-app-interface) | mandatory | RFC 1122 §4.1.3.2, §4.1.3.5, §4.1.4 | RFC1122-UAPI-1, RFC1122-UMH-1, RFC1122-UMH-2, RFC1122-UOPT-1, RFC1122-UOPT-2 |
 
-Seven features, five mandatory. UDP is a thin protocol by design — "a minimum of protocol
+Seven features, six mandatory. UDP is a thin protocol by design — "a minimum of protocol
 mechanism", in the words of its introduction — and the map is correspondingly short. Four
-of the five mandatory features come from RFC 1122, which entered the in-scope set at
+of the six mandatory features rest on RFC 1122, which entered the in-scope set at
 level 3: RFC 768 describes a datagram, and RFC 1122 says what a host must do with one. What
 a run showed about each feature is in [`coverage.md`](../../model/udp/coverage.md).
 

@@ -54,10 +54,10 @@ unexpected per-test verdicts. Run: 2026-09-17 17:10:51–17:11:36 +02:00; runner
 inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f '/(WifiQosDelayedBa|N_ReverseDirection|N_LdpcCap|Ac_80p80|Ac_MuMimo|G_ErpProtection|B_Pbcc|B_ShortPreamble|N_Greenfield|Ac_MultiTidBa|Ac_Ampdu|N_Ampdu)\.test$' --log-file /home/user/omnetpp_ws/inet/audit/protocol/wifi/deferred-expectations/runner.log
 ```
 
-[Command](../../../../../audit/protocol/wifi/deferred-expectations/command.json),
-[run metadata](../../../../../audit/protocol/wifi/deferred-expectations/run.json),
-[output](../../../../../audit/protocol/wifi/deferred-expectations/output.log), and
-[outcomes](../../../../../audit/protocol/wifi/deferred-expectations/outcomes.json) are local artifacts.
+Command (`audit/protocol/wifi/deferred-expectations/command.json`),
+run metadata (`audit/protocol/wifi/deferred-expectations/run.json`),
+output (`audit/protocol/wifi/deferred-expectations/output.log`), and
+outcomes (`audit/protocol/wifi/deferred-expectations/outcomes.json`) are local artifacts.
 Build output is `/tmp/inet-wifi-deferred-build.log`. This run regenerates and compiles the selected
 tests; their assertions and simulation configuration are unchanged by this declaration update.
 
@@ -124,10 +124,10 @@ print(digest.hexdigest())
 ## Full-suite run before marker changes
 
 - Run: 2026-09-17 14:43:26–14:45:51 +02:00 (Europe/Madrid), 2m 25s.
-- INET: `master`, `bf7b4872bb3bc48a5b7d0bfc115812931392e939` **dirty**. The hash does not identify the tested tree; [changed paths](../../../../../audit/protocol/wifi/2026-09-17/changed-paths.txt) and [test patch](../../../../../audit/protocol/wifi/2026-09-17/test-source.diff) identify the edits.
+- INET: `master`, `bf7b4872bb3bc48a5b7d0bfc115812931392e939` **dirty**. The hash does not identify the tested tree; changed paths (`audit/protocol/wifi/2026-09-17/changed-paths.txt`) and test patch (`audit/protocol/wifi/2026-09-17/test-source.diff`) identify the edits.
 - OMNeT++: 6.4.0aipre2, build `260526-7b9114f72c`; installation is not a Git checkout.
 - Build: debug, INET library `src/libINET_dbg.so` (the successful pre-audit `make MODE=debug -j$(nproc)`); no compiled INET sources changed during this audit. The protocol runner rebuilt test executables and applicable support.
-- Compiler: `Ubuntu clang version 21.1.8 (6ubuntu1)`; [full compiler/platform record](../../../../../audit/protocol/wifi/2026-09-17/run-record.json).
+- Compiler: `Ubuntu clang version 21.1.8 (6ubuntu1)`; full compiler/platform record (`audit/protocol/wifi/2026-09-17/run-record.json`).
 - Platform: Ubuntu 26.04.1 LTS; `Linux 7.0.0-31-generic x86_64`.
 - Working directory: `/home/user/omnetpp_ws/inet`; configuration `General`, seed-set 0. The reassociation test uses `ReassociationNetwork`; other tests use `WifiInfraNetwork`.
 - Full-suite command (with OMNeT++/INET sourced and `MPLCONFIGDIR=/tmp/inet-matplotlib`):
@@ -137,7 +137,7 @@ print(digest.hexdigest())
     --log-file /tmp/inet-wifi-audit-20260917/full.log
   ```
 
-- Exit status: 1. [Runner output](../../../../../audit/protocol/wifi/2026-09-17/full-output.log); [per-test outcomes and failure excerpts](../../../../../audit/protocol/wifi/2026-09-17/outcomes.json).
+- Exit status: 1. Runner output (`audit/protocol/wifi/2026-09-17/full-output.log`); per-test outcomes and failure excerpts (`audit/protocol/wifi/2026-09-17/outcomes.json`).
 
 ## Scope and result
 
@@ -151,7 +151,7 @@ Observed full-suite artifacts before marker changes: **45 PASS, 30 FAIL (includi
 
 The approved patch was applied and the exact 18 affected tests rerun in debug mode: **6 PASS, 12 unexpected FAIL**, exit 1, runner duration 2m 17.582s. All 18 outcomes match their pre-marker observations; the failures are now exposed by the runner. The run started `2026-09-17T15:14:41.718194+02:00` and finished `2026-09-17T15:17:04.853313+02:00` with the same environment and seed as the full-suite run.
 
-[Exact command](../../../../../audit/protocol/wifi/2026-09-17/postapproval-command.json), [runner output](../../../../../audit/protocol/wifi/2026-09-17/postapproval-output.log), [per-test outcomes and excerpts](../../../../../audit/protocol/wifi/2026-09-17/postapproval-outcomes.json), and [tested source diff](../../../../../audit/protocol/wifi/2026-09-17/postapproval-test-source.diff) preserve this verification. An initial incorrectly anchored selector selected zero tests; its artifacts are preserved with the `empty-selection-` prefix and excluded from verification.
+Exact command (`audit/protocol/wifi/2026-09-17/postapproval-command.json`), runner output (`audit/protocol/wifi/2026-09-17/postapproval-output.log`), per-test outcomes and excerpts (`audit/protocol/wifi/2026-09-17/postapproval-outcomes.json`), and tested source diff (`audit/protocol/wifi/2026-09-17/postapproval-test-source.diff`) preserve this verification. An initial incorrectly anchored selector selected zero tests; its artifacts are preserved with the `empty-selection-` prefix and excluded from verification.
 
 Combining the earlier full-suite observations with this focused rerun yields **45 passing tests, 17 expected failures, and 13 unexpected failures** across 75 tests. The extra unexpected failure is the separately added `Ac_Ldpc` test. This reconciliation is not a second full-suite execution. That historical source inventory contained 17 expected-failure declarations; the current inventory is 30.
 
@@ -168,7 +168,7 @@ Negative controls use each generated `./run` with `--cmdenv-log-level=off`:
 | Deauthentication/reassociation | `'--*.sta1.wlan[*].agent.typename="Ieee80211AgentSta"'` | Initial association completes but the untriggered operation is absent. |
 | Retransmission | `'--*.sta1.wlan[*].mac.typename="Ieee80211Mac"'` | ACK suppression prerequisite is absent. |
 
-Negative-control output is preserved in [audit/protocol/wifi/2026-09-17](../../../../../audit/protocol/wifi/2026-09-17). These diagnostics intentionally fail and are not suite failures. INET emits the test verdict on stdout; process success alone is not the verdict.
+Negative-control output is preserved in `audit/protocol/wifi/2026-09-17`. These diagnostics intentionally fail and are not suite failures. INET emits the test verdict on stdout; process success alone is not the verdict.
 
 ## Current classifications and expectations
 
@@ -180,7 +180,7 @@ identifies the six repaired tests whose failure markers remain absent. This tabl
 
 A declaration does not change the diagnostic class or establish full feature support.
 Retained presence probes do not validate complete procedures or their triggers. The original
-[removal patch](../../../../../audit/protocol/wifi/2026-09-17/expectation-changes.patch) records
+removal patch (`audit/protocol/wifi/2026-09-17/expectation-changes.patch`) records
 history only; the later deferral decision supersedes it for the 12 restored declarations.
 
 | Source test | Observed / stage | Current expectation | Class | Evidence and follow-up |
@@ -224,7 +224,7 @@ history only; the later deferral decision supersedes it for the 12 restored decl
 
 `Ac_Ldpc` is the new VHT coding-observation gap split from `Ac_LdpcStbcCap`; the historical combined filename now tests STBC only.
 
-The source-search commands and matches supporting the bounded absence claims are recorded in [source-searches.json](../../../../../audit/protocol/wifi/2026-09-17/source-searches.json).
+The source-search commands and matches supporting the bounded absence claims are recorded in source-searches.json (`audit/protocol/wifi/2026-09-17/source-searches.json`).
 
 ## Failure analysis and limitations
 
