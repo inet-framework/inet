@@ -1,0 +1,112 @@
+# Standards tests, wave 0 — debt, fresh run records, and level 1 for the Mode B protocols
+
+**Status:** in progress. Started 2026-09-23 on `topic/standards-tests-wave0`, from `master` at
+`28536bd0a5`. Worktree: `/home/levy/workspace/inet-standards-tests-wave0`.
+
+Source: the survey `audit/sweep/standards-tests.md` in `inet-master` (local, not in git), §6
+"Wave 0". The user chose two extensions on 2026-09-23: the level-1 sweep covers the 17 Mode B
+protocols, and the guide changes so that a run record survives a rebase.
+
+## What changed since the survey
+
+The survey named two stale run records (TCP, DHCP). A check of every run record shows that the
+debt is systemic: **all 17 run records in `evidence/model/` name a commit that is not on
+`master`**. The branches were rebased when they landed. The objects still exist, and the `src/`
+tree of each old commit is identical to a range of commits on `master`:
+
+| Old commit | Used by | Same `src/` tree as `master` commits |
+| --- | --- | --- |
+| `0868c36c88` | ipv4, ipv6, quic, udp | `512d6c1b15` to `cae555ebc8` |
+| `223ba89ce5` | arp | the same range |
+| `4e20c74e82`, `4acb050ab1` | dhcp | the same range |
+| `e0ac3b7307` | tcp | `83396aa655` to `ab1447501a` |
+
+The survey also misread one fact. The "obsolete-citation sweep" of TCP pass 4 (`0dd31d7948`)
+counted the old citations; it never changed a source file ("No source file changed"). The
+pass-log sentence "moved the model's own references off RFC 793" is the error, not the code.
+
+## The fresh run
+
+Run on 2026-09-23 18:26 +0200 in the worktree, before any commit of this plan:
+
+- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- OMNeT++: 6.4.0, commit `cf58891643` (`omnetpp-6.x`; only IDE project files under `ui/` differ)
+- Build: debug. The worktree linked the objects of `inet-master`, deleted the 412 objects with
+  whole-second times (copied objects that make cannot judge), and rebuilt them: 408 compiled
+  files, no undefined `inet::` symbol.
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/<p>$'`, once per suite
+
+| Suite | Tests | PASS | FAIL (expected) | FAIL (unexpected) | The ledger said |
+| --- | ---: | ---: | ---: | ---: | --- |
+| arp | 16 | 16 | 0 | 0 | 13 PASS, 3 unexpected (row notes: repaired) |
+| udp | 13 | 11 | 2 | 0 | 10 PASS, 1 expected, 2 unexpected |
+| ipv4 | 22 | 20 | 2 | 0 | 16 PASS, 2 expected, 4 unexpected |
+| dhcp | 26 | 21 | 5 | 0 | 13 PASS, 5 expected, 8 unexpected |
+| tcp | 27 | 25 | 2 | 0 | 22 PASS, 2 expected, 3 unexpected |
+| quic | 11 | 10 | 1 | 0 | 8 PASS, 1 expected, 2 unexpected |
+| ipv6 | 27 | 27 | 0 | 0 | 19 PASS, 8 unexpected |
+
+The declared failures: udp `Rfc1122ChecksumDefault`, `Rfc1122MulticastSourceAddress`; ipv4
+`Rfc1122InvalidSourceAddress`, `Rfc1122VersionDiscard`; dhcp `Rfc2131BroadcastBitClear`,
+`Rfc2131InformWithoutLease`, `Rfc2131ReleaseOnShutdown`, `Rfc6842ClientIdentifierEchoed`,
+`Rfc6842ForeignClientIdentifier`; tcp `Rfc9293ChecksumDefault`, `Rfc9293Push`; quic
+`Rfc9000VersionNegotiation`.
+
+## Steps
+
+Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh`,
+`check-seals.sh`, and at the end `check-commits.sh master..HEAD` and
+`check-classification.sh master..HEAD`.
+
+1. [ ] **The guide: a run record survives a rebase.** The run-record table and script of
+   `guide/derive-tests-from-a-standard.md` step 7 gain the `src/` and `tests/protocol/` tree
+   hashes. The guide also says what a level-1 pass records instead of a run: the commit and
+   the trees that the claims were read from.
+2. [ ] **TCP ledger.** Rebuild `model/tcp/coverage.md` for the in-scope set of pass 4: the 39
+   rows of RFC 6298 and RFC 5681, the 10 features of level 4, the achieved-level text and table,
+   and the fresh run. Correct the pass-log sentence about the sweep. Correct the summary
+   sentence of `conformance.md`. Give `results.md` the trees of its old commit.
+3. [ ] **The six other ledgers** (arp, dhcp, ipv4, ipv6, quic, udp), one commit each: the fresh
+   run record, each row verdict from the fresh run, the feature support by the rule of step 7,
+   the conformance matrix from the new support, and the trees of the old commit in each snapshot
+   document. Fix the inconsistent ARP summary line on the way.
+4. [ ] **Small debt**, one commit: the UDP `features.md` prose count; the stale "one tap
+   carries one rule" in `model/ipv4/notes.md`; the Mobile IPv6 entry of `AUTHORING.md`, whose
+   two tests were removed on 2026-09-10.
+5. [ ] **Level 1 for the Mode B protocols**, one commit per protocol: RFC texts in
+   `evidence/standard/`, `protocol/<proto>/standards.md`, `model/<proto>/conformance.md` (part 1
+   only) and `model/<proto>/coverage.md` (the achieved level and the pass log). Folder names
+   from the survey, §2.3:
+
+   | `<proto>` | Base documents |
+   | --- | --- |
+   | `rip` | RFC 2453, RFC 2080 |
+   | `nd` | RFC 4861, RFC 4862 |
+   | `igmp` | RFC 9776, RFC 2236 |
+   | `mld` | RFC 9777, RFC 2710 |
+   | `ipsec` | RFC 4301, RFC 4302, RFC 4303 |
+   | `mpls` | RFC 3031, RFC 3032 |
+   | `mipv6` | RFC 6275 |
+   | `pmipv6` | RFC 5213 (and RFC 6275 from `mipv6`) |
+   | `ipv6tunnel` | RFC 2473 |
+   | `diffserv` | RFC 2474, RFC 2475, RFC 2597, RFC 3246, RFC 2697, RFC 2698 |
+   | `ospfv2` | RFC 2328 |
+   | `ospfv3` | RFC 5340 (and RFC 2328 from `ospfv2`) |
+   | `bgp` | RFC 4271, RFC 4760, RFC 5492 |
+   | `pim` | RFC 7761, RFC 3973 |
+   | `aodv` | RFC 3561 |
+   | `sctp` | RFC 9260 |
+   | `rtp` | RFC 3550, RFC 3551 |
+
+   The level-2 in-scope set of each map comes from the register, and the target level is 1.
+   `rip` goes first and is the template for the others.
+6. [ ] Gates, then move this plan to `plan/done/`.
+
+## Decisions and facts found on the way
+
+- The fresh run replaces the run record of every ledger. A `results.md` stays the record of its
+  pass; it keeps its old commit and gains the trees of that commit, so a reader can find the
+  same code on `master`.
