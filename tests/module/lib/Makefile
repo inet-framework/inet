@@ -42,6 +42,7 @@ OBJS = \
     $O/TCPTester.o \
     $O/TestIGMP.o \
     $O/TestMld.o \
+    $O/TunnelCeMarker.o \
     $O/ieee80211/Ieee80211BitDomainTest.o \
     $O/ieee80211/Ieee80211SymbolDomainTest.o \
     $O/ieee80211retransmissiontest/Ieee80211TesterMac.o \

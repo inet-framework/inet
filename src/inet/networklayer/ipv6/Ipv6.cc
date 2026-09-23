@@ -848,12 +848,21 @@ void Ipv6::localDeliverFinish(Packet *packet)
         // datagram is re-processed as if received from the network, so it is routed
         // or forwarded -- and seen by the netfilter pre-routing hooks -- normally.
         // The L3AddressInd left by decapsulate() carries the tunnel (outer) source.
-        packet->removeTagIfPresent<InterfaceReq>();
-        auto verdict = datagramPreRoutingHook(packet);
-        if (verdict == INetfilter::IHook::ACCEPT)
-            preroutingFinish(packet, fromIE, nullptr, Ipv6Address::UNSPECIFIED_ADDRESS);
-        else if (verdict == INetfilter::IHook::DROP)
+        if (!propagateTunnelEcn(packet, ipv6Header->getEcn())) {
+            EV_WARN << "Congestion Experienced on the outer header of a Not-ECT datagram, dropping it (RFC 6040 Section 4.2)\n";
+            PacketDropDetails details;
+            details.setReason(CONGESTION);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
+        }
+        else {
+            packet->removeTagIfPresent<InterfaceReq>();
+            auto verdict = datagramPreRoutingHook(packet);
+            if (verdict == INetfilter::IHook::ACCEPT)
+                preroutingFinish(packet, fromIE, nullptr, Ipv6Address::UNSPECIFIED_ADDRESS);
+            else if (verdict == INetfilter::IHook::DROP)
+                delete packet;
+        }
     }
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
@@ -887,6 +896,33 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
         send(msg, "transportOut");
     }
+}
+
+// RFC 6040 Section 4.2: the order of severity is CE, ECT(1), ECT(0), Not-ECT.
+static int getEcnSeverity(int ecn)
+{
+    switch (ecn) {
+        case IP_ECN_CE: return 3;
+        case IP_ECN_ECT_1: return 2;
+        case IP_ECN_ECT_0: return 1;
+        default: return 0;
+    }
+}
+
+bool Ipv6::propagateTunnelEcn(Packet *packet, int outerEcn)
+{
+    // RFC 6040 Section 4.2, Figure 4: a Not-ECT inner header is never given
+    // another codepoint, and is dropped under a CE outer header; otherwise the
+    // inner header takes the more severe of the two markings.
+    int innerEcn = packet->peekAtFront<Ipv6Header>()->getEcn();
+    if (innerEcn == IP_ECN_NOT_ECT)
+        return outerEcn != IP_ECN_CE;
+    if (getEcnSeverity(outerEcn) > getEcnSeverity(innerEcn)) {
+        auto innerHeader = packet->removeAtFront<Ipv6Header>();
+        innerHeader->setEcn(outerEcn);
+        packet->insertAtFront(innerHeader);
+    }
+    return true;
 }
 
 void Ipv6::decapsulate(Packet *packet)
