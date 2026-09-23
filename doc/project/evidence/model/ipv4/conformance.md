@@ -1,26 +1,36 @@
 # IPv4 — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/ipv4/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/ipv4/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/ipv4/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/ipv4/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
 features, never at the level of a single test.
 
 - Claim scan: 2026-09-09, worktree at commit `da7ac0d5bf`. `Ipv4.ned`, `Icmp.ned` and the
-  IPv4 tree are unchanged since the scan of pass 2, and the scan gave the same result. The
+  IPv4 tree were unchanged since the scan of pass 2, and the scan gave the same result. The
   scan was extended to `RFC 1122`, `RFC1122`, `RFC 6864` and `RFC6864` over
-  `src/inet/networklayer/` and `src/inet/transportlayer/udp/`: no line names either.
-  The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
-  identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-10
-  on `master`, commit `0868c36c88`. Every verdict of that run repeats the verdict of the
-  earlier pass.
+  `src/inet/networklayer/` and `src/inet/transportlayer/udp/`: no line names either. The
+  claim scan did not run again on 2026-09-23.
+- Support values, from this run:
+  - Date: 2026-09-23 18:26 +0200
+  - INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+  - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+  - OMNeT++: 6.4.0, commit `cf58891643`
+  - Build: debug, built from this commit
+  - Compiler: Ubuntu clang version 23.0.0
+  - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+  - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipv4$'`
+- Ledger state: [`coverage.md`](coverage.md#feature-support), from the run above. Three
+  commits repaired four defects since the pass that first found them: `f77a73d5a1`,
+  `37ddbfa7a8` and `40c9f04e21`.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalogs, the feature map, or the check
 descriptions.
 
 ## Part 1 — what the model claims
+
+Part 1 was read on 2026-09-09 and this refresh did not read the claims again.
 
 ### The claims of the active modules
 
@@ -64,19 +74,22 @@ ledger, and the level of the feature, by the table of step 8.
 | IPV4-F-HEADER | mandatory | yes (implicit, RFC 791) | supported | **confirmed** |
 | IPV4-F-TTL | mandatory | yes (implicit, RFC 791 and RFC 1122) | supported | **confirmed** |
 | IPV4-F-FRAGMENTATION | mandatory | yes (implicit, RFC 791) | supported | **confirmed** |
-| IPV4-F-REASSEMBLY | mandatory | yes (implicit, RFC 1122) | partial | **partial** — RFC791-REASM-1 and REASM-3: the reassembly key lacks the protocol field |
+| IPV4-F-REASSEMBLY | mandatory | yes (implicit, RFC 1122) | supported | **confirmed** |
 | IPV4-F-DONT-FRAGMENT | mandatory | no (RFC 6864 governs; the RFC 791 base text is claimed) | supported | **undocumented** |
 | IPV4-F-IDENTIFICATION | mandatory | no (RFC 6864 governs) | supported | **undocumented** |
-| IPV4-F-HEADER-CHECKSUM | mandatory | yes (implicit, RFC 791 and RFC 1122) | partial | **partial** — RFC1122-CKSUM-1: a bad checksum is not detected on a well-formed header |
+| IPV4-F-HEADER-CHECKSUM | mandatory | yes (implicit, RFC 791 and RFC 1122) | supported | **confirmed** |
 | IPV4-F-MIN-SIZE | mandatory | yes (implicit, RFC 791 and RFC 1122) | supported | **confirmed** |
 | IPV4-F-ERROR-REPORT | mandatory for a host, optional for a gateway | yes (implicit, RFC 792 and RFC 1122) | supported | **confirmed** |
-| IPV4-F-INPUT-VALIDATION | mandatory | yes (implicit, RFC 1122) | partial | **partial** — RFC1122-VER-1, CKSUM-1, ADDR-3, ICMP-1: four of five silent-discard rules fail |
-| IPV4-F-ERROR-SUPPRESSION | mandatory | yes (implicit, RFC 1122) | partial | **partial** — RFC1122-ICMP-7: a report is sent about a link-layer broadcast |
+| IPV4-F-INPUT-VALIDATION | mandatory | yes (implicit, RFC 1122) | partial | **partial** — RFC1122-VER-1, ADDR-3: two of five silent-discard rules fail |
+| IPV4-F-ERROR-SUPPRESSION | mandatory | yes (implicit, RFC 1122) | supported | **confirmed** |
 | IPV4-F-ERROR-DELIVERY | mandatory | yes (implicit, RFC 1122) | untested | **unverified** — every core statement is internal; module tests |
 
-Six features `confirmed`, four `partial`, two `undocumented`, one `unverified`. No
-`defect` in the strict sense of the table: every failing feature also has a core check that
-passed, so the table says `partial` and lists the gap. No `declined`.
+Nine features `confirmed`, one `partial`, two `undocumented`, one `unverified`. No
+`defect` in the strict sense of the table: the one partial feature also has a core check
+that passed, so the table says `partial` and lists the gap. No `declined`. Three verdicts
+moved from `partial` to `confirmed` since the pass that wrote them — IPV4-F-REASSEMBLY,
+IPV4-F-HEADER-CHECKSUM, IPV4-F-ERROR-SUPPRESSION — repaired by `f77a73d5a1` and
+`37ddbfa7a8`.
 
 ## Findings
 
@@ -89,40 +102,41 @@ keywords, the model satisfies every RFC 6864 check that ran, and the matrix stil
 the house style of `Igmpv2.ned` ("implements ... as specified in RFC 2236") would turn both
 `undocumented` rows into `confirmed` and every `implicit` into an explicit claim.
 
-### 2. Input validation: four of the five silent-discard rules fail
+### 2. Input validation: two of the five silent-discard rules fail, down from four
 
 RFC 1122 §3.2.1 and §3.2.2 require a host to discard, silently, a datagram with a wrong
 version, a bad checksum, or an invalid source address, and an ICMP message of unknown type.
-The model discards only a datagram that is not addressed to it. The four gaps, with the
-code in [`results.md`](results.md#model-analysis--where-inet-implements-the-checked-behavior):
+The model discards a datagram that is not addressed to it, and now also a bad checksum and
+an unknown ICMP type. Two gaps remain, with the code in
+[`results.md`](results.md#model-analysis--where-inet-implements-the-checked-behavior):
 
-- the header checksum is consulted only when the header is already malformed, so a
-  well-formed header with a wrong checksum passes (the pass 2 candidate, now a confirmed
-  gap);
 - the version field is never read on receipt;
-- the source address is never validated, at the network layer or at UDP;
-- an unknown ICMP type stops the simulation with a runtime error. This one is more than a
-  conformance gap: it is a robustness problem for any scenario that carries crafted,
-  external or fuzzed traffic.
+- the source address is never validated, at the network layer or at UDP.
 
-Within a simulation, the first three are the same kind of shortcut as the declared
-checksum mode: the model trusts its own senders. The fourth is not a shortcut.
+Two gaps are repaired since the pass that found them: the header checksum guard, by
+`f77a73d5a1`; the unknown ICMP type, by `40c9f04e21`. The unknown-type gap was more than a
+conformance gap: it was a robustness problem for any scenario that carries crafted,
+external or fuzzed traffic. Within a simulation, the source address gap left is the same
+kind of shortcut as the declared checksum mode: the model trusts its own senders.
 
-### 3. A report about a link-layer broadcast
+### 3. A report about a link-layer broadcast — repaired by `37ddbfa7a8`
 
 RFC 1122 §3.2.2 forbids an ICMP error about a datagram that arrived as a link-layer
 broadcast, and its implementation note says why the rule is separate from the IP-broadcast
-rule. The model's ICMP decides from the IP addresses only. A unicast datagram inside a
-broadcast frame, to a closed port, is answered with Destination Unreachable.
+rule. The model's ICMP decided from the IP addresses only, and a unicast datagram inside a
+broadcast frame, to a closed port, was answered with Destination Unreachable.
+`Icmp::maySendErrorMessage` now also reads the `MacAddressInd` tag of the arriving frame,
+and the report is suppressed.
 
-### 4. The reassembly key has three fields
+### 4. The reassembly key had three fields — repaired by `f77a73d5a1`
 
 RFC 791 §2.3 combines fragments that agree in identification, source, destination and
-protocol. The model's buffer key omits the protocol, so two datagrams of different
-protocols with the same identification share a buffer; in the check, the echo request was
-reassembled out of the UDP datagram's buffer and the UDP datagram was lost. The exposure is
-small in the model's own traffic, whose identifications come from one counter for all
-protocols; it is real for forged or wrapped identifications.
+protocol. The model's buffer key omitted the protocol, so two datagrams of different
+protocols with the same identification shared a buffer; in the check, the echo request was
+reassembled out of the UDP datagram's buffer and the UDP datagram was lost. The key carries
+the protocol too now. The exposure was small in the model's own traffic, whose
+identifications come from one counter for all protocols; it was real for forged or wrapped
+identifications.
 
 ### 5. The handoff of ICMP errors to the transport layer is unverified
 

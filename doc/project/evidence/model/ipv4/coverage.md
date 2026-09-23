@@ -14,13 +14,14 @@ once, and a later document may govern an earlier statement.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-10 15:18 +0200
-- INET: branch `master`, commit `0868c36c88`, tree clean
-- OMNeT++: 6.4.0
+- Date: 2026-09-23 18:26 +0200
+- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
-- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
-- Command: `inet_run_protocol_tests -p inet -w ipv4`
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipv4$'`
 - Target level: 3
 
 ## Statement coverage
@@ -43,11 +44,11 @@ which is not a failure.
 | [RFC791-FRAG-4](../../standard/rfc791/catalog.md#rfc791-frag-4) | selected | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test | PASS |
 | [RFC791-FRAG-5](../../standard/rfc791/catalog.md#rfc791-frag-5) | superseded by RFC6864-ID-6 | [dont-fragment](../../protocol/ipv4/checks/fragmentation.md#dont-fragment) | Rfc791DontFragment.test | PASS (the same check establishes both) |
 | [RFC791-FRAG-6](../../standard/rfc791/catalog.md#rfc791-frag-6) | selected | [minimum-sizes](../../protocol/ipv4/checks/fragmentation.md#minimum-sizes) | Rfc791MinimumSizes.test | PASS |
-| [RFC791-REASM-1](../../standard/rfc791/catalog.md#rfc791-reasm-1) | superseded by RFC1122-REASM-1 | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly), [same-identification-different-protocol](../../protocol/ipv4/checks/fragmentation.md#same-identification-different-protocol) | Rfc791FragmentReassembly.test, Rfc791SameIdDifferentProtocol.test | PASS (procedure); PASS since 2026-09-14 (four-field key) |
+| [RFC791-REASM-1](../../standard/rfc791/catalog.md#rfc791-reasm-1) | superseded by RFC1122-REASM-1 | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly), [same-identification-different-protocol](../../protocol/ipv4/checks/fragmentation.md#same-identification-different-protocol) | Rfc791FragmentReassembly.test, Rfc791SameIdDifferentProtocol.test | PASS (procedure); PASS since `f77a73d5a1` (four-field key) |
 | [RFC791-REASM-2](../../standard/rfc791/catalog.md#rfc791-reasm-2) | superseded by RFC1122-REASM-2 | [minimum-sizes](../../protocol/ipv4/checks/fragmentation.md#minimum-sizes) | Rfc791MinimumSizes.test | PASS |
-| [RFC791-REASM-3](../../standard/rfc791/catalog.md#rfc791-reasm-3) | selected | [interleaved-reassembly](../../protocol/ipv4/checks/fragmentation.md#interleaved-reassembly), [same-identification-different-protocol](../../protocol/ipv4/checks/fragmentation.md#same-identification-different-protocol) | Rfc791InterleavedReassembly.test, Rfc791SameIdDifferentProtocol.test | PASS (interleaved); PASS since 2026-09-14 (same identification) |
+| [RFC791-REASM-3](../../standard/rfc791/catalog.md#rfc791-reasm-3) | selected | [interleaved-reassembly](../../protocol/ipv4/checks/fragmentation.md#interleaved-reassembly), [same-identification-different-protocol](../../protocol/ipv4/checks/fragmentation.md#same-identification-different-protocol) | Rfc791InterleavedReassembly.test, Rfc791SameIdDifferentProtocol.test | PASS (interleaved); PASS since `f77a73d5a1` (same identification) |
 | [RFC791-CKSUM-1](../../standard/rfc791/catalog.md#rfc791-cksum-1) | selected | [ttl-decrement](../../protocol/ipv4/checks/ttl.md#ttl-decrement) | Rfc791TtlDecrement.test | PASS |
-| [RFC791-CKSUM-2](../../standard/rfc791/catalog.md#rfc791-cksum-2) | superseded by RFC1122-CKSUM-1 | [checksum-discard](../../protocol/ipv4/checks/checksum.md#checksum-discard) | Rfc1122ChecksumDiscard.test | **PASS** since 2026-09-14 |
+| [RFC791-CKSUM-2](../../standard/rfc791/catalog.md#rfc791-cksum-2) | superseded by RFC1122-CKSUM-1 | [checksum-discard](../../protocol/ipv4/checks/checksum.md#checksum-discard) | Rfc1122ChecksumDiscard.test | **PASS** since `f77a73d5a1` |
 | [RFC791-ID-1](../../standard/rfc791/catalog.md#rfc791-id-1) | superseded by RFC6864-ID-5 | [identification](../../protocol/ipv4/checks/identification.md#identification) | Rfc791Identification.test | PASS |
 | [RFC791-HDR-1](../../standard/rfc791/catalog.md#rfc791-hdr-1) | selected | [datagram-delivery](../../protocol/ipv4/checks/delivery.md#datagram-delivery) | Rfc791DatagramDelivery.test | PASS |
 | [RFC791-HDR-2](../../standard/rfc791/catalog.md#rfc791-hdr-2) | selected | [datagram-delivery](../../protocol/ipv4/checks/delivery.md#datagram-delivery) | Rfc791DatagramDelivery.test | PASS |
@@ -58,7 +59,7 @@ which is not a failure.
 | [RFC792-TE-1](../../standard/rfc792/catalog.md#rfc792-te-1) | selected | [ttl-expiry](../../protocol/ipv4/checks/ttl.md#ttl-expiry) | Rfc791TtlExpiry.test | PASS |
 | [RFC792-DU-4](../../standard/rfc792/catalog.md#rfc792-du-4) | selected | [dont-fragment](../../protocol/ipv4/checks/fragmentation.md#dont-fragment) | Rfc791DontFragment.test | PASS |
 | [RFC1122-VER-1](../../standard/rfc1122/catalog.md#rfc1122-ver-1) | selected | [version-discard](../../protocol/ipv4/checks/input-validation.md#version-discard) | Rfc1122VersionDiscard.test | **FAIL** (model gap) |
-| [RFC1122-CKSUM-1](../../standard/rfc1122/catalog.md#rfc1122-cksum-1) | selected | [checksum-discard](../../protocol/ipv4/checks/checksum.md#checksum-discard) | Rfc1122ChecksumDiscard.test | **PASS** since 2026-09-14 |
+| [RFC1122-CKSUM-1](../../standard/rfc1122/catalog.md#rfc1122-cksum-1) | selected | [checksum-discard](../../protocol/ipv4/checks/checksum.md#checksum-discard) | Rfc1122ChecksumDiscard.test | **PASS** since `f77a73d5a1` |
 | [RFC1122-ADDR-1](../../standard/rfc1122/catalog.md#rfc1122-addr-1) | covered | [datagram-delivery](../../protocol/ipv4/checks/delivery.md#datagram-delivery) | Rfc791DatagramDelivery.test | PASS |
 | [RFC1122-ADDR-2](../../standard/rfc1122/catalog.md#rfc1122-addr-2) | selected | [foreign-destination](../../protocol/ipv4/checks/input-validation.md#foreign-destination) | Rfc1122ForeignDestination.test | PASS |
 | [RFC1122-ADDR-3](../../standard/rfc1122/catalog.md#rfc1122-addr-3) | selected | [invalid-source-address](../../protocol/ipv4/checks/input-validation.md#invalid-source-address) | Rfc1122InvalidSourceAddress.test | **FAIL** (model gap) |
@@ -78,13 +79,13 @@ which is not a failure.
 | [RFC1122-FRAG-3](../../standard/rfc1122/catalog.md#rfc1122-frag-3) | candidate (conditional on the absence of FRAG-1) | — | — | — |
 | [RFC1122-FRAG-4](../../standard/rfc1122/catalog.md#rfc1122-frag-4) | covered | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test | **declined** (a should: 1028 octets sent whole off-net) |
 | [RFC1122-FRAG-5](../../standard/rfc1122/catalog.md#rfc1122-frag-5) | covered | [fragment-and-reassembly](../../protocol/ipv4/checks/fragmentation.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test | PASS (on a gateway interface of the same module type) |
-| [RFC1122-ICMP-1](../../standard/rfc1122/catalog.md#rfc1122-icmp-1) | selected | [unknown-icmp-type](../../protocol/ipv4/checks/input-validation.md#unknown-icmp-type) | Rfc1122UnknownIcmpType.test | **PASS** (the runtime error is repaired) |
+| [RFC1122-ICMP-1](../../standard/rfc1122/catalog.md#rfc1122-icmp-1) | selected | [unknown-icmp-type](../../protocol/ipv4/checks/input-validation.md#unknown-icmp-type) | Rfc1122UnknownIcmpType.test | **PASS** since `40c9f04e21` (the runtime error is repaired) |
 | [RFC1122-ICMP-2](../../standard/rfc1122/catalog.md#rfc1122-icmp-2) | selected | [host-error-report](../../protocol/ipv4/checks/error-report.md#host-error-report) | Rfc1122HostErrorReport.test | PASS |
 | [RFC1122-ICMP-3](../../standard/rfc1122/catalog.md#rfc1122-icmp-3) | later (module test: a handoff) | — | — | — |
 | [RFC1122-ICMP-4](../../standard/rfc1122/catalog.md#rfc1122-icmp-4) | selected | [host-error-report](../../protocol/ipv4/checks/error-report.md#host-error-report) | Rfc1122HostErrorReport.test | PASS (a should) |
 | [RFC1122-ICMP-5](../../standard/rfc1122/catalog.md#rfc1122-icmp-5) | selected | [no-error-about-an-error](../../protocol/ipv4/checks/error-report.md#no-error-about-an-error) | Rfc1122NoErrorAboutError.test | PASS |
 | [RFC1122-ICMP-6](../../standard/rfc1122/catalog.md#rfc1122-icmp-6) | selected | [no-error-for-a-broadcast](../../protocol/ipv4/checks/error-report.md#no-error-for-a-broadcast) | Rfc1122NoErrorForBroadcast.test | PASS |
-| [RFC1122-ICMP-7](../../standard/rfc1122/catalog.md#rfc1122-icmp-7) | selected | [no-error-for-a-link-layer-broadcast](../../protocol/ipv4/checks/error-report.md#no-error-for-a-link-layer-broadcast) | Rfc1122NoErrorForLinkBroadcast.test | **PASS** (the missing condition is added) |
+| [RFC1122-ICMP-7](../../standard/rfc1122/catalog.md#rfc1122-icmp-7) | selected | [no-error-for-a-link-layer-broadcast](../../protocol/ipv4/checks/error-report.md#no-error-for-a-link-layer-broadcast) | Rfc1122NoErrorForLinkBroadcast.test | **PASS** since `37ddbfa7a8` (the missing condition is added) |
 | [RFC1122-ICMP-8](../../standard/rfc1122/catalog.md#rfc1122-icmp-8) | selected | [no-error-for-a-non-initial-fragment](../../protocol/ipv4/checks/error-report.md#no-error-for-a-non-initial-fragment) | Rfc1122NoErrorForNonInitialFragment.test | PASS |
 | [RFC1122-ICMP-9](../../standard/rfc1122/catalog.md#rfc1122-icmp-9) | selected | [no-error-for-an-invalid-source](../../protocol/ipv4/checks/error-report.md#no-error-for-an-invalid-source) | Rfc1122NoErrorForInvalidSource.test | PASS |
 | [RFC1122-DU-1](../../standard/rfc1122/catalog.md#rfc1122-du-1) | selected | [host-error-report](../../protocol/ipv4/checks/error-report.md#host-error-report) | Rfc1122HostErrorReport.test | PASS (a should) |
@@ -103,8 +104,10 @@ which is not a failure.
 | [RFC6864-ID-7](../../standard/rfc6864/catalog.md#rfc6864-id-7) | selected | [atomic-identification](../../protocol/ipv4/checks/identification.md#atomic-identification) | Rfc6864AtomicIdentification.test | PASS |
 
 67 entries: 23 of RFC 791 and RFC 792, 37 of RFC 1122, 7 of RFC 6864. 50 have a verdict
-from a check that ran: 41 PASS, 6 FAIL -- 4 of them a defect and 2 an unimplemented behavior -- 2 with one PASS and one FAIL
-(RFC791-REASM-1 and REASM-3, each with two checks), 1 declined should. 17 have none:
+from a check that ran: 47 PASS, 2 FAIL -- both an unimplemented behavior -- 1 declined
+should. Three commits repaired the four defects that the pass 3 run found: `f77a73d5a1`
+(the header checksum guard and the four-field reassembly key), `37ddbfa7a8` (the
+link-layer broadcast suppression), and `40c9f04e21` (the unknown ICMP type). 17 have none:
 7 need a module test (an interface or a handoff inside the host), 2 wait for level 4 (the
 reassembly timer), 1 needs a TCP retransmission, 1 needs a standing negative rule in the
 framework, 1 is refused by the model with an assertion, 2 are superseded or internal, and
@@ -125,22 +128,23 @@ govern an RFC 791 one; the governing statement counts.
 | [IPV4-F-HEADER](../../protocol/ipv4/features.md#ipv4-f-header) | RFC791-HDR-1, HDR-2, HDR-3 all PASS | **supported** |
 | [IPV4-F-TTL](../../protocol/ipv4/features.md#ipv4-f-ttl) | RFC791-TTL-1 PASS, RFC791-TTL-2 PASS, RFC1122-TTL-2 PASS | **supported** |
 | [IPV4-F-FRAGMENTATION](../../protocol/ipv4/features.md#ipv4-f-fragmentation) | RFC791-FRAG-1..4 all PASS | **supported** |
-| [IPV4-F-REASSEMBLY](../../protocol/ipv4/features.md#ipv4-f-reassembly) | RFC1122-REASM-1 PASS, RFC791-REASM-1 PASS (procedure) and FAIL (four-field key), RFC791-REASM-3 PASS (interleaved) and FAIL (same identification) | **partial** |
+| [IPV4-F-REASSEMBLY](../../protocol/ipv4/features.md#ipv4-f-reassembly) | RFC1122-REASM-1 PASS, RFC791-REASM-1 PASS (both parts, the four-field key since `f77a73d5a1`), RFC791-REASM-3 PASS (both parts) | **supported** |
 | [IPV4-F-DONT-FRAGMENT](../../protocol/ipv4/features.md#ipv4-f-dont-fragment) | RFC6864-ID-6 PASS, RFC6864-ID-7 PASS | **supported** |
 | [IPV4-F-IDENTIFICATION](../../protocol/ipv4/features.md#ipv4-f-identification) | RFC6864-ID-5 PASS, RFC6864-ID-3 PASS, RFC791-FRAG-3 PASS | **supported** |
-| [IPV4-F-HEADER-CHECKSUM](../../protocol/ipv4/features.md#ipv4-f-header-checksum) | RFC791-CKSUM-1 PASS; RFC1122-CKSUM-1 FAIL | **partial** |
+| [IPV4-F-HEADER-CHECKSUM](../../protocol/ipv4/features.md#ipv4-f-header-checksum) | RFC791-CKSUM-1 PASS; RFC1122-CKSUM-1 PASS since `f77a73d5a1` | **supported** |
 | [IPV4-F-MIN-SIZE](../../protocol/ipv4/features.md#ipv4-f-min-size) | RFC791-FRAG-6 PASS, RFC1122-REASM-2 PASS | **supported** |
 | [IPV4-F-ERROR-REPORT](../../protocol/ipv4/features.md#ipv4-f-error-report) | RFC792-DU-4, RFC792-TE-1, RFC1122-ERR-1, RFC1122-DU-1, RFC1122-ICMP-2 all PASS | **supported** |
-| [IPV4-F-INPUT-VALIDATION](../../protocol/ipv4/features.md#ipv4-f-input-validation) | RFC1122-ADDR-2 PASS; RFC1122-VER-1, CKSUM-1, ADDR-3, ICMP-1 FAIL | **partial** |
-| [IPV4-F-ERROR-SUPPRESSION](../../protocol/ipv4/features.md#ipv4-f-error-suppression) | RFC1122-ICMP-5, ICMP-6, ICMP-8, ICMP-9 PASS; RFC1122-ICMP-7 FAIL | **partial** |
+| [IPV4-F-INPUT-VALIDATION](../../protocol/ipv4/features.md#ipv4-f-input-validation) | RFC1122-ADDR-2 PASS; RFC1122-CKSUM-1 PASS since `f77a73d5a1`, ICMP-1 PASS since `40c9f04e21`; RFC1122-VER-1, ADDR-3 FAIL | **partial** |
+| [IPV4-F-ERROR-SUPPRESSION](../../protocol/ipv4/features.md#ipv4-f-error-suppression) | RFC1122-ICMP-5, ICMP-6, ICMP-8, ICMP-9 PASS; RFC1122-ICMP-7 PASS since `37ddbfa7a8` | **supported** |
 | [IPV4-F-ERROR-DELIVERY](../../protocol/ipv4/features.md#ipv4-f-error-delivery) | RFC1122-ICMP-3, DU-2, TE-1, PP-2: none ran (internal; module tests) | **untested** |
 
-Eight features supported, four partial, one untested. The four partial ones are where the
-level 3 toolset found the model wanting: the verification of the header checksum, the
-silent discard of malformed or misaddressed input, the suppression of a report for a
-link-layer broadcast, and the four-field reassembly key. The untested one is the handoff of
-a received ICMP error to the transport protocol, which happens inside the host and needs a
-module test.
+Eleven features supported, one partial, one untested. Three commits (`f77a73d5a1`,
+`37ddbfa7a8`, `40c9f04e21`) repaired four defects since the pass that first found them, and
+moved IPV4-F-REASSEMBLY, IPV4-F-HEADER-CHECKSUM and IPV4-F-ERROR-SUPPRESSION from partial to
+supported. The one partial feature left is where the level 3 toolset still finds the model
+wanting: two of the five silent-discard rules of input validation, the wrong version and the
+unvalidated source address. The untested one is the handoff of a received ICMP error to the
+transport protocol, which happens inside the host and needs a module test.
 
 Two bounds on these values, as before. A `supported` feature is supported as far as its
 checks reach: one datagram size, one MTU, one topology per check. And the checksum
@@ -176,7 +180,7 @@ have a verdict. 14 mandatory statements have none, and they fall into four kinds
 | --- | --- | --- |
 | 1, Survey | **reached** | The standards map pins the in-scope set; [`conformance.md`](conformance.md) maps every model claim onto it and names the missing version statement. |
 | 2, Core | **reached** | The inventory of pass 2, and every level 2 statement with a PASS on this tree. |
-| 3, Edge | **partial** | Both catalogs complete for the in-scope sections; 22 checks with the relay, the two-gateway and the one-link mockups; 6 model gaps found; 14 mandatory statements without a check, listed above. |
+| 3, Edge | **partial** | Both catalogs complete for the in-scope sections; 22 checks with the relay, the two-gateway and the one-link mockups; 2 model gaps found (4 more, repaired since by `f77a73d5a1`, `37ddbfa7a8` and `40c9f04e21`); 14 mandatory statements without a check, listed above. |
 | 4, Dynamics | not started | the reassembly timer: RFC1122-REASM-4, REASM-5, with the `fragmentTimeout` parameter and a withheld fragment |
 | 5, Complete | not started | options, type of service, the ICMP query messages, RFC 1812 for the gateway side |
 
@@ -192,7 +196,7 @@ or supporting, has a verdict:
 | IPV4-F-REASSEMBLY | partial | RFC1122-REASM-3 (interface), REASM-4 and REASM-5 (level 4) |
 | IPV4-F-DONT-FRAGMENT | reached | — |
 | IPV4-F-IDENTIFICATION | partial | RFC6864-ID-4 (TCP), ID-1 (internal) |
-| IPV4-F-HEADER-CHECKSUM | reached | — (one check fails; the level asks whether it ran) |
+| IPV4-F-HEADER-CHECKSUM | reached | — |
 | IPV4-F-MIN-SIZE | reached | — |
 | IPV4-F-ERROR-REPORT | reached | — |
 | IPV4-F-INPUT-VALIDATION | partial | RFC1122-ADDR-4 (a standing rule) |
@@ -200,8 +204,12 @@ or supporting, has a verdict:
 | IPV4-F-ERROR-DELIVERY | not reached | all four core statements are internal |
 
 Seven of thirteen features reach level 3. The level and the support value are different
-axes: IPV4-F-HEADER-CHECKSUM reaches level 3 with a `partial` support value, because its
-verification check ran and failed, which is exactly what the level exists to find.
+axes, in principle: reaching level 3 needs every mandatory statement to have a check that
+ran, not that it passed. On this run every feature that reaches level 3 also holds a
+`supported` value, because the repairs of `f77a73d5a1` and `37ddbfa7a8` cleared the one
+case that used to show the difference: IPV4-F-HEADER-CHECKSUM reached level 3 with a
+`partial` support value, before `f77a73d5a1`, because its verification check ran and
+failed.
 
 ## Pass log
 
@@ -210,6 +218,7 @@ verification check ran and failed, which is exactly what the level exists to fin
 | 1 | 2026-09-02 | 2, partial | RFC 791 + RFC 792 error signals; 17 catalog entries; 3 checks; 3 tests | 4 PASS; two mandatory features untested |
 | 2 | 2026-09-08 | **2, reached** | Level 2 pass: 23 catalog entries (6 new), 10 features (2 new), 7 checks (4 new), 7 tests (4 new, 1 extended). | 8 PASS; 9 features supported, 1 partial; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
 | 3 | 2026-09-09 | **3, partial** | Level 3 pass: RFC 1122 and RFC 6864 enter the in-scope set (44 new catalog entries, 5 override cross references), 13 features (3 new, 2 levels changed by the new documents), 22 checks (15 new, split into one file per feature), 23 tests (15 new, 1 extended); the relay, two-gateway and one-link mockups. | 16 PASS, 6 FAIL: 2 declared expected and 4 undeclared defects, so the suite reports FAIL; 8 features supported, 4 partial, 1 untested; 14 mandatory statements without a check; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
+| 4 | 2026-09-23 | 3, partial | Re-run only, no new check. The run record of the last pass named a commit that the landing rebase removed; this row gives the ledger a run on master. | 22 tests, 20 PASS, 2 FAIL (expected), 0 FAIL (unexpected); verdicts changed since pass 3: `Rfc1122ChecksumDiscard.test` and `Rfc791SameIdDifferentProtocol.test` FAIL (unexpected) → PASS by `f77a73d5a1`; `Rfc1122NoErrorForLinkBroadcast.test` FAIL (unexpected) → PASS by `37ddbfa7a8`; `Rfc1122UnknownIcmpType.test` FAIL (unexpected) → PASS by `40c9f04e21`; IPV4-F-REASSEMBLY, IPV4-F-HEADER-CHECKSUM and IPV4-F-ERROR-SUPPRESSION move from partial to supported, 11 features supported, 1 partial, 1 untested; see [`results.md`](results.md) and [`conformance.md`](conformance.md) |
 
 ## Out of scope
 
