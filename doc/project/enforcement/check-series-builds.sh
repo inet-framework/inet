@@ -17,6 +17,9 @@
 #   - objects land in src/out, not out
 #   - a libINET.so left in src/ makes the whole tree look current, so make does nothing
 #   - git checkout keeps an unchanged file's mtime, so the differing files must be touched
+#   - a message dependency file (src/out/**/*_m.h.d) can name a .msg file that a later commit
+#     moved, and a commit whose message compilation fails never rewrites it; the next commit
+#     then runs opp_msgtool on a file that no longer exists, and one failure shows as two
 #
 # Exit status 0 = every commit builds, 1 = at least one does not.
 
@@ -47,6 +50,8 @@ for sha in "${SHAS[@]}"; do
   # make cannot see a file whose mtime git left alone
   git diff --name-only "$sha" "$prev" -- 'src/*' | xargs -r touch 2>/dev/null
   rm -f src/libINET.so src/libINET_dbg.so
+  # every _m file is generated again after the clean above, so its dependency file costs nothing
+  find src/out -name '*_m.h.d' -delete 2>/dev/null
   if make MODE="$MODE" -j"$(nproc)" >"$log" 2>&1; then
     printf "  %3d/%d  ok    %s  %s\n" "$n" "${#SHAS[@]}" "${sha:0:9}" "$(git log -1 --format=%s | cut -c1-46)"
   else
