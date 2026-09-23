@@ -31,6 +31,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/EthTestApp.o \
     $O/IGMPTester.o \
+    $O/InnerDatagramDropper.o \
     $O/MeterTestApp.o \
     $O/NetfilterHookProbe.o \
     $O/PacketDump.o \

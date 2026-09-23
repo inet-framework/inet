@@ -857,11 +857,9 @@ void Ipv6::localDeliverFinish(Packet *packet)
         }
         else {
             packet->removeTagIfPresent<InterfaceReq>();
-            auto verdict = datagramPreRoutingHook(packet);
-            if (verdict == INetfilter::IHook::ACCEPT)
+            // on DROP datagramPreRoutingHook() has already deleted the datagram
+            if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
                 preroutingFinish(packet, fromIE, nullptr, Ipv6Address::UNSPECIFIED_ADDRESS);
-            else if (verdict == INetfilter::IHook::DROP)
-                delete packet;
         }
     }
     else if (contains(upperProtocols, protocol)) {
