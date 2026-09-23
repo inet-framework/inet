@@ -37,22 +37,20 @@ autoconfiguration (SLAAC). Routing then delivers anything addressed to that
 prefix to that link. The address is therefore a statement about where the host
 is.
 
+A host that is exchanging traffic has that traffic pinned to the address it
+started with. Both ends named each other when they started, and neither expects
+the other's name to change. Most transport connections are identified by the two
+addresses and the two port numbers they started with, and the echo requests and
+replies in this showcase are matched the same way. Change one of those addresses
+and an exchange identified that way ends. In this page, a *session* means such
+an ongoing exchange between two end nodes.
+
 A laptop that moves between two access points of the same wireless network
 keeps its address, and nothing it was doing breaks. Those access points bridge
 one and the same IP link, so nothing about the host's link changed. The two
 access routers in this showcase are different IP links with different prefixes,
 and a host that moves from one to the other leaves one network and joins
 another.
-
-A host that is exchanging traffic has that traffic pinned to the address it
-started with. Both ends named each other when they started, and neither expects
-the other's name to change. A transport connection is identified by the two
-addresses and the two port numbers it started with, and the echo requests and
-replies in this showcase are matched the same way. Change one of the addresses
-and the exchange ends. QUIC is the deployed exception: it names its connection
-with an identifier of its own, so it can survive the change. Most traffic
-cannot. In this page, a *session* means such
-an ongoing exchange between two end nodes.
 
 The obvious repair is to announce a route for the moving host's address from
 wherever the host currently is. That does not scale: the network would have to
@@ -62,44 +60,45 @@ about the individual addresses inside it.
 Proxy Mobile IPv6, specified in RFC 5213, gives the mobile node a home network
 prefix, which stays with it wherever it goes inside the Proxy Mobile IPv6
 domain — the access routers and anchors configured to serve it. Whichever
-access router the node attaches to
-advertises that prefix on its own link, even though the prefix does not
-topologically belong there. The network tells the node the same thing on every
-link inside the domain, so the node builds the same address every time. The home
-network prefix behaves like a link that follows the mobile node.
+access router the node attaches to advertises that prefix on its own link,
+even though the prefix does not topologically belong there. That contradicts
+the rule this section opened with, so something has to bring the traffic to
+where the prefix now is. The network tells the node the same thing on every
+link inside the domain, so the node builds the same address every time — its
+home address. The home network prefix behaves like a link that follows the
+mobile node.
 
 Two roles do this work.
 
 - The Mobile Access Gateway is a function on an access router. It learns from
   the link layer that a node has attached, looks the node up in a policy
   profile, and sends a Proxy Binding Update to the anchor on the node's behalf.
+  The profile names the home network prefix that node gets.
 - The Local Mobility Anchor is the fixed point. It keeps a binding that maps the
   node's identity to the gateway currently serving it, and it answers with a
   Proxy Binding Acknowledgement.
 
-The gateway then builds a tunnel to the anchor and advertises the node's home
-network prefix on the access link. The node is identified in these messages by a
-mobile node identifier and by the link-layer address of the interface it
-attached with, not by its IP address — the address the protocol is working to
-keep constant.
+The gateway then builds a tunnel to the anchor. The node is identified in these
+messages by a mobile node identifier and by the link-layer address of the
+interface it attached with, not by its IP address — the address the protocol is
+working to keep constant.
 
-The anchor advertises the home network prefix into ordinary routing, so a packet
-for the mobile node arrives at the anchor no matter where the node is. The
-anchor puts it through the tunnel to the serving gateway, which strips the outer
-header and delivers it on the access link. The mobile node's own packets take
-the same tunnel back: the gateway sends a mobile node's packets to its anchor
-whatever their destination. An ordinary router decides where a packet goes by
-looking at its destination; for a mobile node's packets the gateway decides by
-looking at where they came from.
+The anchor is what brings the traffic. It advertises the home network prefix
+into ordinary routing, so a packet for the mobile node arrives at the anchor no
+matter where the node is. The anchor wraps it in an outer header and puts it
+through the tunnel to the serving gateway, which strips that header and delivers
+it on the access link. The mobile node's own packets take the same tunnel back:
+the gateway sends a mobile node's packets to its anchor whatever their
+destination. An ordinary router decides where a packet goes by looking at its
+destination; for a mobile node's packets the gateway decides by looking at where
+they came from.
 
 The cost is that the anchor sits on the path in both directions, even when the
 two ends are near each other. Traffic runs to the anchor and back out again, so
-a packet between two nearby nodes crosses the link to the anchor twice. Proxy
-Mobile IPv6 has nothing like Mobile IPv6's route optimization, which lets the
-two ends talk directly, so the detour lasts as long as the session does. It does
-allow one shortcut: an access router may route directly between two mobile nodes
-it serves itself. This showcase never has two, so everything here goes to the
-anchor.
+a packet between two nearby nodes crosses the link to the anchor twice. Unless
+both ends are attached to the same access router, Proxy Mobile IPv6 has nothing
+like Mobile IPv6's route optimization, which lets the two ends talk directly, so
+the detour lasts as long as the session does.
 
 Mobile IPv6 uses the same ideas under different names. The home agent becomes
 the Local Mobility Anchor, and the binding update the host used to send becomes
