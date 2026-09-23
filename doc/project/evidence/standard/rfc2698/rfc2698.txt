@@ -1,0 +1,283 @@
+
+
+
+
+
+
+Network Working Group                                        J. Heinanen
+Request for Comments: 2698                                 Telia Finland
+Category: Informational                                        R. Guerin
+                                              University of Pennsylvania
+                                                          September 1999
+
+
+                     A Two Rate Three Color Marker
+
+Status of this Memo
+
+   This memo provides information for the Internet community.  It does
+   not specify an Internet standard of any kind.  Distribution of this
+   memo is unlimited.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (1999).  All Rights Reserved.
+
+Abstract
+
+   This document defines a Two Rate Three Color Marker (trTCM), which
+   can be used as a component in a Diffserv traffic conditioner
+   [RFC2475, RFC2474].  The trTCM meters an IP packet stream and marks
+   its packets based on two rates, Peak Information Rate (PIR) and
+   Committed Information Rate (CIR), and their associated burst sizes to
+   be either green, yellow, or red.  A packet is marked red if it
+   exceeds the PIR.  Otherwise it is marked either yellow or green
+   depending on whether it exceeds or doesn't exceed the CIR.
+
+1. Introduction
+
+   The Two Rate Three Color Marker (trTCM) meters an IP packet stream
+   and marks its packets either green, yellow, or red.  A packet is
+   marked red if it exceeds the Peak Information Rate (PIR).  Otherwise
+   it is marked either yellow or green depending on whether it exceeds
+   or doesn't exceed the Committed Information Rate (CIR).  The trTCM is
+   useful, for example, for ingress policing of a service, where a peak
+   rate needs to be enforced separately from a committed rate.
+
+
+
+
+
+
+
+
+
+
+
+
+Heinanen & Guerin            Informational                      [Page 1]
+
+RFC 2698             A Two Rate Three Color Marker        September 1999
+
+
+   The Meter meters each packet and passes the packet and the metering
+   result to the Marker:
+
+                            +------------+
+                            |   Result   |
+                            |            V
+                        +-------+    +--------+
+                        |       |    |        |
+      Packet Stream ===>| Meter |===>| Marker |===> Marked Packet Stream
+                        |       |    |        |
+                        +-------+    +--------+
+   The Meter operates in one of two modes.  In the Color-Blind mode, the
+   Meter assumes that the packet stream is uncolored.  In the Color-
+   Aware mode the Meter assumes that some preceding entity has pre-
+   colored the incoming packet stream so that each packet is either
+   green, yellow, or red.  The details of the pre-coloring process,
+   including handling of error scenarios, and how the Meter determines
+   the color of a pre-colored packet are DS domain specific and outside
+   the scope of this document.
+
+   The Marker (re)colors an IP packet according to the results of the
+   Meter.  The color is coded in the DS field [RFC2474] of the packet in
+   a PHB specific manner (see section 4 for an example).
+
+   A companion document [RFC2697] describes another three color marker,
+   called a Single Rate Three Color Maker (srTCM), where packets are
+   marked based on a single rate and two burst sizes.
+
+2. Configuration
+
+   The trTCM is configured by setting its mode and by assigning values
+   to four traffic parameters: a Peak Information Rate (PIR) and its
+   associated Peak Burst Size (PBS) and a Committed Information Rate
+   (CIR) and its associated Committed Burst Size (CBS).
+
+   The PIR and CIR are measured in bytes of IP packets per second, i.e.,
+   it includes the IP header, but not link specific headers.  The PIR
+   must be equal to or greater than the CIR.
+
+   The PBS and the CBS and are measured in bytes and both of them must
+   be configured to be greater than 0.  It is recommended that they be
+   configured to be equal to or greater than the size of the largest
+   possible IP packet in the stream.
+
+
+
+
+
+
+
+
+Heinanen & Guerin            Informational                      [Page 2]
+
+RFC 2698             A Two Rate Three Color Marker        September 1999
+
+
+3. Metering
+
+   The behavior of the Meter is specified in terms of its mode and two
+   token buckets, P and C, with rates PIR and CIR, respectively.  The
+   maximum size of the token bucket P is PBS and the maximum size of the
+   token bucket C is CBS.
+
+   The token buckets P and C are initially (at time 0) full, i.e., the
+   token count Tp(0) = PBS and the token count Tc(0) = CBS.  Thereafter,
+   the token count Tp is incremented by one PIR times per second up to
+   PBS and the token count Tc is incremented by one CIR times per second
+   up to CBS.
+
+   When a packet of size B bytes arrives at time t, the following
+   happens if the trTCM is configured to operate in the Color-Blind
+   mode:
+
+     o If Tp(t)-B < 0, the packet is red, else
+
+     o if Tc(t)-B < 0, the packet is yellow and Tp is decremented by B,
+       else
+
+     o the packet is green and both Tp and Tc are decremented by B.
+
+   When a packet of size B bytes arrives at time t, the following
+   happens if the trTCM is configured to operate in the Color-Aware
+   mode:
+
+     o If the packet has been precolored as red or if Tp(t)-B < 0, the
+       packet is red, else
+
+     o if the packet has been precolored as yellow or if Tc(t)-B < 0,
+       the packet is yellow and Tp is decremented by B, else
+
+     o the packet is green and both Tp and Tc are decremented by B.
+
+   The actual implementation of a Meter doesn't need to be modeled
+   according to the above formal specification.
+
+4. Marking
+
+   The Marker reflects the metering result by setting the DS field of
+   the packet to a particular codepoint.  In case of the AF PHB
+   [RFC2597], the color can be coded as the drop precedence of the
+   packet.
+
+
+
+
+
+
+Heinanen & Guerin            Informational                      [Page 3]
+
+RFC 2698             A Two Rate Three Color Marker        September 1999
+
+
+5. Service Example
+
+   The trTCM can be used to mark a IP packet stream in a service, where
+   different, decreasing levels of assurances (either absolute or
+   relative) are given to packets which are green, yellow, or red.  For
+   example, a service may discard all red packets, because they exceeded
+   the peak rate, forward yellow packets as best effort, and forward
+   green packets with a low drop probability.
+
+6. Security Considerations
+
+   The trTCM has no known security concerns.
+
+7. References
+
+   [RFC2697] Heinanen, J. and R. Guerin, "A Single Rate Three Color
+               Marker", RFC 2697, September 1999.
+
+   [RFC2597] Heinanen, J., Baker, F., Weiss, W. and J. Wroclawski,
+               "Assured Forwarding PHB Group", RFC 2597, June 1999.
+
+   [RFC2474]   Nichols, K., Blake, S., Baker, F. and D. Black,
+               "Definition of the Differentiated Services Field (DS
+               Field) in the IPv4 and IPv6 Headers", RFC 2474, December
+               1998.
+
+   [RFC2475]   Blake, S., Black, D., Carlson, M., Davies, E., Wang, Z
+               and W. Weiss, "An Architecture for Differentiated
+               Services",  RFC 2475, December 1998.
+
+8. Authors' Addresses
+
+   Juha Heinanen
+   Telia Finland, Inc.
+   Myyrmaentie 2
+   01600 Vantaa, Finland
+
+   EMail: jh@telia.fi
+
+
+   Roch Guerin
+   University of Pennsylvania
+   Department of Electrical Engineering, Rm 367 GRW
+   200 South 33rd Street
+   Philadelphia, PA 19104
+
+   EMail: guerin@ee.upenn.edu
+
+
+
+
+Heinanen & Guerin            Informational                      [Page 4]
+
+RFC 2698             A Two Rate Three Color Marker        September 1999
+
+
+9.  Full Copyright Statement
+
+   Copyright (C) The Internet Society (1999).  All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice or references to the Internet Society or other
+   Internet organizations, except as needed for the purpose of
+   developing Internet standards in which case the procedures for
+   copyrights defined in the Internet Standards process must be
+   followed, or as required to translate it into languages other than
+   English.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the Internet Society or its successors or assigns.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+   TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+   HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+Acknowledgement
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Heinanen & Guerin            Informational                      [Page 5]
+
