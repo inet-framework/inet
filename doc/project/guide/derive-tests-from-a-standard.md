@@ -516,6 +516,7 @@ The run record answers one question: what ran, and where? These fields are manda
 | --- | --- |
 | Date | The date and the time of the run, with the time zone. |
 | INET | The branch, the commit, and the state of the working tree. |
+| Trees | The tree hashes of `src/` and of `tests/protocol/` at that commit. |
 | OMNeT++ | The version, and the commit when the checkout is a git repository. |
 | Build | The mode, `debug` or `release`, and where the libraries come from. |
 | Compiler | The name and the full version. |
@@ -524,6 +525,20 @@ The run record answers one question: what ran, and where? These fields are manda
 
 Do not write a commit hash for a working tree that has uncommitted changes. The hash then
 names code that did not run. Write `dirty` beside the hash and list the changed files.
+
+A commit hash does not survive a rebase. A topic branch that lands on `master` by a rebase
+gets new commits, and the hash in the record then names a commit that no branch holds. This
+happened to every run record of the first seven passes. The two tree hashes survive: a
+rebase that does not change `src/` keeps the same `src/` tree, so a reader can find the
+commits on `master` that hold the code that ran:
+
+```sh
+T=$(git rev-parse <src-tree>); git rev-list master | while read c; do [ "$(git rev-parse $c:src)" = "$T" ] && echo $c; done
+```
+
+`src/` decides the behaviour of the model, and `tests/protocol/` decides what the checks
+ask. When a rebase changes either tree, run the suite again on `master` and write a new
+record.
 
 Check that the build is newer than the sources. A stale `libINET.so` gives you the
 verdicts of an older commit under the name of the new one, and it gives no warning.
@@ -541,6 +556,7 @@ if [ -z "$(git status --porcelain)" ]; then TREE=clean; else TREE="DIRTY -- the 
 if [ -n "$(find src -name '*.cc' -newer "$LIB" -print -quit)" ]; then BUILD="STALE -- rebuild before you trust the run"; else BUILD="built from this commit"; fi
 echo "- Date: $(date '+%Y-%m-%d %H:%M %z')"
 echo "- INET: branch \`$(git symbolic-ref --quiet --short HEAD || echo detached)\`, commit \`$(git rev-parse --short HEAD)\`, tree $TREE"
+echo "- Trees: src \`$(git rev-parse --short HEAD:src)\`, tests/protocol \`$(git rev-parse --short HEAD:tests/protocol)\`"
 echo "- OMNeT++: $(opp_run -v | sed -n 's/^Version: \([^,]*\),.*/\1/p')"
 echo "- Build: $MODE, $BUILD"
 echo "- Compiler: $(clang++ --version | head -1)"
@@ -552,6 +568,7 @@ It gives a block of this shape:
 ```markdown
 - Date: 2026-09-10 15:11 +0200
 - INET: branch `master`, commit `7c6e39829e`, tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (...)
@@ -564,6 +581,10 @@ configuration option, a patched source file, or a container image.
 
 Three documents carry the run record: `results.md`, `coverage.md` and `conformance.md`.
 `categories.md` records decisions, not run data, so it does not need one.
+
+A level 1 pass has no run. Its `conformance.md` and `coverage.md` carry a read record
+instead: the date, the INET branch, the commit, the trees, and the words "no build, no
+run". The claims of part 1 were read from that code.
 
 ### The class of a failure, and when to declare it expected
 
