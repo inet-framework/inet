@@ -1,23 +1,35 @@
 # QUIC — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/quic/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/quic/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/quic/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/quic/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
 features, never at the level of a single test.
 
+- Date: 2026-09-23 18:26 +0200
+- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- OMNeT++: 6.4.0, commit `cf58891643`
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/quic$'`
 - Claim scan: 2026-09-08, source identical to `master`.
-  The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
-  identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-10
-  on `master`, commit `0868c36c88`. Every verdict of that run repeats the verdict of the
-  earlier pass.
+  The claim scan did not run again on 2026-09-23. `Quic.ned`, which part 1 quotes, has not
+  changed since the scan, so the claims still hold. `PacketBuilder.cc` and
+  `ConnectionState.cc`, which the findings cite, changed in `948c8b5cb4`, so a line number
+  there can be off.
+- Ledger state: [`coverage.md`](coverage.md#feature-support), from the run above. Two
+  verdicts differ from the run the earlier snapshot read: commit `948c8b5cb4` (2026-09-15)
+  repaired the server's Initial padding and the unknown frame type, closing gap 1 and gap 3.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalog, the feature map, or the check
 descriptions.
 
 ## Part 1 — what the model claims
+
+Part 1 was read on 2026-09-08. This refresh did not read the claims again.
 
 ### The claim, and the deviations declared with it
 
@@ -72,21 +84,23 @@ ledger, and the level of the feature, by the table of step 8.
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
 | QUIC-F-PACKET | mandatory | yes, RFC 9000 by number; the connection identifier is a declared exception | supported | **confirmed**, with the identifier degenerate |
-| QUIC-F-INITIAL-SIZE | mandatory | yes, and no deviation is declared for it | partial | **defect** for the server half, finding 3; **confirmed** for the client half |
+| QUIC-F-INITIAL-SIZE | mandatory | yes, and no deviation is declared for it | supported | **confirmed** for both halves; the server half was a **defect**, finding 3, until `948c8b5cb4` repaired it |
 | QUIC-F-STREAMS | mandatory | the ordered stream, yes; the identifier encoding is a **declared exception** | partial | **declined** for the encoding, **confirmed** for the rest, including its buffering half |
 | QUIC-F-FLOW-CONTROL | mandatory | yes, with a declared exception for the three stream-type parameters | supported | **confirmed** for the stream limit |
 | QUIC-F-ACKNOWLEDGE | mandatory | yes | supported | **confirmed** |
 | QUIC-F-CLOSE | mandatory | yes | supported | **confirmed** |
 | QUIC-F-VERSION-NEGOTIATION | mandatory | yes, RFC 9000 by number, and no deviation is declared for it | not supported | **defect** — finding 4 |
 | QUIC-F-ADDRESS-VALIDATION | mandatory | the amplification limit is a **declared exception** ("Missing bits") | supported | **undocumented** — the model does more than it claims, finding 5 |
-| QUIC-F-FRAME-VALIDATION | mandatory | yes, and no deviation is declared for it | not supported | **defect** — finding 6 |
+| QUIC-F-FRAME-VALIDATION | mandatory | yes, and no deviation is declared for it | supported | **confirmed**; was a **defect**, finding 6, until `948c8b5cb4` repaired it |
 
-Five confirmed, one split between a declined half and a confirmed half, three `defect`, one
-`undocumented`.
+Six confirmed outright, one split between a declined half and a confirmed half, one `defect`,
+one `undocumented`.
 
 Pass 1 recorded no `defect` and named one candidate for the next pass: the server's Initial
-datagram. That candidate is now a `defect`, because a check covers it. Two more joined it,
-and one feature turned out better than the model claims.
+datagram. Pass 2 made that candidate a `defect`, because a check covers it, and found two
+more, and one feature turned out better than the model claims. This refresh repairs two of
+the three: commit `948c8b5cb4` (2026-09-15) closed the server's Initial datagram (finding 3)
+and the unknown frame type (finding 6). One `defect` remains: version negotiation, finding 4.
 
 A `defect` is the matrix's word for a feature the model claims and does not do. It is a
 strong word, and it is the right one here: RFC 9000 is claimed by number, none of these three
@@ -103,7 +117,8 @@ a `declined`, not a `defect`, because the model never claimed the behavior. The 
 the workflow against such a model is not in catching it out — it is in confirming that the
 declared list is complete.
 
-It is not quite complete. Finding 3.
+It is not quite complete. Finding 4 still stands; finding 3 and finding 6 named the same kind
+of gap and are repaired now.
 
 ### 2. The stream identifier encoding: declared, and therefore declined
 
@@ -133,9 +148,13 @@ undeclared gap in an otherwise exemplary declaration. Pass 2 found two more, in 
 6, so the sentence needs correcting: there are three, and this is the smallest of them.
 
 **Pass 2 wrote that check.** `Rfc9000ServerInitialSize.test` finds the server sending an
-Initial packet with a CRYPTO frame in a datagram of 27 octets. The verdict for the feature is
-now `defect` for the server half: a requirement the model claims, does not declare an
-exception to, and does not meet.
+Initial packet with a CRYPTO frame in a datagram of 27 octets. The verdict for the feature was
+`defect` for the server half: a requirement the model claims, did not declare an exception to,
+and did not meet.
+
+**Repaired by `948c8b5cb4`** (2026-09-15). `buildServerInitialPacket` pads to 1200 octets now,
+the check passes, and the verdict is `confirmed`. This headline no longer holds; it stays here
+because the "Missing bits" list still needed the correction, and the gap is the reason it did.
 
 ### 4. Version negotiation is absent, and it is not declared
 
@@ -169,6 +188,10 @@ switch in `ConnectionState.cc`. The "Missing bits" list does not name it.
 This is the third undeclared departure, and the one with the widest reach: frame types come
 from a registry that grows, so any peer of a later version can stop this endpoint. See gap 3
 of [`results.md`](results.md).
+
+**Repaired by `948c8b5cb4`** (2026-09-15). The connection now closes with FRAME_ENCODING_ERROR
+instead of stopping the run, the check passes, and the verdict is `confirmed`. This headline no
+longer holds; it stays here because the "Missing bits" list still needed the correction.
 
 ### 7. A documentation gap outside the module
 

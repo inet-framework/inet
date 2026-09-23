@@ -7,6 +7,7 @@ workflow that may reference code.
 
 - Date: 2026-09-10 15:18 +0200
 - INET: branch `master`, commit `0868c36c88`, tree clean
+- Trees: src `182ba10a23`, tests/protocol `e0255bd96d` — the commit left master in the landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -47,7 +48,10 @@ Pass 2, level 3, with the two level 2 blockers closed first:
 | Rfc9000UnknownFrameType.test | RFC9000-ERR-1 | **PASS** since 2026-09-15; gap 3 is repaired |
 
 Summary after pass 2: 11 tests, 8 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite
-reports FAIL. The tallies of the other suites are not repeated here: a document that quotes another
+reports FAIL.
+Since 2026-09-15 it is 10 PASS and 1 FAIL (expected), and it reports PASS: commit `948c8b5cb4`
+repairs gap 1 and gap 3. See [`coverage.md`](coverage.md) for the later verdicts.
+The tallies of the other suites are not repeated here: a document that quotes another
 suite's numbers goes stale on that suite's next run.
 
 ## Which failures are declared, and which are not
@@ -360,13 +364,13 @@ stream does reach the wire, and it is stream 0.
 
 - **Done:** the two probes above; ordered delivery under reordering; the anti-amplification
   limit; version negotiation; connection errors through the unknown frame type; the
-  server-side 1200-octet expansion, which is now gap 1.
+  server-side 1200-octet expansion, which is now gap 1. Also done, since
+  [`coverage.md`](coverage.md): the frame type switch, and the server-side padding, both
+  repaired by commit `948c8b5cb4`.
 - **A protocol dissector for QUIC**, still. It is not a gate any more — the level 3 checks
   read and now also **change** chunk types, and that works — but every QUIC check in this
   suite pays for its absence in hand-written code, and a dissector would turn all of them
   into ordinary field filters.
-- **Correct the frame type switch** so that a type it does not know ends the connection
-  instead of the run. The same shape waits in the ICMP module for IPv4 and TCP.
 - **A check for RFC9000-VER-2**, that no endpoint answers a Version Negotiation packet with
   another. The relay can make such a packet now that it can change a version field; this
   pass did not.
