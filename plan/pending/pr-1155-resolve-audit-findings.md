@@ -602,9 +602,10 @@ build.** The two that fail:
   message compilation of 17 never rewrites them, and at 18 `make` runs `opp_msgtool` on two files
   that no longer exist. Removing the `*_m.h.d` files before the build makes 16, 17, 18 give 0, 2,
   0. The gate already deletes every generated `_m` file before each commit, so every message is
-  compiled again anyway and removing its dependency file costs nothing. **The one-line repair to
-  `check-series-builds.sh` waits for the owner's decision**, because the gate is a rule artifact;
-  until then one expected failure can show as two.
+  compiled again anyway and removing its dependency file costs nothing. **The owner approved the
+  repair, and it is in `check-series-builds.sh` since 2026-09-23**; over commits 16 to 18 the gate
+  now reports ok, FAIL, ok. **The series therefore builds, except the one move that the rule
+  exempts.**
 
 
 ```bash
