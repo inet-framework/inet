@@ -1,6 +1,6 @@
 # TCP — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-14 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/tcp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/tcp/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
@@ -18,12 +18,25 @@ is a feature-level one.
   repeated and gave the same result.
   The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
   identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-14
-  on `topic/rfc-tests-tcp-level4`, commit `e0ac3b7307`, which is the level 4 pass.
-- Claim scan for the level 4 features: 2026-09-14. `Tcp.ned` names RFC 9293 and RFC 5681 and
-  the flavour modules name their own documents; `TcpBaseAlg::established` quotes the
-  paragraph of RFC 5681 that governs the initial window after a lost SYN. The two control
-  loops are therefore claimed, in code and in the documentation.
+- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-23:
+  - Date: 2026-09-23 18:26 +0200
+  - INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+  - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+  - OMNeT++: 6.4.0, commit `cf58891643`
+  - Build: debug, built from this commit
+  - Compiler: Ubuntu clang version 23.0.0
+  - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+  - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/tcp$'`
+- Claim scan for the level 4 features: 2026-09-14, corrected on 2026-09-23. The list of
+  standards in `Tcp.ned:94-108` names RFC 793 and RFC 2581, the predecessors of RFC 9293 and
+  RFC 5681; RFC 2988, the predecessor of RFC 6298, appears in the flavour sources
+  (`TcpReno.cc:284`). `Tcp.ned` names neither RFC 5681 nor RFC 6298. `TcpBaseAlg::established` quotes
+  the paragraph of RFC 5681 that governs the initial window after a lost SYN, without its
+  number (`TcpBaseAlg.cc:138-140`); `TcpBaseAlg::sendData` cites "RFC 5681, page 11" for the
+  restart window after an idle period (`TcpBaseAlg.cc:400`); and since `f3064a83d0` two comments of `TcpBaseAlg.cc` cite RFC 6298
+  §2.2 and §2.3 (`TcpBaseAlg.cc:335, 344`). The two control loops are claimed through the
+  older documents and in code. The earlier text of this item said that `Tcp.ned` names RFC 9293
+  and RFC 5681; it does not.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalog, the feature map, or the check
@@ -117,27 +130,32 @@ ledger, and the level of the feature, by the table of step 8.
 | TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported; supporting PSH-1 failed | **confirmed**, with finding 3 |
 | TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect |
+| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect whose repair is blocked |
 | TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-RESET | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-SEGMENT-ACCEPTANCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported; supporting WND-5 failed | **confirmed**, with finding 5, a statement-level defect |
-| TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | partial | **partial** — a Source Quench stops the run, finding 6 |
-| TCP-F-RTO-ESTIMATOR | mandatory | yes, RFC 6298 | partial | **partial** — the estimator runs and the first measurement is wrong, gap 5, a statement-level defect |
-| TCP-F-RTO-BOUNDS | mandatory | yes, RFC 6298 | supported | **confirmed** — one second before any measurement, and a ceiling of 240 seconds |
-| TCP-F-RTO-BACKOFF | mandatory | yes, RFC 6298 | supported | **confirmed** — the timeout doubles at every expiry |
-| TCP-F-RTT-SAMPLING | mandatory | yes, RFC 6298 | supported | **confirmed** — no sample is taken from a retransmitted segment |
-| TCP-F-CONGESTION-WINDOW | mandatory | yes, RFC 5681 | supported | **confirmed** — the growth stays inside one segment per acknowledgment |
-| TCP-F-INITIAL-WINDOW | mandatory | yes, RFC 5681 | supported | **confirmed** — inside the table, and one segment after a lost SYN |
-| TCP-F-LOSS-RESPONSE | mandatory | yes, RFC 5681 | supported | **confirmed** — the window falls to one segment and the threshold to half the flight |
-| TCP-F-FAST-RETRANSMIT | mandatory | yes, RFC 5681 | supported | **confirmed** — three duplicates repair the loss without the timer |
-| TCP-F-RESTART-IDLE | mandatory | yes, RFC 5681 | untested | **unverified** — no check of this pass reaches it |
-| TCP-F-DELAYED-ACK | recommended | yes, RFC 5681 | untested | **unverified** — no check of this pass reaches it |
+| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 5 was withdrawn, gap 3 was a test error |
+| TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | supported | **confirmed** — finding 6 was repaired by `40c9f04e21` |
+| TCP-F-RTO-ESTIMATOR | mandatory | yes, through RFC 2988, and RFC 6298 in two comments | partial | **partial** — the first measurement passes since `f3064a83d0` repaired gap 5; the update of a later measurement, RFC6298-UPD-1, has no check yet |
+| TCP-F-RTO-BOUNDS | optional | yes, through RFC 2988 | supported | **confirmed** — one second before any measurement, and a ceiling of 240 seconds |
+| TCP-F-RTO-BACKOFF | mandatory | yes, through RFC 2988 | partial | **partial** — the timeout doubles at every expiry on the wire; RFC6298-EXP-1 has no check yet |
+| TCP-F-RTT-SAMPLING | mandatory | yes, through RFC 2988 | supported | **confirmed** — no sample is taken from a retransmitted segment |
+| TCP-F-CONGESTION-WINDOW | mandatory | yes, through RFC 2581 | partial | **partial** — slow start stays inside one segment per acknowledgment; congestion avoidance, RFC5681-USE-1 and CA-2, has no check yet |
+| TCP-F-INITIAL-WINDOW | mandatory | yes, through RFC 2581, and RFC 5681 in one quote | supported | **confirmed** — inside the table, and one segment after a lost SYN |
+| TCP-F-LOSS-RESPONSE | mandatory | yes, through RFC 2581 | supported | **confirmed** — the window falls to one segment and the threshold to half the flight |
+| TCP-F-FAST-RETRANSMIT | mandatory | yes, through RFC 2581 and RFC 3782 | partial | **partial** — three duplicates repair the loss without the timer; the deflation, RFC5681-FR-5, is not asserted |
+| TCP-F-RESTART-IDLE | optional | yes, RFC 5681 in one comment | untested | **unverified** — the check is owed |
+| TCP-F-DELAYED-ACK | mandatory | yes, through RFC 1122 and RFC 2581 | partial | **partial** — an out-of-order segment is acknowledged at once; the 500 ms bound waits for a statistical check |
 
-Eleven features `confirmed`, two `partial`. No feature reaches `defect` by the rules of the
-matrix. Three MUST-level statements are violated all the same, two of them on supporting
-statements; findings 3, 4 and 6 say so rather than let the matrix's shape hide it.
+Twenty-three features: sixteen `confirmed`, six `partial`, one `unverified`. No feature
+reaches `defect` by the rules of the matrix. The level 4 column is corrected on 2026-09-23 to
+the level that [`features.md`](../../protocol/tcp/features.md) gives: TCP-F-RESTART-IDLE is
+optional and TCP-F-DELAYED-ACK mandatory, where the earlier matrix had them the other way.
+Two MUST-level statements are violated all the same, on supporting statements; findings 3 and
+4 say so rather than let the matrix's shape hide it. Five of the six `partial` verdicts come
+from core statements without a check, not from a failure; see the owed rows of
+[`coverage.md`](coverage.md#statement-coverage).
 
 Pass 3 added four features and changed one verdict. The four new ones describe the same
 connection under attack or under a fault, and three of them are `confirmed` on every core
@@ -192,7 +210,10 @@ mechanism, and the finding is about which mode a user gets without asking. The U
 the same default one layer down; the two share a correction. See gap 2 of
 [`results.md`](results.md).
 
-### 5. New data goes past a window edge that moved backward
+### 5. New data goes past a window edge that moved backward — withdrawn
+
+**Withdrawn.** Gap 3 was a test error, not a defect, and `Rfc9293ShrunkWindowNoNewData.test`
+passes. The text below is the finding as the pass recorded it.
 
 RFC 9293 §3.8.6 asks two things of a sender whose peer shrinks the window: survive it
 (MUST-34), and send no new data past the new edge (SHLD-15). The model does the first and not
@@ -201,7 +222,10 @@ the second. With the right edge at 26708 it sent a full segment starting at 2714
 The two are separate tests on purpose, so that the failure of the weaker requirement cannot
 hide the verdict on the stronger one. See gap 3 of [`results.md`](results.md).
 
-### 6. A Source Quench stops the simulation
+### 6. A Source Quench stops the simulation — repaired by `40c9f04e21`
+
+**Repaired.** The ICMP module discards an unknown type now, and `Rfc9293SourceQuench.test`
+passes. The text below is the finding as the pass recorded it.
 
 RFC 9293 §3.9.2.2 requires a TCP implementation to silently discard a received Source Quench
 (MUST-55). The model never offers the message to TCP: the ICMP module throws on an unknown

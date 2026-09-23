@@ -26,8 +26,8 @@ The level decides which documents the next pass must add:
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
 | level 3, Edge | none | RFC 9293 already folds in RFC 1122 and the errata, so the edge rules — the receiver's checksum check, reset handling on a live connection, a shrunk window — are in the document that is in scope |
-| level 4, Dynamics | RFC 6298, RFC 5681 | **done** — the retransmission timer and the congestion window are the two control loops of TCP |
-| level 5, Complete | RFC 7323, RFC 2018, RFC 2883, **RFC 6675**, RFC 8257 | the options and the loss-recovery extensions. RFC 6675 replaces RFC 3517, which an earlier version of this row named |
+| level 4, Dynamics | RFC 6298, RFC 5681 | in scope now — the retransmission timer and the congestion window are the two control loops of TCP |
+| level 5, Complete | RFC 7323, RFC 2018, RFC 2883, **RFC 6675**, RFC 8257, RFC 3168 | the options, the loss-recovery extensions, and explicit congestion notification. RFC 6675 replaces RFC 3517, which an earlier version of this row named |
 
 TCP shows a property of the level system worth noting: a well-collected base document can
 carry a whole level on its own. RFC 9293 replaced a family of update documents, so level 3

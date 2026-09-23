@@ -7,6 +7,8 @@ workflow that may reference code.
 
 - Date: 2026-09-14 12:31 +0200
 - INET: branch `topic/rfc-tests-tcp-level4`, commit `e0ac3b7307`, tree clean
+- Trees: src `72114fab35`, tests/protocol `4add3d87de` — the commit left master in the landing
+  rebase; the same src tree is on master from `83396aa655` to `ab1447501a`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -18,8 +20,9 @@ workflow that may reference code.
   inet_run_protocol_tests -p inet -w tcp
   ```
 - Earlier passes ran on other trees. The pass log of [`coverage.md`](coverage.md#pass-log)
-  names them. Every verdict below is the verdict of the run above, and it repeats the
-  verdict of the earlier pass.
+  names them. Every verdict below is the verdict of the run above, except the rows that name
+  a later date: a later commit changed those by hand, and each row names it. The fresh run of
+  2026-09-23 in [`coverage.md`](coverage.md) confirms every one of them.
 
 ## Verdicts
 
@@ -73,6 +76,11 @@ The suite is 27 tests: **22 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.
 Since 2026-09-14 it is **23 PASS, 1 FAIL (expected), 3 FAIL (unexpected)**.
 `Rfc9293SourceQuench.test` passes and its declaration is removed: the ICMP repair that the
 IPv4 suite asked for closed gap 4 as well, exactly as that test predicted.
+
+A fresh run on master, commit `28536bd0a5`, gives **25 PASS, 2 FAIL (expected), 0 FAIL
+(unexpected)**: gap 5 was repaired by `f3064a83d0`, gap 3 was a test error, and gap 2 is a
+declared defect whose repair is blocked. See [`coverage.md`](coverage.md) for the later
+verdicts.
 
 | Test | Checks | Verdict |
 | --- | --- | --- |
