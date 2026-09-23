@@ -587,6 +587,26 @@ separates these five from the nine in step 1f.
 
 ### Step 6 — Verify
 
+**The series build ran on 2026-09-23**, ahead of the rebase and on the old base (step 2 is held):
+`check-series-builds.sh` over all 75 commits, release mode, 12 jobs under `nice`. **73 of 75
+build.** The two that fail:
+
+- **Commit 17**, the move of the six `TcpBaseAlg` and `TcpTahoeRenoFamily` files. Expected, and its
+  body says so: the moved files still declare the old types until commit 18 renames them.
+  [PR-SERIES-BUILDS](../../doc/project/rule/pull-request.md#pr-series-builds) exempts a commit
+  whose diff is only moves.
+- **Commit 18**, the rename -- **a false failure, and a defect of the gate.** Commit 18 builds from
+  the head's state and on the path that `git bisect skip` takes past 17 (16 then 18: status 0). It
+  fails only after the failed build of 17: the message dependency files that commit 16 wrote
+  (`*_m.h.d`) still name `TcpBaseAlgState.msg` and `TcpTahoeRenoFamilyState.msg`, the failed
+  message compilation of 17 never rewrites them, and at 18 `make` runs `opp_msgtool` on two files
+  that no longer exist. Removing the `*_m.h.d` files before the build makes 16, 17, 18 give 0, 2,
+  0. The gate already deletes every generated `_m` file before each commit, so every message is
+  compiled again anyway and removing its dependency file costs nothing. **The one-line repair to
+  `check-series-builds.sh` waits for the owner's decision**, because the gate is a rule artifact;
+  until then one expected failure can show as two.
+
+
 ```bash
 export PATH=/home/levy/workspace/omnetpp/bin:$PATH        # REQUIRED — F-8
 MB=$(git merge-base HEAD origin/master)
@@ -624,9 +644,24 @@ Two repairs in `opp_repl`:
 2. **Record the provenance.** The generated preamble names the parser versions that actually ran,
    so a reader sees their absence.
 
-Until both land, every command line that generates a summary carries the `PATH` export, as step 6
-does and as
-[review-a-pull-request.md](../../doc/project/guide/review-a-pull-request.md) now does.
+**Both done 2026-09-23**, `opp_repl` commit `215d07b` on `main`, not pushed. The repair found a
+second silent path: on a syntax error both parsers write the XML of the files they could read and
+exit with status 1, and the extractor checked only that the XML existed, so the facts of a broken
+file vanished and its types read as removed. Now:
+
+| Situation | Before | After |
+| --- | --- | --- |
+| a parser is not on the `PATH` | a note at the end, exit 0 | stops before any git work, exit 2 |
+| a parser exits non-zero | nothing, exit 0 | stops, names the file, exit 1 |
+| `--allow-incomplete` (new) | — | writes the report; it opens with **This report is incomplete** and one line per gap |
+| the preamble | asserts both parsers as sources | names the version and directory of each parser that ran |
+
+On #1155: 547 added with the parsers, exit 2 without them, and 210 added under the incomplete
+heading with `--allow-incomplete` -- the audit's two numbers, now told apart by the report itself.
+
+The `PATH` export stays in every command line, as step 6 and
+[review-a-pull-request.md](../../doc/project/guide/review-a-pull-request.md) have it: without it
+the tool now stops instead of lying, but it still needs the parsers.
 
 ## 6. Effort, and where it goes
 
