@@ -7,6 +7,8 @@ workflow that may reference code.
 
 - Date: 2026-09-10 15:18 +0200
 - INET: branch `master`, commit `0868c36c88`, tree clean
+- Trees: src `182ba10a23`, tests/protocol `e0255bd96d` — the commit left master in the
+  landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -18,8 +20,8 @@ workflow that may reference code.
   inet_run_protocol_tests -p inet -w udp
   ```
 - Earlier passes ran on other trees. The pass log of [`coverage.md`](coverage.md#pass-log)
-  names them. Every verdict below is the verdict of the run above, and it repeats the
-  verdict of the earlier pass.
+  names them. Every verdict below is the verdict of the run above, except two rows: a later
+  commit changed them by hand, and each row names the commit and the date.
 
 ## Verdicts
 
@@ -48,7 +50,9 @@ Pass 2, level 3:
 
 Summary: 13 tests, 10 PASS, **1 FAIL (expected), 2 FAIL (unexpected)**, so the suite reported FAIL.
 Since 2026-09-17 it is 11 PASS and 2 FAIL (expected), and it reports PASS: gap 3 is repaired, and
-gap 1 is declared as a defect with a blocked repair.
+gap 1 is declared as a defect with a blocked repair. This is what this pass run found. A fresh
+run on `master`, commit `28536bd0a5`, confirms the same 13 tests still show 11 PASS, 2 FAIL
+(expected), 0 FAIL (unexpected); see [`coverage.md`](coverage.md#pass-log) for the later verdicts.
 Each failure is analysed below. The tallies of the other suites are not repeated here: a document
 that quotes another suite's numbers goes stale on that suite's next run, and each suite's own
 `results.md` holds its own.

@@ -1,24 +1,32 @@
 # UDP — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-10 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/udp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/udp/standards.md)
+> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/udp/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/udp/standards.md)
 
 Step 8 artifact of the standards test workflow. The tests tell what the model does. This
 document adds what the model says it intends to do, and compares the two at the level of
 features, never at the level of a single test.
 
 - Claim scan: 2026-09-09 on `master`. The claims of the model did not change between the two
-  passes; part 1 below is unchanged.
-  The claim scan did not run again on 2026-09-10. Every source file that part 1 cites is
-  identical to the file at the commit above, so the claims still hold.
-- Support values: [`coverage.md`](coverage.md#feature-support), from the run of 2026-09-10
-  on `master`, commit `0868c36c88`. Every verdict of that run repeats the verdict of the
-  earlier pass.
+  passes; part 1 below is unchanged. The claim scan did not run again on 2026-09-23.
+- Support values, from this run:
+  - Date: 2026-09-23 18:26 +0200
+  - INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
+  - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+  - OMNeT++: 6.4.0, commit `cf58891643`
+  - Build: debug, built from this commit
+  - Compiler: Ubuntu clang version 23.0.0
+  - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+  - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/udp$'`
+- Ledger state: [`coverage.md`](coverage.md#feature-support), 3 features supported,
+  3 partial, 1 untested.
 
 This is the one document of the workflow whose first part reads the model documentation on
 purpose. The claims must not travel back into the catalogs, the feature map, or the check
 descriptions.
 
 ## Part 1 — what the model claims
+
+Part 1 was read on 2026-09-09 and this refresh did not read the claims again.
 
 ### The claim of the active module
 
@@ -58,15 +66,15 @@ ledger, and the level of the feature, by the table of step 8.
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
 | UDP-F-DELIVERY | mandatory | yes (implicit, RFC 768) | supported | **confirmed** |
-| UDP-F-HEADER | mandatory | yes (implicit, RFC 768) | partial | **partial** — the minimum length of eight, gap 3 |
+| UDP-F-HEADER | mandatory | yes (implicit, RFC 768) | supported | **confirmed** — repaired by `d63f1fdef5`; the check was the minimum length of eight, gap 3 |
 | UDP-F-CHECKSUM | mandatory | yes (implicit, RFC 768; the modes are documented "as defined by the RFC") | partial | **partial** — the default is a placeholder, gap 1 |
 | UDP-F-PORT-UNREACHABLE | optional | yes (implicit, RFC 792 through the ICMP module) | supported | **confirmed** |
 | UDP-F-INPUT-VALIDATION | mandatory | no (RFC 1122 is named nowhere in the module) | partial | **out of claim** — the checksum half works, the address half, gap 2, does not |
 | UDP-F-ERROR-DELIVERY | mandatory | no (the same) | untested | **out of claim** |
 | UDP-F-APP-INTERFACE | mandatory | no (the same) | partial | **out of claim** |
 
-Two features `confirmed`, two `partial`, three `out of claim`. No `defect`: a `defect` needs
-a claim, and the model claims RFC 768 alone.
+Three features `confirmed`, one `partial`, three `out of claim`. No `defect`: a `defect`
+needs a claim, and the model claims RFC 768 alone.
 
 The three `out of claim` rows are the honest reading of a model that names one document. The
 model does not claim RFC 1122, so it cannot fail RFC 1122 in this matrix. That does not make
@@ -136,10 +144,12 @@ Two layers of one model, one rule, two different answers.
 
 ### 5. One gap belongs to neither layer under test
 
-Gap 3 stops a run, and its cause is in neither UDP nor IPv4. It is a statistic that the
-standard receiving program declares: `dataAge` calls `peekData()` on a packet of zero
-length. Any protocol that can deliver an empty payload to an application meets it. A reader
-who owns the result filters, and not UDP, is the audience for that gap.
+**Repaired by `d63f1fdef5`, 2026-09-15.** Gap 3 stopped a run, and its cause was in neither
+UDP nor IPv4. It was a statistic that the standard receiving program declares: `dataAge`
+called `peekData()` on a packet of zero length. Any protocol that can deliver an empty
+payload to an application met it. A reader who owned the result filters, and not UDP, was
+the audience for that gap, and the fix landed there; see
+[`results.md`](results.md#gap-3--an-empty-datagram-stops-the-run).
 
 ## What this document does not establish
 
