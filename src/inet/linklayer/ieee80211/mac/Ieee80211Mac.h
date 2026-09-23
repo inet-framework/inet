@@ -11,6 +11,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
+#include "inet/linklayer/ieee80211/mac/contract/IIeee80211MacConfiguration.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -21,6 +22,8 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Pcf.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,13 +38,24 @@ class Ieee80211MacHeader;
  * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
  * IRx, ITx, IContention and other interface classes).
  */
-class INET_API Ieee80211Mac : public MacProtocolBase
+class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211MacConfiguration,
+        public physicallayer::IIeee80211ModeSetListener, public physicallayer::IIeee80211ModeSetCoordinator
 {
   public:
     static simsignal_t frameTransmissionOutcomeSignal;
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
+    virtual void applyModeSet(const physicallayer::Ieee80211ModeSet *modeSet) override;
+    void registerModeSetConsumer(cModule *consumer, Phase phase) override;
+    void unregisterModeSetConsumer(cModule *consumer) override;
+    void beginModeSetChange(const physicallayer::Ieee80211ModeSet *modeSet) override;
+    void completeModeSetChange(const physicallayer::Ieee80211ModeSet *modeSet) override;
 
   protected:
     FcsMode fcsMode;
+    std::map<int, Phase> modeSetConsumers;
+    const physicallayer::Ieee80211ModeSet *pendingModeSet = nullptr;
+    bool changingModeSet = false;
+    bool modeSetInitialized = false;
 
     ModuleRefByPar<Ieee80211Mib> mib;
     opp_component_ptr<IIeee80211Llc> llc;
@@ -65,8 +79,11 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     virtual void initializeRadioMode();
+    void updateLocalHtCapabilities(bool reconfiguration = false);
+    void updateLocalVhtCapabilities();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     using MacProtocolBase::receiveSignal;
     virtual void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual void configureNetworkInterface() override;
@@ -100,6 +117,9 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
 
+    void prepareLocalCapabilities() override;
+    const physicallayer::Ieee80211ModeSet *getConfiguredModeSet() const override { return modeSet; }
+
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;
@@ -115,4 +135,3 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 } // namespace inet
 
 #endif
-

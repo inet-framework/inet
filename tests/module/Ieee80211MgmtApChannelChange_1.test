@@ -109,9 +109,9 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         rates.numRates = 1;
         rates.rate[0] = 6;
         body->setSupportedRates(rates);
-        if (mib->isHtOperationSupported()) {
+        if (mib->isLocalHtCapable()) {
             body->setHtCapabilitiesPresent(true);
-            auto staCaps = mib->localHtCapabilities;
+            auto staCaps = mib->getLocalHtCapabilities();
             staCaps.supportedChannelWidths.insert(MHz(20));
             staCaps.supportedChannelWidths.insert(MHz(40));
             body->setHtCapabilities(makeHtCapabilitiesElement(staCaps));
@@ -188,9 +188,9 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         const auto *peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
         ASSERT(peerState->valid);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
-        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
-        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
 
         // Verify beacon advertised HT Operation matches 40 MHz SCA operation
         mgmt->emitBeaconNow();
@@ -204,7 +204,7 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         // Verify rate selection selects 40 MHz mode for peer
         const auto *mcs7_40 = findHtMode(modeSet, 7, MHz(40));
         ASSERT(mcs7_40 != nullptr);
-        const auto *selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        const auto *selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress, &mib->getHtOperation(), mib->relationshipAllowsHt(staAddress));
         ASSERT(selectedMode == mcs7_40);
         std::cout << "Station associated and negotiated 40 MHz HT operation.\n";
 
@@ -222,9 +222,9 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
         ASSERT(peerState->valid);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 10);
-        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 0);
-        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(20));
+        ASSERT(mib->getHtOperation().primaryChannel == 10);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
 
         // Verify beacon advertised HT Operation reflects 20 MHz BSS operation
         mgmt->emitBeaconNow();
@@ -234,11 +234,24 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         ASSERT(!beaconElem.staChannelWidth40Mhz);
 
         // Verify rate selection for existing peer restricts to 20 MHz
-        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress, &mib->getHtOperation(), mib->relationshipAllowsHt(staAddress));
         ASSERT(selectedMode != nullptr);
         ASSERT(selectedMode != mcs7_40);
         ASSERT(selectedMode->getDataMode()->getBandwidth() == MHz(20));
         std::cout << "Dynamic channel change to 11 downgraded to 20 MHz and updated peer state.\n";
+
+        // Reapplying HT must not undo the band-derived fallback, including in
+        // existing peer state. Exercise the real coordinated radio setter.
+        auto capabilities = peerState->negotiatedCapabilities;
+        radio->setModeSetAndMode(modeSet, modeSet->getMode(Mbps(24)));
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState->negotiatedCapabilities == capabilities);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        mgmt->emitBeaconNow();
+        ASSERT(!mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        std::cout << "HT mode refresh preserves edge-channel fallback and peer state.\n";
 
         // 4. Dynamic runtime channel change back to channel index 0 (std channel 1)
         radio->setChannelNumber(0);
@@ -253,9 +266,9 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
         ASSERT(peerState->valid);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
-        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
-        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
 
         // Verify beacon advertised HT Operation restored to 40 MHz
         mgmt->emitBeaconNow();
@@ -265,7 +278,7 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         ASSERT(beaconElem.staChannelWidth40Mhz);
 
         // Verify rate selection permits 40 MHz again
-        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress);
+        selectedMode = selectPeerCompatibleMode(modeSet, peerState, mcs7_40, staAddress, &mib->getHtOperation(), mib->relationshipAllowsHt(staAddress));
         ASSERT(selectedMode == mcs7_40);
         std::cout << "Dynamic channel change back to 0 restored 40 MHz HT operation.\n";
 
@@ -283,7 +296,9 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
 
         bool threwMibInvalidChannel = false;
         try {
-            mib->setPrimaryChannel(99, mgmt->getHtOperationBand());
+            auto invalidOperation = mib->getHtOperation();
+            invalidOperation.primaryChannel = 99;
+            mib->commitBss("test", mib->address, mgmt->getHtOperationBand(), 99, &invalidOperation);
         }
         catch (const cRuntimeError& e) {
             threwMibInvalidChannel = true;
@@ -313,9 +328,9 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
         ASSERT(peerState->valid);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 0);
-        ASSERT(peerState->negotiatedCapabilities.operation.secondaryChannelOffset == 1);
-        ASSERT(peerState->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
+        ASSERT(mib->getHtOperation().primaryChannel == 0);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 1);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(40));
 
         // Advertised beacon reflects new band standard channel number (36)
         mgmt->emitBeaconNow();
@@ -327,7 +342,7 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
         // Also verify that band change to a band without standard channel numbers throws
         bool threwInvalidBand = false;
         try {
-            mib->setPrimaryChannel(0, &physicallayer::Ieee80211CompliantBands::band5GHz);
+            mib->commitBss("test", mib->address, &physicallayer::Ieee80211CompliantBands::band5GHz, 0, &mib->getHtOperation());
         }
         catch (const cRuntimeError& e) {
             threwInvalidBand = true;
@@ -339,11 +354,27 @@ class Ieee80211MgmtApChannelChangeTest : public cSimpleModule
 
         std::cout << "Dynamic band change revalidated against new active band.\n";
 
+        // Legacy-to-HT on an edge channel must also apply the configured
+        // secondary-channel policy before advertising HT operation again.
+        auto legacy = physicallayer::Ieee80211ModeSet::getModeSet("g(mixed)");
+        radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24)));
+        radio->setChannelNumber(2); // last channel in the three-channel test band
+        radio->setModeSetAndMode(modeSet, modeSet->getMode(Mbps(24)));
+        ASSERT(mib->getHtOperation().primaryChannel == 2);
+        ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+        ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+        mgmt->emitBeaconNow();
+        ASSERT(mgmt->sentBeacons.back()->getHtOperation().primaryChannel == 44);
+        ASSERT(!mgmt->sentBeacons.back()->getHtOperation().staChannelWidth40Mhz);
+        radio->setChannelNumber(0);
+        std::cout << "Legacy-to-HT switch validates the active band before advertising.\n";
+
         // 7. Band notifications may arrive during initialization before the MAC
         // publishes whether HT operation is supported. A legacy/non-HT AP must
         // retain the radio's channel without applying HT-only band validation.
-        mib->updateLocalHtCapabilities(nullptr, {}, 0);
-        ASSERT(!mib->isHtOperationSupported());
+        mib->clearBss();
+        mib->installLocalHtCapabilities(Ieee80211HtCapabilities(), false);
+        ASSERT(!mib->isLocalHtCapable());
         bool threwNonHtBandChange = false;
         try {
             radio->setBand(&physicallayer::Ieee80211CompliantBands::band5GHz);
@@ -426,7 +457,7 @@ record-scalar-results = false
 *.ap.wlan[0].radio.transmitter.typename = "TestHt40Transmitter"
 *.ap.wlan[0].radio.receiver.typename = "TestHt40Receiver"
 **.wlan[*].opMode = "n(mixed-2.4Ghz)"
-**.wlan[*].bitrate = 65Mbps
+**.wlan[*].bitrate = 24Mbps
 **.wlan[*].radio.bandName = "2.4 GHz"
 **.wlan[*].radio.centerFrequency = 2.4GHz
 **.mobility.initFromDisplayString = false
@@ -459,3 +490,9 @@ Dynamic band change revalidated against new active band.
 
 %contains: stdout
 Non-HT band notification deferred HT-only validation.
+
+%contains: stdout
+HT mode refresh preserves edge-channel fallback and peer state.
+
+%contains: stdout
+Legacy-to-HT switch validates the active band before advertising.

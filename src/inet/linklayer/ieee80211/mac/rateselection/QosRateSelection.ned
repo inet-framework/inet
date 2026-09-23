@@ -21,6 +21,7 @@ import inet.common.SimpleModule;
 simple QosRateSelection extends SimpleModule
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(QosRateSelection);
         string rateControlModule;
         string mibModule = default("^.^.^.mib");
@@ -32,8 +33,9 @@ simple QosRateSelection extends SimpleModule
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
-        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
-        int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
+        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Explicit mode qualifier when dataFrameBitrate is specified
+        int dataFrameNumSpatialStreams = default(-1); // Explicit mode qualifier when dataFrameBitrate is specified
+        double dataFrameGuardInterval @unit(s) = default(-1s); // Explicit mode qualifier when dataFrameBitrate is specified; negative means unspecified, otherwise it must equal the selected PHY mode's modeled GI
 
         // Per-receiver unicast data-frame rate. Keys are peer interface module paths (e.g.
         // "host1.wlan[0]"), resolved to MAC addresses at run time; values are bitrates (bps).

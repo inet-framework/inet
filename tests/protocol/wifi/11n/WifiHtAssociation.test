@@ -1,0 +1,41 @@
+%description:
+HT infrastructure authentication/association sequence through the real packet PHY.
+Uses the existing 802.11n configuration with two antennas and QoS enabled.
+Local/peer HT constraints are checked separately by module tests.
+
+%file: WifiHtAssociation.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Frame type (combined type+subtype byte): 0=Assoc Request, 1=Assoc Response,
+// 8=Beacon, 11=Authentication.
+Define_ProtocolTest(wifi_ht_association)
+{
+    return ProtocolTest("wifi_ht_association")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 8").describe("a Beacon from the AP").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 11").describe("an Authentication request").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 11").describe("the Authentication response").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 0").describe("an Association Request").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 1").describe("the Association Response").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_ht_association"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_ht_association: PASS

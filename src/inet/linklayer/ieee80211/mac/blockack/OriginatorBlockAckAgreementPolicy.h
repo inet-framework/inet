@@ -9,13 +9,13 @@
 #define __INET_ORIGINATORBLOCKACKAGREEMENTPOLICY_H
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, public IOriginatorBlockAckAgreementPolicy
+class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetModuleBase, public IOriginatorBlockAckAgreementPolicy
 {
   protected:
     IOriginatorQoSAckPolicy *ackPolicy = nullptr;

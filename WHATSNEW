@@ -280,6 +280,32 @@ Notable backward incompatible changes are the following:
     arrives, so renewal timing does not move; traffic from the client starts one
     probeWait later.
 
+16. IEEE 802.11 capability and BSS state ownership
+
+    HT capabilities are prepared independently of the active BSS operation.
+    Simplified associations prepare both peers before network configuration,
+    regardless of node declaration order. Accepted BSS changes publish a
+    bssStateChanged notification after management completes its bookkeeping.
+    Legacy simplified stations retain BSS identity and channel information
+    without accepting the HT operation advertised by an HT access point.
+
+    Custom WLAN modules must replace ModeSetListener and modesetChanged with
+    an explicit modeSetModule using IIeee80211ModeSetProvider, and replace
+    direct MIB BSS/profile writes with the owner APIs. Custom HT PHY contributors
+    use typed capability interfaces. The migration guide describes these source
+    and wiring changes.
+    The selected legacy QoS and non-QoS ad hoc fingerprints remain unchanged;
+    no recorded fingerprint baseline was updated.
+
+17. IEEE 802.11 PHY mode API
+
+   External implementations of IIeee80211DataMode must implement the new pure
+   virtual getGuardInterval() query. Return the modeled guard interval as a
+   simtime_t, or -1 when the PHY has no guard interval. The bitrate-based
+   Ieee80211ModeSet getMode() and findMode() overloads also take a trailing,
+   defaulted guardInterval argument. Ordinary existing calls still compile;
+   member-function pointers must use the new signature. See the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -333,6 +359,58 @@ Notable backward compatible changes are the following:
    this happens when ResidenceTimeMeasurer ends a measurement: it removed the
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
+
+6. IEEE 802.11 HT/VHT guard intervals and timing
+
+   HT MCS 32, 73, and 76 definitions are corrected. HT/VHT signal fields use
+   long-GI symbol timing independently of the data GI. Mixed-format HT and VHT
+   short-GI data airtimes are rounded to 4 us boundaries; HT greenfield retains
+   its unrounded short-GI airtime. Results and fingerprints may change for
+   simulations using the affected modes and frame formats.
+
+   IIeee80211Mode duration-component queries are now pure virtual. Their
+   previous defaults are supplied by Ieee80211ModeBase; direct external
+   implementations must provide these queries or inherit the base defaults.
+
+   RateSelection and QosRateSelection now accept dataFrameGuardInterval to
+   qualify a configured dataFrameBitrate. The default, -1s, leaves the GI
+   unspecified; an explicit value must match the selected mode's modeled GI.
+   The MAC now coordinates explicitly registered mode-set consumers,
+   updating MAC, management, rate selection, and active contention before
+   publishing modesetChanged from the MAC. Initialization queries the catalog;
+   unchanged catalogs retain algorithm state. Incompatible catalog-only requests
+   are rejected before opening a transition, allowing an explicit-mode retry.
+   Failures after PHY mutation remain fatal. External PHY
+   and contention implementations have new contracts described in the
+   migration guide. Default TXOP limits are resolved for each new TXOP after
+   a mode-set change; active TXOPs and configured overrides retain their limits.
+
+   Radio reconfiguration preserves ongoing receptions when the incoming mode
+   and receiver listening configuration remain compatible. Transmit-only mode
+   changes and reapplying unchanged settings no longer interrupt reception.
+   Incompatible changes abort through the normal reception cleanup path.
+
+   Management subclasses can override addVhtCapabilities and addVhtOperation
+   to customize advertisements produced by inherited AP/STA frame builders.
+
+   Group-addressed frames use a legacy basic rate when that set is nonempty.
+   Eligible configured basic rates are preserved; other configured rates fall
+   back to the fastest legacy basic rate. For example, a configured 54 Mbps
+   group rate becomes 24 Mbps in the default mixed legacy catalog. This changes
+   airtime and fingerprints in affected existing scenarios.
+
+   The ac catalog now contains both 800 ns and 400 ns GI for all 310 supported
+   VHT width/NSS/MCS tuples. Existing unqualified lookups, mandatory/basic flags,
+   and reference modes retain their previous choices.
+
+   Detailed AP/STA management now exchanges VHT Capabilities and VHT Operation
+   elements. Both rate selectors constrain VHT unicast by local Tx and peer Rx
+   MCS/NSS maps, bandwidth, GI, and advertised long-GI rate limits. Association
+   loss and mode-set application invalidate peer state. Missing VHT negotiation
+   falls back to legacy rates, including simplified-management and ad-hoc setups;
+   this changes their airtime and fingerprints. Current detailed VHT operation
+   is limited to 20 MHz and long GI. See the migration guide for configuration
+   and the retained VHT-only profile limitations.
 
 
 INET-4.7 (July 2026) — feature release

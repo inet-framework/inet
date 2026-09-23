@@ -23,6 +23,7 @@ simsignal_t linkBrokenSignal = cComponent::registerSignal("linkBroken");
 
 simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
 
+
 simsignal_t interpacketGapStartedSignal = cComponent::registerSignal("interpacketGapStarted");
 simsignal_t interpacketGapEndedSignal = cComponent::registerSignal("interpacketGapEnded");
 
@@ -153,4 +154,3 @@ void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *deta
 }
 
 } // namespace inet
-

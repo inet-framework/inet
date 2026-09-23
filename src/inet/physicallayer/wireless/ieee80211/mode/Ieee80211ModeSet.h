@@ -34,6 +34,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         bool isMandatory;
         const IIeee80211Mode *mode;
         bool isLegacyOperational = false;
+        // Prefer historical catalog entries when no GI qualifier is supplied.
+        bool isPreferredForUnqualifiedLookup = true;
     };
 
     struct EntryNetBitrateComparator {
@@ -88,17 +90,21 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
+    // Finds a mode with the same PHY tuple as mode. Unlike findMode(), this
+    // treats an absent guard interval (negative value) as an exact value.
+    const IIeee80211Mode *findCompatibleMode(const IIeee80211Mode *mode) const;
 
-    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
+    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
     const IIeee80211Mode *getSlowestMode() const;
     const IIeee80211Mode *getFastestMode() const;
     const IIeee80211Mode *getSlowerMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getSlowestMandatoryMode() const;
     const IIeee80211Mode *getFastestMandatoryMode() const;
+    const IIeee80211Mode *getMandatoryModeAtOrBelow(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 

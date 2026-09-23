@@ -64,6 +64,7 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
   public:
     Ieee80211DsssDataMode(const DpskModulationBase *modulation);
 
+    virtual const simtime_t getGuardInterval() const override { return -1; }
     virtual Hz getBandwidth() const override { return MHz(22); }
     virtual bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
