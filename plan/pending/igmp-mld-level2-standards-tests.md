@@ -60,7 +60,9 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
    32 checks in 6 files, the twins of the IGMP checks; 278 statements are in a check, and the
    other 110 are in the closing list. One check has an observation that its IGMP twin has not:
    the Reports for the solicited-node addresses, the second half of RFC9777-LSN-3.
-8. [ ] **MLD step 6, tests** — `tests/protocol/mld/Rfc9777*.test`, `Rfc2710*.test`, and a helper.
+8. [x] **MLD step 6, tests** — `tests/protocol/mld/Rfc9777*.test`, `Rfc2710*.test`, and a helper.
+   47 tests for the 32 checks, with the helper `MldChecks.h`. Run: 21 PASS, 1 FAIL declared
+   expected (the model has no MLDv1 mode of an MLDv2 router), 25 FAIL.
 9. [ ] **MLD steps 7 to 9, and the ledger** — `model/mld/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`.
 10. [ ] Gates, then move this plan to `plan/done/`.
@@ -154,3 +156,24 @@ Six agents, one brief (scratchpad `igmp-mld-catalog-brief.md`), one range each:
 - **The ledger comes from a script** (scratchpad `gen-igmp-ledger.py`, with the verdict table
   from `gen-igmp-verdicts.py`), as for ND: the statement tables, the feature support and the
   debt table are generated, and the prose is written around them.
+- **The MLD tests are the twins of the IGMP tests** on IPv6 mockups: `Router6` and
+  `StandardHost6` with fixed MAC addresses, so the interface identifiers are known; the
+  configurator gives every node the address of the mockup and adds no route; `MulticastLeafRoute6`
+  gives R its multicast route. The MLD messages need two more splits: the source address and
+  the checksum of each message, and the Reports for the solicited-node addresses.
+- **The ICMPv6 checksum of the model has no pseudo-header.** `mldChecksumOk` of `MldChecks.h`
+  sums the pseudo-header and the serialized message; the model sums the message alone
+  (`Icmpv6.cc:452-475`), so every MLD checksum fails. The check reads the field last.
+- **The MLDv1 node of the mockups stops on an MLDv2 Query** ("Cannot convert chunk from type
+  inet::Mldv2Query to type inet::MldQuery", `Mldv1.cc:351`), so the two checks with an older
+  host have no verdict on the router; RFC2710-NODE-2 moved to their covers.
+- **The documentation of `Mldv2` is stale**: its "parity gaps" say that State-Change Reports and
+  specific Queries are not repeated and that MLDv1 interoperation is missing; the runs show all
+  three.
+- **The MLD pass corrected an IGMP check.** The answer to a source-specific Query could never be
+  empty in its scenario; both twins now query a source that A does not want, and both models
+  send an empty record (IGMP commits `a9fd397749`, `95a5e5be5b`). IGMP steps 7 to 9 need a new
+  fresh run for it.
+- **An interval check must bracket the value tightly** where the model is only a few seconds
+  off: the return to MLDv2 reads 290 and 293 seconds around 291.25 seconds, and finds 255 seconds
+  where RFC 9777 gives 260.
