@@ -1,0 +1,146 @@
+%description:
+
+ESP services.
+
+Checks RFC4303-ALG-5, ALG-6, CONF-8 and CONF-10 from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/esp.md#esp-services; the program steps below map onto
+its expected observations. The guards are observation 2; steps 1 to 3 are observations 1, 3, 4
+and 5.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4303_esp_services")
+        // Expected observation 2: B delivers the five datagrams of each flow.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2000 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // ...
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001; })
+                  .describe("a datagram that B delivers on port 2001")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2001 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // ...
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2002; })
+                  .describe("a datagram that B delivers on port 2002")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2002 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2002 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observations 1 and 3: SA 101, confidentiality only, has no ICV.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 101); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(espIcvLength(p) == 0, "the packets of SA 101 end with an ICV of " + num(espIcvLength(p)) + " octets, where the SA has NULL integrity (RFC4303-ALG-6)"); })
+                  .describe("an ESP packet with SPI 101 from A")
+                  .within(3.0))
+        // Expected observation 4: SA 102, integrity only, has no IV and a 16-octet ICV.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 102); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(espIvLength(p) == 0 && espIcvLength(p) == 16, "the packets of SA 102 have an IV of " + num(espIvLength(p)) + " and an ICV of " + num(espIcvLength(p)) + " octets (RFC4303-ALG-5, CONF-8)"); })
+                  .describe("an ESP packet with SPI 102 from A")
+                  .within(1.5))
+        // Expected observation 5: SA 103, a combined algorithm, ends with a 16-octet ICV.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 103); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(espIcvLength(p) == 16, "the packets of SA 103 end with an ICV of " + num(espIcvLength(p)) + " octets"); })
+                  .describe("an ESP packet with SPI 103 from A")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4303_esp_services compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 3
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].localPort = 1001
+*.hostA.app[1].destAddresses = "10.0.1.11"
+*.hostA.app[1].destPort = 2001
+*.hostA.app[1].messageLength = 100B
+*.hostA.app[1].startTime = 1s
+*.hostA.app[1].stopTime = 5.5s
+*.hostA.app[1].sendInterval = 1s
+*.hostA.app[2].typename = "UdpBasicApp"
+*.hostA.app[2].localPort = 1002
+*.hostA.app[2].destAddresses = "10.0.1.11"
+*.hostA.app[2].destPort = 2002
+*.hostA.app[2].messageLength = 100B
+*.hostA.app[2].startTime = 1s
+*.hostA.app[2].stopTime = 5.5s
+*.hostA.app[2].sendInterval = 1s
+*.hostB.numApps = 3
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 2001
+*.hostB.app[2].typename = "UdpSink"
+*.hostB.app[2].localPort = 2002
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>CONFIDENTIALITY</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2002</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_GCM_16_128</EncryptionAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>CONFIDENTIALITY</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2001</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2002</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_GCM_16_128</EncryptionAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4303_esp_services: PASS

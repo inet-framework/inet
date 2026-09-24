@@ -1,0 +1,113 @@
+%description:
+
+AH format in transport mode (IPv6).
+
+Checks RFC4302-FMT-1, LOC-2, LOC-3, LOC-5, LOC-7, OSA-1, NH-2, RSV-2, SEQ-5, SEQ-7, LEN-1 and
+IICV-2 from the catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/ah.md#ah-format-in-transport-mode; the program steps
+below map onto its expected observations. The guard is observation 2; step 1 is observations 1
+and 3, step 2 observation 4, and step 3 observation 6. Observation 5, the place of the ICV, is
+Rfc4302AhIcvPositionIpv6.test.
+
+Model gap: IPsec::ahProtect sets the Next Header, the SPI and the Sequence Number of the AH
+header, but never its Payload Length (src/inet/networklayer/ipsec/IPsec.cc:574-579), which stays
+0.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4302_ah_format_ipv6")
+        // Expected observation 2: B delivers the five datagrams with their 100 octets.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2003; })
+                  .describe("a datagram that B delivers on port 2003")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2003 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2003 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observations 1 and 3: an AH packet of flow 2003; AH follows the IP header, and the UDP header comes after AH.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return ahOf(p) != nullptr && flowOf(p) == 2003; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ipProtocolOf(p) == PROTO_AH, "the IP header names protocol " + num(ipProtocolOf(p)) + " (RFC4302-FMT-1)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto ch = wireChunks(p); int i = indexOf<Ipv6Header>(ch), a = indexOf<IPsecAuthenticationHeader>(ch), u = indexOf<UdpHeader>(ch); return require(i >= 0 && a == i + 1 && u > a, "the chunks of the packet are " + chunkNames(ch) + " (RFC4302-LOC-2, LOC-3, LOC-5, LOC-7, OSA-1)"); })
+                  .describe("an AH packet of flow 2003 from A")
+                  .within(3.0))
+        // Expected observation 4: Next Header 17, a zero Reserved field, SPI 103 and a Sequence Number.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return ahOf(p) != nullptr && flowOf(p) == 2003; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto h = ahOf(p); return require(h->getNextHeader() == PROTO_UDP && h->getReserved() == 0 && h->getSpi() == 103, "the AH header holds Next Header " + num(h->getNextHeader()) + ", Reserved " + num(h->getReserved()) + " and SPI " + num(h->getSpi()) + " (RFC4302-NH-2, RSV-2, SEQ-5, SEQ-7)"); })
+                  .describe("the next AH packet of flow 2003")
+                  .within(1.5))
+        // Expected observation 6: the Payload Length is 6.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return ahOf(p) != nullptr && flowOf(p) == 2003; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ahOf(p)->getPayloadLength() == 6, "the Payload Length is " + num(ahOf(p)->getPayloadLength()) + ", where an AH header of 12 + 20 octets is 8 words, minus 2 (RFC4302-LEN-1)"); })
+                  .describe("the next AH packet of flow 2003")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4302_ah_format_ipv6 compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv6).
+network IpsecLink6
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:1::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=150,250"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink6
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv6.hasIpsec = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1003
+*.hostA.app[0].destAddresses = "2001:db8:1::11"
+*.hostA.app[0].destPort = 2003
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2003
+*.hostA.ipv6.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>OUT</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>IN</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2003</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv6.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>OUT</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>IN</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2003</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4302_ah_format_ipv6: PASS

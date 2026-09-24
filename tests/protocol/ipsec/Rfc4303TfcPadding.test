@@ -1,0 +1,105 @@
+%description:
+
+Traffic flow confidentiality padding.
+
+Checks RFC4303-TFC-2 and TFC-5 from the catalogs under doc/project/evidence/standard/. The
+English procedure is in
+doc/project/evidence/protocol/ipsec/checks/esp.md#traffic-flow-confidentiality-padding; the
+program steps below map onto its expected observations. The guards are observations 2 and 4, and
+the record of the lengths; steps 1 and 2 are observations 1 and 3.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+static int minLen = 1 << 30, maxLen = 0;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4303_tfc_padding")
+        // Expected observation 2: B delivers the 20 datagrams with 50 octets each.
+        .meanwhile(exactlyTimes(20, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 50 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 50; })
+                  .describe("a datagram on port 2000 that B delivers with other than 50 octets")
+                  .within(10.0)))
+        // Expected observation 4: every UDP Length field is 58, and every Pad Length 3 or less.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isEsp(p, 101)) return false; int n = ipPacketLength(p); minLen = std::min(minLen, n); maxLen = std::max(maxLen, n); auto u = udpOf(p); auto t = espTrailerOf(p); return u == nullptr || t == nullptr || u->getTotalLengthField() != B(58) || t->getPadLength() > 3; })
+                  .describe("an ESP packet of SA 101 with a UDP Length other than 58 or a Pad Length above 3 (RFC4303-TFC-5)")
+                  .within(10.0)))
+        // Expected observation 1: ESP packets with SPI 101.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 101); })
+                  .describe("an ESP packet with SPI 101 from A")
+                  .within(3.0))
+        // Expected observation 3: at the last datagram, some packets were longer than the shortest one.
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && c.event.time > 4.7; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(maxLen > minLen, "every ESP packet of SA 101 was " + num(minLen) + " octets long: A added no TFC padding (RFC4303-TFC-2)"); })
+                  .describe("the last datagram that B delivers on port 2000")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4303_tfc_padding compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 50B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 4.9s
+*.hostA.app[0].sendInterval = 0.2s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><MaxTfcPadLength>100</MaxTfcPadLength><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><MaxTfcPadLength>100</MaxTfcPadLength><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4303_tfc_padding: PASS

@@ -1,0 +1,109 @@
+%description:
+
+Tunnel mode between two hosts (AH).
+
+Checks RFC4301-SA-47, SA-50, TUN-1, TUN-19, TUN-26, RFC4302-LOC-9, LOC-11 and LOC-13 from the
+catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/modes.md#tunnel-mode-between-two-hosts; the program
+steps below map onto its expected observations. The guard is observation 4; steps 1 and 2 are
+observations 1 to 3.
+
+The check gives SA 103 tunnel mode, with A and B as the tunnel endpoints. The SPD configuration
+of the model has no element for the mode of an SA, and the model supports transport mode only, so
+the test runs SA 103 in transport mode and says here what it would set.
+
+Expected result FAIL, missing feature: the model supports transport mode only ("Transport mode
+only. Tunnel mode is not supported.", src/inet/networklayer/ipsec/IPsec.ned:40). See results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4301_tunnel_mode_ah")
+        // Expected observation 4: B delivers the five datagrams.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001; })
+                  .describe("a datagram that B delivers on port 2001")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2001 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observations 1 and 2: an AH packet with SPI 103; the outer header has the tunnel endpoints and names protocol 51.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 103); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto h = ipv4Of(p); return require(h->getSrcAddress() == Ipv4Address("10.0.1.10") && h->getDestAddress() == Ipv4Address("10.0.1.11") && h->getProtocolId() == PROTO_AH, "the outer header goes from " + h->getSrcAddress().str() + " to " + h->getDestAddress().str() + " with protocol " + num(h->getProtocolId()) + " (RFC4301-TUN-1, TUN-19, TUN-26)"); })
+                  .describe("an AH packet with SPI 103 from A")
+                  .within(3.0))
+        // Expected observation 3: after the AH header, a whole IPv4 header; AH names Next Header 4.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 103); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto ch = wireChunks(p); int a = indexOf<IPsecAuthenticationHeader>(ch); bool ok = ahOf(p)->getNextHeader() == 4 && indexOf<Ipv4Header>(ch, a + 1) > a; return require(ok, "after the AH header come " + chunkNames(std::vector<Ptr<const Chunk>>(ch.begin() + a + 1, ch.end())) + ", with Next Header " + num(ahOf(p)->getNextHeader()) + ": no inner IPv4 header (RFC4301-SA-47, RFC4302-LOC-9, LOC-11, LOC-13)"); })
+                  .describe("the next AH packet with SPI 103")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4301_tunnel_mode_ah compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1001
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2001
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2001
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2001</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4301_tunnel_mode_ah: PASS

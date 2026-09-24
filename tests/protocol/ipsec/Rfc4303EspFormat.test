@@ -1,0 +1,111 @@
+%description:
+
+ESP packet format in transport mode (IPv4).
+
+Checks RFC4303-FMT-1, FMT-2, FMT-3, SPI-2, SEQ-5, PAY-2, PAY-4, PAY-5, PADL-1, PADL-3, NH-1,
+ICV-3, ICV-4, LOC-2, LOC-3, LOC-6, OSA-1, OENC-1, IICV-2, IICV-8, IICV-14, CONF-1, CONF-2,
+RFC4301-SA-34, SA-35, SA-37, OVW-2, OVW-5, CONF-1 and CONF-2 from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/esp.md#esp-packet-format-in-transport-mode; the
+program steps below map onto its expected observations. The guard is observation 2; step 1 is
+observations 1 and 3, step 2 observations 4 and 5, and step 3 observations 6 and 7.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4303_esp_format")
+        // Expected observation 2: B delivers the five datagrams with their 100 octets.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2000 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observations 1 and 3: an ESP packet of flow 2000; the ESP header follows the IP header, and the UDP header is inside it.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return espOf(p) != nullptr && flowOf(p) == 2000; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ipProtocolOf(p) == PROTO_ESP, "the IP header names protocol " + num(ipProtocolOf(p)) + " (RFC4303-FMT-1)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto ch = wireChunks(p); int i = indexOf<Ipv4Header>(ch), e = indexOf<IPsecEspHeader>(ch); auto plain = espPlain(p); return require(i >= 0 && e == i + 1 && !plain.empty() && dynamicPtrCast<const UdpHeader>(plain[0]) != nullptr, "the chunks of the packet are " + chunkNames(ch) + " (RFC4303-LOC-2, LOC-3, LOC-6, RFC4301-SA-34, SA-35, SA-37)"); })
+                  .describe("an ESP packet of flow 2000 from A")
+                  .within(3.0))
+        // Expected observations 4 and 5: SPI 101, and the 16-octet IV before the UDP header.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return espOf(p) != nullptr && flowOf(p) == 2000; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(espOf(p)->getSpi() == 101, "the ESP header holds SPI " + num(espOf(p)->getSpi()) + " (RFC4303-SPI-2, SEQ-5)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; int off = 8 + espIvLength(p); return require(espIvLength(p) == 16 && off % 4 == 0, "the UDP header starts " + num(off) + " octets after the start of the ESP header, after an IV of " + num(espIvLength(p)) + " octets (RFC4303-PAY-2, PAY-4, PAY-5)"); })
+                  .describe("the next ESP packet of flow 2000")
+                  .within(1.5))
+        // Expected observations 6 and 7: the trailer, and the 16-octet ICV that closes the packet.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return espOf(p) != nullptr && flowOf(p) == 2000; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto t = espTrailerOf(p); return require(t != nullptr && t->getNextHeader() == PROTO_UDP && (int)espPaddingOf(p).size() == t->getPadLength(), "the trailer holds Pad Length " + (t ? num(t->getPadLength()) : std::string("-")) + " and Next Header " + (t ? num(t->getNextHeader()) : std::string("-")) + " (RFC4303-PADL-1, PADL-3, NH-1)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(espIcvLength(p) == 16, "the packet ends with an ICV of " + num(espIcvLength(p)) + " octets after the trailer, where the integrity algorithm has 16 (RFC4303-FMT-2, FMT-3, ICV-3, ICV-4)"); })
+                  .describe("the next ESP packet of flow 2000")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4303_esp_format compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4303_esp_format: PASS

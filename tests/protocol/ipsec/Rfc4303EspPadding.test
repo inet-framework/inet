@@ -1,0 +1,125 @@
+%description:
+
+ESP padding.
+
+Checks RFC4303-PAD-1, PAD-2, PAD-5, PAD-6, PAD-8 and PAD-9 from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/esp.md#esp-padding; the program steps below map onto
+its expected observations. The guards are observation 2; step 1 is observation 1 and 3, step 2
+observations 4 and 5.
+
+Model gap: IPsec::espProtect computes the Pad Length right, but fills the padding with a
+ByteCountChunk whose octets are all 63 (src/inet/networklayer/ipsec/IPsec.cc:535-536), where RFC
+4303 section 2.4 gives 1, 2, 3 and so on.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4303_esp_padding")
+        // Expected observation 2: B delivers the datagrams of each flow with their lengths.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 90 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 90; })
+                  .describe("a datagram on port 2000 that B delivers with other than 90 octets")
+                  .within(10.0)))
+        // ...
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001; })
+                  .describe("a datagram that B delivers on port 2001")
+                  .within(10.0)))
+        // ... each with 91 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001 && p->getByteLength() != 91; })
+                  .describe("a datagram on port 2001 that B delivers with other than 91 octets")
+                  .within(10.0)))
+        // Expected observations 1 and 3: an ESP packet of SA 101; Pad Length 12, and seven blocks of plaintext.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 101); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto t = espTrailerOf(p); int plain = espToTrailerEnd(p) - 8 - espIvLength(p); return require(t != nullptr && t->getPadLength() == 12 && plain == 112, "on SA 101 the Pad Length is " + (t ? num(t->getPadLength()) : std::string("-")) + " and the plaintext is " + num(plain) + " octets, where 98 + 12 + 2 = 112 fills seven 16-octet blocks (RFC4303-PAD-1, PAD-6)"); })
+                  .describe("an ESP packet with SPI 101 from A")
+                  .within(3.0))
+        // Expected observations 4 and 5: an ESP packet of SA 102; Pad Length 3 on a 4-octet boundary, and the padding 1, 2, 3.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 102); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto t = espTrailerOf(p); return require(t != nullptr && t->getPadLength() == 3 && espToTrailerEnd(p) % 4 == 0, "on SA 102 the Pad Length is " + (t ? num(t->getPadLength()) : std::string("-")) + " and the Next Header ends " + num(espToTrailerEnd(p)) + " octets after the start of the ESP header (RFC4303-PAD-2, PAD-8)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto pad = espPaddingOf(p); std::string s; for (auto o : pad) s += (s.empty() ? "" : ", ") + num(o); return require(pad == std::vector<uint8_t>{1, 2, 3}, "the padding octets of SA 102 are " + s + ", where the default is 1, 2, 3 (RFC4303-PAD-9)"); })
+                  .describe("an ESP packet with SPI 102 from A")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4303_esp_padding compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 90B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].localPort = 1001
+*.hostA.app[1].destAddresses = "10.0.1.11"
+*.hostA.app[1].destPort = 2001
+*.hostA.app[1].messageLength = 91B
+*.hostA.app[1].startTime = 1s
+*.hostA.app[1].stopTime = 5.5s
+*.hostA.app[1].sendInterval = 1s
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 2001
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2001</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>INTEGRITY</EspMode><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4303_esp_padding: PASS

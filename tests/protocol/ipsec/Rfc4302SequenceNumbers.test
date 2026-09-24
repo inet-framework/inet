@@ -1,0 +1,116 @@
+%description:
+
+Sequence numbers of an SA (AH).
+
+Checks RFC4302-SEQ-1, SEQ-2, SEQ-8, OSEQ-1 and OSEQ-2 from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-of-an-sa; the
+program steps below map onto its expected observations. The guards are observation 2; steps 1 and
+2 are observations 1, 3 and 4.
+
+Model gap: the counter of an SA starts at 0 and SecurityAssociation::getAndIncSeqNum returns it
+before the increment (src/inet/networklayer/ipsec/SecurityAssociation.h:42, 72), so the first
+packet of an SA carries Sequence Number 0, not 1. The increments and the separate counters hold.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+static int lastA = -1, lastB = -1, firstA = -1;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4302_sequence_numbers")
+        // Expected observation 2: on SA 103 each packet carries the number of the packet before it plus one ...
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isAh(p, 103)) return false; int s = ahOf(p)->getSequenceNumber(); bool bad = lastA >= 0 && s != lastA + 1; lastA = s; return bad; })
+                  .describe("a packet of SA 103 whose Sequence Number is not the one before it plus one (RFC4302-SEQ-1, SEQ-2, OSEQ-2)")
+                  .within(10.0)))
+        // ... and on SA 104 too.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isAh(p, 104)) return false; int s = ahOf(p)->getSequenceNumber(); bool bad = lastB >= 0 && s != lastB + 1; lastB = s; return bad; })
+                  .describe("a packet of SA 104 whose Sequence Number is not the one before it plus one")
+                  .within(10.0)))
+        // Expected observation 1: the first packet of SA 103.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 103); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; firstA = ahOf(p)->getSequenceNumber(); return true; })
+                  .describe("the first AH packet with SPI 103 from A")
+                  .within(3.0))
+        // Expected observations 3 and 4: the first packet of SA 104, two seconds later.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 104); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require((int)ahOf(p)->getSequenceNumber() == firstA, "the first packet of SA 104 carries Sequence Number " + num(ahOf(p)->getSequenceNumber()) + ", and the first packet of SA 103 carried " + num(firstA) + ": each SA counts on its own"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(firstA == 1 && ahOf(p)->getSequenceNumber() == 1, "the first packet of SA 103 and of SA 104 carries Sequence Number " + num(firstA) + ", where the counter starts at zero and is incremented before the first packet (RFC4302-SEQ-8, OSEQ-1)"); })
+                  .describe("the first AH packet with SPI 104 from A")
+                  .within(4.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4302_sequence_numbers compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1003
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2003
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].localPort = 1004
+*.hostA.app[1].destAddresses = "10.0.1.11"
+*.hostA.app[1].destPort = 2004
+*.hostA.app[1].messageLength = 100B
+*.hostA.app[1].startTime = 3s
+*.hostA.app[1].stopTime = 7.5s
+*.hostA.app[1].sendInterval = 1s
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2003
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 2004
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2003</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2004</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>104</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2003</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2004</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>104</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4302_sequence_numbers: PASS

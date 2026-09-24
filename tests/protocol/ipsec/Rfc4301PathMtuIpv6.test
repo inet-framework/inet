@@ -1,0 +1,120 @@
+%description:
+
+Path MTU of a protected flow.
+
+Checks RFC4301-OUT-21, RFC4302-FRAG-10 and RFC4303-FRAG-9 from the catalogs under
+doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/fragmentation.md#path-mtu-of-a-protected-flow; the
+program steps below map onto its expected observations. Step 1 is observation 1; the guards after
+it are observations 2 and 3.
+
+Expected result FAIL, missing feature: neither the IPsec module nor the IPv6 layer of the model
+keeps a path MTU. Icmpv6 turns the Packet Too Big message of R into an indication for the
+protocol that the quoted packet names (Icmpv6.cc:124), and no code of Ipv6 or IPsec reads its
+MTU, so A goes on to send packets of 1410 octets that R cannot forward. See results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4301_path_mtu_ipv6")
+        // Expected observation 1: a Packet Too Big message with MTU 1280 from R to A.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return packetTooBigOf(p) != nullptr; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(packetTooBigOf(p)->getMTU() == 1280, "the Packet Too Big message names MTU " + num(packetTooBigOf(p)->getMTU())); })
+                  .describe("an ICMPv6 Packet Too Big message from R onto L1")
+                  .within(4.0))
+        // Expected observation 2: after it, no packet of the two flows longer than 1280 octets.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return (isEsp(p, 101) || isAh(p, 103)) && ipPacketLength(p) > 1280; })
+                  .describe("a protected packet of more than 1280 octets from A after the Packet Too Big message (RFC4301-OUT-21, RFC4302-FRAG-10, RFC4303-FRAG-9)")
+                  .within(3.0)))
+        // Expected observation 3: B delivers the datagrams that A sends after the report ...
+        .meanwhile(atLeastTimes(2, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(3.0)))
+        // ...
+        .meanwhile(atLeastTimes(2, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001; })
+                  .describe("a datagram that B delivers on port 2001")
+                  .within(3.0)));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4301_path_mtu_ipv6 compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// the path: host A on L1, router R, host B on L2 (IPv6).
+network IpsecPath6
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='router' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,250"); }
+        router: Router { hasIpv4 = false; hasIpv6 = true; @display("p=300,250"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=500,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecPath6
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv6.hasIpsec = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "2001:db8:2::11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 1300B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].localPort = 1001
+*.hostA.app[1].destAddresses = "2001:db8:2::11"
+*.hostA.app[1].destPort = 2001
+*.hostA.app[1].messageLength = 1300B
+*.hostA.app[1].startTime = 1s
+*.hostA.app[1].stopTime = 5.5s
+*.hostA.app[1].sendInterval = 1s
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 2001
+*.hostA.ipv6.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>OUT</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>IN</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv6.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>OUT</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>58</Protocol></Selector><Direction>IN</Direction><Action>BYPASS</Action></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2001</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.router.eth[1].mac.mtu = 1280B
+
+%contains: stdout
+PROTOCOLTEST rfc4301_path_mtu_ipv6: PASS

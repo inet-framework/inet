@@ -43,8 +43,9 @@ it.
    the closing list of the statements without a check. 23 checks in 7 files; 325 statements are
    in a check, and the other 472 are in the closing list, in 15 groups of what a check would
    need.
-6. [ ] **Step 6, tests** — `tests/protocol/ipsec/Rfc430[123]*.test` and the helper header
-   `IpsecChecks.h`.
+6. [x] **Step 6, tests** — `tests/protocol/ipsec/Rfc430[123]*.test` and the helper header
+   `IpsecChecks.h`. 31 tests for the 23 checks. First full run: 15 PASS, 6 FAIL declared expected
+   (missing features), 10 FAIL.
 7. [ ] **Steps 7 to 9, and the ledger** — `model/ipsec/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`, from one fresh run.
 8. [ ] **Notes** — `model/ipsec/notes.md`: the model quirks, the scenario and tooling traps, and
@@ -93,3 +94,33 @@ Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `R
 - **The closing list comes from a generator** (scratchpad `ipsec/gen-ipsec-closing.py`) that
   refuses a statement in no group or in two, and the placement checker confirms that every entry
   is in exactly one of a check and the closing list.
+- **The checks name HMAC-SHA-256-128, not HMAC-SHA-1-96.** The exploration showed that the
+  model's `HMAC_SHA1` makes a 20-octet ICV, where HMAC-SHA-1-96 of RFC 2404 makes 12 — a matter
+  of the algorithm documents, level 5. HMAC-SHA-256-128 (16 octets) is the integrity algorithm
+  that RFC 8221 makes mandatory, and the model's `HMAC_SHA2_256_128` makes 16 octets. The checks
+  and the tests changed together, so that each test tells the story of its check.
+- **The check of a both-NULL SA accepts a refusal at configuration.** The model stops at
+  initialization with "Cannot set authenticationAlg=NONE if espMode=INTEGRITY", on stderr. The
+  check now names both forms of the refusal, and the test expects the error (`%exitcode: 1`,
+  `%contains-regex: stderr`).
+- **Test tooling facts found on the way** (they go into `notes.md`):
+  - a pattern with an assertion matches only the first event that its filter picks, so a counting
+    guard with an assertion counts one; the length of the delivered datagrams is a guard of its own;
+  - the tester does not subscribe to the `packetReceived` signal of an application, so a datagram
+    is "delivered" when UDP emits `packetSentToUpper` with its port in the `L4PortInd` tag;
+  - `**.ipv4.hasIpsec` also gives the router IPsec, which then asks for an SPD; only the hosts get
+    it (`*.host*`);
+  - the MTU of an Ethernet interface is a parameter of its MAC, `eth[1].mac.mtu`;
+  - the exploration dump (`mkexplore.py`) showed the chunk layout of every packet kind before a
+    test read it: the AH payload is an `EncryptedChunk` although AH does not encrypt, the ICV is a
+    `ByteCountChunk` at the end, an IPv6 fragment has an `Ipv6FragmentHeader` chunk, and a
+    fragment carries a `SliceChunk` of the protected packet.
+- **The model applies IPsec before fragmentation**, on IPv4 and IPv6: only the first fragment
+  holds the AH or ESP header, and B reassembles before IPsec. An IPv4 router fragments a protected
+  packet on its way, and B still delivers it.
+- **The IPv6 layer keeps no path MTU.** R sends Packet Too Big, Icmpv6 passes it up as an
+  indication (`Icmpv6.cc:124`), and A goes on with packets of 1410 octets. Neither IPsec nor IPv6
+  has code for it, so the test declares the failure expected: a missing feature.
+- **AH across a router passes, but the model cannot fail it.** The receiver never verifies the
+  ICV (the TODO at `IPsec.cc:832`), so a changed TTL cannot make it reject a packet. The ledger
+  records the pass and says that only level 3, an ICV that fails, gives the verdict weight.

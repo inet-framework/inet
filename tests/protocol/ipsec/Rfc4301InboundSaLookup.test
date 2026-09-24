@@ -1,0 +1,182 @@
+%description:
+
+Inbound SA lookup.
+
+Checks RFC4301-SA-6, SA-13, SA-18, SAD-3, IN-14, IN-15, IN-17, RFC4302-SPI-2, SPI-5, SPI-10,
+SPI-15, ISA-1, ISA-2, ISA-6, RFC4303-SPI-4, SPI-10, SPI-13, ISA-1, ISA-2 and ISA-6 from the
+catalogs under doc/project/evidence/standard/. The English procedure is in
+doc/project/evidence/protocol/ipsec/checks/security-associations.md#inbound-sa-lookup; the
+program steps below map onto its expected observations. The guards are observations 2 to 6; steps
+1 to 3 are observation 1.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IpsecChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4301_inbound_sa_lookup")
+        // Expected observations 2 and 6: B delivers the five datagrams of flow 2000, and none of flow 2010 ...
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2000 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observation 2: ... and of flow 2001.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001; })
+                  .describe("a datagram that B delivers on port 2001")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2001 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2001 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observation 3: B delivers the datagrams of flow 2002.
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2002; })
+                  .describe("a datagram that B delivers on port 2002")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2002 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2002 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observation 4: B delivers none of flow 2008.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2008; })
+                  .describe("a datagram that B delivers on port 2008")
+                  .within(10.0)))
+        // Expected observation 5: B delivers none of flow 2009.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2009; })
+                  .describe("a datagram that B delivers on port 2009")
+                  .within(10.0)))
+        // Expected observation 1: the ESP packets with SPI 104 ...
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEsp(p, 104); })
+                  .describe("an ESP packet with SPI 104 from A")
+                  .within(3.0))
+        // ... the AH packets with SPI 105 ...
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 105); })
+                  .describe("an AH packet with SPI 105 from A")
+                  .within(3.0))
+        // ... and the AH packets with SPI 101 leave A.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isAh(p, 101); })
+                  .describe("an AH packet with SPI 101 from A")
+                  .within(3.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4301_inbound_sa_lookup compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// the link: A, B on L1 through a switch (IPv4).
+network IpsecLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=300,100"); }
+        hostA: StandardHost { @display("p=150,250"); }
+        hostB: StandardHost { @display("p=300,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IpsecLink
+sim-time-limit = 11s
+seed-set = 0
+*.host*.ipv4.hasIpsec = true
+*.hostA.numApps = 6
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.1.11"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[1].typename = "UdpBasicApp"
+*.hostA.app[1].localPort = 1001
+*.hostA.app[1].destAddresses = "10.0.1.11"
+*.hostA.app[1].destPort = 2001
+*.hostA.app[1].messageLength = 100B
+*.hostA.app[1].startTime = 1s
+*.hostA.app[1].stopTime = 5.5s
+*.hostA.app[1].sendInterval = 1s
+*.hostA.app[2].typename = "UdpBasicApp"
+*.hostA.app[2].localPort = 1002
+*.hostA.app[2].destAddresses = "10.0.1.11"
+*.hostA.app[2].destPort = 2002
+*.hostA.app[2].messageLength = 100B
+*.hostA.app[2].startTime = 1s
+*.hostA.app[2].stopTime = 5.5s
+*.hostA.app[2].sendInterval = 1s
+*.hostA.app[3].typename = "UdpBasicApp"
+*.hostA.app[3].localPort = 1008
+*.hostA.app[3].destAddresses = "10.0.1.11"
+*.hostA.app[3].destPort = 2008
+*.hostA.app[3].messageLength = 100B
+*.hostA.app[3].startTime = 1s
+*.hostA.app[3].stopTime = 5.5s
+*.hostA.app[3].sendInterval = 1s
+*.hostA.app[4].typename = "UdpBasicApp"
+*.hostA.app[4].localPort = 1009
+*.hostA.app[4].destAddresses = "10.0.1.11"
+*.hostA.app[4].destPort = 2009
+*.hostA.app[4].messageLength = 100B
+*.hostA.app[4].startTime = 1s
+*.hostA.app[4].stopTime = 5.5s
+*.hostA.app[4].sendInterval = 1s
+*.hostA.app[5].typename = "UdpBasicApp"
+*.hostA.app[5].localPort = 1010
+*.hostA.app[5].destAddresses = "10.0.1.11"
+*.hostA.app[5].destPort = 2000
+*.hostA.app[5].messageLength = 100B
+*.hostA.app[5].startTime = 1s
+*.hostA.app[5].stopTime = 5.5s
+*.hostA.app[5].sendInterval = 1s
+*.hostB.numApps = 5
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+*.hostB.app[1].typename = "UdpSink"
+*.hostB.app[1].localPort = 2001
+*.hostB.app[2].typename = "UdpSink"
+*.hostB.app[2].localPort = 2002
+*.hostB.app[3].typename = "UdpSink"
+*.hostB.app[3].localPort = 2008
+*.hostB.app[4].typename = "UdpSink"
+*.hostB.app[4].localPort = 2009
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1000</LocalPort><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1001</LocalPort><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1002</LocalPort><RemotePort>2002</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1008</LocalPort><RemotePort>2008</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>104</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1009</LocalPort><RemotePort>2009</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>105</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>1010</LocalPort><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2001</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2002</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>AH</Protection><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>103</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+
+%contains: stdout
+PROTOCOLTEST rfc4301_inbound_sa_lookup: PASS
