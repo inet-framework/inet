@@ -1,6 +1,6 @@
 # Standards tests, wave 0 — debt, fresh run records, and level 1 for the Mode B protocols
 
-**Status:** done. Started and finished 2026-09-23 on `topic/standards-tests-wave0`, from `master` at
+**Status:** in progress. Started 2026-09-23 on `topic/standards-tests-wave0`, from `master` at
 `28536bd0a5`. Worktree: `/home/levy/workspace/inet-standards-tests-wave0`.
 
 Source: the survey `audit/sweep/standards-tests.md` in `inet-master` (local, not in git), §6
@@ -69,8 +69,8 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
    rows of RFC 6298 and RFC 5681, the 10 features of level 4, the achieved-level text and table,
    and the fresh run. Correct the pass-log sentence about the sweep. Correct the summary
    sentence of `conformance.md`. Give `results.md` the trees of its old commit.
-3. [x] **The six other ledgers** (arp `887770ae37`, quic `50d4d8c59a`, ipv4 `ee39dc807b`,
-   udp `8a46bf4945`, ipv6 `179975ae33`, dhcp `b98d771aa3`) (arp, dhcp, ipv4, ipv6, quic, udp), one commit each: the fresh
+3. [ ] **The six other ledgers** (done: arp `887770ae37`, quic `50d4d8c59a`, ipv4 `ee39dc807b`,
+   udp `8a46bf4945`, ipv6 `179975ae33`; open: dhcp) (arp, dhcp, ipv4, ipv6, quic, udp), one commit each: the fresh
    run record, each row verdict from the fresh run, the feature support by the rule of step 7,
    the conformance matrix from the new support, and the trees of the old commit in each snapshot
    document. Fix the inconsistent ARP summary line on the way.
@@ -78,7 +78,7 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
    `model/wifi/results.md` into `audit/` into inline paths: the UDP `features.md` prose count; the stale "one tap
    carries one rule" in `model/ipv4/notes.md`; the Mobile IPv6 entry of `AUTHORING.md`, whose
    two tests were removed on 2026-09-10.
-5. [x] **Level 1 for the Mode B protocols**, one commit per protocol: RFC texts in
+5. [ ] **Level 1 for the Mode B protocols**, one commit per protocol: RFC texts in
    `evidence/standard/`, `protocol/<proto>/standards.md`, `model/<proto>/conformance.md` (part 1
    only) and `model/<proto>/coverage.md` (the achieved level and the pass log). Folder names
    from the survey, §2.3:
@@ -106,8 +106,7 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
    The level-2 in-scope set of each map comes from the register, and the target level is 1.
    `rip` goes first and is the template for the others: done in `e360ca980e`. Six agents
    write the other 16; each protocol gets its own commit after review.
-6. [x] Gates, then move this plan to `plan/done/`. All four gates pass on `master..HEAD`:
-   225 files and 0 broken links, seals in step, commits and classification clean.
+6. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -129,39 +128,3 @@ Commit group: `standards-tests-wave0`. Gates before each commit: `check-links.sh
 - **A snapshot claim can go stale silently.** "Every source file that part 1 cites is identical
   to the file at the commit above" stopped being true for QUIC after `948c8b5cb4`; the
   sentence now names what changed.
-- **DHCP:** the repair `bdde132792` gave the server the code of RFC2131-DECL-4, so the row moves
-  from `no check` to `owed` (the debt is 14), and DHCP-F-DECLINE reads `partial`.
-  DHCP-F-DUPLICATE-DETECTION reads `partial` too: the server's probe (OFF-7) has no code. The
-  debt heading lost its count, so its anchor survives the next change of the count.
-- **The spec-first zone leaked in three maps** (igmp, mld, nd): sentences about what "the model"
-  does. They were removed before the commits; each map keeps only a constant pointer to
-  `conformance.md`.
-
-## Level 1: what each map found
-
-| `<proto>` | In-scope set for level 2 | Headline of level 1 |
-| --- | --- | --- |
-| `rip` | RFC 2453, RFC 2080 | claims both; the serializer names RFC 1058 for the version 2 layout; authentication declined in words |
-| `nd` | RFC 4861, RFC 4862, RFC 5942, RFC 6980 | class docs name RFC 2461; about three of four code citations name RFC 2461 or RFC 2462 |
-| `igmp` | RFC 9776, RFC 2236 | claims RFC 3376, obsoleted by RFC 9776 (March 2025); the GMI formula and the unknown-type rule changed |
-| `mld` | RFC 9777, RFC 2710 | claims RFC 3810, obsoleted by RFC 9777; the "Parity gaps" note of MLDv2 is stale; no Router Alert |
-| `ipsec` | RFC 4301, RFC 4302, RFC 4303 | clean claim with five stated limits; ICV verification is a bare TODO, so a claim |
-| `mpls` | RFC 3031, RFC 3032, RFC 3443, RFC 5462 | no document named anywhere; the TTL of every label entry is 0 on the wire |
-| `mipv6` | RFC 6275 | nine places name RFC 3775; only the serializer names RFC 6275; nonce fixed at 0 |
-| `pmipv6` | RFC 5213, RFC 4283 | clean claim of RFC 5213 |
-| `ipv6tunnel` | RFC 2473 | clean claim in eight places |
-| `diffserv` | RFC 2474, 2475, 2597, 3246, 2697, 2698, 3260 | the EF code point cites RFC 2598, obsoleted by RFC 3246, which the queue cites |
-| `ospfv2` | RFC 2328, a one-area slice | RFC1583Compatible cites RFC 3101 and RFC 1583, both wrong; authentication and LSA checksum return true |
-| `ospfv3` | RFC 5340 and the RFC 2328 clauses it keeps | clean claim; steps 4 and 5 of the route calculation commented out |
-| `bgp` | RFC 4271, 4760, 5492, 6793, 8212 | claims RFC 4271 and RFC 4760, not the two updates that change the normal exchange; AS numbers are 16-bit |
-| `pim` | RFC 7761, 3973, 3956, 4607 | the PIM-SM module docs name RFC 4601; the checksum comment names RFC 2460 |
-| `aodv` | RFC 3561, RFC 5148 | clean claim; local repair has a parameter and a bare TODO, so it is a claim |
-| `sctp` | RFC 9260, a clause slice | no place names RFC 9260; RFC 4960 is an enum value; one comment names RFC 2960 |
-| `rtp` | RFC 3550, RFC 3551 | the README names RFC 1889 and RFC 1890; payload type 10 lives in files the build excludes |
-
-## What the next wave inherits
-
-- The TCP debt of 18 `owed` statements, nine of them mandatory, and the TIME-WAIT catalog entry.
-- The DHCP debt of 14 `owed` statements.
-- The level 2 facts at the end of each new `conformance.md`, which decide for each gap whether
-  a failing check is a defect or a declared expected failure.
