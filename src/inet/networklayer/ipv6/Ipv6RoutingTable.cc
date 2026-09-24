@@ -206,6 +206,10 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
         ASSERT(entry != nullptr); // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
     }
+    // these fields decide which next hop a destination gets
+    if (fieldCode == Ipv6Route::F_DESTINATION || fieldCode == Ipv6Route::F_PREFIX_LENGTH || fieldCode == Ipv6Route::F_METRIC ||
+        fieldCode == Ipv6Route::F_NEXTHOP || fieldCode == Ipv6Route::F_IFACE)
+        purgeDestCache();
     emit(routeChangedSignal, entry); // TODO include fieldCode in the notification
 }
 
@@ -726,8 +730,7 @@ Ipv6Route *Ipv6RoutingTable::removeRoute(Ipv6Route *route)
 {
     route = internalRemoveRoute(route);
     if (route) {
-        // TODO purge cache?
-
+        purgeDestCache();
         emit(routeDeletedSignal, route); // rather: going to be deleted
     }
     return route;
@@ -762,8 +765,8 @@ Ipv6RoutingTable::RouteList::iterator Ipv6RoutingTable::internalDeleteRoute(Rout
     ASSERT(it != routeList.end());
     Ipv6Route *route = *it;
     it = routeList.erase(it);
+    purgeDestCache();
     emit(routeDeletedSignal, route);
-    // TODO purge cache?
     delete route;
     return it;
 }
@@ -976,7 +979,7 @@ void Ipv6RoutingTable::deleteAllRoutes()
     }
 
     routeList.clear();
-    // TODO purge cache?
+    purgeDestCache();
 }
 
 // 4.9.07 - Added by CB
