@@ -246,14 +246,16 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
     virtual const IRadioMedium *getMedium() const = 0;
 
     /**
-     * Returns the ongoing transmission that the transmitter is currently
-     * transmitting or nullptr.
+     * Returns an ongoing transmission that the transmitter is currently
+     * transmitting or nullptr. A radio that transmits concurrently returns
+     * one of its transmissions in progress.
      */
     virtual const ITransmission *getTransmissionInProgress() const = 0;
 
     /**
-     * Returns the ongoing reception that the receiver is currently receiving
-     * or nullptr.
+     * Returns an ongoing reception that the receiver is currently receiving
+     * (attempting) or nullptr. A radio that attempts receptions concurrently
+     * returns one of its attempted receptions in progress.
      */
     virtual const ITransmission *getReceptionInProgress() const = 0;
 
