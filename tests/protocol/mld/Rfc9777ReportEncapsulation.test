@@ -1,0 +1,139 @@
+%description:
+
+Multicast Listener Report encapsulation.
+
+Checks RFC9777-GEN-1, GEN-3, GEN-6, REP-2, REP-7, REP-15, REP-19 and REP-40 from
+doc/project/evidence/standard/rfc9777/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/message-format.md#multicast-listener-report-encapsulation;
+the program steps below map onto its expected observations. Step 1 is observations 1, 3, 4, the
+Hop Limit and Next Header of observation 2, and the Reserved field of observation 5. The source
+of observation 2 is in Rfc9777ReportSource.test, and the checksum of observation 5 in
+Rfc9777ReportChecksum.test.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
+section 9.11; Rfc9777StartRepeated.test checks the default itself.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2"), K("ff0e::1:3");
+static const Ipv6Address S1("2001:db8:2::10"), S2("2001:db8:2::11");
+static const Ipv6Address ALL_NODES("ff02::1"), ALL_ROUTERS("ff02::2"), V2_ROUTERS("ff02::16");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv6Address> sset(std::initializer_list<Ipv6Address> l) { return std::set<Ipv6Address>(l); }
+
+// A State-Change Report: a Version 2 Report with a Filter-Mode-Change or Source-List-Change record for the address.
+static bool isStateChange(const Packet *p, const Ipv6Address& g)
+{
+    return hasRecordOf(p, g, MLD_CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, MLD_CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, MLD_ALLOW_NEW_SOURCES) || hasRecordOf(p, g, MLD_BLOCK_OLD_SOURCES);
+}
+// A Current-State Report for the address.
+static bool isCurrentState(const Packet *p, const Ipv6Address& g) { return hasRecordOf(p, g, MLD_MODE_IS_INCLUDE) || hasRecordOf(p, g, MLD_MODE_IS_EXCLUDE); }
+// A Query for the address: Multicast Address Specific with no sources, Multicast Address and Source Specific with sources.
+static bool isAddressQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) > 0; }
+static std::set<Ipv6Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv6Address> out;
+    if (auto q = v2QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9777_report_encapsulation")
+        // Expected observations 1 to 5: the Version 2 Report of A after its start of listening.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV2Report(p) && hasRecord(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(upperProtocolOf(p) == 58 && hopLimitOf(p) == 1, "the Report of A has Next Header " + num(upperProtocolOf(p)) + " and Hop Limit " + num(hopLimitOf(p)) + " (RFC9777-GEN-1, GEN-3)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == V2_ROUTERS, "the Report of A went to " + destOf(p).str() + " (RFC9777-REP-40)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto r = v2ReportOf(p); int len = 8; for (size_t i = 0; i < r->getMulticastAddressRecordArraySize(); i++) { len += 20 + 16 * (int)r->getMulticastAddressRecord(i).getSourceList().size(); if (r->getMulticastAddressRecord(i).getAuxDataArraySize() != 0) return require(false, std::string("a record of A carries auxiliary data (RFC9777-REP-15)")); } return require(mldLength(p) == len, "the Report of A is " + num(mldLength(p)) + " octets for records of " + num(len) + " (RFC9777-REP-7, REP-19)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(v2ReportOf(p)->getCode() == 0 && v2ReportOf(p)->getReserved() == 0, std::string("the Report of A has a Reserved field that is not zero (RFC9777-REP-2)")); })
+                  .describe("the Version 2 Report of A for G (RFC9777-GEN-6)")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_report_encapsulation compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// The requests of a host, as its sockets would make them (tests/protocol/mld/MldChecks.h).
+simple MldRequests
+{
+    parameters:
+        @class(::inet::protocoltest::MldRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// the link: router R, host A and host B on L1 (router.eth0, hostA.eth0, hostB.eth0 through the switch sw1).
+network MldLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:1::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        requestsA: MldRequests {
+            node = "hostA";
+            script = "10 a ff0e::1:1 EXCLUDE";
+            @display("p=50,500");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldLink
+sim-time-limit = 22s
+seed-set = 0
+**.mld.unsolicitedReportInterval = 1s
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_report_encapsulation: PASS

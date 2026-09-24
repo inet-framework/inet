@@ -1,0 +1,138 @@
+%description:
+
+Querier configured for an MLDv1 router.
+
+Checks RFC9777-COMPR-1, COMPR-3, COMPR-4, COMPR-5 and COMPR-7 from
+doc/project/evidence/standard/rfc9777/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/compatibility.md#querier-configured-for-an-mldv1-router;
+the program steps below map onto its expected observations. Step 1 is observation 1; the guard
+and step 2 are observations 2 and 3.
+
+The check configures R1 into MLDv1 mode. The model has no parameter for that mode, so the test
+runs R1 with its defaults, as an administrator of the model would have to.
+
+Expected result FAIL, model gap: Mldv2 has no configuration option to act in MLDv1 mode
+(src/inet/networklayer/icmpv6/Mldv2.ned), and it builds only MLDv2 Queries
+(src/inet/networklayer/icmpv6/Mldv2.cc:1291-1298). The router half of RFC 9777 section 8.3.1 is
+not in the model. In the run, R1 sends an MLDv2 Query at the start, and R2, the MLDv1 router,
+stops the simulation on it (src/inet/networklayer/icmpv6/Mldv1.cc:351, the defect of
+Rfc9777RouterV1Listener.test). The assertion stays as the standard states it; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2"), K("ff0e::1:3");
+static const Ipv6Address S1("2001:db8:2::10"), S2("2001:db8:2::11");
+static const Ipv6Address ALL_NODES("ff02::1"), ALL_ROUTERS("ff02::2"), V2_ROUTERS("ff02::16");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv6Address> sset(std::initializer_list<Ipv6Address> l) { return std::set<Ipv6Address>(l); }
+
+// A State-Change Report: a Version 2 Report with a Filter-Mode-Change or Source-List-Change record for the address.
+static bool isStateChange(const Packet *p, const Ipv6Address& g)
+{
+    return hasRecordOf(p, g, MLD_CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, MLD_CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, MLD_ALLOW_NEW_SOURCES) || hasRecordOf(p, g, MLD_BLOCK_OLD_SOURCES);
+}
+// A Current-State Report for the address.
+static bool isCurrentState(const Packet *p, const Ipv6Address& g) { return hasRecordOf(p, g, MLD_MODE_IS_INCLUDE) || hasRecordOf(p, g, MLD_MODE_IS_EXCLUDE); }
+// A Query for the address: Multicast Address Specific with no sources, Multicast Address and Source Specific with sources.
+static bool isAddressQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) > 0; }
+static std::set<Ipv6Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv6Address> out;
+    if (auto q = v2QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9777_querier_configured_v1")
+        // Expected observation 1: at the start, a General Query of R2 of 24 octets.
+        .once(on("r2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && mldLength(p) == 24; })
+                  .describe("a General Query of R2 of 24 octets")
+                  .within(1.0))
+        // Expected observation 2: every General Query of R1 is 24 octets long.
+        .meanwhile(never(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && mldLength(p) != 24; })
+                  .describe("a General Query of R1 that is not 24 octets long (RFC9777-COMPR-1, COMPR-3, COMPR-4, COMPR-5)")
+                  .within(199.0)))
+        // Expected observation 3: its Maximum Response Code is 10000.
+        .once(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(maxRespCode(p) == 10000, "the General Query of R1 has Maximum Response Code " + num(maxRespCode(p)) + " (RFC9777-COMPR-7)"); })
+                  .describe("the next General Query of R1")
+                  .within(195.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_querier_configured_v1 compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the two routers: R1, R2 and host A on L1 (through the switch sw1); the interface identifier of R1 is the lower one.
+network MldTwoRouters
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='r1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='r2' names='eth0' address='2001:db8:1::2'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        r1: Router6 { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        r2: Router6 { @display("p=550,100"); }
+        hostA: StandardHost6 { @display("p=350,250"); }
+    connections:
+        r1.ethg++ <--> Eth100M <--> sw1.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldTwoRouters
+sim-time-limit = 202s
+seed-set = 0
+*.r2.ipv6.mld.typename = "Mldv1"
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.r1.eth[0].address = "0A-00-00-00-00-01"
+*.r2.eth[0].address = "0A-00-00-00-00-02"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_querier_configured_v1: PASS

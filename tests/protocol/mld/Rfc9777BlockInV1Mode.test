@@ -1,0 +1,207 @@
+%description:
+
+A BLOCK record for an address in MLDv1 mode.
+
+Checks RFC9777-COMPR-22 from
+doc/project/evidence/standard/rfc9777/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/compatibility.md#a-block-record-for-an-address-in-mldv1-mode;
+the program steps below map onto its expected observations. Step 1 is observation 1; the guard
+and the gap guard are observations 2 and 3.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
+section 9.11; Rfc9777StartRepeated.test checks the default itself.
+
+Defect: the MLDv1 host C stops the simulation at the first MLDv2 Query of R, at the start:
+Mldv1::processQuery reads every Query as an MLDv1 Query of 24 octets
+(src/inet/networklayer/icmpv6/Mldv1.cc:351), and the 28 octets of an MLDv2 Query cannot be read
+so ("Cannot convert chunk from type inet::Mldv2Query to type inet::MldQuery"). RFC 2710 section
+5 accepts every Query of at least 24 octets (RFC2710-NODE-2). The run stops before observation
+1, so the statements of the router have no verdict. This test FAILS, and the failure is
+deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
+wrong thing, which is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2"), K("ff0e::1:3");
+static const Ipv6Address S1("2001:db8:2::10"), S2("2001:db8:2::11");
+static const Ipv6Address ALL_NODES("ff02::1"), ALL_ROUTERS("ff02::2"), V2_ROUTERS("ff02::16");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv6Address> sset(std::initializer_list<Ipv6Address> l) { return std::set<Ipv6Address>(l); }
+
+// A State-Change Report: a Version 2 Report with a Filter-Mode-Change or Source-List-Change record for the address.
+static bool isStateChange(const Packet *p, const Ipv6Address& g)
+{
+    return hasRecordOf(p, g, MLD_CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, MLD_CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, MLD_ALLOW_NEW_SOURCES) || hasRecordOf(p, g, MLD_BLOCK_OLD_SOURCES);
+}
+// A Current-State Report for the address.
+static bool isCurrentState(const Packet *p, const Ipv6Address& g) { return hasRecordOf(p, g, MLD_MODE_IS_INCLUDE) || hasRecordOf(p, g, MLD_MODE_IS_EXCLUDE); }
+// A Query for the address: Multicast Address Specific with no sources, Multicast Address and Source Specific with sources.
+static bool isAddressQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) > 0; }
+static std::set<Ipv6Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv6Address> out;
+    if (auto q = v2QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+static simtime_t lastS1;
+
+Define_ProtocolTestProgram()
+{
+    lastS1 = -1;
+    return ProtocolTest("rfc9777_block_in_v1_mode")
+        // Expected observation 3: from 30 to 40 s, no gap longer than 1 s.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isFwd(p, S1) || c.event.time < 30 || c.event.time > 40) return false; bool gap = lastS1 >= 0 && c.event.time - lastS1 > 1.0; lastS1 = c.event.time; return gap; })
+                  .describe("a gap longer than 1.0 s between forwarded datagrams of S1 from 30 to 40 s")
+                  .within(40.0)))
+        // Expected observation 1: the Version 2 Report of A with BLOCK(S1).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 30 && sourcesOfRecord(p, G, MLD_BLOCK_OLD_SOURCES) == sset({S1}); })
+                  .describe("at 30 s, the Report of A with BLOCK(S1) for G")
+                  .within(31.0))
+        // Expected observation 2: no Multicast Address and Source Specific Query for G after it.
+        .never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isSourceQuery(p, G); })
+                  .describe("a Multicast Address and Source Specific Query for G (RFC9777-COMPR-22)")
+                  .within(9.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_block_in_v1_mode compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// The requests of a host, as its sockets would make them (tests/protocol/mld/MldChecks.h).
+simple MldRequests
+{
+    parameters:
+        @class(::inet::protocoltest::MldRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// The multicast routing of R: one route from L2 to L1 with L1 as a leaf (MldChecks.h).
+simple MulticastLeafRoute6
+{
+    parameters:
+        @class(::inet::protocoltest::MulticastLeafRoute6);
+        string node;
+        string origin;
+        int prefixLength;
+        string group;
+        string inInterface;
+        string outInterface;
+}
+
+// the link with an older host: the link with a source, and host C on L1.
+network MldOlderHost
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='router' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:1::11'/>" +
+                         "<interface hosts='hostC' names='eth0' address='2001:db8:1::12'/>" +
+                         "<interface hosts='S1' names='eth0' address='2001:db8:2::10'/>" +
+                         "<interface hosts='S2' names='eth0' address='2001:db8:2::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=350,200"); }
+        sw1: EthernetSwitch { @display("p=350,330"); }
+        hostA: StandardHost6 { @display("p=200,450"); }
+        hostB: StandardHost6 { @display("p=350,450"); }
+        hostC: StandardHost6 { @display("p=500,450"); }
+        sw2: EthernetSwitch { @display("p=350,80"); }
+        S1: StandardHost6 { @display("p=250,20"); }
+        S2: StandardHost6 { @display("p=450,20"); }
+        requestsC: MldRequests {
+            node = "hostC";
+            script = "10 c ff0e::1:1 EXCLUDE";
+            @display("p=50,500");
+        }
+        requestsA: MldRequests {
+            node = "hostA";
+            script = "10 a ff0e::1:1 INCLUDE 2001:db8:2::10; 30 a ff0e::1:1 INCLUDE";
+            @display("p=150,500");
+        }
+        routeR: MulticastLeafRoute6 {
+            node = "router";
+            origin = "2001:db8:2::";
+            prefixLength = 64;
+            group = "::";
+            inInterface = "eth1";
+            outInterface = "eth0";
+            @display("p=50,250");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        router.ethg++ <--> Eth100M <--> sw2.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostC.ethg++ <--> Eth100M <--> sw1.ethg++;
+        S1.ethg++ <--> Eth100M <--> sw2.ethg++;
+        S2.ethg++ <--> Eth100M <--> sw2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldOlderHost
+sim-time-limit = 42s
+seed-set = 0
+**.mld.unsolicitedReportInterval = 1s
+*.hostC.ipv6.mld.typename = "Mldv1"
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.router.eth[1].address = "0A-00-00-00-00-02"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+*.hostC.eth[0].address = "0A-00-00-00-00-0C"
+*.S1.eth[0].address = "0A-00-00-00-00-10"
+*.S2.eth[0].address = "0A-00-00-00-00-11"
+*.S1.numApps = 1
+*.S1.app[0].typename = "UdpBasicApp"
+*.S1.app[0].destAddresses = "ff0e::1:1"
+*.S1.app[0].destPort = 5000
+*.S1.app[0].messageLength = 100B
+*.S1.app[0].sendInterval = 0.5s
+*.S1.app[0].startTime = 0.5s
+*.S1.app[0].timeToLive = 16
+*.S1.app[0].multicastInterface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_block_in_v1_mode: PASS

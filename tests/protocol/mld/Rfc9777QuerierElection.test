@@ -1,0 +1,143 @@
+%description:
+
+Querier election.
+
+Checks RFC9777-RQRY-6, RQRY-8, RQRY-9, RQRY-11, TIMER-8 and RFC2710-ROUTER-8 to ROUTER-10 from
+doc/project/evidence/standard/rfc9777/catalog.md and
+doc/project/evidence/standard/rfc2710/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/router-queries.md#querier-election;
+the program steps below map onto its expected observations. The first guard records the last
+General Query of R1 before it leaves L1, the second is observation 2; step 1 is observation 1,
+and step 2 observation 3.
+
+A node joins or leaves L1 through its link: the ScenarioManager enables or disables the channel
+between the node and the switch (the rules of checks.md).
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2"), K("ff0e::1:3");
+static const Ipv6Address S1("2001:db8:2::10"), S2("2001:db8:2::11");
+static const Ipv6Address ALL_NODES("ff02::1"), ALL_ROUTERS("ff02::2"), V2_ROUTERS("ff02::16");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv6Address> sset(std::initializer_list<Ipv6Address> l) { return std::set<Ipv6Address>(l); }
+
+// A State-Change Report: a Version 2 Report with a Filter-Mode-Change or Source-List-Change record for the address.
+static bool isStateChange(const Packet *p, const Ipv6Address& g)
+{
+    return hasRecordOf(p, g, MLD_CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, MLD_CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, MLD_ALLOW_NEW_SOURCES) || hasRecordOf(p, g, MLD_BLOCK_OLD_SOURCES);
+}
+// A Current-State Report for the address.
+static bool isCurrentState(const Packet *p, const Ipv6Address& g) { return hasRecordOf(p, g, MLD_MODE_IS_INCLUDE) || hasRecordOf(p, g, MLD_MODE_IS_EXCLUDE); }
+// A Query for the address: Multicast Address Specific with no sources, Multicast Address and Source Specific with sources.
+static bool isAddressQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) > 0; }
+static std::set<Ipv6Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv6Address> out;
+    if (auto q = v2QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+static simtime_t lastR1, heardAt;
+
+Define_ProtocolTestProgram()
+{
+    lastR1 = -1;
+    heardAt = -1;
+    return ProtocolTest("rfc9777_querier_election")
+        // Records the last General Query of R1 before it leaves L1.
+        .meanwhile(never(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isGeneralQuery(p) && c.event.time < 100) lastR1 = c.event.time; return false; })
+                  .describe("(a recorder of the General Queries of R1)")
+                  .within(350.0)))
+        // Expected observation 2: from 1 ms after the first Query of R1 until 255 s after the last Query of R1, R2 sends none.
+        .meanwhile(never(on("r2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && heardAt >= 0 && c.event.time > heardAt + 0.001 && c.event.time < lastR1 + 255 - 0.1; })
+                  .describe("a General Query of R2 while R1 is the querier (RFC9777-RQRY-6, RQRY-8, RQRY-11, RFC2710-ROUTER-8, ROUTER-10)")
+                  .within(350.0)))
+        // Expected observation 1: the General Query of R1 at the start, which R2 hears.
+        .once(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; heardAt = c.event.time; return true; })
+                  .describe("the first General Query of R1")
+                  .within(1.0))
+        // Expected observation 3: a General Query of R2, 255 s after the last Query of R1.
+        .once(on("r2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && c.event.time > 100; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t d = c.event.time - lastR1; return require(d >= 255 - 0.1 && d <= 255 + 0.1, "R2 became the querier " + d.str() + " s after the last Query of R1, not 255 s (RFC9777-RQRY-9, TIMER-8, RFC2710-ROUTER-9)"); })
+                  .describe("after 100 s, a General Query of R2")
+                  .within(300.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_querier_election compiled\n";
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the two routers: R1, R2 and host A on L1 (through the switch sw1); the interface identifier of R1 is the lower one.
+network MldTwoRouters
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='r1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='r2' names='eth0' address='2001:db8:1::2'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        r1: Router6 { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        r2: Router6 { @display("p=550,100"); }
+        hostA: StandardHost6 { @display("p=350,250"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><set-channel-param src-module='r1' src-gate='ethg[0]' par='disabled' value='true'/></at></scenario>");
+            @display("p=50,150");
+        }
+    connections:
+        r1.ethg++ <--> Eth100M <--> sw1.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldTwoRouters
+sim-time-limit = 352s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.r1.eth[0].address = "0A-00-00-00-00-01"
+*.r2.eth[0].address = "0A-00-00-00-00-02"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_querier_election: PASS

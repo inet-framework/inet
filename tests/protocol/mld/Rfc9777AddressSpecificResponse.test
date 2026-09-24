@@ -1,0 +1,163 @@
+%description:
+
+Response to a Multicast Address Specific Query.
+
+Checks RFC9777-LQRY-7 and LTIM-6 from
+doc/project/evidence/standard/rfc9777/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/query-response.md#response-to-a-multicast-address-specific-query;
+the program steps below map onto its expected observations. The guard records the answers of B;
+step 1 is observation 1, step 2 observation 2 and, last, observation 3 for an answer of B
+before it; step 3 is observation 3 after it.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
+section 9.11; Rfc9777StartRepeated.test checks the default itself.
+
+An answer that leaves less than 1 ms after the Query leaves at the instant of the Query (the
+rules of checks.md).
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2"), K("ff0e::1:3");
+static const Ipv6Address S1("2001:db8:2::10"), S2("2001:db8:2::11");
+static const Ipv6Address ALL_NODES("ff02::1"), ALL_ROUTERS("ff02::2"), V2_ROUTERS("ff02::16");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv6Address> sset(std::initializer_list<Ipv6Address> l) { return std::set<Ipv6Address>(l); }
+
+// A State-Change Report: a Version 2 Report with a Filter-Mode-Change or Source-List-Change record for the address.
+static bool isStateChange(const Packet *p, const Ipv6Address& g)
+{
+    return hasRecordOf(p, g, MLD_CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, MLD_CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, MLD_ALLOW_NEW_SOURCES) || hasRecordOf(p, g, MLD_BLOCK_OLD_SOURCES);
+}
+// A Current-State Report for the address.
+static bool isCurrentState(const Packet *p, const Ipv6Address& g) { return hasRecordOf(p, g, MLD_MODE_IS_INCLUDE) || hasRecordOf(p, g, MLD_MODE_IS_EXCLUDE); }
+// A Query for the address: Multicast Address Specific with no sources, Multicast Address and Source Specific with sources.
+static bool isAddressQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv6Address& g) { return isQuery(p) && queryAddress(p) == g && querySources(p) > 0; }
+static std::set<Ipv6Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv6Address> out;
+    if (auto q = v2QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+static simtime_t tq;
+static bool bAnswered;
+
+Define_ProtocolTestProgram()
+{
+    bAnswered = false;
+    return ProtocolTest("rfc9777_address_specific_response")
+        // Records a Current-State Report of B for G after its stop.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (c.event.time > 50 && isCurrentState(p, G)) bAnswered = true; return false; })
+                  .describe("(a recorder of the answers of B)")
+                  .within(60.0)))
+        // Expected observation 1: after 50 s, a Multicast Address Specific Query for G.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && isAddressQuery(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; tq = c.event.time; return true; })
+                  .describe("after 50 s, a Multicast Address Specific Query for G")
+                  .within(55.0))
+        // Expected observation 2: within 1 s, not at the instant, the answer of A; and no answer of B so far.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isCurrentState(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(c.event.time > tq + 0.001 && hasRecordOf(p, G, MLD_MODE_IS_EXCLUDE) && sourcesOfRecord(p, G, MLD_MODE_IS_EXCLUDE).empty(), "the answer of A at " + c.event.time.str() + " s holds " + recordsText(p) + " (RFC9777-LQRY-7, LTIM-6)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(!bAnswered, std::string("B, which stopped listening to G, answered the Query for G (RFC9777-LTIM-6)")); })
+                  .describe("within 1 s, the answer of A")
+                  .within(1.0))
+        // Expected observation 3: no answer of B after that.
+        .never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isCurrentState(p, G); })
+                  .describe("a Current-State Report of B for G after its stop (RFC9777-LTIM-6)")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_address_specific_response compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// The requests of a host, as its sockets would make them (tests/protocol/mld/MldChecks.h).
+simple MldRequests
+{
+    parameters:
+        @class(::inet::protocoltest::MldRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// the link: router R, host A and host B on L1 (router.eth0, hostA.eth0, hostB.eth0 through the switch sw1).
+network MldLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:1::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        requestsA: MldRequests {
+            node = "hostA";
+            script = "10 a ff0e::1:1 EXCLUDE";
+            @display("p=50,500");
+        }
+        requestsB: MldRequests {
+            node = "hostB";
+            script = "10 b ff0e::1:1 EXCLUDE; 50 b ff0e::1:1 INCLUDE";
+            @display("p=150,500");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldLink
+sim-time-limit = 62s
+seed-set = 0
+**.mld.unsolicitedReportInterval = 1s
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_address_specific_response: PASS
