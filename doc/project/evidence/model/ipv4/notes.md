@@ -176,6 +176,85 @@ order. Pass `-p inet` to skip project discovery, which crashes on a `~/.omnetpp`
 A simulation that stops with a runtime error counts as `FAIL`, not `ERROR`: declare
 `%# expected-result: FAIL` and say in the description why the verdict line is missing.
 
+### The first matching ini line wins
+
+The IGMP pass generated a wildcard line before the lines of each test. The wildcard matched
+first, and the per-node lines of the test never applied. Put the lines of a test before the
+lines that every test shares. See
+[`igmp/notes.md`](../igmp/notes.md#the-first-matching-ini-line-wins).
+
+### A channel disabled at initialization never comes back
+
+An Ethernet MAC subscribes to the parameters of its channel only when the channel is enabled at
+initialization. A channel that the NED disables, and that the scenario enables later, stays dead
+for the MAC. Start every link enabled, and break it at run time with `set-channel-param`. See
+[`igmp/notes.md`](../igmp/notes.md#a-channel-disabled-at-initialization-never-comes-back).
+
+### A step window starts at the match of the step before it
+
+`within(t)` counts from the match of the previous step, not from the start of the run or of the
+check. A window that looks long enough on the timeline of the scenario can end before its event.
+Compute every window from the instant of the previous match, and leave a margin for the
+transmission time.
+
+### A guard starts at the previous match and holds the run open
+
+A step started with `meanwhile(...)` starts at the match of the step before it. It runs until its
+own window closes, also after the last ordered step has matched. A guard with a long window keeps
+the run open to `sim-time-limit`. Make the window of a guard the length of its observation.
+
+### A filter that throws is a non-match
+
+When a filter or an assertion throws, the tester counts the event as a non-match. What the
+filter did before the throw stays, and what it would have done after the throw is lost. A
+`SimTime` constant out of range throws in a comparison, and a dump then looks as if it lost
+events. See
+[`igmp/notes.md`](../igmp/notes.md#a-filter-that-throws-is-a-non-match-and-loses-what-it-did-after-the-throw).
+
+### A failure says which step, not why: make the assertions say why
+
+The reason line of a failure in `work/<Test>/test.out` names the pattern of the step, not the
+text of `describe()`. A missed deadline says only which step it was. A predicate that returns
+false says only "does not hold". A predicate that throws a sentence gives "the predicate raised:"
+and the sentence. The RIP pass added a helper for it, `require(holds, "what the message held")`.
+Collect the reasons of a suite with `grep -A8 ": FAIL" work/*/test.out | grep reason`.
+
+### A failing assertion hides the observations after it
+
+The first false assertion stops the check, so every later observation of that check has no
+verdict. Put a field that the model is known to get wrong last, or split the check into two
+tests. The RIP pass split the expiry of a route from its garbage collection for this reason.
+
+### A timer check can pass by chance
+
+The start phases of the nodes are random by default. A timer defect can then fall between two
+events of the scenario and escape a window. RIP looked at its timeout only when it sent, and the
+two routers started 1.3 s apart, so a 6 s window passed. Fix the start instants in the scenario,
+so that the instant under test falls between the node's own events.
+
+### A module class in a test header needs the global namespace
+
+`opp_test` puts the NED of a test into a namespace of its own. A module class of a test header
+(for example, a management module that sets a variable of the model) therefore needs
+`@class(::inet::protocoltest::Name)`, with the leading `::`. The ND pass found it.
+
+### The IPv6 configurator gives routes to every node
+
+`Ipv6NetworkConfigurator` gives the hosts a default route and on-link routes, also with
+`assignAddressesToHosts = false`. For a routing protocol, keep the on-link routes that the
+protocol imports and remove the others: `addRemoteRoutes = false` and `addDefaultRoutes = false`.
+For Neighbor Discovery, the hosts must learn their routes: `addStaticRoutes = false`, and
+`<route>` elements for the routers only. Every IPv6 mockup also needs
+`**.ipv6.configurator.networkConfiguratorModule = "configurator"`. Examine the result with
+`dumpRoutes = true`.
+
+### Explore before you call a failure a finding
+
+A temporary test that prints every message of the protocol at the named MACs, with its fields,
+shows the cause of a failure faster than a debugger. It found the configurator trap of the ND pass
+and the cause of every gap of the ND, IGMP and MLD passes. Name it `ZzExplore.test`, keep its
+generator outside git, and never commit it.
+
 ## Follow-ups, in the order I would do them
 
 1. **Report the four robustness gaps to the model.** The unknown-ICMP-type crash first, then
