@@ -147,8 +147,8 @@ fields. §6.2.1 gives the default of each variable.
 ### Expected observations
 
 1. On L1, from R, a Router Advertisement. This confirms the stimulus.
-2. It holds a Source Link-Layer Address option of type 1 and length 1 with the link-layer address
-   of R on L1 (RFC4861-RA-23, OPT-8, OPT-9).
+2. A Source Link-Layer Address option, when present, has type 1 and length 1 and holds the
+   link-layer address of R on L1 (RFC4861-RA-23, OPT-8, OPT-9).
 3. The M and O flags are clear (RFC4861-ADV-6, RCFG-7, RCFG-8), and Router Lifetime is 1800
    (RFC4861-ADV-5, RCFG-13).
 4. An MTU option, when present, has type 5, length 1, zero in its Reserved field and MTU 1500
@@ -159,6 +159,8 @@ fields. §6.2.1 gives the default of each variable.
 
 ### Notes
 
+- Observation 2 accepts the absence of the Source Link-Layer Address option, because
+  RFC4861-RA-24 lets a router leave it out.
 - Observation 4 accepts an MTU option or its absence. With AdvLinkMTU 0 the router sends none
   (RFC4861-ADV-11, RCFG-9), but RFC4861-RA-26 lets a router send one on any link, and the check
   cannot tell a router that set AdvLinkMTU to 1500 from one that did not.
