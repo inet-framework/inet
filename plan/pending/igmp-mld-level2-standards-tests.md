@@ -63,8 +63,12 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
 8. [x] **MLD step 6, tests** — `tests/protocol/mld/Rfc9777*.test`, `Rfc2710*.test`, and a helper.
    47 tests for the 32 checks, with the helper `MldChecks.h`. Run: 21 PASS, 1 FAIL declared
    expected (the model has no MLDv1 mode of an MLDv2 router), 25 FAIL.
-9. [ ] **MLD steps 7 to 9, and the ledger** — `model/mld/results.md`, `conformance.md` part 2,
-   `categories.md`, `coverage.md`.
+9. [x] **MLD steps 7 to 9, and the ledger** — `model/mld/results.md`, `conformance.md` part 2,
+   `categories.md`, `coverage.md`. Fresh run at `29aed12310`: 47 tests, 21 PASS, 26 FAIL, one
+   of them declared expected. Seventeen gaps: sixteen defects and one missing feature. Level 2
+   is reached; the matrix holds 2 `confirmed`, 15 `partial`, 2 `defect` and 1 `out of claim`;
+   58 statements are owed. IGMP steps 7 to 9 were brought up to the same run (commit
+   `e7e95ca116`): 42 tests, 24 PASS, 18 FAIL, one declared.
 10. [ ] Gates, then move this plan to `plan/done/`.
 
 ## The catalog drafts
