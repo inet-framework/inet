@@ -1,7 +1,8 @@
 # ND level 2 — catalogs, feature map, checks and tests for RFC 4861, RFC 4862, RFC 5942, RFC 6980
 
-**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-nd-level2`, from
+**Status:** done. Started and finished 2026-09-24 on `topic/standards-tests-nd-level2`, from
 `origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-nd-level2`.
+The branch is not merged and not pushed.
 
 The second pass for IPv6 Neighbor Discovery and stateless address autoconfiguration, after the
 level 1 survey of wave 0, and the second pass of wave 1 after RIP. It follows
@@ -51,7 +52,7 @@ Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
    `model/nd/categories.md`, `model/nd/coverage.md`. Level 2 is reached: 14 of the 15 mandatory
    features have core checks that ran; the matrix holds 4 `confirmed`, 12 `partial`, 1
    `declined`, 1 `defect` and 5 `unverified`; 88 statements are owed.
-8. [ ] Gates, then move this plan to `plan/done/`.
+8. [x] Gates, then move this plan to `plan/done/`. All four gates pass on `origin/master..HEAD`.
 
 ## Facts found before the catalogs
 
