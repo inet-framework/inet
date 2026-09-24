@@ -37,7 +37,10 @@ Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
    drafted by four agents in parallel and merged; every quote checked against its lines.
 3. [x] **Step 4, feature map** — `protocol/nd/features.md`, `ND-F-*`. With step 3 in one commit.
    23 features, generated from a specification that places every one of the 489 entries.
-4. [ ] **Step 5, checks** — `protocol/nd/checks.md` and `protocol/nd/checks/<feature>.md`.
+4. [x] **Step 5, checks** — `protocol/nd/checks.md` and `protocol/nd/checks/<feature>.md`.
+   34 checks in 7 files; 254 statements are in a check, and the other 235 are in the closing
+   list of `checks.md` with what a check would need. A script checks that every one of the 489
+   entries has exactly one place.
 5. [ ] **Step 6, tests** — `tests/protocol/nd/Rfc4861*.test`, `Rfc4862*.test`, and a helper.
 6. [ ] **Step 7, run** — `model/nd/results.md`.
 7. [ ] **Steps 8 and 9, and the ledger** — `model/nd/conformance.md` part 2,
@@ -69,3 +72,15 @@ The one look at the code that the guide permits, to pick practical candidates:
 - **Three levels needed the conditional-keyword refinement**: unsolicited advertisements, the
   processing of a Redirect and the change of a router's role are `optional`, because the
   `must` of each holds only once the node does the optional thing.
+- **Every mandatory feature has a core check except message validation**: all its statements
+  need a crafted message, so it waits for level 3, and `checks.md` says so.
+- **Two readings of the text are fixed in the checks.** "About every RetransTimer" is 1 to 1.5
+  times the timer. The cap of the first unsolicited advertisements holds for the intervals after
+  the first and the second one; the interval after the third one is not judged, because the text
+  leaves it open.
+- **Two scenarios serve two checks each**, so that one rule does not hide another: the prefix
+  with the L flag clear (on-link determination, then the Redirect to the on-link destination),
+  and the prefix with a valid lifetime of 30 seconds and a router that stops (the prefix, then
+  the address).
+- **The size of a Redirect makes the check of RFC 6980**: an echo request of 1448 octets makes a
+  Redirect that would exceed the link MTU if the router did not cut the redirected packet.
