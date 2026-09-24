@@ -45,9 +45,12 @@ Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
    37 tests for the 34 checks, from a generator with the five mockups; `NdChecks.h` reads the
    ND messages, their options and their serialized octets. 22 pass and 15 fail; each failure
    has a paragraph that names its gap, and none is declared expected.
-6. [ ] **Step 7, run** — `model/nd/results.md`.
-7. [ ] **Steps 8 and 9, and the ledger** — `model/nd/conformance.md` part 2,
-   `model/nd/categories.md`, `model/nd/coverage.md`.
+6. [x] **Step 7, run** — `model/nd/results.md`. A fresh run at `8f78f1a73c`: 37 tests, 22 PASS,
+   15 FAIL, none declared; eleven gaps of the model, all defects.
+7. [x] **Steps 8 and 9, and the ledger** — `model/nd/conformance.md` part 2,
+   `model/nd/categories.md`, `model/nd/coverage.md`. Level 2 is reached: 14 of the 15 mandatory
+   features have core checks that ran; the matrix holds 4 `confirmed`, 12 `partial`, 1
+   `declined`, 1 `defect` and 5 `unverified`; 88 statements are owed.
 8. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Facts found before the catalogs
@@ -106,3 +109,9 @@ The one look at the code that the guide permits, to pick practical candidates:
   with Target Link-Layer Address option, Redirected Header option).
 - **An exploration test prints every ICMPv6 message** (scratchpad `mkexplore.py`); it made the
   causes of the failures visible and is never committed.
+- **The ledger table comes from a generator** (scratchpad `gen-nd-ledger.py`, copied to
+  `audit/nd-level2/` in `inet-master`): it reads the `Checks:` lines, the closing list, the tests
+  and the feature map, and needs a hand mapping only for the statements of the 15 failing tests.
+- **A check was stricter than the standard.** The fields check demanded the Source Link-Layer
+  Address option, which RFC4861-RA-24 lets a router leave out; the check and its test now accept
+  its absence (`b2822881e9`, `8f78f1a73c`).

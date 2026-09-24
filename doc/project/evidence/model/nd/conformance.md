@@ -1,16 +1,25 @@
-# ND — model claims
+# ND — model claims and conformance matrix
 
-> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/nd/standards.md), [coverage.md](coverage.md)
+> **Kind:** report · **Status:** snapshot 2026-09-24 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/nd/standards.md), [features.md](../../protocol/nd/features.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the
-model intends: which standards it claims to implement, mapped onto the standards map. Part 2,
-the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+Step 8 artifact of the standards test workflow. Part 1 records what the model intends: which
+standards it claims to implement, mapped onto the standards map. Part 2 crosses the claims
+with the feature support of the ledger, feature by feature.
 
-Read record — no build, no run:
+Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-23
-- INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
-- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- Date: 2026-09-24 14:02 +0200
+- INET: branch `topic/standards-tests-nd-level2`, commit `8f78f1a73c`, tree clean
+- Trees: src `5c4f41c600`, tests/protocol `2e0e43b607`
+- OMNeT++: 6.4.0, commit `cf58891643`
+- Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/nd$'`
+
+Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0
+branch. The ND code is the same in `5c4f41c600`: the two trees differ only in seven files of
+IEEE 802.11. The line numbers of part 1 therefore hold for both.
 
 ## Part 1 — the claims
 
@@ -90,3 +99,68 @@ claim question, and the pass must check each one):
    Destination Cache "on-link" test the way the two documents describe it. A level 2 pass
    that adds RFC 5942 to the catalog should read the model's actual on-link logic before
    assuming either version is implemented.
+
+## Part 2 — the conformance matrix
+
+A feature is `claimed` when the claims of part 1 cover its governing source document. The
+model claims RFC 4861 and RFC 4862 as wholes, and every feature of the map comes from one of the
+two; the two features that RFC 5942 and RFC 6980 change, ND-F-ON-LINK-DETERMINATION and
+ND-F-NO-FRAGMENTATION, rest on RFC 4861 first. So every feature of the map is claimed. The
+support comes from [`coverage.md`](coverage.md#feature-support).
+
+| Feature | Level | Claimed | Support | Verdict |
+| --- | --- | --- | --- | --- |
+| [ND-F-MESSAGE-FORMAT](../../protocol/nd/features.md#nd-f-message-format) | mandatory | yes | supported | `confirmed` |
+| [ND-F-OPTIONS](../../protocol/nd/features.md#nd-f-options) | mandatory | yes | supported | `confirmed` |
+| [ND-F-MULTICAST-GROUPS](../../protocol/nd/features.md#nd-f-multicast-groups) | mandatory | yes | partial | `partial` — RFC4861-AR-4: no solicited-node group is joined, [gap 9](results.md#gap-9-defect--a-node-does-not-join-its-solicited-node-groups) |
+| [ND-F-ROUTER-SOLICITATION](../../protocol/nd/features.md#nd-f-router-solicitation) | optional | yes | partial | `partial` — the random delay of RFC4861-HOST-47 is level 4 |
+| [ND-F-ROUTER-ADVERTISEMENT](../../protocol/nd/features.md#nd-f-router-advertisement) | mandatory | yes | partial | `partial` — RFC4861-ADV-7, ADV-11: two defaults, [gap 2](results.md#gap-2-defect--two-defaults-of-the-router-are-wrong); ADV-29: only the first solicitation is answered, [gap 5](results.md#gap-5-defect--the-router-answers-only-its-first-solicitation) |
+| [ND-F-ADVERTISEMENT-TIMING](../../protocol/nd/features.md#nd-f-advertisement-timing) | mandatory | yes | partial | `partial` — RFC4861-ADV-23, ADV-32 fail, and ADV-22, ADV-36 are not reached, [gap 5](results.md#gap-5-defect--the-router-answers-only-its-first-solicitation) and [gap 6](results.md#gap-6-defect--the-first-periodic-advertisement-comes-after-198-to-600-seconds) |
+| [ND-F-ROUTER-DISCOVERY](../../protocol/nd/features.md#nd-f-router-discovery) | mandatory | yes | partial | `partial` — RFC4861-RA-17 is not reached: [gap 7](results.md#gap-7-defect--a-host-drops-every-advertisement-during-duplicate-address-detection); HOST-12 passes with one router only |
+| [ND-F-PARAMETER-DISCOVERY](../../protocol/nd/features.md#nd-f-parameter-discovery) | optional | yes | not supported | `declined` by the table of the guide, but the run shows no choice: the host copies each value and then does not use it, [gap 1](results.md#gap-1-defect--the-hop-limit-of-a-host-is-a-constant), [gap 3](results.md#gap-3-defect--the-host-fragments-to-the-mtu-of-the-interface-not-to-the-advertised-mtu), [gap 4](results.md#gap-4-defect--address-resolution-waits-a-constant-not-retranstimer) |
+| [ND-F-ON-LINK-DETERMINATION](../../protocol/nd/features.md#nd-f-on-link-determination) | mandatory | yes | partial | `partial` — no core check fails; RFC4861-HOST-31, HOST-32 are owed, RFC5942-ONLINK-9, ONLINK-10 are level 3 |
+| [ND-F-ADDRESS-RESOLUTION](../../protocol/nd/features.md#nd-f-address-resolution) | mandatory | yes | partial | `partial` — no core check fails; the state of RFC4861-AR-45 is level 4 |
+| [ND-F-RESOLUTION-FAILURE](../../protocol/nd/features.md#nd-f-resolution-failure) | mandatory | yes | supported | `confirmed` |
+| [ND-F-UNSOLICITED-ADVERTISEMENT](../../protocol/nd/features.md#nd-f-unsolicited-advertisement) | optional | yes | untested | `unverified` — owed at level 2: a node whose link-layer address changes |
+| [ND-F-ANYCAST-AND-PROXY](../../protocol/nd/features.md#nd-f-anycast-and-proxy) | optional | yes | untested | `unverified` — the model declines anycast targets with a TODO, `Ipv6NeighbourDiscovery.cc:2002`; the proxy is owed |
+| [ND-F-REDIRECT](../../protocol/nd/features.md#nd-f-redirect) | optional | yes | supported | `confirmed` — the core rules hold; the supporting options fail, [gap 8](results.md#gap-8-defect--the-redirect-carries-no-option) |
+| [ND-F-REDIRECT-PROCESSING](../../protocol/nd/features.md#nd-f-redirect-processing) | optional | yes | partial | `partial` — no core check fails; the cache state of RFC4861-RDH-3, RDH-7 is level 4 |
+| [ND-F-MESSAGE-VALIDATION](../../protocol/nd/features.md#nd-f-message-validation) | mandatory | yes | untested | `unverified` — level 3 |
+| [ND-F-ROUTER-ROLE-CHANGE](../../protocol/nd/features.md#nd-f-router-role-change) | optional | yes | untested | `unverified` — owed at level 2 |
+| [ND-F-ROUTER-CONSISTENCY](../../protocol/nd/features.md#nd-f-router-consistency) | optional | yes | untested | `unverified` — owed at level 2 |
+| [ND-F-LINK-LOCAL-ADDRESS](../../protocol/nd/features.md#nd-f-link-local-address) | mandatory | yes | partial | `partial` — no core check fails; the infinite lifetime of RFC4862-LL-7 is level 4 |
+| [ND-F-DUPLICATE-ADDRESS-DETECTION](../../protocol/nd/features.md#nd-f-duplicate-address-detection) | mandatory | yes | partial | `partial` — RFC4862-DAD-11: the solicited-node group is not joined, [gap 9](results.md#gap-9-defect--a-node-does-not-join-its-solicited-node-groups); DAD-20, DAD-21 are owed; the supporting DAD-1 fails, [gap 10](results.md#gap-10-defect--a-router-does-not-test-its-configured-address) |
+| [ND-F-STATELESS-AUTOCONFIGURATION](../../protocol/nd/features.md#nd-f-stateless-autoconfiguration) | mandatory | yes | partial | `partial` — no core check fails; the two-hour rule, RFC4862-GLOB-12, GLOB-13, GLOB-15, is owed |
+| [ND-F-ADDRESS-LIFETIME](../../protocol/nd/features.md#nd-f-address-lifetime) | mandatory | yes | not supported | `defect` — RFC4862-GLOB-22, GLOB-23: an expired address stays in use, [gap 11](results.md#gap-11-defect--an-expired-address-stays-in-use) |
+| [ND-F-NO-FRAGMENTATION](../../protocol/nd/features.md#nd-f-no-fragmentation) | mandatory | yes | partial | `partial` — the sender half holds; the receiver half, RFC6980-FRAG-2 to FRAG-6, is level 3 |
+
+Four features are `confirmed`, twelve `partial`, one `declined`, one `defect` and five
+`unverified`.
+
+### How to read the matrix
+
+- **The one `defect`**, ND-F-ADDRESS-LIFETIME, is a mandatory feature whose two checked core
+  statements both fail: the model forms an address with the lifetimes of the prefix, and
+  never retires it. Its other core statements, the deprecation of RFC4862-GLOB-16 and GLOB-18,
+  are owed.
+- **The one `declined`**, ND-F-PARAMETER-DISCOVERY, is the verdict that the table gives an
+  optional feature that is not supported. The word is wrong for what the run found: the model
+  claims the feature in its code, and the three gaps show a value that is stored and never
+  used. Read it as three statement-level defects of [`results.md`](results.md#the-model-gaps).
+- **The `partial` verdicts** fall into two groups. Five hold a failing core check: the
+  multicast groups, the advertisement and its timing, router discovery and Duplicate Address
+  Detection, which gaps 2, 5, 6, 7 and 9 explain. The other seven fail no core check, and are
+  partial only because some core statement needs a later level or an owed check.
+- **The `unverified` verdicts** are the level 3 work and the owed checks, not verdicts on the
+  model.
+
+## Headlines for the next pass
+
+1. **ND-F-ADDRESS-LIFETIME is a `defect`**, and ND-F-MESSAGE-VALIDATION is `unverified` and
+   mandatory. The first needs a repair of gap 11; the second needs level 3.
+2. **The eleven gaps** of [`results.md`](results.md#the-model-gaps) are repairs, not tests: none
+   is declared, so the suite stays red until they are repaired. After a repair of gaps 5 to 7,
+   RFC4861-RA-17 and the intervals of ADV-22 and ADV-36 reach their observations for the first
+   time.
+3. **The obsolete claims of level 1 stand**: the class documentation of the module and of the
+   cache names RFC 2461, and the inline comments name it more often than RFC 4861.
