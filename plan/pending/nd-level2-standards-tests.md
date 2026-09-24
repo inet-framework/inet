@@ -41,7 +41,10 @@ Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
    34 checks in 7 files; 254 statements are in a check, and the other 235 are in the closing
    list of `checks.md` with what a check would need. A script checks that every one of the 489
    entries has exactly one place.
-5. [ ] **Step 6, tests** — `tests/protocol/nd/Rfc4861*.test`, `Rfc4862*.test`, and a helper.
+5. [x] **Step 6, tests** — `tests/protocol/nd/Rfc4861*.test`, `Rfc4862*.test`, and a helper.
+   37 tests for the 34 checks, from a generator with the five mockups; `NdChecks.h` reads the
+   ND messages, their options and their serialized octets. 22 pass and 15 fail; each failure
+   has a paragraph that names its gap, and none is declared expected.
 6. [ ] **Step 7, run** — `model/nd/results.md`.
 7. [ ] **Steps 8 and 9, and the ledger** — `model/nd/conformance.md` part 2,
    `model/nd/categories.md`, `model/nd/coverage.md`.
@@ -84,3 +87,22 @@ The one look at the code that the guide permits, to pick practical candidates:
   the address).
 - **The size of a Redirect makes the check of RFC 6980**: an echo request of 1448 octets makes a
   Redirect that would exceed the link MTU if the router did not cut the redirected packet.
+- **The configurator gave the hosts routes.** With its defaults, it adds a default route and an
+  on-link route to every host, so the first run measured the configurator and not Neighbor
+  Discovery. The mockups now set `addStaticRoutes = false` and give each router its routes in
+  `<route>` elements; a host has no route until an advertisement gives it one.
+- **Two router variables have no parameter.** AdvReachableTime and AdvRetransTimer can only be
+  set in the interface data, so the tests that need them carry a small management module,
+  `NdRouterVariables` in `NdChecks.h`. opp_test puts the NED of a test into a namespace of its
+  own, so its `@class` starts with `::`.
+- **MLD is off in the nodes by default** (`hasMld = false`). The two multicast checks turn it
+  on, and `multicast.md` now says that every node runs MLD.
+- **The Redirect checks start R2 and C at 5 seconds.** With all nodes up at once, host A dropped
+  the advertisement of R1 because the one of R2 had started its Duplicate Address Detection,
+  so the Redirect checks never reached their stimulus. The check of Router Lifetime zero keeps
+  the simultaneous start and fails on that gap.
+- **One check became two tests where a failure hid a verdict**: the Router Advertisement fields
+  (three tests: fields, MTU option, Cur Hop Limit) and the Redirect fields (two tests: header
+  with Target Link-Layer Address option, Redirected Header option).
+- **An exploration test prints every ICMPv6 message** (scratchpad `mkexplore.py`); it made the
+  causes of the failures visible and is never committed.

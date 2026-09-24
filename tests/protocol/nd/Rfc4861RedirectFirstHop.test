@@ -1,0 +1,141 @@
+%description:
+
+Redirect from the first-hop router.
+
+Checks RFC4861-RDM-1, RDM-3, RDM-4, RDM-11, RDM-13, RDM-14, RDR-1 to RDR-4, RDR-6, RDVAL-2 and
+ADV-46 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/redirect.md#redirect-from-the-first-hop-router;
+the program steps below map onto its expected observations. Step 1 is observation 1, the guard
+observation 2, and step 2 observations 3 to 6.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static Ipv6Address echoSource;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_redirect_first_hop")
+        // Expected observation 1: the echo request of A to C goes to R1.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEchoRequest(p) && destOf(p) == C_GLOBAL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ethDest(p) == macOf("r1", "eth0"), "the echo request of A to C went to " + ethDest(p).str() + ", not to R1: the stimulus is missing"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; echoSource = srcOf(p); return true; })
+                  .describe("the echo request of A to C")
+                  .within(20.0))
+        // Expected observation 2: R1 forwards it to R2 on L1.
+        .meanwhile(atLeastTimes(1, (on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEchoRequest(p) && destOf(p) == C_GLOBAL && ethDest(p) == macOf("r2", "eth0"); })
+                  .describe("the echo request of A to C, forwarded by R1 to R2 on L1")
+                  .within(1.0))))
+        // Expected observations 3 to 6: a Redirect of R1 to the source of the echo request, from its link-local address, with R2 as target and C as destination.
+        .once(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRedirect(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == echoSource, "the Redirect of R1 went to " + destOf(p).str() + ", not to " + echoSource.str() + " (RFC4861-RDR-3, RDR-1, RDM-1, RDM-4)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(srcOf(p) == linkLocalOf("r1", "eth0"), "the Redirect of R1 came from " + srcOf(p).str() + ", not from its link-local address (RFC4861-RDM-3, RDVAL-2)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(redirectOf(p)->getTargetAddress() == linkLocalOf("r2", "eth0"), "the Redirect of R1 has Target Address " + redirectOf(p)->getTargetAddress().str() + ", not the link-local address " + linkLocalOf("r2", "eth0").str() + " of R2 (RFC4861-RDR-2, RDR-4, RDM-11, RDM-13, ADV-46)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(redirectOf(p)->getDestinationAddress() == C_GLOBAL, "the Redirect of R1 has Destination Address " + redirectOf(p)->getDestinationAddress().str() + " (RFC4861-RDM-14, RDR-6)"); })
+                  .describe("a Redirect of R1 on L1")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_redirect_first_hop compiled\n";
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the two routers: R1, R2 and host A on link L1 (r1.eth0, r2.eth0, hostA.eth0 through the switch sw); R2 and host C on link L2 (r2.eth1, hostC.eth0).
+network NdTwoRouters
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='r1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='r2' names='eth0' address='2001:db8:1::2' advDefaultLifetime='0'/>" +
+                         "<interface hosts='r2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<route hosts='r1' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "<route hosts='r2' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "<route hosts='r2' destination='2001:db8:2::' prefixLength='64' interface='eth1'/>" +
+                         "<route hosts='r1' destination='2001:db8:2::' prefixLength='64' gateway='fe80::800:ff:fe00:2' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        r1: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        r2: Router6 { @display("p=550,100"); }
+        hostA: StandardHost6 { @display("p=350,250"); }
+        hostC: StandardHost6 { @display("p=750,100"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='5'><startup module='r2'/><startup module='hostC'/></at></scenario>");
+            @display("p=50,150");
+        }
+    connections:
+        r1.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdTwoRouters
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.r1.eth[0].address = "0A-00-00-00-00-01"
+*.r2.eth[0].address = "0A-00-00-00-00-02"
+*.r2.eth[1].address = "0A-00-00-00-00-03"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostC.eth[0].address = "0A-00-00-00-00-0C"
+**.hasStatus = true
+
+*.r2.status.initialStatus = "down"
+*.hostC.status.initialStatus = "down"
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:2::800:ff:fe00:c"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 1
+
+%contains: stdout
+PROTOCOLTEST rfc4861_redirect_first_hop: PASS

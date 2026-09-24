@@ -1,0 +1,120 @@
+%description:
+
+Router Advertisement header and addressing.
+
+Checks RFC4861-RA-1, RA-3 to RA-7, RA-13, ADV-4, RVAL-11 and ADV-21 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement-header-and-addressing;
+the program steps below map onto its expected observations. The guards are observations 4 and
+5, and record the sources of the solicitations for observation 3; step 1 is observations 1, 2,
+3 and, last, 6.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static std::vector<Ipv6Address> rsSources;
+
+Define_ProtocolTestProgram()
+{
+    rsSources.clear();
+    return ProtocolTest("rfc4861_ra_header")
+        // Expected observation 5: no Router Advertisement leaves A or B. The same filters record the sources of their solicitations.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isRs(p)) rsSources.push_back(srcOf(p)); return isRa(p); })
+                  .describe("a Router Advertisement of A (RFC4861-ADV-21)")
+                  .within(30.0)))
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isRs(p)) rsSources.push_back(srcOf(p)); return isRa(p); })
+                  .describe("a Router Advertisement of B (RFC4861-ADV-21)")
+                  .within(30.0)))
+        // Expected observation 4: every Router Advertisement of R leaves from its link-local address.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && srcOf(p) != linkLocalOf("router", "eth0"); })
+                  .describe("a Router Advertisement of R from another address than its link-local address (RFC4861-RA-3)")
+                  .within(30.0)))
+        // Expected observations 1, 2, 3 and 6: the first Router Advertisement of R, its addresses, and last its header fields.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(srcOf(p) == linkLocalOf("router", "eth0"), "the advertisement of R came from " + srcOf(p).str() + ", not from its link-local address (RFC4861-RA-3, RVAL-11)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == Ipv6Address::ALL_NODES_2 || std::find(rsSources.begin(), rsSources.end(), destOf(p)) != rsSources.end(), "the advertisement of R went to " + destOf(p).str() + ", neither ff02::1 nor the source of a solicitation (RFC4861-RA-4)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(hopLimitOf(p) == 255 && ndOf(p)->getCode() == 0 && ndReservedZero(p), "the advertisement of R has " + ndHeader(p) + " (RFC4861-RA-5, RA-7, RA-13)"); })
+                  .describe("the first Router Advertisement of R (RFC4861-RA-1, RA-6, ADV-4)")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_ra_header compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 32s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc4861_ra_header: PASS

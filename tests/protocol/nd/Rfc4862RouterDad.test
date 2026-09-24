@@ -1,0 +1,121 @@
+%description:
+
+Duplicate Address Detection of a router.
+
+Checks RFC4862-DAD-1 and LL-1 from
+doc/project/evidence/standard/rfc4862/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/autoconfiguration.md#duplicate-address-detection-of-a-router;
+the program steps below map onto its expected observations. The first guard is observation 3,
+the second observation 2, and step 1 observation 1.
+
+Defect: the configurator assigns the global address of a router as not tentative,
+"assignAddress(interfaceInfo->globalAddress, false, ...)"
+(src/inet/networklayer/configurator/ipv6/Ipv6NetworkConfigurator.cc:172), so the router never
+tests it. RFC 4862 section 5: "In addition, routers perform Duplicate Address Detection on all
+addresses prior to assigning them to an interface." Observations 1 and 3 hold; observation 2
+fails. This test FAILS, and the failure is deliberately NOT declared expected: the model has
+the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static simtime_t llNsAt;
+
+Define_ProtocolTestProgram()
+{
+    llNsAt = -1;
+    return ProtocolTest("rfc4862_router_dad")
+        // Expected observation 3: no Router Advertisement of R before 1 s after its solicitation for its link-local address.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && (llNsAt < 0 || c.event.time < llNsAt + 1); })
+                  .describe("a Router Advertisement of R before its solicitation for its link-local address, or less than 1 s after it (RFC4862-DAD-1)")
+                  .within(20.0)))
+        // Expected observation 2: a solicitation of R from the unspecified address for its global address on L1.
+        .meanwhile(atLeastTimes(1, (on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isNs(p) && srcOf(p).isUnspecified() && nsOf(p)->getTargetAddress() == R_GLOBAL; })
+                  .describe("a Neighbor Solicitation of R from the unspecified address for 2001:db8:1::1 (RFC4862-DAD-1)")
+                  .within(20.0))))
+        // Expected observation 1: a solicitation of R from the unspecified address for its link-local address.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isNs(p) && srcOf(p).isUnspecified() && nsOf(p)->getTargetAddress() == linkLocalOf("router", "eth0"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; llNsAt = c.event.time; return true; })
+                  .describe("a Neighbor Solicitation of R from the unspecified address for its link-local address (RFC4862-DAD-1, LL-1)")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4862_router_dad compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc4862_router_dad: PASS

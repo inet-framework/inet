@@ -1,0 +1,108 @@
+%description:
+
+Hop limit without a router.
+
+Checks RFC4861-HOST-1 and HOST-4 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/parameters.md#hop-limit-without-a-router;
+the program steps below map onto its expected observations. Step 1 is observations 1 and 2.
+
+Defect: the hop limit of a host is the constant IPv6_DEFAULT_ADVCURHOPLIMIT, 30
+(src/inet/networklayer/ipv6/Ipv6.cc:964, src/inet/networklayer/ipv6/Ipv6InterfaceData.h:31),
+not the value of the Assigned Numbers registry, 64. RFC 4861 section 6.3.2, CurHopLimit:
+"Default: The value specified in the "Assigned Numbers" [ASSIGNED] that was in effect at the
+time of implementation." Observation 1 holds; observation 2 fails with hop limit 30. This test
+FAILS, and the failure is deliberately NOT declared expected: a value that the model sets wrong
+is a defect, not a missing feature. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_hop_limit_no_router")
+        // Expected observations 1 and 2: the echo request of A to the link-local address of B has hop limit 64.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEchoRequest(p) && destOf(p) == B_LL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(hopLimitOf(p) == 64, "the echo request of A has hop limit " + num(hopLimitOf(p)) + ", not 64 (RFC4861-HOST-1, HOST-4)"); })
+                  .describe("the echo request of A to the link-local address of B")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_hop_limit_no_router compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.StandardHost6;
+
+// the link without a router: host A and host B on one Ethernet (through the switch sw).
+network NdNoRouter
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdNoRouter
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "fe80::800:ff:fe00:b"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 1
+
+%contains: stdout
+PROTOCOLTEST rfc4861_hop_limit_no_router: PASS

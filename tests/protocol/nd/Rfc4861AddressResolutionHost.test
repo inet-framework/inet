@@ -1,0 +1,133 @@
+%description:
+
+Address resolution of a host.
+
+Checks RFC4861-AR-8 to AR-10, AR-12, AR-14, AR-15, AR-18, AR-24, AR-31, AR-32, AR-34, AR-41,
+AR-44, NS-1, NS-2, NS-5, NS-12, NS-15, NA-1, NA-4, NA-21 and NA-24 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/address-resolution.md#address-resolution-of-a-host;
+the program steps below map onto its expected observations. Step 1 is observations 1 to 3, the
+guard and step 2 observations 4 to 6, and step 3 observation 7 and, last, 8.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static Ipv6Address nsSource;
+static bool naSeen;
+
+Define_ProtocolTestProgram()
+{
+    naSeen = false;
+    return ProtocolTest("rfc4861_address_resolution_host")
+        // Expected observations 1 to 3: a Neighbor Solicitation of A for the global address of B, to its solicited-node address, with the link-layer address of A.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isNs(p) && nsOf(p)->getTargetAddress() == B_GLOBAL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == solicitedNodeOf(B_GLOBAL), "the solicitation of A went to " + destOf(p).str() + ", not to the solicited-node address of B (RFC4861-AR-9, NS-2, NS-5)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(linkLayerOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION) == macOf("hostA", "eth0"), "the solicitation of A carries the Source Link-Layer Address " + linkLayerOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION).str() + ", not the address of A (RFC4861-AR-12, NS-15)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; nsSource = srcOf(p); return true; })
+                  .describe("a Neighbor Solicitation of A for the global address of B (RFC4861-AR-8, NS-1, NS-12)")
+                  .within(20.0))
+        // Expected observation 4, second half: B sends no solicitation for the source of A before its answer.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return !naSeen && isNs(p) && nsOf(p)->getTargetAddress() == nsSource; })
+                  .describe("a Neighbor Solicitation of B for the source of the solicitation of A, before the answer of B (RFC4861-AR-24, AR-41)")
+                  .within(5.0)))
+        // Expected observations 4 to 6: the Neighbor Advertisement of B to the source of the solicitation, with its target and its link-layer address.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isNa(p)) return false; naSeen = true; return true; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == nsSource, "the advertisement of B went to " + destOf(p).str() + ", not to " + nsSource.str() + " (RFC4861-AR-31, NA-1, NA-4)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(naOf(p)->getTargetAddress() == B_GLOBAL, "the advertisement of B has target " + naOf(p)->getTargetAddress().str() + " (RFC4861-AR-32, NA-21)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(linkLayerOption(p, IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION) == macOf("hostB", "eth0"), "the advertisement of B carries the Target Link-Layer Address " + linkLayerOption(p, IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION).str() + ", not the address of B (RFC4861-AR-34, NA-24)"); })
+                  .describe("the first Neighbor Advertisement of B after the solicitation")
+                  .within(1.0))
+        // Expected observations 7 and 8: the echo request of A to B goes to the link-layer address of B; the solicitation came from its source.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEchoRequest(p) && destOf(p) == B_GLOBAL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ethDest(p) == macOf("hostB", "eth0"), "the echo request of A to B went to " + ethDest(p).str() + ", not to B (RFC4861-AR-14, AR-15, AR-18, AR-44)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(nsSource == srcOf(p), "the solicitation of A came from " + nsSource.str() + ", not from " + srcOf(p).str() + ", the source of the echo request (RFC4861-AR-10)"); })
+                  .describe("the echo request of A to B")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_address_resolution_host compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:1::800:ff:fe00:b"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 1
+
+%contains: stdout
+PROTOCOLTEST rfc4861_address_resolution_host: PASS

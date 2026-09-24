@@ -1,0 +1,134 @@
+%description:
+
+Router Advertisement in answer to a solicitation.
+
+Checks RFC4861-ADV-29, RS-1, ADV-32 to ADV-35 and ADV-19 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement-in-answer-to-a-solicitation;
+the program steps below map onto its expected observations. The guard is observation 4; steps 1
+and 2 are observations 1 to 3.
+
+Defect: the router answers a solicitation only when the answer comes before nextScheduledRATime
+(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1210), and sendSolicitedRa
+(Ipv6NeighbourDiscovery.cc:1723) neither moves that time forward nor restarts the timer. After
+the answer to A, nextScheduledRATime stays in the past, and the router drops the answer to
+every later solicitation until its first periodic advertisement. RFC 4861 section 6.2.6: "In
+addition to sending periodic, unsolicited advertisements, a router sends advertisements in
+response to valid solicitations received on an advertising interface." Observation 1 holds;
+observation 2 fails; observation 3 has no verdict; observation 4 held while the test ran. This
+test FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism,
+and the mechanism does the wrong thing, which is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static simtime_t lastMulticastRa;
+static Ipv6Address rsSource;
+
+Define_ProtocolTestProgram()
+{
+    lastMulticastRa = -1;
+    return ProtocolTest("rfc4861_ra_solicited")
+        // Expected observation 4: no two multicast Router Advertisements of R less than 3 s apart.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isRa(p) || destOf(p) != Ipv6Address::ALL_NODES_2) return false; bool close = lastMulticastRa >= 0 && c.event.time - lastMulticastRa < 3; lastMulticastRa = c.event.time; return close; })
+                  .describe("a multicast Router Advertisement of R less than 3 s after the one before it (RFC4861-ADV-33)")
+                  .within(30.0)))
+        // Expected observation 1: after 10 s, a Router Solicitation of B.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 10 && isRs(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; rsSource = srcOf(p); return true; })
+                  .describe("after 10 s, a Router Solicitation of B")
+                  .within(30.0))
+        // Expected observations 2 and 3: within 3.5 s, a Router Advertisement of R to ff02::1 or to B, with all its options.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && (destOf(p) == Ipv6Address::ALL_NODES_2 || destOf(p) == rsSource); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(hasOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION) && prefixInfoOf(p, PREFIX1, 64) != nullptr, std::string("the answer of R lacks the Source Link-Layer Address option or the Prefix Information option (RFC4861-ADV-19)")); })
+                  .describe("a Router Advertisement of R to ff02::1 or to the source of the solicitation of B (RFC4861-ADV-29, RS-1, ADV-32, ADV-34, ADV-35)")
+                  .within(3.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_ra_solicited compiled\n";
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='10'><startup module='hostB'/></at></scenario>");
+            @display("p=50,150");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 32s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+**.hasStatus = true
+
+*.hostB.status.initialStatus = "down"
+
+%contains: stdout
+PROTOCOLTEST rfc4861_ra_solicited: PASS

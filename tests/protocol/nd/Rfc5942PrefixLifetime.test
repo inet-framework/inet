@@ -1,0 +1,124 @@
+%description:
+
+Prefix after its valid lifetime.
+
+Checks RFC5942-ONLINK-3 and RFC4861-HOST-36, OPT-24, HOST-34 from
+doc/project/evidence/standard/rfc5942/catalog.md and
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/on-link.md#prefix-after-its-valid-lifetime;
+the program steps below map onto its expected observations. The two guards are observations 2
+and 3; step 1 is observation 1.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5942_prefix_lifetime")
+        // Expected observation 2: after 50 s, no echo request of A to B goes to the link-layer address of B.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && isEchoRequest(p) && destOf(p) == B_GLOBAL && ethDest(p) == macOf("hostB", "eth0"); })
+                  .describe("after 50 s, an echo request of A to B sent to the link-layer address of B (RFC5942-ONLINK-3, RFC4861-HOST-36, OPT-24)")
+                  .within(80.0)))
+        // Expected observation 3: after 50 s, no Neighbor Solicitation of A for the global address of B.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && isNs(p) && nsOf(p)->getTargetAddress() == B_GLOBAL; })
+                  .describe("after 50 s, a Neighbor Solicitation of A for the global address of B (RFC5942-ONLINK-3)")
+                  .within(80.0)))
+        // Expected observation 1: before 15 s, an echo request of A to B, sent to the link-layer address of B.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time < 15 && isEchoRequest(p) && destOf(p) == B_GLOBAL && ethDest(p) == macOf("hostB", "eth0"); })
+                  .describe("before 15 s, an echo request of A to B sent to the link-layer address of B")
+                  .within(15.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5942_prefix_lifetime compiled\n";
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1' advValidLifetime='30' advPreferredLifetime='20'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='15'><crash module='router'/></at></scenario>");
+            @display("p=50,150");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 85s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+**.hasStatus = true
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:1::800:ff:fe00:b"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 71
+*.hostA.app[0].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST rfc5942_prefix_lifetime: PASS

@@ -1,0 +1,112 @@
+%description:
+
+Router Advertisement fields: the MTU option with the default AdvLinkMTU.
+
+Checks RFC4861-ADV-11, OPT-45, OPT-46 and OPT-47 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement-fields;
+the program steps below map onto its expected observations. Step 1 is observations 1 and 4; the
+other observations of the check are in Rfc4861RaFields.test and Rfc4861RaCurHopLimit.test.
+
+AdvLinkMTU keeps its default, zero in RFC 4861: an MTU option is then not expected at all, and
+an option that is present must at least hold the MTU of the link.
+
+Defect: the default of AdvLinkMTU is 1280
+(src/inet/networklayer/ipv6/Ipv6RoutingTable.ned:101), so a router that keeps the default sends
+an MTU option of 1280 on a link with MTU 1500. RFC 4861 section 6.2.1: "AdvLinkMTU The value to
+be placed in MTU options sent by the router. A value of zero indicates that no MTU options are
+sent." and "Default: 0". Observation 1 holds; observation 4 fails. This test FAILS, and the
+failure is deliberately NOT declared expected: a value that the model sets wrong is a defect,
+not a missing feature. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_ra_mtu_option")
+        // Expected observations 1 and 4: the first Router Advertisement of R, and its MTU option if any.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto o = ndOptionBytes(p, IPv6ND_MTU); if (o.empty()) return true; uint32_t mtu = o.size() == 8 ? ((uint32_t)o[4] << 24 | (uint32_t)o[5] << 16 | (uint32_t)o[6] << 8 | o[7]) : 0; return require(o.size() == 8 && o[1] == 1 && o[2] == 0 && o[3] == 0 && mtu == 1500, "the advertisement of R carries an MTU option of length " + num(o[1]) + ", Reserved " + num(o[2] << 8 | o[3]) + " and MTU " + num(mtu) + ", where the default AdvLinkMTU of zero sends none and the link has MTU 1500 (RFC4861-ADV-11, OPT-45, OPT-46, OPT-47)"); })
+                  .describe("the first Router Advertisement of R")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_ra_mtu_option compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 32s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc4861_ra_mtu_option: PASS

@@ -1,0 +1,132 @@
+%description:
+
+Duplicate link-local address.
+
+Checks RFC4862-DAD-25, DAD-27, DAD-29 and RFC4861-AR-38, NA-14 from
+doc/project/evidence/standard/rfc4862/catalog.md and
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/autoconfiguration.md#duplicate-link-local-address;
+the program steps below map onto its expected observations. Step 1 is observation 1, the two
+guards observations 3 and 4, and step 2 observation 2 and, last, 5.
+
+A and B share the link-layer address, so the observations tell the two hosts apart by the
+module that sends the frame.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static simtime_t naAt;
+
+Define_ProtocolTestProgram()
+{
+    naAt = -1;
+    return ProtocolTest("rfc4862_duplicate_link_local")
+        // Expected observation 1: after 10 s, a solicitation of B from the unspecified address for the shared link-local address.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 10 && isNs(p) && srcOf(p).isUnspecified() && nsOf(p)->getTargetAddress() == A_LL; })
+                  .describe("a Neighbor Solicitation of B from the unspecified address for fe80::800:ff:fe00:a")
+                  .within(20.0))
+        // Expected observation 3: after the answer of A, no packet of B from the shared link-local address.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return naAt >= 0 && c.event.time > naAt && srcOf(p) == A_LL; })
+                  .describe("a packet of B from the shared link-local address after the answer of A (RFC4862-DAD-25, DAD-27)")
+                  .within(15.0)))
+        // Expected observation 4: after the answer of A, no IPv6 packet of B at all.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return naAt >= 0 && c.event.time > naAt && ipv6Of(p) != nullptr; })
+                  .describe("an IPv6 packet of B after the answer of A (RFC4862-DAD-29)")
+                  .within(15.0)))
+        // Expected observations 2 and 5: the Neighbor Advertisement of A for the shared address, to ff02::1, and last its Solicited flag clear.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isNa(p) && naOf(p)->getTargetAddress() == A_LL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; naAt = c.event.time; return true; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == Ipv6Address::ALL_NODES_2, "the advertisement of A went to " + destOf(p).str() + ", not to ff02::1 (RFC4861-AR-38)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(!naOf(p)->getSolicitedFlag(), std::string("the advertisement of A to ff02::1 has the Solicited flag set (RFC4861-AR-38, NA-14)")); })
+                  .describe("the Neighbor Advertisement of A for fe80::800:ff:fe00:a")
+                  .within(2.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4862_duplicate_link_local compiled\n";
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link with a duplicate: router R, host A and host B on one Ethernet (through the switch sw); host B has the link-layer address of host A.
+network NdDuplicate
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='10'><startup module='hostB'/></at></scenario>");
+            @display("p=50,150");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdDuplicate
+sim-time-limit = 32s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0A"
+**.hasStatus = true
+
+*.hostB.status.initialStatus = "down"
+
+%contains: stdout
+PROTOCOLTEST rfc4862_duplicate_link_local: PASS

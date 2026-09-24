@@ -1,0 +1,112 @@
+%description:
+
+The default router.
+
+Checks RFC4861-HOST-12, HOST-39 and RA-15 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#the-default-router;
+the program steps below map onto its expected observations. Steps 1 and 2 are observations 1
+and 2.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_default_router")
+        // Expected observation 1: a Router Advertisement of R on L1 with a non-zero Router Lifetime.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return raOf(p) != nullptr && raOf(p)->getRouterLifetime() > 0; })
+                  .describe("a Router Advertisement of R on L1 with a non-zero Router Lifetime (RFC4861-RA-15)")
+                  .within(20.0))
+        // Expected observation 2: the echo request of A to C goes to the link-layer address of R.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isEchoRequest(p) && destOf(p) == C_GLOBAL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ethDest(p) == macOf("router", "eth0"), "the echo request of A to C went to " + ethDest(p).str() + ", not to R (RFC4861-HOST-12, HOST-39)"); })
+                  .describe("the echo request of A to C")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_default_router compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the path: host A on link L1 (hostA.eth0, router.eth0), router R, host C on link L2 (router.eth1, hostC.eth0).
+network NdPath
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='router' names='eth1' address='2001:db8:2::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "<route hosts='router' destination='2001:db8:2::' prefixLength='64' interface='eth1'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        hostA: StandardHost6 { @display("p=150,200"); }
+        router: Router6 { @display("p=350,200"); }
+        hostC: StandardHost6 { @display("p=550,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdPath
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.router.eth[1].address = "0A-00-00-00-00-02"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostC.eth[0].address = "0A-00-00-00-00-0C"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:2::800:ff:fe00:c"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 1
+
+%contains: stdout
+PROTOCOLTEST rfc4861_default_router: PASS

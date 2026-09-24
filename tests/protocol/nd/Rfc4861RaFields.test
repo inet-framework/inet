@@ -1,0 +1,129 @@
+%description:
+
+Router Advertisement fields: the link-layer address, the flags, the lifetime and the two
+timers.
+
+Checks RFC4861-RA-23, OPT-8, OPT-9, ADV-5, ADV-6, ADV-8, ADV-9, RA-19, RA-21, RCFG-7, RCFG-8,
+RCFG-10, RCFG-11 and RCFG-13 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement-fields;
+the program steps below map onto its expected observations. Step 1 is observations 1, 2, 3 and
+5. Observations 4 and 6 are in Rfc4861RaMtuOption.test and Rfc4861RaCurHopLimit.test, so that a
+wrong default does not hide these fields.
+
+The router sets AdvReachableTime and AdvRetransTimer through NdRouterVariables of NdChecks.h,
+because the model has no parameter for them.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_ra_fields")
+        // Expected observations 1, 2, 3 and 5: the first Router Advertisement of R.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(hasOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION) && optionOf(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)->getOptionLength() == 1 && linkLayerOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION) == macOf("router", "eth0"), "the advertisement of R carries " + (hasOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION) ? "the Source Link-Layer Address option " + linkLayerOption(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION).str() + " of length " + num(optionOf(p, IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)->getOptionLength()) : std::string("no Source Link-Layer Address option")) + ", not the address of R with length 1 (RFC4861-RA-23, OPT-8, OPT-9)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(!raOf(p)->getManagedAddrConfFlag() && !raOf(p)->getOtherStatefulConfFlag(), "the advertisement of R has M " + num(raOf(p)->getManagedAddrConfFlag()) + " and O " + num(raOf(p)->getOtherStatefulConfFlag()) + ", not both clear (RFC4861-ADV-6, RCFG-7, RCFG-8)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(raOf(p)->getRouterLifetime() == 1800, "the advertisement of R has Router Lifetime " + num(raOf(p)->getRouterLifetime()) + ", not 1800 (RFC4861-ADV-5, RCFG-13)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(raOf(p)->getReachableTime() == 30000 && raOf(p)->getRetransTimer() == 1000, "the advertisement of R has Reachable Time " + num(raOf(p)->getReachableTime()) + " and Retrans Timer " + num(raOf(p)->getRetransTimer()) + ", not 30000 and 1000 milliseconds (RFC4861-ADV-8, ADV-9, RA-19, RA-21, RCFG-10, RCFG-11)"); })
+                  .describe("the first Router Advertisement of R")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_ra_fields compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// The system management of the router for AdvReachableTime and AdvRetransTimer, which the model
+// has no parameter for (tests/protocol/nd/NdChecks.h).
+simple NdRouterVariables
+{
+    parameters:
+        @class(::inet::protocoltest::NdRouterVariables);
+        string node;
+        string interfaceName;
+        int advReachableTime = default(-1);
+        int advRetransTimer = default(-1);
+}
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+        management: NdRouterVariables {
+            node = "router";
+            interfaceName = "eth0";
+            advReachableTime = 30000;
+            advRetransTimer = 1000;
+            @display("p=50,250");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 32s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc4861_ra_fields: PASS

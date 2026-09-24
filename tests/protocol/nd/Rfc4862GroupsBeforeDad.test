@@ -1,0 +1,124 @@
+%description:
+
+Groups joined before Duplicate Address Detection.
+
+Checks RFC4862-DAD-11, DAD-16 and RFC4861-AR-4, AR-6 from
+doc/project/evidence/standard/rfc4862/catalog.md and
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection;
+the program steps below map onto its expected observations. The guard records the MLD Reports
+of A; step 1 is observations 1 and 2.
+
+MLD is off by default in the node, hasMld = false
+(src/inet/networklayer/ipv6/Ipv6NetworkLayer.ned:72). The check assumes that every node runs
+MLD, as RFC 4861 section 7.2.1 does, so the test turns it on.
+
+Defect: a node accepts packets to a solicited-node address by matching it against its addresses
+(src/inet/networklayer/ipv6/Ipv6InterfaceData.cc:375), but never joins the group, so MLD never
+reports it; the router, which joins ff02::2 with joinMulticastGroup, reports that group. RFC
+4862 section 5.4.2: "Before sending a Neighbor Solicitation, an interface MUST join the all-
+nodes multicast address and the solicited-node multicast address of the tentative address."
+Observation 1 holds; observation 2 fails. This test FAILS, and the failure is deliberately NOT
+declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
+is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static bool reportSeen;
+
+Define_ProtocolTestProgram()
+{
+    reportSeen = false;
+    return ProtocolTest("rfc4862_groups_before_dad")
+        // Records the MLD Reports of A that name the solicited-node address of its link-local address.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isMldReportFor(p, solicitedNodeOf(A_LL))) reportSeen = true; return false; })
+                  .describe("(a recorder of the MLD Reports of A; it never matches)")
+                  .within(20.0)))
+        // Expected observations 1 and 2: the solicitation of A for its link-local address, after an MLD Report for its solicited-node address.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isNs(p) && srcOf(p).isUnspecified() && nsOf(p)->getTargetAddress() == A_LL; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(reportSeen, "no MLD Report of A named " + solicitedNodeOf(A_LL).str() + " before its solicitation for its link-local address (RFC4862-DAD-11, RFC4861-AR-4, AR-6)"); })
+                  .describe("a Neighbor Solicitation of A from the unspecified address for its link-local address")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4862_groups_before_dad compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+**.ipv6.hasMld = true
+
+%contains: stdout
+PROTOCOLTEST rfc4862_groups_before_dad: PASS

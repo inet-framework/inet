@@ -1,0 +1,128 @@
+%description:
+
+MTU from the router.
+
+Checks RFC4861-HOST-24, HOST-3 and OPT-49 from
+doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/parameters.md#mtu-from-the-router;
+the program steps below map onto its expected observations. Step 1 is observation 1; the guard
+and step 2 are observation 2.
+
+Defect: the host copies the MTU option into LinkMTU
+(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1536), but Ipv6::fragmentPostRouting
+fragments to the MTU of the interface, "int mtu = ie->getMtu();"
+(src/inet/networklayer/ipv6/Ipv6.cc:1059), and never reads LinkMTU. RFC 4861 section 6.3.4: "If
+the MTU option is present, hosts SHOULD copy the option's value into LinkMTU [...]".
+Observation 1 holds; observation 2 fails: the echo request leaves whole, 1500 octets. This test
+FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism, and
+the mechanism does the wrong thing, which is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_mtu_from_router")
+        // Expected observation 1: a Router Advertisement of R with an MTU option of 1400.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; auto o = ndOptionBytes(p, IPv6ND_MTU); uint32_t mtu = o.size() == 8 ? ((uint32_t)o[4] << 24 | (uint32_t)o[5] << 16 | (uint32_t)o[6] << 8 | o[7]) : 0; return require(mtu == 1400, "the advertisement of R carries " + (o.empty() ? std::string("no MTU option") : "MTU " + num(mtu)) + ", not 1400: the stimulus is missing"); })
+                  .describe("a Router Advertisement of R")
+                  .within(20.0))
+        // Expected observation 2: no IPv6 packet of A is larger than 1400 octets ...
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return ipv6LengthOf(p) > 1400; })
+                  .describe("an IPv6 packet of A larger than 1400 octets (RFC4861-HOST-24, HOST-3, OPT-49)")
+                  .within(18.0)))
+        // ... and the echo request of A to B leaves in fragments.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isFragmented(p) && destOf(p) == B_GLOBAL; })
+                  .describe("a fragment of the echo request of A to B (RFC4861-HOST-24)")
+                  .within(18.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_mtu_from_router compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// the link: router R, host A and host B on one Ethernet (router.eth0, hostA.eth0, hostB.eth0 through the switch sw).
+network NdLink
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=150,100"); }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdLink
+sim-time-limit = 22s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+*.router.ipv6.routingTable.advLinkMtu = 1400
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:1::800:ff:fe00:b"
+*.hostA.app[0].startTime = 10s
+*.hostA.app[0].count = 1
+*.hostA.app[0].packetSize = 1452B
+
+%contains: stdout
+PROTOCOLTEST rfc4861_mtu_from_router: PASS

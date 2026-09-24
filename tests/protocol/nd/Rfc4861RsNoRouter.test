@@ -1,0 +1,114 @@
+%description:
+
+Router Solicitations on a link without a router.
+
+Checks RFC4861-HOST-42, HOST-52 and RFC4862-GLOB-4 from
+doc/project/evidence/standard/rfc4861/catalog.md and
+doc/project/evidence/standard/rfc4862/catalog.md. The English procedure is in
+doc/project/evidence/protocol/nd/checks/router-discovery.md#router-solicitations-on-a-link-without-a-router;
+the program steps below map onto its expected observations. Steps 1 to 4 are observations 1 to
+4.
+
+%includes:
+#include "ProtocolTest.h"
+#include "NdChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address PREFIX1("2001:db8:1::");
+static const Ipv6Address R_GLOBAL("2001:db8:1::1");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+static const Ipv6Address B_LL("fe80::800:ff:fe00:b");
+static const Ipv6Address A_GLOBAL("2001:db8:1::800:ff:fe00:a");
+static const Ipv6Address B_GLOBAL("2001:db8:1::800:ff:fe00:b");
+static const Ipv6Address C_GLOBAL("2001:db8:2::800:ff:fe00:c");
+static const Ipv6Address NOBODY("2001:db8:1::99");
+static const Ipv6Address NOBODY_B("2001:db8:1::b");
+
+static MacAddress ethDest(const Packet *p) { auto e = ethOf(p); return e != nullptr ? e->getDest() : MacAddress::UNSPECIFIED_ADDRESS; }
+static std::string num(long v) { return std::to_string(v); }
+
+// The header fields of an ND message, for a message that reports them.
+static std::string ndHeader(const Packet *p)
+{
+    return "hop limit " + num(hopLimitOf(p)) + ", code " + num(ndOf(p)->getCode()) + ", Reserved field "
+           + (ndReservedZero(p) ? "zero" : "not zero") + ", source " + srcOf(p).str();
+}
+static simtime_t prevAt;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4861_rs_no_router")
+        // Expected observation 1: a first Router Solicitation of A.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRs(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
+                  .describe("a first Router Solicitation of A")
+                  .within(20.0))
+        // Expected observation 2: a second one, at least 4 s after the first.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRs(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t gap = c.event.time - prevAt; prevAt = c.event.time; return require(gap >= 4, "the second solicitation of A came " + gap.str() + " s after the first, less than 4 s (RFC4861-HOST-42)"); })
+                  .describe("a second Router Solicitation of A")
+                  .within(20.0))
+        // Expected observation 3: a third one, at least 4 s after the second.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRs(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t gap = c.event.time - prevAt; prevAt = c.event.time; return require(gap >= 4, "the third solicitation of A came " + gap.str() + " s after the second, less than 4 s (RFC4861-HOST-42)"); })
+                  .describe("a third Router Solicitation of A")
+                  .within(20.0))
+        // Expected observation 4: no fourth one in the 20 s after the third.
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRs(p); })
+                  .describe("a fourth Router Solicitation of A (RFC4861-HOST-42, HOST-52, RFC4862-GLOB-4)")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4861_rs_no_router compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.StandardHost6;
+
+// the link without a router: host A and host B on one Ethernet (through the switch sw).
+network NdNoRouter
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // the routers only: the hosts configure themselves from the Router Advertisements,
+            // and learn their routers and on-link prefixes from them, so the configurator adds
+            // no route of its own; the routers get their routes from the <route> elements
+            assignAddressesToHosts = false;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        sw: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost6 { @display("p=250,250"); }
+        hostB: StandardHost6 { @display("p=450,250"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = NdNoRouter
+sim-time-limit = 70s
+seed-set = 0
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+
+%contains: stdout
+PROTOCOLTEST rfc4861_rs_no_router: PASS
