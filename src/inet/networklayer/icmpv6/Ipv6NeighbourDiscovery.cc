@@ -1123,6 +1123,10 @@ void Ipv6NeighbourDiscovery::startRouterDiscovery(NetworkInterface *ie)
     // RTR_SOLICITATION_INTERVAL seconds.  This is invoked after DAD completes
     // (from makeTentativeAddressPermanent) with a random initial delay, and on
     // link-layer (re)association when detectL2Movement is set.
+    // fetchRdEntry(), cancelRouterDiscovery() and processRdTimeout() find the
+    // entry by interface, so a second start restarts the process instead of
+    // adding a second entry for the same interface.
+    cancelRouterDiscovery(ie);
     RdEntry *rdEntry = new RdEntry();
     rdEntry->interfaceId = ie->getInterfaceId();
     rdEntry->numRSSent = 0;
