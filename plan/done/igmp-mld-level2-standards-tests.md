@@ -69,7 +69,8 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
    is reached; the matrix holds 2 `confirmed`, 15 `partial`, 2 `defect` and 1 `out of claim`;
    58 statements are owed. IGMP steps 7 to 9 were brought up to the same run (commit
    `e7e95ca116`): 42 tests, 24 PASS, 18 FAIL, one declared.
-10. [ ] Gates, then move this plan to `plan/done/`.
+10. [x] Gates, then move this plan to `plan/done/`. The four gates pass on the 17 commits over
+    `origin/master` (links, seals, commits, classification).
 
 ## The catalog drafts
 
