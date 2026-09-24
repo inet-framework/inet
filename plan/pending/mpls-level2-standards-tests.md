@@ -38,7 +38,7 @@ The pass delivers every output of the section "What a pass delivers" of the guid
    closing list.
 6. [x] **Step 6, tests** — `tests/protocol/mpls/Rfc30*.test`, `Rfc3443*.test`, and the helper
    header `MplsChecks.h`.
-7. [ ] **Steps 7 to 9, and the ledger** — `model/mpls/results.md`, `conformance.md` part 2,
+7. [x] **Steps 7 to 9, and the ledger** — `model/mpls/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`, from one fresh run.
 8. [ ] **Notes** — `model/mpls/notes.md`, with every gap by number in the follow-ups.
 9. [ ] Gates, then move this plan to `plan/done/`.
@@ -102,3 +102,15 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
 - **The first run:** 5 PASS (the label stack entry, two entries, label switching, penultimate hop
   popping, the PPP encapsulation), 6 expected FAIL (the two NULL labels, the three fragmentation
   tests, the MPLS Control Protocol), 10 FAIL (nine TTL tests and the Ethernet test).
+- **The fresh run at `daac3593fb`** gives 21 tests: 5 PASS, 10 FAIL, 6 FAIL declared expected.
+  Seven gaps: four defects (the TTL field is 0; the LSP does not count its hops in the IPv4
+  TTL; a TTL that reaches zero goes on; an MPLS router on an Ethernet link stops the run) and
+  three unimplemented features (the reserved labels; the MTU check and fragmentation; the MPLS
+  Control Protocol). An order problem of the first run is repaired in the amended test commit:
+  the guard of observation 3 of `Rfc3032TooBigFragments` failed before observation 2 matched.
+- **The claim of the matrix.** The model names no document; the matrix reads "the MPLS
+  protocol" (`Mpls.ned:14`) as a claim of RFC 3031, RFC 3032 and the field rename of RFC 5462,
+  not of the Pipe and Short Pipe Models of RFC 3443. Result: 5 `confirmed`, 3 `partial`, 2
+  `defect`, 3 `unverified`, 1 `out of claim`. The ledger: 74 selected, 25 covered, 2 owed (the
+  Router Alert label, which `MplsPacket.msg:16` names), 23 later, 33 no check. Level 2 is
+  reached for the normal path.
