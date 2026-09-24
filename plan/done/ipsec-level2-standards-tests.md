@@ -1,6 +1,6 @@
 # IPsec level 2 — catalogs, feature map, checks and tests for RFC 4301, RFC 4302, RFC 4303
 
-**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-ipsec-level2`, from
+**Status:** done. Started and finished 2026-09-24 on `topic/standards-tests-ipsec-level2`, from
 `origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-ipsec-level2`.
 
 The fourth pass of wave 1, after RIP, ND, and IGMP with MLD. It follows
@@ -54,9 +54,11 @@ it.
    of claim`.
 8. [x] **Notes** — `model/ipsec/notes.md`: the model quirks, the scenario and tooling traps, and
    the follow-ups with every gap by number (1 to 12).
-9. [ ] Gates, then move this plan to `plan/done/`.
+9. [x] Gates, then move this plan to `plan/done/`. The four gates pass on the 8 commits over
+   `origin/master` (links, seals, commits, classification).
 
-Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `README.md`.
+Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `README.md` that
+says what each one does.
 
 ## Decisions and facts found on the way
 
