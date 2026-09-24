@@ -17,13 +17,21 @@ The relationships come from the RFC-editor metadata
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
+The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
+claims of the model. The level 2 pass of 2026-09-24 writes the catalogs of the three documents,
+the feature map, the checks and the tests of the normal path.
+
+The level 2 pass added four parts to the sections that the level 1 pass listed, because the
+normal path needs them: the Security Association and its two modes (RFC 4301 §4 to §4.3, with the
+rule that a host supports both modes, `rfc4301.txt:873-875`), the introduction to the databases
+(§4.4), the location of each header in a packet (§3.1 of RFC 4302 and RFC 4303, with the
+algorithms of §3.2), and the conformance sections (RFC 4301 §10, RFC 4302 §5, RFC 4303 §5), which
+say what an implementation must support.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
-| level 2, Core | RFC 4301 §3.1 to §3.2, §4.4.1, §4.4.2, §5.1, §5.2; RFC 4302 §2, §3.3, §3.4; RFC 4303 §2, §3.3, §3.4 | the normal path: what a Security Policy and a Security Association are, how the SPD and the SAD select one, how AH and ESP each build their header and trailer on egress, and how each is verified and removed on ingress |
+| level 2, Core | RFC 4301 §3.1 to §3.2, §4 to §4.4.2, §5.1, §5.2, §10; RFC 4302 §2 to §3.4, §5; RFC 4303 §2 to §3.4, §5 | the normal path: what an SA is and its two modes, what a Security Policy and a Security Association are, how the SPD and the SAD select one, how AH and ESP each build their header and trailer on egress, and how each is verified and removed on ingress |
 | level 3, Edge | nothing new | RFC 4301 §5.1.1 (a packet that must be discarded), RFC 4302 §3.4.3 to §3.4.4 and RFC 4303 §3.4.3 to §3.4.4 (a sequence number or an Integrity Check Value that fails verification) are already inside the base documents above |
 | level 4, Dynamics | nothing new | RFC 4302 §3.4.3 and Appendix B, and RFC 4303 §3.4.3, hold the anti-replay window, the one control loop of the family |
 | level 5, Complete | RFC 8221, RFC 2405, RFC 2451, RFC 3602, RFC 4106, RFC 4309, RFC 7634, RFC 4543, RFC 6040, RFC 7619 | the cryptographic algorithms themselves, tunnel-mode ECN-field construction (a single field of RFC 4301 §5.1.2), and the IKEv2 authentication method that establishes a Security Association |
@@ -81,9 +89,9 @@ The set that a level 2 pass tests against:
 
 | Document | Version | Catalog file |
 | --- | --- | --- |
-| RFC 4301 | December 2005, Proposed Standard; §3.1 to §3.2, §4.4.1, §4.4.2, §5.1, §5.2 | none yet; level 2 writes `standard/rfc4301/catalog.md` |
-| RFC 4302 | December 2005, Proposed Standard; §2, §3.3, §3.4 | none yet; level 2 writes `standard/rfc4302/catalog.md` |
-| RFC 4303 | December 2005, Proposed Standard; §2, §3.3, §3.4 | none yet; level 2 writes `standard/rfc4303/catalog.md` |
+| RFC 4301 | December 2005, Proposed Standard; §3.1 to §3.2, §4 to §4.4.2, §5.1, §5.2, §10 | [`standard/rfc4301/catalog.md`](../../standard/rfc4301/catalog.md) |
+| RFC 4302 | December 2005, Proposed Standard; §2 to §3.4, §5 | [`standard/rfc4302/catalog.md`](../../standard/rfc4302/catalog.md) |
+| RFC 4303 | December 2005, Proposed Standard; §2 to §3.4, §5 | [`standard/rfc4303/catalog.md`](../../standard/rfc4303/catalog.md) |
 
 Out of scope, with the reason:
 
