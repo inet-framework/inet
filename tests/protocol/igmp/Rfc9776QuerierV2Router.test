@@ -1,0 +1,126 @@
+%description:
+
+Querier with an IGMPv2 router.
+
+Checks RFC9776-RQRY-8, COMPR-1, COMPR-6 and COMPR-8 from
+doc/project/evidence/standard/rfc9776/catalog.md. The English procedure is in
+doc/project/evidence/protocol/igmp/checks/compatibility.md#querier-with-an-igmpv2-router;
+the program steps below map onto its expected observations. Step 1 is observation 1; the guard
+and step 2 are observations 2 and 3.
+
+Expected result FAIL, model gap: an IGMPv3 router that hears an IGMPv2 General Query uses it
+only for the querier election (Igmpv3::processOlderVersionQuery,
+src/inet/networklayer/ipv4/Igmpv3.cc:1151). The router has no IGMPv2 querier mode: it goes on
+with Version 3 Queries of 12 octets. Observation 1 holds; observation 2 fails with the General
+Query of R1 at 31.25 s. The assertion stays as the standard states it; see results.md.
+
+%# expected-result: FAIL
+
+%includes:
+#include "ProtocolTest.h"
+#include "IgmpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv4Address G("225.0.1.1"), H("225.0.1.2"), K("225.0.1.3");
+static const Ipv4Address S1("10.0.2.10"), S2("10.0.2.11");
+static const Ipv4Address R_L1("10.0.1.1"), A_L1("10.0.1.10"), B_L1("10.0.1.11"), C_L1("10.0.1.12");
+static const Ipv4Address ALL_SYSTEMS("224.0.0.1"), ALL_ROUTERS("224.0.0.2"), V3_ROUTERS("224.0.0.22");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv4Address> sset(std::initializer_list<Ipv4Address> l) { return std::set<Ipv4Address>(l); }
+
+// A State-Change Report: a Version 3 Report with a Filter-Mode-Change or Source-List-Change record for the group.
+static bool isStateChange(const Packet *p, const Ipv4Address& g)
+{
+    return hasRecordOf(p, g, CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, ALLOW_NEW_SOURCES) || hasRecordOf(p, g, BLOCK_OLD_SOURCE);
+}
+// A Current-State Report for the group.
+static bool isCurrentState(const Packet *p, const Ipv4Address& g) { return hasRecordOf(p, g, MODE_IS_INCLUDE) || hasRecordOf(p, g, MODE_IS_EXCLUDE); }
+// A Query for the group: Group-Specific with no sources, Group-and-Source-Specific with sources.
+static bool isGroupQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) > 0; }
+static std::set<Ipv4Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv4Address> out;
+    if (auto q = v3QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, s, G); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9776_querier_v2_router")
+        // Expected observation 1: at the start, a General Query of R2 of 8 octets.
+        .once(on("r2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && igmpLength(p) == 8; })
+                  .describe("a General Query of R2 of 8 octets")
+                  .within(1.0))
+        // Expected observation 2: every General Query of R1 from 1 s on is 8 octets long.
+        .meanwhile(never(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && c.event.time > 1 && igmpLength(p) != 8; })
+                  .describe("a General Query of R1 that is not 8 octets long (RFC9776-RQRY-8, COMPR-1, COMPR-6)")
+                  .within(199.0)))
+        // Expected observation 3: its Max Resp Code is 100.
+        .once(on("r1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && c.event.time > 1; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(maxRespCode(p) == 100, "the General Query of R1 has Max Resp Code " + num(maxRespCode(p)) + " (RFC9776-COMPR-8)"); })
+                  .describe("the next General Query of R1")
+                  .within(195.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9776_querier_v2_router compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// the two routers: R1, R2 and host A on L1 (through the switch sw1).
+network IgmpTwoRouters
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='r1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='r2' names='eth0' address='10.0.1.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        r1: Router { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        r2: Router { @display("p=550,100"); }
+        hostA: StandardHost { @display("p=350,250"); }
+    connections:
+        r1.ethg++ <--> Eth100M <--> sw1.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IgmpTwoRouters
+sim-time-limit = 202s
+seed-set = 0
+*.r2.ipv4.igmp.typename = "Igmpv2"
+
+**.ipv4.igmp.typename = "Igmpv3"
+**.igmp.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+
+%contains: stdout
+PROTOCOLTEST rfc9776_querier_v2_router: PASS

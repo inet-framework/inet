@@ -1,0 +1,189 @@
+%description:
+
+Leave and the last member query: the S flag.
+
+Checks RFC9776-RQRY-11 from
+doc/project/evidence/standard/rfc9776/catalog.md. The English procedure is in
+doc/project/evidence/protocol/igmp/checks/router-state.md#leave-and-the-last-member-query;
+the program steps below map onto its expected observations. Step 1 is observation 1, and steps
+2 and 3 observation 6. The other observations are in Rfc9776LastMemberQuery.test.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
+section 8.11; Rfc9776JoinRepeated.test checks the default itself.
+
+Host A sends each State-Change Report once: its Robustness Variable is 1. Each repetition would
+start the query sequence again (RFC 9776 section 6.6.3.1; the rules of checks.md).
+
+Defect: Igmpv3::sendGroupSpecificQuery computes the S flag from the Group Timer before it
+lowers the timer to LMQT (src/inet/networklayer/ipv4/Igmpv3.cc:1364-1367), so the first Group-
+Specific Query has the S flag set; RFC 9776 section 6.6.3.1 lowers the timer first. Every
+retransmission sets the flag without a look at the timer
+(src/inet/networklayer/ipv4/Igmpv3.cc:514). Observation 1 holds; observation 6 fails at the
+first Query. This test FAILS, and the failure is deliberately NOT declared expected: the model
+has the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IgmpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv4Address G("225.0.1.1"), H("225.0.1.2"), K("225.0.1.3");
+static const Ipv4Address S1("10.0.2.10"), S2("10.0.2.11");
+static const Ipv4Address R_L1("10.0.1.1"), A_L1("10.0.1.10"), B_L1("10.0.1.11"), C_L1("10.0.1.12");
+static const Ipv4Address ALL_SYSTEMS("224.0.0.1"), ALL_ROUTERS("224.0.0.2"), V3_ROUTERS("224.0.0.22");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv4Address> sset(std::initializer_list<Ipv4Address> l) { return std::set<Ipv4Address>(l); }
+
+// A State-Change Report: a Version 3 Report with a Filter-Mode-Change or Source-List-Change record for the group.
+static bool isStateChange(const Packet *p, const Ipv4Address& g)
+{
+    return hasRecordOf(p, g, CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, ALLOW_NEW_SOURCES) || hasRecordOf(p, g, BLOCK_OLD_SOURCE);
+}
+// A Current-State Report for the group.
+static bool isCurrentState(const Packet *p, const Ipv4Address& g) { return hasRecordOf(p, g, MODE_IS_INCLUDE) || hasRecordOf(p, g, MODE_IS_EXCLUDE); }
+// A Query for the group: Group-Specific with no sources, Group-and-Source-Specific with sources.
+static bool isGroupQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) > 0; }
+static std::set<Ipv4Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv4Address> out;
+    if (auto q = v3QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, s, G); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9776_last_member_query_s_flag")
+        // Expected observation 1: the Report of A with CHANGE_TO_INCLUDE_MODE for G.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && hasRecordOf(p, G, CHANGE_TO_INCLUDE_MODE); })
+                  .describe("after 50 s, the Report of A for the leave")
+                  .within(51.0))
+        // Expected observation 6: the S flag of the first Query is clear ...
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGroupQuery(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(!v3QueryOf(p)->getSuppressRouterProc(), std::string("the first Group-Specific Query has the S flag set, with the Group Timer at the Last Member Query Time (RFC9776-RQRY-11)")); })
+                  .describe("the first Group-Specific Query for G")
+                  .within(0.1))
+        // ... and of the second.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGroupQuery(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(!v3QueryOf(p)->getSuppressRouterProc(), std::string("the second Group-Specific Query has the S flag set (RFC9776-RQRY-11)")); })
+                  .describe("the second Group-Specific Query for G")
+                  .within(1.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9776_last_member_query_s_flag compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// The requests of a host, as its sockets would make them (tests/protocol/igmp/IgmpChecks.h).
+simple IgmpRequests
+{
+    parameters:
+        @class(::inet::protocoltest::IgmpRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// The multicast routing of R: one route from L2 to L1 with L1 as a leaf (IgmpChecks.h).
+simple MulticastLeafRoute
+{
+    parameters:
+        @class(::inet::protocoltest::MulticastLeafRoute);
+        string node;
+        string origin;
+        string netmask;
+        string group;
+        string inInterface;
+        string outInterface;
+}
+
+// the link with a source: R, A and B on L1 (router.eth0 through sw1); R, S1 and S2 on L2 (router.eth1 through sw2).
+network IgmpSource
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='router' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "<interface hosts='S1' names='eth0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='S2' names='eth0' address='10.0.2.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router { @display("p=350,200"); }
+        sw1: EthernetSwitch { @display("p=350,330"); }
+        hostA: StandardHost { @display("p=250,450"); }
+        hostB: StandardHost { @display("p=450,450"); }
+        sw2: EthernetSwitch { @display("p=350,80"); }
+        S1: StandardHost { @display("p=250,20"); }
+        S2: StandardHost { @display("p=450,20"); }
+        requestsA: IgmpRequests {
+            node = "hostA";
+            script = "10 a 225.0.1.1 EXCLUDE; 50 a 225.0.1.1 INCLUDE";
+            @display("p=50,500");
+        }
+        routeR: MulticastLeafRoute {
+            node = "router";
+            origin = "10.0.2.0";
+            netmask = "255.255.255.0";
+            group = "0.0.0.0";
+            inInterface = "eth1";
+            outInterface = "eth0";
+            @display("p=50,250");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        router.ethg++ <--> Eth100M <--> sw2.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+        S1.ethg++ <--> Eth100M <--> sw2.ethg++;
+        S2.ethg++ <--> Eth100M <--> sw2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IgmpSource
+sim-time-limit = 62s
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 1s
+*.hostA.ipv4.igmp.robustnessVariable = 1
+
+**.ipv4.igmp.typename = "Igmpv3"
+**.igmp.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.S1.numApps = 1
+*.S1.app[0].typename = "UdpBasicApp"
+*.S1.app[0].destAddresses = "225.0.1.1"
+*.S1.app[0].destPort = 5000
+*.S1.app[0].messageLength = 100B
+*.S1.app[0].sendInterval = 0.5s
+*.S1.app[0].startTime = 0.5s
+*.S1.app[0].timeToLive = 16
+*.S1.app[0].multicastInterface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc9776_last_member_query_s_flag: PASS

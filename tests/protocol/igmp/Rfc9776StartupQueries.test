@@ -1,0 +1,132 @@
+%description:
+
+General Queries at startup and after it.
+
+Checks RFC9776-RQ-6, TIMER-4, TIMER-11, TIMER-12 and RFC2236-ROUTER-8 to ROUTER-10 from
+doc/project/evidence/standard/rfc9776/catalog.md and
+doc/project/evidence/standard/rfc2236/catalog.md. The English procedure is in
+doc/project/evidence/protocol/igmp/checks/router-queries.md#general-queries-at-startup-and-after-it;
+the program steps below map onto its expected observations. Steps 1 to 4 are observations 1 to
+3, and step 5 observation 4.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IgmpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv4Address G("225.0.1.1"), H("225.0.1.2"), K("225.0.1.3");
+static const Ipv4Address S1("10.0.2.10"), S2("10.0.2.11");
+static const Ipv4Address R_L1("10.0.1.1"), A_L1("10.0.1.10"), B_L1("10.0.1.11"), C_L1("10.0.1.12");
+static const Ipv4Address ALL_SYSTEMS("224.0.0.1"), ALL_ROUTERS("224.0.0.2"), V3_ROUTERS("224.0.0.22");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv4Address> sset(std::initializer_list<Ipv4Address> l) { return std::set<Ipv4Address>(l); }
+
+// A State-Change Report: a Version 3 Report with a Filter-Mode-Change or Source-List-Change record for the group.
+static bool isStateChange(const Packet *p, const Ipv4Address& g)
+{
+    return hasRecordOf(p, g, CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, ALLOW_NEW_SOURCES) || hasRecordOf(p, g, BLOCK_OLD_SOURCE);
+}
+// A Current-State Report for the group.
+static bool isCurrentState(const Packet *p, const Ipv4Address& g) { return hasRecordOf(p, g, MODE_IS_INCLUDE) || hasRecordOf(p, g, MODE_IS_EXCLUDE); }
+// A Query for the group: Group-Specific with no sources, Group-and-Source-Specific with sources.
+static bool isGroupQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) > 0; }
+static std::set<Ipv4Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv4Address> out;
+    if (auto q = v3QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, s, G); }
+static simtime_t prevAt;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9776_startup_queries")
+        // Expected observation 1: within 1 s, a General Query to 224.0.0.1.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == ALL_SYSTEMS, std::string("the General Query of R did not go to 224.0.0.1 (RFC2236-ROUTER-8)")); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
+                  .describe("within 1 s of the start, a General Query of R (RFC2236-ROUTER-9)")
+                  .within(1.0))
+        // Expected observation 2: the second, 31.25 s after the first.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t d = c.event.time - prevAt; prevAt = c.event.time; return require(d >= 31.25 - 0.1 && d <= 31.25 + 0.1, "a General Query of R came " + d.str() + " s after the one before it, not 31.25 s (RFC9776-TIMER-11, TIMER-12)"); })
+                  .describe("the second General Query of R")
+                  .within(32.0))
+        // Expected observation 3: the third, 125 s after the second ...
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t d = c.event.time - prevAt; prevAt = c.event.time; return require(d >= 125 - 0.1 && d <= 125 + 0.1, "a General Query of R came " + d.str() + " s after the one before it, not 125 s (RFC9776-RQ-6, TIMER-4, RFC2236-ROUTER-10)"); })
+                  .describe("the third General Query of R")
+                  .within(126.0))
+        // ... and the fourth, 125 s after the third.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t d = c.event.time - prevAt; prevAt = c.event.time; return require(d >= 125 - 0.1 && d <= 125 + 0.1, "a General Query of R came " + d.str() + " s after the one before it, not 125 s (RFC9776-RQ-6, TIMER-4, RFC2236-ROUTER-10)"); })
+                  .describe("the fourth General Query of R")
+                  .within(126.0))
+        // Expected observation 4: no other General Query in the window.
+        .never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
+                  .describe("a fifth General Query of R before 320 s (RFC9776-TIMER-12)")
+                  .within(38.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9776_startup_queries compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// the link: router R, host A and host B on L1 (router.eth0, hostA.eth0, hostB.eth0 through the switch sw1).
+network IgmpLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost { @display("p=250,250"); }
+        hostB: StandardHost { @display("p=450,250"); }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IgmpLink
+sim-time-limit = 322s
+seed-set = 0
+**.ipv4.igmp.typename = "Igmpv3"
+**.igmp.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+
+%contains: stdout
+PROTOCOLTEST rfc9776_startup_queries: PASS

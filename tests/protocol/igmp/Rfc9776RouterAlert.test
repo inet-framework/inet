@@ -1,0 +1,145 @@
+%description:
+
+Router Alert on every message.
+
+Checks RFC9776-GEN-4 from
+doc/project/evidence/standard/rfc9776/catalog.md. The English procedure is in
+doc/project/evidence/protocol/igmp/checks/message-format.md#router-alert-and-precedence-on-every-message;
+the program steps below map onto its expected observations. The guards are observation 2; steps
+1 and 2 are observation 1. The precedence, observation 3, is in Rfc9776Precedence.test.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
+section 8.11; Rfc9776JoinRepeated.test checks the default itself.
+
+%includes:
+#include "ProtocolTest.h"
+#include "IgmpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv4Address G("225.0.1.1"), H("225.0.1.2"), K("225.0.1.3");
+static const Ipv4Address S1("10.0.2.10"), S2("10.0.2.11");
+static const Ipv4Address R_L1("10.0.1.1"), A_L1("10.0.1.10"), B_L1("10.0.1.11"), C_L1("10.0.1.12");
+static const Ipv4Address ALL_SYSTEMS("224.0.0.1"), ALL_ROUTERS("224.0.0.2"), V3_ROUTERS("224.0.0.22");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv4Address> sset(std::initializer_list<Ipv4Address> l) { return std::set<Ipv4Address>(l); }
+
+// A State-Change Report: a Version 3 Report with a Filter-Mode-Change or Source-List-Change record for the group.
+static bool isStateChange(const Packet *p, const Ipv4Address& g)
+{
+    return hasRecordOf(p, g, CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, ALLOW_NEW_SOURCES) || hasRecordOf(p, g, BLOCK_OLD_SOURCE);
+}
+// A Current-State Report for the group.
+static bool isCurrentState(const Packet *p, const Ipv4Address& g) { return hasRecordOf(p, g, MODE_IS_INCLUDE) || hasRecordOf(p, g, MODE_IS_EXCLUDE); }
+// A Query for the group: Group-Specific with no sources, Group-and-Source-Specific with sources.
+static bool isGroupQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) > 0; }
+static std::set<Ipv4Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv4Address> out;
+    if (auto q = v3QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, s, G); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9776_router_alert")
+        // Expected observation: every IGMP message of router a Router Alert option.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return igmpOf(p) != nullptr && !(hasRouterAlert(p)); })
+                  .describe("an IGMP message of router that does not have a Router Alert option (RFC9776-GEN-4)")
+                  .within(40.0)))
+        // Expected observation: every IGMP message of hostA a Router Alert option.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return igmpOf(p) != nullptr && !(hasRouterAlert(p)); })
+                  .describe("an IGMP message of hostA that does not have a Router Alert option (RFC9776-GEN-4)")
+                  .within(40.0)))
+        // Expected observation: every IGMP message of hostB a Router Alert option.
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return igmpOf(p) != nullptr && !(hasRouterAlert(p)); })
+                  .describe("an IGMP message of hostB that does not have a Router Alert option (RFC9776-GEN-4)")
+                  .within(40.0)))
+        // Expected observation 1: a Report of A and a Query of R.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV3Report(p); })
+                  .describe("a Report of A")
+                  .within(20.0))
+        // 
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isQuery(p); })
+                  .describe("a Query of R")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9776_router_alert compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// The requests of a host, as its sockets would make them (tests/protocol/igmp/IgmpChecks.h).
+simple IgmpRequests
+{
+    parameters:
+        @class(::inet::protocoltest::IgmpRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// the link: router R, host A and host B on L1 (router.eth0, hostA.eth0, hostB.eth0 through the switch sw1).
+network IgmpLink
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router { @display("p=150,100"); }
+        sw1: EthernetSwitch { @display("p=350,100"); }
+        hostA: StandardHost { @display("p=250,250"); }
+        hostB: StandardHost { @display("p=450,250"); }
+        requestsA: IgmpRequests {
+            node = "hostA";
+            script = "10 a 225.0.1.1 EXCLUDE; 20 a 225.0.1.1 INCLUDE";
+            @display("p=50,500");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IgmpLink
+sim-time-limit = 42s
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 1s
+
+**.ipv4.igmp.typename = "Igmpv3"
+**.igmp.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+
+%contains: stdout
+PROTOCOLTEST rfc9776_router_alert: PASS

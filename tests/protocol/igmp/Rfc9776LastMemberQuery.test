@@ -1,0 +1,203 @@
+%description:
+
+Leave and the last member query.
+
+Checks RFC9776-RQ-7, RQ-8, RREP-18, RREP-27, RQRY-1, RQRY-3, RQRY-10, QRY-8, QRY-26, QRY-29,
+TIMER-13 and TIMER-16 from
+doc/project/evidence/standard/rfc9776/catalog.md. The English procedure is in
+doc/project/evidence/protocol/igmp/checks/router-state.md#leave-and-the-last-member-query;
+the program steps below map onto its expected observations. Step 1 is observation 1, step 2
+observations 2 and 5, step 3 and the guard observations 3 and 5, and steps 4 and 5 observation
+4. The S flag, observation 6, is in Rfc9776LastMemberQuerySFlag.test.
+
+The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
+section 8.11; Rfc9776JoinRepeated.test checks the default itself.
+
+Host A sends each State-Change Report once: its Robustness Variable is 1. Each repetition would
+start the query sequence again (RFC 9776 section 6.6.3.1; the rules of checks.md).
+
+%includes:
+#include "ProtocolTest.h"
+#include "IgmpChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv4Address G("225.0.1.1"), H("225.0.1.2"), K("225.0.1.3");
+static const Ipv4Address S1("10.0.2.10"), S2("10.0.2.11");
+static const Ipv4Address R_L1("10.0.1.1"), A_L1("10.0.1.10"), B_L1("10.0.1.11"), C_L1("10.0.1.12");
+static const Ipv4Address ALL_SYSTEMS("224.0.0.1"), ALL_ROUTERS("224.0.0.2"), V3_ROUTERS("224.0.0.22");
+
+static std::string num(double v) { std::ostringstream s; s << v; return s.str(); }
+static std::set<Ipv4Address> sset(std::initializer_list<Ipv4Address> l) { return std::set<Ipv4Address>(l); }
+
+// A State-Change Report: a Version 3 Report with a Filter-Mode-Change or Source-List-Change record for the group.
+static bool isStateChange(const Packet *p, const Ipv4Address& g)
+{
+    return hasRecordOf(p, g, CHANGE_TO_INCLUDE_MODE) || hasRecordOf(p, g, CHANGE_TO_EXCLUDE_MODE) || hasRecordOf(p, g, ALLOW_NEW_SOURCES) || hasRecordOf(p, g, BLOCK_OLD_SOURCE);
+}
+// A Current-State Report for the group.
+static bool isCurrentState(const Packet *p, const Ipv4Address& g) { return hasRecordOf(p, g, MODE_IS_INCLUDE) || hasRecordOf(p, g, MODE_IS_EXCLUDE); }
+// A Query for the group: Group-Specific with no sources, Group-and-Source-Specific with sources.
+static bool isGroupQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) == 0; }
+static bool isSourceQuery(const Packet *p, const Ipv4Address& g) { return isQuery(p) && queryGroup(p) == g && querySources(p) > 0; }
+static std::set<Ipv4Address> querySourceSet(const Packet *p)
+{
+    std::set<Ipv4Address> out;
+    if (auto q = v3QueryOf(p))
+        for (auto& a : q->getSourceList())
+            out.insert(a);
+    return out;
+}
+static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, s, G); }
+static simtime_t tl, tq;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc9776_last_member_query")
+        // Expected observation 1: the Report of A with CHANGE_TO_INCLUDE_MODE for G.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && hasRecordOf(p, G, CHANGE_TO_INCLUDE_MODE); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; tl = c.event.time; return true; })
+                  .describe("after 50 s, the Report of A for the leave")
+                  .within(51.0))
+        // Expected observations 2 and 5: within 0.1 s, a Group-Specific Query to G, Max Resp Code 10.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGroupQuery(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == G, "the Group-Specific Query went to " + destOf(p).str() + " (RFC9776-QRY-29)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(maxRespCode(p) == 10, "the Group-Specific Query has Max Resp Code " + num(maxRespCode(p)) + " (RFC9776-TIMER-13)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; tq = c.event.time; return true; })
+                  .describe("a Group-Specific Query for G (RFC9776-RQ-7, RQ-8, RREP-27, RQRY-10, QRY-8, QRY-26)")
+                  .within(0.1))
+        // Expected observations 3 and 5: the second one, 1 s after the first ...
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGroupQuery(p, G); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; simtime_t d = c.event.time - tq; return require(d >= 0.9 && d <= 1.1, "the second Group-Specific Query came " + d.str() + " s after the first (RFC9776-RREP-18, RQRY-10, TIMER-16)"); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(maxRespCode(p) == 10, "the second Group-Specific Query has Max Resp Code " + num(maxRespCode(p)) + " (RFC9776-TIMER-13)"); })
+                  .describe("the second Group-Specific Query for G")
+                  .within(1.1))
+        // ... and no third one.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGroupQuery(p, G); })
+                  .describe("a third Group-Specific Query for G (RFC9776-TIMER-16)")
+                  .within(8.0)))
+        // Expected observation 4: datagrams of S1 on L1 until 1.5 s after the leave ...
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isFwd(p, S1) && c.event.time >= tl + 1.5; })
+                  .describe("a datagram of S1 on L1 1.5 s or more after the leave (RFC9776-RQRY-1, RQRY-3)")
+                  .within(1.0))
+        // ... and none later than 2.5 s after it.
+        .never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isFwd(p, S1) && c.event.time > tl + 2.5; })
+                  .describe("a datagram of S1 on L1 more than 2.5 s after the leave (RFC9776-RQRY-3, RREP-27)")
+                  .within(8.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9776_last_member_query compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// The requests of a host, as its sockets would make them (tests/protocol/igmp/IgmpChecks.h).
+simple IgmpRequests
+{
+    parameters:
+        @class(::inet::protocoltest::IgmpRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// The multicast routing of R: one route from L2 to L1 with L1 as a leaf (IgmpChecks.h).
+simple MulticastLeafRoute
+{
+    parameters:
+        @class(::inet::protocoltest::MulticastLeafRoute);
+        string node;
+        string origin;
+        string netmask;
+        string group;
+        string inInterface;
+        string outInterface;
+}
+
+// the link with a source: R, A and B on L1 (router.eth0 through sw1); R, S1 and S2 on L2 (router.eth1 through sw2).
+network IgmpSource
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='router' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.1.11' netmask='255.255.255.0'/>" +
+                         "<interface hosts='S1' names='eth0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='S2' names='eth0' address='10.0.2.11' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router { @display("p=350,200"); }
+        sw1: EthernetSwitch { @display("p=350,330"); }
+        hostA: StandardHost { @display("p=250,450"); }
+        hostB: StandardHost { @display("p=450,450"); }
+        sw2: EthernetSwitch { @display("p=350,80"); }
+        S1: StandardHost { @display("p=250,20"); }
+        S2: StandardHost { @display("p=450,20"); }
+        requestsA: IgmpRequests {
+            node = "hostA";
+            script = "10 a 225.0.1.1 EXCLUDE; 50 a 225.0.1.1 INCLUDE";
+            @display("p=50,500");
+        }
+        routeR: MulticastLeafRoute {
+            node = "router";
+            origin = "10.0.2.0";
+            netmask = "255.255.255.0";
+            group = "0.0.0.0";
+            inInterface = "eth1";
+            outInterface = "eth0";
+            @display("p=50,250");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        router.ethg++ <--> Eth100M <--> sw2.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+        S1.ethg++ <--> Eth100M <--> sw2.ethg++;
+        S2.ethg++ <--> Eth100M <--> sw2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = IgmpSource
+sim-time-limit = 62s
+seed-set = 0
+**.igmp.unsolicitedReportInterval = 1s
+*.hostA.ipv4.igmp.robustnessVariable = 1
+
+**.ipv4.igmp.typename = "Igmpv3"
+**.igmp.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.r1.multicastForwarding = true
+*.r2.multicastForwarding = true
+*.S1.numApps = 1
+*.S1.app[0].typename = "UdpBasicApp"
+*.S1.app[0].destAddresses = "225.0.1.1"
+*.S1.app[0].destPort = 5000
+*.S1.app[0].messageLength = 100B
+*.S1.app[0].sendInterval = 0.5s
+*.S1.app[0].startTime = 0.5s
+*.S1.app[0].timeToLive = 16
+*.S1.app[0].multicastInterface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc9776_last_member_query: PASS
