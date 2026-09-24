@@ -16,10 +16,10 @@ output that a pass must deliver.
    step that writes it, and what it holds — with `notes.md`, the helper header of a suite, the
    plan and its decision log, and the scripts outside git; the table of the steps and the tree
    of "Where everything lives" name `notes.md`.
-3. [ ] **RIP notes** on `topic/standards-tests-rip-level2`: `model/rip/notes.md`, from the plan
+3. [x] **RIP notes** on `topic/standards-tests-rip-level2`: `model/rip/notes.md`, from the plan
    decision log, `results.md` and the lessons of the pass.
-4. [ ] **ND notes** on `topic/standards-tests-nd-level2`: `model/nd/notes.md`, the same way.
-5. [ ] Gates on the three branches, then move this plan to `plan/done/`.
+4. [x] **ND notes** on `topic/standards-tests-nd-level2`: `model/nd/notes.md`, the same way.
+5. [x] Gates on the three branches, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -36,3 +36,14 @@ output that a pass must deliver.
   `results.md` appears in a follow-up by its number, and a later pass adds to the file.
 - The ledger and part 1 of the conformance matrix are level 1 outputs: every level 1 protocol
   of wave 0 has `coverage.md` and `conformance.md`.
+- RIP notes: commit `ebf6699fcb` on `topic/standards-tests-rip-level2`; ND notes: commit
+  `9784c6a790` on `topic/standards-tests-nd-level2`. Each follow-up list names every gap of its
+  `results.md` by number: RIP 1 to 6, ND 1 to 11, IGMP 1 to 13, MLD 1 to 17.
+- A check against the texts corrected two draft statements of the RIP notes. RFC 2453 §3.8 and
+  RFC 2080 §2.3 require one of two precautions against synchronization, and the fixed 30 s clock
+  of the model is one of them, so the missing random offset is not a defect. Only one of the
+  three `throw`s on a malformed request breaks a rule of the in-scope set (§3.9.1).
+- The four gates pass on the three branches: `check-links.sh`, `check-seals.sh`,
+  `check-commits.sh origin/master..HEAD` and `check-classification.sh origin/master..HEAD`. The
+  first notes commit on this branch said `add:` in its subject and `add+change` in its trailer;
+  the trailer became `behavior.add` before the gate run, with the same tree.
