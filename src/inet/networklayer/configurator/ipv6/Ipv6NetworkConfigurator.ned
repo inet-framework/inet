@@ -78,6 +78,9 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    - `@minRtrAdvInterval` - min time between unsolicited RAs in seconds (default: 200)
 //    - `@advDefaultLifetime` - Router Lifetime in RAs in seconds (default: 3*maxRtrAdvInterval)
 //    - `@dupAddrDetectTransmits` - number of NS sent for DAD (default: 1; 0 = disable DAD)
+//    - `@maxRtrSolicitations` - number of Router Solicitations a host sends when
+//      Router Discovery starts on the interface (default: 3; 0 = disable Router
+//      Discovery, e.g. on links whose router is known by configuration)
 //
 //  - `<route>`
 //    Adds manual static routes.

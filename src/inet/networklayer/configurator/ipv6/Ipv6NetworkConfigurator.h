@@ -74,6 +74,7 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
         double minRtrAdvInterval = -1;  // min interval between RAs in seconds
         int advDefaultLifetime = -1;    // Router Lifetime in RA in seconds
         int dupAddrDetectTransmits = -1; // number of DAD NS transmissions
+        int maxRtrSolicitations = -1;    // number of Router Solicitations a host sends (0 = no Router Discovery)
 
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);

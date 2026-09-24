@@ -218,6 +218,11 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     // Apply per-interface DAD parameter from XML (applies to hosts and routers)
     if (interfaceInfo->dupAddrDetectTransmits >= 0)
         ipv6Data->setDupAddrDetectTransmits(interfaceInfo->dupAddrDetectTransmits);
+
+    // Apply per-interface Router Discovery parameter from XML (takes effect on
+    // non-advertising interfaces only, as advertising interfaces never solicit)
+    if (interfaceInfo->maxRtrSolicitations >= 0)
+        ipv6Data->_setMaxRtrSolicitations(interfaceInfo->maxRtrSolicitations);
 }
 
 void Ipv6NetworkConfigurator::configureRoutingTable(Node *node)
@@ -470,6 +475,7 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
         const char *minRtrAdvIntervalAttr = interfaceElement->getAttribute("minRtrAdvInterval");
         const char *advDefaultLifetimeAttr = interfaceElement->getAttribute("advDefaultLifetime");
         const char *dupAddrDetectTransmitsAttr = interfaceElement->getAttribute("dupAddrDetectTransmits");
+        const char *maxRtrSolicitationsAttr = interfaceElement->getAttribute("maxRtrSolicitations");
 
         if (amongAttr && *amongAttr) {
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
@@ -547,6 +553,13 @@ void Ipv6NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                                 interfaceInfo->advDefaultLifetime = atoi(advDefaultLifetimeAttr);
                             if (!opp_isempty(dupAddrDetectTransmitsAttr))
                                 interfaceInfo->dupAddrDetectTransmits = atoi(dupAddrDetectTransmitsAttr);
+                            if (!opp_isempty(maxRtrSolicitationsAttr)) {
+                                char *end;
+                                long value = strtol(maxRtrSolicitationsAttr, &end, 10);
+                                if (*end != '\0' || value < 0)
+                                    throw cRuntimeError("Invalid maxRtrSolicitations='%s', expected a non-negative integer", maxRtrSolicitationsAttr);
+                                interfaceInfo->maxRtrSolicitations = value;
+                            }
 
                             interfacesSeen.insert(interfaceInfo);
                         }

@@ -104,6 +104,9 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         // This runs BEFORE the Ipv6NodeConfigurator applies per-interface
         // XML overrides at INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT.
         int dupAddrDetectTransmits = par("dupAddrDetectTransmits");
+        int maxRtrSolicitations = par("maxRtrSolicitations");
+        if (maxRtrSolicitations < 0)
+            throw cRuntimeError("Invalid maxRtrSolicitations = %d, must not be negative", maxRtrSolicitations);
         bool optimisticDad = par("optimisticDad");
         simtime_t retransTimer = par("retransTimer");
         simtime_t baseReachableTime = par("baseReachableTime");
@@ -117,6 +120,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
             auto ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
             ipv6Data->setDupAddrDetectTransmits(dupAddrDetectTransmits);
+            ipv6Data->_setMaxRtrSolicitations(maxRtrSolicitations);
             ipv6Data->setOptimisticDad(optimisticDad);
             ipv6Data->setRetransTimer((uint)retransTimer.dbl());
             ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
@@ -1029,6 +1033,7 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
     }
 
     // Construct a Router Solicitation message
+    EV_INFO << "Sending Router Solicitation on " << ie->getInterfaceName() << endl;
     auto packet = new Packet("RouterSolicitation");
     Icmpv6::insertChecksum(checksumMode, rs, packet);
     packet->insertAtFront(rs);
@@ -1069,6 +1074,10 @@ void Ipv6NeighbourDiscovery::startRouterDiscovery(NetworkInterface *ie)
     // RTR_SOLICITATION_INTERVAL seconds.  This is invoked after DAD completes
     // (from makeTentativeAddressPermanent) with a random initial delay, and on
     // link-layer (re)association when detectL2Movement is set.
+    if (ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitations() == 0) {
+        EV_INFO << "Router Discovery is disabled on " << ie->getInterfaceName() << " (maxRtrSolicitations = 0)" << endl;
+        return;
+    }
     RdEntry *rdEntry = new RdEntry();
     rdEntry->interfaceId = ie->getInterfaceId();
     rdEntry->numRSSent = 0;
