@@ -15,9 +15,10 @@ The relationships come from the RFC-editor metadata
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
+The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
+claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
+feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -108,10 +109,10 @@ The set that a level 2 pass tests against:
 
 | Document | Version | Catalog file |
 | --- | --- | --- |
-| RFC 4861 | September 2007, Draft Standard, no revision of the body since; §4, §6 minus the MIPv6/SEND-reserved flags, §7.2, §8 | none yet; level 2 writes `standard/rfc4861/catalog.md` |
-| RFC 4862 | September 2007, Draft Standard, no revision of the body since; §5 | none yet; level 2 writes `standard/rfc4862/catalog.md` |
-| RFC 5942 | July 2010, Proposed Standard; §6 (the on-link override) | none yet |
-| RFC 6980 | August 2013, Proposed Standard; §5 (the fragmentation prohibition) | none yet |
+| RFC 4861 | September 2007, Draft Standard, no revision of the body since; §4, §6 minus the MIPv6/SEND-reserved flags, §7.2, §8 | [`standard/rfc4861/catalog.md`](../../standard/rfc4861/catalog.md) |
+| RFC 4862 | September 2007, Draft Standard, no revision of the body since; §5 | [`standard/rfc4862/catalog.md`](../../standard/rfc4862/catalog.md) |
+| RFC 5942 | July 2010, Proposed Standard; §6 (the on-link override) | [`standard/rfc5942/catalog.md`](../../standard/rfc5942/catalog.md) |
+| RFC 6980 | August 2013, Proposed Standard; §5 (the fragmentation prohibition) | [`standard/rfc6980/catalog.md`](../../standard/rfc6980/catalog.md) |
 
 RFC 4443 stays a background companion, exactly as in the ipv6 pass: every ND message is an
 ICMPv6 message, and the checks tolerate its general rules without re-deriving them; see
