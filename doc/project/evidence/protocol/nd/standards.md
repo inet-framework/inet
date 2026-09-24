@@ -54,9 +54,9 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc4861.txt`, `rfc4862.txt`, `rfc5942.txt`, `rfc6980.txt` in their own folders under
-  [`evidence/standard/`](../../standard/) — `https://www.rfc-editor.org/rfc/rfcNNNN.txt`,
-  downloaded 2026-09-23.
+- `rfc4861.txt`, `rfc4862.txt`, `rfc5942.txt`, `rfc6980.txt` in
+  [`standards/RFC/`](../../../../../../standards/RFC/rfc4861.txt), the `standards` project beside
+  the INET tree — `https://www.rfc-editor.org/rfc/rfcNNNN.txt`, downloaded 2026-09-23.
 - `rfc4443.txt` is not fetched again; the ipv6 pass owns it at
   [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt).
 
