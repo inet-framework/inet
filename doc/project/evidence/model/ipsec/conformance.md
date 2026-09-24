@@ -1,16 +1,20 @@
-# IPsec — model claims
+# IPsec — model claims and conformance
 
-> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/ipsec/standards.md), [coverage.md](coverage.md)
+> **Kind:** report · **Status:** snapshot 2026-09-24 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/ipsec/standards.md), [features.md](../../protocol/ipsec/features.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the
-model intends: which standards it claims to implement, mapped onto the standards map. Part 2,
-the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+Step 8 artifact of the standards test workflow, in two parts. Part 1 records what the model
+intends: which standards it claims to implement, mapped onto the standards map; the level 1 pass
+wrote it, and the level 2 pass adds what its run found for the facts that part 1 named. Part 2,
+the conformance matrix, combines the claims with the feature support of the level 2 run.
 
-Read record — no build, no run:
+Read record of part 1 — no build, no run:
 
 - Date: 2026-09-23
 - INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
 - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+
+The src tree of the level 2 run, `5c4f41c600`, is a later one; the claims of part 1 are the same
+in it (`IPsec.ned`, `SecurityPolicy.h`, `SecurityAssociation.h`).
 
 ## Part 1 — the claims
 
@@ -91,3 +95,102 @@ question, and the pass must check each one):
    that needs a byte-accurate field falls back to the chunk class name, per `AUTHORING.md`;
    a check that needs the wire bytes themselves cannot be built yet, which is an untestable-
    claim candidate for the AH/ESP header fields RFC 4302 §2 and RFC 4303 §2 define.
+
+### What the level 2 run found for these facts
+
+1. **The ICV is never verified**, on AH and on ESP. No level 2 check reaches it: a failed ICV needs
+   a crafted packet. The two passes of `Rfc4302AhAcrossRouter` therefore have no weight, and the
+   level 3 checks will be defects, because the TODOs are claims
+   ([results.md](results.md#other-findings)).
+2. **The `EncryptedChunk` payload** made every ESP field observable to the tests, which read the
+   plaintext "with the keys of the SA". AH wraps its payload in the same chunk, although AH does
+   not encrypt; the dissector opens it.
+3. **No serializer**: the tests read the chunks of a frame (`tests/protocol/ipsec/IpsecChecks.h`).
+   The chunk order is the order of the wire, and it showed that the AH ICV is at the end of the
+   packet ([gap 3](results.md#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet)).
+4. **The five stated refusals hold**: tunnel mode, key exchange, multicast, anti-replay and DSCP
+   selection are absent, and part 2 treats the features that they name as not claimed. The run
+   found two more absences that no sentence of the model states: dummy packets and the path MTU
+   ([gaps 11 and 12](results.md#gap-11-unimplemented-feature--no-dummy-packets)).
+
+## Part 2 — the conformance matrix
+
+Run record of the verdicts behind the support values:
+
+- Date: 2026-09-24 19:35 +0200
+- INET: branch `topic/standards-tests-ipsec-level2`, commit `829ba07bae`, tree clean
+- Trees: src `5c4f41c600`, tests/protocol `3ffda5ff0f`
+- OMNeT++: 6.4.0
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipsec$'`
+
+A feature is `claimed` when the claims of part 1 cover its governing source document. The model
+claims RFC 4301, RFC 4302 and RFC 4303, so every feature is claimed by its document, except the
+six that a stated refusal of part 1 names: tunnel mode, multicast, anti-replay, the choice of an
+SA by DSCP, and the two features that need key management, the creation of an SA with its
+lifetime and the named SPD entries. The support comes from
+[`coverage.md`](coverage.md#feature-support).
+
+| Feature | Level | Claimed | Support | Verdict |
+| --- | --- | --- | --- | --- |
+| [IPSEC-F-ARCHITECTURE](../../protocol/ipsec/features.md#ipsec-f-architecture) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-SECURITY-ASSOCIATION](../../protocol/ipsec/features.md#ipsec-f-security-association) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-SPD-PROCESSING](../../protocol/ipsec/features.md#ipsec-f-spd-processing) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-SPD-MANAGEMENT](../../protocol/ipsec/features.md#ipsec-f-spd-management) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-SELECTORS](../../protocol/ipsec/features.md#ipsec-f-selectors) | mandatory | yes | partial | `partial` — no core check fails; RFC4301-SEL-13 (OPAQUE) belongs to a gateway, and SEL-8 needs an extension header, owed |
+| [IPSEC-F-NAMED-SPD-ENTRIES](../../protocol/ipsec/features.md#ipsec-f-named-spd-entries) | mandatory | no | untested | `out of claim` — a stated refusal: no key management (`IPsec.ned:37`), whose identities a name matches |
+| [IPSEC-F-SA-CREATION](../../protocol/ipsec/features.md#ipsec-f-sa-creation) | mandatory | no | not supported | `out of claim` — a stated refusal: "Key exchange protocols are not implemented" (`IPsec.ned:37`); "SA lifetime is omitted" (`SecurityAssociation.h:30-35`); [gap 6](results.md#gap-6-defect--a-protect-entry-without-an-sa-sends-the-packet-in-clear), [gap 9](results.md#gap-9-unimplemented-feature--no-sa-lifetime) |
+| [IPSEC-F-SA-LOOKUP](../../protocol/ipsec/features.md#ipsec-f-sa-lookup) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-INBOUND-SELECTOR-CHECK](../../protocol/ipsec/features.md#ipsec-f-inbound-selector-check) | mandatory | yes | partial | `partial` — RFC4301-IN-32, IN-33, SAD-6: no check against the selectors of the SA, [gap 5](results.md#gap-5-defect--no-selector-check-after-ah-or-esp-processing) |
+| [IPSEC-F-TRANSPORT-MODE](../../protocol/ipsec/features.md#ipsec-f-transport-mode) | mandatory | yes | partial | `partial` — RFC4301-SA-50: a host also supports tunnel mode, [gap 8](results.md#gap-8-unimplemented-feature--no-tunnel-mode); every rule of transport mode itself passed |
+| [IPSEC-F-TUNNEL-MODE](../../protocol/ipsec/features.md#ipsec-f-tunnel-mode) | mandatory | no | not supported | `out of claim` — a stated refusal: "Transport mode only" (`IPsec.ned:40`); [gap 8](results.md#gap-8-unimplemented-feature--no-tunnel-mode) |
+| [IPSEC-F-PARALLEL-SAS](../../protocol/ipsec/features.md#ipsec-f-parallel-sas) | mandatory | no | not supported | `out of claim` — a stated refusal: "DSCP-based SA selection is not implemented" (`IPsec.ned:43`); [gap 10](results.md#gap-10-unimplemented-feature--no-choice-of-an-sa-by-dscp) |
+| [IPSEC-F-SA-COMBINATION](../../protocol/ipsec/features.md#ipsec-f-sa-combination) | optional | yes | not supported | `declined` — declined by the table, but the code and the module documentation name AH with ESP; the configuration cannot reach them, [gap 7](results.md#gap-7-untestable-claim--ah-and-esp-cannot-protect-one-packet) |
+| [IPSEC-F-FRAGMENTATION](../../protocol/ipsec/features.md#ipsec-f-fragmentation) | mandatory | yes | partial | `partial` — no core check fails; RFC4302-REAS-3 and RFC4303-REAS-2, a fragment offered to AH or ESP, are level 3 |
+| [IPSEC-F-PATH-MTU](../../protocol/ipsec/features.md#ipsec-f-path-mtu) | mandatory | yes | not supported | `defect` — no code in IPsec or IPv6 keeps a path MTU, [gap 12](results.md#gap-12-unimplemented-feature--no-path-mtu) |
+| [IPSEC-F-OUTBOUND-DISCARD-REPORT](../../protocol/ipsec/features.md#ipsec-f-outbound-discard-report) | optional | yes | untested | `unverified` — no check: the model has no ICMP report of a discard |
+| [IPSEC-F-AUDIT](../../protocol/ipsec/features.md#ipsec-f-audit) | unstated | yes | untested | `unverified` — level 4: an audit log |
+| [IPSEC-F-AH-FORMAT](../../protocol/ipsec/features.md#ipsec-f-ah-format) | optional | yes | partial | `partial` — RFC4302-LEN-1: Payload Length 0, [gap 2](results.md#gap-2-defect--the-ah-payload-length-is-always-0); FMT-2, ICV-1, ICV-2, ICV-4: the ICV after the payload, [gap 3](results.md#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet) |
+| [IPSEC-F-AH-INTEGRITY](../../protocol/ipsec/features.md#ipsec-f-ah-integrity) | optional | yes | partial | `partial` — no core check fails, but the passes have no weight: the receiver never checks the ICV; IICV-3 and ISEQ-21 are level 3 |
+| [IPSEC-F-ESP-FORMAT](../../protocol/ipsec/features.md#ipsec-f-esp-format) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-ESP-PADDING](../../protocol/ipsec/features.md#ipsec-f-esp-padding) | mandatory | yes | partial | `partial` — RFC4303-PAD-9: the padding octets are 63, [gap 4](results.md#gap-4-defect--the-esp-padding-octets-are-63-not-1-2-3) |
+| [IPSEC-F-ESP-SERVICES](../../protocol/ipsec/features.md#ipsec-f-esp-services) | mandatory | yes | supported | `confirmed` |
+| [IPSEC-F-ESP-PROCESSING](../../protocol/ipsec/features.md#ipsec-f-esp-processing) | mandatory | yes | partial | `partial` — no core check fails; the ICV that fails (IICV-3, ISEQ-23) and the order of the operations are level 3 and 5 |
+| [IPSEC-F-SEQUENCE-NUMBERS](../../protocol/ipsec/features.md#ipsec-f-sequence-numbers) | mandatory | yes | partial | `partial` — RFC4302-SEQ-8, OSEQ-1, RFC4303-SEQ-7, OSEQ-1: the first packet carries 0, [gap 1](results.md#gap-1-defect--the-first-packet-of-an-sa-carries-sequence-number-0) |
+| [IPSEC-F-ANTI-REPLAY](../../protocol/ipsec/features.md#ipsec-f-anti-replay) | mandatory | no | untested | `out of claim` — a stated refusal: "Anti-replay mechanism is not implemented" (`IPsec.ned:42`) |
+| [IPSEC-F-EXTENDED-SEQUENCE-NUMBERS](../../protocol/ipsec/features.md#ipsec-f-extended-sequence-numbers) | optional | yes | untested | `unverified` — no check: the counter is 32 bits |
+| [IPSEC-F-ESP-TFC-PADDING](../../protocol/ipsec/features.md#ipsec-f-esp-tfc-padding) | optional | yes | supported | `confirmed` |
+| [IPSEC-F-ESP-DUMMY-PACKETS](../../protocol/ipsec/features.md#ipsec-f-esp-dummy-packets) | mandatory | yes | not supported | `defect` — no code makes a dummy packet, [gap 11](results.md#gap-11-unimplemented-feature--no-dummy-packets) |
+| [IPSEC-F-MULTICAST](../../protocol/ipsec/features.md#ipsec-f-multicast) | optional | no | untested | `out of claim` — a stated refusal: "Multicast traffic is not supported" (`IPsec.ned:41`) |
+
+### How to read the matrix
+
+- **Two mandatory features are `defect` by the table, and both are missing features**: dummy
+  packets and the path MTU. The model claims RFC 4303 and RFC 4301, which make both a must, and
+  has no code for either; [`results.md`](results.md#the-model-gaps) classes the failures as
+  unimplemented features, and a repair is new code, not a fix.
+- **The six defects of [`results.md`](results.md#the-model-gaps) sit inside `partial`
+  features**: every feature with a failing core check also has core checks that pass.
+- **The six `out of claim` features are the stated refusals of part 1.** Their tests declare the
+  failure expected where a test exists; the model says in its own words that it does not do them.
+- **The one `declined` feature, SA combination, is not a choice of the model.** Its code and its
+  documentation name AH with ESP, and only the configuration cannot express it (gap 7, an
+  untestable claim).
+- **The three `unverified` features are not mandatory**: the ICMP report of a discard and
+  extended sequence numbers are optional, the audit log is unstated.
+
+## Headlines for the next pass
+
+1. **Two mandatory features are `defect`**: dummy packets and the path MTU. Both are new code.
+2. **The six defects of [`results.md`](results.md#the-model-gaps)** are repairs, and none is
+   declared, so the suite stays red until they are repaired. The first sequence number, the AH
+   Payload Length and the ESP padding octets are a few lines each; the AH ICV place changes the
+   dissector too; the inbound selector check and the discard of a PROTECT packet without an SA
+   close two holes of the access control.
+3. **Level 3 gives the ICV its verdicts**: a corrupted ICV on AH and on ESP, which the TODOs of
+   `IPsec.cc:832, 885` make defects.
+4. **The documentation of `IPsec.ned` is stale in three places**: `AH_ESP`, `DROP` and
+   `IcvNumBits` ([results.md](results.md#other-findings)).
+

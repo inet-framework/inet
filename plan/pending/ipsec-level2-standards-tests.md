@@ -46,10 +46,14 @@ it.
 6. [x] **Step 6, tests** — `tests/protocol/ipsec/Rfc430[123]*.test` and the helper header
    `IpsecChecks.h`. 31 tests for the 23 checks. First full run: 15 PASS, 6 FAIL declared expected
    (missing features), 10 FAIL.
-7. [ ] **Steps 7 to 9, and the ledger** — `model/ipsec/results.md`, `conformance.md` part 2,
-   `categories.md`, `coverage.md`, from one fresh run.
-8. [ ] **Notes** — `model/ipsec/notes.md`: the model quirks, the scenario and tooling traps, and
-   the follow-ups with every gap by number.
+7. [x] **Steps 7 to 9, and the ledger** — `model/ipsec/results.md`, `conformance.md` part 2,
+   `categories.md`, `coverage.md`, from one fresh run. Run at `829ba07bae`: 31 tests, 15 PASS,
+   16 FAIL, 6 of them declared expected. Twelve gaps: six defects, one untestable claim, five
+   unimplemented features. Level 2 is reached for the normal path; 6 statements are owed. The
+   matrix holds 8 `confirmed`, 9 `partial`, 2 `defect`, 1 `declined`, 3 `unverified` and 6 `out
+   of claim`.
+8. [x] **Notes** — `model/ipsec/notes.md`: the model quirks, the scenario and tooling traps, and
+   the follow-ups with every gap by number (1 to 12).
 9. [ ] Gates, then move this plan to `plan/done/`.
 
 Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `README.md`.
@@ -124,3 +128,12 @@ Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `R
 - **AH across a router passes, but the model cannot fail it.** The receiver never verifies the
   ICV (the TODO at `IPsec.cc:832`), so a changed TTL cannot make it reject a packet. The ledger
   records the pass and says that only level 3, an ICV that fails, gives the verdict weight.
+- **The claim of a feature in the matrix follows the stated refusals.** The model claims all
+  three RFCs, so each feature is claimed by its document, except the six that a stated refusal of
+  part 1 names (tunnel mode, multicast, anti-replay, DSCP selection, SA creation with its lifetime,
+  named SPD entries): those are `out of claim`. Dummy packets and the path MTU have no stated
+  refusal, so the table makes them `defect`; `results.md` classes their failures as unimplemented
+  features, because no code exists.
+- **Level 2 is reached for the normal path**, as the IGMP pass read the criterion: 19 of the 21
+  mandatory features have core checks that ran, and the other two, named SPD entries and
+  anti-replay, need key management or a replayed packet.
