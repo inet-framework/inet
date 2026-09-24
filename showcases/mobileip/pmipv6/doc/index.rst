@@ -347,13 +347,287 @@ suggest a shorter path that does not exist:
 Results
 -------
 
+This section follows the ``Pmipv6`` run in time order. It starts with the node's
+first attachment and the traffic that follows. Then it shows the move twice:
+first without Proxy Mobile IPv6, where the traffic stops, and then with it,
+where the traffic continues. The cost of the interruption comes last.
+
+The node arrives
+~~~~~~~~~~~~~~~~
+
+The mobile node starts under ``ar1`` but is not yet associated with it. At
+t = 3 s it scans the two channels for access points, finds ``ar1``, and
+authenticates and associates with it at about 3.651 s.
+
+The node's IPv6 layer does not wait for the radio. It checks its link-local
+address for duplicates, which finishes at 2.76 s, and sends a first Router
+Solicitation at 3.509 s. That solicitation never leaves the node: its own
+802.11 interface discards it, because the station is not associated yet. When
+the association completes, the node sends a second Router Solicitation. It
+asks any router on the link to send a Router Advertisement, the message that
+carries the prefixes from which a host builds its addresses.
+
+The sequence chart below shows what happens in the next 40 ms, on the axes of
+the mobile node, ``ar1``, ``core`` and the anchor:
+
+.. figure:: media/sequence-first-registration.png
+   :align: center
+   :width: 100%
+
+..
+   PLACEHOLDER — sequence chart of the first registration.
+   source:   Pmipv6 eventlog (the analyst's E-P run, full 60 s)
+   axes:     mn, ar1, core, anchor (node level, this top-to-bottom order)
+   window:   3.649 .. 3.690 s
+   filter:   ProxyBinding* or RouterSol* or RouterAdv* or NeighbourSol* or
+             NeighbourAdv* or Auth* or Assoc*   (about 25 arrows)
+   must show: the authentication and association with ar1; the Router
+             Solicitation at 3.651105 and its re-broadcast copy from ar1's radio;
+             the Proxy Binding Update from ar1 (on the wire 3.651165) through core
+             to the anchor (3.666202); core's Neighbor Solicitation/Advertisement
+             for the anchor (3.651176 -> 3.661191); the anchor's own address
+             resolution of core (3.666202 -> 3.676217); the Proxy Binding
+             Acknowledgement reaching ar1 (3.681238); the unsolicited Router
+             Advertisement to mn; the node's first Neighbor Solicitation for its
+             new address (3.681289).
+   Proposed by the analyst (results-walkthrough-corrected.md, evidence for A).
+
+The chart reads from top to bottom as follows.
+
+1. The node authenticates and associates with ``ar1``. ``ar1`` learns of the new
+   station from its own access point at 3.651 s. It looks up the station's
+   link-layer address, ``0A-AA-00-00-00-0B``, in the policy profile. It finds the node's identifier,
+   ``mn1@example.com``, and its home network prefix, ``2001:db8:1::/64``.
+2. The node's Router Solicitation reaches ``ar1``. It appears twice on the
+   chart. The access point re-broadcasts a multicast frame it receives from a
+   station to all stations, and the node's own interface discards the copy. The
+   node does not ask twice.
+3. ``ar1`` sends a Proxy Binding Update to the anchor. It asks the anchor to
+   bind the node's home network prefix to ``ar1``.
+4. The update crosses ``core`` to the anchor. The anchor has no entry for this
+   prefix, so it creates one in its binding cache, creates a tunnel to ``ar1``,
+   and routes the prefix into that tunnel. In the same step it answers with a
+   Proxy Binding Acknowledgement, which confirms the binding.
+5. When the acknowledgement arrives, ``ar1`` creates its end of the tunnel and
+   routes the prefix to its wireless link. Then it sends a Router Advertisement
+   that carries ``2001:db8:1::/64``, without waiting to be asked.
+6. The node builds its home address, ``2001:db8:1:0:8aa:ff:fe00:b``, from the
+   advertised prefix at 3.681 s. It then checks that no other node uses the
+   address. This duplicate address detection finishes at 4.88 s.
+
+The node sends no mobility message at any point. From its side it associated,
+asked for a router, and got an advertisement — what any IPv6 host does on a new
+link. The node's solicitation is never answered directly. The advertisement
+that ``ar1`` sends after the acknowledgement is its own. The next periodic
+advertisement, at 3.927 s, carries the same prefix, and that is the only
+answer the solicitation gets.
+
+Here is the Proxy Binding Update that ``ar1`` sends, as it leaves ``ar1``:
+
+.. figure:: media/pbu-inspector.png
+   :align: center
+   :width: 80%
+
+..
+   PLACEHOLDER — Qtenv packet-inspector view of the first Proxy Binding Update.
+   source:   Pmipv6, Qtenv; stop at the FES entry of the ProxyBindingUpdate at ar1,
+             3.651165 s (see memory reference_qtenv_packet_dissection_capture)
+   must show: outer IPv6 source 2001:db8:0:1::2, destination 2001:db8::2; Mobility
+             Header type 5; sequence 1; lifetime 3600; flags A, H, P set; options:
+             mobile node identifier mn1@example.com, link-layer identifier
+             0A-AA-00-00-00-0B, home network prefix 2001:db8:1::/64, handoff
+             indicator 4, access technology type 4, timestamp
+   crop:     the Mobility Header and its options only
+   Proposed by the analyst (results-walkthrough-corrected.md, evidence for A).
+   The analyst also proposed the same view of the ProxyBindingAck; not placed.
+
+The update goes from ``ar1``'s address on its link to ``core``,
+``2001:db8:0:1::2``, to the anchor, ``2001:db8::2``. It is a Mobile IPv6 Binding
+Update with one more flag. The fields that matter here are:
+
+- The flags. P (proxy registration) marks the update as sent by a gateway on the
+  node's behalf. H (home registration) asks the receiver to act as the anchor
+  for the node. A (acknowledge) asks for an acknowledgement.
+- The lifetime, 3600 s. This is how long the anchor keeps the binding unless
+  ``ar1`` renews or removes it.
+- The sequence number, 1. This is ``ar1``'s own counter for this node.
+- The mobile node identifier and link-layer identifier. They name the node. The
+  node's IP address appears nowhere in the message, because that address is what
+  the protocol keeps constant.
+- The home network prefix, ``2001:db8:1::/64``, from the profile.
+- The handoff indicator, 4, which means "handoff state unknown". ``ar1`` does
+  not claim to know whether the node is new to the domain or comes from another
+  gateway.
+- The access technology type, 4, which means IEEE 802.11.
+- The timestamp, the time at which ``ar1`` sent the update: 3.651 s. The anchor
+  uses it to put updates from different gateways in order.
+
+The acknowledgement carries a status of 0, which means accepted, the same
+sequence number and lifetime, and a copy of the update's options.
+
+The model gives these messages the field values the standard defines, but not
+the standard's byte layout. A packet capture of them does not dissect in tools
+that follow the standard.
+
+The whole registration takes 30.09 ms, from the update leaving ``ar1`` to the
+acknowledgement arriving. The same exchange at the handover later in the run
+takes 10.06 ms. The difference is address resolution. This is the first use of
+the link between ``core`` and the anchor, and neither end has the other's
+link-layer address yet. Before ``core`` can forward the update, it sends
+a Neighbor Solicitation to the anchor and waits for the Neighbor Advertisement.
+Before the anchor can send the acknowledgement, it does the same for ``core``.
+Each of these exchanges crosses the 5 ms link twice, so each costs 10 ms. The
+remaining 10 ms is the update and the acknowledgement, each crossing the link
+once. ``ar1`` also resolves ``core``'s address first, but that link is short
+and it costs almost nothing. At the handover every address is already known.
+
+Traffic through the anchor
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From t = 8 s the correspondent node sends an echo request every 50 ms. Here is
+the path one request takes and the path its reply takes back:
+
+1. ``cn`` sends the request to the node's home address. Its router, ``core``,
+   has a route for ``2001:db8:1::/64`` that points at the anchor, so ``core``
+   sends the request there.
+2. The anchor's route for the prefix points into its tunnel to ``ar1``. The
+   anchor wraps the request in an outer IPv6 header, from its own address to
+   ``ar1``'s, and sends it back out through ``core``.
+3. ``core`` forwards the packet on the outer destination, to ``ar1``.
+4. ``ar1`` removes the outer header and delivers the request on its wireless
+   link.
+5. The node answers. The reply is addressed to ``cn``, and it goes to ``ar1``,
+   the node's default router.
+6. ``ar1`` does not forward the reply toward ``cn``, although ``cn`` is only two
+   hops away through ``core``. It sees that the packet comes from a mobile node
+   it serves and sends it into its tunnel to the anchor. The gateway chooses the
+   path from the packet's source, not its destination.
+7. The anchor removes the outer header and forwards the reply to ``cn``, again
+   through ``core``.
+
+The figure below shows this path on the network. It was taken after the move,
+so the gateway in it is ``ar2``; before the move the picture is the same with
+``ar1`` in its place:
+
+.. figure:: media/path.png
+   :align: center
+   :width: 80%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     Qtenv canvas screenshot with the network route visualizer
+   config:   Pmipv6          seed: seed-set = 1
+   shows:    the routed path after the handover -- cn <- core <-> anchor and
+             core -> ar2, with the anchor's link carrying two parallel arrows
+             because every packet crosses it twice
+   launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
+             --'*.visualizer.networkRouteVisualizer.labelFormat'='""'
+             Without that override each arrow carries its packet name, and on the
+             anchor's link the two names are drawn rotated and on top of each
+             other, which is illegible and says nothing the prose needs.
+   view:     set_canvas_view {module_path:"<root>", zoom:1.0}
+   window:   run_simulation to 39.90 s in "express" mode, then to 40.10 s in
+             "fast" mode so the visualizer has fresh paths on the canvas
+   capture:  get_canvas_image {module_path:"<root>", area:"module_rectangle",
+             margin:5}; was 814x514
+   anchor:   two parallel arrows on the core-anchor link and an arrow into ar2,
+             none into ar1, and the address label still reads
+             2001:db8:1:0:8aa:ff:fe00:b. The re-anchoring happens at
+             t = 31.261193; any time after ~31.4 s shows the same picture.
+   known:    the hop from ar2 to mn is not drawn -- the tunnel makes the gateway
+             re-inject the packet, which starts a new path in PathVisualizerBase.
+             The page says so; do not "fix" it by cropping.
+             cn's node label is hidden behind the arrowhead that points at it.
+             Qtenv draws a node's name under its icon and the path ends exactly
+             there; lineWidth=2, a higher zoom and lineShiftMode="x" were all
+             tried and none of them moves it.
+   stamp:    captured 2026-09, INET 4.7
+
+The arrows show the routed path as far as the access router that serves the
+node; the last hop over the air is not drawn. The link between ``core`` and the
+anchor carries two arrows, because every packet crosses it twice: once to the
+anchor and once back. The frame counts show the same detour. Counted at the two
+links' Ethernet interfaces, the correspondent node's link carries 2101 frames
+over the run and the anchor's link carries 4195 — about two per exchange against
+about four.
+
+Here is one of those requests on the link from the anchor, with its outer
+header:
+
+.. figure:: media/packet.png
+   :align: center
+   :width: 80%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     Qtenv object-inspector screenshot, cropped to the chunk list
+   config:   Pmipv6          seed: seed-set = 1
+   shows:    one encapsulated echo request on the anchor-to-gateway link: the
+             outer IPv6 header addressed 2001:db8::2 -> 2001:db8:0:2::2 around the
+             inner header addressed 2001:db8:ff:0:8aa:ff:fe00:1 ->
+             2001:db8:1:0:8aa:ff:fe00:b
+   launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
+   window:   run_simulation to ~40 s, and the last step must be in "fast" or
+             "normal" mode -- an express run does not fill Qtenv's packet log
+             buffer and list_logged_packets then returns nothing
+   capture:  list_logged_packets {module_path:"Pmipv6Showcase.anchor",
+                                  name_pattern:"ping*"}
+             pick an EthernetSignal of 170 B, name without "-reply", whose
+             hop_modules start at Pmipv6Showcase.anchor.eth[0].mac -- that is the
+             encapsulated downlink request (130 B entries are the decapsulated
+             replies, and the 170 B ones starting at core.eth[1].mac are the
+             reverse-tunnelled uplink)
+             expand_inspector_tree {object_path:"logged:<id>", type:"object",
+                                    depth:4}
+             get_inspector_screenshot {object_path:"logged:<id>", type:"object",
+                                       width:2600, height:4200}
+             crop x 72..918, y 2716..2858, then pad 12 px white -> 870x166.
+             The x bound is what matters: it must fall AFTER the inner header's
+             destinationAddress, or the figure cuts an address in half. 918 also
+             keeps both protocol fields. Ask for :width: 80% or less; the figure
+             is meant to render close to 1:1.
+   anchor:   the chunk list must read EthernetPhyHeader, EthernetMacHeader,
+             Ipv6Header (protocol = ipv6(40)), Ipv6Header (protocol = icmpv6(18)),
+             Icmpv6EchoRequestMsg, ByteCountChunk, EthernetFcs -- two IPv6 headers,
+             the outer one carrying the anchor and gateway addresses, and all four
+             addresses complete. If only one Ipv6Header appears, the packet was
+             taken off the wrong link.
+   known:    depth 4 also expands the raw bit dump, which is why the useful rows
+             sit 2700 px down; the crop is what makes the figure. The inspector
+             prints the anchor's address in its canonical short form,
+             2001:db8::2, where config.xml writes 2001:db8:0::2 -- same address,
+             and Qtenv offers no way to render the longer form.
+   stamp:    captured 2026-09, INET 4.7
+
+The packet has two IPv6 headers. The outer one is addressed from the anchor to
+the gateway; the inner one from the correspondent node to the mobile node. The
+anchor's address is printed in its shortest form, ``2001:db8::2``, which is the
+same address the route in ``config.xml`` writes as ``2001:db8:0::2``. Both ends
+of the session see only the mobile node's home address. The outer header exists
+only between the gateway and the anchor, and both headers are ordinary IPv6.
+
+The detour has a price. A round trip takes 20.361 ms on average here, against
+0.312 ms in the baseline, where the traffic never reaches the anchor. Four
+crossings of the anchor's 5 ms link account for the difference. The very first
+round trip takes 20.78 ms, because the routers resolve link-layer addresses on
+first use. The 5 ms is this showcase's choice, made so that the detour can be
+seen in the numbers. It is a short link by deployment standards: an anchor
+reached across a country costs a great deal more per crossing.
+
 Moving without Proxy Mobile IPv6
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the move itself. Watch the address label on the mobile node, and the
-arrows that mark the path of the traffic. Above the address label, a Wifi icon
-carries the name of the access point the node is associated with, ``AR1`` or
-``AR2``. The icon disappears while the node is associated with neither:
+In the ``NoPmipv6`` configuration the node arrives in the same way, but no
+registration takes place. ``ar1`` advertises its own prefix,
+``2001:db8:1::/64``, in its periodic Router Advertisement at 3.927 s, and the
+node builds the same address from it as in the ``Pmipv6`` run. The traffic
+flows directly between ``core`` and ``ar1``.
+
+At t = 20 s the node starts to drive toward ``ar2``. Here is the move. Watch the
+address label on the mobile node, and the arrows that mark the path of the
+traffic. Above the address label, a Wi-Fi icon carries the name of the access
+point the node is associated with, ``AR1`` or ``AR2``. The icon disappears while
+the node is associated with neither:
 
 .. video:: media/baseline-movement.mp4
    :align: center
@@ -407,12 +681,34 @@ carries the name of the access point the node is associated with, ``AR1`` or
              label added, then moved above the address label and recoloured.
              INET 4.7
 
-The label below the node reads ``AR2`` as soon as the node associates with the
-second access point. The address label changes 2.7 s later. In between, the node
-asks the new access router for a Router Advertisement and waits for it. Then it
-runs the duplicate address check that IPv6 requires on a link it has just joined.
-The arrows never come back. Here are the echo replies the correspondent node
-received over the whole run:
+The video shows three moments, in this order.
+
+- The arrows stop. The last echo reply reaches ``cn`` at 30.250 s. From
+  30.306 s on, the requests die at ``ar1``'s radio. It sends each one to the
+  node, gets no 802.11 acknowledgement, retransmits it up to the retry limit,
+  and then drops it. ``ar1`` is a plain router here, so nothing else happens: it does not
+  tell anyone.
+- The icon changes from AR1 to AR2. The node notices that ``ar1`` is gone
+  only when it misses ``ar1``'s beacons, at 30.605 s. It then scans, and
+  associates with ``ar2`` at 31.256 s.
+- The address label changes, 2.7 s after the icon. At association the node
+  sends a Router Solicitation. Nothing answers it. The node learns ``ar2``'s
+  prefix, ``2001:db8:2::/64``, only from ``ar2``'s next periodic Router
+  Advertisement, which arrives at 32.386 s, 1.13 s later. The node builds a new
+  address from it, ``2001:db8:2:0:8aa:ff:fe00:b``. It then runs duplicate
+  address detection again — on its link-local address, not on the new global
+  address. When that check finishes, at 33.946 s, the node adds the new address
+  and removes the old one in the same step. That is the moment the label
+  changes.
+
+.. TODO: surprise S2 in results-walkthrough-corrected.md — the baseline host
+   marks all its addresses tentative, checks only the link-local one, and drops
+   the old global address when the check ends. INET expert to say whether the
+   page should state that this is not what plain stateless address
+   autoconfiguration does.
+
+The arrows never come back. Here are the echo replies that the correspondent
+node received over the whole run:
 
 .. figure:: media/baseline-chart.png
    :align: center
@@ -452,14 +748,38 @@ received over the whole run:
              -o baseline-chart -d doc/media      ; 1200x900, transparent
    stamp:    captured 2026-09, INET 4.7
 
-The replies stop when the node changes access router and never resume. Of the
-1041 requests sent, 446 are answered — a loss rate of 57.16 % — and the missing
-sequence numbers run unbroken from 446 to the last one sent. This is not a gap;
-it is the end of the session. The node is not gone: it re-associated, and it
-replaced its address with one built from the prefix the new access router
-advertises, the old address being removed at the same instant. The correspondent
-node is not told the new address and keeps sending to the old one, and no reply
-comes back.
+Each point is one reply, plotted at the time it arrived against its sequence
+number. The points climb steadily to sequence number 445 at 30.25 s, and the
+right half of the chart is empty. Of the 1041 requests sent, 446 are answered —
+a loss rate of 57.16 % — and the missing sequence numbers run unbroken from 446
+to the last one sent. This is not a gap; it is the end of the session.
+
+The node is still in the network, with a new address, but the correspondent
+node does not know that address and keeps sending to the old one. ``core``
+still routes the old prefix to ``ar1``, and ``ar1`` still has the node's
+link-layer address in its neighbor cache, the table in which an IPv6 node keeps
+the link-layer addresses of its neighbors. So ``ar1`` sends every request to a
+station that is no longer there, and every frame dies at the retry limit,
+silently.
+
+Only after several seconds does ``ar1`` start to doubt the entry. It uses
+Neighbor Unreachability Detection (NUD), the check an IPv6 node runs on a
+neighbor that it has not recently confirmed as reachable:
+
+- At 38.05 s the entry goes from STALE (not recently confirmed) to DELAY (wait
+  briefly before checking).
+- At 43.05 s it goes to PROBE: ``ar1`` sends unicast Neighbor Solicitations to
+  the node.
+- At 46.05 s ``ar1`` declares the neighbor unreachable and removes the entry.
+  The next request starts a new address resolution with a multicast Neighbor
+  Solicitation, and ``ar1`` queues the requests while it waits.
+- At 49.05 s the address resolution fails. ``ar1`` sends an ICMPv6 Destination
+  Unreachable message (code 3, address unreachable) to ``cn`` for each queued
+  request.
+
+The cycle then repeats: ``cn`` receives 240 such errors between 49.05 s and
+58.05 s. The network does tell the correspondent node that the address is
+unreachable, but only from 49.05 s on, and it never tells it the new address. No echo reply returns after 30.25 s.
 
 Moving with Proxy Mobile IPv6
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -510,10 +830,11 @@ Here is the same move, with Proxy Mobile IPv6 running:
              label added, then moved above the address label and recoloured.
              INET 4.7
 
-The arrows stop, and then reappear through the second access router. The name on
-the icon changes from ``AR1`` to ``AR2``, which is the move itself. The address
-label does not change at any point. Here are the replies from the same movement,
-around the moment of the handover:
+.. TODO: re-capture after the destination-cache fix
+
+The arrows stop, and then reappear through ``ar2``. The icon changes from
+``AR1`` to ``AR2``, as in the baseline. The address label does not change at any
+point. Here are the replies around the moment of the move:
 
 .. figure:: media/pmipv6-chart.png
    :align: center
@@ -539,90 +860,77 @@ around the moment of the handover:
              -o pmipv6-chart -d doc/media        ; 1200x900, transparent
    stamp:    captured 2026-09, INET 4.7
 
-The traffic stops for about a second and then continues. The correspondent node
-has been addressing one and the same destination from the first request to the
-last, so a reply plotted after the gap is a reply from the same address as one
-plotted before it. Of the 1041 requests, 1020 are answered — a loss rate of
-2.02 %. Twenty of the twenty-one missing ones are consecutive, 446 to 465, and
-they are the handover; the twenty-first is the request sent at t = 60 s, at the
-time limit, whose reply had no time to arrive.
+.. TODO: re-capture after the destination-cache fix
 
-The interruption has four parts, and almost none of it belongs to Proxy Mobile
-IPv6:
+This chart shows only the run from 29 s to 33 s, because on a 60 s axis the gap
+is too narrow to see. The replies stop after sequence number 445, at 30.270 s, and
+continue from sequence number 466, at 31.321 s. The correspondent node addresses
+the same destination from the first request to the last, so a reply after the
+gap comes from the same address as a reply before it. Of the 1041 requests,
+1020 are answered — a loss rate of 2.02 %. Twenty of the twenty-one missing
+ones are consecutive, 446 to 465, and they are the move; the twenty-first is the
+request sent at t = 60 s, at the time limit, whose reply had no time to arrive.
 
-.. list-table::
-   :header-rows: 1
+What happens in that second is below, in time order.
 
-   * - Part of the interruption
-     - Length
-   * - the radio is already unusable and the station has not noticed
-     - 0.335 s
-   * - scan, authenticate, associate — the 802.11 handover
-     - 0.651 s
-   * - Proxy Binding Update and Proxy Binding Acknowledgement
-     - 0.010 s
-   * - waiting for the next echo request
-     - 0.055 s
+**ar1 notices first.** The first request that ``ar1`` cannot deliver, number
+446, reaches the 802.11 retry limit at 30.317 s. In the baseline ``ar1`` did
+nothing with this event. Here ``ar1`` is a gateway, and it treats a frame that
+its radio could not deliver as a sign that the node has left the link (the
+:par:`detectTransmissionFailure` parameter, on by default). This is the point
+where the two runs diverge. ``ar1`` knows before the node does: the node
+notices the loss only when it misses beacons, at 30.605 s. In the same instant
+``ar1`` does three things:
 
-The four parts add up to 1.051 s. The registration is 10.0577 ms of that, and
-10 ms of it is the 5 ms link between ``core`` and the anchor, crossed once in
-each direction — a delay this showcase chooses, not a property of the protocol.
-The remaining 57.68 µs is not protocol work either: it is 41.6 µs of Ethernet
-transmission, 0.2 µs of propagation, and 15.88 µs during which the gateway held
-the update while it resolved a link-layer address. The anchor answers in the
-same event in which it receives, so no processing time appears at all.
+- It stops advertising ``2001:db8:1::/64`` on its wireless link and deletes its
+  route to the node.
+- It sends a de-registration to the anchor. This is a Proxy Binding Update with
+  the same options as before but with a lifetime of 0, which asks the anchor to
+  release the binding. Its sequence number is 2, and its handoff indicator is
+  4 again.
+- It waits for the answer before it removes its tunnel.
 
-The 802.11 handover dominates. Its first part is easy to miss: the radio is
-dead for about a third of a second before the station gives up on it. That third
-of a second is the station's own policy — it waits for a few beacons to go
-missing at the interval this network configures — rather than a fixed property
-of 802.11. The "authenticate" step is 802.11's own two-frame formality; a
-network that runs 802.1X puts a whole authentication exchange there instead, and
-that can take most of a second on its own.
+**The anchor accepts, and waits.** The de-registration reaches the anchor at
+30.323 s. It comes from the gateway that serves the node, so the anchor accepts
+it. It deletes its route for the prefix, but it does not delete the binding
+cache entry. The standard makes the anchor keep the entry for a while, called
+MinDelayBeforeBCEDelete, 10 s by default (the
+:par:`minDelayBeforeBindingCacheEntryDelete` parameter). The reason is that the
+node may reappear at another gateway, and then its mobility session can
+continue. The anchor acknowledges with status 0 and lifetime 0. At 30.328 s
+``ar1`` receives the acknowledgement, releases its binding, and deletes its
+tunnel. ``ar1``'s part in the move is over.
 
-**This ordering is not a general rule.** It holds for the two terms this network
-has: a plain 802.11 handover of about 0.65 s, and a gateway 5 ms away from its
-anchor. A network with 802.11r fast transition brings the link-layer term down
-to tens of milliseconds, while the registration grows with the distance from the
-gateway to the anchor — a few milliseconds across a metropolitan network,
-hundreds across a country. Somewhere around a 10 ms anchor link the two terms
-change places.
+.. TODO: after the destination-cache fix — where the 20 requests die and why
 
-The requests sent during the interruption are lost, and it is possible to say
-exactly where. Twenty frames hit the 802.11 retry limit at the old access
-router's radio — the same twenty requests the chart is missing — and none is
-dropped at the anchor, which keeps tunnelling them to the old access router
-until the instant it re-points the prefix. Proxy Mobile IPv6 does not hold
-traffic for a node that is between access routers, and nothing forwards it from
-the old one. Buffering it instead of dropping it is what Fast Handovers for
-Proxy Mobile IPv6 (RFC 5949) adds; this model has none.
+Proxy Mobile IPv6 does not hold traffic for a node that is between access
+routers, and nothing forwards it from the old one. Buffering it instead of
+dropping it is what Fast Handovers for Proxy Mobile IPv6 (RFC 5949) adds; this
+model has none.
 
-What the network does
-~~~~~~~~~~~~~~~~~~~~~
+**The node moves.** After it misses ``ar1``'s beacons at 30.605 s, the node
+scans. It finds nothing on the first channel and finds ``ar2`` on the second.
+It associates with ``ar2`` at 31.256 s and sends a Router Solicitation, exactly
+as in the baseline.
 
-The state that changes across the handover is the anchor's, not the node's:
+**ar2 registers the node.** ``ar2`` looks the station up in the same profile and
+sends its own Proxy Binding Update at 31.256 s. It carries the same identifier,
+link-layer identifier and home network prefix as ``ar1``'s, a lifetime of
+3600 s, and handoff indicator 4. Its sequence number is 1: this is ``ar2``'s own
+counter, and ``ar2`` does not know that ``ar1`` reached 2. A sequence number
+therefore cannot tell the anchor which update is newer. The timestamp can: it is
+the time at which the gateway sent the update, and the later update wins.
 
-.. list-table::
-   :header-rows: 1
+**The anchor re-points the prefix.** The update reaches the anchor at 31.261 s,
+well inside the 10 s wait. The anchor finds the entry by the prefix. The
+update's timestamp is later than the one it stored, so it accepts it. Because
+the entry still exists, this is a move and not a new registration: the anchor
+keeps the entry, stops the wait, creates a tunnel to ``ar2``, routes the prefix
+into it, and removes the old tunnel to ``ar1``. It answers with status 0,
+sequence number 1 and lifetime 3600. The acknowledgement reaches ``ar2`` at
+31.266 s, 10.06 ms after the update left.
 
-   * -
-     - before the move
-     - after the move
-   * - the mobile node's global address
-     - ``2001:db8:1:0:8aa:ff:fe00:b``
-     - the same address
-   * - what the mobile node stores about the move
-     - nothing
-     - nothing
-   * - the anchor's binding for the node
-     - prefix via the first gateway
-     - prefix via the second gateway
-   * - who sent the messages that changed it
-     - the first gateway
-     - the second gateway
-
-The third row of that table can be read straight out of the anchor. Here is its
-binding cache before the move and after it:
+Here is the anchor's binding cache before the move and after it:
 
 .. figure:: media/binding-cache.png
    :align: center
@@ -662,19 +970,32 @@ binding cache before the move and after it:
    stamp:    captured 2026-09, INET 4.7
 
 Before and after are the same entry: one mobile node, the same identifier and
-link-layer address, the same home network prefix. The boxed field is the only
-one that moves. The serving gateway goes from ``2001:db8:0:1::2`` to
-``2001:db8:0:2::2`` — the two access routers' addresses on their links to
-``core`` — and that single change is what re-points the node's traffic. This is
-the mobility state the claim is about, in the place the claim says it lives.
+link-layer address, the same home network prefix. The boxed field, the serving
+gateway, is the only one that moves. It goes from ``2001:db8:0:1::2`` to
+``2001:db8:0:2::2``, the two access routers' addresses on their links to
+``core``, and that single change re-points the node's traffic. The entry never
+left the cache: the de-registration removed the route and started the wait, and
+the new registration arrived before the wait ran out.
 
-The sequence chart below shows the same handover message by message. The
-``core`` router has an axis of its own because every message between an access
-router and the anchor passes through it. Watch the mobile node's axis, on the
-top. It does the ordinary 802.11 work any laptop does — scan, authenticate,
-associate — and then asks the new access router for a Router Advertisement, as
-any IPv6 host does on a link it has just joined. None of it is mobility
-signalling:
+**ar2 advertises the same prefix.** When the acknowledgement arrives, ``ar2``
+creates its end of the tunnel, routes the prefix to its wireless link, and sends
+a Router Advertisement carrying ``2001:db8:1::/64``, without waiting to be
+asked. The node receives it at 31.266 s. The prefix is one it already has, so
+it builds no new address and runs no duplicate address detection. The
+advertisement also comes from the same link-local address as ``ar1``'s did,
+because both gateways share one link-layer address. So the node's default
+router does not change either.
+
+**Traffic resumes.** Request 466 is the first to reach ``ar2``, at 31.310 s.
+``ar2`` has no neighbor cache entry for the node's home address, so it first resolves
+the node's link-layer address with a Neighbor Solicitation, and the node answers
+with a Neighbor Advertisement. Then ``ar2`` delivers the request. The reply
+takes the tunnel to the anchor and reaches ``cn`` at 31.321 s. The node's own
+Router Solicitation is answered only by ``ar2``'s periodic advertisement at
+31.402 s, after the traffic has already resumed.
+
+The sequence chart below shows the node's side of the move and ``ar2``'s
+registration, from the scan to the advertisement:
 
 .. figure:: media/sequence.png
    :align: center
@@ -734,142 +1055,60 @@ signalling:
              be windowed out without losing the scan.
    stamp:    captured 2026-09, INET 4.7
 
-It reads in four steps:
+.. TODO: re-capture after the destination-cache fix. The window 30.85-31.38 s
+   leaves out ar1's de-registration at 30.317 s and its acknowledgement: widen
+   the window (and add ar1 as an axis) or add a second chart for 30.30-30.33 s.
 
-1. The mobile node loses the first access router and scans the channels.
-2. It authenticates and associates with the second access router.
-3. That access router recognizes the node from its policy profile and sends a
-   Proxy Binding Update. The anchor re-points the home network prefix at the new
-   gateway and answers.
-4. The new access router advertises the same home network prefix on its link.
+Read the chart from left to right. On the mobile node's axis, at the top, the
+node scans, authenticates and associates with ``ar2``, and sends its Router
+Solicitation; as at the first attachment, the solicitation appears twice. Then
+the Proxy Binding Update runs from ``ar2`` through ``core`` to the anchor, and
+the Proxy Binding Acknowledgement comes back the same way. The last arrow is
+``ar2``'s unsolicited Router Advertisement to the node. The advertisement on
+the rows of ``core`` and the anchor at about 31.10 s is the anchor's
+own periodic advertisement on its link to ``core``; it is not part of the move.
+Everything on the node's axis is ordinary 802.11 and Neighbor Discovery traffic.
+None of it is mobility signalling.
 
-Two things in the chart are easy to misread. The node's request for a Router
-Advertisement appears twice because the access point re-broadcasts the same
-frame on the wireless link, not because the node asks again. And the
-advertisement drawn just after the acknowledgement is the access router's own,
-sent unprompted; the answer to the node's request arrives later still, after the
-traffic has already resumed.
+What the interruption costs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The fourth step is why the node has nothing left to do. Stateless address
-autoconfiguration is offered a prefix the node already holds, so it builds no
-address, and there is nothing for it to check before it can carry on using the
-one it has.
+The interruption lasts from the last reply before the move to the first reply
+after it. It has four parts, and almost none of it belongs to Proxy Mobile IPv6:
 
-Where the packets go
-~~~~~~~~~~~~~~~~~~~~
+.. list-table::
+   :header-rows: 1
 
-Here is the path the traffic takes after the handover:
+   * - Part of the interruption
+     - Length
+   * - the radio is already unusable and the station has not noticed
+     - 0.335 s
+   * - scan, authenticate, associate — the 802.11 handover
+     - 0.651 s
+   * - Proxy Binding Update and Proxy Binding Acknowledgement
+     - 0.010 s
+   * - the next echo request reaches the node, and its reply returns
+     - 0.055 s
 
-.. figure:: media/path.png
-   :align: center
-   :width: 80%
+The four parts add up to 1.051 s. The registration is 10.0577 ms of that, and
+10 ms of it is the 5 ms link between ``core`` and the anchor, crossed once in
+each direction — a delay this showcase chooses, not a property of the protocol.
+The de-registration adds nothing: it happens inside the first part, while the
+node has not yet noticed that it lost ``ar1``.
 
-..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     Qtenv canvas screenshot with the network route visualizer
-   config:   Pmipv6          seed: seed-set = 1
-   shows:    the routed path after the handover -- cn <- core <-> anchor and
-             core -> ar2, with the anchor's link carrying two parallel arrows
-             because every packet crosses it twice
-   launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
-             --'*.visualizer.networkRouteVisualizer.labelFormat'='""'
-             Without that override each arrow carries its packet name, and on the
-             anchor's link the two names are drawn rotated and on top of each
-             other, which is illegible and says nothing the prose needs.
-   view:     set_canvas_view {module_path:"<root>", zoom:1.0}
-   window:   run_simulation to 39.90 s in "express" mode, then to 40.10 s in
-             "fast" mode so the visualizer has fresh paths on the canvas
-   capture:  get_canvas_image {module_path:"<root>", area:"module_rectangle",
-             margin:5}; was 814x514
-   anchor:   two parallel arrows on the core-anchor link and an arrow into ar2,
-             none into ar1, and the address label still reads
-             2001:db8:1:0:8aa:ff:fe00:b. The re-anchoring happens at
-             t = 31.261193; any time after ~31.4 s shows the same picture.
-   known:    the hop from ar2 to mn is not drawn -- the tunnel makes the gateway
-             re-inject the packet, which starts a new path in PathVisualizerBase.
-             The page says so; do not "fix" it by cropping.
-             cn's node label is hidden behind the arrowhead that points at it.
-             Qtenv draws a node's name under its icon and the path ends exactly
-             there; lineWidth=2, a higher zoom and lineShiftMode="x" were all
-             tried and none of them moves it.
-   stamp:    captured 2026-09, INET 4.7
+The 802.11 handover dominates. The first part is the station's own policy: it
+waits for a few beacons to go missing at the interval this network configures.
+The "authenticate" step is 802.11's own two-frame formality; a network that runs
+802.1X puts a whole authentication exchange there instead, and that can take
+most of a second on its own.
 
-The arrows show the routed path as far as the access router serving the node;
-the last hop over the air is not drawn. Both directions run through the anchor,
-and the frame counts show the detour. The reply takes that path although the
-correspondent node is two hops the other way: the access router forwards the
-node's packets on where they came from, not on where they are going. Counted at
-the two links' Ethernet interfaces, the correspondent node's link carries 2101
-frames over the run and the anchor's carries 4195 — about two per exchange
-against about four.
-The traffic crosses the link between ``core`` and the anchor twice, on its way to
-a node that is two hops from the correspondent node's router. That is what the
-detour costs: a round trip takes 20.361 ms here against 0.312 ms in the baseline,
-where the traffic never reaches the anchor, and four crossings of the anchor's
-5 ms link account for the difference. The 5 ms is this showcase's choice, made so
-that the detour can be felt as well as seen. It is a short link by deployment
-standards: the same four crossings cost proportionally less on a faster one and
-a great deal more on a slower one, and an anchor reached across a country is the
-normal case rather than an unusual one.
-
-Here is one of those packets on the link to the anchor, with its outer header:
-
-.. figure:: media/packet.png
-   :align: center
-   :width: 80%
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     Qtenv object-inspector screenshot, cropped to the chunk list
-   config:   Pmipv6          seed: seed-set = 1
-   shows:    one encapsulated echo request on the anchor-to-gateway link: the
-             outer IPv6 header addressed 2001:db8::2 -> 2001:db8:0:2::2 around the
-             inner header addressed 2001:db8:ff:0:8aa:ff:fe00:1 ->
-             2001:db8:1:0:8aa:ff:fe00:b
-   launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
-   window:   run_simulation to ~40 s, and the last step must be in "fast" or
-             "normal" mode -- an express run does not fill Qtenv's packet log
-             buffer and list_logged_packets then returns nothing
-   capture:  list_logged_packets {module_path:"Pmipv6Showcase.anchor",
-                                  name_pattern:"ping*"}
-             pick an EthernetSignal of 170 B, name without "-reply", whose
-             hop_modules start at Pmipv6Showcase.anchor.eth[0].mac -- that is the
-             encapsulated downlink request (130 B entries are the decapsulated
-             replies, and the 170 B ones starting at core.eth[1].mac are the
-             reverse-tunnelled uplink)
-             expand_inspector_tree {object_path:"logged:<id>", type:"object",
-                                    depth:4}
-             get_inspector_screenshot {object_path:"logged:<id>", type:"object",
-                                       width:2600, height:4200}
-             crop x 72..918, y 2716..2858, then pad 12 px white -> 870x166.
-             The x bound is what matters: it must fall AFTER the inner header's
-             destinationAddress, or the figure cuts an address in half. 918 also
-             keeps both protocol fields. Ask for :width: 80% or less; the figure
-             is meant to render close to 1:1.
-   anchor:   the chunk list must read EthernetPhyHeader, EthernetMacHeader,
-             Ipv6Header (protocol = ipv6(40)), Ipv6Header (protocol = icmpv6(18)),
-             Icmpv6EchoRequestMsg, ByteCountChunk, EthernetFcs -- two IPv6 headers,
-             the outer one carrying the anchor and gateway addresses, and all four
-             addresses complete. If only one Ipv6Header appears, the packet was
-             taken off the wrong link.
-   known:    depth 4 also expands the raw bit dump, which is why the useful rows
-             sit 2700 px down; the crop is what makes the figure. The inspector
-             prints the anchor's address in its canonical short form,
-             2001:db8::2, where config.xml writes 2001:db8:0::2 -- same address,
-             and Qtenv offers no way to render the longer form.
-   stamp:    captured 2026-09, INET 4.7
-
-The outer header is addressed from the anchor to the gateway; the inner one is
-addressed from the correspondent node to the mobile node. The anchor's address
-is printed here in its shortest form, ``2001:db8::2``, which is the same address
-the route in ``config.xml`` writes as ``2001:db8:0::2``. Both ends of the
-session see the mobile node's home address throughout, and the outer header
-exists only between the gateway and the anchor.
-
-Both headers here are ordinary IPv6 and read as such in any dissector. The
-protocol's own messages are a different matter: the model gives the Proxy
-Binding Update and its Acknowledgement the values the standard defines, but not
-its byte layout, so a capture of those will not dissect against the standard.
+**This ordering is not a general rule.** It holds for the two terms this network
+has: a plain 802.11 handover of about 0.65 s, and a gateway 5 ms away from its
+anchor. A network with 802.11r fast transition brings the link-layer term down
+to tens of milliseconds, while the registration grows with the distance from the
+gateway to the anchor — a few milliseconds across a metropolitan network,
+hundreds across a country. Somewhere around a 10 ms anchor link the two terms
+change places.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Pmipv6Showcase.ned <../Pmipv6Showcase.ned>`, :download:`profiles.xml <../profiles.xml>`, :download:`config.xml <../config.xml>`, :download:`config-nopmipv6.xml <../config-nopmipv6.xml>`, :download:`movement.xml <../movement.xml>`
 
