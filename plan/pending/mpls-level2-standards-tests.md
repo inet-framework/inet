@@ -34,7 +34,7 @@ The pass delivers every output of the section "What a pass delivers" of the guid
 3. [x] **Step 3, catalogs** — `standard/rfc3031/catalog.md`, `standard/rfc3032/catalog.md`,
    `standard/rfc3443/catalog.md`, `standard/rfc5462/catalog.md`; every quote checked.
 4. [x] **Step 4, feature map** — `protocol/mpls/features.md` (`MPLS-F-*`).
-5. [ ] **Step 5, checks** — `protocol/mpls/checks.md` and `protocol/mpls/checks/*.md`, with the
+5. [x] **Step 5, checks** — `protocol/mpls/checks.md` and `protocol/mpls/checks/*.md`, with the
    closing list.
 6. [ ] **Step 6, tests** — `tests/protocol/mpls/Rfc30*.test`, `Rfc3443*.test`, and the helper
    header `MplsChecks.h`.
@@ -77,3 +77,14 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
   encoding, the label forwarding and the LAN encapsulation. ICMP is `optional`: its must holds
   only for an LSR that sends an ICMP message. Penultimate hop popping stays `mandatory`: its
   condition, an LSR that can pop at all, holds for every LSR that ends an LSP.
+- **15 checks in six files** (`encoding`, `forwarding`, `reserved-labels`, `ttl`,
+  `fragmentation`, `links`) place 99 entries; the closing list places the other 58 in 14 groups.
+  Every mandatory feature has a core check except the discard of a label without a binding,
+  which the standards map puts at level 3. The mockups use one path, A — R1 — R2 — R3 — B, on PPP
+  links, and one Ethernet variant for RFC 3032 §5. A rule makes the bindings by hand, as a label
+  distribution protocol would, for the request for penultimate hop popping and for the Explicit
+  NULL and Implicit NULL labels. A second rule fixes the Uniform Model and RFC 1812 IPv4
+  forwarding in the LSRs, so that the TTL on each link is known.
+- **IPv6 and the Router Alert label go to the closing list.** A labeled IPv6 datagram needs an
+  IPv6 mockup; the Router Alert label needs local software in the LSR and a rule for what that
+  software does, which RFC 3032 does not give. The ledger decides whether each is owed.
