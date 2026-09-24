@@ -7,9 +7,10 @@ document of the in-scope set: RFC 6842, Client Identifier Option in DHCP Server 
 January 2013. It updates RFC 2131. The catalog comes from the RFC text only. It contains no
 simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc6842.txt` — Client Identifier Option in DHCP Server Replies, January 2013. Downloaded
+- [`standards/RFC/rfc6842.txt`](../../../../../../standards/RFC/rfc6842.txt) —
+  Client Identifier Option in DHCP Server Replies, January 2013. Downloaded
   2026-09-11 from <https://www.rfc-editor.org/rfc/rfc6842.txt>.
 
 This document is four pages long, and one section of it is normative: §3, `Modification to
@@ -28,8 +29,8 @@ The state of the workflow — which statement a check targets, which test carrie
 what the run said — is **not** in this document. It lives in the coverage ledger,
 [`dhcp/coverage.md`](../../model/dhcp/coverage.md).
 
-Quotes are verbatim. A reference such as `rfc6842.txt:159` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc6842.txt:159` points to a line of that
+file.
 
 ## How to read an entry
 

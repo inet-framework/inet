@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 5213 and RFC 4283 cached; the standards map; the claims of the model | no run; no obsolete claim, unlike Mobile IPv6's split RFC 3775/RFC 6275 claim; RFC 4283 enters this protocol's in-scope set although it stays out of Mobile IPv6's, because RFC 5213 elevates it to mandatory |
+| 1 | 2026-09-23 | **1, reached** | RFC 5213 and RFC 4283 downloaded; the standards map; the claims of the model | no run; no obsolete claim, unlike Mobile IPv6's split RFC 3775/RFC 6275 claim; RFC 4283 enters this protocol's in-scope set although it stays out of Mobile IPv6's, because RFC 5213 elevates it to mandatory |

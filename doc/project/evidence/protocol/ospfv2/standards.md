@@ -28,9 +28,9 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 2328 | OSPF Version 2 | April 1998 | Internet Standard (STD 54) | `base`; obsoletes RFC 2178 | [`standard/rfc2328/`](../../standard/rfc2328/rfc2328.txt), 2026-09-23 |
+| RFC 2328 | OSPF Version 2 | April 1998 | Internet Standard (STD 54) | `base`; obsoletes RFC 2178 | [`standards/RFC/rfc2328.txt`](../../../../../../standards/RFC/rfc2328.txt), 2026-09-23 |
 | RFC 2178 | OSPF Version 2 | July 1997 | Draft Standard | obsoleted by RFC 2328; obsoletes RFC 1583 | no |
 | RFC 1583 | OSPF Version 2 | March 1994 | Draft Standard | obsoleted by RFC 2178 | no |
 | RFC 5709 | OSPFv2 HMAC-SHA Cryptographic Authentication | October 2009 | Proposed Standard | `updates` RFC 2328; `updated by` RFC 7474 | no |
@@ -43,9 +43,9 @@ What a pass actually reached is not recorded here. It is in
 | RFC 9454 | Update to OSPF Terminology | August 2023 | Proposed Standard | `updates` RFC 2328 and six other RFCs, one of them RFC 5340 | no |
 | RFC 3101 | The OSPF Not-So-Stubby Area (NSSA) Option | January 2003 | Proposed Standard | `companion`; obsoletes RFC 1587 | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc2328.txt` in [`evidence/standard/rfc2328/`](../../standard/rfc2328/) —
+- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt) —
   <https://www.rfc-editor.org/rfc/rfc2328.txt>, downloaded 2026-09-23. 244 pages, 12201 lines.
 
 RFC 2328 predates the common use of the RFC 2119 convention: it carries no upper-case

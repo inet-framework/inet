@@ -7,9 +7,10 @@ the in-scope set: RFC 4443. RFC 8200 delegates its error reports to ICMPv6, so e
 here pairs with an entry of [`rfc8200/catalog.md`](../rfc8200/catalog.md). The catalog
 comes from the RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc4443.txt` — Internet Control Message Protocol (ICMPv6) for the Internet Protocol
+- [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) —
+  Internet Control Message Protocol (ICMPv6) for the Internet Protocol
   Version 6 (IPv6) Specification, March 2006. Downloaded 2026-09-09 from
   <https://www.rfc-editor.org/rfc/rfc4443.txt>.
 
@@ -17,8 +18,8 @@ The scope of this catalog: the general rules of §2 (the source address of a mes
 processing rules of §2.4) and the error messages of §3. The informational messages of §4
 (echo request and reply) belong to an ICMPv6 protocol folder and stay out.
 
-Quotes are verbatim. A reference such as `rfc4443.txt:548` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc4443.txt:548` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

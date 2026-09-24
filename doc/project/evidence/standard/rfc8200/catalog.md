@@ -7,9 +7,10 @@ the in-scope set: RFC 8200. It lists statements of that document that a test can
 The catalog comes from the RFC text only. It contains no simulation model names and no code
 references — that mapping happens in later steps.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc8200.txt` — Internet Protocol, Version 6 (IPv6) Specification, July 2017. Downloaded
+- [`standards/RFC/rfc8200.txt`](../../../../../../standards/RFC/rfc8200.txt) —
+  Internet Protocol, Version 6 (IPv6) Specification, July 2017. Downloaded
   2026-09-09 from <https://www.rfc-editor.org/rfc/rfc8200.txt>.
 
 RFC 8200 delegates error reports to ICMPv6. Those statements belong to RFC 4443 and live in
@@ -18,8 +19,8 @@ relatives, and the override rows are in
 [`standards.md`](../../protocol/ipv6/standards.md). A feature that spans both documents is
 in [`features.md`](../../protocol/ipv6/features.md).
 
-Quotes are verbatim. A reference such as `rfc8200.txt:348` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc8200.txt:348` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

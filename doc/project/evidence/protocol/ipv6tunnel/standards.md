@@ -26,13 +26,13 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 2473 | Generic Packet Tunneling in IPv6 Specification | December 1998 | Proposed Standard | `base` | [`standard/rfc2473/`](../../standard/rfc2473/rfc2473.txt), 2026-09-23 |
+| RFC 2473 | Generic Packet Tunneling in IPv6 Specification | December 1998 | Proposed Standard | `base` | [`standards/RFC/rfc2473.txt`](../../../../../../standards/RFC/rfc2473.txt), 2026-09-23 |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc2473.txt` in [`evidence/standard/rfc2473/`](../../standard/rfc2473/) —
+- `rfc2473.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2473.txt) —
   <https://www.rfc-editor.org/rfc/rfc2473.txt>, downloaded 2026-09-23.
 
 The register shows no `obsoletes`, `obsoleted by`, `updates` or `updated by` relation for RFC

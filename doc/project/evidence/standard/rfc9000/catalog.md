@@ -6,9 +6,10 @@ This document is the step 3 artifact of the standards test workflow, for the one
 of the in-scope set: RFC 9000, the QUIC transport, May 2021. The catalog comes from the RFC
 text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc9000.txt` — QUIC: A UDP-Based Multiplexed and Secure Transport, May 2021. Downloaded
+- [`standards/RFC/rfc9000.txt`](../../../../../../standards/RFC/rfc9000.txt) —
+  QUIC: A UDP-Based Multiplexed and Secure Transport, May 2021. Downloaded
   2026-09-08 from <https://www.rfc-editor.org/rfc/rfc9000.txt>.
 
 The document is 8485 lines, and this catalog does not exhaust it. It holds the normal-path
@@ -23,8 +24,8 @@ what the run said — is **not** in this document. It lives in the coverage ledg
 catalog states what the standard says, so a new test or a new run must never force an edit
 here.
 
-Quotes are verbatim. A reference such as `rfc9000.txt:1050` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc9000.txt:1050` points to a line of that
+file.
 
 ## Index
 

@@ -30,10 +30,10 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 3550 | RTP: A Transport Protocol for Real-Time Applications | July 2003 | Draft Standard at publication, Internet Standard now | `base` | [`standard/rfc3550/`](../../standard/rfc3550/rfc3550.txt), 2026-09-23 |
-| RFC 3551 | RTP Profile for Audio and Video Conferences with Minimal Control | July 2003 | Draft Standard at publication, Internet Standard now | `base`, the profile RFC 3550 needs to be usable | [`standard/rfc3551/`](../../standard/rfc3551/rfc3551.txt), 2026-09-23 |
+| RFC 3550 | RTP: A Transport Protocol for Real-Time Applications | July 2003 | Draft Standard at publication, Internet Standard now | `base` | [`standards/RFC/rfc3550.txt`](../../../../../../standards/RFC/rfc3550.txt), 2026-09-23 |
+| RFC 3551 | RTP Profile for Audio and Video Conferences with Minimal Control | July 2003 | Draft Standard at publication, Internet Standard now | `base`, the profile RFC 3550 needs to be usable | [`standards/RFC/rfc3551.txt`](../../../../../../standards/RFC/rfc3551.txt), 2026-09-23 |
 | RFC 1889 | RTP: A Transport Protocol for Real-Time Applications | January 1996 | Proposed Standard | `obsoleted by` RFC 3550 | no |
 | RFC 1890 | RTP Profile for Audio and Video Conferences with Minimal Control | January 1996 | Proposed Standard | `obsoleted by` RFC 3551 | no |
 | RFC 2250 | RTP Payload Format for MPEG1/MPEG2 Video | January 1998 | Proposed Standard | `companion`, one specific payload format; obsoletes RFC 2038, no `updated_by` | no |
@@ -49,11 +49,11 @@ What a pass actually reached is not recorded here. It is in
 | RFC 8860 | Sending Multiple Types of Media in a Single RTP Session | January 2021 | Proposed Standard | `updates` RFC 3550, RFC 3551 | no |
 | RFC 7007 | Update to Remove DVI4 from the Recommended Codecs for the RTP Profile for Audio and Video Conferences with Minimal Control (RTP/AVP) | August 2013 | Proposed Standard | `updates` RFC 3551 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc3550.txt` in [`evidence/standard/rfc3550/`](../../standard/rfc3550/) —
+- `rfc3550.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3550.txt) —
   <https://www.rfc-editor.org/rfc/rfc3550.txt>, downloaded 2026-09-23.
-- `rfc3551.txt` in [`evidence/standard/rfc3551/`](../../standard/rfc3551/) —
+- `rfc3551.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3551.txt) —
   <https://www.rfc-editor.org/rfc/rfc3551.txt>, downloaded 2026-09-23.
 
 Both base documents were published as Draft Standard, one step short of full Internet

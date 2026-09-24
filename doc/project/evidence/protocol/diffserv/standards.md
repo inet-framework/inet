@@ -32,15 +32,15 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 2474 | Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers | December 1998 | Proposed Standard | `base`, the DS field | [`standard/rfc2474/`](../../standard/rfc2474/rfc2474.txt), 2026-09-23 |
-| RFC 2475 | An Architecture for Differentiated Services | December 1998 | Informational | `base`, the architecture | [`standard/rfc2475/`](../../standard/rfc2475/rfc2475.txt), 2026-09-23 |
-| RFC 2597 | Assured Forwarding PHB Group | June 1999 | Proposed Standard | `base`, the AF PHB | [`standard/rfc2597/`](../../standard/rfc2597/rfc2597.txt), 2026-09-23 |
-| RFC 3246 | An Expedited Forwarding PHB (Per-Hop Behavior) | March 2002 | Proposed Standard | `base`, the EF PHB; `obsoletes` RFC 2598 | [`standard/rfc3246/`](../../standard/rfc3246/rfc3246.txt), 2026-09-23 |
-| RFC 2697 | A Single Rate Three Color Marker | September 1999 | Informational | `base`, srTCM | [`standard/rfc2697/`](../../standard/rfc2697/rfc2697.txt), 2026-09-23 |
-| RFC 2698 | A Two Rate Three Color Marker | September 1999 | Informational | `base`, trTCM | [`standard/rfc2698/`](../../standard/rfc2698/rfc2698.txt), 2026-09-23 |
-| RFC 3260 | New Terminology and Clarifications for Diffserv | April 2002 | Informational | `updates` RFC 2474, RFC 2475, RFC 2597 | [`standard/rfc3260/`](../../standard/rfc3260/rfc3260.txt), 2026-09-23 |
+| RFC 2474 | Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers | December 1998 | Proposed Standard | `base`, the DS field | [`standards/RFC/rfc2474.txt`](../../../../../../standards/RFC/rfc2474.txt), 2026-09-23 |
+| RFC 2475 | An Architecture for Differentiated Services | December 1998 | Informational | `base`, the architecture | [`standards/RFC/rfc2475.txt`](../../../../../../standards/RFC/rfc2475.txt), 2026-09-23 |
+| RFC 2597 | Assured Forwarding PHB Group | June 1999 | Proposed Standard | `base`, the AF PHB | [`standards/RFC/rfc2597.txt`](../../../../../../standards/RFC/rfc2597.txt), 2026-09-23 |
+| RFC 3246 | An Expedited Forwarding PHB (Per-Hop Behavior) | March 2002 | Proposed Standard | `base`, the EF PHB; `obsoletes` RFC 2598 | [`standards/RFC/rfc3246.txt`](../../../../../../standards/RFC/rfc3246.txt), 2026-09-23 |
+| RFC 2697 | A Single Rate Three Color Marker | September 1999 | Informational | `base`, srTCM | [`standards/RFC/rfc2697.txt`](../../../../../../standards/RFC/rfc2697.txt), 2026-09-23 |
+| RFC 2698 | A Two Rate Three Color Marker | September 1999 | Informational | `base`, trTCM | [`standards/RFC/rfc2698.txt`](../../../../../../standards/RFC/rfc2698.txt), 2026-09-23 |
+| RFC 3260 | New Terminology and Clarifications for Diffserv | April 2002 | Informational | `updates` RFC 2474, RFC 2475, RFC 2597 | [`standards/RFC/rfc3260.txt`](../../../../../../standards/RFC/rfc3260.txt), 2026-09-23 |
 | RFC 1349 | Type of Service in the Internet Protocol Suite | July 1992 | Proposed Standard | `obsoleted by` RFC 2474 | no |
 | RFC 2598 | An Expedited Forwarding PHB | June 1999 | Proposed Standard | `obsoleted by` RFC 3246 | no |
 | RFC 3168 | The Addition of Explicit Congestion Notification (ECN) to IP | September 2001 | Proposed Standard | `updates` RFC 2474 | no |
@@ -48,27 +48,27 @@ What a pass actually reached is not recorded here. It is in
 | RFC 3290 | An Informal Management Model for Diffserv Routers | June 2002 | Informational | `companion` | no |
 | RFC 4115 | A Differentiated Service Two-Rate, Three-Color Marker with Efficient Handling of in-Profile Traffic | July 2005 | Informational | `companion`, an alternative to RFC 2698 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc2474.txt` in [`evidence/standard/rfc2474/`](../../standard/rfc2474/) —
+- `rfc2474.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2474.txt) —
   <https://www.rfc-editor.org/rfc/rfc2474.txt>, downloaded 2026-09-23.
-- `rfc2475.txt` in [`evidence/standard/rfc2475/`](../../standard/rfc2475/) —
+- `rfc2475.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2475.txt) —
   <https://www.rfc-editor.org/rfc/rfc2475.txt>, downloaded 2026-09-23.
-- `rfc2597.txt` in [`evidence/standard/rfc2597/`](../../standard/rfc2597/) —
+- `rfc2597.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2597.txt) —
   <https://www.rfc-editor.org/rfc/rfc2597.txt>, downloaded 2026-09-23.
-- `rfc3246.txt` in [`evidence/standard/rfc3246/`](../../standard/rfc3246/) —
+- `rfc3246.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3246.txt) —
   <https://www.rfc-editor.org/rfc/rfc3246.txt>, downloaded 2026-09-23.
-- `rfc2697.txt` in [`evidence/standard/rfc2697/`](../../standard/rfc2697/) —
+- `rfc2697.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2697.txt) —
   <https://www.rfc-editor.org/rfc/rfc2697.txt>, downloaded 2026-09-23.
-- `rfc2698.txt` in [`evidence/standard/rfc2698/`](../../standard/rfc2698/) —
+- `rfc2698.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2698.txt) —
   <https://www.rfc-editor.org/rfc/rfc2698.txt>, downloaded 2026-09-23.
-- `rfc3260.txt` in [`evidence/standard/rfc3260/`](../../standard/rfc3260/) —
+- `rfc3260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3260.txt) —
   <https://www.rfc-editor.org/rfc/rfc3260.txt>, downloaded 2026-09-23.
 
-RFC 2474 obsoletes RFC 1349 (and RFC 1455) as a whole; no predecessor text is cached. RFC
+RFC 2474 obsoletes RFC 1349 (and RFC 1455) as a whole; no predecessor text is downloaded. RFC
 3246 obsoletes RFC 2598 as a whole; RFC 3260 itself records the reason
 (`rfc3260.txt:43-45`): "RFC 2598 has been obsoleted by RFC 3246, and clarifications agreed
-by the group were incorporated in that revision." Neither obsoleted document is cached.
+by the group were incorporated in that revision." Neither obsoleted document is downloaded.
 
 Keyword use is mixed across the family. RFC 2474 has "MUST" on 21 lines, "SHOULD" on 11 and
 "MAY" on 15; RFC 2597 has 20, 6 and 7; RFC 3246 has 11, 8 and 10; RFC 3260 has 4, 3 and 0

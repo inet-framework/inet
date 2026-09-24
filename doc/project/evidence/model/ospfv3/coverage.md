@@ -49,4 +49,4 @@ needs, three of which mark code that runs (the checksum stub, the active
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 5340 cached; RFC 2328 reused from `ospfv2`; the standards map; the claims of the model | no run; no obsolete or misattributed claim; two stale/misleading comments found next to live code (`Ospfv3Process.cc:427`'s "multiarea... not supported" above a multi-area loop, and the commented-out step 4/step 5 of the routing-table calculation next to the step 3 call that does run); the LSA checksum stub repeats the OSPFv2 defect in all eight LSA classes |
+| 1 | 2026-09-23 | **1, reached** | RFC 5340 downloaded; RFC 2328 reused from `ospfv2`; the standards map; the claims of the model | no run; no obsolete or misattributed claim; two stale/misleading comments found next to live code (`Ospfv3Process.cc:427`'s "multiarea... not supported" above a multi-area loop, and the commented-out step 4/step 5 of the routing-table calculation next to the step 3 call that does run); the LSA checksum stub repeats the OSPFv2 defect in all eight LSA classes |

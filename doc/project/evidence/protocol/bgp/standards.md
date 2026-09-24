@@ -29,15 +29,15 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 4271 | A Border Gateway Protocol 4 (BGP-4) | January 2006 | Draft Standard | `base`; obsoletes RFC 1771 | [`standard/rfc4271/`](../../standard/rfc4271/rfc4271.txt), 2026-09-23 |
+| RFC 4271 | A Border Gateway Protocol 4 (BGP-4) | January 2006 | Draft Standard | `base`; obsoletes RFC 1771 | [`standards/RFC/rfc4271.txt`](../../../../../../standards/RFC/rfc4271.txt), 2026-09-23 |
 | RFC 1771 | A Border Gateway Protocol 4 (BGP-4) | March 1995 | Draft Standard | `obsoleted by` RFC 4271 | no |
-| RFC 4760 | Multiprotocol Extensions for BGP-4 | January 2007 | Draft Standard | `companion`; obsoletes RFC 2858; the multiprotocol mechanism the model uses for IPv6 | [`standard/rfc4760/`](../../standard/rfc4760/rfc4760.txt), 2026-09-23 |
-| RFC 5492 | Capabilities Advertisement with BGP-4 | February 2009 | Draft Standard | `companion`; obsoletes RFC 3392; the capability-negotiation mechanism RFC 4760 and RFC 6793 both use | [`standard/rfc5492/`](../../standard/rfc5492/rfc5492.txt), 2026-09-23 |
+| RFC 4760 | Multiprotocol Extensions for BGP-4 | January 2007 | Draft Standard | `companion`; obsoletes RFC 2858; the multiprotocol mechanism the model uses for IPv6 | [`standards/RFC/rfc4760.txt`](../../../../../../standards/RFC/rfc4760.txt), 2026-09-23 |
+| RFC 5492 | Capabilities Advertisement with BGP-4 | February 2009 | Draft Standard | `companion`; obsoletes RFC 3392; the capability-negotiation mechanism RFC 4760 and RFC 6793 both use | [`standards/RFC/rfc5492.txt`](../../../../../../standards/RFC/rfc5492.txt), 2026-09-23 |
 | RFC 8810 | Revision to Capability Codes Registration Procedures | August 2020 | Proposed Standard | `updates` RFC 5492 | no |
-| RFC 6793 | BGP Support for Four-Octet Autonomous System (AS) Number Space | December 2012 | Proposed Standard | `updates` RFC 4271; obsoletes RFC 4893 | [`standard/rfc6793/`](../../standard/rfc6793/rfc6793.txt), 2026-09-23 |
-| RFC 8212 | Default External BGP (EBGP) Route Propagation Behavior without Policies | July 2017 | Proposed Standard | `updates` RFC 4271 | [`standard/rfc8212/`](../../standard/rfc8212/rfc8212.txt), 2026-09-23 |
+| RFC 6793 | BGP Support for Four-Octet Autonomous System (AS) Number Space | December 2012 | Proposed Standard | `updates` RFC 4271; obsoletes RFC 4893 | [`standards/RFC/rfc6793.txt`](../../../../../../standards/RFC/rfc6793.txt), 2026-09-23 |
+| RFC 8212 | Default External BGP (EBGP) Route Propagation Behavior without Policies | July 2017 | Proposed Standard | `updates` RFC 4271 | [`standards/RFC/rfc8212.txt`](../../../../../../standards/RFC/rfc8212.txt), 2026-09-23 |
 | RFC 6286 | Autonomous-System-Wide Unique BGP Identifier for BGP-4 | June 2011 | Proposed Standard | `updates` RFC 4271 | no |
 | RFC 6608 | Subcodes for BGP Finite State Machine Error | May 2012 | Proposed Standard | `updates` RFC 4271 | no |
 | RFC 7606 | Revised Error Handling for BGP UPDATE Messages | August 2015 | Proposed Standard | `updates` RFC 4271, RFC 4760, RFC 4456, RFC 1997, and others | no |
@@ -52,20 +52,20 @@ What a pass actually reached is not recorded here. It is in
 | RFC 7911 | Advertisement of Multiple Paths in BGP | July 2016 | Proposed Standard | `companion` | no |
 | RFC 4456 | BGP Route Reflection: An Alternative to Full Mesh Internal BGP (IBGP) | April 2006 | Draft Standard | `companion`; obsoletes RFC 1966 and RFC 2796; updated by RFC 7606 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc4271.txt` in [`evidence/standard/rfc4271/`](../../standard/rfc4271/) —
+- `rfc4271.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4271.txt) —
   <https://www.rfc-editor.org/rfc/rfc4271.txt>, downloaded 2026-09-23.
-- `rfc4760.txt` in [`evidence/standard/rfc4760/`](../../standard/rfc4760/) —
+- `rfc4760.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4760.txt) —
   <https://www.rfc-editor.org/rfc/rfc4760.txt>, downloaded 2026-09-23.
-- `rfc5492.txt` in [`evidence/standard/rfc5492/`](../../standard/rfc5492/) —
+- `rfc5492.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5492.txt) —
   <https://www.rfc-editor.org/rfc/rfc5492.txt>, downloaded 2026-09-23.
-- `rfc6793.txt` in [`evidence/standard/rfc6793/`](../../standard/rfc6793/) —
+- `rfc6793.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6793.txt) —
   <https://www.rfc-editor.org/rfc/rfc6793.txt>, downloaded 2026-09-23.
-- `rfc8212.txt` in [`evidence/standard/rfc8212/`](../../standard/rfc8212/) —
+- `rfc8212.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8212.txt) —
   <https://www.rfc-editor.org/rfc/rfc8212.txt>, downloaded 2026-09-23.
 
-All five cached documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 4271
+All five downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 4271
 has `MUST` on 98 lines, `MUST NOT` on 9, `SHOULD` on 77, `SHALL` on 32, `MAY` on 38. RFC 4760 has
 `MUST` on 10 lines and `SHOULD` on 10. RFC 5492 has `MUST` on 11 lines and `SHOULD` on 6.
 RFC 6793 has `MUST` on 23 lines, `SHALL` on 12. RFC 8212 has `MUST` once and `SHALL` three

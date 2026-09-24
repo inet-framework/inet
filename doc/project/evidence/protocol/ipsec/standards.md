@@ -33,11 +33,11 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 4301 | Security Architecture for the Internet Protocol | December 2005 | Proposed Standard | `base` | [`standard/rfc4301/`](../../standard/rfc4301/rfc4301.txt), 2026-09-23 |
-| RFC 4302 | IP Authentication Header | December 2005 | Proposed Standard | `companion`, AH | [`standard/rfc4302/`](../../standard/rfc4302/rfc4302.txt), 2026-09-23 |
-| RFC 4303 | IP Encapsulating Security Payload (ESP) | December 2005 | Proposed Standard | `companion`, ESP | [`standard/rfc4303/`](../../standard/rfc4303/rfc4303.txt), 2026-09-23 |
+| RFC 4301 | Security Architecture for the Internet Protocol | December 2005 | Proposed Standard | `base` | [`standards/RFC/rfc4301.txt`](../../../../../../standards/RFC/rfc4301.txt), 2026-09-23 |
+| RFC 4302 | IP Authentication Header | December 2005 | Proposed Standard | `companion`, AH | [`standards/RFC/rfc4302.txt`](../../../../../../standards/RFC/rfc4302.txt), 2026-09-23 |
+| RFC 4303 | IP Encapsulating Security Payload (ESP) | December 2005 | Proposed Standard | `companion`, ESP | [`standards/RFC/rfc4303.txt`](../../../../../../standards/RFC/rfc4303.txt), 2026-09-23 |
 | RFC 2401 | Security Architecture for the Internet Protocol | November 1998 | Proposed Standard | `obsoleted by` RFC 4301 | no |
 | RFC 6040 | Tunnelling of Explicit Congestion Notification | November 2010 | Proposed Standard | `updates` RFC 4301 (and RFC 3168, RFC 4774) | no |
 | RFC 7619 | The NULL Authentication Method in IKEv2 | August 2015 | Proposed Standard | `updates` RFC 4301 | no |
@@ -50,18 +50,18 @@ What a pass actually reached is not recorded here. It is in
 | RFC 7634 | ChaCha20, Poly1305, and Their Use in IKE and IPsec | August 2015 | Proposed Standard | `companion`, cipher | no |
 | RFC 4543 | The Use of GMAC in IPsec ESP and AH | May 2006 | Proposed Standard | `companion`, cipher | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc4301.txt` in [`evidence/standard/rfc4301/`](../../standard/rfc4301/) —
+- `rfc4301.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4301.txt) —
   <https://www.rfc-editor.org/rfc/rfc4301.txt>, downloaded 2026-09-23.
-- `rfc4302.txt` in [`evidence/standard/rfc4302/`](../../standard/rfc4302/) —
+- `rfc4302.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4302.txt) —
   <https://www.rfc-editor.org/rfc/rfc4302.txt>, downloaded 2026-09-23.
-- `rfc4303.txt` in [`evidence/standard/rfc4303/`](../../standard/rfc4303/) —
+- `rfc4303.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4303.txt) —
   <https://www.rfc-editor.org/rfc/rfc4303.txt>, downloaded 2026-09-23.
 
 RFC 4301 obsoletes RFC 2401 as a whole (`December 2005`, superseding the `November 1998`
 edition); RFC 4302 obsoletes RFC 2402, and RFC 4303 obsoletes RFC 2406, in the same
-December 2005 round. No predecessor of the three current documents is cached.
+December 2005 round. No predecessor of the three current documents is downloaded.
 
 The three documents use the keywords of RFC 2119 throughout: RFC 4301 has "MUST" on 93
 lines, "SHOULD" on 42 and "MAY" on 36; RFC 4302 has 37, 18 and 8; RFC 4303 has 59, 29 and

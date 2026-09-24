@@ -7,9 +7,10 @@ the in-scope set: RFC 826, An Ethernet Address Resolution Protocol of November 1
 the Internet Standard (STD 37). The catalog comes from the RFC text only. It contains no
 simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc826.txt` — An Ethernet Address Resolution Protocol, November 1982. Downloaded
+- [`standards/RFC/rfc826.txt`](../../../../../../standards/RFC/rfc826.txt) —
+  An Ethernet Address Resolution Protocol, November 1982. Downloaded
   2026-09-11 from <https://www.rfc-editor.org/rfc/rfc826.txt>.
 
 The family of documents and the in-scope set are in
@@ -25,8 +26,8 @@ what the run said — is **not** in this document. It lives in the coverage ledg
 catalog states what the standard says, so a new test or a new run must never force an edit
 here.
 
-Quotes are verbatim. A reference such as `rfc826.txt:188-190` points to a line of the
-cached file in this folder.
+Quotes are verbatim. A reference such as `rfc826.txt:188-190` points to a line of that
+file.
 
 ## Index
 

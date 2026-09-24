@@ -8,7 +8,7 @@ pins the set that a level 2 pass tests against. RFC 5340 states its own relation
 version 2 in its own words, `rfc5340.txt:698-699`: "the basic OSPF mechanisms remain
 unchanged from those documented in [OSPFV2]. These mechanisms are briefly outlined in
 Section 4 of [OSPFV2]." A large share of the in-scope set is therefore RFC 2328 clauses that
-RFC 5340 points at, cached once and shared with [`ospfv2/standards.md`](../ospfv2/standards.md).
+RFC 5340 points at, read from the same text as [`ospfv2/standards.md`](../ospfv2/standards.md).
 
 The relationships come from the RFC-editor metadata
 (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
@@ -31,11 +31,11 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 5340 | OSPF for IPv6 | July 2008 | Proposed Standard | `base`; obsoletes RFC 2740 | [`standard/rfc5340/`](../../standard/rfc5340/rfc5340.txt), 2026-09-23 |
+| RFC 5340 | OSPF for IPv6 | July 2008 | Proposed Standard | `base`; obsoletes RFC 2740 | [`standards/RFC/rfc5340.txt`](../../../../../../standards/RFC/rfc5340.txt), 2026-09-23 |
 | RFC 2740 | OSPF for IPv6 | December 1999 | Proposed Standard | obsoleted by RFC 5340 | no |
-| RFC 2328 | OSPF Version 2 | April 1998 | Internet Standard (STD 54) | `companion`; RFC 5340 inherits its procedures, see the mapping table below | [`standard/rfc2328/`](../../standard/rfc2328/rfc2328.txt), 2026-09-23; the same cached file [`ospfv2/standards.md`](../ospfv2/standards.md) uses |
+| RFC 2328 | OSPF Version 2 | April 1998 | Internet Standard (STD 54) | `companion`; RFC 5340 inherits its procedures, see the mapping table below | [`standards/RFC/rfc2328.txt`](../../../../../../standards/RFC/rfc2328.txt), 2026-09-23; the same file [`ospfv2/standards.md`](../ospfv2/standards.md) uses |
 | RFC 6845 | OSPF Hybrid Broadcast and Point-to-Multipoint Interface Type | January 2013 | Proposed Standard | `updates` RFC 2328 and RFC 5340 | no |
 | RFC 6860 | Hiding Transit-Only Networks in OSPF | January 2013 | Proposed Standard | `updates` RFC 2328 and RFC 5340 | no |
 | RFC 7503 | OSPFv3 Autoconfiguration | April 2015 | Proposed Standard | `updates` RFC 5340 | no |
@@ -43,11 +43,11 @@ What a pass actually reached is not recorded here. It is in
 | RFC 9454 | Update to OSPF Terminology | August 2023 | Proposed Standard | `updates` RFC 5340 and six other RFCs | no |
 | RFC 5838 | Support of Address Families in OSPFv3 | April 2010 | Proposed Standard | `companion`; `updated by` RFC 6969, RFC 7949, RFC 8362, RFC 9454 | no |
 
-Source of the cached text:
+Sources of the texts:
 
-- `rfc5340.txt` in [`evidence/standard/rfc5340/`](../../standard/rfc5340/) —
+- `rfc5340.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5340.txt) —
   <https://www.rfc-editor.org/rfc/rfc5340.txt>, downloaded 2026-09-23. 94 pages, 5267 lines.
-- `rfc2328.txt` in [`evidence/standard/rfc2328/`](../../standard/rfc2328/), downloaded
+- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt), downloaded
   2026-09-23 for [`ospfv2/standards.md`](../ospfv2/standards.md); reused here, not
   re-downloaded, per the guide's rule that one document serves every protocol that uses it.
 
@@ -101,7 +101,7 @@ The set that a level 2 pass tests against:
 | Document | Version | Catalog file |
 | --- | --- | --- |
 | RFC 5340 | July 2008, Proposed Standard; §4.1 to §4.1.3, §4.2 to §4.2.2.1, §4.3, §4.3.1, §4.4.1 to §4.4.3.3, §4.4.3.8, §4.4.3.9, §4.4.4, §4.5 to §4.5.3, §4.6, §4.8, §4.8.1, §4.8.2, Appendix A.1 to A.3, A.4.1 to A.4.4, A.4.9, A.4.10 | none yet; level 2 writes `standard/rfc5340/catalog.md` |
-| RFC 2328 | April 1998, Internet Standard (STD 54); the clauses of the mapping table above | shares [`standard/rfc2328/catalog.md`](../../standard/rfc2328/) with [`ospfv2/standards.md`](../ospfv2/standards.md#in-scope-set); OSPFv3 owns no new area of it |
+| RFC 2328 | April 1998, Internet Standard (STD 54); the clauses of the mapping table above | none yet; shares `standard/rfc2328/catalog.md` with [`ospfv2/standards.md`](../ospfv2/standards.md#in-scope-set); OSPFv3 owns no new area of it |
 
 Out of scope, with the reason:
 

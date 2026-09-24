@@ -7,13 +7,14 @@ RFC 6298, the June 2011 text that obsoletes RFC 2988 and updates RFC 1122. It li
 statements that a test can check. The catalog comes from the RFC text only. It contains no
 simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc6298.txt` — Computing TCP's Retransmission Timer, June 2011. Downloaded 2026-09-11
+- [`standards/RFC/rfc6298.txt`](../../../../../../standards/RFC/rfc6298.txt) —
+  Computing TCP's Retransmission Timer, June 2011. Downloaded 2026-09-11
   from <https://www.rfc-editor.org/rfc/rfc6298.txt>.
 
-Quotes are verbatim. A reference such as `rfc6298.txt:122` points to a line of the cached
-file in this folder. The document numbers its own rules, so §2.1 below is rule (2.1) of the
+Quotes are verbatim. A reference such as `rfc6298.txt:122` points to a line of that
+file. The document numbers its own rules, so §2.1 below is rule (2.1) of the
 text.
 
 This document is small and almost entirely normative: it is one control loop, written as

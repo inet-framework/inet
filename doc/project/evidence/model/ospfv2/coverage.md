@@ -47,4 +47,4 @@ RFC 2328 Appendix C.1 and Appendix G actually govern. See
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 2328 cached; the standards map; the claims of the model | no run; one obsolete document named twice (RFC 1583), one wrong citation (RFC 3101 for `RFC1583Compatible`), two stub mechanisms found (authentication, LSA checksum validation) that a later pass must treat as defects, not omissions |
+| 1 | 2026-09-23 | **1, reached** | RFC 2328 downloaded; the standards map; the claims of the model | no run; one obsolete document named twice (RFC 1583), one wrong citation (RFC 3101 for `RFC1583Compatible`), two stub mechanisms found (authentication, LSA checksum validation) that a later pass must treat as defects, not omissions |

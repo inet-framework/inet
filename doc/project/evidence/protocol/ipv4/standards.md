@@ -30,12 +30,12 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 791 | Internet Protocol | September 1981 | Internet Standard | `base` | [`standard/rfc791/`](../../standard/rfc791/rfc791.txt), 2026-09-02 |
-| RFC 792 | Internet Control Message Protocol | September 1981 | Internet Standard | `companion` of RFC 791 (error reports) | [`standard/rfc792/`](../../standard/rfc792/rfc792.txt), 2026-09-02 |
-| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (see the note below) | [`standard/rfc1122/`](../../standard/rfc1122/rfc1122.txt), 2026-09-09 |
-| RFC 6864 | Updated Specification of the IPv4 ID Field | February 2013 | Proposed Standard | `updates` RFC 791, RFC 1122, RFC 2003 | [`standard/rfc6864/`](../../standard/rfc6864/rfc6864.txt), 2026-09-09 |
+| RFC 791 | Internet Protocol | September 1981 | Internet Standard | `base` | [`standards/RFC/rfc791.txt`](../../../../../../standards/RFC/rfc791.txt), 2026-09-02 |
+| RFC 792 | Internet Control Message Protocol | September 1981 | Internet Standard | `companion` of RFC 791 (error reports) | [`standards/RFC/rfc792.txt`](../../../../../../standards/RFC/rfc792.txt), 2026-09-02 |
+| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (see the note below) | [`standards/RFC/rfc1122.txt`](../../../../../../standards/RFC/rfc1122.txt), 2026-09-09 |
+| RFC 6864 | Updated Specification of the IPv4 ID Field | February 2013 | Proposed Standard | `updates` RFC 791, RFC 1122, RFC 2003 | [`standards/RFC/rfc6864.txt`](../../../../../../standards/RFC/rfc6864.txt), 2026-09-09 |
 | RFC 1349 | Type of Service in the Internet Protocol Suite | July 1992 | Proposed Standard | `updates` RFC 791; obsoleted by RFC 2474 | no |
 | RFC 2474 | Definition of the Differentiated Services Field | December 1998 | Proposed Standard | `updates` RFC 791; `obsoletes` RFC 1349 | no |
 | RFC 950 | Internet Standard Subnetting Procedure | August 1985 | Internet Standard | `updates` RFC 792 | no |
@@ -46,17 +46,16 @@ What the pass actually reached is not recorded here. It is in
 | RFC 1812 | Requirements for IP Version 4 Routers | June 1995 | Proposed Standard | `companion` (the router counterpart of RFC 1122) | no |
 | RFC 815 | IP Datagram Reassembly Algorithms | July 1982 | informational, legacy | `companion` (an algorithm, not a requirement) | no |
 
-Sources of the four cached texts. Each one lives in the folder of its own document,
-beside the catalog of that document, and every quote in this tree cites it by file name
-and line number:
+Sources of the four texts. Each one is in the `standards` project, outside the INET tree,
+and every quote in this tree cites it by file name and line number:
 
-- `rfc791.txt` in [`evidence/standard/rfc791/`](../../standard/rfc791) —
+- `rfc791.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc791.txt) —
   <https://www.rfc-editor.org/rfc/rfc791.txt>, downloaded 2026-09-02.
-- `rfc792.txt` in [`evidence/standard/rfc792/`](../../standard/rfc792) —
+- `rfc792.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc792.txt) —
   <https://www.rfc-editor.org/rfc/rfc792.txt>, downloaded 2026-09-02.
-- `rfc1122.txt` in [`evidence/standard/rfc1122/`](../../standard/rfc1122) —
+- `rfc1122.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc1122.txt) —
   <https://www.rfc-editor.org/rfc/rfc1122.txt>, downloaded 2026-09-09.
-- `rfc6864.txt` in [`evidence/standard/rfc6864/`](../../standard/rfc6864) —
+- `rfc6864.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6864.txt) —
   <https://www.rfc-editor.org/rfc/rfc6864.txt>, downloaded 2026-09-09.
 
 Three relationship notes, because the register alone gives the wrong picture:
@@ -78,8 +77,8 @@ Three relationship notes, because the register alone gives the wrong picture:
 ## Override table
 
 One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. The references into the four cached files are line numbers; the other
-references are clause numbers, because those texts are not cached.
+two texts disagree. The references into the four downloaded files are line numbers; the other
+references are clause numbers, because those texts are not downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
@@ -114,7 +113,7 @@ The current pass tests against these exact documents:
 
 The four documents revise by replacement, never in place, so the document identity pins
 the version by itself. A standard that revises in place (an IEEE edition, for example)
-needs the year in this table and in the file name of the cached text.
+needs the year in this table and in the file name of the downloaded text.
 
 RFC 1122 is a multi-protocol document: its §3 covers IP, ICMP and IGMP, and its §4 covers
 UDP and TCP. Only the sections named above enter the IPv4 set. The parts of §3 that stay

@@ -7,17 +7,18 @@ the in-scope set: RFC 9293, the August 2022 text that obsoletes RFC 793. It list
 statements that a test can check. The catalog comes from the RFC text only. It contains no
 simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc9293.txt` — Transmission Control Protocol (TCP), August 2022. Downloaded 2026-09-04
+- [`standards/RFC/rfc9293.txt`](../../../../../../standards/RFC/rfc9293.txt) —
+  Transmission Control Protocol (TCP), August 2022. Downloaded 2026-09-04
   from <https://www.rfc-editor.org/rfc/rfc9293.txt>.
 
 The family of TCP documents, and the reason this catalog quotes RFC 9293 and not RFC 793,
 are in [`standards.md`](../../protocol/tcp/standards.md). The features that these statements
 build are in [`features.md`](../../protocol/tcp/features.md).
 
-Quotes are verbatim. A reference such as `rfc9293.txt:337` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc9293.txt:337` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

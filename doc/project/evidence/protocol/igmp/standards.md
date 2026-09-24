@@ -32,25 +32,25 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 9776 | Internet Group Management Protocol, Version 3 | March 2025 | Internet Standard | `base`; `obsoletes` RFC 3376; `updates` RFC 2236 | [`standard/rfc9776/`](../../standard/rfc9776/rfc9776.txt), 2026-09-23 |
-| RFC 2236 | Internet Group Management Protocol, Version 2 | November 1997 | Proposed Standard | `companion`; `updates` RFC 1112; `updated by` RFC 3376 and RFC 9776; not obsoleted | [`standard/rfc2236/`](../../standard/rfc2236/rfc2236.txt), 2026-09-23 |
+| RFC 9776 | Internet Group Management Protocol, Version 3 | March 2025 | Internet Standard | `base`; `obsoletes` RFC 3376; `updates` RFC 2236 | [`standards/RFC/rfc9776.txt`](../../../../../../standards/RFC/rfc9776.txt), 2026-09-23 |
+| RFC 2236 | Internet Group Management Protocol, Version 2 | November 1997 | Proposed Standard | `companion`; `updates` RFC 1112; `updated by` RFC 3376 and RFC 9776; not obsoleted | [`standards/RFC/rfc2236.txt`](../../../../../../standards/RFC/rfc2236.txt), 2026-09-23 |
 | RFC 1112 | Host extensions for IP multicasting | August 1989 | Internet Standard | version 1; `updated by` RFC 2236; **not** marked `obsoleted by` anything in the register | no |
 | RFC 3376 | Internet Group Management Protocol, Version 3 | October 2002 | Proposed Standard | obsoleted by RFC 9776; `updates` RFC 2236; `updated by` RFC 4604 | no |
 | RFC 4604 | Using IGMPv3 and MLDv2 for Source-Specific Multicast | August 2006 | Proposed Standard | `updates` RFC 3376 and RFC 3810; not obsoleted; not shown by the register as updating RFC 9776 or RFC 9777, even though both fold its content in by reference | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc9776.txt` in [`evidence/standard/rfc9776/`](../../standard/rfc9776/) —
+- `rfc9776.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9776.txt) —
   <https://www.rfc-editor.org/rfc/rfc9776.txt>, downloaded 2026-09-23.
-- `rfc2236.txt` in [`evidence/standard/rfc2236/`](../../standard/rfc2236/) —
+- `rfc2236.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2236.txt) —
   <https://www.rfc-editor.org/rfc/rfc2236.txt>, downloaded 2026-09-23.
 
 `grep -c '\bMUST\b' rfc9776.txt` counts 48 lines, `\bSHOULD\b` counts 20, `\bMAY\b` counts 4.
 `rfc2236.txt` counts 25 `MUST` lines, 10 `SHOULD` and 6 `MAY`; both documents formally adopt
 the RFC 2119 keywords (`rfc2236.txt:44-46`). RFC 1112 predates RFC 2119 by eight years and is
-not cached; the survey lead that called it "obsoleted by RFC 2236" is not what the register
+not downloaded; the survey lead that called it "obsoleted by RFC 2236" is not what the register
 says — see the note below.
 
 Four relationship notes the register alone does not give:
@@ -82,10 +82,10 @@ Four relationship notes the register alone does not give:
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
-| Group Membership Interval, the timeout after which a router decides a group has no more members | RFC 2236 §8.4, `rfc2236.txt:979-984`: "MUST be ((the Robustness Variable) times (the Query Interval)) plus (**one** Query Response Interval)" — RFC 3376 §8.4 states the identical formula (not cached; same clause number) | RFC 9776 §8.4, `rfc9776.txt:2045-2052`: "MUST be ([Robustness Variable] times [Query Interval]) plus (**2 *** [Query Response Interval])" | RFC 9776 | **yes**, level 4 |
-| Older Version Querier Present Interval, the timeout for a v3 host to fall back to v3 after an older Query | RFC 2236/RFC 3376 §8.12 (not cached in the RFC 2236 text under this number; RFC 3376 §8.12 states "MUST be ((the Robustness Variable) times (the Query Interval in the last Query received)) plus (one Query Response Interval)", by clause) | RFC 9776 §8.12, `rfc9776.txt:2110-2122`: downgraded to "SHOULD be [Robustness Variable] times [Query Interval] plus (10 times the Max Response Time in the last received Query Message)" — a different formula and a lower keyword | RFC 9776 | **yes**, level 4 |
+| Group Membership Interval, the timeout after which a router decides a group has no more members | RFC 2236 §8.4, `rfc2236.txt:979-984`: "MUST be ((the Robustness Variable) times (the Query Interval)) plus (**one** Query Response Interval)" — RFC 3376 §8.4 states the identical formula (not downloaded; same clause number) | RFC 9776 §8.4, `rfc9776.txt:2045-2052`: "MUST be ([Robustness Variable] times [Query Interval]) plus (**2 *** [Query Response Interval])" | RFC 9776 | **yes**, level 4 |
+| Older Version Querier Present Interval, the timeout for a v3 host to fall back to v3 after an older Query | RFC 2236/RFC 3376 §8.12 (not downloaded in the RFC 2236 text under this number; RFC 3376 §8.12 states "MUST be ((the Robustness Variable) times (the Query Interval in the last Query received)) plus (one Query Response Interval)", by clause) | RFC 9776 §8.12, `rfc9776.txt:2110-2122`: downgraded to "SHOULD be [Robustness Variable] times [Query Interval] plus (10 times the Max Response Time in the last received Query Message)" — a different formula and a lower keyword | RFC 9776 | **yes**, level 4 |
 | Unrecognized message types | RFC 2236, `rfc2236.txt:123`: "Unrecognized message types **should** be silently ignored" — lower case, a description rather than the formal keyword, even though the document adopts RFC 2119 (`rfc2236.txt:44-46`) | RFC 9776, `rfc9776.txt:482`: "Unrecognized message types **MUST** be silently ignored" | RFC 9776 | **yes**, level 3 |
-| The Router Filter Mode / forwarding-suggestion table | RFC 3376 §6.3 (not cached; same table shape by clause) | RFC 9776 §6.3, `rfc9776.txt:1447-1493` (Table 7); Appendix C names this a clarification (Erratum 5562), not a new rule | RFC 9776 | yes, background — no numeric or keyword change found between the two tables |
+| The Router Filter Mode / forwarding-suggestion table | RFC 3376 §6.3 (not downloaded; same table shape by clause) | RFC 9776 §6.3, `rfc9776.txt:1447-1493` (Table 7); Appendix C names this a clarification (Erratum 5562), not a new rule | RFC 9776 | yes, background — no numeric or keyword change found between the two tables |
 | SSM-aware router and host behavior | RFC 3376 has no SSM-aware concept | RFC 4604, folded into RFC 9776 §6.4 and §8.1.2, `rfc9776.txt:834-837,1497-1501`: SSM-aware routers and hosts SHOULD ignore EXCLUDE-mode records and older-version messages in the SSM address range | RFC 9776, with RFC 4604 as the document that introduced the rule | no; level 5 |
 | Router Alert on every message | RFC 2236, `rfc2236.txt:1272`: "The IGMPv2 spec requires the presence of the IP Router Alert option" | RFC 9776, `rfc9776.txt:447-450`: "Every IGMP message described in this document is sent with... an IP Router Alert option [RFC2113] in its IP header" | RFC 9776; unchanged in substance since RFC 2236/RFC 1112 | yes, level 2 — a base-document requirement on every message, not a version conflict; see the facts in [`conformance.md`](../../model/igmp/conformance.md) |
 

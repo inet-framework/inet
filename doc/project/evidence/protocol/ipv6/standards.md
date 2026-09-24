@@ -31,16 +31,16 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 8200 | Internet Protocol, Version 6 (IPv6) Specification | July 2017 | Internet Standard (STD 86) | `base`; `obsoletes` RFC 2460 | [`standard/rfc8200/`](../../standard/rfc8200/rfc8200.txt), 2026-09-09 |
-| RFC 4443 | Internet Control Message Protocol (ICMPv6) for the IPv6 Specification | March 2006 | Internet Standard (STD 89) | `companion` of RFC 8200 (error reports); `obsoletes` RFC 2463 | [`standard/rfc4443/`](../../standard/rfc4443/rfc4443.txt), 2026-09-09 |
+| RFC 8200 | Internet Protocol, Version 6 (IPv6) Specification | July 2017 | Internet Standard (STD 86) | `base`; `obsoletes` RFC 2460 | [`standards/RFC/rfc8200.txt`](../../../../../../standards/RFC/rfc8200.txt), 2026-09-09 |
+| RFC 4443 | Internet Control Message Protocol (ICMPv6) for the IPv6 Specification | March 2006 | Internet Standard (STD 89) | `companion` of RFC 8200 (error reports); `obsoletes` RFC 2463 | [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt), 2026-09-09 |
 | RFC 2460 | Internet Protocol, Version 6 (IPv6) Specification | December 1998 | Draft Standard, obsoleted | obsoleted by RFC 8200 | no |
 | RFC 2463 | ICMPv6 for the IPv6 Specification | December 1998 | Draft Standard, obsoleted | obsoleted by RFC 4443 | no |
 | RFC 9673 | IPv6 Hop-by-Hop Options Processing Procedures | October 2024 | Proposed Standard | `updates` RFC 8200 | no |
 | RFC 4884 | Extended ICMP to Support Multi-Part Messages | May 2007 | Proposed Standard | `updates` RFC 4443 | no |
 | RFC 8201 | Path MTU Discovery for IP version 6 | July 2017 | Internet Standard | `companion` (RFC 8200 §5 strongly recommends it) | no |
-| RFC 8504 | IPv6 Node Requirements | January 2019 | Best Current Practice (BCP 220); `obsoletes` RFC 6434 | `companion` (the node requirements; the RFC 1122 of IPv6) | [`standard/rfc8504/`](../../standard/rfc8504/rfc8504.txt), 2026-09-09 |
+| RFC 8504 | IPv6 Node Requirements | January 2019 | Best Current Practice (BCP 220); `obsoletes` RFC 6434 | `companion` (the node requirements; the RFC 1122 of IPv6) | [`standards/RFC/rfc8504.txt`](../../../../../../standards/RFC/rfc8504.txt), 2026-09-09 |
 | RFC 4291 | IP Version 6 Addressing Architecture | February 2006 | Draft Standard | `companion` (RFC 8200 §3 delegates the address formats to it) | no |
 | RFC 4861 | Neighbor Discovery for IP version 6 | September 2007 | Draft Standard | `companion` (address resolution on a link; the redirect message) | no |
 | RFC 4862 | IPv6 Stateless Address Autoconfiguration | September 2007 | Draft Standard | `companion` (address configuration; duplicate address detection) | no |
@@ -50,15 +50,14 @@ What the pass actually reached is not recorded here. It is in
 | RFC 7739 | Security Implications of Predictable Fragment Identification Values | February 2016 | Informational | `companion` (identification algorithms; cited by RFC 8200 §4.5) | no |
 | RFC 6936 | Applicability Statement for IPv6 UDP Datagrams with Zero Checksums | May 2013 | Proposed Standard | `companion` (the exception to the mandatory UDP checksum) | no |
 
-Sources of the three cached texts. Each one lives in the folder of its own document, beside
-the catalog of that document, and every quote in this tree cites it by file name and line
-number:
+Sources of the three texts. Each one is in the `standards` project, outside the INET tree,
+and every quote in this tree cites it by file name and line number:
 
-- `rfc8200.txt` in [`evidence/standard/rfc8200/`](../../standard/rfc8200) —
+- `rfc8200.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8200.txt) —
   <https://www.rfc-editor.org/rfc/rfc8200.txt>, downloaded 2026-09-09.
-- `rfc4443.txt` in [`evidence/standard/rfc4443/`](../../standard/rfc4443) —
+- `rfc4443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4443.txt) —
   <https://www.rfc-editor.org/rfc/rfc4443.txt>, downloaded 2026-09-09.
-- `rfc8504.txt` in [`evidence/standard/rfc8504/`](../../standard/rfc8504) —
+- `rfc8504.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8504.txt) —
   <https://www.rfc-editor.org/rfc/rfc8504.txt>, downloaded 2026-09-09.
 
 Four relationship notes, because the register alone gives the wrong picture:
@@ -86,8 +85,9 @@ Four relationship notes, because the register alone gives the wrong picture:
 ## Override table
 
 One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. The RFC 8200 and RFC 4443 references are line numbers of the cached
-files; the other references are clause numbers, because those texts are not cached.
+two texts disagree. The RFC 8200 and RFC 4443 references are line numbers of the
+downloaded files; the other references are clause numbers, because those texts are not
+downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |

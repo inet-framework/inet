@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 9260 cached; the standards map; the claims of the model | no run; RFC 9260 is claimed nowhere; RFC 4960 is claimed pervasively, including as an enum identifier in the parameter surface; RFC 2960 is claimed once, two generations behind |
+| 1 | 2026-09-23 | **1, reached** | RFC 9260 downloaded; the standards map; the claims of the model | no run; RFC 9260 is claimed nowhere; RFC 4960 is claimed pervasively, including as an enum identifier in the parameter surface; RFC 2960 is claimed once, two generations behind |

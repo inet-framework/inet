@@ -34,11 +34,11 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 2131 | Dynamic Host Configuration Protocol | March 1997 | Draft Standard | `base`; obsoletes RFC 1541 | [`standard/rfc2131/`](../../standard/rfc2131/rfc2131.txt), 2026-09-11 |
-| RFC 2132 | DHCP Options and BOOTP Vendor Extensions | March 1997 | Draft Standard | `companion`; obsoletes RFC 1533. RFC 2131 §3 delegates the whole option set to it | [`standard/rfc2132/`](../../standard/rfc2132/rfc2132.txt), 2026-09-11 |
-| RFC 6842 | Client Identifier Option in DHCP Server Replies | January 2013 | Proposed Standard | `updates` RFC 2131 | [`standard/rfc6842/`](../../standard/rfc6842/rfc6842.txt), 2026-09-11 |
+| RFC 2131 | Dynamic Host Configuration Protocol | March 1997 | Draft Standard | `base`; obsoletes RFC 1541 | [`standards/RFC/rfc2131.txt`](../../../../../../standards/RFC/rfc2131.txt), 2026-09-11 |
+| RFC 2132 | DHCP Options and BOOTP Vendor Extensions | March 1997 | Draft Standard | `companion`; obsoletes RFC 1533. RFC 2131 §3 delegates the whole option set to it | [`standards/RFC/rfc2132.txt`](../../../../../../standards/RFC/rfc2132.txt), 2026-09-11 |
+| RFC 6842 | Client Identifier Option in DHCP Server Replies | January 2013 | Proposed Standard | `updates` RFC 2131 | [`standards/RFC/rfc6842.txt`](../../../../../../standards/RFC/rfc6842.txt), 2026-09-11 |
 | RFC 951 | Bootstrap Protocol | September 1985 | Draft Standard | `companion`; RFC 2131 §3 takes the message format from it | no |
 | RFC 1542 | Clarifications and Extensions for the Bootstrap Protocol | October 1993 | Draft Standard | `companion`; `updates` RFC 951. RFC 2131 §4.1 delegates the meaning of the BROADCAST bit and all relay agent behavior to it | no |
 | RFC 3396 | Encoding Long Options in DHCPv4 | November 2002 | Proposed Standard | `updates` RFC 2131 and RFC 2132 | no |
@@ -46,13 +46,13 @@ What the pass actually reached is not recorded here. It is in
 | RFC 5494 | IANA Allocation Guidelines for the ARP | April 2009 | Proposed Standard | `updates` RFC 2131 and RFC 2132 | no |
 | RFC 3442, RFC 3942, RFC 4833 | classless static route; reclassifying option codes; timezone options | 2002 to 2007 | Proposed Standard | `updates` RFC 2132 | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc2131.txt` in [`evidence/standard/rfc2131/`](../../standard/rfc2131/) —
+- `rfc2131.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2131.txt) —
   <https://www.rfc-editor.org/rfc/rfc2131.txt>, downloaded 2026-09-11.
-- `rfc2132.txt` in [`evidence/standard/rfc2132/`](../../standard/rfc2132/) —
+- `rfc2132.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2132.txt) —
   <https://www.rfc-editor.org/rfc/rfc2132.txt>, downloaded 2026-09-11.
-- `rfc6842.txt` in [`evidence/standard/rfc6842/`](../../standard/rfc6842/) —
+- `rfc6842.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6842.txt) —
   <https://www.rfc-editor.org/rfc/rfc6842.txt>, downloaded 2026-09-11.
 
 Each of the three documents gets its own catalog file. No other protocol in this tree uses

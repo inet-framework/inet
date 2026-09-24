@@ -31,16 +31,16 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 4861 | Neighbor Discovery for IP version 6 (IPv6) | September 2007 | Draft Standard | `base`; `obsoletes` RFC 2461 | [`standard/rfc4861/`](../../standard/rfc4861/rfc4861.txt), 2026-09-23 |
-| RFC 4862 | IPv6 Stateless Address Autoconfiguration | September 2007 | Draft Standard | `base`; `obsoletes` RFC 2462 | [`standard/rfc4862/`](../../standard/rfc4862/rfc4862.txt), 2026-09-23 |
+| RFC 4861 | Neighbor Discovery for IP version 6 (IPv6) | September 2007 | Draft Standard | `base`; `obsoletes` RFC 2461 | [`standards/RFC/rfc4861.txt`](../../../../../../standards/RFC/rfc4861.txt), 2026-09-23 |
+| RFC 4862 | IPv6 Stateless Address Autoconfiguration | September 2007 | Draft Standard | `base`; `obsoletes` RFC 2462 | [`standards/RFC/rfc4862.txt`](../../../../../../standards/RFC/rfc4862.txt), 2026-09-23 |
 | RFC 2461 | Neighbor Discovery for IP Version 6 (IPv6) | December 1998 | Draft Standard, obsoleted | obsoleted by RFC 4861 | no |
 | RFC 2462 | IPv6 Stateless Address Autoconfiguration | December 1998 | Draft Standard, obsoleted | obsoleted by RFC 4862 | no |
 | RFC 4429 | Optimistic Duplicate Address Detection (DAD) for IPv6 | April 2006 | Proposed Standard | `companion`; `updates` RFC 2461, RFC 2462 (both now obsoleted; RFC 7527 groups it with RFC 4861 and RFC 4862 as the documents it updates) | no |
-| RFC 4443 | Internet Control Message Protocol (ICMPv6) | March 2006 | Internet Standard (STD 89) | `companion`; every ND message is an ICMPv6 message | already cached, [`standard/rfc4443/`](../../standard/rfc4443/rfc4443.txt) — belongs to the ipv6 pass; referenced here, not copied |
-| RFC 5942 | IPv6 Subnet Model: The Relationship between Links and Subnet Prefixes | July 2010 | Proposed Standard | `updates` RFC 4861 | [`standard/rfc5942/`](../../standard/rfc5942/rfc5942.txt), 2026-09-23 |
-| RFC 6980 | Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery | August 2013 | Proposed Standard | `updates` RFC 4861 (also RFC 3971, out of this family) | [`standard/rfc6980/`](../../standard/rfc6980/rfc6980.txt), 2026-09-23 |
+| RFC 4443 | Internet Control Message Protocol (ICMPv6) | March 2006 | Internet Standard (STD 89) | `companion`; every ND message is an ICMPv6 message | already downloaded, [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) — belongs to the ipv6 pass; referenced here, not copied |
+| RFC 5942 | IPv6 Subnet Model: The Relationship between Links and Subnet Prefixes | July 2010 | Proposed Standard | `updates` RFC 4861 | [`standards/RFC/rfc5942.txt`](../../../../../../standards/RFC/rfc5942.txt), 2026-09-23 |
+| RFC 6980 | Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery | August 2013 | Proposed Standard | `updates` RFC 4861 (also RFC 3971, out of this family) | [`standards/RFC/rfc6980.txt`](../../../../../../standards/RFC/rfc6980.txt), 2026-09-23 |
 | RFC 7048 | Neighbor Unreachability Detection Is Too Impatient | January 2014 | Proposed Standard | `updates` RFC 4861 | no |
 | RFC 7527 | Enhanced Duplicate Address Detection | April 2015 | Proposed Standard | `updates` RFC 4429, RFC 4861, RFC 4862 | no |
 | RFC 7559 | Packet-Loss Resiliency for Router Solicitations | May 2015 | Proposed Standard | `updates` RFC 4861 | no |
@@ -52,13 +52,13 @@ What a pass actually reached is not recorded here. It is in
 | RFC 9762 | Using Router Advertisements to Signal the Availability of DHCPv6 Prefix Delegation to Clients | June 2025 | Proposed Standard | `updates` RFC 4861, RFC 4862 | no |
 | RFC 9926 | Prefix Registration for IPv6 Neighbor Discovery | February 2026 | Proposed Standard | `updates` RFC 4861 (and RPL documents RFC 6550, RFC 8505, RFC 8928, RFC 9010) | no |
 
-Source of the cached texts:
+Source of the texts:
 
 - `rfc4861.txt`, `rfc4862.txt`, `rfc5942.txt`, `rfc6980.txt` in their own folders under
   [`evidence/standard/`](../../standard/) — `https://www.rfc-editor.org/rfc/rfcNNNN.txt`,
   downloaded 2026-09-23.
 - `rfc4443.txt` is not fetched again; the ipv6 pass owns it at
-  [`standard/rfc4443/`](../../standard/rfc4443/rfc4443.txt).
+  [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt).
 
 Both documents postdate RFC 2119 and use its keywords throughout: `grep -c '\bMUST\b'
 rfc4861.txt` counts 151 lines, `\bSHOULD\b` counts 65, `\bMAY\b` counts 23. RFC 4862 counts 17
@@ -79,8 +79,8 @@ Two relationship notes the register alone does not give:
 ## Override table
 
 One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. Line references are into the cached files; a clause reference stands for
-an uncached document.
+two texts disagree. Line references are into the downloaded files; a clause reference stands for
+a document that is not downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |

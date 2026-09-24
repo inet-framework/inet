@@ -38,13 +38,13 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 9293 | Transmission Control Protocol (TCP) | August 2022 | Internet Standard | `base` | [`standard/rfc9293/`](../../standard/rfc9293/rfc9293.txt), 2026-09-08 |
+| RFC 9293 | Transmission Control Protocol (TCP) | August 2022 | Internet Standard | `base` | [`standards/RFC/rfc9293.txt`](../../../../../../standards/RFC/rfc9293.txt), 2026-09-08 |
 | RFC 793 | Transmission Control Protocol | September 1981 | Internet Standard | **obsoleted by RFC 9293** | no |
 | RFC 1122 | Requirements for Internet Hosts | October 1989 | Internet Standard | `updates` RFC 793; RFC 9293 in turn updates and replaces its TCP part | no |
-| RFC 5681 | TCP Congestion Control | September 2009 | Draft Standard | `companion` (congestion control); `obsoletes` RFC 2581 | [`standard/rfc5681/`](../../standard/rfc5681/rfc5681.txt), 2026-09-11 |
-| RFC 6298 | Computing TCP's Retransmission Timer | June 2011 | Proposed Standard | `companion`; `obsoletes` RFC 2988; `updates` RFC 1122 | [`standard/rfc6298/`](../../standard/rfc6298/rfc6298.txt), 2026-09-11 |
+| RFC 5681 | TCP Congestion Control | September 2009 | Draft Standard | `companion` (congestion control); `obsoletes` RFC 2581 | [`standards/RFC/rfc5681.txt`](../../../../../../standards/RFC/rfc5681.txt), 2026-09-11 |
+| RFC 6298 | Computing TCP's Retransmission Timer | June 2011 | Proposed Standard | `companion`; `obsoletes` RFC 2988; `updates` RFC 1122 | [`standards/RFC/rfc6298.txt`](../../../../../../standards/RFC/rfc6298.txt), 2026-09-11 |
 | RFC 7323 | TCP Extensions for High Performance | September 2014 | Proposed Standard | `companion` (window scale, timestamps); `obsoletes` RFC 1323 | no |
 | RFC 2018 | TCP Selective Acknowledgment Options | October 1996 | Proposed Standard | `companion` (SACK) | no |
 | RFC 6675 | A Conservative Loss Recovery Algorithm Based on SACK | August 2012 | Proposed Standard | `companion` (SACK loss recovery); `obsoletes` RFC 3517 | no |
@@ -63,13 +63,13 @@ sweep and its counts are in
 [`model/tcp/conformance.md`](../../model/tcp/conformance.md#the-claimed-set-is-one-standards-generation-behind).
 Each `obsoletes` relation comes from the header of the replacing text.
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc9293.txt` in [`evidence/standard/rfc9293/`](../../standard/rfc9293) —
+- `rfc9293.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9293.txt) —
   <https://www.rfc-editor.org/rfc/rfc9293.txt>, downloaded 2026-09-08.
-- `rfc6298.txt` in [`evidence/standard/rfc6298/`](../../standard/rfc6298) —
+- `rfc6298.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6298.txt) —
   <https://www.rfc-editor.org/rfc/rfc6298.txt>, downloaded 2026-09-11.
-- `rfc5681.txt` in [`evidence/standard/rfc5681/`](../../standard/rfc5681) —
+- `rfc5681.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5681.txt) —
   <https://www.rfc-editor.org/rfc/rfc5681.txt>, downloaded 2026-09-11.
 
 RFC 9293 states its own place in the family, and this is the authority for the rows above:

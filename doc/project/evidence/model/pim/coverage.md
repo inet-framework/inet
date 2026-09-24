@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 7761, RFC 3973, RFC 3956 and RFC 4607 cached; the standards map; the claims of the model | no run; two obsolete claims (RFC 4601 in the published module documentation of PIM-SM, RFC 2460 in the checksum comments of both modes); three declared limitations in `PimSm.ned`, not two; the Bootstrap and Candidate-RP-Advertisement message types have a reserved code and a discard-only receive path but no message class |
+| 1 | 2026-09-23 | **1, reached** | RFC 7761, RFC 3973, RFC 3956 and RFC 4607 downloaded; the standards map; the claims of the model | no run; two obsolete claims (RFC 4601 in the published module documentation of PIM-SM, RFC 2460 in the checksum comments of both modes); three declared limitations in `PimSm.ned`, not two; the Bootstrap and Candidate-RP-Advertisement message types have a reserved code and a discard-only receive path but no message class |

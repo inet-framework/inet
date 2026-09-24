@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 3550 and RFC 3551 cached; the standards map; the claims of the model | no run; three of five claims name a document obsoleted in 2003 (RFC 1889, RFC 1890); one names RFC 2250, current but out of scope; the one in-scope current-document claim is a single comment inside a formula, not a documentation comment; the claimed payload type 10 is excluded from the build |
+| 1 | 2026-09-23 | **1, reached** | RFC 3550 and RFC 3551 downloaded; the standards map; the claims of the model | no run; three of five claims name a document obsoleted in 2003 (RFC 1889, RFC 1890); one names RFC 2250, current but out of scope; the one in-scope current-document claim is a single comment inside a formula, not a documentation comment; the claimed payload type 10 is excluded from the build |

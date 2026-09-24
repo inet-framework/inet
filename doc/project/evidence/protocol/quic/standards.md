@@ -31,9 +31,9 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 9000 | QUIC: A UDP-Based Multiplexed and Secure Transport | May 2021 | Proposed Standard | `base` | [`standard/rfc9000/`](../../standard/rfc9000/rfc9000.txt), 2026-09-08 |
+| RFC 9000 | QUIC: A UDP-Based Multiplexed and Secure Transport | May 2021 | Proposed Standard | `base` | [`standards/RFC/rfc9000.txt`](../../../../../../standards/RFC/rfc9000.txt), 2026-09-08 |
 | RFC 9001 | Using TLS to Secure QUIC | May 2021 | Proposed Standard | `companion`; supplies the handshake that RFC 9000 requires | no |
 | RFC 9002 | QUIC Loss Detection and Congestion Control | May 2021 | Proposed Standard | `companion`; supplies the recovery that RFC 9000 requires | no |
 | RFC 8999 | Version-Independent Properties of QUIC | May 2021 | Proposed Standard | `companion`; the invariants across versions | no |
@@ -41,9 +41,9 @@ What the pass actually reached is not recorded here. It is in
 | RFC 9369 | QUIC Version 2 | May 2023 | Proposed Standard | `companion`; a second version of the wire image | no |
 | RFC 9114 | HTTP/3 | June 2022 | Proposed Standard | `companion`; an application above QUIC, not a requirement on it | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc9000.txt` in [`evidence/standard/rfc9000/`](../../standard/rfc9000/) —
+- `rfc9000.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9000.txt) —
   <https://www.rfc-editor.org/rfc/rfc9000.txt>, downloaded 2026-09-08.
 
 RFC 9000 has not been updated or obsoleted since publication. Unlike RFC 791 and RFC 793,

@@ -7,9 +7,10 @@ the in-scope set: RFC 8504, the sections of §5 that the IPv6 standards map pins
 ([`standards.md`](../../protocol/ipv6/standards.md#in-scope-set)). The catalog comes from
 the RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc8504.txt` — IPv6 Node Requirements, January 2019, Best Current Practice 220.
+- [`standards/RFC/rfc8504.txt`](../../../../../../standards/RFC/rfc8504.txt) —
+  IPv6 Node Requirements, January 2019, Best Current Practice 220.
   Downloaded 2026-09-09 from <https://www.rfc-editor.org/rfc/rfc8504.txt>.
 
 RFC 8504 is the RFC 1122 of IPv6, with one difference of form: most of its sentences say
@@ -20,8 +21,8 @@ of such a statement is the pass over the document it names. The behavior-level s
 of §5.1 and §5.2 restate and sharpen RFC 8200 §4.5, and the RFC 8200 entries that they
 govern carry an `Overridden by` field.
 
-Quotes are verbatim. A reference such as `rfc8504.txt:327` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc8504.txt:327` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

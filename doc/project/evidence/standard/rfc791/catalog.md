@@ -7,9 +7,10 @@ the in-scope set: RFC 791. It lists statements of that document that a test can 
 catalog comes from the RFC text only. It contains no simulation model names and no code
 references — that mapping happens in later steps.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc791.txt` — Internet Protocol, September 1981. Downloaded 2026-09-02 from
+- [`standards/RFC/rfc791.txt`](../../../../../../standards/RFC/rfc791.txt) —
+  Internet Protocol, September 1981. Downloaded 2026-09-02 from
   <https://www.rfc-editor.org/rfc/rfc791.txt>.
 
 RFC 791 delegates error reports to ICMP. Those statements belong to RFC 792 and live in
@@ -17,8 +18,8 @@ RFC 791 delegates error reports to ICMP. Those statements belong to RFC 792 and 
 override rows are in [`standards.md`](../../protocol/ipv4/standards.md). A feature that spans both documents is
 in [`features.md`](../../protocol/ipv4/features.md).
 
-Quotes are verbatim. A reference such as `rfc791.txt:1012` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc791.txt:1012` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

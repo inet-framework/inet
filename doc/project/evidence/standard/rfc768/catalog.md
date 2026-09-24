@@ -7,9 +7,10 @@ the in-scope set: RFC 768, the User Datagram Protocol of August 1980, still the 
 Standard. The document is three pages long, and nearly all of it is checkable. The catalog
 comes from the RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc768.txt` — User Datagram Protocol, 28 August 1980. Downloaded 2026-09-08 from
+- [`standards/RFC/rfc768.txt`](../../../../../../standards/RFC/rfc768.txt) —
+  User Datagram Protocol, 28 August 1980. Downloaded 2026-09-08 from
   <https://www.rfc-editor.org/rfc/rfc768.txt>.
 
 The error report that answers a datagram to a closed port belongs to RFC 792 and lives in
@@ -23,8 +24,8 @@ what the run said — is **not** in this document. It lives in the coverage ledg
 catalog states what the standard says, so a new test or a new run must never force an edit
 here.
 
-Quotes are verbatim. A reference such as `rfc768.txt:69` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc768.txt:69` points to a line of that
+file.
 
 ## Index
 

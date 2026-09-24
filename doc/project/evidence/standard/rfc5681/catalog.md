@@ -7,13 +7,14 @@ RFC 5681, the September 2009 text that obsoletes RFC 2581. It lists statements t
 can check. The catalog comes from the RFC text only. It contains no simulation model names
 and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc5681.txt` — TCP Congestion Control, September 2009. Downloaded 2026-09-11
+- [`standards/RFC/rfc5681.txt`](../../../../../../standards/RFC/rfc5681.txt) —
+  TCP Congestion Control, September 2009. Downloaded 2026-09-11
   from <https://www.rfc-editor.org/rfc/rfc5681.txt>.
 
-Quotes are verbatim. A reference such as `rfc5681.txt:241` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc5681.txt:241` points to a line of that
+file.
 
 The document numbers three equations that the statements below refer to by number, as the
 text does:

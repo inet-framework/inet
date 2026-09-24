@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 3031, RFC 3032, RFC 3443, RFC 5462 cached; the standards map; the claims of the model | no run; zero claims of any kind, and one verified TTL defect found while checking the claim question |
+| 1 | 2026-09-23 | **1, reached** | RFC 3031, RFC 3032, RFC 3443, RFC 5462 downloaded; the standards map; the claims of the model | no run; zero claims of any kind, and one verified TTL defect found while checking the claim question |

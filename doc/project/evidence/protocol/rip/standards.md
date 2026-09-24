@@ -29,20 +29,20 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 2453 | RIP Version 2 | November 1998 | Internet Standard (STD 56) | `base`, IPv4 | [`standard/rfc2453/`](../../standard/rfc2453/rfc2453.txt), 2026-09-23 |
-| RFC 2080 | RIPng for IPv6 | January 1997 | Proposed Standard | `base`, IPv6 | [`standard/rfc2080/`](../../standard/rfc2080/rfc2080.txt), 2026-09-23 |
+| RFC 2453 | RIP Version 2 | November 1998 | Internet Standard (STD 56) | `base`, IPv4 | [`standards/RFC/rfc2453.txt`](../../../../../../standards/RFC/rfc2453.txt), 2026-09-23 |
+| RFC 2080 | RIPng for IPv6 | January 1997 | Proposed Standard | `base`, IPv6 | [`standards/RFC/rfc2080.txt`](../../../../../../standards/RFC/rfc2080.txt), 2026-09-23 |
 | RFC 1058 | Routing Information Protocol | June 1988 | Historic | the RIP version 1 base; RFC 2453 restates its algorithm and its message format, and RFC 2080 §1.1 cites it for the theory | no |
 | RFC 1723 | RIP Version 2 — Carrying Additional Information | November 1994 | Draft Standard | `obsoleted by` RFC 2453 | no |
 | RFC 4822 | RIPv2 Cryptographic Authentication | March 2007 | Proposed Standard | `updates` RFC 2453 | no |
 | RFC 2091 | Triggered Extensions to RIP to Support Demand Circuits | January 1997 | Proposed Standard | `companion` | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc2453.txt` in [`evidence/standard/rfc2453/`](../../standard/rfc2453/) —
+- `rfc2453.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2453.txt) —
   <https://www.rfc-editor.org/rfc/rfc2453.txt>, downloaded 2026-09-23.
-- `rfc2080.txt` in [`evidence/standard/rfc2080/`](../../standard/rfc2080/) —
+- `rfc2080.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2080.txt) —
   <https://www.rfc-editor.org/rfc/rfc2080.txt>, downloaded 2026-09-23.
 
 RFC 2080 is older than RFC 2453. It cites RFC 1058 and RFC 1723, not RFC 2453, and nothing

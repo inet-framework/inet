@@ -6,9 +6,10 @@ This document is the step 3 artifact of the standards test workflow, for one doc
 in-scope set: RFC 2132, DHCP Options and BOOTP Vendor Extensions, of March 1997. The catalog
 comes from the RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc2132.txt` — DHCP Options and BOOTP Vendor Extensions, March 1997. Downloaded
+- [`standards/RFC/rfc2132.txt`](../../../../../../standards/RFC/rfc2132.txt) —
+  DHCP Options and BOOTP Vendor Extensions, March 1997. Downloaded
   2026-09-11 from <https://www.rfc-editor.org/rfc/rfc2132.txt>.
 
 RFC 2131 §3 delegates its whole option set to this document, so no DHCP message is legal
@@ -22,8 +23,8 @@ The state of the workflow — which statement a check targets, which test carrie
 what the run said — is **not** in this document. It lives in the coverage ledger,
 [`dhcp/coverage.md`](../../model/dhcp/coverage.md).
 
-Quotes are verbatim. A reference such as `rfc2132.txt:1478` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc2132.txt:1478` points to a line of that
+file.
 
 ## How to read an entry
 

@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 9776 and RFC 2236 cached; the standards map; the claims of the model | no run; one obsolete claim (RFC 3376, claimed at `Igmpv3.ned:13`); two RFC 9776 formula changes found relative to the model's defaults (Group Membership Interval, Older Version Querier Present Interval); the unrecognized-message-type rule went from a lower-case "should" to a formal MUST between RFC 2236 and RFC 9776, against code that already crashes on the case |
+| 1 | 2026-09-23 | **1, reached** | RFC 9776 and RFC 2236 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 3376, claimed at `Igmpv3.ned:13`); two RFC 9776 formula changes found relative to the model's defaults (Group Membership Interval, Older Version Querier Present Interval); the unrecognized-message-type rule went from a lower-case "should" to a formal MUST between RFC 2236 and RFC 9776, against code that already crashes on the case |

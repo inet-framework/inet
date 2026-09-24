@@ -7,9 +7,10 @@ the in-scope set: RFC 5494, IANA Allocation Guidelines for the Address Resolutio
 of April 2009, which updates RFC 826. The catalog comes from the RFC text only. It contains
 no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc5494.txt` — IANA Allocation Guidelines for the Address Resolution Protocol (ARP),
+- [`standards/RFC/rfc5494.txt`](../../../../../../standards/RFC/rfc5494.txt) —
+  IANA Allocation Guidelines for the Address Resolution Protocol (ARP),
   April 2009. Downloaded 2026-09-11 from <https://www.rfc-editor.org/rfc/rfc5494.txt>.
 
 The document is four pages of substance and it asks nothing of a host. It gives IANA the
@@ -34,8 +35,8 @@ The state of the workflow — which statement a check targets, which test carrie
 what the run said — is **not** in this document. It lives in the coverage ledger,
 [`arp/coverage.md`](../../model/arp/coverage.md).
 
-Quotes are verbatim. A reference such as `rfc5494.txt:181-183` points to a line of the
-cached file in this folder.
+Quotes are verbatim. A reference such as `rfc5494.txt:181-183` points to a line of that
+file.
 
 ## Index
 

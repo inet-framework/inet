@@ -31,23 +31,23 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 9777 | Multicast Listener Discovery Version 2 (MLDv2) for IPv6 | March 2025 | Internet Standard (STD 101) | `base`; `obsoletes` RFC 3810; `updates` RFC 2710 | [`standard/rfc9777/`](../../standard/rfc9777/rfc9777.txt), 2026-09-23 |
-| RFC 2710 | Multicast Listener Discovery (MLD) for IPv6 | October 1999 | Proposed Standard | `companion`; `updated by` RFC 3590, RFC 3810 and RFC 9777; not obsoleted | [`standard/rfc2710/`](../../standard/rfc2710/rfc2710.txt), 2026-09-23 |
+| RFC 9777 | Multicast Listener Discovery Version 2 (MLDv2) for IPv6 | March 2025 | Internet Standard (STD 101) | `base`; `obsoletes` RFC 3810; `updates` RFC 2710 | [`standards/RFC/rfc9777.txt`](../../../../../../standards/RFC/rfc9777.txt), 2026-09-23 |
+| RFC 2710 | Multicast Listener Discovery (MLD) for IPv6 | October 1999 | Proposed Standard | `companion`; `updated by` RFC 3590, RFC 3810 and RFC 9777; not obsoleted | [`standards/RFC/rfc2710.txt`](../../../../../../standards/RFC/rfc2710.txt), 2026-09-23 |
 | RFC 3810 | Multicast Listener Discovery Version 2 (MLDv2) for IPv6 | June 2004 | Proposed Standard | obsoleted by RFC 9777; `updates` RFC 2710; `updated by` RFC 4604 | no |
-| RFC 3590 | Source Address Selection for the Multicast Listener Discovery (MLD) Protocol | September 2003 | Proposed Standard | `updates` RFC 2710; not obsoleted; not named by either RFC 3810 or RFC 9777 (checked by grep, neither cached text mentions "3590") | no |
+| RFC 3590 | Source Address Selection for the Multicast Listener Discovery (MLD) Protocol | September 2003 | Proposed Standard | `updates` RFC 2710; not obsoleted; not named by either RFC 3810 or RFC 9777 (checked by grep, neither downloaded text mentions "3590") | no |
 | RFC 4604 | Using IGMPv3 and MLDv2 for Source-Specific Multicast | August 2006 | Proposed Standard | `updates` RFC 3376 and RFC 3810 (shared with [`igmp/standards.md`](../igmp/standards.md#document-list)); not shown by the register as updating RFC 9776 or RFC 9777 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc9777.txt` in [`evidence/standard/rfc9777/`](../../standard/rfc9777/) —
+- `rfc9777.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9777.txt) —
   <https://www.rfc-editor.org/rfc/rfc9777.txt>, downloaded 2026-09-23.
-- `rfc2710.txt` in [`evidence/standard/rfc2710/`](../../standard/rfc2710/) —
+- `rfc2710.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2710.txt) —
   <https://www.rfc-editor.org/rfc/rfc2710.txt>, downloaded 2026-09-23.
-- RFC 4443 (ICMPv6) is not cached again for this protocol either; every MLD message is an
-  ICMPv6 message (types 130/131/132/143), and it belongs to the ipv6 pass, already cached at
-  [`standard/rfc4443/`](../../standard/rfc4443/rfc4443.txt) — see
+- RFC 4443 (ICMPv6) is not downloaded again for this protocol either; every MLD message is an
+  ICMPv6 message (types 130/131/132/143), and it belongs to the ipv6 pass, already downloaded as
+  [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) — see
   [`ipv6/standards.md`](../ipv6/standards.md#document-list).
 
 `grep -c '\bMUST\b' rfc9777.txt` counts 44 lines, `\bSHOULD\b` counts 15, `\bMAY\b` counts 4.
@@ -106,8 +106,8 @@ Four relationship notes the register alone does not give, in the same shape as t
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
-| Multicast Address Listening Interval, the timeout after which a router decides a group has no more listeners | RFC 2710 §7.4, `rfc2710.txt:923-929`: "MUST be ((the Robustness Variable) times (the Query Interval)) plus (**one** Query Response Interval)" — RFC 3810 §9.4 states the identical formula (not cached; same clause number, same wording) | RFC 9777 §9.4, `rfc9777.txt:2551-2557`: "MUST be ([Robustness Variable] times [Query Interval]) plus **2 times** [Query Response Interval]" | RFC 9777 | **yes**, level 4 |
-| Older Version Querier Present Interval | RFC 3810 §8.2.1 (not cached; same clause as below) | RFC 9777 §9.12, `rfc9777.txt:2622-2631`: "MUST be ([Robustness Variable] times [Query Interval] in the last Query received) plus ([Query Response Interval])" — **unchanged** from RFC 3810; the register shows no formula or keyword change here, unlike IGMP's equivalent clause | RFC 9777 (no substantive change from RFC 3810) | not a conflict; background |
+| Multicast Address Listening Interval, the timeout after which a router decides a group has no more listeners | RFC 2710 §7.4, `rfc2710.txt:923-929`: "MUST be ((the Robustness Variable) times (the Query Interval)) plus (**one** Query Response Interval)" — RFC 3810 §9.4 states the identical formula (not downloaded; same clause number, same wording) | RFC 9777 §9.4, `rfc9777.txt:2551-2557`: "MUST be ([Robustness Variable] times [Query Interval]) plus **2 times** [Query Response Interval]" | RFC 9777 | **yes**, level 4 |
+| Older Version Querier Present Interval | RFC 3810 §8.2.1 (not downloaded; same clause as below) | RFC 9777 §9.12, `rfc9777.txt:2622-2631`: "MUST be ([Robustness Variable] times [Query Interval] in the last Query received) plus ([Query Response Interval])" — **unchanged** from RFC 3810; the register shows no formula or keyword change here, unlike IGMP's equivalent clause | RFC 9777 (no substantive change from RFC 3810) | not a conflict; background |
 | Unrecognized message types | RFC 2710 states no rule for an unrecognized MLD type at all (`grep -i unrecognized rfc2710.txt` finds nothing) | RFC 9777, `rfc9777.txt:765`: "Unrecognized message types MUST be silently ignored." — the rule enters the family only with MLDv2, not as an upgrade of an older statement the way IGMP's did | RFC 9777 | **yes**, level 3 |
 | Router Alert on every message | RFC 2710 §3, `rfc2710.txt:83-85`: "All MLD messages described in this document **are sent with** a link-local IPv6 Source Address, an IPv6 Hop Limit of 1, and an IPv6 Router Alert option... in a Hop-by-Hop Options header" — descriptive, no RFC 2119 keyword | RFC 9777 §5, `rfc9777.txt:738-741`: "All MLDv2 messages described in this document **MUST** be sent with a link-local IPv6 Source Address, an IPv6 Hop Limit of 1, and an IPv6 Router Alert option [RFC2711] in a Hop-by-Hop Options header" — upgraded to a formal MUST, exactly the same shape of change IGMP's Router Alert clause underwent (`igmp/standards.md`) | RFC 9777 | yes, level 2 — a base-document requirement on every message; see the facts in [`conformance.md`](../../model/mld/conformance.md) |
 | SSM-aware router and host behavior | RFC 3810 has no SSM-aware concept | RFC 4604 (a companion to both RFC 3810 and RFC 9777 by subject, though the register does not show it updating RFC 9777 directly) | RFC 9777, with RFC 4604 as the document that introduced the rule | no; level 5 |

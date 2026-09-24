@@ -18,9 +18,10 @@ the identifiers of the internet layer, and the entries of §4.1 carry identifier
 with `U`. One document holds all three, because one document owns the `RFC1122-*`
 identifiers; a reader of any of the three protocols reads the same text.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc1122.txt` — Requirements for Internet Hosts — Communication Layers, October 1989.
+- [`standards/RFC/rfc1122.txt`](../../../../../../standards/RFC/rfc1122.txt) —
+  Requirements for Internet Hosts — Communication Layers, October 1989.
   Downloaded 2026-09-09 from <https://www.rfc-editor.org/rfc/rfc1122.txt>.
 
 RFC 1122 speaks for hosts. It restates the rules of RFC 791 with the keywords of its §1.3.2
@@ -29,8 +30,8 @@ what a host does with a datagram it cannot process, and when a host must stay si
 an entry restates an RFC 791 statement, the RFC 791 entry carries an `Overridden by` field
 that points here; the test targets the entry that governs.
 
-Quotes are verbatim. A reference such as `rfc1122.txt:1686` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc1122.txt:1686` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledgers,

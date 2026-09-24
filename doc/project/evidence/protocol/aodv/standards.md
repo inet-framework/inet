@@ -28,16 +28,16 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [`standard/rfc3561/`](../../standard/rfc3561/rfc3561.txt), 2026-09-23 |
-| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [`standard/rfc5148/`](../../standard/rfc5148/rfc5148.txt), 2026-09-23 |
+| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [`standards/RFC/rfc3561.txt`](../../../../../../standards/RFC/rfc3561.txt), 2026-09-23 |
+| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [`standards/RFC/rfc5148.txt`](../../../../../../standards/RFC/rfc5148.txt), 2026-09-23 |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc3561.txt` in [`evidence/standard/rfc3561/`](../../standard/rfc3561/) —
+- `rfc3561.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3561.txt) —
   <https://www.rfc-editor.org/rfc/rfc3561.txt>, downloaded 2026-09-23.
-- `rfc5148.txt` in [`evidence/standard/rfc5148/`](../../standard/rfc5148/) —
+- `rfc5148.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5148.txt) —
   <https://www.rfc-editor.org/rfc/rfc5148.txt>, downloaded 2026-09-23.
 
 Neither document has an `obsoletes`, `obsoleted_by`, `updates` or `updated_by` entry in the

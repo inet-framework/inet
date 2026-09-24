@@ -29,9 +29,22 @@ Facts that shaped the plan:
 1. [x] Download the `.txt` of the 61 RFCs of the evidence tree into `standards/RFC/`, and check
    that each one equals the copy in the INET tree. Done: all 61 are identical. `standards/RFC/`
    now holds 61 `.txt` and the 17 `.docx` of the user.
-2. [ ] The guide: step 1, the table of steps, the naming paragraph and "Where everything lives"
-   say where the texts live now.
-3. [ ] The evidence tree links to `standards/RFC/rfcNNNN.txt`, and the 61 copies leave the tree.
+2. [x] The guide: step 1, the table of steps, the naming paragraph and "Where everything lives"
+   say where the texts live now. Done in `5c2c632978`.
+3. [x] The evidence tree links to `standards/RFC/rfcNNNN.txt`, and the 61 copies leave the tree.
+   Done: 128 links in 34 files point into `../standards/RFC/`, and the 17 catalogs link their
+   source text there. `evidence/standard/` keeps only the 17 folders with a `catalog.md`.
 4. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
+
+- The links had three forms: a link to the text file, a link to the text folder with a slash,
+  and a link to the folder without a slash. One rewrite covered all three.
+- "Cached" in the prose became "downloaded": the texts are still downloaded from the RFC Editor,
+  but INET no longer keeps a copy. "The cached mapping" of ARP stays, because it names the ARP
+  cache.
+- The link gate resolves a link outside the INET tree: with `rfc2453.txt` hidden, the gate
+  reported two missing files in `rip/standards.md`. So the local gate also checks that the
+  `standards` project is complete.
+- The two plans in `plan/done/` that name `standard/rfcNNNN/rfcNNNN.txt` are history and stay
+  as they are.

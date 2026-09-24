@@ -6,9 +6,10 @@ This document is the step 3 artifact of the standards test workflow, for one doc
 the in-scope set: RFC 6864, which updates RFC 791 and RFC 1122. The catalog comes from the
 RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc6864.txt` — Updated Specification of the IPv4 ID Field, February 2013. Downloaded
+- [`standards/RFC/rfc6864.txt`](../../../../../../standards/RFC/rfc6864.txt) —
+  Updated Specification of the IPv4 ID Field, February 2013. Downloaded
   2026-09-09 from <https://www.rfc-editor.org/rfc/rfc6864.txt>.
 
 RFC 6864 narrows the meaning of the identification field to fragmentation and reassembly,
@@ -23,8 +24,8 @@ of datagram, and every entry below depends on the distinction:
 > "Atomic datagrams: (DF==1)&&(MF==0)&&(frag_offset==0)" — `rfc6864.txt:331`
 > "Non-atomic datagrams: (DF==0)||(MF==1)||(frag_offset>0)" — `rfc6864.txt:333`
 
-Quotes are verbatim. A reference such as `rfc6864.txt:354` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc6864.txt:354` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

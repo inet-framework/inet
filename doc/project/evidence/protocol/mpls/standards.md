@@ -32,12 +32,12 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 3031 | Multiprotocol Label Switching Architecture | January 2001 | Proposed Standard | `base`, architecture | [`standard/rfc3031/`](../../standard/rfc3031/rfc3031.txt), 2026-09-23 |
-| RFC 3032 | MPLS Label Stack Encoding | January 2001 | Proposed Standard | `base`, wire encoding | [`standard/rfc3032/`](../../standard/rfc3032/rfc3032.txt), 2026-09-23 |
-| RFC 3443 | Time To Live (TTL) Processing in Multi-Protocol Label Switching (MPLS) Networks | January 2003 | Proposed Standard | `updates` RFC 3032 | [`standard/rfc3443/`](../../standard/rfc3443/rfc3443.txt), 2026-09-23 |
-| RFC 5462 | MPLS Label Stack Entry: "EXP" Field Renamed to "Traffic Class" Field | February 2009 | Proposed Standard | `updates` RFC 3032 (and RFC 3443, among others) | [`standard/rfc5462/`](../../standard/rfc5462/rfc5462.txt), 2026-09-23 |
+| RFC 3031 | Multiprotocol Label Switching Architecture | January 2001 | Proposed Standard | `base`, architecture | [`standards/RFC/rfc3031.txt`](../../../../../../standards/RFC/rfc3031.txt), 2026-09-23 |
+| RFC 3032 | MPLS Label Stack Encoding | January 2001 | Proposed Standard | `base`, wire encoding | [`standards/RFC/rfc3032.txt`](../../../../../../standards/RFC/rfc3032.txt), 2026-09-23 |
+| RFC 3443 | Time To Live (TTL) Processing in Multi-Protocol Label Switching (MPLS) Networks | January 2003 | Proposed Standard | `updates` RFC 3032 | [`standards/RFC/rfc3443.txt`](../../../../../../standards/RFC/rfc3443.txt), 2026-09-23 |
+| RFC 5462 | MPLS Label Stack Entry: "EXP" Field Renamed to "Traffic Class" Field | February 2009 | Proposed Standard | `updates` RFC 3032 (and RFC 3443, among others) | [`standards/RFC/rfc5462.txt`](../../../../../../standards/RFC/rfc5462.txt), 2026-09-23 |
 | RFC 6178 | Label Edge Router Forwarding of IPv4 Option Packets | March 2011 | Proposed Standard | `updates` RFC 3031 | no |
 | RFC 4182 | Removing a Restriction on the use of MPLS Explicit NULL | September 2005 | Proposed Standard | `updates` RFC 3032 (and RFC 5462, RFC 7274 update it in turn) | no |
 | RFC 7274 | Allocating and Retiring Special-Purpose MPLS Labels | June 2014 | Proposed Standard | `updates` RFC 3032, RFC 3209, and others | no |
@@ -51,15 +51,15 @@ What a pass actually reached is not recorded here. It is in
 | RFC 2205 | Resource ReSerVation Protocol (RSVP) | September 1997 | Proposed Standard | `companion`; the base document of a separate protocol, out of scope | no |
 | RFC 3209 | RSVP-TE: Extensions to RSVP for LSP Tunnels | December 2001 | Proposed Standard | `companion`; the base document of a separate protocol, out of scope | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc3031.txt` in [`evidence/standard/rfc3031/`](../../standard/rfc3031/) —
+- `rfc3031.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3031.txt) —
   <https://www.rfc-editor.org/rfc/rfc3031.txt>, downloaded 2026-09-23.
-- `rfc3032.txt` in [`evidence/standard/rfc3032/`](../../standard/rfc3032/) —
+- `rfc3032.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3032.txt) —
   <https://www.rfc-editor.org/rfc/rfc3032.txt>, downloaded 2026-09-23.
-- `rfc3443.txt` in [`evidence/standard/rfc3443/`](../../standard/rfc3443/) —
+- `rfc3443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3443.txt) —
   <https://www.rfc-editor.org/rfc/rfc3443.txt>, downloaded 2026-09-23.
-- `rfc5462.txt` in [`evidence/standard/rfc5462/`](../../standard/rfc5462/) —
+- `rfc5462.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5462.txt) —
   <https://www.rfc-editor.org/rfc/rfc5462.txt>, downloaded 2026-09-23.
 
 Neither base document uses the keywords of RFC 2119 heavily. RFC 3031 has "MUST" on 10

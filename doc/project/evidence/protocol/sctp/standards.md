@@ -31,9 +31,9 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 9260 | Stream Control Transmission Protocol | June 2022 | Proposed Standard | `base` | [`standard/rfc9260/`](../../standard/rfc9260/rfc9260.txt), 2026-09-23 |
+| RFC 9260 | Stream Control Transmission Protocol | June 2022 | Proposed Standard | `base` | [`standards/RFC/rfc9260.txt`](../../../../../../standards/RFC/rfc9260.txt), 2026-09-23 |
 | RFC 4960 | Stream Control Transmission Protocol | September 2007 | Proposed Standard | `obsoleted by` RFC 9260 | no |
 | RFC 2960 | Stream Control Transmission Protocol | October 2000 | Proposed Standard | `obsoleted by` RFC 4960, two generations behind RFC 9260 | no |
 | RFC 4460 | Stream Control Transmission Protocol (SCTP) Specification Errata and Issues | April 2006 | Informational | `obsoleted by` RFC 9260; folded into it | no |
@@ -51,12 +51,12 @@ What a pass actually reached is not recorded here. It is in
 | RFC 3649 | HighSpeed TCP for Large Congestion Windows | December 2003 | Experimental | `companion`, a TCP congestion-control algorithm; SCTP is not its subject | no |
 | RFC 1982 | Serial Number Arithmetic | August 1996 | Proposed Standard | `companion`, a generic wraparound-comparison algorithm; not about SCTP | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc9260.txt` in [`evidence/standard/rfc9260/`](../../standard/rfc9260/) —
+- `rfc9260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9260.txt) —
   <https://www.rfc-editor.org/rfc/rfc9260.txt>, downloaded 2026-09-23.
 
-Every other document of this family stays uncached in this pass: the four errata/registration
+Every other document of this family is not downloaded in this pass: the four errata/registration
 documents RFC 9260 already folds in (RFC 4460, RFC 6096, RFC 7053, RFC 8540), the two older
 generations (RFC 4960, RFC 2960), the generic registry and math documents (RFC 6335,
 RFC 1982), the still-standing extension RFC 8899, and the four level-5 extensions. None of them
@@ -108,5 +108,5 @@ Out of scope, with the reason:
 | RFC 6951 (SCTP over UDP) | 5 | A separate encapsulation of the whole protocol for a host that cannot send SCTP directly; the base association uses SCTP directly over IP. |
 | RFC 6335, RFC 1982 | out of scope at every level | Generic tools (a port-registry procedure, a wraparound-comparison algorithm) that RFC 9260 itself cites (`rfc9260.txt:751,762,6734`); neither states SCTP-specific behavior. |
 | RFC 6356, RFC 3649 | 5, and only if concurrent multipath transfer (CMT) enters scope | Alternative congestion-control algorithms for a multipath association; CMT itself is an Internet-Draft family (draft-tuexen and related), not a stable RFC, and is out of scope at every level of this pass for that reason as well as the level. |
-| NR-SACK (draft-natarajan-tsvwg-sctp-nrsack) | 5, and unstable | An Internet-Draft, not permanently hosted at a stable `rfc-editor.org` URL. When this area enters scope, cite the exact draft revision and quote by its own clause numbers, per the guide's rule for an uncached document. |
+| NR-SACK (draft-natarajan-tsvwg-sctp-nrsack) | 5, and unstable | An Internet-Draft, not permanently hosted at a stable `rfc-editor.org` URL. When this area enters scope, cite the exact draft revision and quote by its own clause numbers, per the guide's rule for a text without stable line numbers. |
 | CMT (draft-tuexen and related; also referenced as draft-stewart-sctp-pktdrprep in the model's own change log) | 5, and unstable | Concurrent multipath transfer is a family of Internet-Drafts, not one stable document; the same citation rule applies. |

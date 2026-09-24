@@ -28,21 +28,21 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 826 | An Ethernet Address Resolution Protocol | November 1982 | Internet Standard (STD 37) | `base` | [`standard/rfc826/`](../../standard/rfc826/rfc826.txt), 2026-09-11 |
-| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§2.3.2, one paragraph of §2.3.3 and one of §2.4: the ARP host requirements) | [`standard/rfc1122/`](../../standard/rfc1122/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 and UDP |
-| RFC 5494 | IANA Allocation Guidelines for the Address Resolution Protocol (ARP) | April 2009 | Proposed Standard | `updates` RFC 826 | [`standard/rfc5494/`](../../standard/rfc5494/rfc5494.txt), 2026-09-11 |
+| RFC 826 | An Ethernet Address Resolution Protocol | November 1982 | Internet Standard (STD 37) | `base` | [`standards/RFC/rfc826.txt`](../../../../../../standards/RFC/rfc826.txt), 2026-09-11 |
+| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§2.3.2, one paragraph of §2.3.3 and one of §2.4: the ARP host requirements) | [`standards/RFC/rfc1122.txt`](../../../../../../standards/RFC/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 and UDP |
+| RFC 5494 | IANA Allocation Guidelines for the Address Resolution Protocol (ARP) | April 2009 | Proposed Standard | `updates` RFC 826 | [`standards/RFC/rfc5494.txt`](../../../../../../standards/RFC/rfc5494.txt), 2026-09-11 |
 | RFC 5227 | IPv4 Address Conflict Detection | July 2008 | Proposed Standard | `updates` RFC 826 | no |
 | RFC 903 | A Reverse Address Resolution Protocol | June 1984 | Internet Standard | `companion`; a separate protocol in the same packet format | no |
 | RFC 1027 | Using ARP to Implement Transparent Subnet Gateways | October 1987 | Unknown status | `companion`; proxy ARP | no |
 | RFC 1868 | ARP Extension — UNARP | November 1995 | Experimental | `companion`; never a standards-track update | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc826.txt` in [`evidence/standard/rfc826/`](../../standard/rfc826/) —
+- `rfc826.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc826.txt) —
   <https://www.rfc-editor.org/rfc/rfc826.txt>, downloaded 2026-09-11.
-- `rfc5494.txt` in [`evidence/standard/rfc5494/`](../../standard/rfc5494/) —
+- `rfc5494.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5494.txt) —
   <https://www.rfc-editor.org/rfc/rfc5494.txt>, downloaded 2026-09-11.
 
 The RFC 1122 catalog is the one that IPv4 and UDP use. IPv4 owns the entries of §3 there,

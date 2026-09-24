@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 6275 cached; the standards map; the claims of the model | no run; nine places claim the obsolete RFC 3775 while the serializer already claims RFC 6275; RFC 4877 and RFC 5095 are out of scope by the register and unclaimed |
+| 1 | 2026-09-23 | **1, reached** | RFC 6275 downloaded; the standards map; the claims of the model | no run; nine places claim the obsolete RFC 3775 while the serializer already claims RFC 6275; RFC 4877 and RFC 5095 are out of scope by the register and unclaimed |

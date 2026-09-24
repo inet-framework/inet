@@ -27,17 +27,17 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 6275 | Mobility Support in IPv6 | July 2011 | Proposed Standard | `base`, obsoletes RFC 3775 | [`standard/rfc6275/`](../../standard/rfc6275/rfc6275.txt), 2026-09-23 |
+| RFC 6275 | Mobility Support in IPv6 | July 2011 | Proposed Standard | `base`, obsoletes RFC 3775 | [`standards/RFC/rfc6275.txt`](../../../../../../standards/RFC/rfc6275.txt), 2026-09-23 |
 | RFC 3775 | Mobility Support in IPv6 | June 2004 | Proposed Standard | `obsoleted by` RFC 6275 | no |
 | RFC 4877 | Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture | April 2007 | Proposed Standard | `updates` RFC 3776, a document outside this family | no |
 | RFC 5095 | Deprecation of Type 0 Routing Headers in IPv6 | December 2007 | Proposed Standard | `updates` RFC 2460 and RFC 4294, both outside this family | no |
 | RFC 4283 | Mobile Node Identifier Option for Mobile IPv6 (MIPv6) | December 2005 | Proposed Standard | `companion`; no formal register relation to RFC 6275 | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc6275.txt` in [`evidence/standard/rfc6275/`](../../standard/rfc6275/) —
+- `rfc6275.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6275.txt) —
   <https://www.rfc-editor.org/rfc/rfc6275.txt>, downloaded 2026-09-23. This copy is shared with
   the Proxy Mobile IPv6 pass; see [`pmipv6/standards.md`](../pmipv6/standards.md).
 

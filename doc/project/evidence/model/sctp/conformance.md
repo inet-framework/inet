@@ -95,5 +95,5 @@ claim question, and the pass must check each one):
    still calls "sack immediately" a feature added on top of the base.
 3. **NR-SACK and CMT have no citable stable document.** Any later pass that reaches level 5
    for either one must cite an exact Internet-Draft revision and quote by its own clause
-   numbers, per the guide's rule for an uncached, non-permanent text
+   numbers, per the guide's rule for a text without stable line numbers
    ([`standards.md`](../../protocol/sctp/standards.md#in-scope-set)).

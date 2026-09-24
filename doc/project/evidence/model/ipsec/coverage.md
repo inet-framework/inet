@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 4301, RFC 4302, RFC 4303 cached; the standards map; the claims of the model | no run; no obsolete claim; five stated refusals in the model's own words; one bare TODO (ICV verification) that is a claim, not a refusal |
+| 1 | 2026-09-23 | **1, reached** | RFC 4301, RFC 4302, RFC 4303 downloaded; the standards map; the claims of the model | no run; no obsolete claim; five stated refusals in the model's own words; one bare TODO (ICV verification) that is a claim, not a refusal |

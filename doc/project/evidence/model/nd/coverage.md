@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 4861, RFC 4862, RFC 5942 and RFC 6980 cached; the standards map; the claims of the model | no run; two obsolete claims (RFC 2461, RFC 2462), one claim outside the in-scope set (RFC 4429), one declined document with a stated reason (RFC 7527) |
+| 1 | 2026-09-23 | **1, reached** | RFC 4861, RFC 4862, RFC 5942 and RFC 6980 downloaded; the standards map; the claims of the model | no run; two obsolete claims (RFC 2461, RFC 2462), one claim outside the in-scope set (RFC 4429), one declined document with a stated reason (RFC 7527) |

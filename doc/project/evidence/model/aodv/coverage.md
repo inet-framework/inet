@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 3561 and RFC 5148 cached; the standards map; the claims of the model | no run; no obsolete claim; one claim (local repair) reads as a refusal but is a claim by the guide's own rule, because the switch already exists |
+| 1 | 2026-09-23 | **1, reached** | RFC 3561 and RFC 5148 downloaded; the standards map; the claims of the model | no run; no obsolete claim; one claim (local repair) reads as a refusal but is a claim by the guide's own rule, because the switch already exists |

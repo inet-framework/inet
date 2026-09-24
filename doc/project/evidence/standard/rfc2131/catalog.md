@@ -7,9 +7,10 @@ of the in-scope set: RFC 2131, the Dynamic Host Configuration Protocol of March 
 catalog comes from the RFC text only. It contains no simulation model names and no code
 references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc2131.txt` — Dynamic Host Configuration Protocol, March 1997. Downloaded 2026-09-11
+- [`standards/RFC/rfc2131.txt`](../../../../../../standards/RFC/rfc2131.txt) —
+  Dynamic Host Configuration Protocol, March 1997. Downloaded 2026-09-11
   from <https://www.rfc-editor.org/rfc/rfc2131.txt>.
 
 The options that every DHCP message carries belong to RFC 2132 and live in
@@ -25,14 +26,14 @@ what the run said — is **not** in this document. It lives in the coverage ledg
 catalog states what the standard says, so a new test or a new run must never force an edit
 here.
 
-Quotes are verbatim. A reference such as `rfc2131.txt:1241` points to a line of the cached
-file in this folder. Where a quote crosses a page break of the RFC, the reference names
+Quotes are verbatim. A reference such as `rfc2131.txt:1241` points to a line of that
+file. Where a quote crosses a page break of the RFC, the reference names
 both line groups.
 
 ## How to read an entry
 
 - **ID** — `RFC2131-AREA-n`. The ID is stable forever. New entries go at the end of an area.
-- **Quote** — the verbatim sentence, with a line reference into the cached file.
+- **Quote** — the verbatim sentence, with a line reference into that file.
 - **Strength** — the word the document uses. RFC 2131 §1.4 defines `MUST`, `MUST NOT`,
   `SHOULD`, `SHOULD NOT` and `MAY` in capitals, `rfc2131.txt:243-293`. The document also
   states rules in lowercase prose and in two tables. The entry records what is written:

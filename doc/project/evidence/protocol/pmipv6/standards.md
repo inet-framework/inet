@@ -5,8 +5,8 @@
 Step 2 artifact of the standards test workflow. This document maps the family of standards
 around Proxy Mobile IPv6, records which document governs each contested clause, and pins the
 set that a level 2 pass tests against. Proxy Mobile IPv6 reuses the Mobility Header that
-[Mobile IPv6](../mipv6/standards.md) defines; this pass reads the RFC 6275 text cached there and
-does not cache a second copy.
+[Mobile IPv6](../mipv6/standards.md) defines; this pass reads the same RFC 6275 text as that
+pass.
 
 The relationships come from the RFC-editor metadata
 (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
@@ -29,23 +29,23 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 5213 | Proxy Mobile IPv6 | August 2008 | Proposed Standard | `base` | [`standard/rfc5213/`](../../standard/rfc5213/rfc5213.txt), 2026-09-23 |
-| RFC 4283 | Mobile Node Identifier Option for Mobile IPv6 (MIPv6) | December 2005 | Proposed Standard | `companion`, made mandatory for this exchange by RFC 5213 (see override table) | [`standard/rfc4283/`](../../standard/rfc4283/rfc4283.txt), 2026-09-23 |
-| RFC 6275 | Mobility Support in IPv6 | July 2011 | Proposed Standard | `companion`; the Mobility Header this document's messages extend | [`standard/rfc6275/`](../../standard/rfc6275/rfc6275.txt), cached by the [Mobile IPv6 pass](../mipv6/standards.md), 2026-09-23 |
+| RFC 5213 | Proxy Mobile IPv6 | August 2008 | Proposed Standard | `base` | [`standards/RFC/rfc5213.txt`](../../../../../../standards/RFC/rfc5213.txt), 2026-09-23 |
+| RFC 4283 | Mobile Node Identifier Option for Mobile IPv6 (MIPv6) | December 2005 | Proposed Standard | `companion`, made mandatory for this exchange by RFC 5213 (see override table) | [`standards/RFC/rfc4283.txt`](../../../../../../standards/RFC/rfc4283.txt), 2026-09-23 |
+| RFC 6275 | Mobility Support in IPv6 | July 2011 | Proposed Standard | `companion`; the Mobility Header this document's messages extend | [`standards/RFC/rfc6275.txt`](../../../../../../standards/RFC/rfc6275.txt), downloaded by the [Mobile IPv6 pass](../mipv6/standards.md), 2026-09-23 |
 | RFC 6543 | Reserved IPv6 Interface Identifier for Proxy Mobile IPv6 | May 2012 | Proposed Standard | `updates` RFC 5213 | no |
 | RFC 7864 | Proxy Mobile IPv6 Extensions to Support Flow Mobility | May 2016 | Proposed Standard | `updates` RFC 5213 | no |
 | RFC 5844 | IPv4 Support for Proxy Mobile IPv6 | May 2010 | Proposed Standard | `companion`; adds IPv4 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc5213.txt` in [`evidence/standard/rfc5213/`](../../standard/rfc5213/) —
+- `rfc5213.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5213.txt) —
   <https://www.rfc-editor.org/rfc/rfc5213.txt>, downloaded 2026-09-23.
-- `rfc4283.txt` in [`evidence/standard/rfc4283/`](../../standard/rfc4283/) —
+- `rfc4283.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4283.txt) —
   <https://www.rfc-editor.org/rfc/rfc4283.txt>, downloaded 2026-09-23.
-- `rfc6275.txt` — same file as [`evidence/standard/rfc6275/`](../../standard/rfc6275/), cached by
-  the Mobile IPv6 pass; not re-downloaded.
+- `rfc6275.txt` — same file as [`standards/RFC/`](../../../../../../standards/RFC/rfc6275.txt), downloaded by
+  the Mobile IPv6 pass; not downloaded again.
 
 RFC 5213 is a Proposed Standard with no `obsoletes` and no `obsoleted by` in the register: it is
 the current, sole base document, with no predecessor for a claim to fall behind.
@@ -53,7 +53,7 @@ the current, sole base document, with no predecessor for a claim to fall behind.
 **RFC 5213 depends on RFC 6275, under its old number.** RFC 5213 predates RFC 6275 by three
 years and cites the Mobility Header base document throughout as "[RFC3775]" — 58 lines, for
 example `rfc5213.txt:920,1090,1094,2850,2868`. Two of those citations point at specific sections
-this pass checked directly against the cached RFC 6275 text: `rfc5213.txt:1090` ("the local
+this pass checked directly against the RFC 6275 text: `rfc5213.txt:1090` ("the local
 mobility anchor MUST observe the rules described in Section 9.2 of [RFC3775] when processing the
 Mobility Header") matches RFC 6275 §9.2 ("Processing Mobility Headers", `rfc6275.txt:4319`), and
 `rfc5213.txt:1094` ("the local mobility anchor MUST ignore the check... related to the presence
@@ -61,7 +61,7 @@ of the Home Address destination option") matches RFC 6275 §10.3.1 ("Primary Car
 Registration", `rfc6275.txt:5026`), which does state that check (`rfc6275.txt:5074`, "A Home
 Address destination option MUST be present in the message"). RFC 6275 keeps RFC 3775's section
 numbering (see [`mipv6/standards.md`](../mipv6/standards.md#document-list)), so PMIPv6's
-dependency stands on the cached RFC 6275 text without adjustment. A third rule, at
+dependency stands on the RFC 6275 text without adjustment. A third rule, at
 `rfc5213.txt:2868` ("the mobile access gateway MUST ignore any checks... related to the presence
 of a Type 2 Routing header in the Proxy Binding Acknowledgement message"), points at RFC 6275
 §6.4 ("Type 2 Routing Header", `rfc6275.txt:3064`).

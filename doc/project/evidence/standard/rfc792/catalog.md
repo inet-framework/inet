@@ -9,9 +9,10 @@ with [`rfc791/catalog.md`](../rfc791/catalog.md), and the port unreachable entry
 UDP, [`rfc768/catalog.md`](../rfc768/catalog.md). The catalog comes from
 the RFC text only. It contains no simulation model names and no code references.
 
-Source, cached in this folder:
+Source, in the `standards` project beside the INET tree:
 
-- `rfc792.txt` — Internet Control Message Protocol, September 1981. Downloaded 2026-09-02
+- [`standards/RFC/rfc792.txt`](../../../../../../standards/RFC/rfc792.txt) —
+  Internet Control Message Protocol, September 1981. Downloaded 2026-09-02
   from <https://www.rfc-editor.org/rfc/rfc792.txt>.
 
 The scope of this catalog is narrow by intent: the two messages that report the failures of
@@ -19,8 +20,8 @@ the RFC 791 checks, and the one that answers a UDP datagram to a closed port. Th
 ICMP messages (echo, source quench, redirect, timestamp, information request) are out of
 scope in this pass.
 
-Quotes are verbatim. A reference such as `rfc792.txt:215` points to a line of the cached
-file in this folder.
+Quotes are verbatim. A reference such as `rfc792.txt:215` points to a line of that
+file.
 
 The state of the workflow — which statement a check targets, which test carries it, and
 what the run said — is **not** in this document. It lives in the coverage ledger,

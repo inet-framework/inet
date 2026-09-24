@@ -27,18 +27,18 @@ What the pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 768 | User Datagram Protocol | 28 August 1980 | Internet Standard (STD 6) | `base` | [`standard/rfc768/`](../../standard/rfc768/rfc768.txt), 2026-09-08 |
-| RFC 792 | Internet Control Message Protocol | September 1981 | Internet Standard | `companion` (the port unreachable report) | [`standard/rfc792/`](../../standard/rfc792/rfc792.txt), 2026-09-02; one copy, shared with IPv4 |
+| RFC 768 | User Datagram Protocol | 28 August 1980 | Internet Standard (STD 6) | `base` | [`standards/RFC/rfc768.txt`](../../../../../../standards/RFC/rfc768.txt), 2026-09-08 |
+| RFC 792 | Internet Control Message Protocol | September 1981 | Internet Standard | `companion` (the port unreachable report) | [`standards/RFC/rfc792.txt`](../../../../../../standards/RFC/rfc792.txt), 2026-09-02; one copy, shared with IPv4 |
 | RFC 9868 | Transport Options for UDP | October 2025 | Proposed Standard | `updates` RFC 768 | no |
-| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§4.1, the UDP host requirements) | [`standard/rfc1122/`](../../standard/rfc1122/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 |
+| RFC 1122 | Requirements for Internet Hosts — Communication Layers | October 1989 | Internet Standard | `companion` (§4.1, the UDP host requirements) | [`standards/RFC/rfc1122.txt`](../../../../../../standards/RFC/rfc1122.txt), 2026-09-09; one copy, shared with IPv4 |
 | RFC 8085 | UDP Usage Guidelines | March 2017 | Best Current Practice | `companion`; guidance for applications, not requirements on the UDP module | no |
 | RFC 6935, RFC 6936 | IPv6 and UDP checksums for tunneled packets; applicability | May 2013 | Proposed Standard | `companion`; IPv6 only | no |
 
-Source of the cached text:
+Source of the text:
 
-- `rfc768.txt` in [`evidence/standard/rfc768/`](../../standard/rfc768/) —
+- `rfc768.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc768.txt) —
   <https://www.rfc-editor.org/rfc/rfc768.txt>, downloaded 2026-09-08.
 
 The RFC 792 catalog is the one that IPv4 uses; the level 2 pass added one entry to it, the

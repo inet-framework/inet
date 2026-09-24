@@ -41,4 +41,4 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-09-23 | **1, reached** | RFC 2473 cached; the standards map; the claims of the model | no run; no obsolete claim; the claim reaches beyond this protocol's own directory into the generic IPv6 module and into Mobile IPv6's own copy of the same mechanism |
+| 1 | 2026-09-23 | **1, reached** | RFC 2473 downloaded; the standards map; the claims of the model | no run; no obsolete claim; the claim reaches beyond this protocol's own directory into the generic IPv6 module and into Mobile IPv6's own copy of the same mechanism |

@@ -33,31 +33,31 @@ What a pass actually reached is not recorded here. It is in
 
 ## Document list
 
-| Document | Title | Date | Status | Relation | Cached |
+| Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 7761 | Protocol Independent Multicast - Sparse Mode (PIM-SM): Protocol Specification (Revised) | March 2016 | Internet Standard (STD 83) | `base`, Sparse Mode; obsoletes RFC 4601 | [`standard/rfc7761/`](../../standard/rfc7761/rfc7761.txt), 2026-09-23 |
+| RFC 7761 | Protocol Independent Multicast - Sparse Mode (PIM-SM): Protocol Specification (Revised) | March 2016 | Internet Standard (STD 83) | `base`, Sparse Mode; obsoletes RFC 4601 | [`standards/RFC/rfc7761.txt`](../../../../../../standards/RFC/rfc7761.txt), 2026-09-23 |
 | RFC 4601 | Protocol Independent Multicast - Sparse Mode (PIM-SM): Protocol Specification (Revised) | August 2006 | Proposed Standard | `obsoleted by` RFC 7761 | no |
-| RFC 3973 | Protocol Independent Multicast - Dense Mode (PIM-DM): Protocol Specification (Revised) | January 2005 | Experimental | `base`, Dense Mode; no obsoletes, no obsoleted by | [`standard/rfc3973/`](../../standard/rfc3973/rfc3973.txt), 2026-09-23 |
+| RFC 3973 | Protocol Independent Multicast - Dense Mode (PIM-DM): Protocol Specification (Revised) | January 2005 | Experimental | `base`, Dense Mode; no obsoletes, no obsoleted by | [`standards/RFC/rfc3973.txt`](../../../../../../standards/RFC/rfc3973.txt), 2026-09-23 |
 | RFC 9436 | PIM Message Type Space Extension and Reserved Bits | August 2023 | Proposed Standard | `updates` RFC 7761, RFC 3973, and others; obsoletes RFC 8736 | no |
 | RFC 8736 | PIM Message Type Space Extension and Reserved Bits | February 2020 | Proposed Standard | `updates` RFC 7761, RFC 3973, and others; `obsoleted by` RFC 9436 | no |
-| RFC 3956 | Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast Address | November 2004 | Proposed Standard | `companion`; updates RFC 3306 | [`standard/rfc3956/`](../../standard/rfc3956/rfc3956.txt), 2026-09-23 |
-| RFC 4607 | Source-Specific Multicast for IP | August 2006 | Proposed Standard | `companion` | [`standard/rfc4607/`](../../standard/rfc4607/rfc4607.txt), 2026-09-23 |
+| RFC 3956 | Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast Address | November 2004 | Proposed Standard | `companion`; updates RFC 3306 | [`standards/RFC/rfc3956.txt`](../../../../../../standards/RFC/rfc3956.txt), 2026-09-23 |
+| RFC 4607 | Source-Specific Multicast for IP | August 2006 | Proposed Standard | `companion` | [`standards/RFC/rfc4607.txt`](../../../../../../standards/RFC/rfc4607.txt), 2026-09-23 |
 | RFC 5059 | Bootstrap Router (BSR) Mechanism for Protocol Independent Multicast (PIM) | January 2008 | Proposed Standard | `companion`; updates RFC 4601; obsoletes RFC 2362 | no |
 | RFC 8200 | Internet Protocol, Version 6 (IPv6) Specification | July 2017 | Internet Standard | `companion`, checksum pseudo-header only; obsoletes RFC 2460 | no |
 | RFC 2460 | Internet Protocol, Version 6 (IPv6) Specification | December 1998 | Draft Standard | `obsoleted by` RFC 8200 | no |
 
-Source of the cached texts:
+Source of the texts:
 
-- `rfc7761.txt` in [`evidence/standard/rfc7761/`](../../standard/rfc7761/) —
+- `rfc7761.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc7761.txt) —
   <https://www.rfc-editor.org/rfc/rfc7761.txt>, downloaded 2026-09-23.
-- `rfc3973.txt` in [`evidence/standard/rfc3973/`](../../standard/rfc3973/) —
+- `rfc3973.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3973.txt) —
   <https://www.rfc-editor.org/rfc/rfc3973.txt>, downloaded 2026-09-23.
-- `rfc3956.txt` in [`evidence/standard/rfc3956/`](../../standard/rfc3956/) —
+- `rfc3956.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3956.txt) —
   <https://www.rfc-editor.org/rfc/rfc3956.txt>, downloaded 2026-09-23.
-- `rfc4607.txt` in [`evidence/standard/rfc4607/`](../../standard/rfc4607/) —
+- `rfc4607.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4607.txt) —
   <https://www.rfc-editor.org/rfc/rfc4607.txt>, downloaded 2026-09-23.
 
-All four cached documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 7761
+All four downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 7761
 has `MUST` on 51 lines and `SHOULD` on 43; RFC 3973 has `MUST` on 129 lines and `SHOULD` on 37;
 RFC 3956 has `MUST` on 14 lines and `SHOULD` on 4; RFC 4607 has `MUST` on 18 lines and
 `SHOULD` on 9.
