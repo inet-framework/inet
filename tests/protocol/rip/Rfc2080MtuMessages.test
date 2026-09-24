@@ -1,0 +1,243 @@
+%description:
+
+RFC 2080 -- a router with more routes than one message holds splits its update into several
+messages within the MTU and loses no route.
+
+Checks RFC2080-GEN-4 and MSG-11 (description) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/response-contents.md#messages-limited-by-the-mtu-ripng;
+the program steps below map onto its expected observations. Mapping of the pair on IPv6: every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+netB on R2.eth1. "On L1, from R1" is the named interface of the router, R1.eth[1].mac, as it
+sends a frame to the lower layer.
+
+The static routes of R1 come from manual routes of the network configurator, through host A.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const char *ROUTES[80] = {
+    "2001:db8:100:1::", "2001:db8:100:2::", "2001:db8:100:3::", "2001:db8:100:4::", "2001:db8:100:5::", "2001:db8:100:6::",
+    "2001:db8:100:7::", "2001:db8:100:8::", "2001:db8:100:9::", "2001:db8:100:a::", "2001:db8:100:b::", "2001:db8:100:c::",
+    "2001:db8:100:d::", "2001:db8:100:e::", "2001:db8:100:f::", "2001:db8:100:10::", "2001:db8:100:11::", "2001:db8:100:12::",
+    "2001:db8:100:13::", "2001:db8:100:14::", "2001:db8:100:15::", "2001:db8:100:16::", "2001:db8:100:17::", "2001:db8:100:18::",
+    "2001:db8:100:19::", "2001:db8:100:1a::", "2001:db8:100:1b::", "2001:db8:100:1c::", "2001:db8:100:1d::", "2001:db8:100:1e::",
+    "2001:db8:100:1f::", "2001:db8:100:20::", "2001:db8:100:21::", "2001:db8:100:22::", "2001:db8:100:23::", "2001:db8:100:24::",
+    "2001:db8:100:25::", "2001:db8:100:26::", "2001:db8:100:27::", "2001:db8:100:28::", "2001:db8:100:29::", "2001:db8:100:2a::",
+    "2001:db8:100:2b::", "2001:db8:100:2c::", "2001:db8:100:2d::", "2001:db8:100:2e::", "2001:db8:100:2f::", "2001:db8:100:30::",
+    "2001:db8:100:31::", "2001:db8:100:32::", "2001:db8:100:33::", "2001:db8:100:34::", "2001:db8:100:35::", "2001:db8:100:36::",
+    "2001:db8:100:37::", "2001:db8:100:38::", "2001:db8:100:39::", "2001:db8:100:3a::", "2001:db8:100:3b::", "2001:db8:100:3c::",
+    "2001:db8:100:3d::", "2001:db8:100:3e::", "2001:db8:100:3f::", "2001:db8:100:40::", "2001:db8:100:41::", "2001:db8:100:42::",
+    "2001:db8:100:43::", "2001:db8:100:44::", "2001:db8:100:45::", "2001:db8:100:46::", "2001:db8:100:47::", "2001:db8:100:48::",
+    "2001:db8:100:49::", "2001:db8:100:4a::", "2001:db8:100:4b::", "2001:db8:100:4c::", "2001:db8:100:4d::", "2001:db8:100:4e::",
+    "2001:db8:100:4f::", "2001:db8:100:50::"
+};
+
+static simtime_t roundAt;
+static int messages;
+static std::set<std::pair<std::string, int>> seen;
+
+static int entryCount(const Packet *p) { return (int)ripOf(p)->getEntryArraySize(); }
+
+static bool entriesWithinLimit(const Packet *p)
+{
+    int count = entryCount(p);
+    return require(count >= 1 && count <= 72, "a message holds " + std::to_string(count) + " entries, outside 1 to 72");
+}
+
+static void collect(const Packet *p)
+{
+    auto rip = ripOf(p);
+    messages++;
+    for (size_t i = 0; i < rip->getEntryArraySize(); i++)
+        seen.insert({rip->getEntry(i).address.str(), rip->getEntry(i).prefixLength});
+}
+
+static bool has(const char *address, int prefixLength) { return seen.count({L3Address(address).str(), prefixLength}) > 0; }
+
+static bool allRoutesSeen()
+{
+    if (!has("2001:db8:1::", 64))
+        return false;
+    for (auto r : ROUTES)
+        if (!has(r, 64))
+            return false;
+    return true;
+}
+
+Define_ProtocolTestProgram()
+{
+    messages = 0;
+    seen.clear();
+    return ProtocolTest("rfc2080_mtu_messages")
+        // Expected observation 1: after 60 s, on L1, from R1, a message to the multicast group;
+        // the periodic update starts. Its entries count toward observation 2 and the union.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 60 && isUpdate(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return entriesWithinLimit(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { roundAt = c.event.time; collect(c.event.packet); return true; })
+                  .describe("after 60 s, the first message of a periodic update of R1 on L1")
+                  .within(100.0))
+        // Expected observation 2: every message of the update, within 1 s, holds 1 to 72 entries.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!isUpdate(c.event.packet) || c.event.time > roundAt + 1)
+                          return false;
+                      int count = entryCount(c.event.packet);
+                      return count < 1 || count > 72;
+                  })
+                  .describe("a message of the update with an entry count outside 1 to 72")
+                  .within(1.0)))
+        // Expected observations 3: within 1 s, the messages of the update together hold netA and
+        // every static route.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!isUpdate(c.event.packet) || c.event.time > roundAt + 1)
+                          return false;
+                      collect(c.event.packet);
+                      return allRoutesSeen();
+                  })
+                  .describe("the message that completes the update: netA and every static route held")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_mtu_messages compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --netB-- host B (IPv6).
+network RipngPair
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:5::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:6::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:7::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:8::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:9::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:a::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:b::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:c::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:d::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:e::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:f::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:10::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:11::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:12::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:13::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:14::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:15::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:16::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:17::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:18::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:19::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1a::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1b::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1c::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1d::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1e::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:1f::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:20::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:21::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:22::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:23::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:24::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:25::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:26::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:27::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:28::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:29::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2a::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2b::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2c::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2d::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2e::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:2f::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:30::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:31::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:32::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:33::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:34::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:35::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:36::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:37::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:38::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:39::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3a::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3b::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3c::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3d::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3e::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:3f::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:40::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:41::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:42::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:43::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:44::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:45::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:46::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:47::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:48::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:49::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4a::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4b::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4c::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4d::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4e::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:4f::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "<route hosts='R1' destination='2001:db8:100:50::/64' gateway='2001:db8:1::10' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=300,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=500,200"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngPair
+sim-time-limit = 110s
+seed-set = 0
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_mtu_messages: PASS

@@ -6,9 +6,9 @@ longer one.
 Checks RFC2453-RESP-9 and RESP-12 (description) from
 doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
 doc/project/evidence/protocol/rip/checks/route-learning.md#shorter-path-kept-rip-version-2;
-the program steps below map onto its expected observations. Mapping of the triangle : every
-node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
-L2 on R2.eth1 and R3.eth0, L3 on R1.eth2 and R3.eth1, netC on R3.eth2. "On L1, from R1" is the
+the program steps below map onto its expected observations. Mapping of the triangle: every node
+keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0, L2
+on R2.eth1 and R3.eth0, L3 on R1.eth2 and R3.eth1, netC on R3.eth2. "On L1, from R1" is the
 named interface of the router, R1.eth[1].mac, as it sends a frame to the lower layer.
 
 %includes:

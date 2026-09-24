@@ -1,0 +1,145 @@
+%description:
+
+RFC 2080 -- a new route that arrives during the garbage collection of the old one clears the
+garbage-collection timer.
+
+Checks RFC2080-TIMER-7 (must) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/route-expiry.md#garbage-collection-ended-by-a-new-route-ripng;
+the program steps below map onto its expected observations. Mapping of the pair on IPv6: every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+netB on R2.eth1. "On L1, from R1" is the named interface of the router, R1.eth[1].mac, as it
+sends a frame to the lower layer.
+
+The link between host A and R1 goes down at 100 s and comes back at 130 s, and R1 fails at 200
+s by a crash, all from the scenario manager.
+
+Defect: when the link of netA comes back at 130 s, R1 never advertises netA again. The IPv6
+routing table deletes the on-link routes of an interface when its carrier goes down
+(src/inet/networklayer/ipv6/Ipv6RoutingTable.cc:187-189) and adds nothing back when the carrier
+returns, and RIP re-imports an interface route only on the routeAdded signal
+(src/inet/routing/rip/Rip.cc:357-371). The IPv4 routing table restores the routes
+(Ipv4RoutingTable::updateNetmaskRoutes), which is why the IPv4 twin passes. The new route of
+observation 3 never arrives, so the check never reaches observation 4, the garbage-collection
+rule of RFC 2080 section 2.3 that it exists for. The defect belongs to the router as a whole:
+RFC 2080 section 2 has the router set up the entries of its directly-connected networks. This
+test FAILS, and the failure is deliberately NOT declared expected. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static simtime_t deletedAt;
+static const char *NET_A = "2001:db8:1::";
+static const int PLEN = 64;
+
+Define_ProtocolTestProgram()
+{
+    deletedAt = -1;
+    return ProtocolTest("rfc2080_garbage_collection")
+        // Expected observation 1: before 100 s, on netB, from R2, an update that holds netA with
+        // metric 2.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time < 100 && isUpdateWith(c.event.packet, NET_A, PLEN, 2); })
+                  .describe("before 100 s, an update of R2 on netB that holds netA with metric 2")
+                  .within(100.0))
+        // Expected observation 2: between 100 and 112 s, an update of R2 on netB that holds netA
+        // with metric 16; record its instant.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 100 && isUpdateWith(c.event.packet, NET_A, PLEN, 16); })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time <= 112, "R2 withdrew netA at " + c.event.time.str() + " s, after 112 s");
+                  })
+                  .assertEvent([](const MatchContext& c) { deletedAt = c.event.time; return true; })
+                  .describe("between 100 and 112 s, an update of R2 on netB that holds netA with metric 16")
+                  .within(150.0))
+        // Expected observation 3: after 130 s and before t_del + 120 s, an update of R2 on netB
+        // that holds netA with metric 2 -- the new route arrived during the garbage collection.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 130 && isUpdateWith(c.event.packet, NET_A, PLEN, 2); })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time < deletedAt + 120, "the new route appeared at " + c.event.time.str() + " s, after the garbage collection would have ended");
+                  })
+                  .describe("after 130 s, an update of R2 on netB that holds netA with metric 2 again")
+                  .within(150.0))
+        // Expected observation 4: every periodic update of R2 on netB from t_del + 125 s to 340 s
+        // holds netA with metric 2 (the marker of R2 on netB is L1).
+        .meanwhile(never(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time >= deletedAt + 125 && c.event.time <= 340 && isPeriodicUpdate(c.event.packet, "2001:db8:12::", PLEN)
+                             && metricOf(c.event.packet, NET_A, PLEN) != 2;
+                  })
+                  .describe("a periodic update of R2 on netB after the old garbage collection that does not hold netA with metric 2")
+                  .within(250.0)))
+        // The window of observation 4 runs to 340 s: wait for a periodic update after 330 s.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 330 && isPeriodicUpdate(c.event.packet, "2001:db8:12::", PLEN); })
+                  .describe("a periodic update of R2 on netB after 330 s")
+                  .within(250.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_garbage_collection compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --netB-- host B (IPv6).
+network RipngPair
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=300,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=500,200"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><disconnect src-module='hostA' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[0]'/></at><at t='130'><connect src-module='hostA' src-gate='ethg[0]' dest-module='R1' dest-gate='ethg[0]' channel-type='inet.node.ethernet.Eth100M'/></at><at t='200'><crash module='R1'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngPair
+sim-time-limit = 380s
+seed-set = 0
+**.hasStatus = true
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_garbage_collection: PASS

@@ -1,0 +1,179 @@
+%description:
+
+RFC 2080 -- three changes within 0.6 seconds leave in at most two triggered updates, at least 1
+second apart.
+
+Checks RFC2080-TRIG-1 (must, "requires") and TRIG-2 (should) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/triggered-update.md#rate-of-triggered-updates-ripng;
+the program steps below map onto its expected observations. Mapping of the pair with three
+stubs on IPv6: every node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on
+R1.eth1 and R2.eth0, netB on R2.eth1, netA1, netA2 and netA3 on R1.eth2, eth3 and eth4. "On L1,
+from R1" is the named interface of the router, R1.eth[1].mac, as it sends a frame to the lower
+layer.
+
+The links of the three stubs go down at 100.0, 100.3 and 100.6 s by disconnects from the
+scenario manager.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const char *STUBS[3] = { "2001:db8:4::", "2001:db8:5::", "2001:db8:6::" };
+
+// A triggered update of R1 that withdraws one of the three stubs: an update without the marker
+// netA that holds a stub with metric 16.
+static bool isTriggeredWithdrawal(const Packet *p)
+{
+    if (!isUpdate(p) || metricOf(p, "2001:db8:1::", 64) >= 0)
+        return false;
+    for (auto s : STUBS)
+        if (metricOf(p, s, 64) == 16)
+            return true;
+    return false;
+}
+
+static bool holdsStubsAtMetric1(const Packet *p)
+{
+    for (auto s : STUBS)
+        if (metricOf(p, s, 64) != 1)
+            return false;
+    return true;
+}
+
+static bool inWindow(simtime_t t) { return t >= 100 && t <= 110; }
+static int triggeredCount;
+static simtime_t lastTriggeredAt;
+static bool withdrawn[3];
+
+Define_ProtocolTestProgram()
+{
+    triggeredCount = 0;
+    lastTriggeredAt = -1;
+    withdrawn[0] = withdrawn[1] = withdrawn[2] = false;
+    return ProtocolTest("rfc2080_triggered_rate")
+        // Expected observation 1: before 100 s, on L1, from R1, a periodic update that holds the
+        // three stubs with metric 1.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time >= 60 && c.event.time < 100 && isPeriodicUpdate(c.event.packet, "2001:db8:1::", 64) && holdsStubsAtMetric1(c.event.packet);
+                  })
+                  .describe("between 60 and 100 s, a periodic update of R1 on L1 that holds netA1, netA2 and netA3 with metric 1")
+                  .within(100.0))
+        // Expected observation 2: from 100 to 110 s, at most two triggered updates of R1 on L1
+        // withdraw one of the stubs.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return inWindow(c.event.time) && isTriggeredWithdrawal(c.event.packet) && ++triggeredCount > 2;
+                  })
+                  .describe("a third triggered update of R1 on L1 that withdraws a stub, from 100 to 110 s")
+                  .within(60.0)))
+        // Expected observation 3: two such updates are at least 1 s apart.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!inWindow(c.event.time) || !isTriggeredWithdrawal(c.event.packet))
+                          return false;
+                      bool tooSoon = lastTriggeredAt >= 0 && c.event.time - lastTriggeredAt < 1;
+                      lastTriggeredAt = c.event.time;
+                      return tooSoon;
+                  })
+                  .describe("a triggered update of R1 on L1 that withdraws a stub less than 1 s after the one before it")
+                  .within(60.0)))
+        // Expected observation 4: each stub appears with metric 16 in an update of R1 on L1
+        // before 110 s.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      if (c.event.time < 100 || !isUpdate(c.event.packet))
+                          return false;
+                      for (int i = 0; i < 3; i++)
+                          if (metricOf(c.event.packet, STUBS[i], 64) == 16)
+                              withdrawn[i] = true;
+                      return withdrawn[0] && withdrawn[1] && withdrawn[2];
+                  })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time <= 110, "the last of the three withdrawals left R1 at " + c.event.time.str() + " s, after 110 s");
+                  })
+                  .describe("the last of the three stubs withdrawn in an update of R1 on L1")
+                  .within(60.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_triggered_rate compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// the pair with three stubs: netA1, netA2 and netA3 at R1 besides netA (IPv6).
+network RipngStubs
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>" +
+                         "<interface hosts='R1' names='eth2' address='2001:db8:4::1'/>" +
+                         "<interface hosts='hostA1' names='eth0' address='2001:db8:4::10'/>" +
+                         "<interface hosts='R1' names='eth3' address='2001:db8:5::1'/>" +
+                         "<interface hosts='hostA2' names='eth0' address='2001:db8:5::10'/>" +
+                         "<interface hosts='R1' names='eth4' address='2001:db8:6::1'/>" +
+                         "<interface hosts='hostA3' names='eth0' address='2001:db8:6::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='eth0'/>" +
+                         "<route hosts='hostA1' destination='::/0' gateway='2001:db8:4::1' interface='eth0'/>" +
+                         "<route hosts='hostA2' destination='::/0' gateway='2001:db8:5::1' interface='eth0'/>" +
+                         "<route hosts='hostA3' destination='::/0' gateway='2001:db8:6::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=300,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=500,200"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+        hostA1: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=150,300"); }
+        hostA2: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=300,300"); }
+        hostA3: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=450,300"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><disconnect src-module='hostA1' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[2]'/></at><at t='100.3'><disconnect src-module='hostA2' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[3]'/></at><at t='100.6'><disconnect src-module='hostA3' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[4]'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+        hostA1.ethg++ <--> Eth100M <--> R1.ethg++;
+        hostA2.ethg++ <--> Eth100M <--> R1.ethg++;
+        hostA3.ethg++ <--> Eth100M <--> R1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngStubs
+sim-time-limit = 150s
+seed-set = 0
+**.hasStatus = true
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_triggered_rate: PASS

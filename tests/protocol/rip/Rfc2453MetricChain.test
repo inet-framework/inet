@@ -6,7 +6,7 @@ before it, and the routes carry traffic end to end.
 Checks RFC2453-MET-5, RESP-6 and TABLE-3 (description), and covers RFC2453-NH-1 from
 doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
 doc/project/evidence/protocol/rip/checks/route-learning.md#metric-through-a-chain-rip-version-2;
-the program steps below map onto its expected observations. Mapping of the chain : every node
+the program steps below map onto its expected observations. Mapping of the chain: every node
 keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0, L2
 on R2.eth1 and R3.eth0, netC on R3.eth1. "On L1, from R1" is the named interface of the router,
 R1.eth[1].mac, as it sends a frame to the lower layer.

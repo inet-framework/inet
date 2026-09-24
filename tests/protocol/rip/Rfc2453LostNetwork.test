@@ -1,0 +1,152 @@
+%description:
+
+RFC 2453 -- a router that loses a network sends the route with metric 16 at once, and its
+neighbor passes the withdrawal on.
+
+Checks RFC2453-TRIG-1, TRIG-5, TRIG-9, GEN-5 (must), TRIG-6 (should), TIMER-5 and RESP-9
+(description) from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the chain: every node
+keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0, L2
+on R2.eth1 and R3.eth0, netC on R3.eth1. "On L1, from R1" is the named interface of the router,
+R1.eth[1].mac, as it sends a frame to the lower layer.
+
+The link between host A and R1 goes down at 100 s by a disconnect of both directions from the
+scenario manager, so R1 loses the carrier of its netA interface.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static bool portsAre(const Packet *p, int port)
+{
+    auto udp = udpOf(p);
+    return require(udp != nullptr && udp->getSrcPort() == port && udp->getDestPort() == port,
+                   udp == nullptr ? std::string("no UDP header")
+                                  : "UDP ports are " + std::to_string(udp->getSrcPort()) + " -> " + std::to_string(udp->getDestPort())
+                                    + ", not " + std::to_string(port) + " -> " + std::to_string(port));
+}
+
+static bool destinationIs(const Packet *p, const char *address)
+{
+    L3Address dest = destinationAddressOf(p);
+    return require(dest == L3Address(address), "IP destination is " + dest.str() + ", not " + address);
+}
+
+static bool versionIs(const Packet *p, int version)
+{
+    auto rip = ripOf(p);
+    return require(rip->getVersion() == version, "the header has version " + std::to_string(rip->getVersion()) + ", not " + std::to_string(version));
+}
+
+// The instant of the withdrawal of R1 on L1, and its version.
+static simtime_t withdrawnAt;
+static int withdrawalVersion;
+
+static bool withdrawsNetA(const Packet *p) { return isResponse(p) && metricOf(p, "10.0.1.0", 24) == 16; }
+
+static bool recordWithdrawal(const MatchContext& c)
+{
+    withdrawnAt = c.event.time;
+    withdrawalVersion = ripOf(c.event.packet)->getVersion();
+    return true;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2453_lost_network")
+        // Expected observation 1: before 100 s, on L2, from R2, an update that holds netA with
+        // metric 2.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time < 100 && isUpdateWith(c.event.packet, "10.0.1.0", 24, 2); })
+                  .describe("before 100 s, an update of R2 on L2 that holds netA with metric 2")
+                  .within(100.0))
+        // Expected observations 2 and 3: after the link of netA goes down at 100 s, on L1, from
+        // R1, within 6 s, a response that holds netA with metric 16, following every rule of a
+        // response.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 100 && withdrawsNetA(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time <= 106, "the withdrawal left R1 at " + c.event.time.str() + " s, more than 6 s after the change");
+                  })
+                  .assertEvent([](const MatchContext& c) { return portsAre(c.event.packet, RIP_PORT); })
+                  .assertEvent([](const MatchContext& c) { return destinationIs(c.event.packet, "224.0.0.9"); })
+                  .assertEvent([](const MatchContext& c) { return versionIs(c.event.packet, 2); })
+                  .assertEvent([](const MatchContext& c) { return recordWithdrawal(c); })
+                  .describe("after 100 s, a response of R1 on L1 that holds netA with metric 16, within 6 s")
+                  .within(120.0))
+        // Expected observation 4: on L2, from R2, within 6 s after that, an update that
+        // holds netA with metric 16.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isUpdateWith(c.event.packet, "10.0.1.0", 24, 16); })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time - withdrawnAt <= 6, "R2 withdrew netA " + (c.event.time - withdrawnAt).str() + " s after R1, more than 6 s");
+                  })
+                  .describe("an update of R2 on L2 that holds netA with metric 16, within 6 s")
+                  .within(40.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_lost_network compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --L2-- R3 --netC-- host C.
+network RipChain
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.23.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth0' address='10.0.23.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth1' address='10.0.3.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostC' names='eth0' address='10.0.3.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostC' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=250,200"); }
+        R2: RipRouter { @display("p=400,200"); }
+        R3: RipRouter { @display("p=550,200"); }
+        hostC: StandardHost { @display("p=700,200"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><disconnect src-module='hostA' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[0]'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> R3.ethg++;
+        R3.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipChain
+sim-time-limit = 240s
+seed-set = 0
+**.hasStatus = true
+
+%contains: stdout
+PROTOCOLTEST rfc2453_lost_network: PASS

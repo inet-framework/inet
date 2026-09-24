@@ -1,0 +1,166 @@
+%description:
+
+RFC 2080 -- the route through a silent neighbor expires 180 seconds after its last update,
+stays at metric 16 for 120 seconds, and a router that hears it only at 16 does not add it.
+
+Checks RFC2080-TIMER-4, TIMER-5, TIMER-6 and RESP-9 (description) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng;
+the program steps below map onto its expected observations. Mapping of the chain on IPv6: every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+L2 on R2.eth1 and R3.eth0, netC on R3.eth1. "On L1, from R1" is the named interface of the
+router, R1.eth[1].mac, as it sends a frame to the lower layer.
+
+R1 fails at 100 s by a crash of the node; R3 is down from the start (status.initialStatus) and
+starts at 300 s, both from the scenario manager.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static simtime_t lastOfR1;
+static simtime_t withdrawnAt;
+static const char *NET_A = "2001:db8:1::";
+static const int PLEN = 64;
+
+Define_ProtocolTestProgram()
+{
+    lastOfR1 = -1;
+    withdrawnAt = -1;
+    return ProtocolTest("rfc2080_route_expiry")
+        // Expected observation 1: the updates of R1 on L1 up to 100 s; record the last one that
+        // holds netA.
+        .meanwhile(atLeastTimes(1, on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      if (c.event.time >= 100 || !isUpdate(c.event.packet) || metricOf(c.event.packet, NET_A, PLEN) < 0)
+                          return false;
+                      lastOfR1 = c.event.time;
+                      return true;
+                  })
+                  .describe("an update of R1 on L1 that holds netA, before its failure")
+                  .within(100.0)))
+        // Expected observation 2: before 100 s, on L2, from R2, an update that holds netA with
+        // metric 2.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time < 100 && isUpdateWith(c.event.packet, NET_A, PLEN, 2); })
+                  .describe("before 100 s, an update of R2 on L2 that holds netA with metric 2")
+                  .within(100.0))
+        // Expected observation 3: no update of R2 on L2 holds netA with metric 16 before
+        // t_last + 180 s.
+        .meanwhile(never(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return isUpdateWith(c.event.packet, NET_A, PLEN, 16) && c.event.time < lastOfR1 + 180;
+                  })
+                  .describe("an update of R2 on L2 that holds netA with metric 16 before 180 s after the last update of R1")
+                  .within(300.0)))
+        // Expected observation 4: between t_last + 180 and t_last + 186 s, an update of R2 on L2
+        // that holds netA with metric 16; record its instant.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isUpdateWith(c.event.packet, NET_A, PLEN, 16); })
+                  .assertEvent([](const MatchContext& c) {
+                      simtime_t after = c.event.time - lastOfR1;
+                      return require(after >= 180 && after <= 186, "R2 withdrew netA " + after.str() + " s after the last update of R1, outside 180 to 186 s");
+                  })
+                  .assertEvent([](const MatchContext& c) { withdrawnAt = c.event.time; return true; })
+                  .describe("an update of R2 on L2 that holds netA with metric 16, 180 to 186 s after the last update of R1")
+                  .within(300.0))
+        // Expected observation 5: every periodic update of R2 on L2 to t_wd + 115 s holds netA
+        // with metric 16 (the marker of R2 on L2 is L1).
+        .meanwhile(never(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time <= withdrawnAt + 115 && isPeriodicUpdate(c.event.packet, "2001:db8:12::", PLEN)
+                             && metricOf(c.event.packet, NET_A, PLEN) != 16;
+                  })
+                  .describe("a periodic update of R2 on L2 within 115 s of the withdrawal that does not hold netA with metric 16")
+                  .within(116.0)))
+        // Expected observation 6: no update of R2 on L2 after t_wd + 121 s holds netA.
+        .meanwhile(never(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time > withdrawnAt + 121 && isUpdate(c.event.packet) && metricOf(c.event.packet, NET_A, PLEN) >= 0;
+                  })
+                  .describe("an update of R2 on L2 that still holds netA more than 121 s after the withdrawal")
+                  .within(200.0)))
+        // Expected observation 7: after 300 s, on netC, from R3, an update that holds L1 with
+        // metric 2 -- R3 learns routes from R2.
+        .once(on("R3.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 300 && isUpdateWith(c.event.packet, "2001:db8:12::", PLEN, 2); })
+                  .describe("after 300 s, an update of R3 on netC that holds L1 with metric 2")
+                  .within(150.0))
+        // Expected observation 8: no update of R3 on netC holds netA to the end of the window.
+        .never(on("R3.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isUpdate(c.event.packet) && metricOf(c.event.packet, NET_A, PLEN) >= 0; })
+                  .describe("an update of R3 on netC that holds netA")
+                  .within(100.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_route_expiry compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --L2-- R3 --netC-- host C (IPv6).
+network RipngChain
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:23::2'/>" +
+                         "<interface hosts='R3' names='eth0' address='2001:db8:23::3'/>" +
+                         "<interface hosts='R3' names='eth1' address='2001:db8:3::1'/>" +
+                         "<interface hosts='hostC' names='eth0' address='2001:db8:3::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostC' destination='::/0' gateway='2001:db8:3::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=250,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=400,200"); }
+        R3: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=550,200"); }
+        hostC: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><crash module='R1'/></at><at t='300'><startup module='R3'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> R3.ethg++;
+        R3.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngChain
+sim-time-limit = 470s
+seed-set = 0
+**.hasStatus = true
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+*.R3.status.initialStatus = "down"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_route_expiry: PASS

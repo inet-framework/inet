@@ -1,0 +1,190 @@
+%description:
+
+RFC 2080 -- a router that restarts asks for the table on every network, and the neighbor
+answers it directly, after split horizon.
+
+Checks RFC2080-REQ-1, REQ-4, REQ-8, OUT-1, MSG-4 (description) and REQ-6 (must), and covers
+RFC2080-GEN-1 (must) and GEN-3 (description) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng;
+the program steps below map onto its expected observations. Mapping of the pair on IPv6: every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+netB on R2.eth1. "On L1, from R1" is the named interface of the router, R1.eth[1].mac, as it
+sends a frame to the lower layer.
+
+R2 fails at 100 s by a crash of the node and starts again at 110 s by a startup of the node,
+both from the scenario manager. RIP starts a random time after the node, so the request can
+come up to 30 s after 110 s.
+
+Defect: the answer of R1 never reaches R2. R1 builds it and sends it to the link-local address
+of R2, but Rip::sendPacket attaches the outgoing interface only when the destination is a
+multicast group (src/inet/routing/rip/Rip.cc:984-989). A link-local destination needs its
+interface; without it the IPv6 layer sends the answer towards netA, where neighbour discovery
+for R2 fails after three solicitations, and the answer is dropped with an ICMPv6 destination
+unreachable. Observations 1 to 3, the request, hold; observation 4 fails, and with it
+observations 5 to 7, which read the answer. The IPv4 twin passes, because 10.0.12.2 routes
+through L1. This test FAILS, and the failure is deliberately NOT declared expected: the model
+has the code for the answer and sends it the wrong way. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static bool portsAre(const Packet *p, int port)
+{
+    auto udp = udpOf(p);
+    return require(udp != nullptr && udp->getSrcPort() == port && udp->getDestPort() == port,
+                   udp == nullptr ? std::string("no UDP header")
+                                  : "UDP ports are " + std::to_string(udp->getSrcPort()) + " -> " + std::to_string(udp->getDestPort())
+                                    + ", not " + std::to_string(port) + " -> " + std::to_string(port));
+}
+
+static bool destinationIs(const Packet *p, const char *address)
+{
+    L3Address dest = destinationAddressOf(p);
+    return require(dest == L3Address(address), "IP destination is " + dest.str() + ", not " + address);
+}
+
+static bool versionIs(const Packet *p, int version)
+{
+    auto rip = ripOf(p);
+    return require(rip->getVersion() == version, "the header has version " + std::to_string(rip->getVersion()) + ", not " + std::to_string(version));
+}
+
+// RFC 2080 section 2.4.1: one entry, prefix zero, prefix length zero, metric 16.
+static bool isWholeTableRequest(const Packet *p)
+{
+    auto rip = ripOf(p);
+    // The model holds the zero prefix as an unspecified address; both mean the 16 zero octets.
+    const L3Address& prefix = rip->getEntryArraySize() == 1 ? rip->getEntry(0).address : L3Address();
+    bool ok = rip->getEntryArraySize() == 1 && (prefix.isUnspecified() || prefix == L3Address("::"))
+              && rip->getEntry(0).prefixLength == 0 && rip->getEntry(0).metric == RIP_INFINITY;
+    return require(ok, "the request is not one entry of prefix ::, prefix length 0 and metric 16: " + entriesOf(rip));
+}
+
+// The source address of the request of observation 2; the answer goes back to it.
+static L3Address requester;
+
+static bool recordRequester(const Packet *p) { requester = sourceAddressOf(p); return true; }
+
+static bool netBAbsentOrInfinite(const Packet *p)
+{
+    int metric = metricOf(p, "2001:db8:2::", 64);
+    return require(metric == -1 || metric == 16, "the answer holds netB with metric " + std::to_string(metric));
+}
+
+static bool netAHasMetric1(const Packet *p)
+{
+    return require(metricOf(p, "2001:db8:1::", 64) == 1, "the answer does not hold netA with metric 1: " + entriesOf(ripOf(p)));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2080_table_request")
+        // Expected observation 1: before 100 s, on L1, from R2, an update that holds netB with
+        // metric 1 -- R1 learns netB from R2 over L1.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time < 100 && isUpdateWith(c.event.packet, "2001:db8:2::", 64, 1); })
+                  .describe("before 100 s, an update of R2 on L1 that holds netB with metric 1")
+                  .within(100.0))
+        // Expected observation 2: after 110 s, on L1, from R2, a whole-table request from port
+        // 521 to port 521 and to ff02::9; record its source address.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 110 && isRequest(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return isWholeTableRequest(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return portsAre(c.event.packet, RIPNG_PORT); })
+                  .assertEvent([](const MatchContext& c) { return destinationIs(c.event.packet, "ff02::9"); })
+                  .assertEvent([](const MatchContext& c) { return recordRequester(c.event.packet); })
+                  .describe("after the restart, a whole-table request of R2 on L1, from port 521 to port 521 and ff02::9")
+                  .within(150.0))
+        // Expected observation 3: within 1 s, on netB, from R2, a request of the same form.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isRequest(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return isWholeTableRequest(c.event.packet); })
+                  .describe("a whole-table request of R2 on netB")
+                  .within(1.0))
+        // Expected observations 4 to 6 and 7: within 5 s, on L1, from R1, the answer, to the
+        // address of the requester and to port 521, from the link-local address of R1 on L1; its version,
+        // netA with metric 1, and netB not at all or with metric 16; last, version 1.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isResponse(c.event.packet) && destinationAddressOf(c.event.packet) == requester; })
+                  .assertEvent([](const MatchContext& c) {
+                      auto udp = udpOf(c.event.packet);
+                      return require(udp->getDestPort() == RIPNG_PORT, "the answer goes to UDP port " + std::to_string(udp->getDestPort()) + ", not 521");
+                  })
+                  .assertEvent([](const MatchContext& c) {
+                      L3Address src = sourceAddressOf(c.event.packet);
+                      return require(src == linkLocalOf("R1", "eth1"), "the answer leaves from " + src.str() + ", not the link-local address of the L1 interface of R1");
+                  })
+                  .assertEvent([](const MatchContext& c) { return netAHasMetric1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netBAbsentOrInfinite(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return versionIs(c.event.packet, 1); })
+                  .describe("the answer of R1 on L1 to the requester and its port")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_table_request compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --netB-- host B (IPv6).
+network RipngPair
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=300,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=500,200"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><crash module='R2'/></at><at t='110'><startup module='R2'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngPair
+sim-time-limit = 250s
+seed-set = 0
+**.hasStatus = true
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_table_request: PASS

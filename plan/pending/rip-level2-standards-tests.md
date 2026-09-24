@@ -38,8 +38,10 @@ compatibility area of level 5 and are `later` too.
    `protocol/rip/checks/<feature>.md`. One commit. 24 checks in eight files, 12 for RIP version
    2 and 12 for RIPng; a script confirmed that every catalog entry is in a check or in the
    closing list of `checks.md`.
-5. [ ] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
-   `RipChecks.h`. One commit per group of tests.
+5. [x] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
+   `RipChecks.h`. One commit per group of tests. 24 tests in two commits; a generator in the
+   session scratchpad wrote 22 of them from five shared network templates. First full run: 20
+   PASS, 4 FAIL, all four RIPng findings of the model, none declared.
 6. [ ] **Step 7, run** — the suite, `model/rip/results.md` with the run record, the class of
    each failure and the model analysis.
 7. [ ] **Steps 8 and 9, and the ledger** — `model/rip/conformance.md` part 2,
@@ -66,3 +68,20 @@ answer the claim question. Nothing below enters the artifacts of steps 3 to 5.
   them and observe the values; a simulation of a few hundred seconds is cheap.
 
 ## Decisions and facts found on the way
+
+- **The first runs corrected three check procedures** (commit `649e737b07`): the answer to the
+  table request of a starting router is a response that holds the marker too, so observation
+  starts at 40 s; whether the network of a link counts as learned over it is not stated, so
+  the periodic checks do not ask for it; the RIPng version observations go last, so that a
+  wrong version hides nothing.
+- **Two test errors found and fixed before any commit of the tests concerned:** the rate
+  tests anchored their windows at a first step that could match at 20 s, and the RIPng
+  request test read the zero prefix as `::` where the model holds an unspecified address.
+- **IPv6 mockups need three settings** that the IPv4 ones do not:
+  `**.ipv6.configurator.networkConfiguratorModule = "configurator"`, and on the configurator
+  `addRemoteRoutes = false` with `addDefaultRoutes = false` instead of `addStaticRoutes =
+  false`, which would also drop the on-link routes that RIPng imports.
+- **Four RIPng findings**, all defects of the model, none declared: RIPng messages carry
+  version 2 (two tests); the answer to a table request goes to a link-local address without
+  its interface and never arrives; the IPv6 routing table does not restore the on-link route
+  when the carrier returns, so a RIPng router never advertises its network again.
