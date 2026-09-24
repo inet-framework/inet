@@ -39,8 +39,10 @@ it.
    RFC 4302 190, RFC 4303 237: 797 in all.
 4. [x] **Step 4, feature map** — `protocol/ipsec/features.md` (`IPSEC-F-*`). With step 3 in one
    commit. 29 features: 21 mandatory, 7 optional, 1 unstated; every entry is placed.
-5. [ ] **Step 5, checks** — `protocol/ipsec/checks.md` and `protocol/ipsec/checks/*.md`, with
-   the closing list of the statements without a check.
+5. [x] **Step 5, checks** — `protocol/ipsec/checks.md` and `protocol/ipsec/checks/*.md`, with
+   the closing list of the statements without a check. 23 checks in 7 files; 325 statements are
+   in a check, and the other 472 are in the closing list, in 15 groups of what a check would
+   need.
 6. [ ] **Step 6, tests** — `tests/protocol/ipsec/Rfc430[123]*.test` and the helper header
    `IpsecChecks.h`.
 7. [ ] **Steps 7 to 9, and the ledger** — `model/ipsec/results.md`, `conformance.md` part 2,
@@ -77,3 +79,17 @@ Working scripts: `audit/ipsec-level2/` in `inet-master` (outside git), with a `R
   SA creation with the PFP flags and lifetimes, named SPD entries, the anti-replay window's
   notification, and the negotiation of ESN and TFC padding. Their statements stay in the catalog
   and in the map; the checks decide what a statically keyed implementation can show.
+- **Two mandatory features have no core check at level 2.** The named SPD entries need a key
+  management protocol, and the anti-replay service needs a packet that arrives twice. A sender
+  with two SAs that share an SPI would make such a packet, but that is a configuration the
+  standard forbids, so the replay stays with level 3, as the standards map planned.
+- **A statically keyed host has a defined answer for key management.** Where a rule depends on
+  key management, a check uses the case that RFC 4301 gives for a host without it: a PROTECT
+  entry without an SA discards the packet (RFC4301-OUT-10), and an SA at the end of its lifetime
+  ends, because no replacement comes.
+- **The observer reads an encrypted ESP payload with the keys of the SA.** The SAs are keyed by
+  hand, so the checks can read the trailer and the inner header; where a check needs plaintext
+  on the link, it uses NULL encryption (padding contents, TFC padding).
+- **The closing list comes from a generator** (scratchpad `ipsec/gen-ipsec-closing.py`) that
+  refuses a statement in no group or in two, and the placement checker confirms that every entry
+  is in exactly one of a check and the closing list.
