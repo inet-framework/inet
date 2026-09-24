@@ -20,13 +20,16 @@ on it.
 ### Scenario constants
 
 - The pair. The marker of R1 is netA.
-- Observation lasts 70 seconds from the start, which holds at least one periodic update of
-  R1 on each of its two networks.
+- Both routers come up in the first 30 seconds. A router that comes up asks for the table of
+  its neighbors, and the answer to that request is a response too, sent to a unicast address.
+  Observation therefore starts at 40 seconds, when the requests of the start are over.
+- Observation lasts 70 seconds, from 40 to 110 seconds, which holds at least one periodic
+  update of R1 on each of its two networks.
 
 ### Procedure
 
 1. Build the pair, and let both routers start.
-2. Observe the updates that R1 sends on L1 and on netA.
+2. From 40 seconds on, observe the updates that R1 sends on L1 and on netA.
 
 ### Expected observations
 
@@ -41,9 +44,10 @@ on it.
 
 ### Notes
 
-- Observation 1 finds the update by its content, not by its address or its ports, so that
-  observations 2 and 3 can fail. A search that selected the message by port 520 would pass
-  over a message on the wrong port and time out instead of reporting it.
+- Observation 1 finds the update by its content and its time, not by its address or its
+  ports, so that observations 2 and 3 can fail. A search that selected the message by port
+  520 would pass over a message on the wrong port and time out instead of reporting it. The
+  answer to a request also holds netA; the start at 40 seconds keeps it out.
 - Host A on netA runs no RIP. The standard sends the update onto every network that supports
   broadcasting, and does not ask whether a router listens there; an administrator may switch
   it off, which the mockup does not do.
@@ -107,12 +111,13 @@ periodic advertisements carry hop count 255.
 ### Scenario constants
 
 - The pair, on IPv6. The marker of R1 is netA.
-- Observation lasts 70 seconds from the start.
+- Observation lasts 70 seconds, from 40 to 110 seconds, after the requests of the start, as
+  in the IPv4 twin.
 
 ### Procedure
 
 1. Build the pair on IPv6, and let both routers start.
-2. Observe the updates that R1 sends on L1 and on netA.
+2. From 40 seconds on, observe the updates that R1 sends on L1 and on netA.
 
 ### Expected observations
 
@@ -121,11 +126,14 @@ periodic advertisements carry hop count 255.
 2. That update has UDP source port 521 and UDP destination port 521 (RFC2080-MSG-1, MSG-2,
    MSG-3).
 3. That update has IPv6 destination address FF02::9 (RFC2080-OUT-3).
-4. That update has a link-local IPv6 source address, one in fe80::/10 (RFC2080-GEN-1).
+4. That update leaves from the link-local address of the L1 interface of R1 (RFC2080-GEN-1:
+   a link-local address of the interface that the message leaves).
 5. That update has hop limit 255 (RFC2080-RESP-5).
 6. On netA, from R1, a periodic update too, to FF02::9 (RFC2080-OUT-3: one response for
    each directly-connected network).
-7. No RIPng message that R1 sends on L1 in the window has a UDP source port other than 521.
+7. No RIPng message that R1 sends on L1 in the window has a UDP source port other than 521,
+   and no update leaves from an address other than the link-local address of the L1
+   interface of R1.
 
 ### Notes
 
@@ -158,12 +166,15 @@ significant bits of the prefix. §2.5.2: a route to a link-local address is neve
 ### Expected observations
 
 1. On L1, from R1, a periodic update. This confirms the stimulus.
-2. Its header has command 2, version 1, and zero in the two octets after the version
-   (RFC2080-MSG-8, GEN-3).
+2. Its header has command 2 and zero in the two octets after the version (RFC2080-MSG-8,
+   GEN-3).
 3. Every route entry has a metric from 1 to 16 (RFC2080-MET-4).
 4. The entry of netA has metric 1 and prefix length 64 (RFC2080-MET-3, MSG-10).
 5. No entry has a prefix in fe80::/10 (RFC2080-GEN-5).
+6. Its header has version 1 (RFC2080-GEN-3).
 
 ### Notes
 
 - A next hop entry carries 0xFF in its metric field; observation 3 reads route entries only.
+- The version has an observation of its own, the last one, so that a wrong version cannot keep
+  the other fields of the header and the entries from a verdict.

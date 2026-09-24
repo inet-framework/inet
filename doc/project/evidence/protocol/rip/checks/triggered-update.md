@@ -86,10 +86,11 @@ network, and follows every rule of a response — the link-local source and the 
    the stimulus.
 2. On L1, from R1, within 6 seconds after 100 seconds, an update that holds netA with metric
    16 (RFC2080-OUT-2, TIMER-5, TRIG-4, GEN-7).
-3. That update goes to FF02::9 with UDP ports 521 and 521, from a link-local address, with hop
-   limit 255, command 2 and version 1 (RFC2080-TRIG-8).
+3. That update goes to FF02::9 with UDP ports 521 and 521, from the link-local address of the
+   L1 interface of R1, with hop limit 255 and command 2 (RFC2080-TRIG-8).
 4. On L2, from R2, within 6 seconds after observation 2, an update that holds netA with
    metric 16 (RFC2080-RESP-11, TIMER-5, TRIG-5).
+5. The update of observation 2 carries version 1 (RFC2080-TRIG-8).
 
 ## Rate of triggered updates (RIP version 2)
 

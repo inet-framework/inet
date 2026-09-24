@@ -62,7 +62,7 @@ version of the request.
 ## Table request of a restarted router (RIPng)
 
 Checks: **RFC2080-REQ-1**, **REQ-4**, **REQ-8**, **OUT-1**, **MSG-4** (description),
-**RFC2080-REQ-6** (must); covers **RFC2080-GEN-1** (must).
+**RFC2080-REQ-6** (must); covers **RFC2080-GEN-1** (must), **RFC2080-GEN-3** (description).
 
 ### Requirement
 
@@ -88,8 +88,8 @@ from the RIPng port.
 
 1. On L1, from R2, before 100 seconds, an update that holds netB with metric 1. This confirms
    the first half of the stimulus.
-2. On L1, from R2, after 110 seconds, a request: command 1, version 1, exactly one entry,
-   which has prefix ::, prefix length 0 and metric 16; UDP source port 521, UDP destination
+2. On L1, from R2, after 110 seconds, a request: command 1, exactly one entry, which has
+   prefix ::, prefix length 0 and metric 16; UDP source port 521, UDP destination
    port 521, IPv6 destination address FF02::9 (RFC2080-REQ-1, REQ-4). Record the source
    address of the request.
 3. On netB, from R2, within 1 second of observation 2, a request of the same form
@@ -99,3 +99,4 @@ from the RIPng port.
 5. That response leaves from a link-local address (covers RFC2080-GEN-1) and holds netA with
    metric 1.
 6. That response does not hold netB with a metric below 16 (RFC2080-REQ-6).
+7. That response carries version 1 (covers RFC2080-GEN-3).
