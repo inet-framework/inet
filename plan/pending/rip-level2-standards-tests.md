@@ -39,14 +39,15 @@ compatibility area of level 5 and are `later` too.
    2 and 12 for RIPng; a script confirmed that every catalog entry is in a check or in the
    closing list of `checks.md`.
 5. [x] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
-   `RipChecks.h`. One commit per group of tests. 24 tests in two commits; a generator in the
-   session scratchpad wrote 22 of them from five shared network templates. First full run: 20
-   PASS, 4 FAIL, all four RIPng findings of the model, none declared.
-6. [ ] **Step 7, run** — the suite, `model/rip/results.md` with the run record, the class of
-   each failure and the model analysis.
-7. [ ] **Steps 8 and 9, and the ledger** — `model/rip/conformance.md` part 2,
+   `RipChecks.h`. One commit per group of tests. 30 tests in three commits; a generator in the
+   session scratchpad wrote 28 of them from five shared network templates.
+6. [x] **Step 7, run** — the suite, `model/rip/results.md` with the run record, the class of
+   each failure and the model analysis. Fresh run at `7969452e2d`: 30 tests, 20 PASS, 10 FAIL,
+   0 declared; six gaps of the model, all defects.
+7. [x] **Steps 8 and 9, and the ledger** — `model/rip/conformance.md` part 2,
    `model/rip/categories.md`, `model/rip/coverage.md` with the statement table, the feature
-   support, the achieved level and the pass log. One commit.
+   support, the achieved level and the pass log. One commit, with step 7. Level 2 reached;
+   7 features confirmed, 6 partial, 6 unverified; 21 statements owed.
 8. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Facts found before the catalogs
@@ -85,3 +86,18 @@ answer the claim question. Nothing below enters the artifacts of steps 3 to 5.
   version 2 (two tests); the answer to a table request goes to a link-local address without
   its interface and never arrives; the IPv6 routing table does not restore the on-link route
   when the carrier returns, so a RIPng router never advertises its network again.
+- **A passing expiry test passed by chance.** The code looks at the timeout only when it sends
+  an update (`Rip.cc:537`, `551`), and the default random start put the updates of R2 1.3 s
+  after those of R1. The expiry check now fixes the start of R2 15 s after R1, and it fails,
+  15 s late. The garbage collection after the expiry became a check of its own, so that the
+  late withdrawal does not hide it.
+- **Reading the purge code found two more defects**, and two new checks for each document
+  test them: a router never purges a network it lost itself (`checkExpiredRoutes` purges only
+  learned routes), and a learned route is purged 300 s after the last entry from its next hop,
+  which every repeated withdrawal refreshes. Together they keep every withdrawn network in the
+  updates for good. 30 checks and 30 tests in the end.
+- **RFC2453-ADDR-2, ADDR-3 and ADDR-4 are `later`, not `no check`:** the TODO of `Rip.h:77-78`
+  claims the subnet rules of §3.7, and a check needs a version 1 router, level 5. MASK-2 and
+  QRY-1 have no claim and stay `no check`.
+- **The ledger table is generated** from a mapping of all 168 statements (scratchpad
+  `gen-rip-ledger.py`), so no statement can miss a row.
