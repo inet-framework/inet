@@ -1,6 +1,6 @@
 # RIP level 2 — catalogs, feature map, checks and tests for RFC 2453 and RFC 2080
 
-**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-rip-level2`, from
+**Status:** done. Started and finished 2026-09-24 on `topic/standards-tests-rip-level2`, from
 `origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-rip-level2`.
 
 The second pass for RIP, after the level 1 survey of wave 0. It follows
@@ -48,7 +48,9 @@ compatibility area of level 5 and are `later` too.
    `model/rip/categories.md`, `model/rip/coverage.md` with the statement table, the feature
    support, the achieved level and the pass log. One commit, with step 7. Level 2 reached;
    7 features confirmed, 6 partial, 6 unverified; 21 statements owed.
-8. [ ] Gates, then move this plan to `plan/done/`.
+8. [x] Gates, then move this plan to `plan/done/`. All four gates pass on
+   `origin/master..HEAD`: 239 files and 0 broken links, seals in step, commits and
+   classification clean.
 
 ## Facts found before the catalogs
 
