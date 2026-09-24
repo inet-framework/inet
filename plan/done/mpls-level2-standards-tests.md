@@ -1,7 +1,9 @@
 # MPLS level 2 — catalogs, feature map, checks and tests for RFC 3031, RFC 3032, RFC 3443, RFC 5462
 
-**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-mpls-level2`, from
+**Status:** done on 2026-09-24, in seven commits on `topic/standards-tests-mpls-level2`, from
 `origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-mpls-level2`.
+Not merged and not pushed. Level 2 is reached for the normal path: 21 tests, 5 PASS, 16 FAIL (6
+declared expected), seven gaps of the model, 2 statements owed.
 
 The fifth and last pass of wave 1, after RIP, ND, IGMP with MLD, and IPsec. It follows
 [`derive-tests-from-a-standard.md`](../../doc/project/guide/derive-tests-from-a-standard.md),
@@ -41,9 +43,10 @@ The pass delivers every output of the section "What a pass delivers" of the guid
 7. [x] **Steps 7 to 9, and the ledger** — `model/mpls/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`, from one fresh run.
 8. [x] **Notes** — `model/mpls/notes.md`, with every gap by number in the follow-ups.
-9. [ ] Gates, then move this plan to `plan/done/`.
+9. [x] Gates, then move this plan to `plan/done/`.
 
-Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `README.md`.
+Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `README.md`; the
+generators rerun there give the committed outputs again.
 
 ## Decisions and facts found on the way
 
@@ -119,3 +122,6 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
   the steps by the time of their events; a value reaches the report only through an assertion).
   They stay in the MPLS notes, because the shared section of `ipv4/notes.md` changes on the
   unmerged IGMP and MLD branch.
+- **Step 9.** The four gates pass on `origin/master..HEAD`. The scripts, the drafts, the
+  exploration test and its runner are in `audit/mpls-level2/` of `inet-master`; a rerun of the
+  ledger, the matrix, the placement check and the feature map from there leaves the tree clean.
