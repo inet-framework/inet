@@ -1,6 +1,6 @@
 # The standard texts move to the sibling `standards` project
 
-**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-wave0` (not landed yet),
+**Status:** done. Started and finished 2026-09-24 on `topic/standards-tests-wave0` (not landed yet),
 worktree `/home/levy/workspace/inet-standards-tests-wave0`.
 
 The user added a `standards` project to the workspace, `/home/levy/workspace/standards`, beside
@@ -34,7 +34,8 @@ Facts that shaped the plan:
 3. [x] The evidence tree links to `standards/RFC/rfcNNNN.txt`, and the 61 copies leave the tree.
    Done: 128 links in 34 files point into `../standards/RFC/`, and the 17 catalogs link their
    source text there. `evidence/standard/` keeps only the 17 folders with a `catalog.md`.
-4. [ ] Gates, then move this plan to `plan/done/`.
+4. [x] Gates, then move this plan to `plan/done/`. All four gates pass on `master..HEAD`: 225
+   files and 0 broken links, seals in step, commits and classification clean.
 
 ## Decisions and facts found on the way
 
