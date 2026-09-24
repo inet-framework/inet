@@ -36,10 +36,14 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
 ## Steps
 
 1. [x] **Plan** — this file.
-2. [ ] **Step 3, catalogs** — `standard/rfc9776/catalog.md`, `standard/rfc2236/catalog.md`,
-   `standard/rfc9777/catalog.md`, `standard/rfc2710/catalog.md`.
-3. [ ] **Step 4, feature maps** — `protocol/igmp/features.md` (`IGMP-F-*`) and
-   `protocol/mld/features.md` (`MLD-F-*`). With step 3 in one commit for each protocol.
+2. [x] **Step 3, catalogs** — `standard/rfc9776/catalog.md`, `standard/rfc2236/catalog.md`,
+   `standard/rfc9777/catalog.md`, `standard/rfc2710/catalog.md`. RFC 9776 293 entries, RFC 2236
+   94, RFC 9777 307, RFC 2710 81; every quote checked against its lines.
+3. [x] **Step 4, feature maps** — `protocol/igmp/features.md` (`IGMP-F-*`) and
+   `protocol/mld/features.md` (`MLD-F-*`). With step 3 in one commit for each protocol. Both maps
+   have 20 features; the MLD features are the twins of the IGMP features, with
+   MLD-F-LISTENING-STATE for IGMP-F-GROUP-MEMBERSHIP and the version 1 features for the version
+   2 ones.
 4. [x] **IGMP step 5, checks** — `protocol/igmp/checks.md` and `protocol/igmp/checks/*.md`.
    32 checks in 6 files; 260 statements are in a check, and the other 127 are in the closing
    list with what a check would need. Message validation is the one mandatory feature without a
