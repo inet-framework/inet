@@ -1,0 +1,63 @@
+# RIP level 2 — catalogs, feature map, checks and tests for RFC 2453 and RFC 2080
+
+**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-rip-level2`, from
+`origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-rip-level2`.
+
+The second pass for RIP, after the level 1 survey of wave 0. It follows
+[`derive-tests-from-a-standard.md`](../../doc/project/guide/derive-tests-from-a-standard.md), steps
+3 to 9, at the target level of [`rip/standards.md`](../../doc/project/evidence/protocol/rip/standards.md#target-level):
+**level 2, Core**. The in-scope set is fixed there: RFC 2453 §3 and §4.2 to §4.6, and RFC 2080 §2.
+
+Commit group: `rip-standards-tests`. Gates before each commit: `check-links.sh`,
+`check-seals.sh`, and `check-commits.sh` and `check-classification.sh` on `origin/master..HEAD`.
+
+## What level 2 asks
+
+"Every normal-path mandatory mechanism of the base document appears as a feature, and every
+mandatory feature has a core check that ran and has a verdict." The toolset is observation of a
+normal exchange, including the absence of a packet. A scripted topology change (a lifecycle
+operation of the scenario manager) is part of a normal exchange; the DHCP pass used one for its
+release check. Injection and interception are level 3.
+
+The catalogs hold every normative statement of the in-scope sections, not only the level 2 ones:
+level 3 needs no new document, so the edge statements (crafted responses) go into the catalogs
+now and wait in the ledger as `later`. Statements that need a RIP version 1 router belong to the
+compatibility area of level 5 and are `later` too.
+
+## Steps
+
+1. [x] **Plan** — this file.
+2. [ ] **Step 3, catalogs** — `standard/rfc2453/catalog.md` (§3, §4.2 to §4.6) and
+   `standard/rfc2080/catalog.md` (§2), from the texts in `../standards/RFC/`. One commit.
+3. [ ] **Step 4, feature map** — `protocol/rip/features.md`, `RIP-F-*`, one feature for each
+   mechanism, joining the parallel sections of the two documents. One commit.
+4. [ ] **Step 5, checks** — `protocol/rip/checks.md` with the common mockups and the index, and
+   `protocol/rip/checks/<feature>.md`. One commit.
+5. [ ] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
+   `RipChecks.h`. One commit per group of tests.
+6. [ ] **Step 7, run** — the suite, `model/rip/results.md` with the run record, the class of
+   each failure and the model analysis.
+7. [ ] **Steps 8 and 9, and the ledger** — `model/rip/conformance.md` part 2,
+   `model/rip/categories.md`, `model/rip/coverage.md` with the statement table, the feature
+   support, the achieved level and the pass log. One commit.
+8. [ ] Gates, then move this plan to `plan/done/`.
+
+## Facts found before the catalogs
+
+The guide permits one look at the code before step 3: to select practical candidates, and to
+answer the claim question. Nothing below enters the artifacts of steps 3 to 5.
+
+- **The UDP port table has no entry for port 520 or 521**
+  (`src/inet/common/ProtocolGroup.cc:157-164`). A RIP dissector is registered, but the dissector
+  of a frame never reaches it, so a filter expression over `rip.*` cannot match. The tests read
+  the RIP header with a helper, as the DHCP tests do (`DhcpChecks.h`, `findChunk`). The missing
+  entry is a finding for `results.md`.
+- The serializer writes IPv4 entries only, so a RIPng message has no byte form in the model.
+  The RIPng message format (RFC 2080 §2.1, §2.1.1) is an `encoding` statement; its category is a
+  serializer unit test.
+- RIP imports static routes into its table, so a router with more than 25 static routes shows
+  the limit of 25 entries in one message.
+- The default timers are the values of the standard (30 s, 180 s, 120 s), so a test can keep
+  them and observe the values; a simulation of a few hundred seconds is cheap.
+
+## Decisions and facts found on the way
