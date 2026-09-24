@@ -34,8 +34,10 @@ compatibility area of level 5 and are `later` too.
 3. [x] **Step 4, feature map** — `protocol/rip/features.md`, `RIP-F-*`, one feature for each
    mechanism, joining the parallel sections of the two documents. 19 features; every catalog
    entry is in a feature, except RFC2453-ADDR-8, the forwarding rule of IPv4.
-4. [ ] **Step 5, checks** — `protocol/rip/checks.md` with the common mockups and the index, and
-   `protocol/rip/checks/<feature>.md`. One commit.
+4. [x] **Step 5, checks** — `protocol/rip/checks.md` with the common mockups and the index, and
+   `protocol/rip/checks/<feature>.md`. One commit. 24 checks in eight files, 12 for RIP version
+   2 and 12 for RIPng; a script confirmed that every catalog entry is in a check or in the
+   closing list of `checks.md`.
 5. [ ] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
    `RipChecks.h`. One commit per group of tests.
 6. [ ] **Step 7, run** — the suite, `model/rip/results.md` with the run record, the class of
