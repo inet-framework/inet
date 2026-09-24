@@ -29,11 +29,11 @@ The pass delivers every output of the section "What a pass delivers" of the guid
 ## Steps
 
 1. [x] **Plan** — this file.
-2. [ ] **Step 2, the standards map** — `protocol/mpls/standards.md`: target level 2, and the
+2. [x] **Step 2, the standards map** — `protocol/mpls/standards.md`: target level 2, and the
    sections that level 2 needs beyond the level 1 list.
-3. [ ] **Step 3, catalogs** — `standard/rfc3031/catalog.md`, `standard/rfc3032/catalog.md`,
+3. [x] **Step 3, catalogs** — `standard/rfc3031/catalog.md`, `standard/rfc3032/catalog.md`,
    `standard/rfc3443/catalog.md`, `standard/rfc5462/catalog.md`; every quote checked.
-4. [ ] **Step 4, feature map** — `protocol/mpls/features.md` (`MPLS-F-*`).
+4. [x] **Step 4, feature map** — `protocol/mpls/features.md` (`MPLS-F-*`).
 5. [ ] **Step 5, checks** — `protocol/mpls/checks.md` and `protocol/mpls/checks/*.md`, with the
    closing list.
 6. [ ] **Step 6, tests** — `tests/protocol/mpls/Rfc30*.test`, `Rfc3443*.test`, and the helper
@@ -49,11 +49,31 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
 
 - **The in-scope sections grow for level 2.** RFC 3031 adds the labeled packet (§3.3), the LSP
   with its ingress and egress (§3.15) and the Implicit NULL label (§4.1.5), which §3.16 needs.
-  RFC 3032 adds fragmentation and path MTU (§3, nine MUST lines) and the encapsulation on LAN
-  media (§5). RFC 3443 takes §2 and §3 whole; RFC 5462 takes §2.1 and §3.
+  RFC 3032 adds fragmentation and path MTU (§3, nine MUST lines), and the encapsulation on PPP
+  links (§4) and on LAN media (§5), because a labeled packet crosses a link in every test. RFC
+  3443 takes §2 and §3 whole; RFC 5462 takes §2.1 and §3.
 - **The catalogs are drafted by three agents** (scratchpad `mpls/mpls-catalog-brief.md`): RFC
   3031, RFC 3032, and RFC 3443 with RFC 5462.
 - **The model's own static ingress binding serves the tests.** `RsvpClassifier` binds a
   destination to a label of the LIB without RSVP signaling (`<fecentry>` with a `<label>`,
   `RsvpClassifier::readItemFromXML`), and `LibTable` reads a static LIB, as the example
   `examples/mpls/testte_tunnel` does. The tests need no module of their own for the FTN.
+- **The mockups use PPP links, because MPLS over Ethernet does not work in the model.** On an
+  Ethernet interface, the ARP module gets a labeled packet and throws "Unknown message received"
+  (the FIXME of `Mpls.cc:210-214`). With `GlobalArp`, the labeled packet reaches the MAC without
+  an Ethernet header, and "Cannot convert chunk from type inet::MplsHeader to type
+  inet::EthernetMacHeader" stops the run. On PPP links, the path A — R1 — R2 — R3 — B works:
+  R1 pushes 100, R2 swaps to 200, R3 pops. The PPP protocol field of a labeled packet is 0281
+  hex. The Ethernet encapsulation of RFC 3032 §5 becomes a check of its own.
+- **Facts of the exploration run that the checks must expect.** The MPLS TTL is 0 in every
+  entry: `Mpls::pushLabel` and `swapLabel` never set it. The IPv4 TTL stays 32 from A to B,
+  because the ingress labels the packet before the IPv4 forwarding step, and the egress pops it
+  and sends it to the link with no decrement. The model has no MTU code: a labeled packet of 1032
+  octets crossed a link whose MTU is 500. An incoming label without a LIB entry is discarded
+  (`Mpls.cc:241-246`). The pop of the last label gives the packet to IPv4, whatever its protocol.
+- **The feature map has 14 features** (11 mandatory, 3 optional) and places all 157 entries:
+  RFC 3031 with 49, RFC 3032 with 81, RFC 3443 with 24, RFC 5462 with 3. RFC 3031 and RFC 3443
+  have few keywords, so three features are `mandatory` by the "only path" rule: the label stack
+  encoding, the label forwarding and the LAN encapsulation. ICMP is `optional`: its must holds
+  only for an LSR that sends an ICMP message. Penultimate hop popping stays `mandatory`: its
+  condition, an LSR that can pop at all, holds for every LSR that ends an LSP.

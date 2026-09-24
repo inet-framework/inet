@@ -16,13 +16,22 @@ The relationships come from the RFC-editor metadata
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
+The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
+claims of the model. The level 2 pass of 2026-09-24 writes the catalogs of the four documents,
+the feature map, the checks and the tests of the normal path.
+
+The level 2 pass added four parts to the sections that the level 1 pass listed, because the
+normal path needs them: the labeled packet, the LSP with its ingress and egress, and the
+Implicit NULL label (RFC 3031 §3.3, §3.15, §4.1.5), which penultimate hop popping (§3.16) builds
+on; the fragmentation of a labeled datagram that is too big (RFC 3032 §3), nine MUST lines of
+the base document; the encapsulation on PPP links and on LAN media (RFC 3032 §4 and §5), because
+a labeled packet crosses a link in every test; and the whole of RFC 3443 §2 and §3, and RFC 5462
+§3, the use of the renamed field.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
-| level 2, Core | RFC 3031 §3.1, §3.9 to §3.13, §3.16, §3.23; RFC 3032 §2.1, §2.2, §2.4 | the normal path: what a label is, the label stack, the Incoming Label Map and the NHLFE, label swapping, penultimate hop popping, the Time-to-Live rule, the label stack entry encoding (label, Exp/TC, S, TTL), and how a receiver finds the network-layer protocol under the stack |
+| level 2, Core | RFC 3031 §3.1, §3.3, §3.9 to §3.13, §3.15, §3.16, §3.23, §4.1.5; RFC 3032 §2.1, §2.2, §2.4, §3, §4, §5 | the normal path: what a label is, the label stack, the Incoming Label Map and the NHLFE, label swapping, penultimate hop popping, the Time-to-Live rule, the label stack entry encoding (label, Exp/TC, S, TTL), and how a receiver finds the network-layer protocol under the stack |
 | level 3, Edge | RFC 3031 §3.18, §3.22; RFC 3032 §2.3 | in scope now, through the override table. §3.18 and §3.22 hold the negative cases (an invalid incoming label, no outgoing label for a FEC); §2.3 holds the ICMP report for a labeled IP packet that cannot be delivered |
 | level 4, Dynamics | nothing new | RFC 3031 states no timer or control loop of its own; the label-distribution protocols that do (LDP, RSVP-TE) are out of scope of this protocol |
 | level 5, Complete | RFC 3031 §3.20, §3.26, §3.27 (aggregation, label merging, tunnels and hierarchy); RFC 3270, RFC 5129, RFC 5332, RFC 5586, RFC 6790, RFC 7274, RFC 9017 | optional and compound mechanisms: DiffServ-over-MPLS, ECN marking, multicast encapsulation, the generic associated channel, entropy labels, and the special-purpose label registry |
@@ -87,10 +96,10 @@ The set that a level 2 pass tests against:
 
 | Document | Version | Catalog file |
 | --- | --- | --- |
-| RFC 3031 | January 2001, Proposed Standard; §3.1, §3.9 to §3.13, §3.16, §3.18, §3.22, §3.23 | none yet; level 2 writes `standard/rfc3031/catalog.md` |
-| RFC 3032 | January 2001, Proposed Standard; §2.1, §2.2, §2.3, §2.4, as amended below | none yet; level 2 writes `standard/rfc3032/catalog.md` |
-| RFC 3443 | January 2003, Proposed Standard; §2.1, §3 (the Pipe and Short Pipe Model TTL rules) | none yet |
-| RFC 5462 | February 2009, Proposed Standard; the field rename of §2.1 | none yet |
+| RFC 3031 | January 2001, Proposed Standard; §3.1, §3.3, §3.9 to §3.13, §3.15, §3.16, §3.18, §3.22, §3.23, §4.1.5 | [`standard/rfc3031/catalog.md`](../../standard/rfc3031/catalog.md) |
+| RFC 3032 | January 2001, Proposed Standard; §2.1 to §2.4, §3, §4, §5, as amended below | [`standard/rfc3032/catalog.md`](../../standard/rfc3032/catalog.md) |
+| RFC 3443 | January 2003, Proposed Standard; §2 and §3 (the TTL rules of the Uniform, Pipe and Short Pipe Models) | [`standard/rfc3443/catalog.md`](../../standard/rfc3443/catalog.md) |
+| RFC 5462 | February 2009, Proposed Standard; the field rename of §2.1, and §3 | [`standard/rfc5462/catalog.md`](../../standard/rfc5462/catalog.md) |
 
 Out of scope, with the reason:
 
