@@ -11,9 +11,9 @@ the notes below say where the two diverge.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-24 16:03 +0200
-- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `bb20f0dd5e`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `b925cca8a5`
+- Date: 2026-09-24 16:42 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `29aed12310`, tree clean
+- Trees: src `5c4f41c600`, tests/protocol `8733343d5f`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
 - Compiler: Ubuntu clang version 23.0.0
@@ -123,7 +123,7 @@ the model names RFC 4604 nowhere. The support comes from [`coverage.md`](coverag
 | [IGMP-F-MESSAGE-VALIDATION](../../protocol/igmp/features.md#igmp-f-message-validation) | mandatory | yes | untested | `unverified` — level 3 |
 | [IGMP-F-STATE-CHANGE-REPORT](../../protocol/igmp/features.md#igmp-f-state-change-report) | mandatory | yes | supported | `confirmed` |
 | [IGMP-F-REPORT-RETRANSMISSION](../../protocol/igmp/features.md#igmp-f-report-retransmission) | mandatory | yes | partial | `partial` — RFC9776-HOST-18: the default interval is 10 s, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents); HOST-16, HOST-25: no merge of the pending records, [gap 5](results.md#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
-| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | yes | partial | `partial` — RFC9776-HQRY-10: a record for a group without reception state, [gap 8](results.md#gap-8-defect--the-answer-to-a-general-query-holds-a-record-for-a-group-without-reception-state); HQRY-16 is owed |
+| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | yes | partial | `partial` — RFC9776-HQRY-10, HQRY-17: a record for a group without reception state, and an empty record, [gap 8](results.md#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out); HQRY-16 is owed |
 | [IGMP-F-GENERAL-QUERY](../../protocol/igmp/features.md#igmp-f-general-query) | mandatory | yes | supported | `confirmed` |
 | [IGMP-F-QUERIER-ELECTION](../../protocol/igmp/features.md#igmp-f-querier-election) | mandatory | yes | supported | `confirmed` |
 | [IGMP-F-GROUP-MEMBERSHIP](../../protocol/igmp/features.md#igmp-f-group-membership) | mandatory | yes | partial | `partial` — RFC9776-RREP-11, TIMER-8: the Group Membership Interval of RFC 3376, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents); RST-14 is not reached, [gap 11](results.md#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers); RREP-8, RREP-10 are owed |

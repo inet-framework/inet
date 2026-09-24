@@ -9,15 +9,15 @@ to implement, each checked behavior.
 
 ## Run record
 
-- Date: 2026-09-24 16:03 +0200
-- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `bb20f0dd5e`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `b925cca8a5`
+- Date: 2026-09-24 16:42 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `29aed12310`, tree clean
+- Trees: src `5c4f41c600`, tests/protocol `8733343d5f`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/igmp$'`
-- Suite: 42 tests, 25 PASS, 16 FAIL (unexpected), 1 FAIL (expected), so the suite reports FAIL
+- Suite: 42 tests, 24 PASS, 17 FAIL (unexpected), 1 FAIL (expected), so the suite reports FAIL
 
 The `src/` tree `5c4f41c600` is the tree of `origin/master` at `7772a7e4ef`: this pass changes
 no source file.
@@ -48,9 +48,9 @@ IGMPv2 mode of a host, and the return to IGMPv3.
 | `Rfc9776ChangeDuringRepetitions` | [A change during the repetitions](../../protocol/igmp/checks/host-reports.md#a-change-during-the-repetitions) | FAIL at observation 2 | defect, [gap 5](#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
 | `Rfc9776ChangeDuringRepetitionsTail` | [A change during the repetitions](../../protocol/igmp/checks/host-reports.md#a-change-during-the-repetitions) | PASS | — |
 | `Rfc9776GeneralQueryResponse` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | PASS | — |
-| `Rfc9776GeneralQueryNoState` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | FAIL at observation 5 | defect, [gap 8](#gap-8-defect--the-answer-to-a-general-query-holds-a-record-for-a-group-without-reception-state) |
+| `Rfc9776GeneralQueryNoState` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | FAIL at observation 5 | defect, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
 | `Rfc9776GroupSpecificResponse` | [Response to a Group-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-specific-query) | PASS | — |
-| `Rfc9776GroupSourceResponse` | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | PASS | — |
+| `Rfc9776GroupSourceResponse` | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | FAIL at observation 5 | defect, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
 | `Rfc9776StartupQueries` | [General Queries at startup and after it](../../protocol/igmp/checks/router-queries.md#general-queries-at-startup-and-after-it) | PASS | — |
 | `Rfc9776QuerierElection` | [Querier election](../../protocol/igmp/checks/router-queries.md#querier-election) | PASS | — |
 | `Rfc9776ForwardingAfterJoin` | [Forwarding after a join](../../protocol/igmp/checks/router-state.md#forwarding-after-a-join) | PASS | — |
@@ -78,7 +78,7 @@ IGMPv2 mode of a host, and the return to IGMPv3.
 
 ## The class of every failure
 
-Fifteen failures are of the class **defect** of
+Sixteen failures are of the class **defect** of
 [the guide](../../../guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected):
 the model has code for the behavior, and the code gets it wrong. None of them is declared
 expected, because no limitation blocks a repair; each gap names the code that a repair would
@@ -96,7 +96,8 @@ Query; the pass corrected each one before this run, and the plan records them.
 
 The shapes of the defects: a field that the model never fills (gap 1), a line in a comment
 (gap 2), a default or an interval with the value of another document (gaps 3 and 4), a state of
-the host that the model does not keep (gaps 5, 6, 7 and 8), a timer that the router reads,
+the host that the model does not keep, or a record that it sends where the standard sends none
+(gaps 5, 6, 7 and 8), a timer that the router reads,
 cancels or does not lower at the wrong moment (gaps 9, 10 and 11), and two halves of one
 mechanism that do not meet (gap 12).
 
@@ -207,18 +208,26 @@ mechanism that do not meet (gap 12).
   Version 3 Report to an IGMPv2 router — which the IGMPv2 router of the model does not survive,
   see [Other findings](#other-findings).
 
-### Gap 8 (defect) — the answer to a General Query holds a record for a group without reception state
+### Gap 8 (defect) — an answer to a Query holds a record that the standard leaves out
 
-- **Test**: `Rfc9776GeneralQueryNoState`, observation 5: a MODE_IS_INCLUDE record for K, with no
-  sources, after A left K.
-- **Statement**: RFC9776-HQRY-10 (one record for each address with reception state).
+- **Tests**: `Rfc9776GeneralQueryNoState`, observation 5: a MODE_IS_INCLUDE record for K, with no
+  sources, after A left K; `Rfc9776GroupSourceResponse`, observation 5: a MODE_IS_INCLUDE record
+  for G with no sources, in answer to a Group-and-Source-Specific Query for S2, which A does not
+  want.
+- **Statements**: RFC9776-HQRY-10 (one record for each address with reception state);
+  HQRY-17 (a Current-State Record with an empty set of sources is not sent).
 - **The code**: `Igmpv3::processHostGeneralQueryTimer` makes one record for each entry of the
   group table of the interface
   ([`Igmpv3.cc:557-563`](../../../../../src/inet/networklayer/ipv4/Igmpv3.cc)); a leave sets the
-  entry to INCLUDE({}) and keeps it.
+  entry to INCLUDE({}) and keeps it. `Igmpv3::processHostGroupQueryTimer` builds IS_IN(A ∩ B) for a
+  Group-and-Source-Specific Query and sends it without a look at its size (lines 602-611).
 - **Scope**: a host answers every General Query with an empty record for each group that it has
-  left, for as long as it runs. The run of `Rfc9776SourceBlockedOnlyMember` shows it too: A sends
+  left, for as long as it runs, and every source-specific Query for sources that it does not want
+  with an empty record. The run of `Rfc9776SourceBlockedOnlyMember` shows the first too: A sends
   MODE_IS_INCLUDE {} for G at 163 s and 286 s.
+- **How the pass found the second half**: the MLD twin of the check had a scenario where the
+  answer could never be empty; the corrected check queries a source that A does not want, in
+  both protocols (commit `a9fd397749`).
 
 ### Gap 9 (defect) — the S flag of a Group-Specific Query comes from the timer before it is lowered
 
@@ -309,7 +318,7 @@ mechanism that do not meet (gap 12).
 - **The answers of a host** come within the Max Response Time and not at the instant of the
   Query: MODE_IS_EXCLUDE and MODE_IS_INCLUDE records for a General Query, an answer for the
   queried group only, and for a Group-and-Source-Specific Query only the queried sources that
-  the host wants.
+  the host wants, when it wants one of them.
 - **The querier** sends its General Queries at 0 and 31.25 s and then every 125 s, to 224.0.0.1
   with the Router Alert, precedence 6 and a Max Resp Code of 100; the election gives up the role
   to a lower address and takes it back exactly 255 s after the last Query of the other router.

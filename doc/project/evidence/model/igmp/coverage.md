@@ -10,15 +10,15 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-24 16:03 +0200
-- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `bb20f0dd5e`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `b925cca8a5`
+- Date: 2026-09-24 16:42 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2`, commit `29aed12310`, tree clean
+- Trees: src `5c4f41c600`, tests/protocol `8733343d5f`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/igmp$'`
-- Suite: 42 tests, 25 PASS, 16 FAIL (unexpected), 1 FAIL (expected), so the suite reports FAIL
+- Suite: 42 tests, 24 PASS, 17 FAIL (unexpected), 1 FAIL (expected), so the suite reports FAIL
 - Target level: 2
 
 The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
@@ -164,18 +164,18 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC9776-HQRY-4](../../standard/rfc9776/catalog.md#rfc9776-hqry-4) | covered | [Response to a Group-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-specific-query) | `Rfc9776GroupSpecificResponse` | PASS | — |
 | [RFC9776-HQRY-5](../../standard/rfc9776/catalog.md#rfc9776-hqry-5) | selected | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | `Rfc9776GeneralQueryResponse` | PASS | — |
 | [RFC9776-HQRY-6](../../standard/rfc9776/catalog.md#rfc9776-hqry-6) | selected | [Response to a Group-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-specific-query) | `Rfc9776GroupSpecificResponse` | PASS | — |
-| [RFC9776-HQRY-7](../../standard/rfc9776/catalog.md#rfc9776-hqry-7) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
+| [RFC9776-HQRY-7](../../standard/rfc9776/catalog.md#rfc9776-hqry-7) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | its observation held before the failure |
 | [RFC9776-HQRY-8](../../standard/rfc9776/catalog.md#rfc9776-hqry-8) | owed | — | — | — | a later level 2 pass: two specific Queries for one group within one Max Response Time, or two changes within one query period, and a second IGMPv2 member that answers the Query after a Leave, or a second Query within the delay of a host |
-| [RFC9776-HQRY-9](../../standard/rfc9776/catalog.md#rfc9776-hqry-9) | covered | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
-| [RFC9776-HQRY-10](../../standard/rfc9776/catalog.md#rfc9776-hqry-10) | selected | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | `Rfc9776GeneralQueryNoState` | FAIL | fails: [gap 8](results.md#gap-8-defect--the-answer-to-a-general-query-holds-a-record-for-a-group-without-reception-state); observation 4 of `Rfc9776GeneralQueryResponse` holds |
+| [RFC9776-HQRY-9](../../standard/rfc9776/catalog.md#rfc9776-hqry-9) | covered | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | its observation held before the failure |
+| [RFC9776-HQRY-10](../../standard/rfc9776/catalog.md#rfc9776-hqry-10) | selected | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | `Rfc9776GeneralQueryNoState` | FAIL | fails: [gap 8](results.md#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out); observation 4 of `Rfc9776GeneralQueryResponse` holds |
 | [RFC9776-HQRY-11](../../standard/rfc9776/catalog.md#rfc9776-hqry-11) | covered | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | `Rfc9776GeneralQueryResponse` | PASS | — |
 | [RFC9776-HQRY-12](../../standard/rfc9776/catalog.md#rfc9776-hqry-12) | selected | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | `Rfc9776GeneralQueryResponse` | PASS | — |
 | [RFC9776-HQRY-13](../../standard/rfc9776/catalog.md#rfc9776-hqry-13) | selected | [Response to a Group-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-specific-query) | `Rfc9776GroupSpecificResponse` | PASS | — |
-| [RFC9776-HQRY-14](../../standard/rfc9776/catalog.md#rfc9776-hqry-14) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
-| [RFC9776-HQRY-15](../../standard/rfc9776/catalog.md#rfc9776-hqry-15) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
+| [RFC9776-HQRY-14](../../standard/rfc9776/catalog.md#rfc9776-hqry-14) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | its observation held before the failure |
+| [RFC9776-HQRY-15](../../standard/rfc9776/catalog.md#rfc9776-hqry-15) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | its observation held before the failure |
 | [RFC9776-HQRY-16](../../standard/rfc9776/catalog.md#rfc9776-hqry-16) | owed | — | — | — | a later level 2 pass: a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state of the router |
-| [RFC9776-HQRY-17](../../standard/rfc9776/catalog.md#rfc9776-hqry-17) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
-| [RFC9776-HQRY-18](../../standard/rfc9776/catalog.md#rfc9776-hqry-18) | covered | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | — |
+| [RFC9776-HQRY-17](../../standard/rfc9776/catalog.md#rfc9776-hqry-17) | selected | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | FAIL | fails: [gap 8](results.md#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
+| [RFC9776-HQRY-18](../../standard/rfc9776/catalog.md#rfc9776-hqry-18) | covered | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | `Rfc9776GroupSourceResponse` | PASS | its observation held before the failure |
 | [RFC9776-RQ-1](../../standard/rfc9776/catalog.md#rfc9776-rq-1) | covered | [General Queries at startup and after it](../../protocol/igmp/checks/router-queries.md#general-queries-at-startup-and-after-it) | `Rfc9776StartupQueries` | PASS | — |
 | [RFC9776-RQ-2](../../standard/rfc9776/catalog.md#rfc9776-rq-2) | covered | [Forwarding after a join](../../protocol/igmp/checks/router-state.md#forwarding-after-a-join) | `Rfc9776ForwardingAfterJoin` | PASS | — |
 | [RFC9776-RQ-3](../../standard/rfc9776/catalog.md#rfc9776-rq-3) | later | — | — | — | level 4: state inside the node |
@@ -487,7 +487,7 @@ when every core check that ran failed, `untested` when no core check exists.
 | [IGMP-F-MESSAGE-VALIDATION](../../protocol/igmp/features.md#igmp-f-message-validation) | mandatory | untested | RFC9776-GEN-10, QRY-6, QRY-23, QRY-30, REP-3, REP-5, REP-15, REP-16, REP-30, REP-33, REP-36, VER-4, RFC2236-HOST-7, HOST-11, ROUTER-20, ROUTER-23 are `later` |
 | [IGMP-F-STATE-CHANGE-REPORT](../../protocol/igmp/features.md#igmp-f-state-change-report) | mandatory | supported | — |
 | [IGMP-F-REPORT-RETRANSMISSION](../../protocol/igmp/features.md#igmp-f-report-retransmission) | mandatory | partial | RFC9776-HOST-16, HOST-18, HOST-25 fail ([gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents), [gap 5](results.md#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge)); RFC9776-HOST-21, HOST-24 are not reached ([gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents)) |
-| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | partial | RFC9776-HQRY-10 fails ([gap 8](results.md#gap-8-defect--the-answer-to-a-general-query-holds-a-record-for-a-group-without-reception-state)); RFC9776-HQRY-16 is `owed` |
+| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | partial | RFC9776-HQRY-10, HQRY-17 fail ([gap 8](results.md#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out)); RFC9776-HQRY-16 is `owed` |
 | [IGMP-F-GENERAL-QUERY](../../protocol/igmp/features.md#igmp-f-general-query) | mandatory | supported | — |
 | [IGMP-F-QUERIER-ELECTION](../../protocol/igmp/features.md#igmp-f-querier-election) | mandatory | supported | — |
 | [IGMP-F-GROUP-MEMBERSHIP](../../protocol/igmp/features.md#igmp-f-group-membership) | mandatory | partial | RFC9776-RREP-11, TIMER-8 fail ([gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents)); RFC9776-RST-14 is not reached ([gap 11](results.md#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers)); RFC9776-RREP-8, RREP-10 are `owed` |
@@ -517,14 +517,14 @@ The exit criterion of level 2 has two halves, and both hold:
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 9776 §4 to §8 and of the host and router state diagrams of RFC 2236 §6 and §7, 387 entries; the feature map has 20 features and places every entry |
-| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 18 of the 19 mandatory features have core checks that ran: 42 tests, 25 PASS, 17 FAIL |
+| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 18 of the 19 mandatory features have core checks that ran: 42 tests, 24 PASS, 18 FAIL |
 
 The one mandatory feature without a core check has no normal path, so the criterion does not
 reach it at this level, and the ledger says so rather than count it: IGMP-F-MESSAGE-VALIDATION
 is the silent discard of a message that fails a validity check, and every such message is a
 crafted one, which is level 3.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Seventeen
+A level is a measure of how deeply the pass looked, not of how well the model did. Eighteen
 tests fail, and thirteen gaps of the model stand behind them; the level holds because each of
 those checks ran.
 
@@ -545,7 +545,7 @@ IGMP-F-SSM-AWARE, whose checks are level 5.
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-23 | **1, reached** | RFC 9776 and RFC 2236 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 3376, claimed at `Igmpv3.ned:13`); two RFC 9776 formula changes found relative to the model's defaults (Group Membership Interval, Older Version Querier Present Interval); the unrecognized-message-type rule went from a lower-case "should" to a formal MUST between RFC 2236 and RFC 9776, against code that already crashes on the case |
-| 2 | 2026-09-24 | **2, reached** | catalogs of RFC 9776 (293) and RFC 2236 (94); 20 features; 32 checks; 42 tests; the conformance matrix | 25 PASS, 17 FAIL, one of them declared expected; thirteen gaps of the model, twelve defects and one missing feature; 49 statements owed |
+| 2 | 2026-09-24 | **2, reached** | catalogs of RFC 9776 (293) and RFC 2236 (94); 20 features; 32 checks; 42 tests; the conformance matrix | 24 PASS, 18 FAIL, one of them declared expected; thirteen gaps of the model, twelve defects and one missing feature; 49 statements owed |
 
 The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src
 `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
