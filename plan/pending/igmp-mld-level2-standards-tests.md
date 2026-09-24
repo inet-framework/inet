@@ -40,7 +40,10 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
    `standard/rfc9777/catalog.md`, `standard/rfc2710/catalog.md`.
 3. [ ] **Step 4, feature maps** — `protocol/igmp/features.md` (`IGMP-F-*`) and
    `protocol/mld/features.md` (`MLD-F-*`). With step 3 in one commit for each protocol.
-4. [ ] **IGMP step 5, checks** — `protocol/igmp/checks.md` and `protocol/igmp/checks/*.md`.
+4. [x] **IGMP step 5, checks** — `protocol/igmp/checks.md` and `protocol/igmp/checks/*.md`.
+   32 checks in 6 files; 260 statements are in a check, and the other 127 are in the closing
+   list with what a check would need. Message validation is the one mandatory feature without a
+   core check: all its statements need a crafted message.
 5. [ ] **IGMP step 6, tests** — `tests/protocol/igmp/Rfc9776*.test`, `Rfc2236*.test`, and a helper.
 6. [ ] **IGMP steps 7 to 9, and the ledger** — `model/igmp/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`.
@@ -86,4 +89,6 @@ Six agents, one brief (scratchpad `igmp-mld-catalog-brief.md`), one range each:
 - **Stimuli that the model offers without a special tester** (the one look at the code before
   the checks): a UDP sink joins a group, with a source list for INCLUDE mode, and leaves at its
   stop time; a router of the older version sends the older queries.
-
+- **The `Checks:` lines come from a script** (scratchpad `fill-checks-lines.py`): a check file
+  holds only the IDs, and the script adds the strength of each ID from the catalog, so no label
+  can drift from its entry.
