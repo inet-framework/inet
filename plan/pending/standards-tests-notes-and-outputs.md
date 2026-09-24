@@ -12,7 +12,7 @@ output that a pass must deliver.
 1. [x] **IGMP and MLD notes** on `topic/standards-tests-igmp-mld-level2`:
    `model/igmp/notes.md`, `model/mld/notes.md`, in the form of `model/dhcp/notes.md`; the
    tooling quirks that any protocol can meet go into `model/ipv4/notes.md#tooling-quirks` too.
-2. [ ] **The guide** on the same branch: a section on the outputs of a pass — each file, the
+2. [x] **The guide** on the same branch: a section on the outputs of a pass — each file, the
    step that writes it, and what it holds — with `notes.md`, the helper header of a suite, the
    plan and its decision log, and the scripts outside git; the table of the steps and the tree
    of "Where everything lives" name `notes.md`.
@@ -29,3 +29,10 @@ output that a pass must deliver.
   branches then add no line to `ipv4/notes.md`, and the three branches merge without a conflict.
   Their own notes link to `ipv4/notes.md#tooling-quirks` only, because the link gate checks
   anchors and the new headings do not exist on their branches.
+- The guide got a section "What a pass delivers" after step 9: one table row per output, with
+  the place, the step, the lowest level that needs it and the contents; three rules (what stays
+  out of git, a commit per step with the gates, the plan is not the notes); and a subsection
+  "What notes.md holds" with the sections of the file and two checkable rules: every gap of
+  `results.md` appears in a follow-up by its number, and a later pass adds to the file.
+- The ledger and part 1 of the conformance matrix are level 1 outputs: every level 1 protocol
+  of wave 0 has `coverage.md` and `conformance.md`.

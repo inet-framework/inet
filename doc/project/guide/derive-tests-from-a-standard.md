@@ -219,12 +219,17 @@ exists to find.
 | 2 | Map the standards family, select the in-scope set, declare the target level | `evidence/protocol/<proto>/standards.md` |
 | 3 | Extract checkable statements, per document | `evidence/standard/<doc>/catalog.md` |
 | 4 | Map the features across the combined standards | `evidence/protocol/<proto>/features.md` |
-| 5 | Write the English check procedure with a mockup | `evidence/protocol/<proto>/checks.md` |
-| 6 | Write the protocol test | `tests/protocol/<proto>/<Doc><Name>.test` |
+| 5 | Write the English check procedure with a mockup | `evidence/protocol/<proto>/checks.md`, and `checks/<feature>.md` |
+| 6 | Write the protocol test | `tests/protocol/<proto>/<Doc><Name>.test`, and the helper header of the suite |
 | 7 | Run the test, analyze the model, update feature support | `evidence/model/<proto>/results.md` |
 | 8 | Extract the model claims, cross-check at feature level | `evidence/model/<proto>/conformance.md` |
 | 9 | Decide the category of each check | `evidence/model/<proto>/categories.md` |
 | — | Record the state of steps 5, 6 and 7 | `evidence/model/<proto>/coverage.md` |
+| — | Write down what the pass learned, when it learns it | `evidence/model/<proto>/notes.md` |
+
+The table gives the main artifact of each step. [What a pass delivers](#what-a-pass-delivers)
+lists every output of a pass, also the plan and the working scripts, and says when a pass is
+complete.
 
 Three trees, and which one an artifact belongs to. The first two hold nothing that depends
 on the simulation model; the third holds everything that does.
@@ -699,6 +704,10 @@ Record in `results.md`:
   file and line references. This is the first artifact that may reference code;
 - sharpening candidates for the next pass.
 
+What the analysis taught beyond the verdicts goes into `notes.md`: the model quirks behind the
+gaps, the traps of the scenarios and the tooling, and the repairs in the order to do them. See
+[What notes.md holds](#what-notesmd-holds).
+
 Then write the verdict of every check and the support of every feature into the coverage
 ledger (`coverage.md`). Do not edit the feature map. The rule, per feature:
 
@@ -784,6 +793,74 @@ Record the decision and the reason per check. When a check does not fit the prot
 keep its catalog entry and note the target category; write the test in the other suite in a
 later pass.
 
+## What a pass delivers
+
+A pass is complete when every output in the table exists and agrees with the last run. A later
+pass updates the outputs of the earlier passes; it does not start new files. A level 1 pass
+delivers the rows with level 1 only.
+
+| Output | Where | Written at | Level | What it holds |
+| --- | --- | --- | --- | --- |
+| The texts of the standards | `../standards/`, outside the INET repository | step 1 | 1 | the text of every document of the in-scope set |
+| The standards map | `evidence/protocol/<proto>/standards.md` | step 2 | 1 | the family, the in-scope set, the target level |
+| The catalogs | `evidence/standard/<doc>/catalog.md` | step 3 | 2 | the checkable statements of one document |
+| The feature map | `evidence/protocol/<proto>/features.md` | step 4 | 2 | the features, their sources and their strength |
+| The checks | `evidence/protocol/<proto>/checks.md`, and `checks/<feature>.md` above about ten checks | step 5 | 2 | the procedure and the expected observations of every check |
+| The tests | `tests/protocol/<proto>/<Doc><Name>.test` | step 6 | 2 | one test per check |
+| The helper header | `tests/protocol/<proto>/<Proto>Checks.h` | step 6 | 2 | what the tests of the suite share: the readers of fields, the assertions, the modules of the mockups |
+| The results | `evidence/model/<proto>/results.md` | step 7 | 2 | the run record, the verdicts, the class of each failure, the gaps with links to the code |
+| The ledger | `evidence/model/<proto>/coverage.md` | steps 5 to 7 | 1 | the state of every statement and check, the support of every feature, the achieved level, the debt, the pass log |
+| The conformance matrix | `evidence/model/<proto>/conformance.md` | step 8 | 1 | the model claims (part 1), and each feature against the claim and the run (part 2, level 2 and up) |
+| The categories | `evidence/model/<proto>/categories.md` | step 9 | 2 | the category of each check, and its reason |
+| The notes | `evidence/model/<proto>/notes.md` | the whole pass | 2 | what the pass learned; see [What notes.md holds](#what-notesmd-holds) |
+| The plan | `plan/pending/<proto>-level<N>-standards-tests.md`, then `plan/done/` | before step 1, moved at the end | 1 | the steps and their state, and the decisions and facts found on the way |
+| The working scripts | `audit/<proto>-level<N>/` at the repository root | when a pass needs them | 2 | the generators of tests and of ledger tables, the exploration dump, and a `README.md` that says what each one does |
+
+Three rules go with the table:
+
+- **The texts of the standards and the working scripts stay out of git**, as the audit reports
+  do ([audit/README.md](../audit/README.md#where-a-report-lives)). Every other output is in git.
+  Commit what a script generated, so that the committed outputs need no script to be read.
+- **Commit each step when it is done.** Every commit of the pass carries the same group in its
+  `Change:` trailer. Before the last commit, run `check-links.sh`, `check-seals.sh`,
+  `check-commits.sh` and `check-classification.sh` of
+  [run-the-gates.md](run-the-gates.md#before-every-push).
+- **The plan is not the notes.** The decision log of the plan records what the pass decided,
+  in the order of the work, and moves to `plan/done/` with the plan. `notes.md` keeps what the
+  next person needs, ordered by topic, and stays current.
+
+### What notes.md holds
+
+`results.md` says what the run showed. `notes.md` holds what a person learned while doing the
+work and would otherwise have to learn again. Write each entry when the lesson occurs: a lesson
+that waits for the end of the pass is often lost. Use the form of
+[`dhcp/notes.md`](../evidence/model/dhcp/notes.md):
+
+- the header line with `Kind: reference`, standing on `results.md` and `coverage.md`;
+- an introduction: what the document is for, the passes and their dates, and a link to the
+  shared quirks in [`ipv4/notes.md`](../evidence/model/ipv4/notes.md#tooling-quirks);
+- `## Model quirks` — one heading per behavior of the model that surprised the author, with
+  links to the code: the cause behind a gap, a behavior outside the checks (a throw, a missing
+  lifecycle), a default, a stale comment;
+- `## Scenario quirks` — the traps of the mockups: what went wrong, and the rule that avoids
+  it;
+- `## Tooling quirks` — the traps of the test framework and of the tools, and the helpers that
+  the pass wrote. A quirk that any protocol can meet goes into
+  [`ipv4/notes.md`](../evidence/model/ipv4/notes.md#tooling-quirks) instead;
+- `## Follow-ups, in the order I would do them` — a numbered list: the repairs of the model,
+  with the numbers of their gaps and the tests to run again after each one, then the next
+  level and the debt of the ledger.
+
+A section without an entry can stay out. Two rules make the file checkable:
+
+- **Every gap of `results.md` appears in a follow-up, by its number.** A gap that no follow-up
+  names is a gap that nobody plans to repair.
+- **A later pass adds to the file.** When a repair removes a quirk, its entry stays and starts
+  with "**Fixed on** *date*", followed by what changed.
+
+When two protocols run as twins in one pass (IGMP and MLD), the notes of the second protocol link
+to the notes of the first and hold only what the second added.
+
 ## Iteration model
 
 The workflow is a loop, not a one-shot process. A later pass:
@@ -801,7 +878,7 @@ The workflow is a loop, not a one-shot process. A later pass:
 
 The catalog IDs and the feature IDs are stable names; the coverage ledger carries the
 state between passes. A pass is complete when the ledger, the results, and the conformance
-matrix agree.
+matrix agree, and every output of [What a pass delivers](#what-a-pass-delivers) is there.
 
 ### When a document is replaced
 
@@ -834,17 +911,23 @@ doc/project/evidence/protocol/<proto>/   one folder per protocol, INET-free
   ipv4/standards.md                      step 2: standards family + in-scope set
   ipv4/features.md                       step 4: feature map, no run data
   ipv4/checks.md                         step 5: English procedures, one section per check
+  ipv4/checks/ttl.md                     step 5: the checks of one feature, after a split
 
 doc/project/evidence/model/<proto>/      one folder per protocol, INET-dependent
   ipv4/coverage.md                       the ledger: status, test, verdict, support
   ipv4/results.md                        step 7: verdicts + model analysis
   ipv4/conformance.md                    step 8: model claims + conformance matrix
   ipv4/categories.md                     step 9: category decisions
+  ipv4/notes.md                          the whole pass: quirks and ordered follow-ups
 
 tests/protocol/<proto>/                  the tests
   Rfc791TtlDecrement.test                step 6: one test per check
   Rfc791FragmentReassembly.test
   Rfc791DontFragment.test
+  Ipv4Mutations.h                        step 6: the helper header of the suite
+
+plan/pending/, plan/done/                the plan of the pass, with its decision log
+audit/<proto>-level<N>/                  the working scripts, not in git
 ```
 
 ## Pass log
