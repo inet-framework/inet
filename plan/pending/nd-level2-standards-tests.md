@@ -32,9 +32,11 @@ Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
 
 1. [x] **Plan** — this file; and the source paragraph of `nd/standards.md` points to the
    `standards` project, a leftover of the move of the texts.
-2. [ ] **Step 3, catalogs** — `standard/rfc4861/catalog.md`, `standard/rfc4862/catalog.md`,
-   `standard/rfc5942/catalog.md`, `standard/rfc6980/catalog.md`.
-3. [ ] **Step 4, feature map** — `protocol/nd/features.md`, `ND-F-*`. With step 3 in one commit.
+2. [x] **Step 3, catalogs** — `standard/rfc4861/catalog.md`, `standard/rfc4862/catalog.md`,
+   `standard/rfc5942/catalog.md`, `standard/rfc6980/catalog.md`. 403, 70, 10 and 6 entries,
+   drafted by four agents in parallel and merged; every quote checked against its lines.
+3. [x] **Step 4, feature map** — `protocol/nd/features.md`, `ND-F-*`. With step 3 in one commit.
+   23 features, generated from a specification that places every one of the 489 entries.
 4. [ ] **Step 5, checks** — `protocol/nd/checks.md` and `protocol/nd/checks/<feature>.md`.
 5. [ ] **Step 6, tests** — `tests/protocol/nd/Rfc4861*.test`, `Rfc4862*.test`, and a helper.
 6. [ ] **Step 7, run** — `model/nd/results.md`.
@@ -57,3 +59,13 @@ The one look at the code that the guide permits, to pick practical candidates:
   compile; the IPv6 suite passes 27 of 27 there.
 
 ## Decisions and facts found on the way
+- **The catalog drafts** came from four agents with one brief (scratchpad `nd-catalog-brief.md`):
+  RFC 4861 §4, §6, §7.2 with §8, and RFC 4862 with RFC 5942 and RFC 6980. A merge script
+  normalized the strength of every lowercase keyword to the form `must (lower case)` of the
+  DHCP catalog, joined the "left out" lists into the out-of-scope sections, and kept the order
+  of the document. Three flaws of RFC 4861 itself show in the entries and are named in the
+  catalog: RetransTimer in seconds in §7.2.6, the MinRtrAdvInterval default, and the name
+  CurHopLimit in §6.2.3.
+- **Three levels needed the conditional-keyword refinement**: unsolicited advertisements, the
+  processing of a Redirect and the change of a router's role are `optional`, because the
+  `must` of each holds only once the node does the optional thing.
