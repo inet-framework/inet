@@ -1,0 +1,121 @@
+%description:
+
+The TTL after the last label, run 2: the penultimate LSR pops.
+
+Checks RFC3443-OTTL-5 and RFC3032-TTL-10 from the catalogs under doc/project/evidence/standard/.
+The English procedure is in
+doc/project/evidence/protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label; the program steps
+below map onto its expected observations. The guard records the TTL on L2; step 1 is observations
+1 and 3.
+
+Model gap: the TTL field of every label stack entry is 0. Mpls::pushLabel and Mpls::swapLabel
+build a new MplsHeader, set its label and its S bit, and never set its TTL
+(src/inet/networklayer/mpls/Mpls.cc:139-153); the ingress never reads the IPv4 TTL
+(Mpls.cc:98-99). See results.md.
+
+Model gap: the IPv4 TTL does not change across the LSP. The ingress labels a datagram as it
+arrives from the link, before IPv4 forwards it (Mpls::processPacketFromL2, Mpls.cc:202-208), and
+the egress pops the last label and sends the datagram to the link (Mpls.cc:269-283), so no LSR of
+the LSP counts as a hop and no pop writes the IPv4 TTL. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MplsChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc3443_ttl_after_penultimate_pop")
+        // The TTL of the entry of each datagram on L2.
+        .meanwhile(never(on("R1.ppp[1].ppp").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return flowOf(p) == 2000 && recordTtl("L2", p, topTtl(p)); })
+                  .describe("(records the TTL of each datagram of flow 2000 on L2)")
+                  .within(10.0)))
+        // Expected observations 1 and 3: on L3 the IPv4 TTL is one less than the TTL of the entry on L2.
+        .once(on("R2.ppp[1].ppp").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return flowOf(p) == 2000 && !isLabeled(p); })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(ipTtl(p) == recordedTtl("L2", p) - 1, "the IPv4 TTL on L3 is " + num(ipTtl(p)) + ", and the TTL of the entry of the same datagram on L2 was " + num(recordedTtl("L2", p)) + ", where the rule gives one less (RFC3443-OTTL-5, RFC3032-TTL-10)"); })
+                  .describe("an IPv4 datagram of flow 2000 from R2 onto L3")
+                  .within(3.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc3443_ttl_after_penultimate_pop compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.RsvpMplsRouter;
+import ned.DatarateChannel;
+
+channel Link extends DatarateChannel
+{
+    datarate = 10Mbps;
+    delay = 1us;
+}
+
+// the path: host A on L1, the LSRs R1, R2 and R3, host B on L4, on PPP links.
+network MplsPath
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='ppp0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='ppp0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='ppp1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='ppp0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='ppp1' address='10.0.23.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='ppp0' address='10.0.23.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='ppp1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='ppp0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RsvpMplsRouter { @display("p=250,200"); }
+        R2: RsvpMplsRouter { @display("p=400,200"); }
+        R3: RsvpMplsRouter { @display("p=550,200"); }
+        hostB: StandardHost { @display("p=700,200"); }
+    connections:
+        hostA.pppg++ <--> Link <--> R1.pppg++;
+        R1.pppg++ <--> Link <--> R2.pppg++;
+        R2.pppg++ <--> Link <--> R3.pppg++;
+        R3.pppg++ <--> Link <--> hostB.pppg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MplsPath
+sim-time-limit = 11s
+seed-set = 0
+*.R*.rsvp.helloInterval = 0s
+*.R*.rsvp.helloTimeout = 0s
+# The LSP: the FTN of R1 maps the FEC of B to an internal handle, and the LIB entry of the
+# handle holds the NHLFE of the FEC; R2 and R3 hold the ILM of the labels from the link before.
+*.R1.classifier.config = xml("<fectable><fecentry><id>1</id><destination>10.0.2.10</destination><label>1000</label></fecentry></fectable>")
+*.R1.libTable.config = xml("<libtable><libentry><inLabel>1000</inLabel><inInterface>any</inInterface><outInterface>ppp1</outInterface><outLabel><op code='push' value='100'/></outLabel></libentry></libtable>")
+*.R2.libTable.config = xml("<libtable><libentry><inLabel>100</inLabel><inInterface>ppp0</inInterface><outInterface>ppp1</outInterface><outLabel><op code='pop'/></outLabel></libentry></libtable>")
+*.R3.libTable.config = xml("<libtable></libtable>")
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.2.10"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[0].timeToLive = 32
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+
+%contains: stdout
+PROTOCOLTEST rfc3443_ttl_after_penultimate_pop: PASS

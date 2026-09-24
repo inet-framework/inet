@@ -1,0 +1,129 @@
+%description:
+
+Labeled packets on an Ethernet link.
+
+Checks RFC3032-LAN-1, LAN-2 and LAN-3 from the catalogs under doc/project/evidence/standard/. The
+English procedure is in
+doc/project/evidence/protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link; the
+program steps below map onto its expected observations. The guards are observation 3; step 1 is
+observation 1, and step 2 observation 2.
+
+Model gap: an MPLS router on an Ethernet link stops the run at the first ARP packet.
+Mpls::processPacketFromL2 throws "Unknown message received" for a packet that is neither MPLS nor
+IPv4 (src/inet/networklayer/mpls/Mpls.cc:210-214), and the ARP request of R1 reaches the MPLS
+module of R2 at 0.008 s. The documentation of Mpls names Ethernet as a link layer
+(src/inet/networklayer/mpls/Mpls.ned:39-40). See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MplsChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc3032_ethernet_encapsulation")
+        // Expected observation 3: B delivers the five datagrams of flow 2000 ...
+        .meanwhile(exactlyTimes(5, on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000; })
+                  .describe("a datagram that B delivers on port 2000")
+                  .within(10.0)))
+        // ... each with 100 octets of payload.
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return deliveredPort(p) == 2000 && p->getByteLength() != 100; })
+                  .describe("a datagram on port 2000 that B delivers with other than 100 octets")
+                  .within(10.0)))
+        // Expected observation 1: the ethertype is 8847 hex.
+        .once(on("R1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return flowOf(p) == 2000; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(etherType(p) == MPLS_ETHERTYPE_UNICAST, "the ethertype is " + num(etherType(p)) + ", where the rule gives 8847 hex = 34887 (RFC3032-LAN-3)"); })
+                  .describe("a datagram of flow 2000 from R1 onto L2")
+                  .within(3.0))
+        // Expected observation 2: the entry of label 100 right after the Ethernet header, the IPv4 header after it.
+        .once(on("R1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return flowOf(p) == 2000; })
+                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(stackBetweenLinkAndIpv4(p) && labelStack(p).size() == 1 && topLabel(p) == 100, "the frame holds " + chunkNames(p) + " with " + stackStr(p) + ", where the rule gives the entry of label 100 between the Ethernet header and the IPv4 header (RFC3032-LAN-1, LAN-2)"); })
+                  .describe("the next datagram of flow 2000 from R1 onto L2")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc3032_ethernet_encapsulation compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.RsvpMplsRouter;
+import ned.DatarateChannel;
+
+channel Link extends DatarateChannel
+{
+    datarate = 10Mbps;
+    delay = 1us;
+}
+
+// the path: host A on L1, the LSRs R1, R2 and R3, host B on L4, with an Ethernet link as L2.
+network MplsPathEth
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='ppp0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='ppp0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='ppp0' address='10.0.23.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='ppp0' address='10.0.23.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='ppp1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='ppp0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RsvpMplsRouter { @display("p=250,200"); }
+        R2: RsvpMplsRouter { @display("p=400,200"); }
+        R3: RsvpMplsRouter { @display("p=550,200"); }
+        hostB: StandardHost { @display("p=700,200"); }
+    connections:
+        hostA.pppg++ <--> Link <--> R1.pppg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.pppg++ <--> Link <--> R3.pppg++;
+        R3.pppg++ <--> Link <--> hostB.pppg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MplsPathEth
+sim-time-limit = 11s
+seed-set = 0
+*.R*.rsvp.helloInterval = 0s
+*.R*.rsvp.helloTimeout = 0s
+# The LSP: the FTN of R1 maps the FEC of B to an internal handle, and the LIB entry of the
+# handle holds the NHLFE of the FEC; R2 and R3 hold the ILM of the labels from the link before.
+*.R1.classifier.config = xml("<fectable><fecentry><id>1</id><destination>10.0.2.10</destination><label>1000</label></fecentry></fectable>")
+*.R1.libTable.config = xml("<libtable><libentry><inLabel>1000</inLabel><inInterface>any</inInterface><outInterface>eth0</outInterface><outLabel><op code='push' value='100'/></outLabel></libentry></libtable>")
+*.R2.libTable.config = xml("<libtable><libentry><inLabel>100</inLabel><inInterface>eth0</inInterface><outInterface>ppp0</outInterface><outLabel><op code='swap' value='200'/></outLabel></libentry></libtable>")
+*.R3.libTable.config = xml("<libtable><libentry><inLabel>200</inLabel><inInterface>ppp0</inInterface><outInterface>ppp1</outInterface><outLabel><op code='pop'/></outLabel></libentry></libtable>")
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].localPort = 1000
+*.hostA.app[0].destAddresses = "10.0.2.10"
+*.hostA.app[0].destPort = 2000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].stopTime = 5.5s
+*.hostA.app[0].sendInterval = 1s
+*.hostA.app[0].timeToLive = 32
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 2000
+
+%contains: stdout
+PROTOCOLTEST rfc3032_ethernet_encapsulation: PASS

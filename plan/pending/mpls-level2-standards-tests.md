@@ -36,7 +36,7 @@ The pass delivers every output of the section "What a pass delivers" of the guid
 4. [x] **Step 4, feature map** — `protocol/mpls/features.md` (`MPLS-F-*`).
 5. [x] **Step 5, checks** — `protocol/mpls/checks.md` and `protocol/mpls/checks/*.md`, with the
    closing list.
-6. [ ] **Step 6, tests** — `tests/protocol/mpls/Rfc30*.test`, `Rfc3443*.test`, and the helper
+6. [x] **Step 6, tests** — `tests/protocol/mpls/Rfc30*.test`, `Rfc3443*.test`, and the helper
    header `MplsChecks.h`.
 7. [ ] **Steps 7 to 9, and the ledger** — `model/mpls/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`, from one fresh run.
@@ -88,3 +88,17 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
 - **IPv6 and the Router Alert label go to the closing list.** A labeled IPv6 datagram needs an
   IPv6 mockup; the Router Alert label needs local software in the LSR and a rule for what that
   software does, which RFC 3032 does not give. The ledger decides whether each is owed.
+- **21 tests for the 15 checks.** A test ends at its first failure, so a rule that fails in the
+  model would hide the rules after it; where two rules of a check could both fail, each gets a
+  test of its own (the TTL checks give seven tests, the check of the DF bit two). A filter that
+  throws is swallowed by the tester, so every rule with a value is an assertion on a `.once`
+  step, which prints the value. `MplsChecks.h` reads each label stack entry from its serialized
+  octets, and compares the TTL of one datagram on two links through a record by its IPv4
+  Identification.
+- **Two tests stop the run.** The LIB asserts that a label value is above 0
+  (`LibTable.cc:132` and `:142`), so the Explicit NULL test stops at initialization. On an
+  Ethernet link, the ARP request of R1 reaches the MPLS module of R2 at 0.008 s, and
+  `Mpls::processPacketFromL2` throws "Unknown message received" (`Mpls.cc:210-214`).
+- **The first run:** 5 PASS (the label stack entry, two entries, label switching, penultimate hop
+  popping, the PPP encapsulation), 6 expected FAIL (the two NULL labels, the three fragmentation
+  tests, the MPLS Control Protocol), 10 FAIL (nine TTL tests and the Ethernet test).
