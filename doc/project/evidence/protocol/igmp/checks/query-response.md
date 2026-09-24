@@ -9,7 +9,7 @@ procedures come from the specification only. They name no simulation model and n
 
 Checks: **RFC9776-HQRY-1**, **HQRY-3**, **HQRY-5**, **HQRY-10**, **REP-18**, **REP-19**,
 **REP-20** (description), **HQRY-12** (must not); covers **RFC9776-HQRY-2** (must (lower case)),
-**HQRY-11** (description).
+**HQRY-11**, **HOST-7** (description).
 
 ### Requirement
 
@@ -21,7 +21,8 @@ as possible.
 ### Scenario constants
 
 - The link. From 10 seconds on, host A joins G, and joins H for S1: its state is EXCLUDE({}) for
-  G and INCLUDE({S1}) for H.
+  G and INCLUDE({S1}) for H. A also joins K at 10 seconds and leaves K at 20 seconds, so at the
+  Query it has no reception state for K: INCLUDE({}) (RFC9776-HOST-7).
 - The General Query under test is the second startup Query of R, 31.25 seconds after the first,
   with a Max Response Time of 10 seconds.
 - Observation lasts 50 seconds from the start.
@@ -41,6 +42,7 @@ as possible.
 3. That Report does not leave at the instant of the Query (RFC9776-HQRY-12).
 4. It holds a MODE_IS_EXCLUDE record for G with no sources and a MODE_IS_INCLUDE record for H with
    the source S1 (RFC9776-HQRY-10, REP-19, REP-20).
+5. It holds no record for K (RFC9776-HQRY-10).
 
 ## Response to a Group-Specific Query
 

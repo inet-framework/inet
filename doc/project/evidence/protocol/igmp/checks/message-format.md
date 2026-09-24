@@ -120,7 +120,7 @@ Max Response Time of the General Queries.
 
 ### Scenario constants
 
-- The link, with the default of every value. Observation lasts 10 seconds from the start.
+- The link, with the default of every value. Observation lasts 290 seconds from the start.
 
 ### Procedure
 
@@ -131,10 +131,13 @@ Max Response Time of the General Queries.
 
 1. On L1, from R, a General Query. This confirms the stimulus.
 2. Its QRV is neither zero nor one (RFC9776-TIMER-3).
-3. The Max Response Time of its Max Resp Code is shorter than the Query Interval of its QQIC
-   (RFC9776-TIMER-6, TIMER-26).
+3. The Max Response Time of its Max Resp Code is shorter than the Query Interval, the time from
+   the third General Query of R to the fourth (RFC9776-TIMER-6, TIMER-26).
 
 ### Notes
 
 - A QRV of zero also means a Robustness Variable above 7 (RFC9776-QRY-13). The querier of
   this check keeps the default of 2, so its QRV must be 2.
+- Observation 3 reads the Query Interval from the behavior of R, not from the QQIC: the value of
+  the QQIC is the subject of [Membership Query encapsulation](#membership-query-encapsulation).
+  The third and the fourth General Query come after the startup Queries.

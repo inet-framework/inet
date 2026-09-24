@@ -82,7 +82,7 @@ Interval is [Robustness Variable] × [Query Interval] + 2 × [Query Response Int
 ### Scenario constants
 
 - The link with a source. S1 sends to G. At 10 seconds, host A joins G; A answers the General
-  Queries of R; at 45 seconds, A stops without a leave.
+  Queries of R; at 45 seconds, A leaves L1 without a leave.
 - Observation lasts 350 seconds from the start.
 
 ### Size or value arithmetic
@@ -94,7 +94,7 @@ stops about 270 seconds after that Report, between 280 and 315 seconds.
 ### Procedure
 
 1. Build the link with a source, and let R, A, B and S1 come up.
-2. At 10 seconds, let A join G; at 45 seconds, stop A.
+2. At 10 seconds, let A join G; at 45 seconds, break the link between A and L1.
 3. Observe the Reports of A and the datagrams of S1 on L1.
 
 ### Expected observations
@@ -102,7 +102,7 @@ stops about 270 seconds after that Report, between 280 and 315 seconds.
 1. On L1, from A, before 45 seconds, a Report with a Current-State Record MODE_IS_EXCLUDE for G.
    Record the instant of the last Report of A. This confirms the stimulus.
 2. Datagrams of S1 to G arrive on L1 until 270 seconds after that Report, with a margin of 1
-   second (RFC9776-RREP-9, TIMER-8).
+   second (RFC9776-RREP-11, TIMER-8).
 3. No datagram of S1 to G arrives on L1 later than 1 second after that instant (RFC9776-RST-10,
    TIMER-8).
 
@@ -129,7 +129,7 @@ is set only when the Group Timer is above the Last Member Query Time.
 ### Scenario constants
 
 - The link with a source. S1 sends to G. At 10 seconds, host A joins G; at 50 seconds, A leaves
-  G. A is the only member of G.
+  G. A is the only member of G. A sends each State-Change Report once (Robustness Variable 1).
 - Observation lasts 60 seconds from the start.
 
 ### Size or value arithmetic
@@ -204,7 +204,7 @@ above it.
 
 - The link with a source. S1 sends to G. Host A joins G for S1 and S2 from 10 seconds on; host B
   joins G for S1 from 10 to 50 seconds, so that its leave at 50 seconds sends BLOCK({S1}). A
-  answers the queries for S1.
+  answers the queries for S1. B sends each State-Change Report once (Robustness Variable 1).
 - Observation lasts 60 seconds from the start.
 
 ### Procedure
@@ -222,8 +222,10 @@ above it.
 3. A second such Query 1 second after the first, and no third one (RFC9776-RQRY-13).
 4. Datagrams of S1 to G arrive on L1 from 50 to 60 seconds with no gap longer than 1 second,
    because A answers (RFC9776-RREP-14).
-5. The S flag is clear in every such Query, because the router lowers the Source Timer of S1 to
-   the Last Member Query Time before it builds the Query (RFC9776-RQRY-14).
+5. The S flag is clear in the first such Query, because the router lowers the Source Timer of S1
+   to the Last Member Query Time before it builds the Query. The S flag of the second Query is
+   set if the answer of A came before it, because that answer raises the Source Timer of S1 to
+   the Group Membership Interval, and clear if not (RFC9776-RQRY-14).
 
 ## Source blocked by its only member
 
@@ -239,7 +241,8 @@ in INCLUDE mode the router forwards those sources no more.
 ### Scenario constants
 
 - The link with a source. S1 sends to G. Host A joins G for S1 from 10 to 50 seconds; its leave
-  at 50 seconds sends BLOCK({S1}), and no other system wants S1.
+  at 50 seconds sends BLOCK({S1}), and no other system wants S1. A sends each State-Change Report
+  once (Robustness Variable 1).
 - Observation lasts 60 seconds from the start.
 
 ### Size or value arithmetic
@@ -272,20 +275,22 @@ state for the group is in INCLUDE({}), so it starts to forward the group.
 
 ### Scenario constants
 
-- The link with a source. S1 sends to G. Host A joins G at 10 seconds; R is down until 20
-  seconds, so its first General Query, at 20 seconds, finds A a member already.
-- Observation lasts 40 seconds from the start.
+- The link with a source. S1 sends to G. R leaves L1 at 1 second, after its first startup
+  General Query, and joins L1 again at 20 seconds, so it misses the join of A at 10 seconds. Its
+  next General Query, the second startup Query at 31.25 seconds, finds A a member already.
+- Observation lasts 60 seconds from the start.
 
 ### Procedure
 
-1. Build the link with a source, with R down until 20 seconds; let A, B and S1 come up.
+1. Build the link with a source, and let R, A, B and S1 come up; break the link between R and
+   L1 from 1 to 20 seconds.
 2. At 10 seconds, let A join G.
 3. Observe the Queries of R, the Reports of A and the datagrams of S1 on L1.
 
 ### Expected observations
 
-1. On L1, from A, after the first General Query of R, a Report with a MODE_IS_EXCLUDE record for
-   G. This confirms the stimulus.
+1. On L1, from A, after the General Query of R at 31.25 seconds, a Report with a
+   MODE_IS_EXCLUDE record for G. This confirms the stimulus.
 2. From 1 second after that Report on, every datagram of S1 to G arrives on L1
    (RFC9776-RREP-9).
 

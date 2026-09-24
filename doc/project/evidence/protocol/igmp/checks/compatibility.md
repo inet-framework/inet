@@ -164,8 +164,8 @@ IGMPv3. The Older Version Querier Present Interval is [Robustness Variable] × [
 
 ### Scenario constants
 
-- The link with an older querier. R stops at 100 seconds, after its IGMPv2 General Queries of 0
-  and 31.25 seconds. Host A joins G at 370 seconds and H at 400 seconds.
+- The link with an older querier. R leaves L1 at 100 seconds, after its IGMPv2 General Queries
+  of 0 and 31.25 seconds. Host A joins K at 40 seconds, G at 370 seconds and H at 400 seconds.
 - Observation lasts 420 seconds from the start.
 
 ### Size or value arithmetic
@@ -175,15 +175,18 @@ IGMPv2 mode until 381.25 seconds and in IGMPv3 mode after it.
 
 ### Procedure
 
-1. Build the link with an older querier, and let R, A and B come up; at 100 seconds, stop R.
+1. Build the link with an older querier, and let R, A and B come up; at 100 seconds, break the
+   link between R and L1.
 2. Let A make the requests above.
-3. Observe the Reports of A on L1 after 370 seconds.
+3. Observe the Queries of R and the Reports of A on L1.
 
 ### Expected observations
 
-1. On L1, from A, at 370 seconds, an IGMPv2 Membership Report for G. This confirms the stimulus:
-   A is still in IGMPv2 mode.
-2. On L1, from A, at 400 seconds, a Version 3 Membership Report with a record for H, and no
+1. On L1, from A, at 40 seconds, an IGMPv2 Membership Report for K. This confirms the stimulus:
+   A is in IGMPv2 mode.
+2. On L1, from A, at 370 seconds, an IGMPv2 Membership Report for G: A is still in IGMPv2 mode,
+   338.75 seconds after the last IGMPv2 Query (RFC9776-TIMER-22).
+3. On L1, from A, at 400 seconds, a Version 3 Membership Report with a record for H, and no
    IGMPv2 Report for H (RFC9776-COMPH-9, TIMER-22).
 
 ## Router with an IGMPv2 member
@@ -232,21 +235,21 @@ it sends Queries of 8 octets with the Max Response Time in the Max Resp Code.
 
 ### Scenario constants
 
-- The two routers of different versions. R1 (IGMPv3, 10.0.1.1) comes up at the start, R2
-  (IGMPv2, 10.0.1.2) at 5 seconds, and sends its startup General Query then. R1 has the lower
-  address and stays the querier.
+- The two routers of different versions, up from the start. R2 (IGMPv2, 10.0.1.2) sends its
+  startup General Query at the start. R1 (IGMPv3, 10.0.1.1) has the lower address and stays
+  the querier.
 - Observation lasts 200 seconds from the start.
 
 ### Procedure
 
-1. Build the two routers of different versions, R2 down until 5 seconds.
+1. Build the two routers of different versions.
 2. Observe the General Queries of R1 and R2 on L1.
 
 ### Expected observations
 
-1. On L1, from R2, at 5 seconds, a General Query of 8 octets. This confirms the stimulus.
-2. Every General Query of R1 after that Query is 8 octets long (RFC9776-RQRY-8, COMPR-1,
-   COMPR-6).
+1. On L1, from R2, at the start, a General Query of 8 octets. This confirms the stimulus.
+2. Every General Query of R1 from 1 second after that Query on is 8 octets long
+   (RFC9776-RQRY-8, COMPR-1, COMPR-6).
 3. Its Max Resp Code is 100, the Max Response Time in tenths of a second without the exponential
    code (RFC9776-COMPR-8).
 
@@ -261,28 +264,35 @@ and retransmission timers.
 
 ### Scenario constants
 
-- The link with an older querier, with R down until 10.5 seconds. Host A joins G at 10.0
-  seconds, in IGMPv3 mode, and has a repetition of its State-Change Report pending up to 1 second
-  later. The IGMPv2 General Query of R at 10.5 seconds switches A to IGMPv2 mode.
-- Observation lasts 20 seconds from the start.
+- The link with an older querier. R leaves L1 at 1 second, after its IGMPv2 General Query at the
+  start, and joins L1 again at 406.22 seconds, after the Report of A and before its own General
+  Query of 406.25 seconds. A is in IGMPv3 mode again 350 seconds after the Query at the start
+  (RFC9776-TIMER-22). Host A joins G at 406.2 seconds, in IGMPv3 mode, and has a
+  repetition of its State-Change Report pending up to 1 second later. The IGMPv2 General Query
+  of R at 406.25 seconds switches A to IGMPv2 mode.
+- Observation lasts 420 seconds from the start.
 
 ### Procedure
 
-1. Build the link with an older querier, with R down until 10.5 seconds; let A and B come up.
-2. At 10.0 seconds, let A join G.
+1. Build the link with an older querier, and let R, A and B come up; break the link between R
+   and L1 from 1 to 406.22 seconds.
+2. At 406.2 seconds, let A join G.
 3. Observe the Queries of R and the Reports of A on L1.
 
 ### Expected observations
 
-1. On L1, from A, at 10.0 seconds, a Version 3 Membership Report with a CHANGE_TO_EXCLUDE_MODE
-   record for G, and from R, at 10.5 seconds, an IGMPv2 General Query. This confirms the
+1. On L1, from A, at 406.2 seconds, a Version 3 Membership Report with a CHANGE_TO_EXCLUDE_MODE
+   record for G, and from R, at 406.25 seconds, an IGMPv2 General Query. This confirms the
    stimulus.
 2. No Version 3 Membership Report leaves A after the Query (RFC9776-COMPH-22).
 
 ### Notes
 
-- The random repetition may leave A before 10.5 seconds; then the check has no verdict, and its
+- The random repetition may leave A before 406.25 seconds; then the check has no verdict, and its
   run says so. The check reads only the Reports after the Query.
+- R is an IGMPv2 router, and a Version 3 Report is not for R: RFC 2236 §2 ignores unrecognized
+  message types. The check keeps R off L1 while A sends it, so that the check reads the host
+  alone.
 
 ## A BLOCK record for a group in IGMPv2 mode
 

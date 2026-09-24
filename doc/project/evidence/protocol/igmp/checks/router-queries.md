@@ -64,25 +64,23 @@ the timer expires, it becomes the querier again. RFC 2236 §7 gives the same tra
 
 ### Scenario constants
 
-- The two routers, both IGMPv3. R1 comes up at the start, R2 at 5 seconds. R1 stops at 100
-  seconds.
+- The two routers, both IGMPv3, up from the start. R1 leaves L1 at 100 seconds.
 - Observation lasts 350 seconds from the start.
 
 ### Size or value arithmetic
 
 The Other Querier Present Interval is 2 × 125 + 0.5 × 10 = 255 seconds. R1 sends General
-Queries at 0 and 31.25 seconds before it stops, so R2 becomes the querier at 31.25 + 255 =
+Queries at 0 and 31.25 seconds before it leaves L1, so R2 becomes the querier at 31.25 + 255 =
 286.25 seconds.
 
 ### Procedure
 
-1. Build the two routers, R2 down until 5 seconds; at 100 seconds, stop R1.
+1. Build the two routers; at 100 seconds, break the link between R1 and L1.
 2. Observe the General Queries of R1 and R2 on L1.
 
 ### Expected observations
 
-1. On L1, from R1, the General Query at 31.25 seconds, which R2 hears. This confirms the
-   stimulus.
+1. On L1, from R1, the General Query at the start, which R2 hears. This confirms the stimulus.
 2. From that Query until 255 seconds after the last General Query of R1, no General Query
    leaves R2 (RFC9776-RQRY-5, RQRY-6, RFC2236-ROUTER-11, ROUTER-13).
 3. A General Query of R2 comes 255 seconds after the last General Query of R1, with a margin of
@@ -90,5 +88,5 @@ Queries at 0 and 31.25 seconds before it stops, so R2 becomes the querier at 31.
 
 ### Notes
 
-- R2 may send its own startup Query at 5 seconds, before it hears R1; observation 2 starts at
-  the first Query of R1 that R2 hears.
+- R2 may send its own startup Query at the start, before it hears R1; observation 2 starts
+  1 millisecond after the first Query of R1, when R2 has heard it.

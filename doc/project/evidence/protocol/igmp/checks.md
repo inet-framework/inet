@@ -93,7 +93,9 @@ The checks use the defaults of RFC 9776 §8:
   situation the rule needs — the join, the Query, the leave — before the observation that
   checks the rule.
 - **A random delay of the standard is a window, not a value.** Where the standard gives a random
-  delay, the check tests its bounds and never a value drawn from it.
+  delay, the check tests its bounds and never a value drawn from it. An answer that leaves less
+  than 1 millisecond after the Query that it answers leaves "at the instant of the Query": the
+  margin only absorbs the transmission of the Query.
 - **Start instants are fixed where a timer is under test**, so that the instant under test does
   not fall on another event of the same node by chance.
 - **Every node computes the IGMP checksum** of the messages it sends, because one observation
@@ -101,6 +103,14 @@ The checks use the defaults of RFC 9776 §8:
 - **The fields of the header come last** in a check that also observes behavior, so that a wrong
   field does not keep the behavior from a verdict; a check never puts two rules into one
   observation when one could hide the other.
+- **A node joins or leaves L1 through its link.** Where a check needs a node that comes up late
+  or stops, the link between the node and L1 is broken until the node joins L1, or breaks when
+  the node leaves L1. The node then hears nothing from L1, and L1 hears nothing from the node.
+  The restart of a node is outside IGMP, so no check stops a node.
+- **One Report starts one query sequence.** Where a check reads the Queries that a
+  State-Change Report of a host starts, that host sends each State-Change Report once: its
+  Robustness Variable is 1. Each repetition of the Report would start the sequence again
+  (RFC 9776 §6.6.3.1).
 
 ## Index
 
