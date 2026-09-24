@@ -33,6 +33,24 @@ Notable backward incompatible changes are the following:
    through a tunnel change; the tunnels that Mipv6 and Pmipv6 create are
    Ipv6TunnelInterface modules too.
 
+3. IPv6 stops forwarding along a route once it is removed
+
+   Ipv6 looks a destination up in the destination cache of Ipv6RoutingTable
+   before it looks at the routes, and the routing table purged that cache when
+   a route was added but not when one was removed. A node kept forwarding to
+   the next hop of a removed route until the next route was added anywhere in
+   its table, until the interface went down, or, for a route with an expiry
+   time, until that time passed. Removing a route now purges the cache, and
+   so does a change to the destination, prefix length, metric, next hop or
+   interface of a route in the table.
+
+   Simulations whose IPv6 routes are removed or changed while traffic flows
+   are affected, for example a Border Gateway Protocol (BGP) withdrawal or a
+   route deleted or changed from C++ code. Traffic to a destination that is
+   no longer routed is now answered with an Internet Control Message Protocol
+   for IPv6 (ICMPv6) Destination Unreachable at the router that lost the
+   route, instead of being forwarded towards the old next hop.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
