@@ -1,6 +1,37 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.7.x (unreleased)
+-----------------------
+
+Wireless-layer additions that a cellular physical layer needs. Every item is
+off by default and leaves the behavior of existing simulations unchanged.
+
+Notable backward incompatible changes are the following:
+
+1. Radio: concurrent transmissions and receptions
+
+   Radio can now transmit any number of signals at the same time, and attempt
+   any number of receptions at the same time, as a technology with
+   concurrent per-user transmissions (e.g. a cellular base station) needs.
+   Both are enabled by new Radio parameters, concurrentTransmissions and
+   concurrentReceptions, which default to false. With concurrentReceptions
+   enabled, every reception the receiver's computeIsReceptionAttempted()
+   accepts is attempted alongside the ones in progress; the receivers shipped
+   with INET attempt one reception at a time either way, so the switch only
+   matters with a receiver that attempts more.
+
+   The behavior with the defaults is unchanged, but the C++ API of Radio
+   subclasses changed: the protected receptionTimer and transmissionTimer
+   members were replaced by the attemptedReceptionTimers and
+   transmissionTimers vectors, and continueTransmission(), endTransmission()
+   and abortTransmission() take the transmission timer as an argument.
+   IRadio::getTransmissionInProgress() and getReceptionInProgress() return
+   one of the transmissions or attempted receptions in progress.
+
+   This change requires the modification of C++ code that derives from Radio
+   and accesses these members or overrides these methods.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 

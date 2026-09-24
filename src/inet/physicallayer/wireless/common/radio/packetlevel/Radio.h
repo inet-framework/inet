@@ -94,6 +94,18 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * are simulated separately or not.
      */
     bool separateReceptionParts = false;
+    /**
+     * When true the radio may transmit any number of signals at the same
+     * time, otherwise a packet from the higher layer while transmitting is an
+     * error.
+     */
+    bool concurrentTransmissions = false;
+    /**
+     * When true every reception the receiver decides to attempt is attempted,
+     * alongside the ones already in progress. Otherwise a newly attempted
+     * reception replaces the one in progress.
+     */
+    bool concurrentReceptions = false;
     //@}
 
     /** Gates */
@@ -140,16 +152,19 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     /** @name Timer */
     //@{
     /**
-     * The timer that is scheduled to the end of the current transmission.
-     * If this timer is not scheduled then no transmission is in progress.
+     * The transmission timers: a scheduled one belongs to a transmission in
+     * progress and is scheduled to the end of its current part. Idle timers
+     * are kept for reuse, so a radio that never transmits concurrently has
+     * exactly one. If none is scheduled then no transmission is in progress.
      */
-    cMessage *transmissionTimer = nullptr;
+    std::vector<cMessage *> transmissionTimers;
     /**
-     * The timer that is scheduled to the end of the current reception.
-     * If this timer is nullptr then no attempted reception is in progress but
-     * there still may be incoming receptions which are not attempted.
+     * The timers of the attempted receptions in progress, in start order. If
+     * empty then no attempted reception is in progress but there still may be
+     * incoming receptions which are not attempted. Holds at most one timer
+     * unless concurrentReceptions is set.
      */
-    cMessage *receptionTimer = nullptr;
+    std::vector<cMessage *> attemptedReceptionTimers;
     /**
      * The timer that is scheduled to the end of the radio mode switch.
      */
@@ -183,9 +198,9 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part);
-    virtual void continueTransmission();
-    virtual void endTransmission();
-    virtual void abortTransmission();
+    virtual void continueTransmission(cMessage *timer);
+    virtual void endTransmission(cMessage *timer);
+    virtual void abortTransmission(cMessage *timer);
 
     virtual WirelessSignal *createSignal(Packet *packet) const;
 
@@ -198,6 +213,9 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void sendUp(Packet *macFrame);
     virtual cMessage *createReceptionTimer(WirelessSignal *signal) const;
     virtual bool isReceptionTimer(const cMessage *message) const;
+    virtual bool isTransmissionTimer(const cMessage *message) const;
+    virtual cMessage *getIdleTransmissionTimer();
+    virtual cMessage *getFirstScheduledTransmissionTimer() const;
 
     virtual bool isReceiverMode(IRadio::RadioMode radioMode) const;
     virtual bool isTransmitterMode(IRadio::RadioMode radioMode) const;

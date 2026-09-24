@@ -52,6 +52,8 @@ module Radio extends PhysicalLayerBase like IRadio
 
         bool separateTransmissionParts = default(false); // When enabled the transmission of preamble, header and data part are simulated separately
         bool separateReceptionParts = default(false);    // When enabled the reception of preamble, header and data part are simulated separately
+        bool concurrentTransmissions = default(false);   // When enabled the radio may transmit any number of signals at the same time; otherwise a packet from above while transmitting is an error
+        bool concurrentReceptions = default(false);      // When enabled every reception the receiver decides to attempt is attempted alongside the ones in progress; otherwise a newly attempted reception replaces the one in progress
 
         bool displayCommunicationRange = default(false); // If true communication range is displayed as a blue circle around the node
         bool displayInterferenceRange = default(false);  // If true interference range is displayed as a gray circle around the node

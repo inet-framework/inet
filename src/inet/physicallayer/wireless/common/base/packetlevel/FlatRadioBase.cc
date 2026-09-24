@@ -46,7 +46,7 @@ void FlatRadioBase::setBitrate(bps newBitrate)
 {
     FlatTransmitterBase *flatTransmitter = const_cast<FlatTransmitterBase *>(check_and_cast<const FlatTransmitterBase *>(transmitter));
     flatTransmitter->setBitrate(newBitrate);
-    receptionTimer = nullptr;
+    attemptedReceptionTimers.clear();
 }
 
 } // namespace physicallayer

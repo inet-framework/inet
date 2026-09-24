@@ -1,0 +1,192 @@
+%description:
+
+Radio with concurrentTransmissions and concurrentReceptions enabled: the
+sender's radio starts two transmissions in the same event, and the
+receiver's radio, whose receiver attempts every possible reception,
+attempts both overlapping receptions and sends both up. The two signals
+share a band, so neither decodes; Radio sends an attempted reception up
+either way, which is what is counted here.
+
+%file: test.cc
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskReceiver.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace ConcurrentRadio_1 {
+
+// Attempts every reception it could receive, whatever else is in progress:
+// the policy a receiver that decodes concurrent transmissions would have.
+class AttemptingReceiver : public ApskReceiver
+{
+  public:
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const override
+    {
+        return computeIsReceptionPossible(listening, reception, part);
+    }
+};
+
+Define_Module(AttemptingReceiver);
+
+// Hands two packets to the radio in the same event.
+class TestSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(0, new cMessage("start")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        delete msg;
+        for (const char *name : {"first", "second"}) {
+            auto packet = new Packet(name, makeShared<ByteCountChunk>(B(100)));
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
+            send(packet, "out");
+        }
+    }
+};
+
+Define_Module(TestSource);
+
+// Switches its radio to receiver mode at the start, then counts what the
+// radio sends up, erroneous or not. (A radio configured to start in receiver
+// mode listens on the medium before it has registered with it.)
+class TestSink : public cSimpleModule
+{
+  protected:
+    int received = 0;
+    virtual void initialize() override { scheduleAt(0, new cMessage("switchToReceiver")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        if (msg->isSelfMessage()) {
+            delete msg;
+            check_and_cast<IRadio *>(getParentModule()->getSubmodule("radio"))->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            return;
+        }
+        auto packet = check_and_cast<Packet *>(msg);
+        received++;
+        std::cout << "sink: received " << packet->getName() << " at " << simTime() << std::endl;
+        delete packet;
+    }
+    virtual void finish() override { std::cout << "sink: received " << received << " packets" << std::endl; }
+};
+
+Define_Module(TestSink);
+
+} // namespace ConcurrentRadio_1
+
+%file: test.ned
+
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadio;
+import inet.physicallayer.wireless.apsk.packetlevel.ApskReceiver;
+import inet.physicallayer.wireless.common.medium.DimensionalRadioMedium;
+
+module AttemptingReceiver extends ApskReceiver
+{
+    @class(AttemptingReceiver);
+}
+
+simple TestSource
+{
+    @class(TestSource);
+    gates:
+        output out;
+}
+
+simple TestSink
+{
+    @class(TestSink);
+    gates:
+        input in;
+}
+
+module SenderNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: ApskDimensionalRadio;
+        source: TestSource;
+    connections allowunconnected:
+        source.out --> radio.upperLayerIn;
+}
+
+module ReceiverNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: ApskDimensionalRadio;
+        sink: TestSink;
+    connections allowunconnected:
+        radio.upperLayerOut --> sink.in;
+}
+
+network Test
+{
+    submodules:
+        radioMedium: DimensionalRadioMedium;
+        sender: SenderNode;
+        receiver: ReceiverNode;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 10ms
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.sender.mobility.initialX = 400m
+*.receiver.mobility.initialX = 500m
+
+*.radioMedium.backgroundNoise.power = -110dBm
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
+**.radio.antenna.mobilityModule = "^.^.mobility"
+**.radio.centerFrequency = 2.4GHz
+**.radio.bandwidth = 2MHz
+**.radio.transmitter.bitrate = 2Mbps
+**.radio.transmitter.preambleDuration = 0s
+**.radio.transmitter.headerLength = 96b
+**.radio.transmitter.power = 100mW
+**.radio.receiver.energyDetection = -90dBm
+**.radio.receiver.sensitivity = -80dBm
+**.radio.receiver.snirThreshold = 10dB
+*.sender.radio.initialRadioMode = "transmitter"
+*.receiver.radio.receiver.typename = "AttemptingReceiver"
+*.sender.radio.concurrentTransmissions = true
+*.receiver.radio.concurrentReceptions = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+sink: received first at 0.000448
+%contains: stdout
+sink: received second at 0.000448
+%contains: stdout
+sink: received 2 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

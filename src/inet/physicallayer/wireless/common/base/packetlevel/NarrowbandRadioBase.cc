@@ -61,7 +61,7 @@ void NarrowbandRadioBase::setBandwidth(Hz newBandwidth)
     narrowbandTransmitter->setBandwidth(newBandwidth);
     NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
     narrowbandReceiver->setBandwidth(newBandwidth);
-    receptionTimer = nullptr;
+    attemptedReceptionTimers.clear();
 }
 
 } // namespace physicallayer
