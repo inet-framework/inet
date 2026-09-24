@@ -74,3 +74,16 @@ Six agents, one brief (scratchpad `igmp-mld-catalog-brief.md`), one range each:
   Membership Interval with the formula of the older documents.
 
 ## Decisions and facts found on the way
+- **The six catalog drafts** came from six agents with one brief (scratchpad
+  `igmp-mld-catalog-brief.md`): RFC 9776 with 105 and 188 entries, RFC 2236 with 94, RFC 9777
+  with 103 and 204, RFC 2710 with 81, every quote checked against its lines. The merge script
+  normalizes the strength of each lowercase keyword to the form `must (lower case)`, also where
+  an agent had written a plain `must` for a lower-case word; a quote fragment of a sentence with
+  a capital keyword keeps the plain form.
+- **The IGMP feature map** has 20 features for the 387 entries. A new refinement: a keyword of
+  the base document can make a companion behavior mandatory; the two version 2 features take
+  their level from RFC9776-COMPH-1 and COMPR-13, which require IGMPv2 compatibility mode.
+- **Stimuli that the model offers without a special tester** (the one look at the code before
+  the checks): a UDP sink joins a group, with a source list for INCLUDE mode, and leaves at its
+  stop time; a router of the older version sends the older queries.
+
