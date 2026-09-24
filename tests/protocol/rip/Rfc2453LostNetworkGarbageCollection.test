@@ -1,0 +1,149 @@
+%description:
+
+RFC 2453 -- a router that loses one of its networks advertises it at metric 16 for 120 seconds
+and then no more.
+
+Checks RFC2453-TIMER-5 and TIMER-6 (description) from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the pair with three
+stubs: every node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1
+and R2.eth0, netB on R2.eth1, netA1, netA2 and netA3 on R1.eth2, eth3 and eth4. "On L1, from
+R1" is the named interface of the router, R1.eth[1].mac, as it sends a frame to the lower
+layer.
+
+The link between host A1 and R1 goes down at 100 s by a disconnect of both directions from the
+scenario manager.
+
+Defect: R1 never removes the route to the network it lost. Rip::checkExpiredRoutes purges only
+learned routes, of type RIP_ROUTE_RTE (src/inet/routing/rip/Rip.cc:909-918); the route to a
+network of the router itself stays in its table at metric 16 after Rip::invalidateRoute
+(Rip.cc:936-948), and every update holds it. RFC 2453 section 3.8: "When the garbage-collection
+timer expires, the route is deleted from the routing table." Observations 1 to 3 hold;
+observation 4 fails. This test FAILS, and the failure is deliberately NOT declared expected:
+the model has the garbage collection and leaves this route out of it. See results.md.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static simtime_t withdrawnAt;
+static const char *NET_A1 = "10.0.4.0";
+static const int PLEN = 24;
+
+// The marker of R1 on L1: a periodic update there holds its entry.
+static bool isPeriodicUpdateHere(const Packet *p) { return isPeriodicUpdate(p, "10.0.1.0", PLEN); }
+
+Define_ProtocolTestProgram()
+{
+    withdrawnAt = -1;
+    return ProtocolTest("rfc2453_lost_network_garbage_collection")
+        // Expected observation 1: before 100 s, a periodic update of R1 on L1 that holds netA1 with
+        // metric 1.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time < 100 && isPeriodicUpdateHere(c.event.packet) && metricOf(c.event.packet, NET_A1, PLEN) == 1;
+                  })
+                  .describe("before 100 s, a periodic update of R1 on L1 that holds netA1 with metric 1")
+                  .within(100.0))
+        // Expected observation 2: after 100 s, within 6 s, an update of R1 on L1 that holds
+        // netA1 with metric 16; record its instant.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 100 && isUpdateWith(c.event.packet, NET_A1, PLEN, 16); })
+                  .assertEvent([](const MatchContext& c) {
+                      return require(c.event.time <= 106, "the withdrawal left at " + c.event.time.str() + " s, after 106 s");
+                  })
+                  .assertEvent([](const MatchContext& c) { withdrawnAt = c.event.time; return true; })
+                  .describe("after 100 s, an update of R1 on L1 that holds netA1 with metric 16")
+                  .within(120.0))
+        // Expected observation 3: every periodic update of R1 on L1 to t_wd + 115 s holds netA1 with
+        // metric 16.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time <= withdrawnAt + 115 && isPeriodicUpdateHere(c.event.packet) && metricOf(c.event.packet, NET_A1, PLEN) != 16;
+                  })
+                  .describe("a periodic update of R1 on L1 within 115 s of the withdrawal that does not hold netA1 with metric 16")
+                  .within(116.0)))
+        // Expected observation 4: no update of R1 on L1 after t_wd + 121 s holds netA1.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.time > withdrawnAt + 121 && isUpdate(c.event.packet) && metricOf(c.event.packet, NET_A1, PLEN) >= 0;
+                  })
+                  .describe("an update of R1 on L1 that still holds netA1 more than 121 s after the withdrawal")
+                  .within(200.0)));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_lost_network_garbage_collection compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// the pair with three stubs: netA1, netA2 and netA3 at R1 besides netA.
+network RipStubs
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth2' address='10.0.4.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA1' names='eth0' address='10.0.4.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth3' address='10.0.5.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA2' names='eth0' address='10.0.5.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth4' address='10.0.6.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostA3' names='eth0' address='10.0.6.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='*' netmask='0.0.0.0' gateway='10.0.2.1' interface='eth0'/>" +
+                         "<route hosts='hostA1' destination='*' netmask='0.0.0.0' gateway='10.0.4.1' interface='eth0'/>" +
+                         "<route hosts='hostA2' destination='*' netmask='0.0.0.0' gateway='10.0.5.1' interface='eth0'/>" +
+                         "<route hosts='hostA3' destination='*' netmask='0.0.0.0' gateway='10.0.6.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=300,200"); }
+        R2: RipRouter { @display("p=500,200"); }
+        hostB: StandardHost { @display("p=700,200"); }
+        hostA1: StandardHost { @display("p=150,300"); }
+        hostA2: StandardHost { @display("p=300,300"); }
+        hostA3: StandardHost { @display("p=450,300"); }
+        scenarioManager: ScenarioManager {
+            script = xml("<scenario><at t='100'><disconnect src-module='hostA1' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[2]'/></at></scenario>");
+            @display("p=100,120");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+        hostA1.ethg++ <--> Eth100M <--> R1.ethg++;
+        hostA2.ethg++ <--> Eth100M <--> R1.ethg++;
+        hostA3.ethg++ <--> Eth100M <--> R1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipStubs
+sim-time-limit = 330s
+seed-set = 0
+**.hasStatus = true
+
+%contains: stdout
+PROTOCOLTEST rfc2453_lost_network_garbage_collection: PASS
