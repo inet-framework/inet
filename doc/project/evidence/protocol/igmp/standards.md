@@ -16,9 +16,10 @@ The relationships come from the RFC-editor metadata
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
+The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
+claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
+feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -95,8 +96,8 @@ The set that a level 2 pass tests against:
 
 | Document | Version | Catalog file |
 | --- | --- | --- |
-| RFC 9776 | March 2025, Internet Standard; §4 to §8 | none yet; level 2 writes `standard/rfc9776/catalog.md` |
-| RFC 2236 | November 1997, Proposed Standard; §6 to §7, kept alive by RFC 9776's own compatibility sections | none yet; level 2 writes `standard/rfc2236/catalog.md` |
+| RFC 9776 | March 2025, Internet Standard; §4 to §8 | [`standard/rfc9776/catalog.md`](../../standard/rfc9776/catalog.md) |
+| RFC 2236 | November 1997, Proposed Standard; §6 to §7, kept alive by RFC 9776's own compatibility sections | [`standard/rfc2236/catalog.md`](../../standard/rfc2236/catalog.md) |
 
 Out of scope, with the reason:
 

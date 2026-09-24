@@ -15,9 +15,10 @@ The relationships come from the RFC-editor metadata
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
+The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
+claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
+feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -118,8 +119,8 @@ The set that a level 2 pass tests against:
 
 | Document | Version | Catalog file |
 | --- | --- | --- |
-| RFC 9777 | March 2025, Internet Standard (STD 101); §5 to §9 | none yet; level 2 writes `standard/rfc9777/catalog.md` |
-| RFC 2710 | October 1999, Proposed Standard; §5 to §7 | none yet; level 2 writes `standard/rfc2710/catalog.md` |
+| RFC 9777 | March 2025, Internet Standard (STD 101); §5 to §9 | [`standard/rfc9777/catalog.md`](../../standard/rfc9777/catalog.md) |
+| RFC 2710 | October 1999, Proposed Standard; §5 to §7 | [`standard/rfc2710/catalog.md`](../../standard/rfc2710/catalog.md) |
 
 RFC 4443 stays a background companion, exactly as in the ipv6 pass: every MLD message is an
 ICMPv6 message, and the checks tolerate its general rules without re-deriving them.
