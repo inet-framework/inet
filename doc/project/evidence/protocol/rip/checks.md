@@ -105,19 +105,25 @@ each with one host.
 | [Split horizon on the link of a learned route (RIP version 2)](checks/split-horizon.md#split-horizon-on-the-link-of-a-learned-route-rip-version-2) | `checks/split-horizon.md` | RFC2453-SH-1, SH-2; covers RFC2453-GEN-5 |
 | [Split horizon on the link of a learned route (RIPng)](checks/split-horizon.md#split-horizon-on-the-link-of-a-learned-route-ripng) | `checks/split-horizon.md` | RFC2080-SH-1, SH-2; covers RFC2080-GEN-7 |
 | [Table request of a restarted router (RIP version 2)](checks/table-request.md#table-request-of-a-restarted-router-rip-version-2) | `checks/table-request.md` | RFC2453-REQ-1, REQ-4, REQ-8, OUT-1, MSG-4, REQ-6, GEN-1 |
-| [Table request of a restarted router (RIPng)](checks/table-request.md#table-request-of-a-restarted-router-ripng) | `checks/table-request.md` | RFC2080-REQ-1, REQ-4, REQ-8, OUT-1, MSG-4, REQ-6; covers RFC2080-GEN-1 |
+| [Table request of a restarted router (RIPng)](checks/table-request.md#table-request-of-a-restarted-router-ripng) | `checks/table-request.md` | RFC2080-REQ-1, REQ-4, REQ-8, OUT-1, MSG-4, REQ-6; covers RFC2080-GEN-1, GEN-3 |
 | [Triggered update for a lost network (RIP version 2)](checks/triggered-update.md#triggered-update-for-a-lost-network-rip-version-2) | `checks/triggered-update.md` | RFC2453-TRIG-1, TRIG-5, TRIG-9, GEN-5, TRIG-6, TIMER-5, RESP-9 |
 | [Triggered update for a lost network (RIPng)](checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `checks/triggered-update.md` | RFC2080-TRIG-4, TRIG-8, GEN-7, TRIG-5, OUT-2, TIMER-5, RESP-11 |
 | [Rate of triggered updates (RIP version 2)](checks/triggered-update.md#rate-of-triggered-updates-rip-version-2) | `checks/triggered-update.md` | RFC2453-TRIG-2, TRIG-3 |
 | [Rate of triggered updates (RIPng)](checks/triggered-update.md#rate-of-triggered-updates-ripng) | `checks/triggered-update.md` | RFC2080-TRIG-1, TRIG-2 |
-| [Route expiry after a silent neighbor (RIP version 2)](checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2) | `checks/route-expiry.md` | RFC2453-TIMER-4, TIMER-5, TIMER-6, RESP-7 |
-| [Route expiry after a silent neighbor (RIPng)](checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng) | `checks/route-expiry.md` | RFC2080-TIMER-4, TIMER-5, TIMER-6, RESP-9 |
+| [Route expiry after a silent neighbor (RIP version 2)](checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2) | `checks/route-expiry.md` | RFC2453-TIMER-4, TIMER-5 |
+| [Garbage collection after an expiry (RIP version 2)](checks/route-expiry.md#garbage-collection-after-an-expiry-rip-version-2) | `checks/route-expiry.md` | RFC2453-TIMER-6, RESP-7; covers RFC2453-TIMER-3 |
+| [Route expiry after a silent neighbor (RIPng)](checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng) | `checks/route-expiry.md` | RFC2080-TIMER-4, TIMER-5 |
+| [Garbage collection after an expiry (RIPng)](checks/route-expiry.md#garbage-collection-after-an-expiry-ripng) | `checks/route-expiry.md` | RFC2080-TIMER-6, RESP-9; covers RFC2080-TIMER-3 |
+| [Garbage collection of a lost network (RIP version 2)](checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2) | `checks/route-expiry.md` | RFC2453-TIMER-5, TIMER-6 |
+| [Garbage collection while the next hop still withdraws (RIP version 2)](checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-rip-version-2) | `checks/route-expiry.md` | RFC2453-RESP-10, TIMER-6 |
+| [Garbage collection of a lost network (RIPng)](checks/route-expiry.md#garbage-collection-of-a-lost-network-ripng) | `checks/route-expiry.md` | RFC2080-TIMER-5, TIMER-6 |
+| [Garbage collection while the next hop still withdraws (RIPng)](checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-ripng) | `checks/route-expiry.md` | RFC2080-RESP-12, TIMER-6 |
 | [Garbage collection ended by a new route (RIP version 2)](checks/route-expiry.md#garbage-collection-ended-by-a-new-route-rip-version-2) | `checks/route-expiry.md` | RFC2453-TIMER-7 |
 | [Garbage collection ended by a new route (RIPng)](checks/route-expiry.md#garbage-collection-ended-by-a-new-route-ripng) | `checks/route-expiry.md` | RFC2080-TIMER-7 |
 | [More than 25 routes (RIP version 2)](checks/response-contents.md#more-than-25-routes-rip-version-2) | `checks/response-contents.md` | RFC2453-GEN-3, MSG-7, TABLE-2 |
 | [Messages limited by the MTU (RIPng)](checks/response-contents.md#messages-limited-by-the-mtu-ripng) | `checks/response-contents.md` | RFC2080-GEN-4, MSG-11 |
 
-Twenty-four checks, and all of them are level 2: they observe a normal exchange, and the
+Thirty checks, and all of them are level 2: they observe a normal exchange, and the
 stimuli are a router that starts or stops and a link that goes down or comes back, which a
 scenario of the network sets up without touching a message.
 
@@ -172,8 +178,6 @@ MSG-9, NH-2, NH-3.
 - a host route, RFC2453-ADDR-1 and ADDR-5, needs a static route to one address;
 - an interface with two link-local addresses, RFC2080-GEN-2;
 - a network without broadcast, RFC2453-MCAST-3;
-- a neighbor that keeps sending a withdrawn route with metric 16, RFC2453-RESP-10 and
-  RFC2080-RESP-12 (the deletion starts only once);
 - a route imported with a configured tag, RFC2453-TAG-2 and RFC2080-TAG-2;
 - a second network behind the receiver of a multicast, to see that the multicast is not
   forwarded, RFC2453-MCAST-2.
