@@ -1,0 +1,131 @@
+%description:
+
+RFC 2453 -- a route does not go back with a finite metric onto the link it was learned from,
+while the other learned routes do.
+
+Checks RFC2453-SH-1 (must) and SH-2 (description), and covers RFC2453-GEN-5 (must) from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/split-horizon.md#split-horizon-on-the-link-of-a-learned-route-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the chain : every node
+keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0, L2
+on R2.eth1 and R3.eth0, netC on R3.eth1. "On L1, from R1" is the named interface of the router,
+R1.eth[1].mac, as it sends a frame to the lower layer.
+
+Observation 2 accepts both forms of split horizon: the absence of netA and metric 16. The
+results record which one the model uses.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static bool holdsNetA(const Packet *p, int metric) { return isUpdateWith(p, "10.0.1.0", 24, metric); }
+
+// L2, the marker of R2 on L1: a periodic update of R2 there holds its entry.
+static bool isPeriodicUpdateOfR2OnL1(const Packet *p) { return isPeriodicUpdate(p, "10.0.23.0", 24); }
+
+static bool netAAbsentOrInfinite(const Packet *p)
+{
+    int metric = metricOf(p, "10.0.1.0", 24);
+    return require(metric == -1 || metric == 16, "netA is held with metric " + std::to_string(metric) + " on the link it was learned from");
+}
+
+static bool netCHasMetric2(const Packet *p)
+{
+    return require(metricOf(p, "10.0.3.0", 24) == 2, "netC is not held with metric 2: " + entriesOf(ripOf(p)));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2453_split_horizon")
+        // Expected observation 1: on L2, from R2, an update that holds netA with metric 2 -- R2
+        // has learned netA over L1.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return holdsNetA(c.event.packet, 2); })
+                  .describe("an update of R2 on L2 that holds netA with metric 2")
+                  .within(60.0))
+        // Expected observation 4, from observation 1 on: no update of R2 on L1 holds netA with a
+        // metric below 16.
+        .meanwhile(never(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isUpdateWithFinite(c.event.packet, "10.0.1.0", 24); })
+                  .describe("an update of R2 on L1 that holds netA with a metric below 16")
+                  .within(120.0)))
+        // Expected observations 2 and 3, periodic update 1 of 3: netA absent or at 16, netC at 2.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR2OnL1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netAAbsentOrInfinite(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netCHasMetric2(c.event.packet); })
+                  .describe("a periodic update of R2 on L1 that holds netA not at all or with metric 16, and netC with metric 2")
+                  .within(40.0))
+        // Expected observations 2 and 3, periodic update 2 of 3: netA absent or at 16, netC at 2.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR2OnL1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netAAbsentOrInfinite(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netCHasMetric2(c.event.packet); })
+                  .describe("a periodic update of R2 on L1 that holds netA not at all or with metric 16, and netC with metric 2")
+                  .within(40.0))
+        // Expected observations 2 and 3, periodic update 3 of 3: netA absent or at 16, netC at 2.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR2OnL1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netAAbsentOrInfinite(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netCHasMetric2(c.event.packet); })
+                  .describe("a periodic update of R2 on L1 that holds netA not at all or with metric 16, and netC with metric 2")
+                  .within(40.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_split_horizon compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --L2-- R3 --netC-- host C.
+network RipChain
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.23.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth0' address='10.0.23.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth1' address='10.0.3.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostC' names='eth0' address='10.0.3.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostC' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=250,200"); }
+        R2: RipRouter { @display("p=400,200"); }
+        R3: RipRouter { @display("p=550,200"); }
+        hostC: StandardHost { @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> R3.ethg++;
+        R3.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipChain
+sim-time-limit = 200s
+seed-set = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2453_split_horizon: PASS

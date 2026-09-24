@@ -1,0 +1,113 @@
+%description:
+
+RFC 2080 -- each router of a chain advertises a remote network one higher than the router
+before it, and the routes carry traffic end to end.
+
+Checks RFC2080-MET-5, RESP-8 and TABLE-2 (description) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/route-learning.md#metric-through-a-chain-ripng;
+the program steps below map onto its expected observations. Mapping of the chain on IPv6: every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+L2 on R2.eth1 and R3.eth0, netC on R3.eth1. "On L1, from R1" is the named interface of the
+router, R1.eth[1].mac, as it sends a frame to the lower layer.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static bool holdsNetA(const Packet *p, int metric) { return isUpdateWith(p, "2001:db8:1::", 64, metric); }
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2080_metric_chain")
+        // Expected observation 1: on L1, from R1, an update that holds netA with metric 1.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return holdsNetA(c.event.packet, 1); })
+                  .describe("an update of R1 on L1 that holds netA with metric 1")
+                  .within(60.0))
+        // Expected observation 2: on L2, from R2, an update that holds netA with metric 2.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return holdsNetA(c.event.packet, 2); })
+                  .describe("an update of R2 on L2 that holds netA with metric 2")
+                  .within(60.0))
+        // Expected observation 3: on netC, from R3, an update that holds netA with metric 3.
+        .once(on("R3.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return holdsNetA(c.event.packet, 3); })
+                  .describe("an update of R3 on netC that holds netA with metric 3")
+                  .within(60.0))
+        // Expected observation 4: the echo reply of host C reaches host A.
+        .once(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("icmpv6.type == 129")
+                  .describe("the echo reply of host C at host A")
+                  .within(200.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_metric_chain compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --L2-- R3 --netC-- host C (IPv6).
+network RipngChain
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:23::2'/>" +
+                         "<interface hosts='R3' names='eth0' address='2001:db8:23::3'/>" +
+                         "<interface hosts='R3' names='eth1' address='2001:db8:3::1'/>" +
+                         "<interface hosts='hostC' names='eth0' address='2001:db8:3::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostC' destination='::/0' gateway='2001:db8:3::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=250,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=400,200"); }
+        R3: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=550,200"); }
+        hostC: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> R3.ethg++;
+        R3.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngChain
+sim-time-limit = 250s
+seed-set = 0
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:3::10"
+*.hostA.app[0].startTime = 90s
+*.hostA.app[0].count = 1
+
+%contains: stdout
+PROTOCOLTEST rfc2080_metric_chain: PASS

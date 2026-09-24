@@ -1,0 +1,114 @@
+%description:
+
+RFC 2453 -- a router that hears a network over two paths keeps the shorter one and ignores the
+longer one.
+
+Checks RFC2453-RESP-9 and RESP-12 (description) from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/route-learning.md#shorter-path-kept-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the triangle : every
+node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0,
+L2 on R2.eth1 and R3.eth0, L3 on R1.eth2 and R3.eth1, netC on R3.eth2. "On L1, from R1" is the
+named interface of the router, R1.eth[1].mac, as it sends a frame to the lower layer.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static bool holdsNetA(const Packet *p, int metric) { return isUpdateWith(p, "10.0.1.0", 24, metric); }
+
+// netC, the marker of R3 on netC: a periodic update of R3 there holds its entry.
+static bool isPeriodicUpdateOfR3(const Packet *p) { return isPeriodicUpdate(p, "10.0.3.0", 24); }
+
+static bool netAHasMetric2(const Packet *p)
+{
+    return require(metricOf(p, "10.0.1.0", 24) == 2, "netA is not held with metric 2: " + entriesOf(ripOf(p)));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2453_shorter_path")
+        // Expected observation 1: on L2, from R2, an update that holds netA with metric 2 -- R3 is
+        // offered the longer path.
+        .once(on("R2.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return holdsNetA(c.event.packet, 2); })
+                  .describe("an update of R2 on L2 that holds netA with metric 2")
+                  .within(60.0))
+        // Expected observation 2: on netC, from R3, a periodic update after 60 s that holds netA
+        // with metric 2.
+        .once(on("R3.eth[2].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return c.event.time >= 60 && isPeriodicUpdateOfR3(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netAHasMetric2(c.event.packet); })
+                  .describe("a periodic update of R3 on netC after 60 s, which holds netA with metric 2")
+                  .within(100.0))
+        // Expected observation 3: every update of R3 on netC from then to the end of the window
+        // holds netA, when it holds it, with metric 2.
+        .never(on("R3.eth[2].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      int metric = metricOf(c.event.packet, "10.0.1.0", 24);
+                      return isUpdate(c.event.packet) && metric >= 0 && metric != 2;
+                  })
+                  .describe("an update of R3 on netC that holds netA with a metric other than 2")
+                  .within(100.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_shorter_path compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// the triangle: R1, R2 and R3 each linked to the other two; netA at R1, netC at R3.
+network RipTriangle
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth2' address='10.0.13.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.23.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth0' address='10.0.23.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth1' address='10.0.13.3' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R3' names='eth2' address='10.0.3.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostC' names='eth0' address='10.0.3.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostC' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=250,200"); }
+        R2: RipRouter { @display("p=450,200"); }
+        R3: RipRouter { @display("p=350,200"); }
+        hostC: StandardHost { @display("p=550,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> R3.ethg++;
+        R1.ethg++ <--> Eth100M <--> R3.ethg++;
+        R3.ethg++ <--> Eth100M <--> hostC.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipTriangle
+sim-time-limit = 260s
+seed-set = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2453_shorter_path: PASS

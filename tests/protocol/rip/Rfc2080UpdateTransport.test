@@ -1,0 +1,147 @@
+%description:
+
+RFC 2080 -- a periodic update leaves UDP port 521 for UDP port 521 and goes to FF02::9, from
+a link-local address and with hop limit 255, on every network of the router.
+
+Checks RFC2080-MSG-1, MSG-2, MSG-3, OUT-3 (description), GEN-1 and RESP-5 (must) from
+doc/project/evidence/standard/rfc2080/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng;
+the program steps below map onto its expected observations. Mapping of the pair on IPv6: host A
+= hostA, R1 = R1, R2 = R2, host B = hostB; netA = 2001:db8:1::/64 on R1.eth0, L1 =
+2001:db8:12::/64 on R1.eth1 and R2.eth0, netB = 2001:db8:2::/64 on R2.eth1. "On L1, from R1" is
+R1.eth[1].mac as it sends a frame to the lower layer.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// netA, the marker of R1: a periodic update of R1 holds its entry.
+static bool isPeriodicUpdateOfR1(const Packet *p) { return isResponse(p) && metricOf(p, "2001:db8:1::", 64) >= 0; }
+
+static bool hasRipngPorts(const Packet *p)
+{
+    auto udp = udpOf(p);
+    return require(udp != nullptr && udp->getSrcPort() == RIPNG_PORT && udp->getDestPort() == RIPNG_PORT,
+                   udp == nullptr ? std::string("no UDP header")
+                                  : "UDP ports are " + std::to_string(udp->getSrcPort()) + " -> " + std::to_string(udp->getDestPort()) + ", not 521 -> 521");
+}
+
+static bool goesToRipngGroup(const Packet *p)
+{
+    L3Address dest = destinationAddressOf(p);
+    return require(dest == L3Address("ff02::9"), "IPv6 destination is " + dest.str() + ", not ff02::9");
+}
+
+// RFC 2080 section 2.5.2: "a link-local address of the possible addresses of the sending
+// router's interface" -- of the interface the message leaves, eth1 of R1 for L1.
+static bool comesFromLinkLocalOfL1(const Packet *p)
+{
+    L3Address src = sourceAddressOf(p);
+    L3Address own = linkLocalOf("R1", "eth1");
+    return require(src == own, "IPv6 source is " + src.str() + ", not " + own.str() + ", the link-local address of the L1 interface of R1");
+}
+
+static bool hasHopLimit255(const Packet *p)
+{
+    int hopLimit = hopLimitOf(p);
+    return require(hopLimit == 255, "hop limit is " + std::to_string(hopLimit) + ", not 255");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2080_update_transport")
+        // Expected observation 7, over the whole window: no RIPng message of R1 on L1 leaves a
+        // UDP port other than 521, and no update of R1 on L1 leaves an address other than the
+        // link-local address of its L1 interface.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return isUpdate(c.event.packet) && sourceAddressOf(c.event.packet) != linkLocalOf("R1", "eth1");
+                  })
+                  .describe("an update of R1 on L1 from an address other than the link-local address of its L1 interface")
+                  .within(110.0)))
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      auto udp = udpOf(c.event.packet);
+                      return ripOf(c.event.packet) != nullptr && udp != nullptr && udp->getSrcPort() != RIPNG_PORT;
+                  })
+                  .describe("a RIPng message of R1 on L1 from a UDP port other than 521")
+                  .within(110.0)))
+        // Expected observations 1 to 5: a periodic update of R1 on L1, found by its content and
+        // its time, and its ports, its destination, its source and its hop limit.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return hasRipngPorts(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return goesToRipngGroup(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return comesFromLinkLocalOfL1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return hasHopLimit255(c.event.packet); })
+                  .describe("a periodic update of R1 on L1, from UDP port 521 to UDP port 521 and to ff02::9, from the link-local address of its L1 interface, with hop limit 255")
+                  .notBefore(40.0)
+                  .within(110.0))
+        // Expected observation 6: a periodic update of R1 on netA too, to ff02::9.
+        .once(on("R1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return hasRipngPorts(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return goesToRipngGroup(c.event.packet); })
+                  .describe("a periodic update of R1 on netA, from UDP port 521 to UDP port 521 and to ff02::9")
+                  .within(70.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2080_update_transport compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// The pair on IPv6: host A --netA-- R1 --L1-- R2 --netB-- host B.
+network RipngPair
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // on-link routes only: every route to a remote prefix comes from RIPng
+            addRemoteRoutes = false;
+            addDefaultRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='R1' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='R1' names='eth1' address='2001:db8:12::1'/>" +
+                         "<interface hosts='R2' names='eth0' address='2001:db8:12::2'/>" +
+                         "<interface hosts='R2' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>" +
+                         "<route hosts='hostA' destination='::/0' gateway='2001:db8:1::1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=100,200"); }
+        R1: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=300,200"); }
+        R2: RipRouter { hasIpv4 = false; hasIpv6 = true; @display("p=500,200"); }
+        hostB: StandardHost { hasIpv4 = false; hasIpv6 = true; @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipngPair
+sim-time-limit = 115s
+seed-set = 0
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.rip.mode = "RIPng"
+**.rip.routingTableModule = "^.ipv6.routingTable"
+
+%contains: stdout
+PROTOCOLTEST rfc2080_update_transport: PASS

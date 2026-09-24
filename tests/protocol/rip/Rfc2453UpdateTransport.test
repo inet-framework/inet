@@ -1,0 +1,119 @@
+%description:
+
+RFC 2453 -- a periodic update leaves UDP port 520 for UDP port 520 and goes to 224.0.0.9, on
+every network of the router.
+
+Checks RFC2453-MSG-1, MSG-2, MSG-3, MCAST-1 and OUT-2 (description) from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/update-message.md#update-transport-and-addressing-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the pair: host A =
+hostA, R1 = R1, R2 = R2, host B = hostB; netA = 10.0.1.0/24 on R1.eth0, L1 = 10.0.12.0/24 on
+R1.eth1 and R2.eth0, netB = 10.0.2.0/24 on R2.eth1. "On L1, from R1" is R1.eth[1].mac as it
+sends a frame to the lower layer.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// netA, the marker of R1: a periodic update of R1 holds its entry.
+static bool isPeriodicUpdateOfR1(const Packet *p) { return isResponse(p) && metricOf(p, "10.0.1.0", 24) >= 0; }
+
+static bool hasRipPorts(const Packet *p)
+{
+    auto udp = udpOf(p);
+    return require(udp != nullptr && udp->getSrcPort() == RIP_PORT && udp->getDestPort() == RIP_PORT,
+                   udp == nullptr ? std::string("no UDP header")
+                                  : "UDP ports are " + std::to_string(udp->getSrcPort()) + " -> " + std::to_string(udp->getDestPort()) + ", not 520 -> 520");
+}
+
+static bool goesToRipGroup(const Packet *p)
+{
+    L3Address dest = destinationAddressOf(p);
+    return require(dest == L3Address("224.0.0.9"), "IP destination is " + dest.str() + ", not 224.0.0.9");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2453_update_transport")
+        // Expected observation 5, over the whole window: no RIP message of R1 on L1 leaves a UDP
+        // port other than 520.
+        .meanwhile(never(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      auto udp = udpOf(c.event.packet);
+                      return ripOf(c.event.packet) != nullptr && udp != nullptr && udp->getSrcPort() != RIP_PORT;
+                  })
+                  .describe("a RIP message of R1 on L1 from a UDP port other than 520")
+                  .within(110.0)))
+        // Expected observations 1, 2 and 3: a periodic update of R1 on L1, found by its content
+        // and its time -- from 40 s on, after the requests of the start and their unicast
+        // answers -- and its ports and its destination address.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return hasRipPorts(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return goesToRipGroup(c.event.packet); })
+                  .describe("a periodic update of R1 on L1, from UDP port 520 to UDP port 520 and to 224.0.0.9")
+                  .notBefore(40.0)
+                  .within(110.0))
+        // Expected observation 4: a periodic update of R1 on netA too, with the same ports and
+        // destination address.
+        .once(on("R1.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return hasRipPorts(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return goesToRipGroup(c.event.packet); })
+                  .describe("a periodic update of R1 on netA, from UDP port 520 to UDP port 520 and to 224.0.0.9")
+                  .within(70.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_update_transport compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// The pair: host A --netA-- R1 --L1-- R2 --netB-- host B.
+network RipPair
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='*' netmask='0.0.0.0' gateway='10.0.2.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=300,200"); }
+        R2: RipRouter { @display("p=500,200"); }
+        hostB: StandardHost { @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipPair
+sim-time-limit = 115s
+seed-set = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2453_update_transport: PASS

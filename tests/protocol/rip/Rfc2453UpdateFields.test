@@ -1,0 +1,134 @@
+%description:
+
+RFC 2453 -- the header and the entries of a periodic update: command 2, version 2, zero octets,
+address family 2, a valid metric, the subnet mask, a reachable next hop.
+
+Checks RFC2453-MSG-9, MSG-10, MSG-12, GEN-2, MET-3, MET-4, MASK-1 (description) and NH-2 (must)
+from
+doc/project/evidence/standard/rfc2453/catalog.md. The English procedure is in
+doc/project/evidence/protocol/rip/checks/update-message.md#update-message-fields-rip-version-2;
+the program steps below map onto its expected observations. Mapping of the pair : every node
+keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.eth1 and R2.eth0, netB
+on R2.eth1. "On L1, from R1" is the named interface of the router, R1.eth[1].mac, as it sends a
+frame to the lower layer.
+
+The route entry of the model holds a prefix length where RFC 2453 has a subnet mask field, so
+observation 4 finds the entry of netA by the prefix length 24, which is the mask 255.255.255.0.
+An unspecified next hop of the model is the 0.0.0.0 of RFC 2453 section 4.4.
+
+%includes:
+#include "ProtocolTest.h"
+#include "RipChecks.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// netA, the marker of R1: a periodic update of R1 holds its entry.
+static bool isPeriodicUpdateOfR1(const Packet *p) { return isPeriodicUpdate(p, "10.0.1.0", 24); }
+
+static bool headerIsVersion2Response(const Packet *p)
+{
+    auto rip = ripOf(p);
+    return require(rip->getCommand() == RIP_RESPONSE && rip->getVersion() == 2 && rip->getUnused1() == 0,
+                   "the header has command " + std::to_string(rip->getCommand()) + ", version " + std::to_string(rip->getVersion())
+                   + " and " + std::to_string(rip->getUnused1()) + " in the must-be-zero octets, not command 2, version 2 and 0");
+}
+
+static bool everyEntryHasFamily2AndValidMetric(const Packet *p)
+{
+    auto rip = ripOf(p);
+    for (size_t i = 0; i < rip->getEntryArraySize(); i++) {
+        const RipEntry& e = rip->getEntry(i);
+        require(e.addressFamilyId == RIP_AF_INET && e.metric >= 1 && e.metric <= RIP_INFINITY,
+                "an entry breaks address family 2 or the metric range 1 to 16: " + entriesOf(rip));
+    }
+    return true;
+}
+
+// The model holds a prefix length where RFC 2453 has a subnet mask: 255.255.255.0 is 24.
+static bool netAHasMetric1AndMask24(const Packet *p)
+{
+    auto rip = ripOf(p);
+    const RipEntry *e = findEntry(rip, L3Address("10.0.1.0"), 24);
+    return require(e != nullptr && e->metric == 1, "no entry 10.0.1.0 with mask 255.255.255.0 and metric 1: " + entriesOf(rip));
+}
+
+// RFC 2453 section 4.4: 0.0.0.0, or an address on the subnet of L1. An unspecified next hop of
+// the model is 0.0.0.0 in the octets.
+static bool everyNextHopReachableOnL1(const Packet *p)
+{
+    auto rip = ripOf(p);
+    for (size_t i = 0; i < rip->getEntryArraySize(); i++) {
+        const L3Address& nh = rip->getEntry(i).nextHop;
+        bool ok = nh.isUnspecified() || nh == L3Address("0.0.0.0") || nh.toIpv4().prefixMatches(Ipv4Address("10.0.12.0"), 24);
+        require(ok, "a next hop is neither 0.0.0.0 nor in 10.0.12.0/24: " + entriesOf(rip));
+    }
+    return true;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc2453_update_fields")
+        // Expected observations 1 to 5: the next periodic update of R1 on L1 after 60 s, and its
+        // header, its entries, the entry of netA and the next hops.
+        .once(on("R1.eth[1].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR1(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return headerIsVersion2Response(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return everyEntryHasFamily2AndValidMetric(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return netAHasMetric1AndMask24(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { return everyNextHopReachableOnL1(c.event.packet); })
+                  .describe("a periodic update of R1 on L1: command 2, version 2, zero octets; address family 2 and metric 1 to 16 in every entry; netA with metric 1 and mask 255.255.255.0; every next hop 0.0.0.0 or in 10.0.12.0/24")
+                  .notBefore(60.0)
+                  .within(100.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc2453_update_fields compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RipRouter;
+
+// host A --netA-- R1 --L1-- R2 --netB-- host B.
+network RipPair
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.1.10' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R1' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>" +
+                         "<interface hosts='R2' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/>" +
+                         "<interface hosts='hostB' names='eth0' address='10.0.2.10' netmask='255.255.255.0'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.1.1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='*' netmask='0.0.0.0' gateway='10.0.2.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        hostA: StandardHost { @display("p=100,200"); }
+        R1: RipRouter { @display("p=300,200"); }
+        R2: RipRouter { @display("p=500,200"); }
+        hostB: StandardHost { @display("p=700,200"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> R2.ethg++;
+        R2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RipPair
+sim-time-limit = 105s
+seed-set = 0
+
+%contains: stdout
+PROTOCOLTEST rfc2453_update_fields: PASS
