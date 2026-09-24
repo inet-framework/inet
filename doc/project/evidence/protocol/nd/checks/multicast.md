@@ -8,7 +8,8 @@ procedures come from the specification only. They name no simulation model and n
 A node joins a group on a link with Multicast Listener Discovery: an MLD version 1 Report
 (ICMPv6 type 131) or an MLD version 2 Report (type 143) that names the group. The report is the
 wire trace of the join. MLD never reports the all-nodes address, so a join of ff02::1 leaves no
-trace, and the checks below do not judge it.
+trace, and the checks below do not judge it. In the checks below, every node runs MLD, as RFC 4861
+§7.2.1 assumes.
 
 ## Groups joined before Duplicate Address Detection
 

@@ -23,12 +23,16 @@ Advertisements; its Destination Address is the destination of the packet.
 
 - The two routers. R2 sets AdvDefaultLifetime to zero on L1, so R1 is the only default router of
   A; R1 reaches L2 through R2.
+- R2 and C come up at 5 seconds, when A has finished its router discovery with R1. The check is
+  about the Redirect, so it does not depend on the order in which a host hears the advertisements
+  of two routers; [A router with Router Lifetime zero](router-discovery.md#a-router-with-router-lifetime-zero)
+  checks that order.
 - At 10 seconds, host A sends one ICMPv6 echo request to the global address of host C.
 - Observation lasts 20 seconds from the start.
 
 ### Procedure
 
-1. Build the two routers, and let R1, R2, A and C come up.
+1. Build the two routers, and let R1 and A come up; at 5 seconds, let R2 and C come up.
 2. At 10 seconds, let A send the echo request to C.
 3. Observe L1.
 
