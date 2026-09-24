@@ -56,7 +56,10 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
    of them declared expected. Thirteen gaps: twelve defects and one missing feature. Level 2 is
    reached; the matrix holds 5 `confirmed`, 13 `partial`, 1 `unverified` and 1 `out of claim`;
    49 statements are owed.
-7. [ ] **MLD step 5, checks** — `protocol/mld/checks.md` and `protocol/mld/checks/*.md`.
+7. [x] **MLD step 5, checks** — `protocol/mld/checks.md` and `protocol/mld/checks/*.md`.
+   32 checks in 6 files, the twins of the IGMP checks; 278 statements are in a check, and the
+   other 110 are in the closing list. One check has an observation that its IGMP twin has not:
+   the Reports for the solicited-node addresses, the second half of RFC9777-LSN-3.
 8. [ ] **MLD step 6, tests** — `tests/protocol/mld/Rfc9777*.test`, `Rfc2710*.test`, and a helper.
 9. [ ] **MLD steps 7 to 9, and the ledger** — `model/mld/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`.
