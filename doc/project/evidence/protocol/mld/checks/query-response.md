@@ -90,10 +90,11 @@ reports IS_IN(A ∩ B). A record with no sources is not sent.
 
 ### Scenario constants
 
-- The link. Host A listens to G for S1 and S2 from 10 seconds on: INCLUDE({S1, S2}). Host B
-  listens to G for S1 from 10 to 50 seconds; its stop at 50 seconds makes R send Multicast
-  Address and Source Specific Queries for G and S1.
-- Observation lasts 60 seconds from the start.
+- The link. Host A listens to G for S1 from 10 seconds on: INCLUDE({S1}). Host B listens to G for
+  S1 from 10 to 50 seconds and for S2 from 10 to 55 seconds. Its stop of S1 at 50 seconds makes
+  R send Multicast Address and Source Specific Queries for G and S1, which A wants; its stop of
+  S2 at 55 seconds makes R send them for G and S2, which A does not want.
+- Observation lasts 65 seconds from the start.
 
 ### Procedure
 
@@ -107,6 +108,9 @@ reports IS_IN(A ∩ B). A record with no sources is not sent.
    source S1. Record its instant. This confirms the stimulus.
 2. On L1, from A, within 1 second of that Query, a Report with a Current-State Record for G
    (RFC9777-LTIM-7).
-3. The record is MODE_IS_INCLUDE with the source S1 only, not S2 (RFC9777-LTIM-8).
-4. No Report of A in the window holds a Current-State Record for G with no sources
+3. The record is MODE_IS_INCLUDE with the source S1 only (RFC9777-LTIM-8).
+4. On L1, from R, after 55 seconds, a Multicast Address and Source Specific Query for G with the
+   source S2. This confirms the stimulus of observation 5.
+5. No Report of A with a Current-State Record for G leaves A within 1 second of that Query, and
+   no Report of A in the window holds a Current-State Record for G with no sources
    (RFC9777-LTIM-10).

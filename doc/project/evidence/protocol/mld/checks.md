@@ -164,8 +164,8 @@ judgment about what the model claims, and that judgment lives in the coverage le
 
 **A crafted message**, the toolset of level 3: every validity rule of a received message —
 RFC9777-GEN-8, QRY-3, QRY-6, QRY-9, QRY-20, QRY-21, QRY-27, QRY-30, REP-3, REP-6, REP-16 to
-REP-18, REP-33, REP-35, REP-36, REP-42, LSN-4, LQRY-1, RREP-1, RQRY-1, VER-2 and RFC2710-NODE-2,
-NODE-6, NODE-9, ROUTER-2, ROUTER-13, ROUTER-14, ROUTER-16; a TO_IN record at a router in INCLUDE
+REP-18, REP-33, REP-35, REP-36, REP-42, LSN-4, LQRY-1, RREP-1, RQRY-1, VER-2 and RFC2710-NODE-6,
+NODE-9, ROUTER-2, ROUTER-13, ROUTER-14, ROUTER-16; a TO_IN record at a router in INCLUDE
 mode, which normal listeners do not produce (RFC9777-RREP-23).
 
 **SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9777-REP-24, REP-28, RREP-2,

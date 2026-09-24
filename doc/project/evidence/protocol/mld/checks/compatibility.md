@@ -158,9 +158,9 @@ Interval] of the last Query + [Query Response Interval].
 ### Scenario constants
 
 - The link with an older querier. R leaves L1 at 100 seconds, after its MLDv1 General Queries of
-  0 and 31.25 seconds. Host A starts to listen to K at 40 seconds, to G at 280 seconds and to H
-  at 300 seconds.
-- Observation lasts 320 seconds from the start.
+  0 and 31.25 seconds. Host A starts to listen to K at 40 seconds, to G at 290 seconds and to H
+  at 293 seconds, just before and just after the end of the interval.
+- Observation lasts 300 seconds from the start.
 
 ### Size or value arithmetic
 
@@ -178,16 +178,21 @@ mode until 291.25 seconds and in MLDv2 mode after it.
 
 1. On L1, from A, at 40 seconds, an MLDv1 Report for K. This confirms the stimulus: A is in
    MLDv1 mode.
-2. On L1, from A, at 280 seconds, an MLDv1 Report for G: A is still in MLDv1 mode, 248.75 seconds
+2. On L1, from A, at 290 seconds, an MLDv1 Report for G: A is still in MLDv1 mode, 258.75 seconds
    after the last MLDv1 Query (RFC9777-TIMER-17).
-3. On L1, from A, at 300 seconds, a Version 2 Report with a record for H, and no MLDv1 Report for
+3. On L1, from A, at 293 seconds, a Version 2 Report with a record for H, and no MLDv1 Report for
    H (RFC9777-COMPL-7, TIMER-17).
+
+### Notes
+
+- The two requests are 1.25 and 1.75 seconds from the end of the interval: the timer has no
+  random part, so a margin of about a second tells 260 seconds from a value a few seconds off.
 
 ## Router with an MLDv1 listener
 
 Checks: **RFC9777-COMPR-12** (must), **COMPR-14**, **COMPR-20**, **COMPR-21**, **COMPR-23**
 (description); covers **RFC9777-COMPR-13**, **COMPR-15**, **COMPR-16**, **COMPR-19**,
-**TIMER-18** (description).
+**TIMER-18** (description), **RFC2710-NODE-2** (must).
 
 ### Requirement
 
@@ -215,6 +220,13 @@ IS_EX({}) and a Done as TO_IN({}), and the querier goes on with MLDv2 Queries.
 3. On L1, from R, within 0.1 seconds of the Done of C, a Multicast Address Specific Query for G,
    and no datagram of S1 to G later than 2.5 seconds after the Done (RFC9777-COMPR-21).
 4. Every Query of R in the window is an MLDv2 Query of at least 28 octets (RFC9777-COMPR-23).
+
+### Notes
+
+- C hears the MLDv2 Queries of R, which are longer than 24 octets. RFC 2710 §5 accepts every
+  Query of at least 24 octets from a link-local address with a correct checksum
+  (RFC2710-NODE-2), so C answers them as MLDv1 Queries.
+
 
 ## Querier configured for an MLDv1 router
 
@@ -322,3 +334,9 @@ BLOCK_OLD_SOURCES records of MLDv2 nodes for it.
 2. No Multicast Address and Source Specific Query for G leaves R after that Report
    (RFC9777-COMPR-22).
 3. From 30 to 40 seconds, datagrams of S1 to G arrive on L1 with no gap longer than 1 second.
+
+### Notes
+
+- C hears the MLDv2 Queries of R, which are longer than 24 octets. RFC 2710 §5 accepts every
+  Query of at least 24 octets from a link-local address with a correct checksum
+  (RFC2710-NODE-2), so C answers them as MLDv1 Queries.
