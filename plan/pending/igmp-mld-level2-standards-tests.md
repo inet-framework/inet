@@ -44,7 +44,9 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
    32 checks in 6 files; 260 statements are in a check, and the other 127 are in the closing
    list with what a check would need. Message validation is the one mandatory feature without a
    core check: all its statements need a crafted message.
-5. [ ] **IGMP step 6, tests** — `tests/protocol/igmp/Rfc9776*.test`, `Rfc2236*.test`, and a helper.
+5. [x] **IGMP step 6, tests** — `tests/protocol/igmp/Rfc9776*.test`, `Rfc2236*.test`, and a helper.
+   42 tests for the 32 checks, in `tests/protocol/igmp/`, with the helper `IgmpChecks.h`. First
+   run: 25 PASS, 2 FAIL declared expected (features that the model does not have), 15 FAIL.
 6. [ ] **IGMP steps 7 to 9, and the ledger** — `model/igmp/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`.
 7. [ ] **MLD step 5, checks** — `protocol/mld/checks.md` and `protocol/mld/checks/*.md`.
@@ -92,3 +94,41 @@ Six agents, one brief (scratchpad `igmp-mld-catalog-brief.md`), one range each:
 - **The `Checks:` lines come from a script** (scratchpad `fill-checks-lines.py`): a check file
   holds only the IDs, and the script adds the strength of each ID from the catalog, so no label
   can drift from its entry.
+- **The requests of a host come from a test module**, `IgmpRequests` in `IgmpChecks.h`: a
+  script of timed requests calls `NetworkInterface::changeMulticastGroupMembership`, which is
+  what a socket does. One module serves every host and every filter mode.
+- **The multicast route of R comes from a test module**, `MulticastLeafRoute`: one route from
+  L2 to L1, with L1 as a leaf. The configurator makes no leaf routes, and PIM-DM in the mockup
+  did not forward ("source is not directly connected").
+- **The lines of a test come before the common ini lines.** The first matching line wins, and
+  the common lines have wildcards: `**.ipv4.igmp.typename = "Igmpv3"` before a line for one node
+  kept every node at IGMPv3.
+- **No check stops a node.** `Igmpv2` and `Igmpv3` have no lifecycle: a node that starts down
+  stops the simulation at initialization ("Tag 'inet::Ipv4InterfaceData' is absent"), and a
+  crashed node keeps its IGMP timers. A node joins or leaves L1 through its link instead: the
+  scenario disables or enables the channel between the node and the switch. A channel that is
+  disabled at initialization never comes back, because `EthernetMacBase` subscribes to the
+  channel only when the channel is enabled (`EthernetMacBase.cc:428`); so every link starts
+  enabled, and a check that needs a router off L1 at the start breaks the link at 1 second.
+  The rule is in `checks.md`.
+- **One Report starts one query sequence.** Where a check reads the Queries that a leave starts,
+  the host that leaves has a Robustness Variable of 1: each repetition of its Report would start
+  the sequence again (RFC 9776 §6.6.3.1). The rule is in `checks.md`.
+- **"At the instant of the Query" has a margin of 1 millisecond.** The IGMPv2 mode of the model
+  answers 12 microseconds after the Query, which a strict comparison accepted. The rule is in
+  `checks.md`.
+- **Check corrections from the runs**, each against the text of the standard: the second
+  Group-and-Source-Specific Query has the S flag set when an answer came before it (RFC 9776
+  §6.6.3.2); the Query Interval of "Timer relations" comes from the instants of the Queries,
+  because the QQIC has its own check; "Membership timeout" cites RREP-11, not RREP-9; the check
+  of the General Query answer has a fifth observation, no record for a group without reception
+  state (HQRY-10); the Older Version Querier Present Interval is 350 seconds, as §8.12 says ("10
+  times the Max Response Time"), and has its own observation.
+- **Splits**: a check gets a second test where a failure would hide another verdict — the
+  precedence, the S flag of the two query kinds, the repetition count of a join, the tail of the
+  merged repetitions, the QRV, the blocked source, the IGMPv2 repetition, the interval of the
+  older querier, and the answer without state.
+- **Findings outside the checks**: the `Igmpv2` router stops the simulation on a Version 3
+  Report ("Unhandled message type (34)"), where RFC 2236 §2 ignores unrecognized types; the
+  check of the mode change keeps R off L1 while A sends its Version 3 Report. The IGMP modules
+  have no lifecycle. A channel disabled at initialization never comes back.
