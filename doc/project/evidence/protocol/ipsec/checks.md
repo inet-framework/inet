@@ -50,8 +50,8 @@ both ends: outbound at A, inbound at B, with the same SPI, the same protocol and
 algorithms. Unless a check says otherwise:
 
 - an ESP SA uses AES-CBC with a 128-bit key (a 16-octet IV and a 16-octet block) and
-  HMAC-SHA-1-96 (a 12-octet ICV);
-- an AH SA uses HMAC-SHA-1-96 (a 12-octet ICV);
+  HMAC-SHA-256-128 (a 16-octet ICV), the integrity algorithm that RFC 8221 makes mandatory;
+- an AH SA uses HMAC-SHA-256-128 (a 16-octet ICV);
 - the SA is in transport mode, and its anti-replay service is off, as RFC 4302 §5 and RFC 4303
   §5 advise for a manually keyed SA.
 

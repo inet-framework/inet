@@ -29,7 +29,7 @@ the payload and rebuilds the original datagram.
 ### Scenario constants
 
 - The link, once on IPv4 and once on IPv6. Flow 2000 runs from A to B on ESP SA 101, with the
-  default algorithms: a 16-octet IV and a 12-octet ICV.
+  default algorithms: a 16-octet IV and a 16-octet ICV.
 - The SPDs of A and B name SA 101 for flow 2000.
 
 ### Procedure
@@ -53,7 +53,7 @@ the payload and rebuilds the original datagram.
    start of the ESP header, a multiple of 4 and of 8 (RFC4303-PAY-2, PAY-4, PAY-5).
 6. The trailer, read with the keys of SA 101, holds a Pad Length that counts the padding octets
    before it, and Next Header 17, UDP (RFC4303-PADL-1, PADL-3, NH-1).
-7. A 12-octet ICV closes the packet, after the trailer (RFC4303-FMT-2, FMT-3, ICV-3, ICV-4).
+7. A 16-octet ICV closes the packet, after the trailer (RFC4303-FMT-2, FMT-3, ICV-3, ICV-4).
 
 ## ESP padding
 
@@ -72,9 +72,9 @@ consumes padding.
 ### Scenario constants
 
 - The link, IPv4. Two flows run from A to B:
-  - flow 2000 on ESP SA 101, with AES-CBC (a 16-octet block) and HMAC-SHA-1-96, and 90 octets
+  - flow 2000 on ESP SA 101, with AES-CBC (a 16-octet block) and HMAC-SHA-256-128, and 90 octets
     of payload in each datagram;
-  - flow 2001 on ESP SA 102, with NULL encryption and HMAC-SHA-1-96, so the plaintext is on the
+  - flow 2001 on ESP SA 102, with NULL encryption and HMAC-SHA-256-128, so the plaintext is on the
     link as it is, and 91 octets of payload in each datagram.
 - The arithmetic of SA 101. The UDP datagram is 98 octets, and the Pad Length and the Next
   Header add 2: 100 octets. The next multiple of the 16-octet block is 112, so the Pad Length is
@@ -119,7 +119,7 @@ also supports NULL integrity. A combined algorithm gives both services at once.
 
 - The link, IPv4. Three flows run from A to B:
   - flow 2000 on ESP SA 101: AES-CBC and NULL integrity, confidentiality only;
-  - flow 2001 on ESP SA 102: NULL encryption and HMAC-SHA-1-96, integrity only;
+  - flow 2001 on ESP SA 102: NULL encryption and HMAC-SHA-256-128, integrity only;
   - flow 2002 on ESP SA 103: AES-GCM with a 16-octet ICV, a combined algorithm.
 - The SPDs of A and B name the three SAs.
 
@@ -134,7 +134,7 @@ also supports NULL integrity. A combined algorithm gives both services at once.
 1. On L1, from A to B, ESP packets with SPI 101, 102 and 103. This confirms the stimulus.
 2. B delivers the five datagrams of each flow (RFC4303-ALG-5, ALG-6, CONF-8, CONF-10).
 3. The packets of SA 101 end with the trailer and have no ICV (RFC4303-ALG-6).
-4. The packets of SA 102 carry the UDP datagram without an IV, and end with a 12-octet ICV
+4. The packets of SA 102 carry the UDP datagram without an IV, and end with a 16-octet ICV
    (RFC4303-ALG-5, CONF-8).
 5. The packets of SA 103 end with a 16-octet ICV.
 
@@ -147,7 +147,8 @@ same time); may (lower case, either one being NULL on its own)), **RFC4301-FUNC-
 ### Requirement
 
 RFC 4301 §4.2 and RFC 4303 §3.2 and §5: an ESP SA never has NULL encryption and NULL integrity
-at the same time. A compliant implementation does not let such an SA exist.
+at the same time. A compliant implementation does not let such an SA exist. It can refuse the SA
+when the administrator configures it, or keep it out of use.
 
 ### Scenario constants
 
@@ -160,13 +161,14 @@ at the same time. A compliant implementation does not let such an SA exist.
 
 1. Build the link, and configure the SPDs and SA 101.
 2. Start the two flows at A.
-3. Observe the packets of A on L1.
+3. Observe the configuration result of A and the packets of A on L1.
 
 ### Expected observations
 
-1. On L1, from A to B, plain UDP datagrams of flow 2001. This confirms that A runs and sends.
-2. On L1, no ESP packet with SPI 101, and no plain datagram of flow 2000: SA 101 does not exist
-   (RFC4303-ALG-2, CONF-11, RFC4301-FUNC-9).
+1. Either A reports an error when SA 101 is configured, and SA 101 never exists
+   (RFC4303-ALG-2, CONF-11, RFC4301-FUNC-9);
+2. or A runs: then on L1, from A to B, plain UDP datagrams of flow 2001, and no ESP packet with
+   SPI 101 and no plain datagram of flow 2000 (RFC4303-ALG-2, CONF-11, RFC4301-FUNC-9).
 
 ## Traffic flow confidentiality padding
 
@@ -182,7 +184,7 @@ length field, the Pad Length does not count the TFC padding, and the receiver re
 ### Scenario constants
 
 - The link, IPv4. Flow 2000 runs from A to B, with 50 octets of payload in each datagram, on ESP
-  SA 101 with NULL encryption and HMAC-SHA-1-96, so the plaintext is on the link as it is.
+  SA 101 with NULL encryption and HMAC-SHA-256-128, so the plaintext is on the link as it is.
 - A adds TFC padding of a random length from 0 to 100 octets to each packet of SA 101. The flow
   sends 20 datagrams, one each 0.2 seconds.
 
@@ -213,7 +215,7 @@ reports no error.
 ### Scenario constants
 
 - The link, IPv4. Flow 2000 runs from A to B on ESP SA 101 with NULL encryption and
-  HMAC-SHA-1-96.
+  HMAC-SHA-256-128.
 - A is configured to send dummy packets on SA 101, one each 0.5 seconds from 1 second.
 
 ### Procedure
