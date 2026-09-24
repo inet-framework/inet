@@ -5,11 +5,20 @@ Response to a Group-and-Source-Specific Query.
 Checks RFC9776-HQRY-7, HQRY-14, HQRY-15 and HQRY-17 from
 doc/project/evidence/standard/rfc9776/catalog.md. The English procedure is in
 doc/project/evidence/protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query;
-the program steps below map onto its expected observations. The guard is observation 4; step 1
-is observation 1, and step 2 observations 2 and 3.
+the program steps below map onto its expected observations. The guard is the second half of
+observation 5; step 1 is observation 1, step 2 observations 2 and 3, step 3 observation 4, and
+step 4 the first half of observation 5.
 
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
 section 8.11; Rfc9776JoinRepeated.test checks the default itself.
+
+Defect: the answer to a Group-and-Source-Specific Query holds a MODE_IS_INCLUDE record with no
+sources when the host wants none of the queried sources. Igmpv3::processHostGroupQueryTimer
+builds IS_IN(A * B) and sends it without a look at its size
+(src/inet/networklayer/ipv4/Igmpv3.cc:602-611); RFC 9776 section 5.2 sends no record with an
+empty set of sources. Observations 1 to 4 hold; observation 5 fails with the answer of A at
+55.30 s. This test FAILS, and the failure is deliberately NOT declared expected: the model has
+the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
 
 %includes:
 #include "ProtocolTest.h"
@@ -51,22 +60,32 @@ static bool isFwd(const Packet *p, const Ipv4Address& s) { return isDatagram(p, 
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9776_group_source_response")
-        // Expected observation 4: no Current-State Record of A for G without sources.
+        // Expected observation 5: no Current-State Record of A for G without sources.
         .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return (hasRecordOf(p, G, MODE_IS_INCLUDE) && sourcesOfRecord(p, G, MODE_IS_INCLUDE).empty()); })
                   .describe("a MODE_IS_INCLUDE record of A for G without sources (RFC9776-HQRY-17)")
-                  .within(60.0)))
+                  .within(65.0)))
         // Expected observation 1: after 50 s, a Group-and-Source-Specific Query for G with S1.
         .once(on("router.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && isSourceQuery(p, G); })
-                  .describe("after 50 s, a Group-and-Source-Specific Query for G")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 50 && isSourceQuery(p, G) && querySourceSet(p) == sset({S1}); })
+                  .describe("after 50 s, a Group-and-Source-Specific Query for G with S1")
                   .within(55.0))
         // Expected observations 2 and 3: within 1 s, the answer of A with IS_IN(S1).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isCurrentState(p, G); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(sourcesOfRecord(p, G, MODE_IS_INCLUDE) == sset({S1}), "the answer of A holds " + recordsText(p) + ", not MODE_IS_INCLUDE with S1 only (RFC9776-HQRY-15)"); })
                   .describe("within 1 s, a Current-State Report of A for G (RFC9776-HQRY-7, HQRY-14)")
-                  .within(1.0));
+                  .within(1.0))
+        // Expected observation 4: after 55 s, a Group-and-Source-Specific Query for G with S2.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return c.event.time >= 55 && isSourceQuery(p, G) && querySourceSet(p) == sset({S2}); })
+                  .describe("after 55 s, a Group-and-Source-Specific Query for G with S2")
+                  .within(6.0))
+        // Expected observation 5: no answer of A within 1 s of it.
+        .never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isCurrentState(p, G); })
+                  .describe("a Current-State Report of A for G after the Query for S2 alone (RFC9776-HQRY-17)")
+                  .within(1.1));
 }
 
 %activity:
@@ -109,12 +128,12 @@ network IgmpLink
         hostB: StandardHost { @display("p=450,250"); }
         requestsA: IgmpRequests {
             node = "hostA";
-            script = "10 a 225.0.1.1 INCLUDE 10.0.2.10 10.0.2.11";
+            script = "10 a 225.0.1.1 INCLUDE 10.0.2.10";
             @display("p=50,500");
         }
         requestsB: IgmpRequests {
             node = "hostB";
-            script = "10 b 225.0.1.1 INCLUDE 10.0.2.10; 50 b 225.0.1.1 INCLUDE";
+            script = "10 b 225.0.1.1 INCLUDE 10.0.2.10; 10 c 225.0.1.1 INCLUDE 10.0.2.11; 50 b 225.0.1.1 INCLUDE; 55 c 225.0.1.1 INCLUDE";
             @display("p=150,500");
         }
     connections:
@@ -127,7 +146,7 @@ network IgmpLink
 
 [General]
 network = IgmpLink
-sim-time-limit = 62s
+sim-time-limit = 67s
 seed-set = 0
 **.igmp.unsolicitedReportInterval = 1s
 

@@ -60,7 +60,7 @@ Define_ProtocolTestProgram()
                   .within(14.0))
         // Expected observation 4: the repetition holds the same ALLOW record and no empty record.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return hasRecord(p, G); })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isStateChange(p, G); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(sourcesOfRecord(p, G, ALLOW_NEW_SOURCES) == sset({S2}) && !hasRecordOf(p, G, BLOCK_OLD_SOURCE), "the repetition of A holds " + recordsText(p) + " (RFC9776-HOST-22, HOST-27)"); })
                   .describe("the repetition of the Report of 12 s")
                   .within(1.0))
@@ -72,7 +72,7 @@ Define_ProtocolTestProgram()
                   .within(10.0))
         // Expected observation 4: the repetition holds the same BLOCK record and no empty record.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return hasRecord(p, G); })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isStateChange(p, G); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(sourcesOfRecord(p, G, BLOCK_OLD_SOURCE) == sset({S2}) && !hasRecordOf(p, G, ALLOW_NEW_SOURCES), "the repetition of A holds " + recordsText(p) + " (RFC9776-HOST-26, HOST-27)"); })
                   .describe("the repetition of the Report of 20 s")
                   .within(1.0));
