@@ -47,8 +47,11 @@ Commit group: `igmp-mld-standards-tests`. Gates before each commit: `check-links
 5. [x] **IGMP step 6, tests** — `tests/protocol/igmp/Rfc9776*.test`, `Rfc2236*.test`, and a helper.
    42 tests for the 32 checks, in `tests/protocol/igmp/`, with the helper `IgmpChecks.h`. First
    run: 25 PASS, 2 FAIL declared expected (features that the model does not have), 15 FAIL.
-6. [ ] **IGMP steps 7 to 9, and the ledger** — `model/igmp/results.md`, `conformance.md` part 2,
-   `categories.md`, `coverage.md`.
+6. [x] **IGMP steps 7 to 9, and the ledger** — `model/igmp/results.md`, `conformance.md` part 2,
+   `categories.md`, `coverage.md`. Fresh run at `bb20f0dd5e`: 42 tests, 25 PASS, 17 FAIL, one
+   of them declared expected. Thirteen gaps: twelve defects and one missing feature. Level 2 is
+   reached; the matrix holds 5 `confirmed`, 13 `partial`, 1 `unverified` and 1 `out of claim`;
+   49 statements are owed.
 7. [ ] **MLD step 5, checks** — `protocol/mld/checks.md` and `protocol/mld/checks/*.md`.
 8. [ ] **MLD step 6, tests** — `tests/protocol/mld/Rfc9777*.test`, `Rfc2710*.test`, and a helper.
 9. [ ] **MLD steps 7 to 9, and the ledger** — `model/mld/results.md`, `conformance.md` part 2,
@@ -132,3 +135,15 @@ Six agents, one brief (scratchpad `igmp-mld-catalog-brief.md`), one range each:
   Report ("Unhandled message type (34)"), where RFC 2236 §2 ignores unrecognized types; the
   check of the mode change keeps R off L1 while A sends its Version 3 Report. The IGMP modules
   have no lifecycle. A channel disabled at initialization never comes back.
+- **Source-specific forwarding is a defect, not a missing feature.** The first design declared
+  it expected. The question of the guide, "does code exist for this specific behavior?", finds
+  both halves: `Igmpv3` stores the forwarded sources in the interface data, and the interface
+  data answers the question for one source; only the forwarding asks for the group. Commit
+  `bb20f0dd5e` removed the declaration.
+- **`internal` statements get protocol tests.** 26 checks hold a statement of the class
+  `internal`, whose usual category is a module test. IGMP state shows on the link — in the
+  Reports, the Queries and the forwarded datagrams — so the checks read it there;
+  `categories.md` records the decision.
+- **The ledger comes from a script** (scratchpad `gen-igmp-ledger.py`, with the verdict table
+  from `gen-igmp-verdicts.py`), as for ND: the statement tables, the feature support and the
+  debt table are generated, and the prose is written around them.
