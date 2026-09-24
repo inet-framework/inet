@@ -40,7 +40,7 @@ The pass delivers every output of the section "What a pass delivers" of the guid
    header `MplsChecks.h`.
 7. [x] **Steps 7 to 9, and the ledger** — `model/mpls/results.md`, `conformance.md` part 2,
    `categories.md`, `coverage.md`, from one fresh run.
-8. [ ] **Notes** — `model/mpls/notes.md`, with every gap by number in the follow-ups.
+8. [x] **Notes** — `model/mpls/notes.md`, with every gap by number in the follow-ups.
 9. [ ] Gates, then move this plan to `plan/done/`.
 
 Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `README.md`.
@@ -114,3 +114,8 @@ Working scripts: `audit/mpls-level2/` in `inet-master` (outside git), with a `RE
   `defect`, 3 `unverified`, 1 `out of claim`. The ledger: 74 selected, 25 covered, 2 owed (the
   Router Alert label, which `MplsPacket.msg:16` names), 23 later, 33 no check. Level 2 is
   reached for the normal path.
+- **notes.md names every gap in a follow-up**: gaps 1 to 3 in the first, then 4, 5, 6 and 7.
+  Three tooling quirks hold for every protocol (a test ends at its first failure; the order of
+  the steps by the time of their events; a value reaches the report only through an assertion).
+  They stay in the MPLS notes, because the shared section of `ipv4/notes.md` changes on the
+  unmerged IGMP and MLD branch.
