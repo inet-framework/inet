@@ -1,0 +1,59 @@
+# ND level 2 — catalogs, feature map, checks and tests for RFC 4861, RFC 4862, RFC 5942, RFC 6980
+
+**Status:** in progress. Started 2026-09-24 on `topic/standards-tests-nd-level2`, from
+`origin/master` at `7772a7e4ef`. Worktree: `/home/levy/workspace/inet-standards-tests-nd-level2`.
+
+The second pass for IPv6 Neighbor Discovery and stateless address autoconfiguration, after the
+level 1 survey of wave 0, and the second pass of wave 1 after RIP. It follows
+[`derive-tests-from-a-standard.md`](../../doc/project/guide/derive-tests-from-a-standard.md), steps
+3 to 9, at **level 2, Core**. The in-scope set is fixed in
+[`nd/standards.md`](../../doc/project/evidence/protocol/nd/standards.md#in-scope-set): RFC 4861
+§4, §6, §7.2 and §8; RFC 4862 §5; RFC 5942 §6; RFC 6980 §5.
+
+The user's decision of 2026-09-24: the RIP pass found a failure rate of a third, so no RIP level
+3 now; the next protocol of the wave comes first, and the failures are repaired later. The same
+holds here: this pass measures the model and repairs nothing.
+
+Commit group: `nd-standards-tests`. Gates before each commit: `check-links.sh`,
+`check-seals.sh`, and `check-commits.sh` and `check-classification.sh` on `origin/master..HEAD`.
+
+## What the pass takes over from the RIP pass
+
+- The catalog is drafted in parallel: four agents write the entries of their sections with a
+  shared brief, in the form of the RIP catalogs, and a script checks every quote against its
+  line reference; the entries are then merged, reviewed and indexed.
+- Tests come from a generator with shared network templates, and the ledger table from a
+  per-statement mapping (`audit/rip-level2/` in `inet-master` holds the RIP scripts).
+- A timer check fixes the start phases, so that it cannot pass by chance; a known-failing
+  observation goes last, or into a check of its own.
+- State signals are level 4; the checks of level 2 observe the wire.
+
+## Steps
+
+1. [x] **Plan** — this file; and the source paragraph of `nd/standards.md` points to the
+   `standards` project, a leftover of the move of the texts.
+2. [ ] **Step 3, catalogs** — `standard/rfc4861/catalog.md`, `standard/rfc4862/catalog.md`,
+   `standard/rfc5942/catalog.md`, `standard/rfc6980/catalog.md`.
+3. [ ] **Step 4, feature map** — `protocol/nd/features.md`, `ND-F-*`. With step 3 in one commit.
+4. [ ] **Step 5, checks** — `protocol/nd/checks.md` and `protocol/nd/checks/<feature>.md`.
+5. [ ] **Step 6, tests** — `tests/protocol/nd/Rfc4861*.test`, `Rfc4862*.test`, and a helper.
+6. [ ] **Step 7, run** — `model/nd/results.md`.
+7. [ ] **Steps 8 and 9, and the ledger** — `model/nd/conformance.md` part 2,
+   `model/nd/categories.md`, `model/nd/coverage.md`.
+8. [ ] Gates, then move this plan to `plan/done/`.
+
+## Facts found before the catalogs
+
+The one look at the code that the guide permits, to pick practical candidates:
+
+- The `icmpv6` dissector reaches every ND message, so filter expressions can select them; the
+  IPv6 tests already use `icmpv6.type`.
+- `Ipv6NetworkConfigurator` with `assignAddressesToHosts = false` addresses the routers only and
+  sets their advertised prefixes; the hosts then configure themselves by SLAAC. That is the
+  normal path of RFC 4862, and the mockups use it.
+- The ND module sends unsolicited Router Advertisements every 200 to 600 s by default, and
+  hosts solicit at start; the default duplicate address detection sends one solicitation.
+- The worktree build is a copy of the RIP worktree build (same `src` tree `5c4f41c600`): no
+  compile; the IPv6 suite passes 27 of 27 there.
+
+## Decisions and facts found on the way
