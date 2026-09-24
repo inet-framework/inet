@@ -27,10 +27,13 @@ compatibility area of level 5 and are `later` too.
 ## Steps
 
 1. [x] **Plan** — this file.
-2. [ ] **Step 3, catalogs** — `standard/rfc2453/catalog.md` (§3, §4.2 to §4.6) and
-   `standard/rfc2080/catalog.md` (§2), from the texts in `../standards/RFC/`. One commit.
-3. [ ] **Step 4, feature map** — `protocol/rip/features.md`, `RIP-F-*`, one feature for each
-   mechanism, joining the parallel sections of the two documents. One commit.
+2. [x] **Step 3, catalogs** — `standard/rfc2453/catalog.md` (§3, §4.2 to §4.6) and
+   `standard/rfc2080/catalog.md` (§2), from the texts in `../standards/RFC/`. 88 and 80 entries; a script checked every quote
+   against its line reference. Committed with step 4, because the catalogs and the feature map
+   link to each other and the link gate must pass at each commit.
+3. [x] **Step 4, feature map** — `protocol/rip/features.md`, `RIP-F-*`, one feature for each
+   mechanism, joining the parallel sections of the two documents. 19 features; every catalog
+   entry is in a feature, except RFC2453-ADDR-8, the forwarding rule of IPv4.
 4. [ ] **Step 5, checks** — `protocol/rip/checks.md` with the common mockups and the index, and
    `protocol/rip/checks/<feature>.md`. One commit.
 5. [ ] **Step 6, tests** — `tests/protocol/rip/Rfc2453*.test`, `Rfc2080*.test` and a helper
