@@ -216,6 +216,12 @@ void Pmipv6::initialize(int stage)
                         "would be skipped. Set accessInterfaces to the gateway's access links.",
                         par("accessInterfaces").stringValue(), names.c_str());
         }
+        if (isLma) {
+            // RFC 5213 Section 5.3.5 step 2: the anchor drops the traffic of a binding it
+            // holds after a deregistration, and no route can express a drop
+            auto *ipv6 = check_and_cast<Ipv6 *>(getModuleByPath("^.ipv6"));
+            ipv6->registerHook(0, this);
+        }
         // both roles emit it once, so a gateway records a flat zero rather than nothing at
         // all: a statistic with no data at all reads as nan, which looks like a fault
         emit(bindingCacheSizeSignal, (intval_t)bindingCache.size());
@@ -535,9 +541,12 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
             return;
         }
         BindingCacheEntry& entry = it->second;
-        // Section 5.3.5 step 2: stop forwarding the mobile node's traffic at once -- the
-        // anchor is not on the data path, so removing the prefix route is what drops it --
-        // but hold the entry, because the node may be re-registering elsewhere right now.
+        // Section 5.3.5 step 2: stop forwarding the mobile node's traffic at once, but hold
+        // the entry, because the node may be re-registering elsewhere right now. Removing
+        // the prefix route alone does not drop the traffic: the prefix is routed to the
+        // anchor, so the anchor would forward it on its other routes, or answer it with a
+        // Destination Unreachable if it has none. The running delete timer marks the entry
+        // as held, and dropTrafficOfHeldBindings() drops it.
         if (entry.downlinkRoute) {
             rt6->deleteRoute(entry.downlinkRoute);
             entry.downlinkRoute = nullptr;
@@ -660,6 +669,34 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     }
 
     sendProxyBindingAcknowledgement(pbu, BINDING_UPDATE_ACCEPTED, grantedLifetime, pbu->getTimestampValue(), magAddress, lmaAddress);
+}
+
+//
+// RFC 5213 Section 5.3.5 step 2: "During this wait period, the local mobility anchor
+// SHOULD drop the mobile node's data traffic." The wait is the deletion delay after an
+// accepted deregistration. The check runs before routing, so it also sees what the
+// anchor decapsulates from a tunnel.
+//
+INetfilter::IHook::Result Pmipv6::dropTrafficOfHeldBindings(Packet *datagram)
+{
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    Ipv6Address source = ipv6Header->getSourceAddress().toIpv6();
+    Ipv6Address destination = ipv6Header->getDestinationAddress().toIpv6();
+    for (const auto& element : bindingCache) {
+        const BindingCacheEntry& entry = element.second;
+        if (entry.deleteTimer == nullptr)
+            continue;
+        if (destination.matches(entry.homeNetworkPrefix, entry.homeNetworkPrefixLength)
+                || source.matches(entry.homeNetworkPrefix, entry.homeNetworkPrefixLength))
+        {
+            EV_WARN << "LMA dropping a packet from " << source << " to " << destination
+                    << ": the binding of MN '" << entry.session.mnIdentifier
+                    << "' is held after its deregistration" << endl;
+            dropPacket(datagram, NO_ROUTE_FOUND);
+            return DROP;
+        }
+    }
+    return ACCEPT;
 }
 
 //
@@ -1178,6 +1215,9 @@ Pmipv6::MagBinding *Pmipv6::findBindingForSource(int accessInterfaceId, const Ip
 //
 INetfilter::IHook::Result Pmipv6::datagramPreRoutingHook(Packet *datagram)
 {
+    if (isLma)
+        return dropTrafficOfHeldBindings(datagram);
+
     auto interfaceInd = datagram->findTag<InterfaceInd>();
     if (interfaceInd == nullptr)
         return ACCEPT;

@@ -1,0 +1,231 @@
+%description:
+While a Local Mobility Anchor holds a binding after its deregistration, it drops
+the mobile node's traffic (RFC 5213 Section 5.3.5 step 2).
+
+Topology: cn -- core -- anchor, and core -- mag
+
+The home network prefix 2001:db8:1::/64 is routed from core to the anchor, and
+the anchor's default route leads back to core. mag is a host
+that plays the Mobile Access Gateway: at 1 s it registers the prefix with the
+anchor, at 2 s it deregisters it. The anchor holds the binding for the default
+10 s. cn pings an address in the prefix every 100 ms from 2.5 s. Each echo
+request must be dropped at the anchor; forwarding it on the anchor's other
+routes sends it back and forth between the anchor and core until its hop limit
+runs out.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.applications.contract.IApp;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.node.pmipv6.LocalMobilityAnchor;
+import ned.DatarateChannel;
+
+simple ProxyRegistrar like IApp
+{
+    parameters:
+        string localAddress;
+        string anchorAddress;
+        string homeNetworkPrefix;
+        double registrationTime @unit(s);
+        double deregistrationTime @unit(s);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+simple DropCounter
+{
+    parameters:
+        string anchorModule;
+        string pingAppModule;
+        double deregistrationTime @unit(s);
+}
+
+network DeregistrationHoldTest
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        dropCounter: DropCounter;
+        cn: StandardHost6;
+        core: Router6;
+        anchor: LocalMobilityAnchor;
+        mag: StandardHost6;
+    connections:
+        cn.ethg++ <--> ethline <--> core.ethg++;
+        core.ethg++ <--> ethline <--> anchor.ethg++;
+        core.ethg++ <--> ethline <--> mag.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ProxyRegistrar.cc
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Socket.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
+
+namespace PMIPv6_deregistration_hold_drop {
+
+using namespace inet;
+
+// sends the two Proxy Binding Updates a Mobile Access Gateway would send
+class ProxyRegistrar : public cSimpleModule
+{
+  protected:
+    Ipv6Socket socket;
+
+  protected:
+    virtual void initialize() override
+    {
+        socket.setOutputGate(gate("socketOut"));
+        scheduleAt(par("registrationTime"), new cMessage("register", 3600));
+        scheduleAt(par("deregistrationTime"), new cMessage("deregister", 0));
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        if (msg->isSelfMessage()) {
+            unsigned int lifetime = msg->getKind();
+            if (!socket.isOpen())
+                socket.bind(&Protocol::mobileipv6, Ipv6Address(par("localAddress").stringValue()));
+            std::string mnId = "mn1";
+            auto packet = new Packet(msg->getName());
+            const auto& pbu = makeShared<BindingUpdate>();
+            pbu->setMobilityHeaderType(BINDING_UPDATE);
+            pbu->setProxyRegistrationFlag(true);
+            pbu->setAckFlag(true);
+            pbu->setHomeRegistrationFlag(true);
+            pbu->setLifetime(lifetime);
+            pbu->setSequence(lifetime == 0 ? 1 : 0);
+            pbu->setMobileNodeIdentifier(mnId.c_str());
+            pbu->setMobileNodeLinkLayerIdentifier(MacAddress("0A-AA-00-00-00-0B"));
+            pbu->setHomeNetworkPrefix(Ipv6Address(par("homeNetworkPrefix").stringValue()));
+            pbu->setHomeNetworkPrefixLength(64);
+            pbu->setTimestampValue(lifetime == 0 ? 2 : 1);
+            pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(mnId.size()));
+            packet->insertAtFront(pbu);
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
+            socket.sendTo(packet, Ipv6Address(par("anchorAddress").stringValue()));
+            delete msg;
+        }
+        else
+            delete msg; // the acknowledgements
+    }
+};
+
+Define_Module(ProxyRegistrar);
+
+// counts the echo replies after the deregistration, and the anchor's drops
+class DropCounter : public cSimpleModule, public cListener
+{
+  protected:
+    simtime_t deregistrationTime;
+    int repliesAfterDeregistration = 0;
+    std::map<int, int> anchorDropsByReason;
+
+  protected:
+    virtual void initialize() override
+    {
+        deregistrationTime = par("deregistrationTime");
+        getModuleByPath(par("pingAppModule"))->subscribe("pingRxSeq", this);
+        getModuleByPath(par("anchorModule"))->subscribe(packetDroppedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override
+    {
+        if (simTime() >= deregistrationTime)
+            repliesAfterDeregistration++;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override
+    {
+        anchorDropsByReason[check_and_cast<PacketDropDetails *>(details)->getReason()]++;
+    }
+
+    virtual void finish() override
+    {
+        EV_INFO << "echo replies after deregistration: " << repliesAfterDeregistration << endl;
+        EV_INFO << "anchor drops, no route found: " << anchorDropsByReason[NO_ROUTE_FOUND] << endl;
+    }
+};
+
+Define_Module(DropCounter);
+
+} // namespace PMIPv6_deregistration_hold_drop
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+
+<config>
+    <interface hosts="core"   towards="cn"     address="2001:db8:ff::1"/>
+    <interface hosts="cn"     towards="core"   address="2001:db8:ff::2"/>
+    <interface hosts="core"   towards="anchor" address="2001:db8:0::1"/>
+    <interface hosts="anchor" towards="core"   address="2001:db8:0::2"/>
+    <interface hosts="core"   towards="mag"    address="2001:db8:0:1::1"/>
+    <interface hosts="mag"    towards="core"   address="2001:db8:0:1::2"/>
+    <route hosts="core" destination="2001:db8:1::" prefixLength="64"
+           gateway="2001:db8:0::2" interface="eth1"/>
+    <route hosts="anchor" destination="::" prefixLength="0" gateway="2001:db8:0::1" interface="eth0"/>
+    <route hosts="cn" destination="::" prefixLength="0" gateway="2001:db8:ff::1" interface="eth0"/>
+    <route hosts="mag" destination="::" prefixLength="0" gateway="2001:db8:0:1::1" interface="eth0"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = DeregistrationHoldTest
+ned-path = .;../../../../src
+sim-time-limit = 3.5s
+record-vector-results = false
+cmdenv-express-mode = false
+
+*.configurator.config = xmldoc("config.xml")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+*.mag.numApps = 1
+*.mag.app[0].typename = "ProxyRegistrar"
+*.mag.app[0].localAddress = "2001:db8:0:1::2"
+*.mag.app[0].anchorAddress = "2001:db8:0::2"
+*.mag.app[0].homeNetworkPrefix = "2001:db8:1::"
+*.mag.app[0].registrationTime = 1s
+*.mag.app[0].deregistrationTime = 2s
+
+*.cn.numApps = 1
+*.cn.app[0].typename = "PingApp"
+*.cn.app[0].destAddr = "2001:db8:1::1"
+*.cn.app[0].startTime = 2.5s
+*.cn.app[0].sendInterval = 0.1s
+*.cn.app[0].hopLimit = 32
+
+*.dropCounter.anchorModule = "^.anchor.ipv6.pmipv6"
+*.dropCounter.pingAppModule = "^.cn.app[0]"
+*.dropCounter.deregistrationTime = 2s
+
+*.dropCounter.cmdenv-log-level = info
+*.anchor.ipv6.**.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+LMA accepted deregistration for MN 'mn1'
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+echo replies after deregistration: 0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+anchor drops, no route found: 10
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+sending ICMPv6_TIME_EXCEEDED
+%#--------------------------------------------------------------------------------------------------------------

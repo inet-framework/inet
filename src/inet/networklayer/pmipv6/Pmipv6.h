@@ -220,11 +220,13 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener, public Netf
             unsigned int lifetime, uint64_t timestamp, const Ipv6Address& magAddress, const Ipv6Address& lmaAddress);
     void deleteBindingCacheEntry(BindingCache::iterator it);
     void releaseLmaTunnelIfUnused(int tunnelInterfaceId);
+    Result dropTrafficOfHeldBindings(Packet *datagram);
 
     // MAG: the data path. RFC 5213 Section 6.10.5 makes two decisions about a packet
     // the gateway forwards off an access link, and both turn on the packet's SOURCE:
     // whether the gateway serves the mobile node it came from, and if so that it goes
-    // to the anchor rather than wherever its destination lies.
+    // to the anchor rather than wherever its destination lies. The anchor uses the
+    // same hook for the traffic of a binding held after its deregistration.
     virtual Result datagramPreRoutingHook(Packet *datagram) override;
     virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
