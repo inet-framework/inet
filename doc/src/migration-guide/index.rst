@@ -124,6 +124,11 @@ Buffer release and delivery also preserve cyclic sequence order across 4095 to 0
 delivery order. Custom consumers must iterate that order instead of using map lookup.
 These corrections can change delivery counts and simulation fingerprints after packet loss.
 
+Local recipient DELBA now removes the corresponding Block Ack receive buffer.
+Custom ``IRecipientQosMacDataService`` implementations must implement
+``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
+The next ADDBA agreement starts with a new receive window.
+
 HCF now reports ``STOPPED`` and a finish signal when a start listener cancels a grant.
 Statistics based on starts minus finishes therefore return to zero after cancellation.
 AP disassociation and acknowledged refusal now commit station status before rate removal signals.

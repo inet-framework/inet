@@ -887,6 +887,10 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     Enter_Method("processMgmtFrame");
+    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
+        if (!delba->getInitiator())
+            recipientDataService->blockAckAgreementTerminated(delba->getTid(), delba->getReceiverAddress());
+    }
     mgmtPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(mgmtPacket, mgmtHeader);
 }

@@ -135,6 +135,12 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
         return std::vector<Packet *>({ mgmtPacket });
 }
 
+void RecipientQosMacDataService::blockAckAgreementTerminated(Tid tid, const MacAddress& originatorAddr)
+{
+    Enter_Method("blockAckAgreementTerminated");
+    blockAckReordering->removeReceiveBuffer(tid, originatorAddr);
+}
+
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     Enter_Method("controlFrameReceived");

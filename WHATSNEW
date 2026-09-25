@@ -11,6 +11,8 @@ Late DELBA transmission callbacks cannot remove a replacement agreement.
 Custom agreement handlers must implement processDelbaFrameFinished().
 Recipient handlers must also implement blockAckRequestReceived().
 Recipient activity now refreshes the accepted inactivity timeout.
+Recipient timeout DELBA also removes the old Block Ack receive buffer.
+A replacement agreement can deliver frames from its new sequence window.
 A zero accepted timeout disables expiry at both peers.
 Block Ack records preserve missing frames across empty records and sequence wrap.
 Repeated Block Ack Requests release complete buffered data after a lost frame retransmits.

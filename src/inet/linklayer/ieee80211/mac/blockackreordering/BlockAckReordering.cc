@@ -196,8 +196,11 @@ ReceiveBuffer *BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
 
 void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    Tid tid = delba->getTid();
-    MacAddress originatorAddr = delba->getTransmitterAddress();
+    removeReceiveBuffer(delba->getTid(), delba->getTransmitterAddress());
+}
+
+void BlockAckReordering::removeReceiveBuffer(Tid tid, const MacAddress& originatorAddr)
+{
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
