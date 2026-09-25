@@ -774,6 +774,15 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
     updateNetworkHeaderLength(netHeader, packet);
     packet->insertAtFront(netHeader);
 
+    if (!espProtected && !ahProtected) {
+        // RFC 4301 section 5.1: the entry wants protection, and no SA of it covers the packet;
+        // with no key management to create one, the packet is discarded, not sent in clear
+        EV_INFO << "IPsec OUT DROP, no SA of the PROTECT entry matches, packet: " << packetInfo.str() << std::endl;
+        emit(outDropSignal, 1L);
+        outDrop++;
+        return INetfilter::IHook::DROP;
+    }
+
     if (delay > 0 || lastProtectedOut > simTime()) {
         cMessage *selfmsg = new cMessage("IPsecProtectOutDelay");
         selfmsg->setContextPointer(packet);
