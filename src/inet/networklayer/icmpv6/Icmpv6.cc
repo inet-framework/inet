@@ -307,22 +307,30 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     b copyLength = B(IPv6_MIN_MTU) - errorMsg->getDataLength();
     errorMsg->insertAtBack(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
 
+    // if srcAddr is not filled in, we're still in the src node, so we just
+    // process the ICMP message locally, right away
+    const auto& ipv6Header = origDatagram->peekAtFront<Ipv6Header>();
+    bool isLocal = ipv6Header->getSrcAddress().isUnspecified();
+
     auto icmpHeader = errorMsg->removeAtFront<Icmpv6Header>();
     insertChecksum(icmpHeader, errorMsg);
+    // a local message does not pass the Ipv6 module, so its computed checksum is made here,
+    // with the addresses of its L3AddressInd
+    if (isLocal && icmpHeader->getChecksumMode() == CHECKSUM_COMPUTED)
+        insertComputedChecksum(Ipv6Address::LOOPBACK_ADDRESS, Ipv6Address::LOOPBACK_ADDRESS, icmpHeader, errorMsg);
     errorMsg->insertAtFront(icmpHeader);
 
     // debugging information
     EV_DEBUG << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
              << " type=" << type << " code=" << code << endl;
 
-    // if srcAddr is not filled in, we're still in the src node, so we just
-    // process the ICMP message locally, right away
-    const auto& ipv6Header = origDatagram->peekAtFront<Ipv6Header>();
     numErrorsSent++;
-    if (ipv6Header->getSrcAddress().isUnspecified()) {
+    if (isLocal) {
         // pretend it came from the IP layer
         errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->addTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
+        auto& l3AddressInd = errorMsg->addTag<L3AddressInd>();
+        l3AddressInd->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
+        l3AddressInd->setDestAddress(Ipv6Address::LOOPBACK_ADDRESS);
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -461,20 +469,36 @@ void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& 
             // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xBAAD);
             break;
-        case CHECKSUM_COMPUTED: {
-            // if the checksum mode is computed, then compute the checksum and set it
-            icmpHeader->setChksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
-            MemoryOutputStream icmpStream;
-            Chunk::serialize(icmpStream, icmpHeader);
-            if (packet->getByteLength() > 0)
-                Chunk::serialize(icmpStream, packet->peekDataAsBytes());
-            uint16_t checksum = internetChecksum(icmpStream.getData());
-            icmpHeader->setChksum(checksum);
+        case CHECKSUM_COMPUTED:
+            // the checksum covers the pseudo-header, so the Ipv6 module computes it when the
+            // source address is final, see insertComputedChecksum()
+            icmpHeader->setChksum(0x0000);
             break;
-        }
         default:
             throw cRuntimeError("Unknown checksum mode %d", (int)checksumMode);
     }
+}
+
+// The pseudo-header of RFC 8200 section 8.1, for an ICMPv6 message of the given length.
+static void writePseudoHeader(MemoryOutputStream& stream, const Ipv6Address& srcAddress, const Ipv6Address& destAddress, B length)
+{
+    stream.writeIpv6Address(srcAddress);
+    stream.writeIpv6Address(destAddress);
+    stream.writeUint32Be(length.get<B>());
+    stream.writeByteRepeatedly(0, 3);
+    stream.writeByte(IP_PROT_IPv6_ICMP);
+}
+
+void Icmpv6::insertComputedChecksum(const Ipv6Address& srcAddress, const Ipv6Address& destAddress, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
+{
+    ASSERT(icmpHeader->getChecksumMode() == CHECKSUM_COMPUTED);
+    icmpHeader->setChksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
+    MemoryOutputStream icmpStream;
+    writePseudoHeader(icmpStream, srcAddress, destAddress, icmpHeader->getChunkLength() + packet->getDataLength());
+    Chunk::serialize(icmpStream, icmpHeader);
+    if (packet->getByteLength() > 0)
+        Chunk::serialize(icmpStream, packet->peekDataAsBytes());
+    icmpHeader->setChksum(internetChecksum(icmpStream.getData()));
 }
 
 bool Icmpv6::verifyChecksum(const Packet *packet)
@@ -488,9 +512,18 @@ bool Icmpv6::verifyChecksum(const Packet *packet)
             // if the checksum mode is declared to be incorrect, then the check fails
             return false;
         case CHECKSUM_COMPUTED: {
-            // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
+            // without the addresses of the datagram, for example in a dissector, the
+            // pseudo-header is not known, so only the chunks are checked
+            const auto& l3AddressInd = packet->findTag<L3AddressInd>();
+            if (l3AddressInd == nullptr)
+                return icmpHeader->isCorrect();
+            // otherwise compute the checksum over the pseudo-header and the message, the check
+            // passes if the result is 0 (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            MemoryOutputStream icmpStream;
+            writePseudoHeader(icmpStream, l3AddressInd->getSrcAddress().toIpv6(), l3AddressInd->getDestAddress().toIpv6(), dataBytes->getChunkLength());
+            icmpStream.writeBytes(dataBytes->getBytes());
+            uint16_t checksum = internetChecksum(icmpStream.getData());
             // TODO delete these isCorrect calls, rely on checksum only
             return checksum == 0 && icmpHeader->isCorrect();
         }
