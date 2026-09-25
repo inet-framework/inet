@@ -285,6 +285,7 @@ void Rip::sendRIPRequest(const RipNetworkInterface& ripInterface)
 {
     const auto& packet = makeShared<RipPacket>();
     packet->setCommand(RIP_REQUEST);
+    packet->setVersion(getMessageVersion());
     packet->setEntryArraySize(1);
     RipEntry& entry = packet->getEntryForUpdate(0);
     entry.addressFamilyId = RIP_AF_NONE;
@@ -519,6 +520,8 @@ void Rip::processRequest(Packet *packet)
     }
 
     ripPacket->setCommand(RIP_RESPONSE);
+
+    ripPacket->setVersion(getMessageVersion());
     Packet *outPacket = new Packet("RIP response");
     outPacket->insertAtBack(ripPacket);
     socket.sendTo(outPacket, srcAddr, srcPort);
@@ -547,6 +550,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
     Packet *pk = new Packet("RIP response");
     auto packet = makeShared<RipPacket>();
     packet->setCommand(RIP_RESPONSE);
+    packet->setVersion(getMessageVersion());
     packet->setEntryArraySize(maxEntries);
     int k = 0; // index into RIP entries
 
@@ -599,6 +603,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
             pk = new Packet("RIP response");
             packet = makeShared<RipPacket>();
             packet->setCommand(RIP_RESPONSE);
+            packet->setVersion(getMessageVersion());
             packet->setEntryArraySize(maxEntries);
             k = 0;
         }

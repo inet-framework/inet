@@ -15,14 +15,6 @@ router, R1.eth[1].mac, as it sends a frame to the lower layer.
 The link between host A and R1 goes down at 100 s by a disconnect of both directions from the
 scenario manager, so R1 loses the carrier of its netA interface.
 
-Defect: the model sends RIPng messages with version 2. RipPacket declares "short version
-@bit(8) = 2" (src/inet/routing/rip/RipPacket.msg:60) and Rip.cc sets the version nowhere, so
-the default of RIP version 2 also goes out in RIPng mode. RFC 2080 section 2.5.2: "Set the
-version number to the current version of RIPng. The version described in this document is
-version 1." Observations 1 to 4 hold; observation 5, the version of the withdrawal, fails. This
-test FAILS, and the failure is deliberately NOT declared expected: a field that is set to a
-wrong value is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"
