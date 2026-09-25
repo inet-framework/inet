@@ -307,6 +307,9 @@ void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
 
+    // before Duplicate Address Detection sends its solicitation
+    updateSolicitedNodeGroup(addr, true);
+
     cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
     if (m) {
         Ipv6AddressInfo info(ownerp, addr);
@@ -381,6 +384,22 @@ bool Ipv6InterfaceData::matchesSolicitedNodeMulticastAddress(const Ipv6Address& 
     return false;
 }
 
+void Ipv6InterfaceData::updateSolicitedNodeGroup(const Ipv6Address& addr, bool assigned)
+{
+    if (ownerp == nullptr || !ownerp->isMulticast() || addr.isMulticast() || addr.isUnspecified() || addr.isLoopback())
+        return;
+    // one membership for all addresses that map to the same group
+    Ipv6Address group = addr.formSolicitedNodeMulticastAddress();
+    int count = 0;
+    for (const auto& elem : addresses)
+        if (elem.address.formSolicitedNodeMulticastAddress() == group)
+            count++;
+    if (assigned && count == 1)
+        joinMulticastGroup(group);
+    else if (!assigned && count == 0)
+        leaveMulticastGroup(group);
+}
+
 bool Ipv6InterfaceData::isTentativeAddress(const Ipv6Address& addr) const
 {
     int k = findAddress(addr);
@@ -419,6 +438,7 @@ void Ipv6InterfaceData::removeAddress(const Ipv6Address& address)
     addresses.erase(addresses.begin() + k);
     choosePreferredAddress();
     changed1(F_IP_ADDRESS);
+    updateSolicitedNodeGroup(address, false);
 
     cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
     if (m) {
@@ -833,6 +853,7 @@ Ipv6Address Ipv6InterfaceData::removeAddress(Ipv6InterfaceData::AddressType type
     changed1(F_IP_ADDRESS);
 
     if (!addr.isUnspecified()) {
+        updateSolicitedNodeGroup(addr, false);
         cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
         if (m) {
             Ipv6AddressInfo info(ownerp, addr);

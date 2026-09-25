@@ -87,13 +87,14 @@ cmdenv-log-prefix = "%C: "
 # a group, the shorter delay reports first and the other suppresses (Mldv1.cc:311 and :410). So
 # which host ends up as the reporter -- and therefore holds flag=true and sends the Done on leave --
 # is an RNG coin flip. opp_test cannot express the relational property "the reporter is the host that
-# sends the Done, and the other sends none", so we PIN the seed to fix the roles: at seed 1 host1 is
+# sends the Done, and the other sends none", so we PIN the seed to fix the roles: at seed 0 host1 is
 # the reporter, so host1 sends the Done and host2 (which also leaves) sends none -- exactly one Done,
 # from host1, as asserted below.
 # NOTE: a change elsewhere that shifts how many random numbers are drawn before this point can swap
-# the roles. If that happens, re-pick a seed where host1 wins (seeds 1, 3, 4, 6 do; 0, 2, 5, 7 do
-# not) -- the behavior is unchanged, only which host plays which role.
-seed-set = 1
+# the roles. If that happens, re-pick a seed where host1 wins (seeds 0, 2, 3, 4, 6, 7 do; 1, 5, 8, 9 do
+# not) -- the behavior is unchanged, only which host plays which role. Re-picked on 2026-09-25: the
+# Reports for the solicited-node groups (RFC 4862 section 5.4.2) draw random delays too.
+seed-set = 0
 
 # Enable MLD on all nodes
 **.ipv6.hasMld = true

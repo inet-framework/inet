@@ -69,13 +69,15 @@ seed-set = 0
 %#
 %# First check that the set-filter commands modified the interface state
 %#
+%# The host is also a member of the solicited-node group of its address, ff02::1:ff00:1, in EXCLUDE
+%# mode with no sources (RFC 4862 section 5.4.2), so the interface state holds that group too.
 %postrun-command: grep "TestMld: .* groups = " test.out > groups.out || true
 %contains: groups.out
-TestMld: eth0: groups = ff3e::1 I 2001::1 2001::2.
-TestMld: eth0: groups = ff3e::1 I 2001::1.
-TestMld: eth0: groups = ff3e::1 E 2001::2.
-TestMld: eth0: groups = ff3e::1 E 2001::1 2001::2.
-TestMld: eth0: groups = ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 E 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 E 2001::1 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1.
 
 %#
 %# Now check the state transitions of the Mldv2 module

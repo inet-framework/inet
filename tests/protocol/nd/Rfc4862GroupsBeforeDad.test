@@ -13,15 +13,6 @@ MLD is off by default in the node, hasMld = false
 (src/inet/networklayer/ipv6/Ipv6NetworkLayer.ned:72). The check assumes that every node runs
 MLD, as RFC 4861 section 7.2.1 does, so the test turns it on.
 
-Defect: a node accepts packets to a solicited-node address by matching it against its addresses
-(src/inet/networklayer/ipv6/Ipv6InterfaceData.cc:375), but never joins the group, so MLD never
-reports it; the router, which joins ff02::2 with joinMulticastGroup, reports that group. RFC
-4862 section 5.4.2: "Before sending a Neighbor Solicitation, an interface MUST join the all-
-nodes multicast address and the solicited-node multicast address of the tentative address."
-Observation 1 holds; observation 2 fails. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

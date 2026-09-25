@@ -356,6 +356,14 @@ Notable backward incompatible changes are the following:
    option. The new message class Ipv6NdRedirectedHeader holds the octets of
    the invoking packet, and the ICMPv6 serializer writes and reads it.
 
+   An IPv6 interface now joins the solicited-node multicast group of each of
+   its unicast addresses when it gets the address, before Duplicate Address
+   Detection, and leaves it with the last address of that group (RFC 4861
+   section 7.2.1, RFC 4862 section 5.4.2). Before, a node only accepted
+   packets to these groups, and MLD never reported them. With MLD on, a node
+   now sends Reports for its solicited-node groups, and the group lists of an
+   interface hold them.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
