@@ -1201,9 +1201,11 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
     double maxResponseDelay = query->getMaxRespDelay() / 1000.0; // milliseconds in an MLDv1 Query
 
     if (groupAddr.isUnspecified()) {
-        if (!interfaceData->olderVersionPresent)
+        if (!interfaceData->olderVersionPresent) {
             EV_INFO << "Received older-version (MLDv1) General Query on interface '"
                     << ie->getInterfaceName() << "': entering MLDv1 compatibility.\n";
+            cancelHostTimers(interfaceData, true);
+        }
         else
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing MLDv1 compatibility.\n";
@@ -1385,9 +1387,38 @@ void Mldv2::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to MLDv2.\n";
     interfaceData->olderVersionPresent = false;
-    for (auto& elem : interfaceData->groups) {
-        cancelEvent(elem.second->olderVersionReportTimer);
+    cancelHostTimers(interfaceData, false);
+    for (auto& elem : interfaceData->groups)
         elem.second->lastReporter = false;
+}
+
+// RFC 9777 section 8.2.1: a change of the Host Compatibility Mode cancels all pending responses
+// and retransmission timers of the interface. The Reports of the old mode that wait for the
+// link-local address are pending too, so they are deleted.
+void Mldv2::cancelHostTimers(HostInterfaceData *interfaceData, bool mldv1Mode)
+{
+    cancelEvent(interfaceData->generalQueryTimer);
+    for (auto& elem : interfaceData->groups) {
+        HostGroupData *group = elem.second;
+        cancelEvent(group->timer);
+        group->queriedSources.clear();
+        cancelEvent(group->retransmitTimer);
+        group->filterModeChangeCount = 0;
+        group->sourceChangeCounts.clear();
+        cancelEvent(group->olderVersionReportTimer);
+    }
+    auto it = heldMessages.find(interfaceData->ie->getInterfaceId());
+    if (it != heldMessages.end()) {
+        std::vector<Packet *>& messages = it->second;
+        for (auto msgIt = messages.begin(); msgIt != messages.end(); ) {
+            bool mldv2Report = (*msgIt)->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLDv2_REPORT;
+            if (mldv2Report == mldv1Mode) {
+                delete *msgIt;
+                msgIt = messages.erase(msgIt);
+            }
+            else
+                ++msgIt;
+        }
     }
 }
 

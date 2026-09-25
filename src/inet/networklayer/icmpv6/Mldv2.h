@@ -321,6 +321,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void processHostOlderVersionTimer(cMessage *msg);
     virtual void processHostOlderVersionReportTimer(cMessage *msg);
     virtual void startOlderVersionReportTimer(HostGroupData *group, double maxResponseDelay);
+    virtual void cancelHostTimers(HostInterfaceData *interfaceData, bool mldv1Mode);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);

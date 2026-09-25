@@ -401,6 +401,10 @@ Notable backward incompatible changes are the following:
    section 7.2.1). Before, an IGMPv3 host that entered the IGMPv2 mode still
    sent the pending repetitions of its IGMPv3 State-Change Report.
 
+   A change of the compatibility mode of an Mldv2 node cancels its pending
+   timers in the same way (RFC 9777 section 8.2.1), and deletes the Reports of
+   the old mode that wait for the link-local address of the interface.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
