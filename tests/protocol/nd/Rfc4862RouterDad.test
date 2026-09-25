@@ -8,14 +8,6 @@ doc/project/evidence/protocol/nd/checks/autoconfiguration.md#duplicate-address-d
 the program steps below map onto its expected observations. The first guard is observation 3,
 the second observation 2, and step 1 observation 1.
 
-Defect: the configurator assigns the global address of a router as not tentative,
-"assignAddress(interfaceInfo->globalAddress, false, ...)"
-(src/inet/networklayer/configurator/ipv6/Ipv6NetworkConfigurator.cc:172), so the router never
-tests it. RFC 4862 section 5: "In addition, routers perform Duplicate Address Detection on all
-addresses prior to assigning them to an interface." Observations 1 and 3 hold; observation 2
-fails. This test FAILS, and the failure is deliberately NOT declared expected: the model has
-the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
