@@ -504,6 +504,7 @@ void Igmpv3::processRexmtTimer(cMessage *msg)
         query->setType(IGMP_MEMBERSHIP_QUERY);
         query->setGroupAddress(groupData->groupAddr);
         query->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+        setQuerierFields(query);
         if (groupData->rexmtGroupAndSource) {
             query->setSourceList(sourcesToQuery);
             query->setChunkLength(B(12 + (4 * sourcesToQuery.size())));
@@ -1343,6 +1344,7 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime * 10.0)));
+        setQuerierFields(msg);
         msg->setChunkLength(B(12));
         insertChecksum(msg, packet);
         packet->insertAtFront(msg);
@@ -1372,6 +1374,7 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+        setQuerierFields(msg);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
         insertChecksum(msg, packet);
@@ -1429,6 +1432,7 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+        setQuerierFields(msg);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
         insertChecksum(msg, packet);
@@ -1826,6 +1830,13 @@ Ipv4AddressVector Igmpv3::set_union(const Ipv4AddressVector& first, const Ipv4Ad
 
 // Miscellaneous
 
+void Igmpv3::setQuerierFields(const Ptr<Igmpv3Query>& query)
+{
+    // a Robustness Variable above 7 does not fit, and the QRV is then zero (RFC 9776 section 4.1.6)
+    query->setRobustnessVariable(robustnessVariable <= 7 ? robustnessVariable : 0);
+    query->setQueryIntervalCode(codeTime((uint16_t)queryInterval));
+}
+
 uint16_t Igmpv3::decodeTime(uint8_t code)
 {
     uint16_t time;
@@ -1855,7 +1866,7 @@ uint8_t Igmpv3::codeTime(uint16_t time)
             exp++;
         }
         ASSERT(exp <= 7);
-        ASSERT(time <= 15);
+        ASSERT(time >= 0x10 && time <= 0x1f); // the mantissa with its implicit leading bit
         code = 0x80 | ((exp << 4) & 0x70) | (time & 0x0f);
     }
 
