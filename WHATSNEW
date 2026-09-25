@@ -342,6 +342,13 @@ Notable backward incompatible changes are the following:
    do not advertise in step. Simulations with routers of IPv6 now see their
    first advertisements in the first seconds.
 
+   A host now processes a Router Advertisement during Duplicate Address
+   Detection: the Default Router List and the parameters of the link follow
+   it (RFC 4861 section 6.3.4). Before, the host dropped the whole
+   advertisement, and on a link with two routers it could stay without a
+   default router. The prefixes of such an advertisement still wait for an
+   advertisement after the detection.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

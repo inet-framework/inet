@@ -383,7 +383,7 @@
 /examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,             4a7a-b19c/tplx;f39e-479c/~tNl;a04b-c76b/~tND;44ef-1a45/tyf, PASS, wireless EthernetMac
 /examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,             8762-5a97/tplx;6187-d3ec/~tNl;79cc-4887/~tND;ed3e-17fa/tyf, PASS, wireless EthernetMac
 /examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,             4cf3-a5d3/tplx;4aa6-0216/~tNl;e12d-542b/~tND;afae-2b3c/tyf, PASS, wireless EthernetMac
-/examples/ipv6/pmipv6/,              -f omnetpp.ini -c General -r 0,                 60s,             0768-cda9/tplx;2f88-1aec/~tNl;ddd8-8791/~tND;0277-d784/tyf, PASS, wireless EthernetMac
+/examples/ipv6/pmipv6/,              -f omnetpp.ini -c General -r 0,                 60s,             94cf-720b/tplx;fc91-cf9f/~tNl;1a2c-2b83/~tND;0277-d784/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;7dd1-18eb/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;fa92-f68c/tyf, PASS,
