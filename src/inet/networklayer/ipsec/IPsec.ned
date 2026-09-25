@@ -65,7 +65,7 @@ import inet.common.SimpleModule;
 // - `SecurityPolicy`: Selector, Direction, Action, Protection?, `EspMode`?,
 //   `EncryptionAlg`?, `AuthenticationAlg`?, `MaxTfcPadLength`?, `SecurityAssociation*`
 // - Selector: `LocalAddress`?, `RemoteAddress`?, Protocol?, `LocalPort`?, `RemotePort`?, ICMPType?, ICMPCode?
-// - `SecurityAssociation`: SPI, Selector?
+// - `SecurityAssociation`: SPI, Protection?, Selector?
 //
 // Contained elements may occur in any order.
 //
@@ -102,7 +102,10 @@ import inet.common.SimpleModule;
 // As a rule, an SA inherits its properties from its parent policy. However,
 // the selector can be changed/refined. Elements within `SecurityAssociation`'s
 // Selector override the corresponding elements specified in the parent
-// `SecurityPolicy`'s Selector element.
+// `SecurityPolicy`'s Selector element. The Protection of an SA can also differ
+// from that of its policy, so that one policy can hold an ESP SA and an AH SA:
+// an AH SA uses the `AuthenticationAlg` of the policy, and an ESP SA needs the
+// ESP elements of an ESP policy.
 //
 // Note that an SA needs to be configured at both endpoints to work.
 // (Flip Direction and swap `LocalAddress`/`RemoteAddress` and `LocalPort`/`RemotePort`
@@ -143,12 +146,11 @@ import inet.common.SimpleModule;
 //
 // If Action is PROTECT, the list of SAs defined for the security policy is
 // searched for matching ones (where Selector matches the packet). The protection
-// defined in the SA is applied to the packet. (If there are multiple matching SAs,
-// all of them are.) If Protection is AH, the packet is protected with an AH
-// header. If Protection is ESP, the packet is protected with an ESP header. If
-// Protection is AH_ESP, both headers are added. (Note that in an actual IPsec
-// implementation, this would involve cryptographic processing, but the model does
-// not contain actual cryptography.)
+// defined in the SA is applied to the packet. The first matching ESP SA adds an ESP
+// header, and the first matching AH SA adds an AH header; with both, ESP comes
+// first and AH covers it. If no SA matches, the packet is discarded. (Note that in
+// an actual IPsec implementation, this would involve cryptographic processing, but
+// the model does not contain actual cryptography.)
 //
 // For ingress packets, processing depends on whether the transport protocol in
 // the packet is AH/ESP or something else.
@@ -157,7 +159,9 @@ import inet.common.SimpleModule;
 // and SPI matching the packet's SPI. If there is no matching SA, the packet
 // is discarded. If there is a matching SA but the packet's protocol doesn't
 // match the SA's Protection field, the packet is discarded. Otherwise, the
-// AH or ESP header is removed from the packet.
+// AH or ESP header is removed from the packet; after an AH header, an ESP header
+// is processed in the same way. The packet that remains must match the selectors
+// of its SAs, or it is discarded.
 //
 // If the packet's protocol was not AH or ESP, the list of security policies
 // is searched in order for the first matching entry. If there is no match,
