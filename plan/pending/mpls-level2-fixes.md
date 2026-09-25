@@ -30,22 +30,22 @@ baselines live in the statistics repository, on a branch of the same name.
 ## Steps
 
 1. [x] **Plan** — this file.
-2. [ ] **Gap 1** — the TTL of each label stack entry: the first label copies the IPv4 TTL, each
+2. [x] **Gap 1** — the TTL of each label stack entry: the first label copies the IPv4 TTL, each
    LSR forwards with one less, and a pushed label copies the TTL below it (the Uniform Model).
    Tests: `Rfc3032FirstLabelTtl`, `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`.
-3. [ ] **Gap 2** — the LSP counts its hops in the IPv4 TTL: the ingress labels a datagram after
+3. [x] **Gap 2** — the LSP counts its hops in the IPv4 TTL: the ingress labels a datagram after
    IPv4 forwards it, and a pop that empties the stack writes the outgoing TTL into the IPv4
    header. Tests: `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3443TtlAfterTwoPops`,
    `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate`.
-4. [ ] **Gap 3** — an LSR does not forward a labeled packet whose outgoing TTL is zero. Test:
+4. [x] **Gap 3** — an LSR does not forward a labeled packet whose outgoing TTL is zero. Test:
    `Rfc3032TtlExpiry`.
-5. [ ] **Gap 4** — an MPLS router on an Ethernet link: packets of other protocols go up, and a
+5. [x] **Gap 4** — an MPLS router on an Ethernet link: packets of other protocols go up, and a
    labeled packet gets its Ethernet header. Test: `Rfc3032EthernetEncapsulation`.
-6. [ ] **Gap 5** — the reserved labels 0 and 3. Tests: `Rfc3032ExplicitNull`,
+6. [x] **Gap 5** — the reserved labels 0 and 3. Tests: `Rfc3032ExplicitNull`,
    `Rfc3032ImplicitNull`; their declarations go.
-7. [ ] **Gap 6** — the MTU check and the fragmentation of a labeled datagram, and the ICMP
+7. [x] **Gap 6** — the MTU check and the fragmentation of a labeled datagram, and the ICMP
    message for one with the DF bit. Tests: the three `Rfc3032TooBig*`; their declarations go.
-8. [ ] **Gap 7, a plan only** — PPP LCP and the MPLS Control Protocol:
+8. [x] **Gap 7, a plan only** — PPP LCP and the MPLS Control Protocol:
    `plan/pending/ppp-lcp-and-mplscp.md`.
 9. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
    `notes.md` ("Fixed on" entries) follow it; the statistics branch.
@@ -59,3 +59,24 @@ baselines live in the statistics repository, on a branch of the same name.
   objects that depend on the changed files were deleted in both modes and rebuilt. A second
   cause of errors was the scratch copy: tests with the working folder `.` need the ini files of
   `tests/fingerprint`, so the scratch copy holds the whole folder.
+- **Each repair moved no fingerprint and no statistical result of `examples/mpls`**, except one
+  that was caught: with the Implicit NULL rule of gap 5, the LIB still allocated the labels 1,
+  2 and 3 to RSVP-TE, the label 3 was popped, and two fingerprints and three statistical results
+  of `examples/mpls` moved. RFC 3032 §2.1 reserves 0 to 15, so the allocation starts at 16, in
+  the same commit; then nothing moves. The MPLS fingerprint rows hold `tplx` and `~tNl`, that is
+  no packet contents, so a TTL value alone cannot move them.
+- **Gap 2: the ingress decrements the IPv4 TTL itself.** The alternative, to send every datagram
+  from a link up to IPv4 and label it on the way down, makes an LSP depend on the IPv4 routing
+  table, and changes what an ingress without a route does. `Mpls` decrements, and leaves a
+  datagram with TTL 1 to IPv4, which sends the ICMP Time Exceeded.
+- **Gap 4: a LIB entry has no next hop.** `Mpls` tags a packet for a link as IPv4 does, so the
+  Ethernet layer encapsulates it, but it has no next hop to resolve a MAC address for. The frame
+  goes to the broadcast address: exact on a point-to-point link. Two costs remain: on a shared
+  LAN every station gets the frame, and `Icmp` sends no error about a datagram that arrived in a
+  link-layer broadcast. The repair is a next hop in the NHLFE (RFC 3031 §3.10), filled by RSVP-TE,
+  LDP and the XML of the LIB, and resolved by ARP; a follow-up of `notes.md`.
+- **Gap 6: `Mpls` got the parameter `icmpModule`**, default `^.ipv4.icmp`, optional, for the ICMP
+  message about a too-big datagram with the DF bit. The fragmentation copies the algorithm of
+  `Ipv4::fragmentAndSend`, with the room for the label stack.
+- **Gap 7 has its plan**, `plan/pending/ppp-lcp-and-mplscp.md`: LCP must come first, and with it
+  IPCP, or IPv4 stops on every PPP link.
