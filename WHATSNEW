@@ -396,6 +396,11 @@ Notable backward incompatible changes are the following:
    section 5 in the same way, with the Maximum Response Delay of the MLDv1
    Query and a Done only from the node that sent the last Report.
 
+   A change of the compatibility mode of an Igmpv3 host now cancels all its
+   pending response and retransmission timers on the interface (RFC 9776
+   section 7.2.1). Before, an IGMPv3 host that entered the IGMPv2 mode still
+   sent the pending repetitions of its IGMPv3 State-Change Report.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
