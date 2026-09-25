@@ -381,6 +381,9 @@ Notable backward incompatible changes are the following:
    in them as a TO_IN or TO_EX record. Before, the second change replaced the
    pending records, so a source of the first change could leave fewer times.
 
+   An Mldv2 node merges the pending records in the same way (RFC 9777 section
+   6.1).
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
