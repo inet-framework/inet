@@ -14,14 +14,6 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 A node joins or leaves L1 through its link: the ScenarioManager enables or disables the channel
 between the node and the switch (the rules of checks.md).
 
-Defect: a host that enters MLDv1 mode keeps its pending MLDv2 retransmissions.
-Mldv2::processOlderVersionQuery sets the compatibility mode and starts its timer
-(src/inet/networklayer/icmpv6/Mldv2.cc:1115-1116), and cancels no timer. A answers the Query
-with an MLDv1 Report, and then its pending Version 2 Report leaves at 407.19 s. Observation 1
-holds; observation 2 fails. This test FAILS, and the failure is deliberately NOT declared
-expected: the model has the mechanism, and the mechanism does the wrong thing, which is a
-defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
