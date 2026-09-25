@@ -107,6 +107,16 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         handleDisassociationFrame(new Packet("Disassociation"), header);
     }
 
+    void submitDeauthentication(const MacAddress& address)
+    {
+        Enter_Method("submitDeauthentication");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_DEAUTHENTICATION);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleDeauthenticationFrame(new Packet("Deauthentication"), header);
+    }
+
     void finishAssociationResponse(const MacAddress& address)
     {
         Enter_Method("finishAssociationResponse");
@@ -154,13 +164,14 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
     TestIeee80211MgmtAp *observedMgmt = nullptr;
     Ieee80211Mib *observedMib = nullptr;
     MacAddress observedPeer;
+    Ieee80211Mib::BssMemberStatus expectedStatus = Ieee80211Mib::AUTHENTICATED;
     int teardownNotifications = 0;
 
   public:
     Ieee80211MgmtApLifecycleTest() : cSimpleModule(65536) {}
     virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override
     {
-        ASSERT(observedMgmt->getStationStatus(observedPeer) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(observedMgmt->getStationStatus(observedPeer) == expectedStatus);
         ASSERT(!observedMgmt->hasCommittedAid(observedPeer));
         ASSERT(!observedMgmt->hasPeerHtState(observedPeer));
         ASSERT(observedMgmt->getPendingTransactionId(observedPeer) == 0);
@@ -242,15 +253,22 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
         observedMgmt = mgmt;
         observedMib = mib;
         observedPeer = staAddress;
-        for (bool refusal : {false, true}) {
+        enum class Teardown { DISASSOCIATION, REFUSAL, AUTHENTICATION, DEAUTHENTICATION };
+        for (auto teardown : {Teardown::DISASSOCIATION, Teardown::REFUSAL, Teardown::AUTHENTICATION, Teardown::DEAUTHENTICATION}) {
+            expectedStatus = teardown == Teardown::AUTHENTICATION || teardown == Teardown::DEAUTHENTICATION ?
+                    Ieee80211Mib::NOT_AUTHENTICATED : Ieee80211Mib::AUTHENTICATED;
             ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
             auto revision = mib->getRateSetRevision();
             mib->subscribe("peerRateSetChanged", this);
             mgmt->subscribe("l2ApDisassociated", this);
-            if (refusal) {
+            if (teardown == Teardown::REFUSAL) {
                 mgmt->submitAssociationRequest(staAddress, true);
                 mgmt->finishAssociationResponse(staAddress);
             }
+            else if (teardown == Teardown::AUTHENTICATION)
+                mgmt->submitAuthenticationRequest(staAddress);
+            else if (teardown == Teardown::DEAUTHENTICATION)
+                mgmt->submitDeauthentication(staAddress);
             else
                 mgmt->submitDisassociation(staAddress);
             mib->unsubscribe("peerRateSetChanged", this);
@@ -260,12 +278,16 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
             ASSERT(mib->getBssRateSet() == bssRates);
             ASSERT(*mib->findPeerRateSet(otherPeer) == otherRates);
             ASSERT(mgmt->hasPeerHtState(otherPeer));
-            // Reassociate directly from authenticated state; no new authentication can hide stale rates.
+            ASSERT(mgmt->getStationStatus(otherPeer) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(mgmt->hasCommittedAid(otherPeer));
+            if (teardown == Teardown::DEAUTHENTICATION)
+                mgmt->submitAuthenticationRequest(staAddress);
+            // Other paths already leave the station authenticated when the handler returns.
             mgmt->submitAssociationRequest(staAddress);
             mgmt->finishAssociationResponse(staAddress);
             ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
         }
-        ASSERT(teardownNotifications == 4);
+        ASSERT(teardownNotifications == 8);
     }
 };
 

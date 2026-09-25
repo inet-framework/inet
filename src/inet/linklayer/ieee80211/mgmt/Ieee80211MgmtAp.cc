@@ -254,12 +254,12 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         // keep this cancellation scoped to this existing model transition.
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
+        sta->authSeqExpected = 1;
         if (wasAssociated)
             mib->releaseAssociationId(sta->address);
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         mib->removePeerHtCapabilities(sta->address);
         mib->removePeerRateSet(sta->address);
-        sta->authSeqExpected = 1;
         if (wasAssociated)
             sendDisAssocNotification(sta->address);
     }
@@ -294,9 +294,9 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     // update status
     if (isLast) {
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
         if (wasAssociated)
             mib->releaseAssociationId(sta->address);
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
         mib->removePeerHtCapabilities(sta->address);
         mib->removePeerRateSet(sta->address);
         if (wasAssociated)
@@ -320,10 +320,10 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
         // mark STA as not authenticated; alternatively, it could also be removed from staList
-        if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
+        if (wasAssociated)
+            mib->releaseAssociationId(sta->address);
         mib->removePeerHtCapabilities(sta->address);
         mib->removePeerRateSet(sta->address);
         if (wasAssociated)
