@@ -310,6 +310,13 @@ Notable backward incompatible changes are the following:
    keep the MTU option. Every Router Advertisement with the defaults is 8
    octets shorter, so simulations with routers of IPv6 change.
 
+   A host now sends datagrams of at most the LinkMTU of an interface, which
+   an MTU option of a Router Advertisement sets (RFC 4861 section 6.3.4).
+   Before, the host stored the value and fragmented to the MTU of the
+   interface. The default of LinkMTU is now the MTU of the interface (it was
+   1280), and a host takes an MTU option only between 1280 and the MTU of the
+   interface.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

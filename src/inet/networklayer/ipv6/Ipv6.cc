@@ -1077,7 +1077,11 @@ void Ipv6::fragmentAndSend(Packet *packet)
         return;
     }
 
+    // an MTU option of a Router Advertisement lowers the MTU of the link (RFC 4861 section 6.3.4)
     int mtu = ie->getMtu();
+    if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())
+        if (ipv6Data->getLinkMtu() != 0 && (int)ipv6Data->getLinkMtu() < mtu)
+            mtu = ipv6Data->getLinkMtu();
 
     // check if datagram does not require fragmentation
     if (packet->getDataLength() <= B(mtu)) {

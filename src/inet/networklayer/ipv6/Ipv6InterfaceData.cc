@@ -198,7 +198,7 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     /*******************Setting host/node/router variables*********************/
     nodeVars.dupAddrDetectTransmits = IPv6_DEFAULT_DUPADDRDETECTTRANSMITS;
 
-    hostVars.linkMTU = IPv6_MIN_MTU;
+    hostVars.linkMTU = 0; // the MTU of the link type, that is of the interface, until an advertisement gives one
     hostVars.curHopLimit = IPv6_DEFAULT_CURHOPLIMIT;
     hostVars.baseReachableTime = IPv6_REACHABLE_TIME;
     hostVars.reachableTime = generateReachableTime(_getMinRandomFactor(),

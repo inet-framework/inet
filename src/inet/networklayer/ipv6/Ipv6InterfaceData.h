@@ -304,6 +304,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  The MTU of the link.
          *  Default: The valued defined in the specific document that describes
          *           how Ipv6 operates over the particular link layer (e.g., [Ipv6-ETHER]).
+         *           In the model, 0 stands for that value, the MTU of the interface.
          */
         uint linkMTU;
         /**

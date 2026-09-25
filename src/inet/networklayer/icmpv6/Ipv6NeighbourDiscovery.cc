@@ -1533,12 +1533,12 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
        type specific document (e.g., [Ipv6-ETHER]).*/
     if (auto mtuOption = check_and_cast_nullable<const Ipv6NdMtu *>(ra->getOptions().findOption(IPv6ND_MTU))) {
         uint32_t mtu = mtuOption->getMtu();
-        if (mtu >= IPv6_MIN_MTU) {
+        if (mtu >= IPv6_MIN_MTU && mtu <= (uint32_t)ie->getMtu()) {
             EV_INFO << "RA MTU option: setting link MTU to " << mtu << "\n";
             ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setLinkMtu(mtu);
         }
         else {
-            EV_WARN << "RA MTU option value " << mtu << " is below IPv6 minimum MTU (" << IPv6_MIN_MTU << "), ignoring\n";
+            EV_WARN << "RA MTU option value " << mtu << " is below IPv6 minimum MTU (" << IPv6_MIN_MTU << ") or above the MTU of the interface (" << ie->getMtu() << "), ignoring\n";
         }
     }
 
