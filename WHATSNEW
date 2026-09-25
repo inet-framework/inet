@@ -326,6 +326,11 @@ Notable backward incompatible changes are the following:
    states, so a router with the default leaves the Retrans Timer field
    unspecified.
 
+   A router now answers every Router Solicitation, within the rate limit of
+   RFC 4861 section 6.2.6. Before, it answered only the first one until its
+   first periodic advertisement, 198 to 600 seconds after the start, because
+   the time of its next advertisement stayed at the time of the first answer.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

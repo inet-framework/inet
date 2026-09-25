@@ -1730,6 +1730,11 @@ void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
     EV_DETAIL << "Testing condition!\n";
     createAndSendRaPacket(destAddr, ie);
     delete msg;
+    // the next advertisement is the periodic one again; processRsPacket() compares the answer
+    // to a later solicitation with this time (RFC 4861 section 6.2.6)
+    AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);
+    if (advIfEntry != nullptr && advIfEntry->raTimeoutMsg != nullptr && advIfEntry->raTimeoutMsg->isScheduled())
+        advIfEntry->nextScheduledRATime = advIfEntry->raTimeoutMsg->getArrivalTime();
 }
 
 bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAdvertisement *ra)
