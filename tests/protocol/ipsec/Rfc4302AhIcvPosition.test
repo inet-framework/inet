@@ -7,10 +7,6 @@ The English procedure is in
 doc/project/evidence/protocol/ipsec/checks/ah.md#ah-format-in-transport-mode; the program steps
 below map onto its expected observations. Step 1 is observation 1, and step 2 observation 5.
 
-Model gap: IPsec::ahProtect appends the ICV at the end of the packet, after the payload
-(src/inet/networklayer/ipsec/IPsec.cc:581-583). In RFC 4302 the ICV is a field of the AH header,
-before the payload.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"

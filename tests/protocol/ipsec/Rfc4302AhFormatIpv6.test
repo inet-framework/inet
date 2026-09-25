@@ -9,10 +9,6 @@ below map onto its expected observations. The guard is observation 2; step 1 is 
 and 3, step 2 observation 4, and step 3 observation 6. Observation 5, the place of the ICV, is
 Rfc4302AhIcvPositionIpv6.test.
 
-Model gap: IPsec::ahProtect sets the Next Header, the SPI and the Sequence Number of the AH
-header, but never its Payload Length (src/inet/networklayer/ipsec/IPsec.cc:574-579), which stays
-0.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
