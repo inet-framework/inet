@@ -59,18 +59,20 @@ Define_ProtocolTestProgram()
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
                   .describe("the next multicast Router Advertisement of R")
                   .within(30.0))
-        // Expected observation 2: the second within 16 s of the first (RFC4861-ADV-23).
+        // Expected observation 2: the second at most 16 s after the first (RFC4861-ADV-23). A capped
+        // interval is exactly 16 s, and the deadline of a step fires before an event of the same
+        // instant, so the deadline is 17 s and the assertion holds the bound.
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && destOf(p) == Ipv6Address::ALL_NODES_2; })
-                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
+                  .assertEvent([](const MatchContext& c) { simtime_t gap = c.event.time - prevAt; prevAt = c.event.time; return require(gap <= 16, "a multicast Router Advertisement of R came " + gap.str() + " s after the one before it, more than 16 s (RFC4861-ADV-23)"); })
                   .describe("the next multicast Router Advertisement of R")
-                  .within(16.0))
-        // Expected observation 2: the third within 16 s of the second (RFC4861-ADV-23).
+                  .within(17.0))
+        // Expected observation 2: the third at most 16 s after the second (RFC4861-ADV-23).
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && destOf(p) == Ipv6Address::ALL_NODES_2; })
-                  .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
+                  .assertEvent([](const MatchContext& c) { simtime_t gap = c.event.time - prevAt; prevAt = c.event.time; return require(gap <= 16, "a multicast Router Advertisement of R came " + gap.str() + " s after the one before it, more than 16 s (RFC4861-ADV-23)"); })
                   .describe("the next multicast Router Advertisement of R")
-                  .within(16.0))
+                  .within(17.0))
         // Expected observation 3: the fourth, which starts the intervals under test.
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isRa(p) && destOf(p) == Ipv6Address::ALL_NODES_2; })
