@@ -70,13 +70,13 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
 // bits. If the intended recipient STA is capable of participating, the originator sends an ADDBA Request frame
 // indicating the TID for which the Block Ack is being set up.
 //
-RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq, simtime_t acceptedTimeout)
 {
     MacAddress originatorAddr = addbaReq->getTransmitterAddress();
     auto id = std::make_pair(originatorAddr, addbaReq->getTid());
     auto it = blockAckAgreements.find(id);
     if (it == blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), addbaReq->getBlockAckTimeoutValue());
+        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), acceptedTimeout);
         blockAckAgreements[id] = agreement;
         EV_DETAIL << "Block Ack Agreement is added with the following parameters: " << *agreement << endl;
         return agreement;
@@ -150,10 +150,12 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
     EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
     if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
         EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
-        auto agreement = addAgreement(addbaRequest);
+        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
+        auto agreement = addAgreement(addbaRequest, addbaResponse->getBlockAckTimeoutValue());
         EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
         EV_DETAIL << "Building Addba Response" << endl;
-        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
+        // A duplicate request must describe the retained agreement without a deadline refresh.
+        addbaResponse->setBlockAckTimeoutValue(agreement->getBlockAckTimeoutValue());
         auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
         callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
     }

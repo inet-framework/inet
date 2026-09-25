@@ -23,9 +23,10 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
 class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
 {
   public:
+    simtime_t timeout = SimTime(1);
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& request) override { return true; }
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override { return true; }
-    virtual simtime_t getBlockAckTimeoutValue() const override { return SimTime(1); }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return timeout; }
     virtual bool aMsduSupported() const override { return false; }
     virtual bool delayedBlockAckPolicySupported() const override { return false; }
     virtual int getMaximumAllowedBufferSize() const override { return 64; }
@@ -165,6 +166,30 @@ ASSERT(originatorReplacement->getStartingSequenceNumber() == SequenceNumberCycli
 ASSERT(originatorReplacement->getBufferSize() == 16);
 ASSERT(!originatorReplacement->getIsAddbaResponseReceived());
 ASSERT(originatorReplacement->getExpirationTime() == originatorDeadline);
+for (int i = 0; i < 4; ++i) {
+    RecipientBlockAckAgreementHandler negotiated;
+    TestAgreementCallback result(negotiated);
+    TestRecipientPolicy selection;
+    selection.timeout = i & 1 ? SimTime(1) : SIMTIME_ZERO;
+    auto proposal = makeShared<Ieee80211AddbaRequest>();
+    proposal->setTransmitterAddress(peer);
+    proposal->setTid(0);
+    proposal->setStartingSequenceNumber(SequenceNumberCyclic(1));
+    proposal->setBufferSize(16);
+    proposal->setBlockAckTimeoutValue(i & 2 ? SimTime(20, SIMTIME_MS) : SIMTIME_ZERO);
+    negotiated.processReceivedAddbaRequest(proposal, &selection, &result);
+    auto accepted = negotiated.getAgreement(0, peer);
+    auto interval = result.response->getBlockAckTimeoutValue();
+    ASSERT(accepted->getBlockAckTimeoutValue() == interval);
+    ASSERT(interval == (i == 3 ? SimTime(20, SIMTIME_MS) : SIMTIME_ZERO));
+    auto deadline = accepted->getExpirationTime();
+    wait(SimTime(1, SIMTIME_MS));
+    selection.timeout = SIMTIME_ZERO;
+    negotiated.processReceivedAddbaRequest(proposal, &selection, &result);
+    negotiated.processTransmittedAddbaResp(result.response, &result);
+    ASSERT(accepted->getExpirationTime() == deadline);
+    ASSERT(result.response->getBlockAckTimeoutValue() == interval);
+}
 EV << "ADDBA transmission completion preserves current agreements.\n";
 
 %contains: stdout

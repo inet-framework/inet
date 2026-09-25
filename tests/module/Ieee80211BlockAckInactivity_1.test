@@ -5,7 +5,7 @@ and simultaneous originator and recipient agreements with different deadlines.
 Cover ADDBA response retries and queued responses after agreement expiry.
 IEEE Std 802.11-2024, 11.5.4 requires timeout DELBA for inactive agreements.
 
-%extraargs: -r 0..16
+%extraargs: -r 0..20
 
 %file: TestIeee80211BlockAckInactivity.cc
 
@@ -49,6 +49,11 @@ class TestBlockAckHcf : public Hcf
     bool hasInactivityTimer() const { return inactivityTimer->isScheduled(); }
     simtime_t getInactivityTime() const { return inactivityTimer->getArrivalTime(); }
     bool isIdle() const { return !frameSequenceHandler->isSequenceRunning(); }
+    simtime_t getAgreementTimeout(const MacAddress& peer, bool originator) const
+    {
+        return originator ? originatorBlockAckAgreementHandler->getAgreement(peer, 0)->getBlockAckTimeoutValue() :
+                            recipientBlockAckAgreementHandler->getAgreement(0, peer)->getBlockAckTimeoutValue();
+    }
     simtime_t getAgreementDeadline(const MacAddress& peer, bool originator, Tid tid = 0) const
     {
         if (originator) {
@@ -155,6 +160,25 @@ class Ieee80211BlockAckInactivityTest : public cSimpleModule, public LifecycleCo
         const MacAddress senderAddress("02:00:00:00:00:01");
         const MacAddress recipientAddress("02:00:00:00:00:02");
         int scenario = par("scenario");
+        if (scenario >= 17) {
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            auto timeout = sender->getAgreementTimeout(recipientAddress, true);
+            ASSERT(recipient->getAgreementTimeout(senderAddress, false) == timeout);
+            ASSERT(scenario == 20 ? timeout > SIMTIME_ZERO : timeout == SIMTIME_ZERO);
+            wait(SimTime(30, SIMTIME_MS));
+            if (scenario == 20) {
+                ASSERT(sender->getAgreementDeadline(recipientAddress, true) < 0);
+                ASSERT(recipient->getAgreementDeadline(senderAddress, false) < 0);
+            }
+            else {
+                ASSERT(sender->getAgreementDeadline(recipientAddress, true) == SIMTIME_MAX);
+                ASSERT(recipient->getAgreementDeadline(senderAddress, false) == SIMTIME_MAX);
+                ASSERT(!sender->hasInactivityTimer() && !recipient->hasInactivityTimer());
+            }
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario == 16) {
             sender->queueFrame(recipientAddress);
             wait(SimTime(5, SIMTIME_MS));
@@ -377,15 +401,15 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..16}
+*.test.scenario = ${scenario=0..20}
 *.node[*].hasStatus = true
 *.node[*].wlan[0].mac.typename = "TestBlockAckMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "TestBlockAckHcf"
 **.hcf.isBlockAckSupported = true
-*.node[0].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = ${scenario} == 8 ? 0s : (${scenario} >= 12 && ${scenario} <= 15 ? 1.024ms : 20ms)
+*.node[0].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = (${scenario} == 8 || ${scenario} == 18 || ${scenario} == 19) ? 0s : (${scenario} >= 12 && ${scenario} <= 15 ? 1.024ms : 20ms)
 *.node[1].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = 30ms
-**.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = 1s
+**.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = (${scenario} == 17 || ${scenario} == 18) ? 0s : 1s
 *.node[0].wlan[0].address = "02:00:00:00:00:01"
 *.node[1].wlan[0].address = "02:00:00:00:00:02"
 **.wlan[*].opMode = "g(mixed)"

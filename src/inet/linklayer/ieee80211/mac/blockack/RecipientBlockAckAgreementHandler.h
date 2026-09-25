@@ -34,7 +34,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 
   protected:
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
-    virtual RecipientBlockAckAgreement *addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq);
+    virtual RecipientBlockAckAgreement *addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq, simtime_t acceptedTimeout);
     virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
 
