@@ -11,14 +11,6 @@ the program steps below map onto its expected observations. The guards are obser
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: no MLD message carries a Hop-by-Hop Options header. Mldv2::sendToIPv6 asks for no
-extension header (src/inet/networklayer/icmpv6/Mldv2.cc:1420-1430), and the model has no Router
-Alert option for IPv6: the option types of src/inet/networklayer/ipv6/Ipv6ExtensionHeaders.msg
-do not hold type 5 of RFC 2711. RFC 9777 section 5 sends every MLDv2 message with the option.
-The guard of R fails at its first Query, at the start. This test FAILS, and the failure is
-deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
-wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

@@ -37,6 +37,12 @@ static void serializeIpv6TlvOptions(MemoryOutputStream& stream, const TlvOptions
             stream.writeByte(opt->getLength());
             stream.writeByteRepeatedly(0, opt->getLength());
         }
+        else if (opt->getType() == IPv6TLVOPTION_ROUTER_ALERT) {
+            auto *routerAlert = check_and_cast<const Ipv6RouterAlertOption *>(opt);
+            stream.writeByte(routerAlert->getType());
+            stream.writeByte(2); // length: the 2 octets of the value
+            stream.writeUint16Be(routerAlert->getValue());
+        }
 #ifdef INET_WITH_MIPV6
         else if (opt->getType() == IPv6TLVOPTION_HOME_ADDRESS) {
             auto *hao = check_and_cast<const HomeAddressOption *>(opt);
@@ -84,6 +90,11 @@ static void deserializeIpv6TlvOptions(MemoryInputStream& stream, TlvOptions& tlv
                 opt->setLength(length);
                 stream.readByteRepeatedly(0, length);
                 tlvOptions.appendTlvOption(opt);
+            }
+            else if (type == IPv6TLVOPTION_ROUTER_ALERT && length == 2) {
+                auto *routerAlert = new Ipv6RouterAlertOption();
+                routerAlert->setValue(stream.readUint16Be());
+                tlvOptions.appendTlvOption(routerAlert);
             }
 #ifdef INET_WITH_MIPV6
             else if (type == IPv6TLVOPTION_HOME_ADDRESS) {

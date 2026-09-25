@@ -41,9 +41,29 @@ enum Ipv6TlvOptionTypes
 {
     IPv6TLVOPTION_NOP1 = 0;
     IPv6TLVOPTION_NOPN = 1;
+    IPv6TLVOPTION_ROUTER_ALERT = 5;     // RFC 2711
     IPv6TLVOPTION_TLV_GPSR = 47;
     IPv6TLVOPTION_HOME_ADDRESS = 201;   // 0xC9, RFC 6275 Section 6.3
 };
+
+//
+// The values of the Router Alert option, RFC 2711 section 2.1
+//
+enum Ipv6RouterAlertValue
+{
+    IPv6_ROUTER_ALERT_MLD = 0;   // the datagram holds a Multicast Listener Discovery message
+};
+
+//
+// The Router Alert option of RFC 2711, in a Hop-by-Hop Options header. It
+// asks every router on the path to examine the datagram.
+//
+class Ipv6RouterAlertOption extends TlvOptionBase
+{
+    type = IPv6TLVOPTION_ROUTER_ALERT;
+    length = 4;   // type, length and value
+    uint16_t value = IPv6_ROUTER_ALERT_MLD;
+}
 
 //
 // Hop-by-Hop Options Header.
