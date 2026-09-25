@@ -227,12 +227,24 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
     if (interfaceData->olderVersionPresent) {
         bool wasJoined = groupData->filter == MLDV2_FM_EXCLUDE || !groupData->sourceAddressList.empty();
         bool nowJoined = filter == MLDV2_FM_EXCLUDE || !sourceList.sources.empty();
-        if (!wasJoined && nowJoined)
+        if (!wasJoined && nowJoined) {
+            // RFC 2710 section 5, "start listening": send a Report, set the flag, and start the
+            // timer with a value from [0, [Unsolicited Report Interval]] for the repetition
             sendOlderVersionReport(ie, group);
-        else if (wasJoined && !nowJoined)
-            sendOlderVersionDone(ie, group);
-        else if (nowJoined)
+            groupData->lastReporter = true;
+            startTimer(groupData->olderVersionReportTimer, uniform(0, unsolicitedReportInterval));
+        }
+        else if (wasJoined && !nowJoined) {
+            // "stop listening": stop the timer, and send a Done if the flag is set
+            cancelEvent(groupData->olderVersionReportTimer);
+            if (groupData->lastReporter)
+                sendOlderVersionDone(ie, group);
+            groupData->lastReporter = false;
+        }
+        else if (nowJoined) {
             sendOlderVersionReport(ie, group); // refresh membership
+            groupData->lastReporter = true;
+        }
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
@@ -415,6 +427,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
             case MLDV2_H_OLDER_VERSION_TIMER:
                 processHostOlderVersionTimer(msg);
+                break;
+
+            case MLDV2_H_OLDER_VERSION_REPORT_TIMER:
+                processHostOlderVersionReportTimer(msg);
                 break;
 
             default:
@@ -1182,6 +1198,7 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
     Ipv6Address groupAddr = query->getMulticastAddress();
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    double maxResponseDelay = query->getMaxRespDelay() / 1000.0; // milliseconds in an MLDv1 Query
 
     if (groupAddr.isUnspecified()) {
         if (!interfaceData->olderVersionPresent)
@@ -1196,12 +1213,13 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
         // Query Interval, so the node's own one stands for it
         startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + queryResponseInterval);
 
-        // Answer the General Query in MLDv1 style for every joined group.
+        // Answer the General Query in MLDv1 style for every joined group, after the report
+        // delay of RFC 2710 section 5.
         for (auto& elem : interfaceData->groups) {
             HostGroupData *g = elem.second;
             bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, g->groupAddr);
+                startOlderVersionReportTimer(g, maxResponseDelay);
         }
     }
     else {
@@ -1213,7 +1231,7 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
             HostGroupData *g = it->second;
             bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, groupAddr);
+                startOlderVersionReportTimer(g, maxResponseDelay);
         }
     }
 
@@ -1279,6 +1297,18 @@ void Mldv2::processOlderVersionReport(NetworkInterface *ie, Packet *packet)
         RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
         RouterGroupData *groupData = interfaceData->getOrCreateGroupData(group);
         enterRouterOlderVersionCompat(ie, groupData);
+    }
+
+    // RFC 2710 section 5, "report received" in the Delaying Listener state: another node
+    // answered for the address, so stop the timer and clear the flag
+    auto hostIt = hostData.find(ie->getInterfaceId());
+    if (hostIt != hostData.end()) {
+        auto groupIt = hostIt->second->groups.find(group);
+        if (groupIt != hostIt->second->groups.end() && groupIt->second->olderVersionReportTimer->isScheduled()) {
+            EV_INFO << "Another node reported group '" << group << "', suppressing the own Report.\n";
+            cancelEvent(groupIt->second->olderVersionReportTimer);
+            groupIt->second->lastReporter = false;
+        }
     }
 
     delete packet;
@@ -1355,6 +1385,29 @@ void Mldv2::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to MLDv2.\n";
     interfaceData->olderVersionPresent = false;
+    for (auto& elem : interfaceData->groups) {
+        cancelEvent(elem.second->olderVersionReportTimer);
+        elem.second->lastReporter = false;
+    }
+}
+
+// RFC 2710 section 5, "timer expired" in the Delaying Listener state: send the Report and set
+// the flag.
+void Mldv2::processHostOlderVersionReportTimer(cMessage *msg)
+{
+    HostGroupData *group = (HostGroupData *)msg->getContextPointer();
+    sendOlderVersionReport(group->parent->ie, group->groupAddr);
+    group->lastReporter = true;
+}
+
+// RFC 2710 section 5, "query received": in the Idle Listener state start the report delay timer
+// with a value from [0, Maximum Response Delay]; in the Delaying Listener state reset it only if
+// the Maximum Response Delay is less than the time left.
+void Mldv2::startOlderVersionReportTimer(HostGroupData *group, double maxResponseDelay)
+{
+    cMessage *timer = group->olderVersionReportTimer;
+    if (!timer->isScheduled() || maxResponseDelay < (timer->getArrivalTime() - simTime()).dbl())
+        startTimer(timer, uniform(0, maxResponseDelay));
 }
 
 // RFC 3810 8.3.2: the Older Version Host Present timer for a group expired; revert that
@@ -1597,6 +1650,8 @@ Mldv2::HostGroupData::HostGroupData(HostInterfaceData *parent, const Ipv6Address
     timer->setContextPointer(this);
 
     retransmitTimer = new cMessage("Mldv2 Host State-Change Retransmit Timer", MLDV2_H_STATE_CHANGE_TIMER);
+    olderVersionReportTimer = new cMessage("Mldv2 Host Older Version Report Timer", MLDV2_H_OLDER_VERSION_REPORT_TIMER);
+    olderVersionReportTimer->setContextPointer(this);
     retransmitTimer->setContextPointer(this);
 }
 
@@ -1604,6 +1659,7 @@ Mldv2::HostGroupData::~HostGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(retransmitTimer);
+    parent->owner->cancelAndDelete(olderVersionReportTimer);
 }
 
 string Mldv2::HostGroupData::getStateInfo() const

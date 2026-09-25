@@ -392,6 +392,10 @@ Notable backward incompatible changes are the following:
    every member answered at the instant of the Query and sent one Report for a
    join.
 
+   The MLDv1 mode of an Mldv2 node follows the node state machine of RFC 2710
+   section 5 in the same way, with the Maximum Response Delay of the MLDv1
+   Query and a Done only from the node that sent the last Report.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

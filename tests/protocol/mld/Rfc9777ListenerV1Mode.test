@@ -17,12 +17,15 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 An answer that leaves less than 1 ms after the Query leaves at the instant of the Query (the
 rules of checks.md).
 
-Defect: in MLDv1 mode, a host answers a Query at the instant that the Query arrives.
-Mldv2::processOlderVersionQuery sends the MLDv1 Reports in the same event, with no timer
-(src/inet/networklayer/icmpv6/Mldv2.cc:1115-1136). RFC 2710 section 5 sets a timer to a random
-value in the Maximum Response Delay. Observations 1, 2 and 5 hold; observation 4 fails. This
-test FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism,
-and the mechanism does the wrong thing, which is a defect. See results.md.
+Defect: in MLDv1 mode, A sends Version 2 Reports for its solicited-node groups, at about 2.5 s.
+It joined these groups at the start in MLDv2 mode; the MLDv1 General Query of R then puts it in
+MLDv1 mode, but Mldv2::processOlderVersionQuery cancels neither the pending MLDv2
+retransmissions nor the Reports that wait for the link-local address
+(src/inet/networklayer/icmpv6/Mldv2.cc). RFC 9777 section 8.2.1 cancels them at a change of the
+compatibility mode (the defect of Rfc9777ModeChangeCancels.test). Observations 1 to 4 hold;
+observation 5 fails. This test FAILS, and the failure is deliberately NOT declared expected: the
+model has the mechanism, and the mechanism does the wrong thing, which is a defect. See
+results.md.
 
 %includes:
 #include "ProtocolTest.h"
