@@ -40,8 +40,9 @@ seed-set = 0
 <!-- join an any-source group while still native v3 -->
 <set-filter t="1" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E"/>
 
-<!-- older-version (IGMPv2) General Query: host enters IGMPv2 compatibility and answers -->
-<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv2Query"/>
+<!-- older-version (IGMPv2) General Query: host enters IGMPv2 compatibility and answers after a
+     random delay of up to the Max Response Time (RFC 2236 section 6), here 1 s -->
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv2Query" maxRespCode="10"/>
 
 <!-- a new join while in IGMPv2 compat: host must emit an Igmpv2Report (not v3) -->
 <set-filter t="4" module="node.tester.mac" ifname="eth0" group="225.0.0.2" sources="E"/>

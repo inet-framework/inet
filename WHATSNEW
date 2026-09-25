@@ -384,6 +384,14 @@ Notable backward incompatible changes are the following:
    An Mldv2 node merges the pending records in the same way (RFC 9777 section
    6.1).
 
+   The IGMPv1 and IGMPv2 modes of an Igmpv3 host now follow the host state
+   machine of RFC 2236 section 6: a Query starts a report delay timer with a
+   random value up to its Max Response Time, the Report of another member stops
+   the timer, a join repeats its Report after up to unsolicitedReportInterval,
+   and a Leave goes out only from the host that sent the last Report. Before,
+   every member answered at the instant of the Query and sent one Report for a
+   join.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
