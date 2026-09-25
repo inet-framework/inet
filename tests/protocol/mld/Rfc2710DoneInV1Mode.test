@@ -52,8 +52,8 @@ Define_ProtocolTestProgram()
     return ProtocolTest("rfc2710_done_in_v1_mode")
         // Expected observation 1: before 60 s, an MLDv1 Report of A for G.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p); })
-                  .describe("an MLDv1 Report of A")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p) && messageAddress(p) == G; })
+                  .describe("an MLDv1 Report of A for G")
                   .within(60.0))
         // Expected observations 2 and 3: within 10 ms of the stop, an MLDv1 Done to ff02::2.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
