@@ -421,6 +421,9 @@ Notable backward incompatible changes are the following:
    it was lowered, so the flag was set after the leave of the only member, and
    every retransmission had the flag set.
 
+   The S flag of a Multicast Address Specific Query of Mldv2 comes from the
+   lowered Filter Timer in the same way (RFC 9777 section 7.6.3.1).
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

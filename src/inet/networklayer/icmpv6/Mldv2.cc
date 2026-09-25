@@ -637,9 +637,9 @@ void Mldv2::processRexmtTimer(cMessage *msg)
             query->setChunkLength(B(28 + (16 * sourcesToQuery.size())));
         }
         else {
-            // suppressRouterProc is set on retransmissions: listeners' reports keep the
-            // group/source timers up, but the querier already lowered its own timers.
-            query->setSuppressRouterProc(true);
+            // the S flag is set when the Filter Timer is larger than LLQT, which a Report since
+            // the first Query makes it (RFC 9777 section 7.6.3.1)
+            query->setSuppressRouterProc(groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime);
             query->setChunkLength(B(28));
         }
         Icmpv6::insertChecksum(checksumMode, query, packet);
@@ -1483,10 +1483,11 @@ void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespT
 void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
 {
     RouterInterfaceData *interfaceData = groupData->parent;
-    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    // Set group timer to LMQT
+    // Set the Filter Timer to LLQT, then set the S flag if the Filter Timer is larger than LLQT
+    // (RFC 9777 section 7.6.3.1)
     startTimer(groupData->timer, lastMemberQueryTime);
+    bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
     if (interfaceData->state == MLDV2_RS_QUERIER) {
         Packet *packet = new Packet("Mldv2 query");
