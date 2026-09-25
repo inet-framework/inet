@@ -45,3 +45,5 @@ The S flag (Suppress Router-Side Processing) of a Group-Specific Query of Igmpv3
 The S flag of a Multicast Address Specific Query of Mldv2 comes from the lowered Filter Timer in the same way (RFC 9777 section 7.6.3.1).
 
 The Group-Specific and Group-and-Source-Specific Queries of Igmpv3 now keep the retransmission state of RFC 9776 section 6.6.3. A Report no longer ends the retransmissions of the Queries; it changes only the timers. A Group-and-Source-Specific Query lowers the Source Timers of its sources to the Last Member Query Time, and each transmission is two Queries: one with the S flag for the sources whose timer is larger than that time, and one without it for the others. Before, a source that the last member blocked stayed forwarded until its Source Timer ended, up to 260 s later.
+
+The Multicast Address Specific and Multicast Address and Source Specific Queries of Mldv2 keep the same state (RFC 9777 section 7.6.3).
