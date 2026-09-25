@@ -300,6 +300,11 @@ Notable backward incompatible changes are the following:
    label, and each LSR forwards a labeled packet with the incoming TTL minus
    one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
 
+   The IPv4 TTL also counts the LSRs now. The ingress decrements it before it
+   labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports
+   it; a pop that empties the label stack writes the outgoing TTL into the IPv4
+   header. Before, a datagram left an LSP with the TTL it had at the ingress.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
