@@ -299,6 +299,12 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
         AccessCategory ac = edcaf->getAccessCategory();
         auto dataRecoveryProcedure = edcaf->getRecoveryProcedure();
         Packet *internallyCollidedFrame = edcaf->getInProgressFrames()->getFrameToTransmit();
+        if (originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure())) {
+            dataRecoveryProcedure->blockAckRequestInternalCollision();
+            edcaf->requestChannel(this);
+            continue;
+        }
+        ASSERT(internallyCollidedFrame != nullptr);
         auto internallyCollidedHeader = internallyCollidedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << printAccessCategory(ac) << " (" << internallyCollidedFrame->getName() << ")" << endl;
         bool retryLimitReached = false;
