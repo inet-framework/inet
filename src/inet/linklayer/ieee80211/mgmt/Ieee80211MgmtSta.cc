@@ -5,6 +5,8 @@
 //
 
 
+#include <algorithm>
+
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 
@@ -495,14 +497,20 @@ void Ieee80211MgmtSta::sendScanConfirm()
 {
     EV << "Scanning complete, found " << apList.size() << " APs, sending confirmation to agent\n";
 
-    // copy apList contents into a ScanConfirm primitive and send it back
-    int n = apList.size();
+    // copy matching apList contents into a ScanConfirm primitive and send it back
+    // IEEE Std 802.11-2024, 6.5.3.2.2: BSSID and SSID identify specific or wildcard scan targets.
+    auto matchesScanRequest = [this](const ApInfo& ap) {
+        return (scanning.bssid == MacAddress::BROADCAST_ADDRESS || ap.address == scanning.bssid)
+            && (scanning.ssid.empty() || ap.ssid == scanning.ssid);
+    };
+    int n = std::count_if(apList.begin(), apList.end(), matchesScanRequest);
     Ieee80211Prim_ScanConfirm *confirm = new Ieee80211Prim_ScanConfirm();
     confirm->setBssListArraySize(n);
     auto it = apList.begin();
-    // TODO filter for req'd bssid and ssid
-    for (int i = 0; i < n; i++, it++) {
+    for (int i = 0; it != apList.end(); it++) {
         ApInfo *ap = &(*it);
+        if (!matchesScanRequest(*ap))
+            continue;
         Ieee80211Prim_BssDescription& bss = confirm->getBssListForUpdate(i);
         bss.setChannelNumber(ap->channel);
         bss.setBSSID(ap->address);
@@ -512,6 +520,7 @@ void Ieee80211MgmtSta::sendScanConfirm()
         bss.setExtendedSupportedRates(ap->extendedSupportedRates);
         bss.setBeaconInterval(ap->beaconInterval);
         bss.setRxPower(ap->rxPower);
+        i++;
     }
     sendConfirm(confirm, PRC_SUCCESS);
 }
