@@ -436,6 +436,13 @@ Notable backward incompatible changes are the following:
    The Multicast Address Specific and Multicast Address and Source Specific
    Queries of Mldv2 keep the same state (RFC 9777 section 7.6.3).
 
+   IPv4 now forwards a multicast datagram onto a leaf interface only when the
+   interface has a listener of its source, as the IGMPv3 state of the router
+   says (RFC 9776 section 6.3). Before, a listener of the group was enough, so
+   the source lists of IGMPv3 had no effect on the data.
+   Ipv4InterfaceData::hasMulticastListener(group, source) also returned the
+   opposite answer; it is corrected.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
