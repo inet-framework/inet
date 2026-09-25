@@ -9,7 +9,8 @@ IEEE 802.11 TXOP and rate selection
 
 Management modules accept ``basicRates`` and ``operationalRates`` as lists
 with units, for example ``"6Mbps 12Mbps"``. ``"auto"`` retains the automatic
-policy. An empty string means a known empty set. Custom association frames
+policy. Automatic basic rates include only mandatory rates in the selected
+operational set. An empty string means a known empty set. Custom association frames
 must advertise support for every BSS basic rate. The AP rejects incomplete
 advertisements instead of silently assuming PHY support.
 
