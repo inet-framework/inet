@@ -546,7 +546,7 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
 
     // create ESP packet
     const auto& espHeader = makeShared<IPsecEspHeader>();
-    espHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
+    espHeader->setSequenceNumber(sadEntry->incrementAndGetSeqNum());
     espHeader->setSpi(sadEntry->getSpi());
     espHeader->setIcvBytes(icvBytes);
     transport->insertAtFront(espHeader);
@@ -572,7 +572,7 @@ void IPsec::ahProtect(Packet *transport, SecurityAssociation *sadEntry, int tran
     transport->insertData(encryptedData);
 
     const auto& ahHeader = makeShared<IPsecAuthenticationHeader>();
-    ahHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
+    ahHeader->setSequenceNumber(sadEntry->incrementAndGetSeqNum());
     ahHeader->setSpi(sadEntry->getSpi());
     ahHeader->setNextHeader(transportType);
     ahHeader->setIcvBytes(icvBytes);
