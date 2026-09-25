@@ -12,13 +12,6 @@ Rfc9777ChangeDuringRepetitionsTail.test.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: a second change while a repetition is pending replaces the pending records with the
-records of the new change alone (src/inet/networklayer/icmpv6/Mldv2.cc:264-275). RFC 9777
-section 6.1 merges them: the Report at 10.3 s must hold S1 as well, because S1 has been in
-fewer than two Reports. Observation 1 holds; observation 2 fails with ALLOW_NEW_SOURCES {S2}.
-This test FAILS, and the failure is deliberately NOT declared expected: the model has the
-mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

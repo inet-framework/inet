@@ -25,3 +25,5 @@ The IGMPv2 or IGMPv1 mode of an Igmpv3 host now lasts for the Older Version Quer
 The MLDv1 mode of an Mldv2 node now lasts for the Older Version Querier Present Interval of RFC 9777 section 9.12: [Robustness Variable] x [Query Interval] + [Query Response Interval], 260 s with the defaults. Before, it lasted for otherQuerierPresentInterval, 255 s.
 
 An Igmpv3 host that changes the state of a group again before the repetitions of its State-Change Report end now merges the pending records, as RFC 9776 section 5.1 asks: each source of a change stays in the next [Robustness Variable] State-Change Reports, and a filter-mode change stays in them as a TO_IN or TO_EX record. Before, the second change replaced the pending records, so a source of the first change could leave fewer times.
+
+An Mldv2 node merges the pending records in the same way (RFC 9777 section 6.1).
