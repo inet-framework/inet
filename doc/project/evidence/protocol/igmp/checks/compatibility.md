@@ -253,6 +253,38 @@ it sends Queries of 8 octets with the Max Response Time in the Max Resp Code.
 3. Its Max Resp Code is 100, the Max Response Time in tenths of a second without the exponential
    code (RFC9776-COMPR-8).
 
+## Querier configured in IGMPv1 mode
+
+Checks: **RFC9776-COMPR-2**, **COMPR-3** (must), **COMPH-18** (description); covers
+**RFC9776-COMPH-14**, **COMPH-19** (description).
+
+### Requirement
+
+RFC 9776 §7.3.1: a router that wants to be compatible with IGMPv1 has a configuration option to
+act in IGMPv1 mode, and in that mode it sends Periodic Queries of 8 octets with a Max Resp Code of
+0. RFC 9776 §7.2.1: a host that hears an IGMPv1 Query is in IGMPv1 mode and uses only IGMPv1 on
+the interface.
+
+### Scenario constants
+
+- The link with a source, and R configured to act in IGMPv1 mode. At 10 seconds, host A joins G.
+- Observation lasts 40 seconds from the start.
+
+### Procedure
+
+1. Build the link with a source, with R configured in IGMPv1 mode, and let R, A and B come up.
+2. At 10 seconds, let A join G.
+3. Observe the Queries of R and the IGMP messages of A on L1.
+
+### Expected observations
+
+1. On L1, from R, within 1 second of the start, a General Query. This confirms the stimulus.
+2. Every General Query of R is 8 octets long, with a Max Resp Code of 0 (RFC9776-COMPR-2,
+   COMPR-3).
+3. On L1, from A, within 10 milliseconds of the join, an IGMPv1 Membership Report for G: type
+   0x12, 8 octets, Group Address G, IPv4 destination G (RFC9776-COMPH-18).
+4. No IGMPv2 or IGMPv3 message leaves A in the window (RFC9776-COMPH-18).
+
 ## A mode change cancels the pending reports
 
 Checks: **RFC9776-COMPH-22** (description).

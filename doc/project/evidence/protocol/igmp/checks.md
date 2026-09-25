@@ -146,6 +146,7 @@ The checks use the defaults of RFC 9776 §8:
 | [Host back to IGMPv3](checks/compatibility.md#host-back-to-igmpv3) | `checks/compatibility.md` | RFC9776-COMPH-9, TIMER-22; covers RFC9776-COMPH-10, COMPH-12, TIMER-19, TIMER-21 |
 | [Router with an IGMPv2 member](checks/compatibility.md#router-with-an-igmpv2-member) | `checks/compatibility.md` | RFC9776-COMPR-13, COMPR-17, COMPR-27, COMPR-28; covers RFC9776-RQ-5, GEN-8, GEN-9, COMPR-14, COMPR-15, COMPR-18, COMPR-22, COMPR-23, COMPR-26, TIMER-23, TIMER-24, COMPR-25 |
 | [Querier with an IGMPv2 router](checks/compatibility.md#querier-with-an-igmpv2-router) | `checks/compatibility.md` | RFC9776-RQRY-8, COMPR-1, COMPR-6, COMPR-8; covers RFC9776-COMPR-2 |
+| [Querier configured in IGMPv1 mode](checks/compatibility.md#querier-configured-in-igmpv1-mode) | `checks/compatibility.md` | RFC9776-COMPR-2, COMPR-3, COMPH-18; covers RFC9776-COMPH-14, COMPH-19 |
 | [A mode change cancels the pending reports](checks/compatibility.md#a-mode-change-cancels-the-pending-reports) | `checks/compatibility.md` | RFC9776-COMPH-22 |
 | [A BLOCK record for a group in IGMPv2 mode](checks/compatibility.md#a-block-record-for-a-group-in-igmpv2-mode) | `checks/compatibility.md` | RFC9776-COMPR-29 |
 
