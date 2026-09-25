@@ -3,3 +3,5 @@ RIP and RIPng corrections
 A RIPng message now carries the version 1 of RFC 2080; before, every RIPng message carried the version 2 of RIP.
 
 A RIPng answer to a request now leaves on the interface that the request came from, from the link-local address of that interface (RFC 2080 section 2.5). Before, an answer to the link-local address of a requester left on the first interface of the router, and was lost; so trajectories of RIPng simulations with requests change.
+
+When a static or default route that RIP imported returns to the routing table, for example when the carrier of its interface returns, RIP now takes it back and advertises it again with the metric 1. Before, RIP kept the route at the metric 16. Because the IPv6 routes of the configuration now return with the carrier, a RIPng router also advertises the network of a link again after the link returns.
