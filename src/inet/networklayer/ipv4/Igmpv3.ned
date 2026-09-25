@@ -63,6 +63,7 @@ simple Igmpv3 extends SimpleModule like IIgmp
         double queryResponseInterval @unit(s) = default(10s);  // querier: max delay a host may wait before answering a General Query
         double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + 2 * queryResponseInterval);  // querier: how long a group stays active without a new Report (RV); RFC 9776 section 8.4
         double otherQuerierPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));  // querier: wait this long for another querier before taking over (RV)
+        int    routerVersion = default(3);  // querier: the IGMP version that the router acts in on each interface, 2 or 1 for the IGMPv2 or IGMPv1 compatibility mode of RFC 9776 section 7.3.1; an older General Query lowers it on its interface (section 6.6.2)
         double olderHostPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a group stays in the compatibility mode of an older host without its Report (RV); RFC 9776 section 8.13
         double startupQueryInterval @unit(s) = default(queryInterval / 4);  // querier: interval between the initial General Queries at startup
         int    startupQueryCount = default(robustnessVariable);  // querier: number of General Queries sent at startup (RV)

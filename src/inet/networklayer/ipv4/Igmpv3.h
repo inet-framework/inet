@@ -210,6 +210,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         GroupToRouterDataMap groups;
         RouterState state;
         cMessage *generalQueryTimer;
+        int version; // the IGMP version of the Queries (RFC 9776 sections 6.6.2 and 7.3.1)
+        bool versionWarned = false; // the warning about a Query of another version is given once
 
         RouterInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
         virtual ~RouterInterfaceData();
@@ -245,6 +247,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
     double olderHostPresentInterval;
+    int routerVersion;
     double startupQueryInterval;
     int startupQueryCount;
     double lastMemberQueryInterval;
@@ -317,6 +320,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void setQuerierFields(const Ptr<Igmpv3Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
+    virtual void sendOlderVersionQuery(RouterInterfaceData *interfaceData, Ipv4Address groupAddr, double maxRespTime);
+    virtual void warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion);
     virtual void sendSourceSpecificQueries(RouterGroupData *group);
     virtual void scheduleQueryRetransmission(RouterGroupData *group);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);

@@ -452,6 +452,16 @@ Notable backward incompatible changes are the following:
    simulation stopped with an error when an Mldv1 node received a Query from an
    Mldv2 querier.
 
+   Igmpv3 has a new parameter, routerVersion (default 3), for the IGMPv2 and
+   IGMPv1 compatibility modes of a router (RFC 9776 section 7.3.1). In IGMPv2
+   mode the router sends Queries of 8 octets with the Max Response Time in the
+   Max Resp Code, and no Group-and-Source-Specific Query; in IGMPv1 mode its
+   General Queries have a Max Resp Code of 0, and it ignores Leave Group
+   messages. An IGMPv1 or IGMPv2 General Query on an interface puts the router
+   into that mode on the interface (section 6.6.2), with a warning when the
+   router was not configured so. Before, an Igmpv3 router sent IGMPv3 Queries
+   on a link with an IGMPv2 router.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
