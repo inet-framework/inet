@@ -2,12 +2,13 @@
 Verify pending Block Ack recovery through real radios and MAC handlers.
 Force internal collisions after final BAR deferral and stop/restart.
 
-%extraargs: -r 0..5
+%extraargs: -r 0..11
 
 %file: TestBlockAckLoss.cc
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -43,6 +44,61 @@ class LossTestHcf : public Hcf
     int dropData = 0;
     int dropBlockAck = 0;
     int dropped = 0;
+    bool checkGroups = false;
+    int checkedWaitingGroup = 0;
+    bool checkMixedCollision = false;
+    int mixedCollisions = 0;
+    std::map<Tid, int> barGroups;
+    int reviseOnResponse = -1;
+    bool dropRevisedResponse = false;
+    int rateChangesDuringWait = 0;
+
+    int retries(Edcaf *owner, Packet *packet)
+    {
+        try {
+            return owner->getRecoveryProcedure()->getRetryCount(packet, packet->peekAtFront<Ieee80211DataHeader>());
+        }
+        catch (const cRuntimeError& error) {
+            ASSERT(std::string(error.what()).find("The retry counter entry doesn't exist") != std::string::npos);
+            return 0;
+        }
+    }
+
+    virtual void channelGranted(IChannelAccess *channelAccess) override
+    {
+        std::vector<std::tuple<Edcaf *, Packet *, int>> probes;
+        for (auto loser : edca->getInternallyCollidedEdcafs()) {
+            if (!checkMixedCollision)
+                continue;
+            auto frames = loser->getInProgressFrames();
+            auto candidate = frames->getFrameToTransmit();
+            if (candidate && !frames->getOutstandingFrames().empty()) {
+                ASSERT(originatorAckPolicy->isBlockAckReqNeeded(frames, loser->getTxopProcedure()));
+                probes.emplace_back(loser, candidate, retries(loser, candidate));
+            }
+        }
+        Hcf::channelGranted(channelAccess);
+        for (auto probe : probes) {
+            auto loser = std::get<0>(probe);
+            auto candidate = std::get<1>(probe);
+            ASSERT(retries(loser, candidate) == std::get<2>(probe));
+            ++mixedCollisions;
+        }
+    }
+
+    void reviseRatesDuringWait()
+    {
+        Enter_Method("reviseRatesDuringWait");
+        ASSERT(frameSequenceHandler->isSequenceRunning());
+        ASSERT(frameSequenceHandler->getContext()->getActiveStep()->getType() == IFrameSequenceStep::Type::RECEIVE);
+        auto state = mib->getLocalRateSet();
+        state.operational = state.supported;
+        state.operational.legacyRates.erase(Mbps(54));
+        auto revision = mib->getRateSetRevision();
+        mib->setLocalRateSet(state);
+        ASSERT(mib->getRateSetRevision() == revision + 1);
+        ++rateChangesDuringWait;
+    }
 
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override
     {
@@ -59,6 +115,15 @@ class LossTestHcf : public Hcf
     virtual void transmitControlResponseFrame(Packet *response, const Ptr<const Ieee80211MacHeader>& header,
             Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
     {
+        if (header->getType() == reviseOnResponse) {
+            reviseOnResponse = -1;
+            auto sender = check_and_cast<LossTestHcf *>(getModuleByPath("^.^.^.^.node[0].wlan[0].mac.hcf"));
+            sender->reviseRatesDuringWait();
+            if (dropRevisedResponse) {
+                delete response;
+                return;
+            }
+        }
         if (header->getType() == ST_BLOCKACK && dropBlockAck > 0) {
             --dropBlockAck;
             ++dropped;
@@ -131,6 +196,15 @@ class LossTestHcf : public Hcf
         if (header->getType() == ST_BLOCKACK_REQ)
             ++sentBars;
         Hcf::originatorProcessTransmittedControlFrame(header, ac);
+        if (auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+            ++barGroups[bar->getTidInfo()];
+            if (checkGroups && bar->getTidInfo() == 0 && barGroups[0] == 1) {
+                auto frames = edca->getEdcaf(ac)->getInProgressFrames();
+                auto next = originatorAckPolicy->projectBlockAckReq(frames, nullptr, true);
+                ASSERT(std::get<2>(next) == 3);
+                ++checkedWaitingGroup;
+            }
+        }
     }
 };
 Define_Module(LossTestHcf);
@@ -149,6 +223,49 @@ class BlockAckLossTest : public cSimpleModule
         wait(SimTime(5, SIMTIME_MS));
         ASSERT(sender->hasAgreement(peer));
         ASSERT(receiver->delivered == 1);
+        if (scenario >= 6) {
+            auto recipient = check_and_cast<LossTestHcf *>(getModuleByPath("^.node[1].wlan[0].mac.hcf"));
+            if (scenario == 11) {
+                sender->stopBeforeBar = true;
+                sender->queueFrame(peer);
+                wait(SimTime(2, SIMTIME_MS));
+                ASSERT(sender->isStopped());
+                sender->checkMixedCollision = true;
+                sender->queueFrame(peer);
+                sender->queueFrame(peer, 6);
+                check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"))->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+                sender->start();
+            }
+            else if (scenario == 6) {
+                sender->queueFrame(peer, 3);
+                wait(SimTime(5, SIMTIME_MS));
+                ASSERT(sender->hasAgreement(peer, 3));
+                sender->checkGroups = true;
+                sender->queueFrame(peer);
+                sender->queueFrame(peer);
+                sender->queueFrame(peer, 3);
+            }
+            else {
+                bool normalAck = scenario == 7 || scenario == 9;
+                recipient->reviseOnResponse = normalAck ? ST_ACK : ST_BLOCKACK;
+                recipient->dropRevisedResponse = scenario >= 9;
+                sender->queueFrame(peer, normalAck ? 6 : 0);
+            }
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->empty());
+            ASSERT(receiver->delivered == (scenario == 6 ? 5 : scenario == 11 ? 4 : 2));
+            ASSERT((scenario == 9 || scenario == 10) ? sender->repeatedData > 0 : sender->repeatedData == 0);
+            if (scenario == 6) {
+                ASSERT(sender->barGroups[0] == 1 && sender->barGroups[3] == 1);
+                ASSERT(sender->checkedWaitingGroup == 1);
+            }
+            else if (scenario == 11)
+                ASSERT2(sender->mixedCollisions >= 1, std::to_string(sender->mixedCollisions).c_str());
+            else
+                ASSERT(sender->rateChangesDuringWait == 1);
+            std::cout << "Block Ack recovery scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario < 2) {
             sender->queueVoiceOnDeferral = scenario == 0;
             sender->queueFrame(peer);
@@ -222,18 +339,19 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..5}
+*.test.scenario = ${scenario=0..11}
 *.node[*].wlan[0].mac.typename = "LossTestMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "LossTestHcf"
 **.hcf.isBlockAckSupported = true
+**.hcf.originatorAckPolicy.blockAckReqThreshold = ${scenario} == 11 ? 1 : 5
 **.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = 1s
 **.hcf.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = 1s
 *.node[0].wlan[0].address = "02:00:00:00:00:01"
 *.node[1].wlan[0].address = "02:00:00:00:00:02"
 **.wlan[*].opMode = "g(mixed)"
 **.wlan[*].bitrate = 24Mbps
-**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} < 2 ? 650us : (${scenario} == 2 ? 2ms : 0s)
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} < 2 ? 650us : (${scenario} >= 3 && ${scenario} <= 5 ? 0s : 2ms)
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].cwMin = 0
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].cwMax = 0
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].aifsn = 2

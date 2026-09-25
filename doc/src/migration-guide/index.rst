@@ -31,6 +31,9 @@ Explicit configured rates retain precedence. Selectors no longer own holder
 transmission history. Custom PHY modes must implement the non-HT reference
 rate, modulation-class, and legacy-preamble queries.
 
+The fastest-mode retry does not override a configured QoS rate during an overrun.
+IEEE 802.11 recommends a high rate for this case; it does not require a fixed-rate override.
+
 Custom ACK and RTS policies must provide the explicit response-mode timeout
 queries. ``IFrameSequence`` steps expose prepared mode, length, interval,
 and PPDU duration. Custom transmit callbacks must implement
@@ -96,6 +99,26 @@ HCF ``QosRateSelection`` has no such option. For example, a conflicting
 uses it. Remove conflicting overrides from QoS configurations.
 Response selection uses the BSS basic rates or the applicable mandatory rates,
 without the local operational-rate restriction used for data transmission.
+
+Explicit DCF experimental ACK/CTS overrides also bypass known peer-rate restrictions.
+Configure compatible experimental response modes at both peers.
+Unspecified overrides retain primary response selection and its receive-mode requirements.
+
+Custom recipient agreement handlers must implement ``blockAckRequestReceived()``
+for Basic Block Ack Requests. This callback updates the matching inactivity deadline
+before it requests the shared timer update. Block Ack data reception follows the same order.
+The recipient stores the timeout it accepts in its ADDBA response.
+A zero recipient policy disables expiry; a nonzero policy accepts the requested timeout.
+Duplicate requests and response retries retain the accepted interval and current deadline.
+
+``BlockAckRecord`` construction now requires the agreement's initial sequence number.
+The record uses this cyclic boundary to distinguish missing frames from old frames.
+Its missing-frame bitmap can cause retransmission where the old model silently removed data.
+
+HCF now reports ``STOPPED`` and a finish signal when a start listener cancels a grant.
+Statistics based on starts minus finishes therefore return to zero after cancellation.
+AP disassociation and acknowledged refusal now commit station status before rate removal signals.
+The MIB already removes peer rate and HT state when it releases an association ID.
 
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
 candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then

@@ -29,6 +29,7 @@ simple RateSelection extends SimpleModule like IRateSelection
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
         // Experimental radios can lack IEEE 802.11 receive-mode metadata.
         // If true, explicit ACK/CTS bitrates bypass primary response selection on both peers.
+        // They also bypass negotiated peer-rate validation. Both peers need compatible experimental settings.
         // Unspecified response bitrates still use primary response selection.
         bool useNonstandardResponseModes = default(false);
 

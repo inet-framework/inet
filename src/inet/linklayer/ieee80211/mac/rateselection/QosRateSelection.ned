@@ -33,6 +33,8 @@ simple QosRateSelection extends SimpleModule
         double responseBlockAckFrameBitrate @unit(bps) = default(-1bps);
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
+        // A configured rate retains precedence during a permitted TXOP overrun.
+        // The fastest-mode retry applies only when no fixed rate selects the transmission mode.
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
@@ -49,4 +51,3 @@ simple QosRateSelection extends SimpleModule
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-
