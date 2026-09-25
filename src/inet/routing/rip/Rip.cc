@@ -337,8 +337,9 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
             ie = change->getNetworkInterface();
             if (!ie->isUp() || !ie->hasCarrier()) {
+                // a route in its garbage collection keeps it: the deletion starts only once
                 for (auto& elem : ripRoutingTable)
-                    if ((elem)->getInterface() == ie) {
+                    if ((elem)->getInterface() == ie && (elem)->getMetric() != RIP_INFINITE_METRIC) {
                         invalidateRoute(elem);
                     }
             }
@@ -944,22 +945,20 @@ void Rip::checkExpiredRoutes()
     // note that the iterator becomes invalid after calling purgeRoute
     for (RouteVector::iterator iter = ripRoutingTable.begin(); iter != ripRoutingTable.end();) {
         RipRoute *ripRoute = (*iter);
-        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
-            simtime_t now = simTime();
-            if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime + routePurgeTime) {
+        simtime_t now = simTime();
+        if (ripRoute->getMetric() == RIP_INFINITE_METRIC) {
+            // the garbage collection runs from the invalidation of the route, and nothing restarts
+            // it (RFC 2453 section 3.8); a route of the router itself is deleted too, unless a
+            // route of the routing table is attached to it again
+            if ((ripRoute->getType() == RipRoute::RIP_ROUTE_RTE || ripRoute->getRoute() == nullptr) &&
+                now >= ripRoute->getLastInvalidationTime() + routePurgeTime)
+            {
                 iter = purgeRoute(ripRoute);
                 continue;
             }
-            else if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
-                invalidateRoute(ripRoute);
         }
-        // a route of the router itself that it lost is deleted after the garbage-collection time
-        else if (ripRoute->getMetric() == RIP_INFINITE_METRIC && ripRoute->getRoute() == nullptr &&
-                 simTime() >= ripRoute->getLastInvalidationTime() + routePurgeTime)
-        {
-            iter = purgeRoute(ripRoute);
-            continue;
-        }
+        else if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE && now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
+            invalidateRoute(ripRoute);
 
         iter++;
     }
@@ -976,12 +975,12 @@ void Rip::rescheduleExpiryTimer()
 {
     simtime_t next = SIMTIME_MAX;
     for (auto& ripRoute : ripRoutingTable) {
-        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
-            simtime_t expiryTime = ripRoute->getLastUpdateTime() + routeExpiryTime;
-            next = std::min(next, ripRoute->getMetric() == RIP_INFINITE_METRIC ? expiryTime + routePurgeTime : expiryTime);
+        if (ripRoute->getMetric() == RIP_INFINITE_METRIC) {
+            if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE || ripRoute->getRoute() == nullptr)
+                next = std::min(next, ripRoute->getLastInvalidationTime() + routePurgeTime);
         }
-        else if (ripRoute->getMetric() == RIP_INFINITE_METRIC && ripRoute->getRoute() == nullptr)
-            next = std::min(next, ripRoute->getLastInvalidationTime() + routePurgeTime);
+        else if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE)
+            next = std::min(next, ripRoute->getLastUpdateTime() + routeExpiryTime);
     }
 
     if (next == SIMTIME_MAX)
