@@ -510,6 +510,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     bool matchesSolicitedNodeMulticastAddress(const Ipv6Address& solNodeAddr) const;
 
     /**
+     * Joins the solicited-node multicast group of a unicast address that the interface gets, or
+     * leaves it when the interface loses the last address of that group (RFC 4861 section
+     * 7.2.1, RFC 4862 section 5.4.2).
+     */
+    virtual void updateSolicitedNodeGroup(const Ipv6Address& addr, bool assigned);
+
+    /**
      * Returns true if the interface has the given address and it is tentative.
      */
     bool isTentativeAddress(const Ipv6Address& addr) const;
