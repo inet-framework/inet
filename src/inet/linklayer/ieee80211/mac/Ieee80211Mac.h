@@ -115,4 +115,3 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 } // namespace inet
 
 #endif
-

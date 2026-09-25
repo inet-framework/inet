@@ -37,4 +37,3 @@ class INET_API IQosRateSelection
 } // namespace inet
 
 #endif
-

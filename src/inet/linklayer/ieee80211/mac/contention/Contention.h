@@ -80,4 +80,3 @@ class INET_API Contention : public SimpleModule, public IContention
 } // namespace inet
 
 #endif
-

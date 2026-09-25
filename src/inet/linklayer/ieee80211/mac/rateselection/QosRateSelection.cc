@@ -295,4 +295,3 @@ const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

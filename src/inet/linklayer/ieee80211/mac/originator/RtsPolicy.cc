@@ -55,4 +55,3 @@ simtime_t RtsPolicy::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsF
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
