@@ -293,6 +293,11 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. RIP and RIPng corrections
+
+   A RIPng message now carries the version 1 of RFC 2080; before, every RIPng
+   message carried the version 2 of RIP.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

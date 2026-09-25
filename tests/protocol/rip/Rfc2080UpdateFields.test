@@ -11,14 +11,6 @@ node keeps its name (host A = hostA, R1 = R1, ...); netA on R1.eth0, L1 on R1.et
 netB on R2.eth1. "On L1, from R1" is the named interface of the router, R1.eth[1].mac, as it
 sends a frame to the lower layer.
 
-Defect: the model sends RIPng messages with version 2. RipPacket declares "short version
-@bit(8) = 2" (src/inet/routing/rip/RipPacket.msg:60) and Rip.cc sets the version nowhere, so
-the default of RIP version 2 also goes out in RIPng mode. RFC 2080 section 2.5.2: "Set the
-version number to the current version of RIPng. The version described in this document is
-version 1." Observations 1 to 5 hold; observation 6 fails. This test FAILS, and the failure is
-deliberately NOT declared expected: a field that is set to a wrong value is a defect, not a
-missing feature. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"
