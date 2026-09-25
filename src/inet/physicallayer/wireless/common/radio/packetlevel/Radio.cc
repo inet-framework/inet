@@ -39,6 +39,10 @@ Radio::~Radio()
 
 void Radio::initialize(int stage)
 {
+    // register with the medium before the base class starts the lifecycle,
+    // because starting the radio in a receiver mode already listens on the medium
+    if (stage == INITSTAGE_PHYSICAL_LAYER)
+        medium->addRadio(this);
     PhysicalLayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         switchTimer = new cMessage("switchTimer");
@@ -69,7 +73,6 @@ void Radio::initialize(int stage)
         WATCH(allReceptionTimers);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        medium->addRadio(this);
         if (medium->getCommunicationCache()->getNumTransmissions() == 0 && isListeningPossible())
             throw cRuntimeError("Receiver is busy without any ongoing transmission, probably energy detection level is too low or background noise level is too high");
         initializeRadioMode();
