@@ -10,12 +10,19 @@ list of what to do next.
 
 The tooling quirks that apply to every protocol are in
 [`ipv4/notes.md`](../ipv4/notes.md#tooling-quirks). What follows is what Neighbor Discovery
-added, in one pass: level 2 on 2026-09-24, over RFC 4861, RFC 4862, RFC 5942 and RFC 6980. The
-gaps themselves are in [`results.md`](results.md#the-model-gaps).
+added, in one pass: level 2 on 2026-09-24, over RFC 4861, RFC 4862, RFC 5942 and RFC 6980, and
+the repairs of the eleven gaps on 2026-09-25. The gaps themselves are in
+[`results.md`](results.md#the-model-gaps).
 
 ## Model quirks
 
 ### The host stores what the router advertises, and uses little of it
+
+**Fixed on** 2026-09-25 (gaps 1, 3 and 4): a datagram takes the CurHopLimit of its outgoing
+interface, which `fragmentPostRouting` writes after routing; fragmentation uses a smaller
+LinkMTU; address resolution, the probes and Duplicate Address Detection wait the RetransTimer,
+a time that an advertisement sets from milliseconds. What follows describes the model before
+the repair.
 
 A host copies Cur Hop Limit, the MTU option and Retrans Timer out of each advertisement, and
 then sends with other values:
@@ -39,6 +46,11 @@ look at what the host does next.
 
 ### The router variables have wrong defaults, and two of them have no parameter
 
+**Fixed on** 2026-09-25 for three defaults (gaps 2 and 4): AdvCurHopLimit 64, AdvLinkMTU 0 with
+no MTU option, AdvRetransTimer 0. AdvReachableTime still defaults to 3600 in a field of
+milliseconds, and a host still reads that field as seconds; AdvReachableTime and
+AdvRetransTimer still have no parameter. What follows describes the model before the repair.
+
 `Ipv6RoutingTable` gives `advCurHopLimit = default(30)` and `advLinkMtu = default(1280)`
 ([Ipv6RoutingTable.ned:101-102](../../../../../src/inet/networklayer/ipv6/Ipv6RoutingTable.ned#L101)),
 where RFC 4861 gives 64 and zero (gap 2). AdvReachableTime and AdvRetransTimer default to 3600
@@ -49,6 +61,13 @@ Gaps 2 and 3 hide each other: after a repair of gap 3 alone, every host would se
 octets.
 
 ### The advertisement timer of the router has one time for two jobs
+
+**Fixed on** 2026-09-25 (gaps 5 and 6): an answer sets the time of the next advertisement again,
+a multicast answer restarts the timer, and the timers before the first three advertisements
+are at most 16 s. The capped interval is exactly 16 s, so the timer now starts at the random
+boot time of the router: with all routers at t = 0, twenty GPSR routers sent at the same
+instant, and the radio medium stopped the run. What follows describes the model before the
+repair.
 
 `processRsPacket` answers a solicitation only when the answer comes before
 `nextScheduledRATime`
@@ -64,6 +83,11 @@ that comes up late no advertisement for up to ten minutes.
 
 ### A host drops every advertisement while it tests an address
 
+**Fixed on** 2026-09-25 (gap 7): the Default Router List and the parameters of the link follow
+every valid advertisement; the prefixes of an advertisement during a detection still wait,
+because a new address would start a second detection. What follows describes the model before
+the repair.
+
 `processRaPacket` drops an advertisement during Duplicate Address Detection
 ([Ipv6NeighbourDiscovery.cc:1380](../../../../../src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc#L1380)),
 next to the TODO "improve this procedure in order to allow reinitiating DAD". The advertisement
@@ -77,12 +101,22 @@ for; a trace showed it, and no check observes it yet.
 
 ### The Redirect is the fixed part only
 
+**Fixed on** 2026-09-25 (gap 8): the Redirect carries the Target Link-Layer Address option when
+the router knows the target, and the new `Ipv6NdRedirectedHeader` option with as much of the
+invoking packet as fits into 1280 octets. A router builds the Redirect before it resolves the
+next hop, so the first Redirect to an unresolved target has no Target Link-Layer Address
+option, which the text allows. What follows describes the model before the repair.
+
 `sendRedirect` sets a length of 40 octets and adds no option
 ([Ipv6NeighbourDiscovery.cc:2379](../../../../../src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc#L2379)),
 and the model has no class for the Redirected Header option (gap 8). A host of the model follows
 the Redirect anyway. A repair needs the option class and a case in the serializer first.
 
 ### The solicited-node groups are a match, not a membership
+
+**Fixed on** 2026-09-25 (gap 9): an interface joins the solicited-node group of each unicast
+address, one membership for all addresses of the group, because the join and leave signals
+drive MLDv1 on every call. What follows describes the model before the repair.
 
 A node accepts a packet to a solicited-node address because the address matches one of its own
 ([Ipv6InterfaceData.cc:375](../../../../../src/inet/networklayer/ipv6/Ipv6InterfaceData.cc#L375)),
@@ -91,6 +125,10 @@ from the other side. A switch that snoops MLD would drop every solicitation of a
 resolution and of Duplicate Address Detection.
 
 ### The addresses of the configurator are never tested, and an expired address stays
+
+**Fixed on** 2026-09-25 (gaps 10 and 11): the configurator assigns a tentative address, Neighbor
+Discovery tests every tentative address when the node has booted, and a timer removes an address
+when its valid lifetime ends. What follows describes the model before the repair.
 
 The configurator assigns its addresses as not tentative
 ([Ipv6NetworkConfigurator.cc:172](../../../../../src/inet/networklayer/configurator/ipv6/Ipv6NetworkConfigurator.cc#L172)),
@@ -136,6 +174,24 @@ With all nodes up at once, host A dropped the advertisement of R1, because the o
 started the test of an address, and the Redirect checks never reached their stimulus. The
 Redirect checks now start R2 and host C at 5 s. `Rfc4861RouterLifetimeZero` keeps the start at
 the same instant and fails on gap 7: one check shows the gap, the others reach their own rules.
+
+The order of the two answers was random, and the repair of gap 6 changed the draws, so the test
+passed with gap 7 still in the code. A delay of 250 ms on the link of R1 now makes the order
+structural: the answer of R1 always comes after the answer of R2, and during the detection that
+it starts.
+
+### A repair moves the random draws, and a deadline at the exact bound fails
+
+- A repair that draws more random numbers changes every later draw. Gap 6 changed the order of
+  two answers in `Rfc4861RouterLifetimeZero`, and gap 9 swapped the roles of the two hosts of the
+  MLDv1 module tests, which pin a seed for that; they now pin seed 0. After such a repair, look
+  at each test whose premise is an order of random events.
+- The deadline of a step fires before an event of the same instant. A capped advertising
+  interval is exactly 16 s, and `within(16.0)` failed on it; the check says "at most 16 s", so
+  the test now waits 17 s and asserts the bound.
+- A check whose premise the model does not set up fails for the wrong reason: the Redirect test
+  assumed that R1 knows R2, but a router builds the Redirect before it resolves the next hop. The
+  test now makes R1 ping R2 first.
 
 ### A router variable that the model cannot set
 
@@ -197,27 +253,17 @@ the closing list. The `README.md` there lists them all.
 
 ## Follow-ups, in the order I would do them
 
-1. **The advertisements of the router, and the host during address tests** (gaps 5, 6 and 7):
-   move `nextScheduledRATime` forward with each answer, cap the first periodic advertisement,
-   and keep the advertisements that come during Duplicate Address Detection. Together they leave
-   hosts without a default router. Then run `Rfc4861RouterLifetimeZero`, `Rfc4861RaSolicited`
-   and `Rfc4861RaUnsolicited` again: RFC4861-RA-17, ADV-19 and the intervals of ADV-22 and
-   ADV-36 get their first verdicts.
-2. **Use what the router advertises** (gaps 1, 3 and 4): the stored CurHopLimit when a packet
-   leaves, the stored LinkMTU for fragmentation, and the advertised Retrans Timer for address
-   resolution, in milliseconds, also in Duplicate Address Detection.
-3. **The router defaults** (gap 2) in the same change as gap 3: 64 and zero. Give
-   AdvReachableTime and AdvRetransTimer a parameter with a default of zero, and remove
-   `NdRouterVariables` from the tests.
-4. **Check the expiry of an address when it is used** (gap 11), at the FIXME of
-   `getPreferredAddress`.
-5. **Join the solicited-node groups** (gap 9) in the interface data. MLD then reports them without
-   a change of its own, and MLD gap 5 closes with it.
-6. **The options of the Redirect** (gap 8): a class for the Redirected Header option, its case in
-   the serializer, then both options in `sendRedirect`.
-7. **Test the addresses of the configurator** (gap 10): assign them tentative, so that Duplicate
-   Address Detection runs.
-8. **Level 3 and the 88 owed statements**: the validation of every received message, the
+The eleven gaps are repaired, on `topic/standards-tests-nd-level2-fixes`; the follow-ups that
+repaired them are gone from this list.
+
+1. **The Reachable Time in milliseconds**, the same repair as gap 4: a host sets BaseReachableTime
+   from the field in milliseconds, and AdvReachableTime defaults to zero. Give AdvReachableTime
+   and AdvRetransTimer a parameter (RFC4861-RCFG-1), and remove `NdRouterVariables` from the
+   tests.
+2. **The Source Link-Layer Address option of a host that comes up late** (RFC4861-RS-12): a
+   trace of `Rfc4861RaSolicited` showed a solicitation of host B without it; write the check
+   first.
+3. **Level 3 and the 88 owed statements**: the validation of every received message, the
    receiver halves of the Reserved fields and of the options, and the fragmented ND messages of
    RFC 6980. See [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes), and
    the closing list of
