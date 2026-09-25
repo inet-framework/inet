@@ -286,7 +286,7 @@ const IReception *RadioMedium::computeReception(const IRadio *radio, const ITran
     return analogModel->computeReception(radio, transmission, getArrival(radio, transmission));
 }
 
-const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening) const
+const IInterference *RadioMedium::computeInterference(const IListening *listening) const
 {
     interferenceComputationCount++;
     const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : nullptr;
@@ -326,7 +326,7 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
 const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *radio, const IListening *listening) const
 {
     listeningDecisionComputationCount++;
-    const IInterference *interference = computeInterference(radio, listening);
+    const IInterference *interference = computeInterference(listening);
     const IListeningDecision *decision = radio->getReceiver()->computeListeningDecision(listening, interference);
     delete interference;
     return decision;

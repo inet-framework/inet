@@ -45,6 +45,23 @@ Notable backward incompatible changes are the following:
    This change requires the modification of C++ code that implements
    IPropagation, calls computeArrival(), or constructs Arrival objects.
 
+3. Interference for a listening of the caller's making
+
+   IRadioMedium gained computeInterference(listening), formerly a protected
+   member of RadioMedium that also took a receiver radio and ignored it in
+   favor of the listening's: the background noise plus the receptions, at
+   the listening's receiver radio, of the transmissions on the medium that
+   overlap the listening, for a listening that need not belong to any
+   transmission. The result is not cached, but the receptions in it come
+   from the medium's reception cache: the ones not computed yet are computed
+   at the call, and draw their random numbers, if any, then. Together with
+   the propagation, the receiver's createListening() and the analog model,
+   it lets a radio compute a hypothetical SNIR (e.g. for link-quality
+   estimation) from public API.
+
+   This change requires the modification of C++ code that implements
+   IRadioMedium without deriving from RadioMedium.
+
 Notable backward compatible changes are the following:
 
 1. Correlated log-normal shadowing
