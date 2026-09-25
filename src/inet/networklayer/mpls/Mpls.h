@@ -59,6 +59,7 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual bool tryLabelAndForwardIpv4Datagram(Packet *ipdatagram, bool fromLink = false);
     virtual void labelAndForwardIpv4Datagram(Packet *ipdatagram);
 
+    virtual void sendToLink(Packet *packet, const NetworkInterface *networkInterface);
     virtual void sendToL2(Packet *msg);
     virtual void sendToL3(Packet *msg);
 

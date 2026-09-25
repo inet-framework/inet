@@ -11,9 +11,11 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
@@ -128,10 +130,7 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet, bool fromLink)
     else
         packet->addPar("color") = color;
 
-    packet->trim();
-    packet->removeTagIfPresent<DispatchProtocolReq>();
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    sendToL2(packet);
+    sendToLink(packet, ift->getInterfaceById(outInterfaceId));
 
     return true;
 }
@@ -256,9 +255,8 @@ void Mpls::processPacketFromL2(Packet *packet)
         }
     }
     else {
-        throw cRuntimeError("Unknown message received");
-        // FIXME remove throw above
-        // sendToL3(packet);
+        // a packet of another protocol, for example ARP on an Ethernet link, is not for MPLS
+        sendToL3(packet);
     }
 }
 
@@ -323,10 +321,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         }
 
 //        ASSERT(labelIf[outgoingPort]);
-        packet->removeTagIfPresent<DispatchProtocolReq>();
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-        packet->trim();
-        sendToL2(packet);
+        sendToLink(packet, outgoingInterface);
     }
     else {
         // last label popped, decapsulate and send out Ipv4 datagram
@@ -335,15 +330,28 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::ipv4.getId());
 
         if (outgoingInterface) {
-            packet->trim();
-            packet->removeTagIfPresent<DispatchProtocolReq>();
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-            sendToL2(packet);
+            sendToLink(packet, outgoingInterface);
         }
         else {
             sendToL3(packet);
         }
     }
+}
+
+void Mpls::sendToLink(Packet *packet, const NetworkInterface *networkInterface)
+{
+    packet->trim();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+    if (networkInterface->isBroadcast() && !networkInterface->getMacAddress().isUnspecified() && packet->findTag<MacAddressReq>() == nullptr)
+        // a LIB entry holds no next hop, so a frame on a broadcast link goes to the broadcast
+        // address; on a point-to-point Ethernet link that is the one neighbor
+        packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+    // the link layer protocol of the interface encapsulates the packet, as for an IPv4 datagram
+    if (auto networkInterfaceProtocol = networkInterface->getProtocol())
+        ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
+    setDispatchProtocol(packet);
+    sendToL2(packet);
 }
 
 void Mpls::sendToL2(Packet *msg)

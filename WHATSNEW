@@ -307,6 +307,15 @@ Notable backward incompatible changes are the following:
    An LSR now discards a labeled packet whose outgoing TTL is zero, with a
    packetDropped signal; before, no LSR looked at the TTL.
 
+18. MPLS works on Ethernet links
+
+   An MPLS router with an Ethernet interface stopped the simulation at the
+   first ARP packet, because the MPLS module threw on every protocol other
+   than MPLS and IPv4. Such a packet now goes to the network layer. A labeled
+   packet now also goes through the Ethernet encapsulation, with the ethertype
+   8847 hex. A LIB entry holds no next hop, so the frame goes to the broadcast
+   address of the link; on a point-to-point link that is the one neighbor.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
