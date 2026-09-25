@@ -9,12 +9,6 @@ doc/project/evidence/protocol/igmp/checks/message-format.md#membership-query-enc
 the program steps below map onto its expected observations. Step 1 is observations 1 to 4, then
 6, and last 5: the QRV and QQIC come last.
 
-Defect: the QRV and the QQIC of every Query are 0. Igmpv3::sendGeneralQuery sets the Max Resp
-Code and nothing else (src/inet/networklayer/ipv4/Igmpv3.cc:1339-1346), and the Group-Specific
-Queries are built the same way. Observations 1 to 4 and 6 hold; observation 5 fails with QRV 0
-and QQIC 0. This test FAILS, and the failure is deliberately NOT declared expected: the model
-has the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"

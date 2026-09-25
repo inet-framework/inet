@@ -8,12 +8,6 @@ doc/project/evidence/protocol/igmp/checks/message-format.md#timer-relations-in-t
 the program steps below map onto its expected observations. Step 1 is observations 1 and 2.
 Observation 3 is in Rfc9776QueryTimerRelations.test.
 
-Defect: the QRV of every Query is 0, the value that means a Robustness Variable above 7
-(RFC9776-QRY-13); the Robustness Variable of R is 2. Igmpv3::sendGeneralQuery does not set the
-field (src/inet/networklayer/ipv4/Igmpv3.cc:1339-1346). This test FAILS, and the failure is
-deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
-wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"
