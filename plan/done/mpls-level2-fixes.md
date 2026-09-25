@@ -1,6 +1,7 @@
 # MPLS level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-mpls-level2-fixes`, on top of
+**Status:** done on 2026-09-25: six gaps repaired, gap 7 has its plan; not merged, not pushed.
+Started 2026-09-25 on `topic/standards-tests-mpls-level2-fixes`, on top of
 `topic/standards-tests-mpls-level2` at `24675c3a37`. Worktree:
 `/home/levy/workspace/inet-standards-tests-mpls-level2-fixes`.
 
@@ -50,7 +51,7 @@ baselines live in the statistics repository, on a branch of the same name.
    `plan/pending/ppp-lcp-and-mplscp.md`.
 9. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
    `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
-10. [ ] Gates, then move this plan to `plan/done/`.
+10. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
