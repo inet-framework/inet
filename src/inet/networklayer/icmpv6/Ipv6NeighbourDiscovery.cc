@@ -819,6 +819,18 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
         // initiateDad() makes the address permanent directly if DAD is disabled.
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddr))
             initiateDad(linkLocalAddr, ie);
+
+        // the other tentative addresses of the interface, for example the ones that a network
+        // configurator assigned, are tested too (RFC 4862 section 5.4)
+        std::vector<Ipv6Address> tentativeAddresses;
+        auto ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
+        for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+            const Ipv6Address& address = ipv6Data->getAddress(j);
+            if (address != linkLocalAddr && ipv6Data->isTentativeAddress(address))
+                tentativeAddresses.push_back(address);
+        }
+        for (const auto& address : tentativeAddresses)
+            initiateDad(address, ie);
     }
     assignLinkLocalAddrTimer = nullptr;
     delete timerMsg;
@@ -909,7 +921,9 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     if (sendGratuitousNa)
         sendUnsolicitedNa(ie, tentativeAddr);
 
-    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
+    // another detection may still run on the interface
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(std::any_of(dadList.begin(), dadList.end(),
+            [ie](const DadEntry *entry) { return entry->interfaceId == ie->getInterfaceId(); }));
 
     if (!tentativeAddr.isLinkLocal()) {
         // DAD completed for a global address -- nothing else to do
@@ -1011,7 +1025,9 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     if (git != dadGlobalList.end())
         dadGlobalList.erase(git);
 
-    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
+    // another detection may still run on the interface
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(std::any_of(dadList.begin(), dadList.end(),
+            [ie](const DadEntry *entry) { return entry->interfaceId == ie->getInterfaceId(); }));
 
     emit(dadFailedSignal, 1);
 }

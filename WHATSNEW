@@ -364,6 +364,14 @@ Notable backward incompatible changes are the following:
    now sends Reports for its solicited-node groups, and the group lists of an
    interface hold them.
 
+   Ipv6NetworkConfigurator now assigns a global address as tentative when
+   the interface does Duplicate Address Detection (dupAddrDetectTransmits
+   above 0), and Neighbor Discovery tests it when the node has booted, as the
+   link-local address (RFC 4862 section 5.4). Before, a configured address
+   was valid at once and was never tested. The address becomes usable about
+   one to two seconds after the boot of the node; set dupAddrDetectTransmits
+   to 0 to keep the old behavior.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
