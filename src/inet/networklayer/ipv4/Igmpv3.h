@@ -118,7 +118,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         // Older Version Querier Present (RFC 3376 7.2.1): while olderVersionTimer is
         // scheduled, an older-version querier is present on this interface and the host
         // emits older-version (v1/v2) Reports/Leaves instead of v3 reports.
-        cMessage *olderVersionTimer; // fires at otherQuerierPresentInterval
+        cMessage *olderVersionTimer; // fires at the Older Version Querier Present Interval
         CompatVersion compatVersion = IGMP_COMPAT_NONE;
 
         HostInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
