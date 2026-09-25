@@ -1125,7 +1125,14 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing IGMPv" << (int)version << " compatibility.\n";
         interfaceData->compatVersion = version;
-        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+        // the Older Version Querier Present Interval (RFC 9776 section 8.12): [Robustness
+        // Variable] x [Query Interval] + 10 x the Max Response Time of this Query. An IGMPv1
+        // Query has no Max Response Time, and a host reads it as 10 s (RFC 2236 section 4)
+        double maxResponseTime = 10;
+        auto v2Query = dynamicPtrCast<const Igmpv2Query>(query);
+        if (v2Query != nullptr && v2Query->getMaxRespTimeCode() != 0)
+            maxResponseTime = v2Query->getMaxRespTimeCode() / 10.0;
+        startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + 10 * maxResponseTime);
 
         // Answer the General Query in older-version style for every joined group.
         for (auto& elem : interfaceData->groups) {
