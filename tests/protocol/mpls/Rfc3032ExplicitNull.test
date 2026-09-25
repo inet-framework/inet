@@ -8,14 +8,6 @@ doc/project/evidence/protocol/mpls/checks/reserved-labels.md#the-ipv4-explicit-n
 program steps below map onto its expected observations. The guards are observation 3; steps 1 and
 2 are observations 1 and 2, on one datagram.
 
-Expected result FAIL, missing feature: the model gives the reserved label values no meaning.
-Mpls.cc has no code for a label below 16, and the LIB treats 3 as an ordinary label. The LIB
-refuses the label 0 in its configuration: LibTable::readTableFromXML asserts that the value of a
-swap is above 0 (src/inet/networklayer/mpls/LibTable.cc:142), so the run stops at initialization
-and no step gets a verdict. See results.md.
-
-%# expected-result: FAIL
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"

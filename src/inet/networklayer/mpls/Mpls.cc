@@ -208,12 +208,21 @@ void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outgoin
     for (unsigned int i = 0; i < n; i++) {
         switch (outLabel[i].optcode) {
             case PUSH_OPER: {
+                // RFC 3032 section 2.1: the Implicit NULL label never appears in the encapsulation
+                if ((uint32_t)outLabel[i].label == mpls_constants::IMPLICIT_NULL_LABEL)
+                    break;
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
                 pushLabel(packet, mplsHeader);
                 break;
             }
             case SWAP_OPER: {
+                // RFC 3032 section 2.1: an LSR that would replace the top label with the Implicit
+                // NULL label pops the stack instead
+                if ((uint32_t)outLabel[i].label == mpls_constants::IMPLICIT_NULL_LABEL) {
+                    popLabel(packet);
+                    break;
+                }
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
                 swapLabel(packet, mplsHeader);
@@ -275,6 +284,20 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         EV_INFO << ": decapsulating and sending up\n";
         packet->popAtFront<MplsHeader>();
         packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        sendToL3(packet);
+        return;
+    }
+
+    if (mplsHeader->getLabel() == mpls_constants::IPV4_EXPLICIT_NULL_LABEL && mplsHeader->getS()) {
+        // RFC 3032 section 2.1: the IPv4 Explicit NULL label at the bottom of the stack is
+        // popped, with no binding, and the IPv4 header decides the forwarding. The IP header
+        // gets the TTL of the label, and IPv4 decrements it (RFC 3443 section 3.5).
+        int ttl = mplsHeader->getTtl();
+        popLabel(packet);
+        setIpv4Ttl(packet, ttl);
+        auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
+        dispatchProtocolReq->setProtocol(&Protocol::ipv4);
+        dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
         sendToL3(packet);
         return;
     }

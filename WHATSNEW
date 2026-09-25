@@ -316,6 +316,15 @@ Notable backward incompatible changes are the following:
    8847 hex. A LIB entry holds no next hop, so the frame goes to the broadcast
    address of the link; on a point-to-point link that is the one neighbor.
 
+19. MPLS knows the IPv4 Explicit NULL and the Implicit NULL labels
+
+   An LSR now pops the label 0 at the bottom of the stack with no binding and
+   forwards the datagram by its IPv4 header, and pops the stack where a swap
+   would give the label 3, as RFC 3032 section 2.1 states. The LIB accepts
+   these values as outgoing labels; before, a debug build refused the label 0,
+   and the label 3 went onto the wire. The LIB now allocates labels from 16,
+   after the reserved values; before, RSVP-TE and LDP got labels from 1.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
