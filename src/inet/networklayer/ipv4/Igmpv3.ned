@@ -61,13 +61,14 @@ simple Igmpv3 extends SimpleModule like IIgmp
         int    robustnessVariable = default(2);  // loss tolerance; only supplies the defaults of the params marked (RV) below
         double queryInterval @unit(s) = default(125s);  // querier: interval between periodic General Queries
         double queryResponseInterval @unit(s) = default(10s);  // querier: max delay a host may wait before answering a General Query
-        double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a group stays active without a new Report (RV)
+        double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + 2 * queryResponseInterval);  // querier: how long a group stays active without a new Report (RV); RFC 9776 section 8.4
         double otherQuerierPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));  // querier: wait this long for another querier before taking over (RV)
+        double olderHostPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a group stays in the compatibility mode of an older host without its Report (RV); RFC 9776 section 8.13
         double startupQueryInterval @unit(s) = default(queryInterval / 4);  // querier: interval between the initial General Queries at startup
         int    startupQueryCount = default(robustnessVariable);  // querier: number of General Queries sent at startup (RV)
         double lastMemberQueryInterval @unit(s) = default(1s);  // querier: interval between Group-/Group-and-Source-Specific Queries after a leave
         int    lastMemberQueryCount = default(robustnessVariable);  // querier: number of such Queries sent after a leave (RV)
-        double unsolicitedReportInterval @unit(s) = default(10s);  // host: delay between repeated State-Change Reports
+        double unsolicitedReportInterval @unit(s) = default(1s);  // host: delay between repeated State-Change Reports; RFC 9776 section 8.11
         //double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::IgmpTimerKind);
