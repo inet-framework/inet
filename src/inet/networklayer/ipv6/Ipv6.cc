@@ -36,6 +36,9 @@
 #include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 
+#ifdef INET_WITH_MIPV6
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#endif
 
 namespace inet {
 
@@ -1010,6 +1013,43 @@ void Ipv6::encapsulate(Packet *transportPacket)
     // setting IP options is currently not supported
 }
 
+// Computes the checksum of an ICMPv6 message in CHECKSUM_COMPUTED mode. The checksum covers the
+// pseudo-header (RFC 4443 section 2.3), so it waits until the source address is final. With a
+// Routing header, the pseudo-header holds the final destination (RFC 8200 section 8.1): the
+// last address of the header, which is the first one of a Segment Routing Header (RFC 8754).
+// With a Home Address option, it holds the home address as the source (RFC 6275 section 11.3.1).
+static void insertIcmpv6Checksum(Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    Ipv6Address srcAddress = ipv6Header->getSrcAddress();
+    Ipv6Address destAddress = ipv6Header->getDestAddress();
+    b offset = ipv6Header->getChunkLength();
+    IpProtocolId nextHeader = ipv6Header->getProtocolId();
+    while (isIpv6ExtensionHeader(nextHeader)) {
+        auto extensionHeader = peekIpv6ExtensionHeaderAt(packet, offset, nextHeader);
+        auto routingHeader = dynamicPtrCast<const Ipv6RoutingHeader>(extensionHeader);
+        if (routingHeader != nullptr && routingHeader->getSegmentsLeft() > 0 && routingHeader->getAddressArraySize() > 0)
+            destAddress = routingHeader->getAddress(routingHeader->getRoutingType() == 4 ? 0 : routingHeader->getAddressArraySize() - 1);
+#ifdef INET_WITH_MIPV6
+        if (auto destinationOptionsHeader = dynamicPtrCast<const Ipv6DestinationOptionsHeader>(extensionHeader)) {
+            const TlvOptions& options = destinationOptionsHeader->getTlvOptions();
+            int k = options.findByType(IPv6TLVOPTION_HOME_ADDRESS);
+            if (k != -1)
+                srcAddress = check_and_cast<const HomeAddressOption *>(options.getTlvOption(k))->getHomeAddress();
+        }
+#endif
+        offset += extensionHeader->getChunkLength();
+        nextHeader = extensionHeader->getNextHeaderProtocol();
+    }
+    if (nextHeader != IP_PROT_IPv6_ICMP || packet->peekDataAt<Icmpv6Header>(offset)->getChecksumMode() != CHECKSUM_COMPUTED)
+        return;
+    auto headers = packet->removeAtFront(offset);
+    auto icmpHeader = packet->removeAtFront<Icmpv6Header>();
+    Icmpv6::insertComputedChecksum(srcAddress, destAddress, icmpHeader, packet);
+    packet->insertAtFront(icmpHeader);
+    packet->insertAtFront(headers);
+}
+
 void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL)
 {
 //    const NetworkInterface *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -1041,6 +1081,8 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
             return;
         }
     }
+    if (fromHL)
+        insertIcmpv6Checksum(packet);
     // Reduce the (already resolved) egress decision to packet tags so that the
     // POST_ROUTING continuation -- fragmentAndSend(), possibly reached via a hook's
     // QUEUE/reinject -- can recover it from the packet alone (cf. IPv4). MAC resolution

@@ -326,6 +326,15 @@ Notable backward incompatible changes are the following:
    delivered every ICMPv6 multicast datagram locally, to receive the MLD
    messages.
 
+   In the "computed" checksum mode, the checksum of every ICMPv6 message now
+   covers the pseudo-header of the IPv6 datagram (RFC 4443 section 2.3): MLD,
+   Neighbor Discovery, Echo and the error messages. The Ipv6 module computes it
+   when the source address is final, with the new
+   Icmpv6::insertComputedChecksum(), and Icmpv6 checks it with the addresses of
+   the datagram. Before, the checksum covered the message only, so a real node
+   or a capture tool rejected every message. The "declared" mode, the default,
+   does not change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
