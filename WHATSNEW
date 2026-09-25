@@ -405,6 +405,12 @@ Notable backward incompatible changes are the following:
    timers in the same way (RFC 9777 section 8.2.1), and deletes the Reports of
    the old mode that wait for the link-local address of the interface.
 
+   An Igmpv3 host now leaves out of its answers to Queries a group that it has
+   left, and sends no record with an empty set of sources (RFC 9776 section
+   5.2). Before, it answered every General Query with a MODE_IS_INCLUDE record
+   with no sources for each group that it had left, and a source-specific Query
+   for sources that it did not want with such a record too.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

@@ -577,15 +577,17 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
     unsigned int byteLength = 8; // Igmpv3Report header size
     report->setType(IGMPV3_MEMBERSHIP_REPORT);
     int counter = 0;
-    report->setGroupRecordArraySize(interfaceData->groups.size());
 
     // FIXME Do not create reports larger than MTU of the interface
     //
 
     /*
-     * creating GroupRecord for each group on interface
+     * creating GroupRecord for each group on interface that has reception state: an entry in
+     * INCLUDE mode with no sources is a group that the host has left (RFC 9776 section 5.2)
      */
     for (auto& elem : interfaceData->groups) {
+        if (elem.second->filter == IGMPV3_FM_INCLUDE && elem.second->sourceAddressList.empty())
+            continue;
         GroupRecord gr;
         if (elem.second->filter == IGMPV3_FM_INCLUDE) {
             gr.setRecordType(IGMPV3_RT_IS_IN);
@@ -595,7 +597,8 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
         }
         gr.setGroupAddress(elem.second->groupAddr);
         gr.setSourceList(elem.second->sourceAddressList);
-        report->setGroupRecord(counter++, gr);
+        report->appendGroupRecord(gr);
+        counter++;
         byteLength += 8 + gr.getSourceList().size() * 4; // 8 byte header + n * 4 byte (Ipv4Address)
     }
     report->setChunkLength(B(byteLength));
@@ -623,13 +626,15 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
 
     // checking if query is group or group-and-source specific
     if (group->queriedSources.empty()) {
-        // Send report for a Group-Specific Query
+        // Send report for a Group-Specific Query, if and only if the interface has reception
+        // state for the group (RFC 9776 section 5.2)
         EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
         records[0].setGroupAddress(group->groupAddr);
         records[0].setRecordType(group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX);
         records[0].setSourceList(group->sourceAddressList);
-        sendGroupReport(ie, records);
+        if (group->filter == IGMPV3_FM_EXCLUDE || !group->sourceAddressList.empty())
+            sendGroupReport(ie, records);
     }
     else {
         // Send report for a Group-and-Source-Specific Query
@@ -639,7 +644,9 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
         records[0].setRecordType(IGMPV3_RT_IS_IN);
         records[0].setSourceList(group->filter == IGMPV3_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
             set_complement(group->queriedSources, group->sourceAddressList));
-        sendGroupReport(ie, records);
+        // a Current-State Record with no sources is not sent (RFC 9776 section 5.2)
+        if (!records[0].getSourceList().empty())
+            sendGroupReport(ie, records);
     }
 
     group->queriedSources.clear();
