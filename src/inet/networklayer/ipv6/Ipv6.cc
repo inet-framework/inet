@@ -746,8 +746,9 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
         Ipv6MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
         const NetworkInterface *outIE = outInterface->getInterface();
         if (outIE != fromIE) {
-            // TRPB: on a leaf interface, forward only if there are group listeners
-            if (outInterface->isLeaf() && !outIE->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(destAddr))
+            // TRPB: on a leaf interface, forward only if there is a listener of the source
+            // (RFC 9777 section 7.3)
+            if (outInterface->isLeaf() && !outIE->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(destAddr, srcAddr))
                 EV_DETAIL << "Not forwarding to " << outIE->getInterfaceName() << " (leaf interface with no listeners)\n";
             else {
                 EV_DETAIL << "Forwarding to " << outIE->getInterfaceName() << "\n";
