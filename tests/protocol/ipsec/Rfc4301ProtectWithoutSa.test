@@ -8,10 +8,6 @@ doc/project/evidence/protocol/ipsec/checks/security-associations.md#a-protect-en
 the program steps below map onto its expected observations. The guards are observations 2 and 3;
 step 1 is observation 1.
 
-Model gap: IPsec::protectDatagram applies every SA of the PROTECT entry that matches the packet,
-and with no SA it passes the packet on without protection
-(src/inet/networklayer/ipsec/IPsec.cc:732-778). Flow 2000 leaves A in clear.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
