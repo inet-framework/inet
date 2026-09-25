@@ -1473,8 +1473,8 @@ void Igmpv3::sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
-    // TODO set Type of Service to 0xc0
-//    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
+    // the precedence of Internetwork Control, Type of Service 0xc0 (RFC 9776 section 4)
+    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
