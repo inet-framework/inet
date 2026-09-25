@@ -414,6 +414,13 @@ Notable backward incompatible changes are the following:
    An Mldv2 node leaves such records out in the same way (RFC 9777 section
    6.3).
 
+   The S flag (Suppress Router-Side Processing) of a Group-Specific Query of
+   Igmpv3 now comes from the group timer after it is lowered to the Last Member
+   Query Time (RFC 9776 section 6.6.3.1), for the first Query and for each
+   retransmission. Before, the first Query took the flag from the timer before
+   it was lowered, so the flag was set after the leave of the only member, and
+   every retransmission had the flag set.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

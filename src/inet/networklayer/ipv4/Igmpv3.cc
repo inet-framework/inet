@@ -540,9 +540,9 @@ void Igmpv3::processRexmtTimer(cMessage *msg)
             query->setChunkLength(B(12 + (4 * sourcesToQuery.size())));
         }
         else {
-            // suppressRouterProc is set on retransmissions: receivers' reports keep the
-            // group/source timers up, but the querier already lowered its own timers.
-            query->setSuppressRouterProc(true);
+            // the S flag is set when the group timer is larger than LMQT, which a Report since
+            // the first Query makes it (RFC 9776 section 6.6.3.1)
+            query->setSuppressRouterProc(groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime);
             query->setChunkLength(B(12));
         }
         insertChecksum(query, packet);
@@ -1459,10 +1459,11 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
 void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
 {
     RouterInterfaceData *interfaceData = groupData->parent;
-    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    // Set group timer to LMQT
+    // Set group timer to LMQT, then set the S flag if the group timer is larger than LMQT
+    // (RFC 9776 section 6.6.3.1)
     startTimer(groupData->timer, lastMemberQueryTime);
+    bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
     if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("Igmpv3 query");
