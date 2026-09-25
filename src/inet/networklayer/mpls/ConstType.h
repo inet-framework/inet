@@ -30,6 +30,12 @@ const char empty[] = "";
 
 const int ldp_port = 646;
 
+// the reserved label values of RFC 3032 section 2.1
+const uint32_t IPV4_EXPLICIT_NULL_LABEL = 0;
+const uint32_t ROUTER_ALERT_LABEL = 1;
+const uint32_t IPV6_EXPLICIT_NULL_LABEL = 2;
+const uint32_t IMPLICIT_NULL_LABEL = 3;
+
 const int LDP_KIND = 10;
 const int HOW_KIND = 50;
 

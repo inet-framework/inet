@@ -20,7 +20,8 @@ void LibTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        maxLabel = 0;
+        // RFC 3032 section 2.1 reserves the values 0 to 15, so the first label to allocate is 16
+        maxLabel = 15;
         WATCH(maxLabel);
         WATCH(lib);
         WATCH_EXPR("numLabels", lib.size());
@@ -129,7 +130,7 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
                 l.optcode = PUSH_OPER;
                 ASSERT(val);
                 l.label = atoi(val);
-                ASSERT(l.label > 0);
+                ASSERT(l.label >= 0); // a reserved value of RFC 3032 section 2.1 is a legal outgoing label
             }
             else if (!strcmp(code, "pop")) {
                 l.optcode = POP_OPER;
@@ -139,7 +140,7 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
                 l.optcode = SWAP_OPER;
                 ASSERT(val);
                 l.label = atoi(val);
-                ASSERT(l.label > 0);
+                ASSERT(l.label >= 0); // a reserved value of RFC 3032 section 2.1 is a legal outgoing label
             }
             else
                 ASSERT(false);

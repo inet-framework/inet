@@ -8,13 +8,6 @@ doc/project/evidence/protocol/mpls/checks/reserved-labels.md#the-implicit-null-l
 steps below map onto its expected observations. The guards are observations 2 and 4; step 1 is
 observation 1, and step 2 observation 3.
 
-Expected result FAIL, missing feature: the model gives the reserved label values no meaning.
-Mpls.cc has no code for a label below 16, and the LIB treats 3 as an ordinary label. R2 puts the
-label 3 on L3 as an ordinary label, and R3, which has no binding for it, discards the datagram
-(Mpls.cc:240-246). See results.md.
-
-%# expected-result: FAIL
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"
