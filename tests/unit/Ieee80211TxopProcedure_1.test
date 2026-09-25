@@ -79,7 +79,6 @@ auto getRemainingThrows = [txop]() {
         return true;
     }
 };
-
 ASSERT(getRemainingThrows());
 
 auto checkDefaultLimits = [txop](const char *modeSetName, simtime_t viLimit, simtime_t voLimit) {
@@ -117,16 +116,12 @@ checkDefaultLimits("ac", SimTime(3008, SIMTIME_US), SimTime(1504, SIMTIME_US));
 txop->setTxopLimit(SimTime(10, SIMTIME_MS));
 txop->startTxop(AC_VI);
 ASSERT(txop->getRemaining() == SimTime(10, SIMTIME_MS));
-
 wait(0.003);
 ASSERT(txop->getRemaining() == SimTime(7, SIMTIME_MS));
-
 wait(0.007);
 ASSERT(txop->getRemaining() == SIMTIME_ZERO);
-
 wait(0.001);
 ASSERT(txop->getRemaining() == SIMTIME_ZERO);
-
 txop->endTxop();
 ASSERT(getRemainingThrows());
 

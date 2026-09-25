@@ -104,4 +104,3 @@ simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, co
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

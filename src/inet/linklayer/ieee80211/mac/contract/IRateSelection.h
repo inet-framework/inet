@@ -39,4 +39,3 @@ class INET_API IRateSelection
 } // namespace inet
 
 #endif
-

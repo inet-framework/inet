@@ -62,4 +62,3 @@ class INET_API Ieee80211ErpOfdmCompliantModes
 } /* namespace inet */
 
 #endif
-

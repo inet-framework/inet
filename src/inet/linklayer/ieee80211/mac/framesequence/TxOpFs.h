@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_TXOPFS_H
 #define __INET_TXOPFS_H
 
@@ -26,9 +25,6 @@ class INET_API TxOpFs : public AlternativesFs
     virtual bool isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
     virtual int selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceContext *context);
 };
-
 } // namespace ieee80211
 } // namespace inet
-
 #endif
-

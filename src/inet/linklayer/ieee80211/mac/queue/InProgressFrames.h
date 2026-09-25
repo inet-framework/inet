@@ -59,4 +59,3 @@ class INET_API InProgressFrames : public SimpleModule
 } /* namespace inet */
 
 #endif
-

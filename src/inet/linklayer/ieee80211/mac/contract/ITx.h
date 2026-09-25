@@ -40,4 +40,3 @@ class INET_API ITx
 } // namespace inet
 
 #endif
-

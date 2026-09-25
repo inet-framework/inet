@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -13,7 +12,6 @@
 
 namespace inet {
 namespace ieee80211 {
-
 Define_Module(SingleProtectionMechanism);
 
 void SingleProtectionMechanism::initialize(int stage)

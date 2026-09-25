@@ -27,4 +27,3 @@ simple TxopProcedure extends SimpleModule
         @statistic[txopDuration](title="txop duration"; source=txopDuration(txopEnded); record=histogram,vector?; interpolationmode=none);
         @statistic[txopActive](title="txop active"; source=warmup(count(txopStarted)-count(txopEnded)); record=vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 }
-

@@ -44,4 +44,3 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
 } /* namespace inet */
 
 #endif
-

@@ -124,4 +124,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-
