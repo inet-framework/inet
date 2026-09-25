@@ -308,6 +308,10 @@ Notable backward incompatible changes are the following:
    The payload of AH is no longer an EncryptedChunk, because AH does not
    encrypt, and the AH dissector reads the new layout.
 
+   The padding of an ESP packet now holds the octets 1, 2, 3 and so on, as
+   RFC 4303 section 2.4 states; before, every octet held the default 63 of a
+   ByteCountChunk.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

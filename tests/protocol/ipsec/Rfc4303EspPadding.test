@@ -8,10 +8,6 @@ doc/project/evidence/protocol/ipsec/checks/esp.md#esp-padding; the program steps
 its expected observations. The guards are observation 2; step 1 is observation 1 and 3, step 2
 observations 4 and 5.
 
-Model gap: IPsec::espProtect computes the Pad Length right, but fills the padding with a
-ByteCountChunk whose octets are all 63 (src/inet/networklayer/ipsec/IPsec.cc:535-536), where RFC
-4303 section 2.4 gives 1, 2, 3 and so on.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
