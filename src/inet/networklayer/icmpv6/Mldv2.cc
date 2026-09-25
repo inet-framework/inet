@@ -534,10 +534,12 @@ void Mldv2::processRouterGroupTimer(cMessage *msg)
 
     if (groupData->filter == MLDV2_FM_EXCLUDE) {
         bool timerRunning = false;
-        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-            if (!it->second->sourceTimer->isScheduled()) {
-                EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                groupData->deleteSourceRecord(it->first);
+        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+            // deleteSourceRecord() erases the entry, so step past it first
+            auto current = it++;
+            if (!current->second->sourceTimer->isScheduled()) {
+                EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                groupData->deleteSourceRecord(current->first);
             }
             else {
                 timerRunning = true;
@@ -973,10 +975,12 @@ void Mldv2::processReport(Packet *packet)
 
                 // INCLUDE(A)   -> IS_EX(B) -> EXCLUDE(A*B,B-A): Delete (A-B)
                 // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
-                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                    if (!contains(receivedSources, it->first)) {
-                        EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                        groupData->deleteSourceRecord(it->first);
+                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+                    // deleteSourceRecord() erases the entry, so step past it first
+                    auto current = it++;
+                    if (!contains(receivedSources, current->first)) {
+                        EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                        groupData->deleteSourceRecord(current->first);
                     }
                 }
 
