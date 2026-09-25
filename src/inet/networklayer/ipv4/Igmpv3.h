@@ -329,6 +329,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void processHostOlderVersionTimer(cMessage *msg);
     virtual void processHostOlderVersionReportTimer(cMessage *msg);
     virtual void startOlderVersionReportTimer(HostGroupData *group, double maxResponseTime);
+    virtual void cancelHostTimers(HostInterfaceData *interfaceData);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);

@@ -1149,9 +1149,11 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
     // For a General Query, start/refresh the Older Version Querier Present timer.
     // (A v1/v2 group-specific Query does not change the present-version state per RFC.)
     if (groupAddr.isUnspecified()) {
-        if (interfaceData->compatVersion != version)
+        if (interfaceData->compatVersion != version) {
             EV_INFO << "Received older-version (IGMPv" << (int)version << ") General Query on interface '"
                     << ie->getInterfaceName() << "': entering IGMPv" << (int)version << " compatibility.\n";
+            cancelHostTimers(interfaceData);
+        }
         else
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing IGMPv" << (int)version << " compatibility.\n";
@@ -1370,9 +1372,24 @@ void Igmpv3::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to IGMPv3.\n";
     interfaceData->compatVersion = IGMP_COMPAT_NONE;
-    for (auto& elem : interfaceData->groups) {
-        cancelEvent(elem.second->olderVersionReportTimer);
+    cancelHostTimers(interfaceData);
+    for (auto& elem : interfaceData->groups)
         elem.second->lastReporter = false;
+}
+
+// RFC 9776 section 7.2.1: a change of the Host Compatibility Mode cancels all pending response and
+// retransmission timers of the interface.
+void Igmpv3::cancelHostTimers(HostInterfaceData *interfaceData)
+{
+    cancelEvent(interfaceData->generalQueryTimer);
+    for (auto& elem : interfaceData->groups) {
+        HostGroupData *group = elem.second;
+        cancelEvent(group->timer);
+        group->queriedSources.clear();
+        cancelEvent(group->retransmitTimer);
+        group->filterModeChangeCount = 0;
+        group->sourceChangeCounts.clear();
+        cancelEvent(group->olderVersionReportTimer);
     }
 }
 
