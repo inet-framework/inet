@@ -54,6 +54,12 @@ Define_ProtocolTestProgram()
                   .filterEvent([](const MatchContext& c) { return isUpdateWithFinite(c.event.packet, "2001:db8:1::", 64); })
                   .describe("an update of R2 on L1 that holds netA with a metric below 16")
                   .within(120.0)))
+        // Expected observation 1, second half: on L1, from R2, an update that holds netC with metric 2 --
+        // R2 has learned netC over L2, whenever R3 sent it.
+        .once(on("R2.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isUpdateWith(c.event.packet, "2001:db8:3::", 64, 2); })
+                  .describe("an update of R2 on L1 that holds netC with metric 2")
+                  .within(90.0))
         // Expected observations 2 and 3, periodic update 1 of 3: netA absent or at 16, netC at 2.
         .once(on("R2.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { return isPeriodicUpdateOfR2OnL1(c.event.packet); })
