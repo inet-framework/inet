@@ -24,9 +24,9 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
 ## Steps
 
 1. [x] **Plan** — this file.
-2. [ ] **Gap 1** — RIPng messages carry the version 1. Tests: `Rfc2080UpdateFields`,
+2. [x] **Gap 1** — RIPng messages carry the version 1. Tests: `Rfc2080UpdateFields`,
    `Rfc2080LostNetwork`.
-3. [ ] **Gap 2** — the RIPng answer to a request leaves on the interface of the request, from its
+3. [x] **Gap 2** — the RIPng answer to a request leaves on the interface of the request, from its
    link-local address. Test: `Rfc2080TableRequest`.
 4. [ ] **Gap 3** — the IPv6 routing table adds the routes of an interface again when its carrier
    returns. Test: `Rfc2080GarbageCollection`.
@@ -42,3 +42,15 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
 9. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
+- **Gap 1** (`f6b216f210`): `Rip::getMessageVersion()` gives 1 for RIPng and 2 for RIP; the four
+  `setVersion` calls use it. No fingerprint and no statistical result moves.
+- **Gap 2 made a test error visible.** With the RIPng answers delivered, `Rfc2080SplitHorizon`
+  failed: the triggered update of R3 draws a random delay, so the first periodic update of R3
+  comes after the update of R2 at 47.8 s. The check and the tests of both protocols now wait for
+  the update of R2 on L1 with netC at metric 2. This repair is its own commit (`7a273fced8`),
+  before gap 2.
+- **Gap 2** (`780e15b324`): for RIPng, `sendPacket` binds a unicast answer to the interface of the
+  request and gives it the link-local source; `processRequest` sends the answer to specific
+  entries through `sendPacket` too. One fingerprint moves: `examples/rip/simpletest -c IPv6`
+  (`tplx`, `~tNl`), because the routers get the answers to their startup requests. The 18
+  statistical results of `examples/rip` and `tutorials/rip` do not move.
