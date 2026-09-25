@@ -384,7 +384,10 @@ void Mldv1::processQuery(NetworkInterface *ie, Packet *packet)
     ASSERT(ie->isMulticast());
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    const auto& mldQry = packet->peekAtFront<MldQuery>();
+    // a node accepts every Query of 24 octets or more (RFC 2710 section 5, RFC 9777 section 8.1),
+    // so an MLDv2 Query too: its first 24 octets are the fields of an MLDv1 Query, and its
+    // Maximum Response Code stands for the Maximum Response Delay
+    const auto& mldQry = packet->peekAtFront<MldMessage>();
 
     // MLD maxRespDelay is in MILLISECONDS (uint16_t, RFC 2710 §3.4)
     // Guard against zero (would produce a negative/zero timer interval via uniform(0,0))
