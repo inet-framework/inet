@@ -378,6 +378,17 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 }
             }
             else {
+                // a static or default route that returns, for example when its interface is up again
+                RipRoute::RouteType type = isDefaultRoute(route) ? RipRoute::RIP_ROUTE_DEFAULT : RipRoute::RIP_ROUTE_STATIC;
+                RipRoute *ripRoute = findRipRoute(route->getDestinationAsGeneric(), route->getPrefixLength(), type);
+                if (ripRoute && ripRoute->getRoute() == nullptr) { // readded
+                    ripRoute->setRoute(route);
+                    ripRoute->setNextHop(route->getNextHopAsGeneric());
+                    ripRoute->setInterface(route->getInterface());
+                    ripRoute->setMetric(1);
+                    ripRoute->setChanged(true);
+                    triggerUpdate();
+                }
                 // TODO import external routes from other routing daemons
             }
         }

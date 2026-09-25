@@ -304,6 +304,12 @@ Notable backward incompatible changes are the following:
    the first interface of the router, and was lost; so trajectories of RIPng
    simulations with requests change.
 
+   When a static or default route that RIP imported returns to the routing
+   table, for example when the carrier of its interface returns, RIP now
+   takes it back and advertises it again with the metric 1. Before, RIP kept
+   the route at the metric 16. With the IPv6 routes of entry 18, a RIPng
+   router now advertises the network of a link again after the link returns.
+
 18. The IPv6 routes of the configuration return with the carrier
 
    When an interface goes down or loses its carrier, Ipv6RoutingTable now
