@@ -67,7 +67,8 @@ Notable backward compatible changes are the following:
    With a distance, the value is kept per link (transmitter radio, receiver
    radio) and drawn again only when the receiver has moved farther than that
    distance from where the link's last value was drawn, which is how
-   shadowing behaves physically.
+   shadowing behaves physically. The values of a radio's links are dropped
+   when the radio is removed from the medium.
 
 2. Radio medium purge without a timer
 

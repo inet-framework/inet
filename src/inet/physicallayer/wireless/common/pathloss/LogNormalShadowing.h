@@ -29,9 +29,10 @@ namespace physicallayer {
  * By default every path loss computation draws a new shadowing value. With a
  * correlation distance, the value is kept per link (transmitter radio,
  * receiver radio) and drawn again only when the receiver has moved farther
- * than that distance from where the link's last value was drawn.
+ * than that distance from where the link's last value was drawn. The values
+ * of a radio's links are dropped when the radio is removed from its medium.
  */
-class INET_API LogNormalShadowing : public FreeSpacePathLoss
+class INET_API LogNormalShadowing : public FreeSpacePathLoss, public cListener
 {
   protected:
     struct LinkShadowing {
@@ -47,6 +48,7 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
   protected:
     virtual void initialize(int stage) override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance, double shadowing) const;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
   public:
     LogNormalShadowing();

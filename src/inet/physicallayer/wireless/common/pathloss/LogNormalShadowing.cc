@@ -35,6 +35,11 @@ void LogNormalShadowing::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         sigma = par("sigma");
         correlationDistance = m(par("correlationDistance"));
+        // the medium emits this signal on itself; it propagates up to the
+        // network, which sees the removals of every medium (radio ids are
+        // unique, so a foreign radio's removal finds nothing to drop)
+        if (!std::isnan(correlationDistance.get()))
+            getSimulation()->getSystemModule()->subscribe(IRadioMedium::radioRemovedSignal, this);
     }
 }
 
@@ -47,6 +52,26 @@ std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level,
                << EV_FIELD(sigma)
                << EV_FIELD(correlationDistance);
     return stream;
+}
+
+void LogNormalShadowing::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+    if (signal == IRadioMedium::radioRemovedSignal) {
+        int radioId = check_and_cast<IRadio *>(object)->getId();
+        int count = 0;
+        for (auto it = linkShadowings.begin(); it != linkShadowings.end(); ) {
+            if (it->first.first == radioId || it->first.second == radioId) {
+                it = linkShadowings.erase(it);
+                count++;
+            }
+            else
+                ++it;
+        }
+        EV_DEBUG << "Removed the shadowing values of " << count << " links of radio " << radioId << EV_ENDL;
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 double LogNormalShadowing::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
