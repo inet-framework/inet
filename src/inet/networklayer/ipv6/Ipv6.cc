@@ -961,8 +961,13 @@ void Ipv6::encapsulate(Packet *transportPacket)
     if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv6Header->setEcn(ecnReq->getExplicitCongestionNotification());
 
-    ipv6Header->setHopLimit(ttl != -1 ? ttl : IPv6_DEFAULT_ADVCURHOPLIMIT);
+    // without a hop limit from the transport, the datagram takes the CurHopLimit of its outgoing
+    // interface (RFC 4861 section 6.3.2); only routing knows that interface, so a HopLimitReq
+    // with the value -1 marks the datagram for fragmentPostRouting()
+    ipv6Header->setHopLimit(ttl != -1 ? ttl : IPv6_DEFAULT_CURHOPLIMIT);
     ASSERT(ipv6Header->getHopLimit() > 0);
+    if (ttl == -1)
+        transportPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(-1);
     ipv6Header->setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol())));
 
     // #### Move extension headers from tag to packet as separate chunks
@@ -1001,6 +1006,22 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
 {
 //    const NetworkInterface *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
+    // a datagram that encapsulate() marked takes the CurHopLimit of its outgoing interface
+    if (fromHL) {
+        const auto& hopLimitReq = packet->findTag<HopLimitReq>();
+        if (hopLimitReq != nullptr && hopLimitReq->getHopLimit() == -1) {
+            packet->removeTag<HopLimitReq>();
+            auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+            short curHopLimit = ipv6Data != nullptr ? ipv6Data->getCurHopLimit() : IPv6_DEFAULT_CURHOPLIMIT;
+            if (ipv6Header->getHopLimit() != curHopLimit) {
+                ipv6Header = nullptr;
+                auto newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
+                newIpv6Header->setHopLimit(curHopLimit);
+                insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
+                ipv6Header = newIpv6Header;
+            }
+        }
+    }
     // ensure source address is filled
     if (fromHL && ipv6Header->getSrcAddress().isUnspecified() &&
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())

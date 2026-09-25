@@ -293,6 +293,16 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IPv6 Neighbor Discovery corrections
+
+   A datagram whose transport gives no hop limit now leaves with the
+   CurHopLimit of its outgoing interface (RFC 4861 section 6.3.2): 64 by
+   default, or the Cur Hop Limit of the last Router Advertisement on that
+   interface. Before, every such datagram left with the constant 30, and the
+   value of the router was stored but not used. The hop limit field of most
+   IPv6 datagrams changes, so the fingerprints that include packet data
+   change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

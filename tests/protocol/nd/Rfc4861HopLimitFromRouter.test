@@ -8,15 +8,6 @@ doc/project/evidence/protocol/nd/checks/parameters.md#hop-limit-from-the-router;
 the program steps below map onto its expected observations. Steps 1 and 2 are observations 1
 and 2.
 
-Defect: the hop limit of a host is a constant. Ipv6::encapsulate sets "ttl != -1 ? ttl :
-IPv6_DEFAULT_ADVCURHOPLIMIT" (src/inet/networklayer/ipv6/Ipv6.cc:964), so the CurHopLimit that
-the host copies from the advertisement
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1501) never reaches a packet. RFC 4861
-section 6.3.4: "If the received Cur Hop Limit value is non-zero, the host SHOULD set its
-CurHopLimit variable to the received value." Observation 1 holds; observation 2 fails with hop
-limit 30. This test FAILS, and the failure is deliberately NOT declared expected: the model has
-the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

@@ -29,6 +29,7 @@ class Ipv6RoutingTable;
 
 #define IPv6_MIN_MTU                            1280 // octets
 #define IPv6_DEFAULT_ADVCURHOPLIMIT             30
+#define IPv6_DEFAULT_CURHOPLIMIT                64 // the value of the Assigned Numbers registry (RFC 4861 section 6.3.2)
 
 #define IPv6_DEFAULT_MAX_RTR_ADV_INT            600 // seconds-decrease to enable more periodic RAs
 #define IPv6_DEFAULT_MIN_TO_MAX_RTR_ADV_RATIO   0.33 // RFC 4861: default MinRtrAdvInterval = 0.33 * MaxRtrAdvInterval
