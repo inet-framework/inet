@@ -12,17 +12,6 @@ Rfc9777SourceSpecificForwarding.test.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: the forwarding of a multicast datagram onto a leaf interface asks only whether the
-interface has a listener for the address (src/inet/networklayer/ipv6/Ipv6.cc:734, the one-
-argument Ipv6InterfaceData::hasMulticastListener). The MLDv2 router stores the forwarded
-sources of each address (Mldv2::processReport, src/inet/networklayer/icmpv6/Mldv2.cc:1086,
-setMulticastListeners), and the interface data has the question for one source
-(src/inet/networklayer/ipv6/Ipv6InterfaceData.h:536), but the forwarding does not ask it. So R
-forwards every source of an address that has a listener. Observation 1 holds; observation 3
-fails with the first datagram of S2. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
