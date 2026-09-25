@@ -178,7 +178,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         // Older Version Host Present (RFC 3376 7.3.2): while olderVersionTimer is
         // scheduled, an older-version (v1/v2) host is present for this group. The group
         // is forwarded as EXCLUDE{} (any-source) and v3 per-source processing is bypassed.
-        cMessage *olderVersionTimer; // fires at groupMembershipInterval
+        cMessage *olderVersionTimer; // fires at olderHostPresentInterval
         CompatVersion olderVersionCompat = IGMP_COMPAT_NONE;
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);
@@ -236,6 +236,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     double queryResponseInterval;
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
+    double olderHostPresentInterval;
     double startupQueryInterval;
     int startupQueryCount;
     double lastMemberQueryInterval;

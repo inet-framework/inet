@@ -14,14 +14,6 @@ section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 A node joins or leaves L1 through its link: the ScenarioManager enables or disables the channel
 between the node and the switch (the rules of checks.md).
 
-Defect: the default Group Membership Interval of the model is [Robustness Variable] x [Query
-Interval] + [Query Response Interval], 260 s (src/inet/networklayer/ipv4/Igmpv3.ned:64), the
-value of RFC 3376. RFC 9776 section 8.4 adds twice the Query Response Interval: 270 s. The last
-datagram of S1 on L1 leaves 260 s after the last Report of A, so step 2 does not find a
-datagram 269 s after it. This test FAILS, and the failure is deliberately NOT declared
-expected: the model has the mechanism, and the mechanism does the wrong thing, which is a
-defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"
