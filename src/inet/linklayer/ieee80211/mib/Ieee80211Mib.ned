@@ -24,6 +24,8 @@ simple Ieee80211Mib extends SimpleModule
         int htMaxAmpduLengthExponent = default(0); // maximum received A-MPDU length exponent (0..3)
         int htSecondaryChannelOffset = default(0); // BSS operation policy: 0=20 MHz, 1=40 MHz above, 3=40 MHz below; bounded by the mode set
         int htProtectionMode = default(0); // 0=none, 1=nonmember, 2=20 MHz, 3=non-HT mixed
+        @signal[bssRateSetChanged](type=inet::ieee80211::Ieee80211RateSetChangeDetails);
+        @signal[peerRateSetChanged](type=inet::ieee80211::Ieee80211RateSetChangeDetails);
         displayStringTextFormat = default("Address: {address}{ssidStr}\n{modeStr}{stationTypeStr}{qosStr}{associatedStr}");
         @display("i=block/table");
 }
