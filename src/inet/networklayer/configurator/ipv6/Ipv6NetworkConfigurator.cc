@@ -164,12 +164,19 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     Node *node = static_cast<Node *>(interfaceInfo->node);
     bool isRouter = node->routingTable && node->routingTable->isForwardingEnabled();
 
+    // Apply per-interface DAD parameter from XML (applies to hosts and routers)
+    if (interfaceInfo->dupAddrDetectTransmits >= 0)
+        ipv6Data->setDupAddrDetectTransmits(interfaceInfo->dupAddrDetectTransmits);
+
     if (assignAddressesParameter && !interfaceInfo->globalAddress.isUnspecified()) {
         if (assignAddressesToHostsParameter || isRouter) {
             // assignAddressesToHosts: statically address every interface
             // !assignAddressesToHosts: address only routers; hosts use dynamic config (SLAAC/DHCPv6)
             if (!ipv6Data->hasAddress(interfaceInfo->globalAddress)) {
-                ipv6Data->assignAddress(interfaceInfo->globalAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
+                // the address is tentative until Duplicate Address Detection, which Neighbor Discovery
+                // starts when the node has booted, tests it (RFC 4862 section 5.4)
+                bool tentative = ipv6Data->getDupAddrDetectTransmits() > 0;
+                ipv6Data->assignAddress(interfaceInfo->globalAddress, tentative, SIMTIME_ZERO, SIMTIME_ZERO);
                 EV_DETAIL << "  assigned global address " << interfaceInfo->globalAddress << " to " << interfaceInfo->getFullPath() << endl;
             }
         }
@@ -214,10 +221,6 @@ void Ipv6NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
         if (interfaceInfo->advDefaultLifetime >= 0)
             ipv6Data->setAdvDefaultLifetime(SimTime(interfaceInfo->advDefaultLifetime));
     }
-
-    // Apply per-interface DAD parameter from XML (applies to hosts and routers)
-    if (interfaceInfo->dupAddrDetectTransmits >= 0)
-        ipv6Data->setDupAddrDetectTransmits(interfaceInfo->dupAddrDetectTransmits);
 }
 
 void Ipv6NetworkConfigurator::configureRoutingTable(Node *node)
