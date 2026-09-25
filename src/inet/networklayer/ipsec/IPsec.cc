@@ -21,11 +21,13 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -47,6 +49,8 @@ using namespace inet::xmlutils;
 
 namespace inet {
 namespace ipsec {
+
+static const short DUMMY_PACKET_TIMER_KIND = 1; // the reinjection timers of the delay model have kind 0
 
 simsignal_t IPsec::inProtectedAcceptSignal = registerSignal("inProtectedAccept");
 simsignal_t IPsec::inProtectedDropSignal = registerSignal("inProtectedDrop");
@@ -143,6 +147,8 @@ IPsec::IPsec()
 
 IPsec::~IPsec()
 {
+    for (auto timer : dummyPacketTimers)
+        cancelAndDelete(timer);
 }
 
 void IPsec::initSecurityDBs(cXMLElement *spdConfig)
@@ -210,7 +216,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
-                checkTags(saEntryElem, "SPI Protection HardLifetimeSeconds HardLifetimeBytes DSCP Selector");
+                checkTags(saEntryElem, "SPI Protection HardLifetimeSeconds HardLifetimeBytes DSCP DummyPacketInterval Selector");
 
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
@@ -256,6 +262,21 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
                 // the sender picks the one whose values hold the DSCP of the packet
                 if (const cXMLElement *dscpElem = getUniqueChildIfExists(saEntryElem, "DSCP"))
                     sadEntry->setDscps(rangelist<unsigned int>::parse(dscpElem->getNodeValue(), [](std::string s) { return (unsigned int)atoi(s.c_str()); }));
+
+                // dummy packets (RFC 4303 section 2.6): an outbound ESP SA sends one in each interval,
+                // to the peer of the last packet that it protected
+                if (const cXMLElement *dummyElem = getUniqueChildIfExists(saEntryElem, "DummyPacketInterval")) {
+                    double interval = atof(dummyElem->getNodeValue());
+                    if (interval <= 0)
+                        throw cRuntimeError("DummyPacketInterval must be positive, at %s", dummyElem->getSourceLocation());
+                    if (direction != Direction::OUT || sadEntry->getProtection() != Protection::ESP)
+                        throw cRuntimeError("Only an outbound ESP SA sends dummy packets, at %s", dummyElem->getSourceLocation());
+                    sadEntry->setDummyPacketInterval(interval);
+                    cMessage *timer = new cMessage("IPsecDummyPacket", DUMMY_PACKET_TIMER_KIND);
+                    timer->setContextPointer(sadEntry);
+                    dummyPacketTimers.push_back(timer);
+                    scheduleAfter(interval, timer);
+                }
 
                 if (const cXMLElement *selectorElem = getUniqueChildIfExists(saEntryElem, "Selector")) {
                     IPsecRule rule = sadEntry->getRule();
@@ -375,7 +396,12 @@ void IPsec::initialize(int stage)
 
 void IPsec::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
+    if (msg->isSelfMessage() && msg->getKind() == DUMMY_PACKET_TIMER_KIND) {
+        auto sadEntry = static_cast<SecurityAssociation *>(msg->getContextPointer());
+        sendDummyPacket(sadEntry);
+        scheduleAfter(sadEntry->getDummyPacketInterval(), msg);
+    }
+    else if (msg->isSelfMessage()) {
         Packet *context = static_cast<Packet *>(msg->getContextPointer());
         delete msg;
         ipLayer->reinjectQueuedDatagram(context);
@@ -438,8 +464,34 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const L3Address& local
     return packetInfo;
 }
 
+void IPsec::sendDummyPacket(SecurityAssociation *sadEntry)
+{
+    // a dummy packet goes to the peer of the last packet that the SA protected; before the
+    // first one, the SA has no peer
+    if (sadEntry->getLastRemoteAddress().isUnspecified())
+        return;
+    EV_INFO << "IPsec OUT ESP dummy packet on SA " << sadEntry->getSpi() << std::endl;
+    Packet *packet = new Packet("IPsecDummyPacket");
+    // RFC 4303 section 2.6: the Next Header 59 marks a dummy packet; its payload is empty, and
+    // every other field of the ESP header and trailer is there
+    espProtect(packet, sadEntry, IP_PROT_NONE, false);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipsecEsp);
+    auto addressReq = packet->addTag<L3AddressReq>();
+    addressReq->setSrcAddress(sadEntry->getLastLocalAddress());
+    addressReq->setDestAddress(sadEntry->getLastRemoteAddress());
+    auto dispatchProtocolReq = packet->addTag<DispatchProtocolReq>();
+    dispatchProtocolReq->setProtocol(networkProtocol);
+    dispatchProtocolReq->setServicePrimitive(SP_REQUEST);
+    dummyPackets.insert(packet);
+    send(packet, "ipOut");
+}
+
 INetfilter::IHook::Result IPsec::datagramPostRoutingHook(Packet *packet)
 {
+    // a dummy packet is already protected
+    if (dummyPackets.erase(packet) > 0)
+        return INetfilter::IHook::ACCEPT;
+
     // the local address is the datagram's source address (filled in by routing)
     return processEgressPacket(packet, peekNetworkHeader(packet)->getSourceAddress());
 }
@@ -807,6 +859,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
         EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
         int transportType = networkHeaderProtocol(netHeader);
         espSa->addBytesProcessed(protectedBytes);
+        espSa->setLastAddresses(packetInfo.getLocalAddress(), packetInfo.getRemoteAddress());
         espProtect(packet, espSa, transportType, tfcEnabled);
         setNetworkHeaderProtocol(netHeader, IP_PROT_ESP);
         delay += espProtectOutDelay->doubleValue();
@@ -983,6 +1036,11 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             auto espTrailer = packet->removeAtBack<IPsecEspTrailer>(B(ESP_FIXED_PAYLOAD_TRAILER_BYTES));
             if (espTrailer->getPadLength() > 0)
                 packet->removeAtBack(B(espTrailer->getPadLength()));
+            // RFC 4303 section 2.6: the receiver discards a dummy packet, and reports no error
+            if (espTrailer->getNextHeader() == IP_PROT_NONE) {
+                EV_INFO << "IPsec IN DISCARD ESP dummy packet, packet: " << ingressPacketInfo.str() << std::endl;
+                return INetfilter::IHook::DROP;
+            }
             // RFC 4301 section 4.4.2.1: an SA whose hard lifetime has ended accepts nothing
             if (!sadEntry->isUsable(simTime(), packet->getByteLength())) {
                 EV_INFO << "IPsec IN DROP ESP, the hard lifetime of the SA has ended, packet: " << ingressPacketInfo.str() << std::endl;

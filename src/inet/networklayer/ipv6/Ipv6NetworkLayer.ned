@@ -170,6 +170,9 @@ module Ipv6NetworkLayer like INetworkLayer
         icmpv6.ipv6Out --> lp.in++;
         icmpv6.ipv6In <-- lp.out++;
 
+        ipsec.ipOut --> lp.in++ if hasIpsec;
+        ipsec.ipIn <-- lp.out++ if hasIpsec;
+
         lp.out++ --> ipv6.transportIn;
         lp.in++ <-- ipv6.transportOut;
 

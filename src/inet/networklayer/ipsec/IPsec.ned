@@ -66,7 +66,7 @@ import inet.common.SimpleModule;
 //   `HardLifetimeBytes`?, `SecurityAssociation*`
 // - Selector: `LocalAddress`?, `RemoteAddress`?, Protocol?, `LocalPort`?, `RemotePort`?, ICMPType?, ICMPCode?
 // - `SecurityAssociation`: SPI, Protection?, `HardLifetimeSeconds`?, `HardLifetimeBytes`?, DSCP?,
-//   Selector?
+//   `DummyPacketInterval`?, Selector?
 //
 // Contained elements may occur in any order.
 //
@@ -92,6 +92,9 @@ import inet.common.SimpleModule;
 //   SA has protected. An SA whose hard lifetime has ended is not used any more: an
 //   outgoing packet for it is discarded, and an incoming one too. In a `SecurityPolicy`,
 //   the value is the default of its SAs.
+// - `DummyPacketInterval`: the interval in seconds of the dummy packets of an outbound ESP SA
+//   (RFC 4303 section 2.6): packets with Next Header 59 and an empty payload, to the addresses
+//   of the last packet that the SA protected. The receiver discards them.
 // - DSCP: comma-separated list of DSCP values / ranges of an SA (RFC 4301 section 4.4.2.1).
 //   Of the SAs of a policy that match a packet, the sender uses the first one whose list
 //   holds the DSCP of the packet; an SA without the element takes any DSCP.
@@ -240,4 +243,7 @@ simple IPsec extends SimpleModule
         @statistic[inProcessDelay](title="Incoming Processing Delay"; record=vector,stats);
         @statistic[outProcessDelay](title="Outgoing Processing Delay"; record=vector,stats);
 
+    gates:
+        input ipIn;   // unused: nothing is dispatched up to IPsec
+        output ipOut; // the dummy packets of ESP SAs, to the IP layer
 }

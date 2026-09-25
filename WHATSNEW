@@ -338,6 +338,13 @@ Notable backward incompatible changes are the following:
    classes of traffic can have SAs of their own. Before, the first matching SA
    carried every packet.
 
+   An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with
+   the new DummyPacketInterval element of a SecurityAssociation: ESP packets
+   with Next Header 59 and an empty payload, to the peer of the last packet
+   that the SA protected. The receiver discards them without an error. For
+   this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and
+   IPv6 network layers connect to their dispatcher.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
