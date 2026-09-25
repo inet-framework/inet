@@ -14,14 +14,6 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 Host A sends each State-Change Report once: its Robustness Variable is 1. Each repetition would
 start the query sequence again (RFC 9777 section 7.6.3; the rules of checks.md).
 
-Defect: Mldv2::sendGroupSpecificQuery computes the S flag from the Filter Timer before it
-lowers the timer to the Last Listener Query Time (src/inet/networklayer/icmpv6/Mldv2.cc:1312),
-so the first Multicast Address Specific Query has the S flag set; RFC 9777 section 7.6.3.1
-lowers the timer first. Every retransmission sets the flag without a look at the timer
-(src/inet/networklayer/icmpv6/Mldv2.cc:544). Observation 1 holds; observation 6 fails at the
-first Query. This test FAILS, and the failure is deliberately NOT declared expected: the model
-has the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
