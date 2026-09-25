@@ -42,14 +42,14 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
 9. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
-- **Gap 1** (`f6b216f210`): `Rip::getMessageVersion()` gives 1 for RIPng and 2 for RIP; the four
+- **Gap 1** (`bd42e777ee`): `Rip::getMessageVersion()` gives 1 for RIPng and 2 for RIP; the four
   `setVersion` calls use it. No fingerprint and no statistical result moves.
 - **Gap 2 made a test error visible.** With the RIPng answers delivered, `Rfc2080SplitHorizon`
   failed: the triggered update of R3 draws a random delay, so the first periodic update of R3
   comes after the update of R2 at 47.8 s. The check and the tests of both protocols now wait for
-  the update of R2 on L1 with netC at metric 2. This repair is its own commit (`7a273fced8`),
+  the update of R2 on L1 with netC at metric 2. This repair is its own commit (`3041f782d8`),
   before gap 2.
-- **Gap 2** (`780e15b324`): for RIPng, `sendPacket` binds a unicast answer to the interface of the
+- **Gap 2** (`369f7f1b6b`): for RIPng, `sendPacket` binds a unicast answer to the interface of the
   request and gives it the link-local source; `processRequest` sends the answer to specific
   entries through `sendPacket` too. One fingerprint moves: `examples/rip/simpletest -c IPv6`
   (`tplx`, `~tNl`), because the routers get the answers to their startup requests. The 18
@@ -57,13 +57,13 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
 - **Gap 3 is two commits**, because it is two decisions (PR-SPLIT-ONE-CHANGE). The on-link route
   of netA on R1 is a static (`MANUAL`) route of `Ipv6NetworkConfigurator`, and RIPng imports it
   as `RIP_ROUTE_STATIC`, not as an interface route.
-  - `9f5eb4605a` (`src.networklayer.ipv6`): `Ipv6RoutingTable` keeps the `MANUAL` and
+  - `c79f5dc50d` (`src.networklayer.ipv6`): `Ipv6RoutingTable` keeps the `MANUAL` and
     `OWN_ADV_PREFIX` routes of an interface aside while the interface is down, and adds them again
     when it is up with a carrier, unless an equal route is there (EIGRP for IPv6 adds its own
     on-link routes again on the same signal). A stop or a crash forgets them. The new module test
     `IPv6_routes_return_with_carrier` fails without the repair (R1 sends "unroutable") and passes
     with it. No fingerprint moves; the 38 IPv6 module tests and 27 IPv6 protocol tests pass.
-  - `00ed12e42c` (`src.routing.rip`): the `routeAdded` handler attaches a returning static or
+  - `7ebeebe730` (`src.routing.rip`): the `routeAdded` handler attaches a returning static or
     default route to the RIP route of the same destination and type that lost its route, with the
     metric 1 of the import. No fingerprint moves (the run of both parts together).
   - OMNeT++ calls the listeners of a signal in the order of subscription. The routing table
@@ -75,18 +75,18 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
   sends a triggered update every 1 to 5 s (seen in the log of `Rfc2453ExpiryGarbageCollection`:
   R2 from 286 s on). RFC 2453 section 3.9.2 starts the deletion process only when the metric is
   first set to infinity. The repair of gap 6 needs the same rule, so gap 6 ends the chain.
-- **Gap 4** (`b3c86d279d`): `Rip` has an expiry timer; `rescheduleExpiryTimer` puts it at the
+- **Gap 4** (`0663e93ba1`): `Rip` has an expiry timer; `rescheduleExpiryTimer` puts it at the
   earliest expiry or purge, after each change of a route, so a refreshed route moves it and a
   stable network never fires it. Three fingerprints of `tutorials/rip` move (Step4B, Step4C, and
   Step9 in `tplx` only), and the statistics of Step4B and Step4C: the same datagrams are lost,
   but some now circle in a short loop to the hop limit, because Step4 has no split horizon.
-- **Gap 5** (`210e2a03c0`): `checkExpiredRoutes` purges a lost route of the router itself
+- **Gap 5** (`80d79cffc6`): `checkExpiredRoutes` purges a lost route of the router itself
   `routePurgeTime` after its invalidation, if no route of the table is attached. A route of the
   configuration that returns after the purge is imported again (`MANUAL` or `OWN_ADV_PREFIX`,
   as at startup), and each import triggers an update. 11 fingerprints and 11 statistical results
   move. Step6, Step7 and Step7SplitHorizon do not: there the router learns the lost network
   again from its neighbor, so the route becomes a learned route.
-- **Gap 6** (`19cd0a2f42`): every invalid route is purged `routePurgeTime` after its
+- **Gap 6** (`9004d2ad6e`): every invalid route is purged `routePurgeTime` after its
   invalidation, only valid learned routes expire, and no path invalidates an invalid route
   again. That ends the chain of triggered updates. 15 fingerprints and 15 statistical results
   move. All 30 RIP tests pass.
