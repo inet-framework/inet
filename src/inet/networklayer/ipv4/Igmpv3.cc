@@ -72,6 +72,9 @@ void Igmpv3::initialize(int stage)
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
         olderHostPresentInterval = par("olderHostPresentInterval");
+        routerVersion = par("routerVersion");
+        if (routerVersion < 1 || routerVersion > 3)
+            throw cRuntimeError("Igmpv3: routerVersion must be 1, 2 or 3, got %d", routerVersion);
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -504,7 +507,14 @@ void Igmpv3::processRexmtTimer(cMessage *msg)
         EV_INFO << "Retransmitting Group-Specific Query for group '" << groupData->groupAddr
                 << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->groupRexmtCount
                 << " transmission(s) left).\n";
-        if (interfaceData->state == IGMPV3_RS_QUERIER) {
+        if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+            if (interfaceData->version == 2) {
+                sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+                numQueriesSent++;
+                numGroupSpecificQueriesSent++;
+            }
+        }
+        else if (interfaceData->state == IGMPV3_RS_QUERIER) {
             Packet *packet = new Packet("Igmpv3 query");
             const auto& query = makeShared<Igmpv3Query>();
             query->setType(IGMP_MEMBERSHIP_QUERY);
@@ -796,6 +806,8 @@ void Igmpv3::processQuery(Packet *packet)
     if (rt->isMulticastForwardingEnabled()) {
         // Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        if (routerInterfaceData->version < 3)
+            warnAboutQueryVersion(routerInterfaceData, 3);
         if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
@@ -1157,6 +1169,17 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
     // election); mirror the v3 path so a co-located router yields appropriately.
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        // RFC 9776 section 6.6.2: an older General Query makes the router use the oldest version
+        // of the network; section 7.3.1 asks for a warning when it was not configured so
+        if (groupAddr.isUnspecified() && version < routerInterfaceData->version) {
+            if (version < routerVersion)
+                warnAboutQueryVersion(routerInterfaceData, version);
+            EV_INFO << "Received an IGMPv" << (int)version << " General Query on interface '" << ie->getInterfaceName()
+                    << "': the router acts in IGMPv" << (int)version << " mode from now on.\n";
+            routerInterfaceData->version = version;
+        }
+        else if (version > routerInterfaceData->version)
+            warnAboutQueryVersion(routerInterfaceData, version);
         if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
@@ -1265,7 +1288,11 @@ void Igmpv3::processOlderVersionLeave(NetworkInterface *ie, Packet *packet)
     EV_INFO << "Igmpv3: received IGMPv2 Leave Group for group '" << group
             << "' on interface '" << ie->getInterfaceName() << "'.\n";
 
-    if (rt->isMulticastForwardingEnabled()) {
+    if (rt->isMulticastForwardingEnabled() && getRouterInterfaceData(ie)->version == 1) {
+        // RFC 9776 section 7.3.1: a router in IGMPv1 mode ignores Leave Group messages
+        EV_INFO << "Ignoring IGMPv2 Leave for group '" << group << "': the router acts in IGMPv1 mode.\n";
+    }
+    else if (rt->isMulticastForwardingEnabled()) {
         RouterGroupData *groupData = getRouterGroupData(ie, group);
         if (groupData) {
             if (groupData->olderVersionCompat == IGMP_COMPAT_V1 && groupData->olderVersionTimer->isScheduled()) {
@@ -1397,7 +1424,12 @@ void Igmpv3::processRouterOlderVersionTimer(cMessage *msg)
 
 void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespTime)
 {
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+        sendOlderVersionQuery(interfaceData, Ipv4Address::UNSPECIFIED_ADDRESS, maxRespTime);
+        numQueriesSent++;
+        numGeneralQueriesSent++;
+    }
+    else if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
@@ -1427,7 +1459,15 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
     startTimer(groupData->timer, lastMemberQueryTime);
     bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    // an IGMPv2 router sends an IGMPv2 Group-Specific Query; IGMPv1 has none
+    if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+        if (interfaceData->version == 2) {
+            sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+            numQueriesSent++;
+            numGroupSpecificQueriesSent++;
+        }
+    }
+    else if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
@@ -1506,7 +1546,8 @@ void Igmpv3::sendSourceSpecificQueries(RouterGroupData *groupData)
     }
     for (bool suppressFlag : {true, false}) {
         const Ipv4AddressVector& sources = suppressFlag ? suppressedSources : otherSources;
-        if (sources.empty() || interfaceData->state != IGMPV3_RS_QUERIER)
+        // IGMPv1 and IGMPv2 have no Group-and-Source-Specific Query
+        if (sources.empty() || interfaceData->state != IGMPV3_RS_QUERIER || interfaceData->version < 3)
             continue;
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
@@ -1530,6 +1571,41 @@ void Igmpv3::sendSourceSpecificQueries(RouterGroupData *groupData)
         else
             ++it;
     }
+}
+
+// RFC 9776 section 7.3.1: in the IGMPv2 mode a Query is 8 octets, with the Max Response Time in
+// tenths of a second in the Max Resp Code, not the exponential code; in the IGMPv1 mode the code is 0.
+void Igmpv3::sendOlderVersionQuery(RouterInterfaceData *interfaceData, Ipv4Address groupAddr, double maxRespTime)
+{
+    Packet *packet;
+    Ptr<IgmpQuery> msg;
+    if (interfaceData->version == 1) {
+        packet = new Packet("Igmpv1 query");
+        msg = makeShared<Igmpv1Query>();
+    }
+    else {
+        packet = new Packet("Igmpv2 query");
+        const auto& query = makeShared<Igmpv2Query>();
+        query->setMaxRespTimeCode((uint8_t)std::min(255.0, std::round(10.0 * maxRespTime)));
+        msg = query;
+    }
+    msg->setType(IGMP_MEMBERSHIP_QUERY);
+    msg->setGroupAddress(groupAddr);
+    msg->setChunkLength(B(8));
+    insertChecksum(msg, packet);
+    packet->insertAtFront(msg);
+    sendQueryToIP(packet, interfaceData->ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
+}
+
+// RFC 9776 section 7.3.1: a Query of another version than the configured one gets a warning; the
+// warning is rate-limited to one for each interface.
+void Igmpv3::warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion)
+{
+    if (interfaceData->versionWarned)
+        return;
+    interfaceData->versionWarned = true;
+    EV_WARN << "Received an IGMPv" << queryVersion << " Query on interface '" << interfaceData->ie->getInterfaceName()
+            << "', where the router is configured to act in IGMPv" << routerVersion << " mode.\n";
 }
 
 // Schedules the next retransmission of the Queries of the group while any is left.
@@ -1842,6 +1918,7 @@ Igmpv3::RouterInterfaceData::RouterInterfaceData(Igmpv3 *owner, NetworkInterface
     ASSERT(ie);
 
     state = IGMPV3_RS_INITIAL;
+    version = owner->routerVersion;
     generalQueryTimer = new cMessage("Igmpv3 General Query timer", IGMPV3_R_GENERAL_QUERY_TIMER);
     generalQueryTimer->setContextPointer(this);
 }
