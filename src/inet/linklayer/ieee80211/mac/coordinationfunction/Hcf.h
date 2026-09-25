@@ -8,6 +8,9 @@
 #ifndef __INET_HCF_H
 #define __INET_HCF_H
 
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -54,6 +57,10 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   protected:
     Ieee80211Mac *mac = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
+    simtime_t txnavEnd = 0;
+    bool stopped = false;
+    uint64_t stopRevision = 0;
     IRateControl *dataAndMgmtRateControl = nullptr;
 
     cMessage *startRxTimer = nullptr;
@@ -108,9 +115,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details) override;
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
+    void recoverInterruptedFrames(Edcaf *edcaf);
     void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
     void sendUp(const std::vector<Packet *>& completeFrames);
@@ -152,6 +161,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // ITx::ICallback
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    virtual bool transmissionStarting(Packet *packet) override;
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
@@ -164,6 +174,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Hcf();
+    virtual void stop();
+    virtual void start();
+    bool isStopped() const { return stopped; }
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

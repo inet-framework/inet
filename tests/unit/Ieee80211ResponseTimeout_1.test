@@ -36,6 +36,9 @@ class TestRateSelection : public SimpleModule, public IRateSelection, public IQo
     }
 
   public:
+    virtual const physicallayer::IIeee80211Mode *computeResponseMode(
+            const physicallayer::IIeee80211Mode *elicitingMode,
+            Ieee80211ResponseFrameKind responseKind, const MacAddress& receiver) override { return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet,
             const Ptr<const Ieee80211RtsFrame>& rtsFrame) override { return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet,
@@ -45,7 +48,8 @@ class TestRateSelection : public SimpleModule, public IRateSelection, public IQo
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
             const Ptr<const Ieee80211MacHeader>& header) override { return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
-            const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override { return responseMode; }
+            const Ptr<const Ieee80211MacHeader>& header, bool startsTxop,
+            const physicallayer::IIeee80211Mode *previousModeForReceiver, bool useFastestMode = false) override { return responseMode; }
 };
 
 Define_Module(TestRateSelection);

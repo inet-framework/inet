@@ -1,0 +1,138 @@
+%description:
+Verify that an ad hoc management policy selects the configured basic rate for
+an actual group-addressed data frame.
+
+%file: Ieee80211MgmtAdhocRatePolicyChecker.cc
+
+#include <iostream>
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/SimpleModule.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::units::values;
+
+class Ieee80211MgmtAdhocRatePolicyChecker : public SimpleModule, public cListener
+{
+  protected:
+    cModule *sourceDcf = nullptr;
+    bool groupFrameSent = false;
+    int groupFrameCount = 0;
+    int sequenceCount = 0;
+    int previousSequenceCount = 0;
+
+    virtual void initialize() override
+    {
+        auto sourceMac = getModuleByPath("^.source.wlan[0].mac");
+        sourceMac->subscribe(packetSentToLowerSignal, this);
+        sourceMac->subscribe(IFrameSequenceHandler::frameSequenceStartedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (signalID == IFrameSequenceHandler::frameSequenceStartedSignal) {
+            sequenceCount++;
+            return;
+        }
+        if (signalID != packetSentToLowerSignal)
+            return;
+        auto packet = check_and_cast<Packet *>(value);
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!header->getReceiverAddress().isMulticast())
+            return;
+        const auto& modeReq = packet->findTag<physicallayer::Ieee80211ModeReq>();
+        ASSERT(modeReq != nullptr);
+        ASSERT(modeReq->getMode()->getDataMode()->getNetBitrate() == bps(Mbps(12)));
+        ASSERT(header->getDurationField() == SIMTIME_ZERO);
+        // IEEE Std 802.11-2024, 10.23.2.8: each IBSS group frame needs fresh contention.
+        if (par("qos").intValue() != 0)
+            ASSERT(sequenceCount > previousSequenceCount);
+        previousSequenceCount = sequenceCount;
+        groupFrameSent = true;
+        groupFrameCount++;
+    }
+
+    virtual void finish() override
+    {
+        ASSERT(groupFrameSent);
+        int qos = par("qos").intValue();
+        if (qos == 2)
+            ASSERT(groupFrameCount >= 3);
+        std::cout << "Ad hoc group frame used the configured 12 Mbps basic rate.\n";
+        std::cout << "Ad hoc " << (qos ? "HCF" : "DCF") << " group frames had zero Duration (count=" << groupFrameCount << ").\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtAdhocRatePolicyChecker);
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211MgmtAdhocRatePolicyChecker extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211MgmtAdhocRatePolicyChecker);
+        int qos;
+}
+
+network Ieee80211MgmtAdhocRatePolicyTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source: AdhocHost;
+        sink: AdhocHost;
+        checker: Ieee80211MgmtAdhocRatePolicyChecker;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtAdhocRatePolicyTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 5ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.configurator.addStaticRoutes = false
+*.source.ipv4.ip.limitedBroadcast = true
+*.checker.qos = ${qos=0,1,2}
+*.*.wlan[*].opMode = "g(erp)"
+*.*.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.*.wlan[*].agent.typename = ""
+*.*.wlan[*].radio.transmitter.power = 50mW
+*.*.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.sink.mobility.initialX = 20m
+*.sink.mobility.initialY = 0m
+*.source.wlan[0].mgmt.basicRates = "6Mbps 12Mbps"
+*.source.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
+*.source.wlan[0].mac.qosStation = ${qos} != 0 ? true : false
+*.source.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = ${qos} == 2 ? 2ms : (${qos} == 1 ? 1us : -1s)
+*.source.wlan[0].mac.dcf.rateSelection.dataFrameBitrate = -1bps
+*.source.wlan[0].mac.dcf.rateSelection.multicastFrameBitrate = -1bps
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "255.255.255.255"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 100B
+*.source.app[0].startTime = 0s
+*.source.app[0].sendInterval = ${qos} == 2 ? 10us : 1ms
+*.sink.numApps = 1
+*.sink.app[0].typename = "UdpSink"
+*.sink.app[0].localPort = 5000
+
+%contains: stdout
+Ad hoc group frame used the configured 12 Mbps basic rate.

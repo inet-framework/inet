@@ -191,6 +191,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     RateSelection::setFrameMode(packet, header, mode);
     RateSelection::emitDatarateSelected(this, header, mode);
     EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
+    channelAccess->getInProgressFrames()->prepareCandidate(dynamicPtrCast<const Ieee80211RtsFrame>(header) ? nullptr : packet);
     auto pendingPacket = channelAccess->getInProgressFrames()->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();

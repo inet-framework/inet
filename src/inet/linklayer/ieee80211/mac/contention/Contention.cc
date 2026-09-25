@@ -80,14 +80,20 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
     this->slotTime = slotTime;
     this->callback = callback;
     backoffSlots = intrand(cw + 1);
+    auto revision = cancellationRevision;
     emit(backoffPeriodGeneratedSignal, backoffSlots);
+    if (revision != cancellationRevision)
+        return;
     EV_DETAIL << "Starting contention: cw = " << cw << ", slots = " << backoffSlots << ", slotTime = " << slotTime << ", ifs = " << ifs << ", eifs = " << eifs << endl;
     handleWithFSM(START);
 }
 
 void Contention::handleWithFSM(EventType event)
 {
+    auto revision = cancellationRevision;
     emit(stateChangedSignal, fsm.getState());
+    if (revision != cancellationRevision)
+        return;
     EV_TRACE << "handleWithFSM: processing event " << getEventName(event) << "\n";
     bool finallyReportChannelAccessGranted = false;
     FSMA_Switch(fsm) {
@@ -97,6 +103,7 @@ void Contention::handleWithFSM(EventType event)
                     event == START && mediumFree,
                     IFS_AND_BACKOFF,
                     scheduleTransmissionRequest();
+                    if (revision != cancellationRevision) return;
                     );
             FSMA_Event_Transition(Busy,
                     event == START && !mediumFree,
@@ -113,6 +120,7 @@ void Contention::handleWithFSM(EventType event)
                     event == MEDIUM_STATE_CHANGED && mediumFree,
                     IFS_AND_BACKOFF,
                     scheduleTransmissionRequest();
+                    if (revision != cancellationRevision) return;
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
@@ -133,17 +141,21 @@ void Contention::handleWithFSM(EventType event)
                     event == MEDIUM_STATE_CHANGED && !mediumFree,
                     DEFER,
                     cancelTransmissionRequest();
+                    if (revision != cancellationRevision) return;
                     computeRemainingBackoffSlots();
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
                     IFS_AND_BACKOFF,
                     switchToEifs();
+                    if (revision != cancellationRevision) return;
                     );
             FSMA_Fail_On_Unhandled_Event();
         }
     }
     emit(stateChangedSignal, fsm.getState());
+    if (revision != cancellationRevision)
+        return;
     if (finallyReportChannelAccessGranted)
         scheduleAfter(SIMTIME_ZERO, channelGrantedEvent);
     if (hasGUI()) {
@@ -165,17 +177,38 @@ void Contention::mediumStateChanged(bool mediumFree)
 void Contention::handleMessage(cMessage *msg)
 {
     if (msg == startTxEvent) {
+        auto revision = cancellationRevision;
         emit(backoffStoppedSignal, SimTime::ZERO);
-        handleWithFSM(CHANNEL_ACCESS_GRANTED);
+        if (revision == cancellationRevision)
+            handleWithFSM(CHANNEL_ACCESS_GRANTED);
     }
     else if (msg == channelGrantedEvent) {
         EV_INFO << "Channel granted: startTime = " << startTime << std::endl;
+        auto grantedCallback = callback;
+        auto revision = cancellationRevision;
+        // Keep the request cancellable until the grant signal returns.
+        // A listener can cancel it and install a replacement request.
         emit(channelAccessGrantedSignal, this);
-        callback->channelAccessGranted();
-        callback = nullptr;
+        if (revision == cancellationRevision) {
+            callback = nullptr;
+            grantedCallback->channelAccessGranted();
+        }
     }
     else
         throw cRuntimeError("Unknown msg");
+}
+
+void Contention::cancelContention()
+{
+    Enter_Method("cancelContention");
+    ++cancellationRevision;
+    cancelEvent(startTxEvent);
+    cancelEvent(channelGrantedEvent);
+    auto cancelledCallback = callback;
+    callback = nullptr;
+    fsm.setState(IDLE, "IDLE");
+    if (cancelledCallback)
+        cancelledCallback->expectedChannelAccess(-1);
 }
 
 void Contention::corruptedFrameReceived()
@@ -186,8 +219,11 @@ void Contention::corruptedFrameReceived()
 
 void Contention::scheduleTransmissionRequestFor(simtime_t txStartTime)
 {
+    auto revision = cancellationRevision;
     scheduleAt(txStartTime, startTxEvent);
     callback->expectedChannelAccess(txStartTime);
+    if (revision != cancellationRevision)
+        return;
     emit(backoffStartedSignal, txStartTime);
     if (hasGUI())
         updateDisplayString(txStartTime);
@@ -195,8 +231,11 @@ void Contention::scheduleTransmissionRequestFor(simtime_t txStartTime)
 
 void Contention::cancelTransmissionRequest()
 {
+    auto revision = cancellationRevision;
     cancelEvent(startTxEvent);
     callback->expectedChannelAccess(-1);
+    if (revision != cancellationRevision)
+        return;
     emit(backoffStoppedSignal, SimTime::ZERO);
     if (hasGUI())
         updateDisplayString(-1);
@@ -227,7 +266,10 @@ void Contention::switchToEifs()
 {
     EV_DEBUG << "Switching to EIFS from DISF.\n";
     endEifsTime = simTime() + eifs;
+    auto revision = cancellationRevision;
     cancelTransmissionRequest();
+    if (revision != cancellationRevision)
+        return;
     scheduleTransmissionRequest();
 }
 
@@ -245,7 +287,10 @@ void Contention::revokeBackoffOptimization()
     EV_DEBUG << "Revoking backoff optimization: backoffOptimizationDelta = " << backoffOptimizationDelta << std::endl;
     scheduledTransmissionTime += backoffOptimizationDelta;
     backoffOptimizationDelta = SIMTIME_ZERO;
+    auto revision = cancellationRevision;
     cancelTransmissionRequest();
+    if (revision != cancellationRevision)
+        return;
     computeRemainingBackoffSlots();
     scheduleTransmissionRequest();
 }

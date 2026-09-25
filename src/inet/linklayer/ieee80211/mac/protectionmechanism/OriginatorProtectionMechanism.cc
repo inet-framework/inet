@@ -32,10 +32,10 @@ void OriginatorProtectionMechanism::initialize(int stage)
 simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
-    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
+    simtime_t ackFrameDuration = rateSelection->computeResponseMode(pendingFrameMode,
+            Ieee80211ResponseFrameKind::ACK, pendingHeader->getReceiverAddress())->getDuration(LENGTH_ACK);
     simtime_t durationId = ctsFrameDuration + pendingFrameDuration + ackFrameDuration;
     return durationId + 3 * modeSet->getSifsTime();
 }
@@ -52,16 +52,16 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
 //
 simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader)->getDuration(LENGTH_ACK);
     if (dataHeader->getReceiverAddress().isMulticast())
         return 0;
+    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader)->getDuration(LENGTH_ACK);
     if (!dataHeader->getMoreFragments())
         return ackToDataFrameDuration + modeSet->getSifsTime();
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
         auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
-        RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode);
-        simtime_t ackToPendingFrame = pendingFrameMode->getDuration(LENGTH_ACK);
+        simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
+        simtime_t ackToPendingFrame = rateSelection->computeResponseMode(pendingFrameMode,
+                Ieee80211ResponseFrameKind::ACK, pendingHeader->getReceiverAddress())->getDuration(LENGTH_ACK);
         return pendingFrameDuration + ackToDataFrameDuration + ackToPendingFrame + 3 * modeSet->getSifsTime();
     }
 }
@@ -78,15 +78,18 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
 //
 simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
     if (mgmtHeader->getReceiverAddress().isMulticast())
         return 0;
+    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
     if (!mgmtHeader->getMoreFragments()) {
         return ackFrameDuration + modeSet->getSifsTime();
     }
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
-        return pendingFrameDuration + 2 * ackFrameDuration + 3 * modeSet->getSifsTime();
+        auto pendingMode = rateSelection->computeMode(pendingPacket, pendingHeader);
+        auto pendingResponse = rateSelection->computeResponseMode(pendingMode,
+                Ieee80211ResponseFrameKind::ACK, pendingHeader->getReceiverAddress());
+        return pendingMode->getDuration(pendingPacket->getDataLength()) + ackFrameDuration +
+                pendingResponse->getDuration(LENGTH_ACK) + 3 * modeSet->getSifsTime();
     }
 }
 

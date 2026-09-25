@@ -5,6 +5,8 @@ at both ends.
 
 %file: Ieee80211HtAssociationChecker.cc
 
+#include <set>
+
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/common/Simsignals.h"
@@ -14,9 +16,11 @@ at both ends.
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 using namespace inet;
 using namespace inet::ieee80211;
+using namespace inet::units::values;
 
 class Ieee80211HcfRtsFailureMac : public Ieee80211Mac
 {
@@ -46,8 +50,36 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
     int apAssociationNotifications = 0;
     bool associationResponseWireChannelChecked = false;
     bool staTunedToInternalChannelSix = false;
+    bool associationRequestWireRatesChecked = false;
+    bool associationResponseWireRatesChecked = false;
+    bool apRtsRateChecked = false;
+    bool staCtsRateChecked = false;
+    bool staAckRateChecked = false;
     cMessage *channelChangeTimer = nullptr;
     cModule *apQosEdcaf = nullptr;
+    cModule *staDcf = nullptr;
+    cModule *staHcf = nullptr;
+    cModule *staQosEdcaf = nullptr;
+    cModule *apMac = nullptr;
+    cModule *staMac = nullptr;
+    bool responseReservationPending = false;
+    simtime_t responseReservation;
+    int checkedResponseReservations = 0;
+
+    void checkSupportedRates(const Ieee80211SupportedRatesElement& rates)
+    {
+        ASSERT(rates.numRates == 3);
+        ASSERT(rates.rate[0] == 6 && rates.basicRate[0]);
+        ASSERT(rates.rate[1] == 12 && rates.basicRate[1]);
+        ASSERT(rates.rate[2] == 24 && !rates.basicRate[2]);
+    }
+
+    void checkMode(const Packet *packet, bps expectedRate)
+    {
+        const auto& modeReq = packet->findTag<physicallayer::Ieee80211ModeReq>();
+        ASSERT(modeReq != nullptr);
+        ASSERT(modeReq->getMode()->getDataMode()->getNetBitrate() == expectedRate);
+    }
 
   public:
     virtual ~Ieee80211HtAssociationChecker()
@@ -59,9 +91,20 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
   protected:
     virtual void initialize() override
     {
+        apMac = getModuleByPath("^.ap.wlan[0].mac");
+        staMac = getModuleByPath("^.sta.wlan[0].mac");
+        apMac->subscribe(packetSentToLowerSignal, this);
+        staMac->subscribe(packetSentToLowerSignal, this);
         getModuleByPath("^.ap.wlan[0].mgmt")->subscribe(l2ApAssociatedSignal, this);
         apQosEdcaf = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3]");
         apQosEdcaf->subscribe(packetSentToPeerSignal, this);
+        staDcf = getModuleByPath("^.sta.wlan[0].mac.dcf");
+        staHcf = findModuleByPath("^.sta.wlan[0].mac.hcf");
+        if (staHcf != nullptr)
+            staQosEdcaf = getModuleByPath("^.sta.wlan[0].mac.hcf.edca.edcaf[3]");
+        staDcf->subscribe(packetSentToPeerSignal, this);
+        if (staHcf != nullptr)
+            staHcf->subscribe(packetSentToPeerSignal, this);
         auto staRadio = getModuleByPath("^.sta.wlan[0].radio");
         staRadio->subscribe(physicallayer::Ieee80211Radio::radioChannelChangedSignal, this);
         channelChangeTimer = new cMessage("channelChange");
@@ -88,11 +131,30 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
     {
+        if (signalID == packetSentToLowerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (source == staMac && (header->getType() == ST_AUTHENTICATION || header->getType() == ST_ASSOCIATIONREQUEST)) {
+                responseReservation = header->getDurationField();
+                responseReservationPending = true;
+            }
+            else if (source == apMac && header->getType() == ST_ACK && responseReservationPending) {
+                // IEEE Std 802.11-2024, 10.6.6.5.2: the target BSS determines the primary ACK rate before association.
+                auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                ASSERT(mode->getDataMode()->getNetBitrate() == Mbps(12));
+                ASSERT(responseReservation >= mode->getSifsTime() + mode->getDuration(packet->getDataLength()));
+                responseReservationPending = false;
+                checkedResponseReservations++;
+            }
+            return;
+        }
         if (source == apQosEdcaf && signalID == packetSentToPeerSignal) {
             auto packet = check_and_cast<Packet *>(value);
             const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
             if (header->getType() == ST_ASSOCIATIONRESPONSE) {
                 const auto& responseBody = packet->peekAt<Ieee80211AssociationResponseFrame>(header->getChunkLength());
+                checkSupportedRates(responseBody->getSupportedRates());
+                associationResponseWireRatesChecked = true;
                 ASSERT(responseBody->getHtOperationPresent());
                 ASSERT(responseBody->getHtOperation().primaryChannel == 7);
                 for (bool supported : responseBody->getHtOperation().basicMcsSupported)
@@ -100,6 +162,28 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
                 associationResponseWireChannelChecked = true;
                 if (channelChangeTimer != nullptr && !channelChangeTimer->isScheduled())
                     scheduleAfter(SimTime(1, SIMTIME_US), channelChangeTimer);
+            }
+            else if (header->getType() == ST_RTS) {
+                checkMode(packet, bps(Mbps(12)));
+                apRtsRateChecked = true;
+            }
+        }
+        else if ((source == staDcf || source == staHcf || source == staQosEdcaf) && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONREQUEST) {
+                const auto& requestBody = packet->peekAt<Ieee80211AssociationRequestFrame>(header->getChunkLength());
+                checkSupportedRates(requestBody->getSupportedRates());
+                associationRequestWireRatesChecked = true;
+            }
+            else if (header->getType() == ST_CTS) {
+                checkMode(packet, bps(Mbps(12)));
+                staCtsRateChecked = true;
+            }
+            else if (header->getType() == ST_ACK && associationResponseWireRatesChecked && header->getReceiverAddress() ==
+                    check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"))->address) {
+                checkMode(packet, bps(Mbps(12)));
+                staAckRateChecked = true;
             }
         }
         else if (signalID == l2ApAssociatedSignal)
@@ -130,6 +214,32 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         ASSERT(apMib->requirePrimaryChannel() == 11);
         ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 11);
         ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(associationRequestWireRatesChecked);
+        ASSERT(associationResponseWireRatesChecked);
+        ASSERT(apRtsRateChecked);
+        ASSERT(staCtsRateChecked);
+        ASSERT(staAckRateChecked);
+        ASSERT(checkedResponseReservations >= 2);
+        ASSERT(!responseReservationPending);
+        const auto expectedRates = std::set<bps>{bps(Mbps(6)), bps(Mbps(12)), bps(Mbps(24))};
+        const auto expectedBasicRates = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
+        auto checkRateState = [&](const Ieee80211RateSetState& state) {
+            ASSERT(state.supported.known);
+            ASSERT(state.operational.known);
+            ASSERT(state.basic.known);
+            for (auto rate : expectedRates)
+                ASSERT(state.supported.legacyRates.count(rate) == 1);
+            ASSERT(state.operational.legacyRates == expectedRates);
+            ASSERT(state.basic.legacyRates == expectedBasicRates);
+        };
+        checkRateState(staMib->getLocalRateSet());
+        checkRateState(staMib->getBssRateSet());
+        checkRateState(apMib->getLocalRateSet());
+        checkRateState(apMib->getBssRateSet());
+        ASSERT(apMib->findPeerRateSet(staAddress) != nullptr);
+        ASSERT(staMib->findPeerRateSet(apMib->address) != nullptr);
+        checkRateState(*apMib->findPeerRateSet(staAddress));
+        checkRateState(*staMib->findPeerRateSet(apMib->address));
         // IEEE Std 802.11-2024, 9.4.2.54.2/Figure 9-456 and Table 9-224: the n(mixed-2.4Ghz)
         // profile exposes short GI for the PHY-supported 20 MHz width. The
         // mode catalog also describes 40 MHz modes, but the current packet PHY
@@ -162,7 +272,9 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         ASSERT((serializedBytes[11] & (1 << 6)) == 0);
         ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
         ASSERT(staMib->findPeerHtState(apMib->address)->valid);
-        ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
+        // The HCF run receives a later Beacon on channel 11; the DCF run retains the association-response snapshot.
+        ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel ==
+                (staHcf != nullptr ? 11 : 6));
         ASSERT(apAssociationNotifications == 1);
         EV << "RTS-protected association committed at AP and STA.\n";
     }
@@ -241,7 +353,12 @@ record-scalar-results = false
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 
 **.mgmt.numChannels = 1
+*.ap.wlan[*].mgmt.basicRates = "6Mbps 12Mbps"
+*.ap.wlan[*].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
+*.sta.wlan[*].mgmt.basicRates = "6Mbps 12Mbps"
+*.sta.wlan[*].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
 *.ap.wlan[*].mac.qosStation = true
+*.sta.wlan[*].mac.qosStation = ${false,true}
 *.ap.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
 *.ap.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 0B
 *.ap.wlan[*].mac.hcf.rateControl.typename = "AarfRateControl"

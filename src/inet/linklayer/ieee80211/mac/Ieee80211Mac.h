@@ -102,6 +102,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const { return modeSet; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);

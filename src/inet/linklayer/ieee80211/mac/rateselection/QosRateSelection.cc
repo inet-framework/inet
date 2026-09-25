@@ -22,9 +22,7 @@ Define_Module(QosRateSelection);
 
 void QosRateSelection::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        mib.reference(this, "mibModule", true);
+    RateSelectionBase::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
@@ -76,60 +74,27 @@ const IIeee80211Mode *QosRateSelection::getMode(Packet *packet, const Ptr<const 
     throw cRuntimeError("Missing mode");
 }
 
-bool QosRateSelection::isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
-{
-    bool nonSelfCts = dynamicPtrCast<const Ieee80211CtsFrame>(header) && !txopProcedure->isTxopInitiator(header);
-    bool blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header) != nullptr;
-    bool ack = dynamicPtrCast<const Ieee80211AckFrame>(header) != nullptr;
-    return ack || blockAck || nonSelfCts;
-}
-
-//
-// If a CTS or ACK control response frame is carried in a non-HT PPDU, the primary rate is defined to
-// be the highest rate in the BSSBasicRateSet parameter that is less than or equal to the rate (or non-HT
-// reference rate; see 9.7.9) of the previous frame. If no rate in the BSSBasicRateSet parameter meets
-// these conditions, the primary rate is defined to be the highest mandatory rate of the attached PHY
-// that is less than or equal to the rate (or non-HT reference rate; see 9.7.9) of the previous frame. The
-// STA may select an alternate rate according to the rules in 9.7.6.5.4. The STA shall transmit the
-// non-HT PPDU CTS or ACK control response frame at either the primary rate or the alternate rate, if
-// one exists.
-//
+// IEEE Std 802.11-2024, 10.6.6.5.2: use the primary response mode.
 const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtHeader);
-    ASSERT(modeSet->containsMode(mode));
-    const IIeee80211Mode *responseMode;
-    if (!responseAckFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            responseMode = mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            responseMode = slowerMode;
-        else
-            throw cRuntimeError("Mandatory mode not found");
-    }
-    else
-        responseMode = responseAckFrameMode;
-    return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
+    const auto& peer = getResponsePeer(dataOrMgmtHeader);
+    auto computed = computeResponseMode(mode, Ieee80211ResponseFrameKind::ACK, peer);
+    return validateResponseOverride(computed, responseAckFrameMode, Ieee80211ResponseFrameKind::ACK, peer);
 }
 
 const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
-    // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
-    ASSERT(modeSet->containsMode(mode));
-    const IIeee80211Mode *responseMode;
-    if (!responseCtsFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            responseMode = mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            responseMode = slowerMode;
-        else
-            throw cRuntimeError("Mandatory mode not found");
-    }
-    else
-        responseMode = responseCtsFrameMode;
-    return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
+    const auto& peer = getResponsePeer(rtsFrame);
+    auto computed = computeResponseMode(mode, Ieee80211ResponseFrameKind::CTS, peer);
+    return validateResponseOverride(computed, responseCtsFrameMode, Ieee80211ResponseFrameKind::CTS, peer);
+}
+
+const IIeee80211Mode *QosRateSelection::computeResponseMode(const IIeee80211Mode *elicitingMode,
+        Ieee80211ResponseFrameKind responseKind, const MacAddress& receiver)
+{
+    return computePrimaryResponseMode(elicitingMode, responseKind, receiver);
 }
 
 //
@@ -141,15 +106,21 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        auto mode = responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
-        return getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), mode);
+        auto mode = getMode(packet, blockAckReq);
+        const auto& peer = getResponsePeer(blockAckReq);
+        auto computed = computeResponseMode(mode, Ieee80211ResponseFrameKind::BASIC_BLOCK_ACK, peer);
+        return validateResponseOverride(computed, responseBlockAckFrameMode, Ieee80211ResponseFrameKind::BASIC_BLOCK_ACK, peer);
     }
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
 
-const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, bool useFastestMode)
 {
+    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+        auto preferredMode = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) ? dataFrameMode : mgmtFrameMode;
+        return selectGroupMode(multicastFrameMode, preferredMode);
+    }
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
     // frames are left to the existing rules below.
@@ -157,140 +128,75 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         ensurePerReceiverModesResolved();
         auto it = perReceiverDataFrameMode.find(dataOrMgmtHeader->getReceiverAddress());
         if (it != perReceiverDataFrameMode.end())
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), it->second);
+            return validateConfiguredMode(it->second, dataOrMgmtHeader->getReceiverAddress(), "unicast data");
     }
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
+        return validateConfiguredMode(dataFrameMode, dataOrMgmtHeader->getReceiverAddress(), "unicast data");
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
-    // This subclause describes the rate selection rules for group addressed data and management frames, excluding
-    // the following:
-    //   — Non-STBC Beacon and non-STBC PSMP frames
-    //   — STBC group addressed data and management frames
-    //   — Data frames located in an FMS stream (see 10.23.7)
-    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
-        // If the BSSBasicRateSet parameter is not empty, a data or management frame (excluding the frames listed
-        // above) with a group address in the Address 1 field shall be transmitted in a non-HT PPDU using one of the
-        // rates included in the BSSBasicRateSet parameter or the rate chosen by the AP, described in 10.23.7, if the data
-        // frames are part of an FMS stream.
-        // TODO BSSBasicRateSet
-        // If the BSSBasicRateSet parameter is empty and the BSSBasicMCSSet parameter is not empty, the frame shall
-        // be transmitted in an HT PPDU using one of the MCSs included in the BSSBasicMCSSet parameter.
-
-        // If both the BSSBasicRateSet parameter and the BSSBasicMCSSet parameter are empty (e.g., a scanning STA
-        // that is not yet associated with a BSS), the frame shall be transmitted in a non-HT PPDU using one of the
-        // mandatory PHY rates.
-        // The rate control is not consulted for these frames. It adapts to the feedback of one
-        // peer, and a group-addressed frame has no peer: it is never acknowledged, so nothing
-        // would ever correct a rate chosen for it.
-        return fastestMandatoryMode;
+        return validateConfiguredMode(mgmtFrameMode, dataOrMgmtHeader->getReceiverAddress(), "management");
+    if (useFastestMode) {
+        const IIeee80211Mode *best = nullptr;
+        for (int i = 0; i < modeSet->getNumModes(); ++i) {
+            auto candidate = modeSet->getMode(i);
+            if (isAllowedByRateState(candidate, dataOrMgmtHeader->getReceiverAddress(), false) &&
+                    (best == nullptr || candidate->getDataMode()->getNetBitrate() > best->getDataMode()->getNetBitrate()))
+                best = candidate;
+        }
+        if (best == nullptr)
+            throw cRuntimeError("No eligible mode for a TXOP overrun");
+        return best;
     }
-    // A data or management frame not identified in 9.7.5.1 through 9.7.5.5 shall be sent using any data rate or MCS
-    // subject to the following constraints:
-    //    — A STA shall not transmit a frame using a rate or MCS that is not supported by the receiver STA or
-    //      STAs, as reported in any Supported Rates element, Extended Supported Rates element, or
-    //      Supported MCS field in management frames transmitted by the receiver STA.
-    //    — A STA shall not transmit a frame using a value for the CH_BANDWIDTH parameter of the
-    //      TXVECTOR that is not supported by the receiver STA.
-    //    — A STA shall not initiate transmission of a frame at a data rate higher than the greatest rate in the
-    //      OperationalRateSet or the HTOperationalMCSset, which are parameters of the MLME-
-    //      JOIN.request primitive.
-    else {
-        // TODO Supported Rates element, Extended Supported Rates element
-        // TODO OperationalRateSet or the HTOperationalMCSset
-        if (dataOrMgmtRateControl)
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
-        else
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
-    }
+    if (dataOrMgmtRateControl)
+        return selectAllowedMode(dataOrMgmtHeader->getReceiverAddress(),
+                getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress())));
+    return selectAllowedMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
 
-const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
+// IEEE Std 802.11-2024, 10.6.6.2 and 10.6.6.4.
+const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header,
+        bool startsTxop, const IIeee80211Mode *previousModeForReceiver)
 {
-    ASSERT(!isControlResponseFrame(header, txopProcedure));
-    if (controlFrameMode)
-        return controlFrameMode;
-    // This subclause describes the rate selection rules for control frames that initiate a TXOP and that are not carried
-    // in an A-MPDU.
-    if (txopProcedure->isTxopInitiator(header)) {
-        // If a control frame other than a Basic BlockAckReq or Basic BlockAck is carried in a non-HT PPDU, the
-        // transmitting STA shall transmit the frame using one of the rates in the BSSBasicRateSet parameter or a rate
-        // from the mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
-        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
-            // TODO BSSBasicRateSet
-            return fastestMandatoryMode;
-        }
-        // If a Basic BlockAckReq or Basic BlockAck frame is carried in a non-HT PPDU, the transmitting STA shall
-        // transmit the frame using a rate supported by the receiver STA, if known (as reported in the Supported Rates
-        // element and/or Extended Supported Rates element in frames transmitted by that STA). If the supported rate set
-        // of the receiving STA or STAs is not known, the transmitting STA shall transmit using a rate from the
-        // BSSBasicRateSet parameter or using a rate from the mandatory rate set of the attached PHY if the
-        // BSSBasicRateSet is empty.
-        else {
-            // TODO supported rate set of the receiving STA
-            return fastestMandatoryMode;
-        }
+    auto receiver = header->getReceiverAddress();
+    bool bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header) != nullptr;
+    if (!bar && !dynamicPtrCast<const Ieee80211RtsFrame>(header))
+        throw cRuntimeError("Unsupported originated control frame; responses require an eliciting mode");
+    const IIeee80211Mode *selected = nullptr;
+    const auto *peer = mib->findPeerRateSet(receiver);
+    bool peerBar = !startsTxop && bar && peer != nullptr && peer->supported.known;
+    if (peerBar) {
+        for (auto candidate : modeSet->getLegacyOperationalModes())
+            if (isAllowedByRateState(candidate, receiver, false) &&
+                    (selected == nullptr || candidate->getDataMode()->getNetBitrate() > selected->getDataMode()->getNetBitrate()))
+                selected = candidate;
+        if (selected == nullptr)
+            throw cRuntimeError("No supported legacy BAR mode for peer %s", receiver.str().c_str());
     }
-    // This subclause describes the rate selection rules for control frames that are not control response frames, are not
-    // the frame that initiates a TXOP, are not the frame that terminates a TXOP, and are not carried in an A-MPDU.
-    else if (!txopProcedure->isTxopTerminator(header)) {
-        // A frame other than a BlockAckReq or BlockAck that is carried in a non-HT PPDU shall be transmitted by the
-        // STA using a rate no higher than the highest rate in the BSSBasicRateSet parameter that is less than or equal to
-        // the rate or non-HT reference rate (see 9.7.9) of the previously transmitted frame that was directed to the same
-        // receiving STA. If no rate in the BSSBasicRateSet parameter meets these conditions, the control frame shall be
-        // transmitted at a rate no higher than the highest mandatory rate of the attached PHY that is less than or equal to
-        // the rate or non-HT reference rate (see 9.7.9) of the previously transmitted frame that was directed to the same
-        // receiving STA.
-        // TODO BSSBasicRateSet
-        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
-            // TODO frame sequence context
-            auto it = lastTransmittedFrameMode.find(header->getReceiverAddress());
-            return (it != lastTransmittedFrameMode.end()) ? it->second : fastestMandatoryMode;
-        }
-        // A BlockAckReq or BlockAck that is carried in a non-HT PPDU shall be transmitted by the STA using a rate
-        // supported by the receiver STA, as reported in the Supported Rates element and/or Extended Supported Rates
-        // element in frames transmitted by that STA. When the supported rate set of the receiving STA or STAs is not
-        // known, the transmitting STA shall transmit using a rate from the BSSBasicRateSet parameter or from the
-        // mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
-        else {
-            // TODO BSSBasicRateSet
-            // TODO Supported Rates element and/or Extended Supported Rates
-            return fastestMandatoryMode;
-        }
+    else {
+        if (!startsTxop && !bar && previousModeForReceiver == nullptr)
+            throw cRuntimeError("Later control frame has no prior mode for peer %s", receiver.str().c_str());
+        selected = selectBasicMode(startsTxop || bar ? nullptr : previousModeForReceiver, receiver, false);
     }
-    else
-        throw cRuntimeError("Control frames cannot terminate TXOPs");
+    if (controlFrameMode != nullptr) {
+        validateConfiguredMode(controlFrameMode, receiver, "control");
+        auto rate = controlFrameMode->getDataMode()->getNetBitrate();
+        const auto& basic = getBssRateSetForReceiver(receiver).basic;
+        bool basicEligible = basic.known && !basic.legacyRates.empty() ? basic.legacyRates.count(rate) != 0 : modeSet->getIsMandatory(controlFrameMode);
+        // 10.6.6.4 bounds a later RTS by the selected basic or mandatory rate; it does not require set membership.
+        bool requiresBasicRate = startsTxop || bar;
+        if (controlFrameMode->getHtMcsIndex() >= 0 ||
+                (!peerBar && ((requiresBasicRate && !basicEligible) || rate > selected->getDataMode()->getNetBitrate())))
+            throw cRuntimeError("Configured control mode '%s' violates the control frame rate rule", controlFrameMode->getName());
+        selected = controlFrameMode;
+    }
+    return selected;
 }
 
-const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
+const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+        bool startsTxop, const IIeee80211Mode *previousModeForReceiver, bool useFastestMode)
 {
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
-        return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
-    else
-        return getPeerCompatibleMode(header->getReceiverAddress(), computeControlFrameMode(header, txopProcedure));
-}
-
-void QosRateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
-    }
-}
-
-void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
-{
-    auto receiverAddr = header->getReceiverAddress();
-    lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
-}
-
-const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
-{
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
-        return mode;
-    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
+        return computeDataOrMgmtFrameMode(dataOrMgmtHeader, useFastestMode);
+    return computeControlFrameMode(header, startsTxop, previousModeForReceiver);
 }
 
 } /* namespace ieee80211 */

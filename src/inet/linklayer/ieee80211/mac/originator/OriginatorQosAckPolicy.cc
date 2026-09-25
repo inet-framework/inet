@@ -63,35 +63,35 @@ bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>
 //    return true;
 }
 
-// FIXME
-bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const
+bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *frames, TxopProcedure *txop) const
 {
-    auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
-    for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold)
-            return true;
-    }
-    return false;
+    return !std::get<0>(projectBlockAckReq(frames, nullptr, frames->findPreparedCandidate() == nullptr || txop->getLimit() == SIMTIME_ZERO)).isUnspecified();
 }
 
-// FIXME
-std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *frames, TxopProcedure *txop) const
 {
-    auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
-    for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold) {
-            auto largestOutstandingFrames = outstandingFramesPerReceiver.begin();
-            for (auto it = outstandingFramesPerReceiver.begin(); it != outstandingFramesPerReceiver.end(); it++) {
-                if (it->second.size() > largestOutstandingFrames->second.size())
-                    largestOutstandingFrames = it;
-            }
-            MacAddress receiverAddress = largestOutstandingFrames->first;
-            SequenceNumberCyclic startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
-            Tid tid = largestOutstandingFrames->second.at(0)->peekAtFront<Ieee80211DataHeader>()->getTid();
-            return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
-        }
+    return projectBlockAckReq(frames, nullptr, frames->findPreparedCandidate() == nullptr || txop->getLimit() == SIMTIME_ZERO);
+}
+
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::projectBlockAckReq(
+        InProgressFrames *frames, Packet *projectedBlockAckFrame, bool finalExchange) const
+{
+    std::map<std::pair<MacAddress, Tid>, std::vector<Packet *>> groups;
+    auto outstanding = frames->getOutstandingFrames();
+    if (projectedBlockAckFrame != nullptr && std::find(outstanding.begin(), outstanding.end(), projectedBlockAckFrame) == outstanding.end())
+        outstanding.push_back(projectedBlockAckFrame);
+    for (auto packet : outstanding) {
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        groups[{header->getReceiverAddress(), header->getTid()}].push_back(packet);
     }
-    return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(), -1);
+    auto largest = groups.end();
+    for (auto it = groups.begin(); it != groups.end(); ++it)
+        if ((finalExchange || (int)it->second.size() >= blockAckReqThreshold) &&
+                (largest == groups.end() || it->second.size() > largest->second.size()))
+            largest = it;
+    if (largest == groups.end())
+        return {MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), -1};
+    return {largest->first.first, computeStartingSequenceNumber(largest->second), largest->first.second};
 }
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
@@ -130,12 +130,22 @@ bool OriginatorQosAckPolicy::checkAgreementPolicy(const Ptr<const Ieee80211DataH
 //
 simtime_t OriginatorQosAckPolicy::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getPhyRxStartDelay() : ackTimeout;
+    return getAckTimeout(rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader));
 }
 
 simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getPhyRxStartDelay() : blockAckTimeout;
+    return getBlockAckTimeout(rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq));
+}
+
+simtime_t OriginatorQosAckPolicy::getAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const
+{
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + responseMode->getPhyRxStartDelay() : ackTimeout;
+}
+
+simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const
+{
+    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + responseMode->getPhyRxStartDelay() : blockAckTimeout;
 }
 
 } /* namespace ieee80211 */

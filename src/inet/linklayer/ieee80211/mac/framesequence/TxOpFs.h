@@ -6,24 +6,18 @@
 
 #ifndef __INET_TXOPFS_H
 #define __INET_TXOPFS_H
-
-#include "inet/linklayer/ieee80211/mac/framesequence/GenericFrameSequences.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
-
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 namespace inet {
 namespace ieee80211 {
-
-class INET_API TxOpFs : public AlternativesFs
+class INET_API TxOpFs : public IFrameSequence
 {
-
+  protected:
+    size_t step = 0;
   public:
-    TxOpFs();
-    virtual ~TxOpFs() {}
-
-    virtual int selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
-    virtual bool isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
-    virtual bool isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
-    virtual int selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceContext *context);
+    virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
+    virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
+    virtual bool completeStep(FrameSequenceContext *context) override;
+    virtual std::string getHistory() const override;
 };
 } // namespace ieee80211
 } // namespace inet

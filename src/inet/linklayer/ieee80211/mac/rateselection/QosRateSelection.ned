@@ -25,6 +25,8 @@ simple QosRateSelection extends SimpleModule
         string rateControlModule;
         string mibModule = default("^.^.^.mib");
 
+        // A positive value must be a legal group rate. Otherwise, retain the data or management
+        // rate if it is legal for group frames, or select the highest eligible basic rate.
         double multicastFrameBitrate @unit(bps) = default(-1bps);
 
         double responseAckFrameBitrate @unit(bps) = default(-1bps);

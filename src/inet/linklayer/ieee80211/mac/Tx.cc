@@ -75,8 +75,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     if (ifs == 0) {
         // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        startTransmission();
     }
     else
         scheduleAfter(ifs, endIfsTimer);
@@ -105,11 +104,41 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        startTransmission();
     }
     else
         ASSERT(false);
+}
+
+void Tx::startTransmission()
+{
+    auto pendingFrame = frame;
+    auto pendingCallback = txCallback;
+    frame = nullptr;
+    txCallback = nullptr;
+    auto revision = cancellationRevision;
+    if (!pendingCallback->transmissionStarting(pendingFrame) || revision != cancellationRevision) {
+        delete pendingFrame;
+        return;
+    }
+    ASSERT(frame == nullptr && txCallback == nullptr);
+    frame = pendingFrame;
+    txCallback = pendingCallback;
+    transmitting = true;
+    mac->sendDownFrame(frame->dup());
+}
+
+bool Tx::cancelTransmission()
+{
+    Enter_Method("cancelTransmission");
+    bool wasTransmitting = transmitting;
+    ++cancellationRevision;
+    cancelEvent(endIfsTimer);
+    delete frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    transmitting = false;
+    return wasTransmitting;
 }
 
 } // namespace ieee80211

@@ -21,10 +21,16 @@ simple RateSelection extends SimpleModule like IRateSelection
         string rateControlModule;
         string mibModule = default("^.^.^.mib");
 
+        // A positive value must be a legal group rate. Otherwise, retain the data or management
+        // rate if it is legal for group frames, or select the highest eligible basic rate.
         double multicastFrameBitrate @unit(bps) = default(-1bps);
 
         double responseAckFrameBitrate @unit(bps) = default(-1bps);
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
+        // Experimental radios can lack IEEE 802.11 receive-mode metadata.
+        // If true, explicit ACK/CTS bitrates bypass primary response selection on both peers.
+        // Unspecified response bitrates still use primary response selection.
+        bool useNonstandardResponseModes = default(false);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default

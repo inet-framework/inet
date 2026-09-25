@@ -21,6 +21,10 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     IFrameSequenceHandler::ICallback *callback = nullptr;
     IFrameSequence *frameSequence = nullptr;
     FrameSequenceContext *context = nullptr;
+    // Sequence callbacks do not nest; cancellation waits for the active call to return.
+    bool inCallback = false;
+    bool finishing = false;
+    bool cancellationRequested = false;
 
   protected:
     virtual void startFrameSequenceStep();
@@ -34,6 +38,9 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback) override;
     virtual void processResponse(Packet *frame) override;
     virtual void transmissionComplete() override;
+    virtual void recordTransmission() override;
+    virtual void invalidateRateState() override;
+    virtual void cancelFrameSequence(FrameSequenceOutcome outcome) override;
     virtual void handleStartRxTimeout() override;
     virtual bool isSequenceRunning() override { return frameSequence != nullptr; }
 

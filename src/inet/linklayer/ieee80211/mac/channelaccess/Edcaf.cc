@@ -128,7 +128,9 @@ void Edcaf::channelAccessGranted()
     if (!collisionController->isInternalCollision(this)) {
         owning = true;
         emit(channelOwnershipChangedSignal, owning);
-        callback->channelGranted(this);
+        // A synchronous listener can cancel this grant and request fresh contention.
+        if (owning && callback != nullptr)
+            callback->channelGranted(this);
     }
     else
         EV_WARN << "Ignoring channel access granted due to internal collision.\n";
@@ -139,8 +141,8 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback *callback)
     Enter_Method("releaseChannel");
     ASSERT(owning);
     owning = false;
-    emit(channelOwnershipChangedSignal, owning);
     this->callback = nullptr;
+    emit(channelOwnershipChangedSignal, owning);
     EV_INFO << "Channel released.\n";
 }
 
@@ -158,6 +160,16 @@ void Edcaf::requestChannel(IChannelAccess::ICallback *callback)
 void Edcaf::expectedChannelAccess(simtime_t time)
 {
     collisionController->expectedChannelAccess(this, time);
+}
+
+void Edcaf::cancelChannelAccess()
+{
+    Enter_Method("cancelChannelAccess");
+    callback = nullptr;
+    contention->cancelContention();
+    txopProcedure->endTxop();
+    if (owning)
+        releaseChannel(callback);
 }
 
 bool Edcaf::isInternalCollision()

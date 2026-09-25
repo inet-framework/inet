@@ -42,6 +42,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
         Ieee80211HtCapabilities pendingHtCapabilities;
         bool pendingHtOperationValid = false;
         Ieee80211HtOperation pendingHtOperation;
+        Ieee80211RateSetState pendingRateSet;
 //        int consecFailedTrans; // TODO
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };

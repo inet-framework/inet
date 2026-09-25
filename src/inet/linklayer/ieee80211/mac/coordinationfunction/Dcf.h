@@ -113,6 +113,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // ITx::ICallback
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    virtual bool transmissionStarting(Packet *packet) override { return true; }
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;

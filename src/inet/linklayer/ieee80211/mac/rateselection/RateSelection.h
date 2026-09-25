@@ -8,12 +8,9 @@
 #ifndef __INET_RATESELECTION_H
 #define __INET_RATESELECTION_H
 
-#include "inet/common/ModuleRefByPar.h"
-#include "inet/common/SimpleModule.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelectionBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,15 +28,9 @@ namespace ieee80211 {
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames
  */
-class INET_API RateSelection : public IRateSelection, public SimpleModule, public cListener // FIXME
+class INET_API RateSelection : public IRateSelection, public RateSelectionBase
 {
   protected:
-    IRateControl *dataOrMgmtRateControl = nullptr;
-    ModuleRefByPar<Ieee80211Mib> mib;
-    const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
-
-    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
-    std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
     // originator frame modes
     const physicallayer::IIeee80211Mode *multicastFrameMode = nullptr;
@@ -50,15 +41,14 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
 
     const physicallayer::IIeee80211Mode *responseAckFrameMode = nullptr;
     const physicallayer::IIeee80211Mode *responseCtsFrameMode = nullptr;
+    bool useNonstandardResponseModes = false;
 
     // per-receiver unicast data-frame modes, resolved lazily from dataFrameBitratePerReceiver
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> perReceiverDataFrameMode;
     bool perReceiverResolved = false;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
@@ -68,9 +58,6 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
-    virtual const physicallayer::IIeee80211Mode *getPeerCompatibleMode(const MacAddress& peerAddress,
-            const physicallayer::IIeee80211Mode *mode) const;
-
   public:
     static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
@@ -88,12 +75,14 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
     // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
     // is used to initiate a TXOP.
+    virtual const physicallayer::IIeee80211Mode *computeResponseMode(
+            const physicallayer::IIeee80211Mode *elicitingMode,
+            Ieee80211ResponseFrameKind responseKind, const MacAddress& receiver) override;
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
 
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
-    virtual void frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 };
 
 } // namespace ieee80211

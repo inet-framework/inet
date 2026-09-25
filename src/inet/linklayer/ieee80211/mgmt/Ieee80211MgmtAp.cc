@@ -146,7 +146,9 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
                 else
                     mib->removePeerHtCapabilities(address);
             }
+            auto acceptedRates = sta->second.pendingRateSet;
             clearPendingAssociation(&sta->second);
+            mib->installBssAndPeerRateSets(mib->getBssRateSet(), address, acceptedRates);
             // Signal delivery is synchronous; observers must see committed
             // station/peer state and no pending response transaction.
             if (!wasAssociated)
@@ -205,6 +207,7 @@ void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
     sta->pendingHtCapabilities = Ieee80211HtCapabilities();
     sta->pendingHtOperationValid = false;
     sta->pendingHtOperation = Ieee80211HtOperation();
+    sta->pendingRateSet = Ieee80211RateSetState();
 }
 
 void Ieee80211MgmtAp::sendBeacon()
@@ -255,6 +258,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
             mib->releaseAssociationId(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         mib->removePeerHtCapabilities(sta->address);
+        mib->removePeerRateSet(sta->address);
         sta->authSeqExpected = 1;
         if (wasAssociated)
             sendDisAssocNotification(sta->address);
@@ -294,6 +298,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
             mib->releaseAssociationId(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
         mib->removePeerHtCapabilities(sta->address);
+        mib->removePeerRateSet(sta->address);
         if (wasAssociated)
             sendDisAssocNotification(sta->address);
         EV << "STA authenticated\n";
@@ -320,6 +325,7 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
         mib->removePeerHtCapabilities(sta->address);
+        mib->removePeerRateSet(sta->address);
         if (wasAssociated)
             sendDisAssocNotification(sta->address);
     }
@@ -370,6 +376,13 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     }
     bool basicHtMcsSupported = !htCapabilitiesMalformed &&
             (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
+    Ieee80211RateSetState pendingRateSet = makeRateSetState(requestBody->getSupportedRates(),
+            requestBody->getExtendedSupportedRatesPresent(), requestBody->getExtendedSupportedRates(),
+            pendingHtCapabilitiesValid ? &pendingHtCapabilities : nullptr,
+            pendingHtOperationValid ? &pendingHtOperation : nullptr);
+    for (auto rate : mib->getBssRateSet().basic.legacyRates)
+        if (pendingRateSet.supported.legacyRates.count(rate) == 0)
+            basicHtMcsSupported = false;
     delete packet;
 
     // IEEE Std 802.11-2024, 11.3.5.3 g): an HT STA must support every Basic HT-MCS.
@@ -394,6 +407,7 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     sta->pendingHtCapabilities = pendingHtCapabilities;
     sta->pendingHtOperationValid = pendingHtOperationValid;
     sta->pendingHtOperation = pendingHtOperation;
+    sta->pendingRateSet = pendingRateSet;
     sta->pendingAssociationTransactionId = createAssociationTransactionId();
     setSupportedRateElements(body);
     addHtCapabilities(body);
@@ -450,6 +464,13 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     }
     bool basicHtMcsSupported = !htCapabilitiesMalformed &&
             (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
+    Ieee80211RateSetState pendingRateSet = makeRateSetState(requestBody->getSupportedRates(),
+            requestBody->getExtendedSupportedRatesPresent(), requestBody->getExtendedSupportedRates(),
+            pendingHtCapabilitiesValid ? &pendingHtCapabilities : nullptr,
+            pendingHtOperationValid ? &pendingHtOperation : nullptr);
+    for (auto rate : mib->getBssRateSet().basic.legacyRates)
+        if (pendingRateSet.supported.legacyRates.count(rate) == 0)
+            basicHtMcsSupported = false;
     delete packet;
 
     // send OK response
@@ -473,6 +494,7 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sta->pendingHtCapabilities = pendingHtCapabilities;
     sta->pendingHtOperationValid = pendingHtOperationValid;
     sta->pendingHtOperation = pendingHtOperation;
+    sta->pendingRateSet = pendingRateSet;
     sta->pendingAssociationTransactionId = createAssociationTransactionId();
     setSupportedRateElements(body);
     addHtCapabilities(body);
