@@ -1,0 +1,39 @@
+%description:
+
+LogNormalShadowing with a correlation distance on a medium whose analog model
+is DimensionalMediumAnalogModel: an error at initialization. That model
+computes the path loss per frequency from the distance alone, so the
+shadowing value could not be kept per link, and the correlation distance
+would silently have no effect.
+
+%file: test.ned
+
+import inet.physicallayer.wireless.common.medium.DimensionalRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: DimensionalRadioMedium;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+
+*.radioMedium.backgroundNoise.powerSpectralDensity = -120dBmWpMHz
+*.radioMedium.pathLoss.typename = "LogNormalShadowing"
+*.radioMedium.pathLoss.correlationDistance = 10m
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+correlationDistance cannot be used with DimensionalMediumAnalogModel
+%#--------------------------------------------------------------------------------------------------------------

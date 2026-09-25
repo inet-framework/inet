@@ -45,6 +45,22 @@ Notable backward incompatible changes are the following:
    This change requires the modification of C++ code that implements
    IPropagation, calls computeArrival(), or constructs Arrival objects.
 
+Notable backward compatible changes are the following:
+
+1. Correlated log-normal shadowing
+
+   LogNormalShadowing has a new correlationDistance parameter. By default
+   (NaN) every path loss computation draws a new shadowing value, as before.
+   With a distance, the value is kept per pair of radios, the same in both
+   directions, and drawn again only when either radio has moved farther than
+   that distance from where it was when the value was drawn, which is how
+   shadowing behaves physically. The values of a radio's links are dropped
+   when the radio is removed from the medium. The correlation needs a medium
+   analog model that computes the path loss per link, like
+   ScalarMediumAnalogModel; DimensionalMediumAnalogModel computes it per
+   frequency from the distance alone, so setting a correlation distance
+   there is an error.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
