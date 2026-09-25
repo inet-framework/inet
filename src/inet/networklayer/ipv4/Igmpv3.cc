@@ -967,11 +967,11 @@ void Igmpv3::processReport(Packet *packet)
                 }
                 else if (groupData->filter == IGMPV3_FM_EXCLUDE) {
                     // EXCLUDE (X,Y) -> BLOCK (A) -> EXCLUDE (X+(A-Y),Y): (A-X-Y)=Group Timer
-                    for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                        if (!groupData->hasSourceRecord(it->first)) {
-                            SourceRecord *record = groupData->createSourceRecord(it->first);
+                    for (auto& receivedSource : receivedSources) {
+                        if (!groupData->hasSourceRecord(receivedSource)) {
+                            SourceRecord *record = groupData->createSourceRecord(receivedSource);
                             double grouptimertime = groupData->timer->getArrivalTime().dbl() - simTime().dbl();
-                            EV_DETAIL << "Setting source timer of '" << it->first << "' to '" << grouptimertime << "'.\n";
+                            EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << grouptimertime << "'.\n";
                             startTimer(record->sourceTimer, grouptimertime);
                         }
                     }
