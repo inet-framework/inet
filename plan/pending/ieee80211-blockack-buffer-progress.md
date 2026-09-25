@@ -1,13 +1,14 @@
 # Block Ack receive-buffer progress
 
-Status: implementation in progress.
+Status: complete.
 Date: 2026-09-25.
+Completion date: 2026-09-25.
 Base: `08791304f2`.
 
 The user authorized this follow-up to the completed TXOP and Block Ack plan.
 The [original observation](../../audit/pull-request/branch-96008e2c7c-implementation.md) describes an acknowledged frame that remains in the receive buffer.
 A Block Ack Request (BAR) can name a frame that the recipient already delivered after retransmission.
-The current scan stops at that absent frame and leaves later complete frames in the buffer.
+The original scan stopped at that absent frame and left later complete frames in the buffer.
 
 ## Validated implementation contract
 
@@ -90,3 +91,19 @@ That scenario uses a 2 ms transmission opportunity and loses the first of two Bl
 The sender queue is empty before the failed delivery assertion.
 Both filtered commands exit 1 against the unchanged debug library.
 The logs and assertion output reside under `/tmp/blockack-buffer-*-before.*`.
+
+## Implementation result
+
+The [implementation report](../../audit/pull-request/ieee80211-blockack-buffer-progress.md) records the final contract, tests, and first fingerprint divergence.
+Three unit fixtures, 43 module scenarios, and five protocol fixtures pass in debug mode.
+The source fix also passes scoped architecture, naming, source-seal, and whitespace checks.
+Commit `c8cf3f1c2b` contains the source fix, tests, release note, migration note, and approved fingerprint values.
+The commit and classification checks pass against base `08791304f2`.
+Four fingerprint cases retain their values; `MacQosWithBlockAck` changes three values in one CSV row.
+The former scan rule alone reproduces all three recorded values.
+The user approved the exact [baseline patch](../../audit/pull-request/ieee80211-blockack-buffer-progress-fingerprints.patch) on 2026-09-25 with the reply “yes”.
+All five scoped fingerprint cases pass with the approved values; the command exits 0.
+The rerun logs are `/tmp/blockack-buffer-fingerprint-approved.log` and `/tmp/blockack-buffer-fingerprint-approved-details.log`.
+The implementation report retains copies in its evidence directory.
+The source tree remains identical to the source that passed the direct tests.
+The plan is complete. Release compilation and whole-project gates remain prerequisites for a future push.
