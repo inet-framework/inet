@@ -13,14 +13,6 @@ A takes the link MTU from the MTU option of R1 when there is one, so the echo re
 A in fragments; the Redirect that the first fragment causes is still larger than 1280 octets if
 the router does not cut the packet.
 
-Defect: the Redirect has no Redirected Header option
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:2379), so it is 80 octets whatever the
-size of the packet. RFC 4861 section 8.2: "Redirected Header: as much of the forwarded packet
-as can fit without the redirect packet exceeding the minimum MTU required to support IPv6 as
-specified in [IPv6]." Observations 1 to 3 hold; observation 4 fails. This test FAILS, and the
-failure is deliberately NOT declared expected: the model has the mechanism, and the mechanism
-does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
