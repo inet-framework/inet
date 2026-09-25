@@ -303,6 +303,13 @@ Notable backward incompatible changes are the following:
    IPv6 datagrams changes, so the fingerprints that include packet data
    change.
 
+   Two defaults of Ipv6RoutingTable follow RFC 4861 section 6.2.1:
+   advCurHopLimit is 64 (it was 30), and advLinkMtu is 0 (it was 1280). A
+   Router Advertisement now carries an MTU option only when advLinkMtu is not
+   0; before, it always carried one, also with the value 0. Set advLinkMtu to
+   keep the MTU option. Every Router Advertisement with the defaults is 8
+   octets shorter, so simulations with routers of IPv6 change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

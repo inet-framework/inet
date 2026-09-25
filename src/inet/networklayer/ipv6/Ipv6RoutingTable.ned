@@ -98,8 +98,8 @@ simple Ipv6RoutingTable extends SimpleModule like IRoutingTable
         // Router Advertisement defaults (applied to all router interfaces)
         bool advManagedFlag = default(false); // "Managed address configuration" (M) flag in RAs
         bool advOtherConfigFlag = default(false); // "Other configuration" (O) flag in RAs
-        int advLinkMtu = default(1280); // MTU option in RAs (1280 = IPv6 minimum MTU, 0 = don't include)
-        int advCurHopLimit = default(30); // Cur Hop Limit field in RAs (0 = unspecified)
+        int advLinkMtu = default(0); // MTU option in RAs (0 = don't include, the default of RFC 4861 section 6.2.1)
+        int advCurHopLimit = default(64); // Cur Hop Limit field in RAs (0 = unspecified; 64, the value of the Assigned Numbers registry, is the default of RFC 4861 section 6.2.1)
         double advDefaultLifetime @unit(s) = default(-1s); // Router Lifetime in RAs (-1 = auto: 3*maxRtrAdvInterval)
         @signal[routeAdded](type=inet::Ipv6Route);
         @signal[routeChanged](type=inet::Ipv6Route);
