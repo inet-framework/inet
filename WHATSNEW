@@ -293,6 +293,13 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. MPLS follows the TTL rules of RFC 3032
+
+   The TTL field of every label stack entry was 0. A pushed entry now copies
+   the TTL of the entry below it, or of the IPv4 header when it is the first
+   label, and each LSR forwards a labeled packet with the incoming TTL minus
+   one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

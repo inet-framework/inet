@@ -60,7 +60,13 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     void pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void popLabel(Packet *packet);
-    virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
+    void setTopLabelTtl(Packet *packet, int ttl);
+
+    /**
+     * Applies the label operations. The outgoing TTL is that of RFC 3032 section 2.4.1; -1 means
+     * the packet arrived unlabeled, and the pushed entries copy the TTL of the IP header.
+     */
+    virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel, int outgoingTtl = -1);
 
     // IInterfaceRegistrationListener:
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *in, cGate *out) override;
