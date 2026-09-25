@@ -522,7 +522,8 @@ void Rip::processRequest(Packet *packet)
     ripPacket->setVersion(getMessageVersion());
     Packet *outPacket = new Packet("RIP response");
     outPacket->insertAtBack(ripPacket);
-    socket.sendTo(outPacket, srcAddr, srcPort);
+    RipNetworkInterface *ripInterface = findRipInterfaceById(interfaceId);
+    sendPacket(outPacket, srcAddr, srcPort, ripInterface != nullptr ? ripInterface->ie : nullptr);
 }
 
 /**
@@ -992,6 +993,14 @@ void Rip::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, co
             socket.setTimeToLive(255);
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
+    }
+    else if (mode == RIPng && destInterface != nullptr) {
+        // RFC 2080 section 2.5: a response to a request leaves on the interface that the request
+        // came from, which a link-local requester needs, and from the link-local address of that
+        // interface, unless the request came from a port other than the RIPng port
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
+        if (destPort == ripUdpPort)
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
     }
     numSent++;
     socket.sendTo(packet, destAddr, destPort);

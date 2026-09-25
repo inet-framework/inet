@@ -16,16 +16,6 @@ R2 fails at 100 s by a crash of the node and starts again at 110 s by a startup 
 both from the scenario manager. RIP starts a random time after the node, so the request can
 come up to 30 s after 110 s.
 
-Defect: the answer of R1 never reaches R2. R1 builds it and sends it to the link-local address
-of R2, but Rip::sendPacket attaches the outgoing interface only when the destination is a
-multicast group (src/inet/routing/rip/Rip.cc:984-989). A link-local destination needs its
-interface; without it the IPv6 layer sends the answer towards netA, where neighbour discovery
-for R2 fails after three solicitations, and the answer is dropped with an ICMPv6 destination
-unreachable. Observations 1 to 3, the request, hold; observation 4 fails, and with it
-observations 5 to 7, which read the answer. The IPv4 twin passes, because 10.0.12.2 routes
-through L1. This test FAILS, and the failure is deliberately NOT declared expected: the model
-has the code for the answer and sends it the wrong way. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"
