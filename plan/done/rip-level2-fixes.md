@@ -1,6 +1,6 @@
 # RIP level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-rip-level2-fixes`, on top of
+**Status:** done on 2026-09-25. Started 2026-09-25 on `topic/standards-tests-rip-level2-fixes`, on top of
 `topic/standards-tests-rip-level2` at `3396c80ea1`. Worktree:
 `/home/levy/workspace/inet-standards-tests-rip-level2-fixes`.
 
@@ -37,9 +37,9 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
 7. [x] **Gap 6** — a repeated withdrawal does not restart the garbage collection, which starts at
    the first one. Tests: `Rfc2453WithdrawnRouteGarbageCollection`,
    `Rfc2080WithdrawnRouteGarbageCollection`.
-8. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
+8. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
    `notes.md` ("Fixed on" entries) follow it; the statistics branch.
-9. [ ] Gates, then move this plan to `plan/done/`.
+9. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 - **Gap 1** (`bd42e777ee`): `Rip::getMessageVersion()` gives 1 for RIPng and 2 for RIP; the four
@@ -101,3 +101,15 @@ of the branch (baseline: 27 unexpected failures, all of 802.11 EDCA results).
   repository, on `9ab4c26`, has one commit for each commit that moves a result: gap 2
   (`6d85bba`), gap 4 (`0acdaed`), gap 5 (`1e13d02`) and gap 6 (`4c9b7b3`). Each was regenerated
   in the GitHub-job copy at its INET commit, for the moved configurations only.
+- **The documents** (`0e405a0665`): a fresh run at `06af064900`, 30 of 30 PASS. The ledger script
+  is a copy in `audit/rip-level2-fixes/` of `inet-master`, with `compute-support.py`, which
+  computes the support of each feature from the core checks of `features.md`: 12 supported, 1
+  partial (RIP-F-NEXT-HOP, by level 3 statements), 6 untested. Two findings went to
+  `results.md`: the chain of triggered updates (repaired with gap 6), and a new one, not
+  repaired: on a carrier loss, `Rip::invalidateRoute` deletes a static route of the IPv4
+  configuration, which the IPv4 routing table never adds again.
+- **The whole branch, measured at gap 6** (`9004d2ad6e`, the same tree as the tip for src): the
+  full statistical set gives the summary of the baseline, 929 tests, 890 PASS, 10 SKIP, 27 FAIL
+  (the known 802.11 EDCA results) and 2 expected ERROR, with the statistics branch at
+  `4c9b7b3`. The fingerprints moved over the branch: 1 row (gap 2), 3 (gap 4), 11 (gap 5) and
+  15 (gap 6), all of RIP; the IPv6 commit moved none.
