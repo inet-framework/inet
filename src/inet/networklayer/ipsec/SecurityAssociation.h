@@ -69,7 +69,12 @@ class INET_API SecurityAssociation
     unsigned int getMaxTfcPadLength() const { return rule.getMaxTfcPadLength(); }
     void setMaxTfcPadLength(unsigned int maxTfcPadLength) { rule.setMaxTfcPadLength(maxTfcPadLength); }
     unsigned int getSeqNum() const { return seqNum; }
-    unsigned int getAndIncSeqNum() { return seqNum++; }
+    /**
+     * Increments the sequence counter and returns the new value, for the next packet. The
+     * counter starts at 0, so the first packet of an SA carries 1 (RFC 4302 section 3.3.2,
+     * RFC 4303 section 3.3.3).
+     */
+    unsigned int incrementAndGetSeqNum() { return ++seqNum; }
     void setSeqNum(unsigned int seqNum = 0) { this->seqNum = seqNum; }
     std::string str() const;
 };

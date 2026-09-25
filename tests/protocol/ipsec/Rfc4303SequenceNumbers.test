@@ -8,10 +8,6 @@ doc/project/evidence/protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-
 program steps below map onto its expected observations. The guards are observation 2; steps 1 and
 2 are observations 1, 3 and 4.
 
-Model gap: the counter of an SA starts at 0 and SecurityAssociation::getAndIncSeqNum returns it
-before the increment (src/inet/networklayer/ipsec/SecurityAssociation.h:42, 72), so the first
-packet of an SA carries Sequence Number 0, not 1. The increments and the separate counters hold.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
