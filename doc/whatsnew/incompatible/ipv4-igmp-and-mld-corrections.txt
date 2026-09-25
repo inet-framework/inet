@@ -51,3 +51,5 @@ The Multicast Address Specific and Multicast Address and Source Specific Queries
 IPv4 now forwards a multicast datagram onto a leaf interface only when the interface has a listener of its source, as the IGMPv3 state of the router says (RFC 9776 section 6.3). Before, a listener of the group was enough, so the source lists of IGMPv3 had no effect on the data. Ipv4InterfaceData::hasMulticastListener(group, source) also returned the opposite answer; it is corrected.
 
 IPv6 forwards a multicast datagram onto a leaf interface only when the interface has a listener of its source in the same way (RFC 9777 section 7.3).
+
+An Mldv1 node now accepts an MLDv2 Query and reads its first 24 octets as an MLDv1 Query (RFC 2710 section 5, RFC 9777 section 8.1). Before, the simulation stopped with an error when an Mldv1 node received a Query from an Mldv2 querier.
