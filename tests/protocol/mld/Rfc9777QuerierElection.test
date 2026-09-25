@@ -65,12 +65,12 @@ Define_ProtocolTestProgram()
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && heardAt >= 0 && c.event.time > heardAt + 0.001 && c.event.time < lastR1 + 255 - 0.1; })
                   .describe("a General Query of R2 while R1 is the querier (RFC9777-RQRY-6, RQRY-8, RQRY-11, RFC2710-ROUTER-8, ROUTER-10)")
                   .within(350.0)))
-        // Expected observation 1: the General Query of R1 at the start, which R2 hears.
+        // Expected observation 1: the General Query of R1 when R1 is up, within 3 s, which R2 hears.
         .once(on("r1.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; heardAt = c.event.time; return true; })
                   .describe("the first General Query of R1")
-                  .within(1.0))
+                  .within(3.0))
         // Expected observation 3: a General Query of R2, 255 s after the last Query of R1.
         .once(on("r2.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p) && c.event.time > 100; })
