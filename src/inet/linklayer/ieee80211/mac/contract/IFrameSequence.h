@@ -73,4 +73,3 @@ class INET_API IFrameSequence
 } // namespace inet
 
 #endif
-

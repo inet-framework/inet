@@ -110,4 +110,3 @@ class INET_API FrameSequenceNumPacketsFilter : public cObjectResultFilter
 } // namespace inet
 
 #endif
-

@@ -28,4 +28,3 @@ class INET_API IRtsPolicy
 } // namespace inet
 
 #endif
-
