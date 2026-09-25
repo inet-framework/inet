@@ -7,23 +7,23 @@ document of the pass that may name the simulation model and reference code, and 
 the verdicts of the run, the class of every failure, and where the model implements, or fails
 to implement, each checked behavior.
 
+The level 2 pass ran on 2026-09-24 at `829ba07bae` (src `5c4f41c600`): 31 tests, 15 PASS, 16
+FAIL, 6 of them declared expected, and twelve gaps. The repairs of 2026-09-25, on
+`topic/standards-tests-ipsec-level2-fixes`, repaired ten gaps; the run below is theirs. Each gap
+keeps its description of the code of the level 2 run, and says how it was repaired.
+
 ## Run record
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-ipsec-level2-fixes`, commit `3b03623b11`, tree clean
+- Trees: src `3194a24929`, tests/protocol `1edf25a348`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipsec$'`
 
-31 tests: 15 PASS, 16 FAIL, 6 of them declared expected.
-
-The level 2 pass ran on 2026-09-24 at src `5c4f41c600`, the tree of `origin/master` at `7772a7e4ef`,
-and changed no source file. The branch landed on `master` by a rebase onto `49e1fa0945`, whose
-`src/` differs from that tree in one line of `src/inet/common/InitStages.cc`. So the suite ran again
-on `master`, and the verdicts and the failure reasons are those of the level 2 run.
+31 tests: 28 PASS, 3 FAIL, all three declared expected.
 
 ## Verdicts
 
@@ -41,33 +41,39 @@ Payload Length does not hide it.
 | `Rfc4301Selectors` | [Selectors](../../protocol/ipsec/checks/policy.md#selectors) | PASS | — |
 | `Rfc4301SaPerDirection` | [One SA for each direction](../../protocol/ipsec/checks/security-associations.md#one-sa-for-each-direction) | PASS | — |
 | `Rfc4301InboundSaLookup` | [Inbound SA lookup](../../protocol/ipsec/checks/security-associations.md#inbound-sa-lookup) | PASS | — |
-| `Rfc4301InboundSelectorCheck` | [Inbound selector check](../../protocol/ipsec/checks/security-associations.md#inbound-selector-check) | FAIL at observation 3 | defect, [gap 5](#gap-5-defect--no-selector-check-after-ah-or-esp-processing) |
-| `Rfc4301ProtectWithoutSa` | [A PROTECT entry without an SA](../../protocol/ipsec/checks/security-associations.md#a-protect-entry-without-an-sa) | FAIL at observation 2 | defect, [gap 6](#gap-6-defect--a-protect-entry-without-an-sa-sends-the-packet-in-clear) |
-| `Rfc4301SaLifetime` | [The lifetime of an SA](../../protocol/ipsec/checks/security-associations.md#the-lifetime-of-an-sa) | FAIL at observation 3, declared expected | unimplemented feature, [gap 9](#gap-9-unimplemented-feature--no-sa-lifetime) |
-| `Rfc4301ParallelSas` | [Parallel SAs for classes of traffic](../../protocol/ipsec/checks/security-associations.md#parallel-sas-for-classes-of-traffic) | FAIL at observation 2, declared expected | unimplemented feature, [gap 10](#gap-10-unimplemented-feature--no-choice-of-an-sa-by-dscp) |
-| `Rfc4303SequenceNumbers` | [Sequence numbers of an SA](../../protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-of-an-sa) | FAIL at observation 4 | defect, [gap 1](#gap-1-defect--the-first-packet-of-an-sa-carries-sequence-number-0) |
-| `Rfc4302SequenceNumbers` | [Sequence numbers of an SA](../../protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-of-an-sa) | FAIL at observation 4 | defect, [gap 1](#gap-1-defect--the-first-packet-of-an-sa-carries-sequence-number-0) |
+| `Rfc4301InboundSelectorCheck` | [Inbound selector check](../../protocol/ipsec/checks/security-associations.md#inbound-selector-check) | PASS | repaired, [gap 5](#gap-5-defect--no-selector-check-after-ah-or-esp-processing) |
+| `Rfc4301ProtectWithoutSa` | [A PROTECT entry without an SA](../../protocol/ipsec/checks/security-associations.md#a-protect-entry-without-an-sa) | PASS | repaired, [gap 6](#gap-6-defect--a-protect-entry-without-an-sa-sends-the-packet-in-clear) |
+| `Rfc4301SaLifetime` | [The lifetime of an SA](../../protocol/ipsec/checks/security-associations.md#the-lifetime-of-an-sa) | PASS | repaired, [gap 9](#gap-9-unimplemented-feature--no-sa-lifetime) |
+| `Rfc4301ParallelSas` | [Parallel SAs for classes of traffic](../../protocol/ipsec/checks/security-associations.md#parallel-sas-for-classes-of-traffic) | PASS | repaired, [gap 10](#gap-10-unimplemented-feature--no-choice-of-an-sa-by-dscp) |
+| `Rfc4303SequenceNumbers` | [Sequence numbers of an SA](../../protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-of-an-sa) | PASS | repaired, [gap 1](#gap-1-defect--the-first-packet-of-an-sa-carries-sequence-number-0) |
+| `Rfc4302SequenceNumbers` | [Sequence numbers of an SA](../../protocol/ipsec/checks/sequence-numbers.md#sequence-numbers-of-an-sa) | PASS | repaired, [gap 1](#gap-1-defect--the-first-packet-of-an-sa-carries-sequence-number-0) |
 | `Rfc4303EspFormat` | [ESP packet format in transport mode](../../protocol/ipsec/checks/esp.md#esp-packet-format-in-transport-mode) | PASS | — |
 | `Rfc4303EspFormatIpv6` | [ESP packet format in transport mode](../../protocol/ipsec/checks/esp.md#esp-packet-format-in-transport-mode) | PASS | — |
-| `Rfc4303EspPadding` | [ESP padding](../../protocol/ipsec/checks/esp.md#esp-padding) | FAIL at observation 5 | defect, [gap 4](#gap-4-defect--the-esp-padding-octets-are-63-not-1-2-3) |
+| `Rfc4303EspPadding` | [ESP padding](../../protocol/ipsec/checks/esp.md#esp-padding) | PASS | repaired, [gap 4](#gap-4-defect--the-esp-padding-octets-are-63-not-1-2-3) |
 | `Rfc4303EspServices` | [ESP services](../../protocol/ipsec/checks/esp.md#esp-services) | PASS | — |
 | `Rfc4303EspBothNull` | [An ESP SA without encryption and without integrity](../../protocol/ipsec/checks/esp.md#an-esp-sa-without-encryption-and-without-integrity) | PASS (the configuration is refused) | — |
 | `Rfc4303TfcPadding` | [Traffic flow confidentiality padding](../../protocol/ipsec/checks/esp.md#traffic-flow-confidentiality-padding) | PASS | — |
-| `Rfc4303DummyPackets` | [Dummy packets](../../protocol/ipsec/checks/esp.md#dummy-packets) | FAIL at observation 1, declared expected | unimplemented feature, [gap 11](#gap-11-unimplemented-feature--no-dummy-packets) |
-| `Rfc4302AhFormat` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | FAIL at observation 6 | defect, [gap 2](#gap-2-defect--the-ah-payload-length-is-always-0) |
-| `Rfc4302AhFormatIpv6` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | FAIL at observation 6 | defect, [gap 2](#gap-2-defect--the-ah-payload-length-is-always-0) |
-| `Rfc4302AhIcvPosition` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | FAIL at observation 5 | defect, [gap 3](#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet) |
-| `Rfc4302AhIcvPositionIpv6` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | FAIL at observation 5 | defect, [gap 3](#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet) |
+| `Rfc4303DummyPackets` | [Dummy packets](../../protocol/ipsec/checks/esp.md#dummy-packets) | PASS | repaired, [gap 11](#gap-11-unimplemented-feature--no-dummy-packets) |
+| `Rfc4302AhFormat` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | PASS | repaired, [gap 2](#gap-2-defect--the-ah-payload-length-is-always-0) |
+| `Rfc4302AhFormatIpv6` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | PASS | repaired, [gap 2](#gap-2-defect--the-ah-payload-length-is-always-0) |
+| `Rfc4302AhIcvPosition` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | PASS | repaired, [gap 3](#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet) |
+| `Rfc4302AhIcvPositionIpv6` | [AH format in transport mode](../../protocol/ipsec/checks/ah.md#ah-format-in-transport-mode) | PASS | repaired, [gap 3](#gap-3-defect--the-ah-icv-is-at-the-end-of-the-packet) |
 | `Rfc4302AhAcrossRouter` | [AH across a router](../../protocol/ipsec/checks/ah.md#ah-across-a-router) | PASS, with no weight: the receiver never checks the ICV | — |
 | `Rfc4302AhAcrossRouterIpv6` | [AH across a router](../../protocol/ipsec/checks/ah.md#ah-across-a-router) | PASS, with no weight: the receiver never checks the ICV | — |
 | `Rfc4301TunnelModeEsp` | [Tunnel mode between two hosts](../../protocol/ipsec/checks/modes.md#tunnel-mode-between-two-hosts) | FAIL at observation 3, declared expected | unimplemented feature, [gap 8](#gap-8-unimplemented-feature--no-tunnel-mode) |
 | `Rfc4301TunnelModeAh` | [Tunnel mode between two hosts](../../protocol/ipsec/checks/modes.md#tunnel-mode-between-two-hosts) | FAIL at observation 3, declared expected | unimplemented feature, [gap 8](#gap-8-unimplemented-feature--no-tunnel-mode) |
-| `Rfc4301AhAndEsp` | [AH and ESP on one packet](../../protocol/ipsec/checks/modes.md#ah-and-esp-on-one-packet) | FAIL at observation 1 | untestable claim, [gap 7](#gap-7-untestable-claim--ah-and-esp-cannot-protect-one-packet) |
+| `Rfc4301AhAndEsp` | [AH and ESP on one packet](../../protocol/ipsec/checks/modes.md#ah-and-esp-on-one-packet) | PASS | repaired, [gap 7](#gap-7-untestable-claim--ah-and-esp-cannot-protect-one-packet) |
 | `Rfc4301Fragments` | [Fragments of a protected datagram](../../protocol/ipsec/checks/fragmentation.md#fragments-of-a-protected-datagram) | PASS | — |
 | `Rfc4301FragmentsIpv6` | [Fragments of a protected datagram](../../protocol/ipsec/checks/fragmentation.md#fragments-of-a-protected-datagram) | PASS | — |
 | `Rfc4301PathMtuIpv6` | [Path MTU of a protected flow](../../protocol/ipsec/checks/fragmentation.md#path-mtu-of-a-protected-flow) | FAIL at observation 2, declared expected | unimplemented feature, [gap 12](#gap-12-unimplemented-feature--no-path-mtu) |
 
 ## The class of every failure
+
+**After the repairs of 2026-09-25** three failures are left, all **unimplemented features** that
+declare `%# expected-result: FAIL`: tunnel mode (`Rfc4301TunnelModeEsp`, `Rfc4301TunnelModeAh`,
+[gap 8](#gap-8-unimplemented-feature--no-tunnel-mode)) and the path MTU (`Rfc4301PathMtuIpv6`,
+[gap 12](#gap-12-unimplemented-feature--no-path-mtu)). Each has a plan of its own. The rest of this
+section classes the failures of the level 2 run.
 
 Nine failures are of the class **defect** of
 [the guide](../../../guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected):
@@ -91,8 +97,14 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ## The model gaps
 
+The code that each gap cites is that of the level 2 run, src `5c4f41c600`; the line numbers of
+the repaired code differ.
+
 ### Gap 1 (defect) — the first packet of an SA carries Sequence Number 0
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: the first packet of an SA carries the
+  Sequence Number 1". The counter increments before it gives the number; the method is now
+  `incrementAndGetSeqNum`.
 - **Tests**: `Rfc4303SequenceNumbers` and `Rfc4302SequenceNumbers`, observation 4. The
   increments and the separate counters of observations 2 and 3 hold.
 - **Statements**: RFC4303-SEQ-7, OSEQ-1; RFC4302-SEQ-8, OSEQ-1.
@@ -107,6 +119,9 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 2 (defect) — the AH Payload Length is always 0
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: the AH header has the layout of RFC
+  4302", together with gap 3. The Payload Length is the length of AH in 32-bit words minus 2, and
+  the dissector reads it so.
 - **Tests**: `Rfc4302AhFormat` and `Rfc4302AhFormatIpv6`, observation 6.
 - **Statement**: RFC4302-LEN-1.
 - **The code**: `IPsec::ahProtect` sets the Next Header, the SPI, the Sequence Number and the ICV
@@ -119,6 +134,10 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 3 (defect) — the AH ICV is at the end of the packet
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: the AH header has the layout of RFC
+  4302", together with gap 2. The ICV field, with the IV of an algorithm that has one and the
+  alignment padding, follows the fixed header; the payload of AH is no longer an
+  `EncryptedChunk`.
 - **Tests**: `Rfc4302AhIcvPosition` and `Rfc4302AhIcvPositionIpv6`, observation 5.
 - **Statements**: RFC4302-FMT-2, ICV-1, ICV-2, ICV-4; in IPv6 also LEN-2.
 - **The code**: `IPsec::ahProtect` appends the ICV after the payload
@@ -131,6 +150,8 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 4 (defect) — the ESP padding octets are 63, not 1, 2, 3
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: the ESP padding octets are 1, 2, 3 and
+  so on".
 - **Test**: `Rfc4303EspPadding`, observation 5. The Pad Length and the alignment of
   observations 3 and 4 hold.
 - **Statement**: RFC4303-PAD-9.
@@ -143,6 +164,9 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 5 (defect) — no selector check after AH or ESP processing
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: an inbound packet must match the
+  selectors of its SA". After ESP, and after AH when no ESP follows, the receiver discards a
+  packet that the selectors of its SA do not cover.
 - **Test**: `Rfc4301InboundSelectorCheck`, observation 3: B delivers the datagrams of flow 3000,
   which SA 101 does not cover.
 - **Statements**: RFC4301-IN-32, IN-33, SAD-6.
@@ -155,6 +179,8 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 6 (defect) — a PROTECT entry without an SA sends the packet in clear
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: a PROTECT entry without a matching SA
+  discards the packet".
 - **Test**: `Rfc4301ProtectWithoutSa`, observation 2: flow 2000 leaves A as a plain UDP datagram.
 - **Statement**: RFC4301-OUT-10.
 - **The code**: `IPsec::protectDatagram` applies every SA of the entry that matches the packet
@@ -167,6 +193,10 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 7 (untestable claim) — AH and ESP cannot protect one packet
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: fix: one policy can protect a packet with ESP
+  and AH together". A `SecurityAssociation` can carry a `Protection` element that overrides its
+  policy; the sender applies ESP first and AH around it, and the receiver goes on to ESP after
+  AH.
 - **Test**: `Rfc4301AhAndEsp`, observation 1: no packet with AH around ESP.
 - **Statements**: RFC4301-SA-4, RFC4303-LOC-4.
 - **The code**: `IPsec::protectDatagram` has the code for both headers on one packet, ESP first
@@ -184,6 +214,7 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 8 (unimplemented feature) — no tunnel mode
 
+- **Open**: a large missing feature; the plan is `plan/pending/ipsec-tunnel-mode.md`.
 - **Tests**: `Rfc4301TunnelModeEsp` and `Rfc4301TunnelModeAh`, observation 3: the payload holds
   the UDP datagram, not an inner IPv4 header.
 - **Statements**: RFC4301-SA-47, SA-50, TUN-1, TUN-19, TUN-26, RFC4303-LOC-9, LOC-11, OENC-2,
@@ -196,6 +227,8 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 9 (unimplemented feature) — no SA lifetime
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: add: the hard lifetime of an SA, in seconds
+  and in bytes", with the elements `HardLifetimeSeconds` and `HardLifetimeBytes`.
 - **Test**: `Rfc4301SaLifetime`, observation 3 (the fifth packet of SA 102, at 5 s); observation 2
   would fail at 6 s.
 - **Statements**: RFC4301-SADI-10, SADI-11.
@@ -205,6 +238,8 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 10 (unimplemented feature) — no choice of an SA by DSCP
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: add: the choice of an SA by the DSCP of a
+  packet", with the element `DSCP` of an SA.
 - **Test**: `Rfc4301ParallelSas`, observation 2: the packets with DSCP 46 carry SPI 101.
 - **Statements**: RFC4301-SA-25, SA-26.
 - **The code**: none. "DSCP-based SA selection is not implemented."
@@ -216,6 +251,9 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 11 (unimplemented feature) — no dummy packets
 
+- **Repaired** on 2026-09-25, by the commit "ipsec: add: an ESP SA can send dummy packets", with
+  the element `DummyPacketInterval` of an outbound ESP SA and the new gates `ipIn` and `ipOut` of
+  the IPsec module.
 - **Test**: `Rfc4303DummyPackets`, observation 1.
 - **Statements**: RFC4303-NH-2, NH-3, NH-5; NH-4 has no verdict, because no dummy packet reaches
   B.
@@ -227,6 +265,7 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 ### Gap 12 (unimplemented feature) — no path MTU
 
+- **Open**: a large missing feature; the plan is `plan/pending/ipv6-path-mtu.md`.
 - **Test**: `Rfc4301PathMtuIpv6`, observation 2: after the Packet Too Big message with MTU 1280,
   A goes on to send ESP packets of 1410 octets.
 - **Statements**: RFC4301-OUT-21, RFC4302-FRAG-10, RFC4303-FRAG-9.
@@ -241,13 +280,13 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
 
 - **The SPD** is an ordered list, searched first to last, with the three actions
   ([`SecurityPolicyDatabase.cc:43`](../../../../../src/inet/networklayer/ipsec/SecurityPolicyDatabase.cc),
-  [`IPsec.cc:406-444`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). A packet that no entry
+  [`IPsec.cc:499-537`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). A packet that no entry
   matches is discarded, outbound and inbound; an unprotected packet that matches an inbound PROTECT
   entry is discarded too.
 - **The selectors** match address ranges, the next layer protocol, port ranges and, for IPv4, the
   ICMP type and code ranges, and a selector that an entry does not name is ANY.
 - **The inbound SA lookup** finds the SA by its SPI and direction, and discards a packet with no
-  SA or with an SA of the other protocol ([`IPsec.cc:803-927`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
+  SA or with an SA of the other protocol ([`IPsec.cc:914-1122`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
   Each direction has its own SA.
 - **The ESP packet** has the right order and lengths: SPI, Sequence Number, the IV of the cipher,
   the plaintext with its padding to the cipher block and to 4 octets, the Pad Length, the Next
@@ -255,37 +294,43 @@ went to stderr, not to stdout. See [`notes.md`](notes.md).
   confidentiality only, integrity only with NULL encryption, and a combined algorithm — give the
   right fields, and the receiver restores every datagram.
 - **An ESP SA with NULL encryption and NULL integrity is refused** when it is configured, with a
-  message that names the reason ([`IPsec.cc:192-200`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
+  message that names the reason ([`IPsec.cc:199-203`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
 - **TFC padding** is added only where the payload carries its own length, a UDP datagram, and the
   UDP Length field and the Pad Length stay right
-  ([`IPsec.cc:385, 493`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
+  ([`IPsec.cc:452, 586`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)).
 - **Fragmentation**: the model applies AH and ESP in the post-routing hook, before
   fragmentation, and in the local-in hook, after reassembly; only the first fragment holds the
   AH or ESP header, and a packet that a router fragments on its way is delivered.
+- **Since the repairs of 2026-09-25**, the AH header has the layout of RFC 4302, the sequence
+  numbers start at 1, the ESP padding has its sequence, the receiver checks the selectors of an
+  SA, a PROTECT entry without an SA discards, one policy can apply ESP and AH together, and an SA
+  can have a hard lifetime, a set of DSCP values and dummy packets.
 
 ## Other findings
 
 - **The receiver never checks the ICV.** AH and ESP accept a packet without a verification of
-  its ICV: "TODO check icv" ([`IPsec.cc:832`](../../../../../src/inet/networklayer/ipsec/IPsec.cc))
+  its ICV: "TODO check icv" ([`IPsec.cc:968`](../../../../../src/inet/networklayer/ipsec/IPsec.cc))
   and "TODO calculate icv bytes length from SPI and use espHeader.icvBytes for verify it"
-  ([`IPsec.cc:885`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). A bare TODO is a claim, so
+  ([`IPsec.cc:1027`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). A bare TODO is a claim, so
   the level 3 checks of a failed ICV will be defects. The pass of `Rfc4302AhAcrossRouter` has no
   weight for this reason: the receiver cannot reject a packet whose TTL the router changed.
 - **Two integrity algorithms have wrong ICV lengths.** `HMAC_SHA1` gives 160 bits, where
   HMAC-SHA-1-96 of RFC 2404 gives 96, and `HMAC_SHA2_384_192` gives 384 bits, where RFC 4868
-  gives 192 ([`IPsec.cc:682-698`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). The
+  gives 192 ([`IPsec.cc:788-803`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). The
   algorithm documents are level 5 of the standards map; the checks use HMAC-SHA-256-128, whose
   16 octets are right.
-- **AH carries its payload as an `EncryptedChunk`**, although AH does not encrypt
-  ([`IPsec.cc:568-572`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). The dissector opens it,
-  so no check sees a difference; a model user who reads the chunks does.
-- **The documentation of the module is stale in three places**: it names a protection `AH_ESP`
-  that does not exist (line 149), an action `DROP` where the configuration says `DISCARD` (lines
-  142 and 165), and an element `IcvNumBits` in its example that the configuration rejects (line
-  125) ([`IPsec.ned`](../../../../../src/inet/networklayer/ipsec/IPsec.ned)).
+- **AH carried its payload as an `EncryptedChunk`**, although AH does not encrypt. Since the repair
+  of gaps 2 and 3 it carries the payload as it is.
+- **The documentation of the module is stale in two places**: an action `DROP` where the
+  configuration says `DISCARD` (lines 157 and 181), and an element `IcvNumBits` in its example
+  that the configuration rejects (line 140) ([`IPsec.ned`](../../../../../src/inet/networklayer/ipsec/IPsec.ned)). The protection
+  `AH_ESP`, a third stale place, went with the repair of gap 7.
+- **The inbound ESP path schedules its delay on the outbound queue**: it updates
+  `lastProtectedOut`, where the AH path uses `lastProtectedIn`. No test sees it, because the
+  delays of the performance model are 0 by default.
 - **Multicast traffic bypasses IPsec**, as the documentation says
   ([`IPsec.ned:41`](../../../../../src/inet/networklayer/ipsec/IPsec.ned),
-  [`IPsec.cc:412-417`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). Multicast is optional
+  [`IPsec.cc:506, 923`](../../../../../src/inet/networklayer/ipsec/IPsec.cc)). Multicast is optional
   in the standard, so the checks do not ask for it.
 - **The model has no anti-replay service**, as the documentation says
   ([`IPsec.ned:42`](../../../../../src/inet/networklayer/ipsec/IPsec.ned)). Its SAs are keyed by
@@ -300,10 +345,12 @@ In the order I would do it:
 1. **Level 3**, the crafted packets: an ICV that fails, on AH and on ESP (the TODOs above make
    these defects), a fragment offered to AH or ESP, a non-zero Reserved field, wrong padding, and a
    replayed packet. See [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes).
-2. **After a repair of gap 7**, run `Rfc4301AhAndEsp` again, and then read the ingress path of AH
-   around ESP, which no run reaches today.
+2. **Gaps 8 and 12**, tunnel mode and the path MTU, by their plans
+   `plan/pending/ipsec-tunnel-mode.md` and `plan/pending/ipv6-path-mtu.md`.
 3. **The level 2 statements this pass left**: the ICMP report of an outbound discard, nested SAs,
    a change of the SPD at run time, a host with more than one SPD, IPv4 options and IPv6 extension
    headers, and multicast. The closing list of
    [`checks.md`](../../protocol/ipsec/checks.md#statements-this-pass-wrote-no-check-for) names what
    each needs.
+4. **The small findings**: the two stale places of `IPsec.ned`, the two ICV lengths, and the
+   delay variable of the inbound ESP path.

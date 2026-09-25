@@ -45,8 +45,8 @@ statistics repository has not followed since `c0314ff5aa`).
 11. [x] **Gap 11** — dummy packets. Test: `Rfc4303DummyPackets`.
 12. [x] **Gaps 8 and 12, a plan each** — `plan/pending/ipsec-tunnel-mode.md` and
     `plan/pending/ipv6-path-mtu.md`.
-13. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
-    `notes.md` ("Fixed on" entries) follow it; the statistics branch.
+13. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
+    `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
 14. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
@@ -72,3 +72,10 @@ statistics repository has not followed since `c0314ff5aa`).
 - **Found on the way, not repaired**: the inbound ESP path schedules its delay on
   `lastProtectedOut`, the variable of the outbound queue, where the AH path uses
   `lastProtectedIn`. No test sees it, because the delays are 0 by default.
+- **The whole branch moves no statistical result.** The full suite at `3b03623b11` gives 890 PASS
+  and the same 27 unexpected failures as the baseline, all of 802.11 EDCA.
+- **The documents follow a fresh run** at `3b03623b11`: 28 PASS, 3 FAIL declared expected (tunnel
+  mode twice, the path MTU). The ledger and the matrix come from `audit/ipsec-level2-fixes/` of
+  `inet-master`. The matrix script of the level 2 pass gave `out of claim` to every feature of a
+  stated refusal; the guide gives `undocumented` to a supported one, and the creation of an SA is
+  such a feature now, so the script follows the guide.

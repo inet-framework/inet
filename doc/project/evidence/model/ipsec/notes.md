@@ -17,6 +17,11 @@ pass: level 2 on 2026-09-24, over RFC 4301, RFC 4302 and RFC 4303. The gaps them
 
 ### The configuration is the interface, and it rejects what it does not know
 
+**Fixed on** 2026-09-25 for four of the options: an SA now takes the elements `Protection`,
+`HardLifetimeSeconds`, `HardLifetimeBytes`, `DSCP` and `DummyPacketInterval`, and a policy the
+two lifetimes. Tunnel mode has no element yet. What follows describes the model before the
+repair.
+
 The SPD of a host is an XML element of the parameter `spdConfig`, and `IPsec::initSecurityDBs`
 checks every tag against a fixed list
 ([IPsec.cc:156-242](../../../../../src/inet/networklayer/ipsec/IPsec.cc#L156)). An element for the
@@ -25,6 +30,10 @@ test of a missing option cannot even name the option, so its description says wh
 (tunnel mode, SA lifetime, DSCP selection, dummy packets).
 
 ### One protection for each PROTECT entry, so AH and ESP never meet
+
+**Fixed on** 2026-09-25 (gap 7): the `Protection` element of an SA overrides its policy, the
+sender applies ESP first and AH around it whatever the order of the SAs, and the receiver goes on
+to ESP after AH. What follows describes the model before the repair.
 
 Each `SecurityPolicy` has one `Protection`, AH or ESP, and every `SecurityAssociation` inside it
 takes the rule of the entry ([IPsec.cc:176-233](../../../../../src/inet/networklayer/ipsec/IPsec.cc#L176)).
@@ -49,12 +58,20 @@ The TODOs are claims, so the level 3 checks of a failed ICV will be defects.
 
 ### The counters start at zero
 
+**Fixed on** 2026-09-25 (gap 1): `incrementAndGetSeqNum` increments first, so the first packet
+carries 1. What follows describes the model before the repair.
+
 `SecurityAssociation::getAndIncSeqNum` returns `seqNum++` from 0
 ([SecurityAssociation.h:42, 72](../../../../../src/inet/networklayer/ipsec/SecurityAssociation.h#L42)),
 so the first packet of every SA carries 0 (gap 1). The increments are right, and each SA has its
 own counter.
 
 ### The AH header is 12 octets, and its ICV trails the packet
+
+**Fixed on** 2026-09-25 (gaps 2 and 3): the ICV field, with the IV and the alignment padding,
+follows the 12 octets of the fixed header, the Payload Length counts 32-bit words minus 2, and
+the payload is no longer an `EncryptedChunk`; the dissector reads the new layout. What follows
+describes the model before the repair.
 
 `IPsec::ahProtect` builds the fixed part of the AH header, leaves the Payload Length at 0, wraps
 the payload in an `EncryptedChunk`, and appends the ICV at the end
@@ -67,12 +84,19 @@ carries its payload as an `EncryptedChunk`, although AH does not encrypt.
 
 ### The ESP padding has the right length and the wrong octets
 
+**Fixed on** 2026-09-25 (gap 4): the padding is a `BytesChunk` with the octets 1, 2, 3 and so on.
+What follows describes the model before the repair.
+
 `IPsec::espProtect` pads to the cipher block and to 4 octets, and the Pad Length is right; the
 padding is a `ByteCountChunk`, whose octets are 63, the default of the chunk
 ([IPsec.cc:535-536](../../../../../src/inet/networklayer/ipsec/IPsec.cc#L535)) (gap 4). With NULL
 encryption the padding is in clear, which is how the check reads it.
 
 ### The SA decides alone on ingress, and nothing decides without an SA on egress
+
+**Fixed on** 2026-09-25 (gaps 5 and 6): the receiver checks the selectors of the SA after AH or
+ESP, and a PROTECT entry without a matching SA discards the packet. What follows describes the
+model before the repair.
 
 On ingress the SPI selects the SA, the protocol must match, and the packet is accepted; the
 selectors of the SA are never compared with the packet (gap 5). On egress a PROTECT entry applies
@@ -101,6 +125,10 @@ reassembly. Only the first fragment holds the AH or ESP header, the ICV arrives 
 and a router may fragment a protected IPv4 packet on its way.
 
 ### The documentation of the module is stale in three places
+
+**Fixed on** 2026-09-25 for one of the three: the text on `AH_ESP` now describes the `Protection`
+element of an SA. `DROP` and `IcvNumBits` are still stale. What follows describes the model
+before the repair.
 
 `IPsec.ned` names a protection `AH_ESP` that does not exist (line 149), an action `DROP` where the
 configuration says `DISCARD` (lines 142 and 165), and an element `IcvNumBits` in its example that
@@ -187,24 +215,26 @@ builders, and `gen-ipsec-specs.py` the 31 tests with the gap paragraphs of the f
 
 ## Follow-ups, in the order I would do them
 
-1. **Start the sequence counter at 1** (gap 1): `getAndIncSeqNum` increments first. Then run
-   `Rfc4303SequenceNumbers` and `Rfc4302SequenceNumbers` again.
-2. **Fill the ESP padding with 1, 2, 3** (gap 4): a `BytesChunk` in place of the `ByteCountChunk`.
-   Then run `Rfc4303EspPadding`.
-3. **Discard a PROTECT packet without an SA** (gap 6), and **check the selectors of the SA on
-   ingress** (gap 5). Then run `Rfc4301ProtectWithoutSa` and `Rfc4301InboundSelectorCheck`.
-4. **Lay out the AH header as RFC 4302 does** (gaps 2 and 3): the Payload Length in words minus 2,
-   the ICV inside the header with its IPv6 padding, and the dissector in the same change. Then run
-   the four `Rfc4302Ah*` format tests.
-5. **Let one flow have AH and ESP** (gap 7): a configuration that reaches the existing code, and
-   an ingress path that goes on to ESP after AH. Then run `Rfc4301AhAndEsp`.
-6. **Level 3**: an ICV that fails on AH and ESP (the TODOs of `IPsec.cc:832, 885`), a fragment
-   offered to AH or ESP, a non-zero Reserved field, wrong padding, a replayed packet. The passes
-   of `Rfc4302AhAcrossRouter` get their weight then.
-7. **The missing features, each with its declaration**: dummy packets (gap 11), the path MTU in
-   the IPv6 layer and in IPsec (gap 12), the SA lifetime (gap 9), the choice of an SA by DSCP
-   (gap 10), and tunnel mode (gap 8). The declaration of each test goes with the implementation.
-8. **Correct the documentation and the algorithm lengths**: the three stale places of `IPsec.ned`,
-   and the ICV lengths of `HMAC_SHA1` and `HMAC_SHA2_384_192`.
+1. **Done on 2026-09-25: the sequence counter starts at 1** (gap 1). `Rfc4303SequenceNumbers` and
+   `Rfc4302SequenceNumbers` pass.
+2. **Done on 2026-09-25: the ESP padding holds 1, 2, 3** (gap 4). `Rfc4303EspPadding` passes.
+3. **Done on 2026-09-25: a PROTECT packet without an SA is discarded, and the receiver checks the
+   selectors of the SA** (gaps 6 and 5). `Rfc4301ProtectWithoutSa` and
+   `Rfc4301InboundSelectorCheck` pass.
+4. **Done on 2026-09-25: the AH header has the layout of RFC 4302** (gaps 2 and 3). The four
+   `Rfc4302Ah*` format tests pass.
+5. **Done on 2026-09-25: one flow can have AH and ESP** (gap 7). `Rfc4301AhAndEsp` passes.
+6. **Level 3**: an ICV that fails on AH and ESP (the TODOs of the receiver), a fragment offered to
+   AH or ESP, a non-zero Reserved field, wrong padding, a replayed packet. The passes of
+   `Rfc4302AhAcrossRouter` get their weight then.
+7. **The missing features, each with its declaration**: done on 2026-09-25 for dummy packets (gap
+   11), the SA lifetime (gap 9) and the choice of an SA by DSCP (gap 10), whose tests pass and
+   lost their declarations. Tunnel mode (gap 8) and the path MTU in the IPv6 layer and in IPsec
+   (gap 12) have a plan each: `plan/pending/ipsec-tunnel-mode.md` and
+   `plan/pending/ipv6-path-mtu.md`.
+8. **Correct the documentation and the algorithm lengths**: the two stale places of `IPsec.ned`
+   (`DROP`, `IcvNumBits`), and the ICV lengths of `HMAC_SHA1` and `HMAC_SHA2_384_192`.
 9. **The 6 owed statements**: a check with an IPv6 Hop-by-Hop or Destination Options header; see
    [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes).
+10. **The delay of the inbound ESP path**: it updates `lastProtectedOut`, where the AH path uses
+    `lastProtectedIn`; no test sees it while the delays are 0.
