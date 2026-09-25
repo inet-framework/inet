@@ -30,6 +30,8 @@ class INET_API IOriginatorBlockAckAgreementHandler
     virtual void processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
+    // Report a terminal queue drop, acknowledgment, or retry exhaustion, not an individual attempt.
+    virtual void processDelbaFrameFinished(const Packet *packet, IProcedureCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
     // Return the earliest active absolute deadline, or SIMTIME_MAX if none exists.
@@ -42,4 +44,3 @@ class INET_API IOriginatorBlockAckAgreementHandler
 } // namespace inet
 
 #endif
-

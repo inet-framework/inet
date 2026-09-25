@@ -28,6 +28,8 @@ class INET_API IRecipientBlockAckAgreementHandler
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
+    // Report a terminal queue drop, acknowledgment, or retry exhaustion, not an individual attempt.
+    virtual void processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback) = 0;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
@@ -41,4 +43,3 @@ class INET_API IRecipientBlockAckAgreementHandler
 } // namespace inet
 
 #endif
-

@@ -5,7 +5,7 @@ and simultaneous originator and recipient agreements with different deadlines.
 Cover ADDBA response retries and queued responses after agreement expiry.
 IEEE Std 802.11-2024, 11.5.4 requires timeout DELBA for inactive agreements.
 
-%extraargs: -r 0..15
+%extraargs: -r 0..16
 
 %file: TestIeee80211BlockAckInactivity.cc
 
@@ -155,6 +155,25 @@ class Ieee80211BlockAckInactivityTest : public cSimpleModule, public LifecycleCo
         const MacAddress senderAddress("02:00:00:00:00:01");
         const MacAddress recipientAddress("02:00:00:00:00:02");
         int scenario = par("scenario");
+        if (scenario == 16) {
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->getAgreementDeadline(recipientAddress, true) > simTime());
+            auto radio = check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"));
+            sender->stop();
+            radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_OFF);
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(45, SIMTIME_MS));
+            radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+            sender->start();
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->expiredAddbaRequests == 0);
+            ASSERT(sender->getAgreementDeadline(recipientAddress, true) > simTime());
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) > simTime());
+            ASSERT(sender->isIdle() && recipient->isIdle());
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         sender->dropAddbaAck = scenario == 13;
         recipient->stopOnAddbaResponse = scenario >= 14;
         recipient->repeatStopOnAddbaResponse = scenario == 15;
@@ -358,13 +377,13 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..15}
+*.test.scenario = ${scenario=0..16}
 *.node[*].hasStatus = true
 *.node[*].wlan[0].mac.typename = "TestBlockAckMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "TestBlockAckHcf"
 **.hcf.isBlockAckSupported = true
-*.node[0].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = ${scenario} == 8 ? 0s : (${scenario} >= 12 ? 1.024ms : 20ms)
+*.node[0].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = ${scenario} == 8 ? 0s : (${scenario} >= 12 && ${scenario} <= 15 ? 1.024ms : 20ms)
 *.node[1].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = 30ms
 **.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = 1s
 *.node[0].wlan[0].address = "02:00:00:00:00:01"

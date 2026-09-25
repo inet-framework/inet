@@ -119,6 +119,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     void startFrameSequence(AccessCategory ac);
     void recoverInterruptedFrames(Edcaf *edcaf);
+    void processDelbaFrameFinished(const Packet *packet, bool acknowledged = false);
     void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
     void sendUp(const std::vector<Packet *>& completeFrames);

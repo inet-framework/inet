@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -42,11 +43,15 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
     // IEEE Std 802.11-2024, 11.5.4: inactivity expiry requires DELBA with TIMEOUT.
     // Remove all due agreements before callbacks can restart HCF or alter the map.
     simtime_t now = simTime();
-    std::vector<Ptr<Ieee80211Delba>> expiredAgreements;
+    std::vector<Packet *> expiredAgreements;
     for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end(); ) {
         auto agreement = it->second;
         if (agreement->getExpirationTime() != SIMTIME_MAX && agreement->getExpirationTime() <= now) {
-            expiredAgreements.push_back(buildDelba(it->first.first, it->first.second, 39));
+            auto packet = new Packet("Delba", buildDelba(it->first.first, it->first.second, 39));
+            auto transactionId = packet->getTreeId();
+            packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+            pendingTeardowns.emplace(it->first, PendingTeardown{static_cast<uint64_t>(transactionId), nullptr});
+            expiredAgreements.push_back(packet);
             it = blockAckAgreements.erase(it);
             delete agreement;
         }
@@ -54,8 +59,8 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
             ++it;
     }
     agreementHandlerCallback->scheduleInactivityTimer();
-    for (const auto& delba : expiredAgreements)
-        procedureCallback->processMgmtFrame(new Packet("Delba", delba), delba);
+    for (auto packet : expiredAgreements)
+        procedureCallback->processMgmtFrame(packet, packet->peekAtFront<Ieee80211Delba>());
 }
 
 //
@@ -137,6 +142,11 @@ void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<co
 
 void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
 {
+    auto pending = pendingTeardowns.find({addbaRequest->getTransmitterAddress(), addbaRequest->getTid()});
+    if (pending != pendingTeardowns.end()) {
+        pending->second.deferredRequest = addbaRequest;
+        return;
+    }
     EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
     if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
         EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
@@ -151,13 +161,26 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
 
 void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    // Expiry already removed the agreement. Individual attempts cannot remove a replacement.
+}
+
+void RecipientBlockAckAgreementHandler::processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback)
+{
+    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    auto pending = pendingTeardowns.find({delba->getReceiverAddress(), delba->getTid()});
+    auto tag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    if (pending == pendingTeardowns.end() || tag == nullptr || pending->second.transactionId != tag->getTransactionId())
+        return;
+    auto request = pending->second.deferredRequest;
+    pendingTeardowns.erase(pending);
+    if (request != nullptr)
+        processReceivedAddbaRequest(request, policy, callback);
 }
 
 void RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     if (blockAckAgreementPolicy->isDelbaAccepted(delba))
-        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+        terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
 }
 
 RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
@@ -168,4 +191,3 @@ RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
 
 } // namespace ieee80211
 } // namespace inet
-

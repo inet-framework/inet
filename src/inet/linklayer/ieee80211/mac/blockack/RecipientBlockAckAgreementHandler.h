@@ -26,6 +26,11 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *> blockAckAgreements;
+    struct PendingTeardown {
+        uint64_t transactionId;
+        Ptr<const Ieee80211AddbaRequest> deferredRequest;
+    };
+    std::map<std::pair<MacAddress, Tid>, PendingTeardown> pendingTeardowns;
 
   protected:
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
@@ -41,6 +46,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
+    virtual void processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;
@@ -50,4 +56,3 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 } // namespace inet
 
 #endif
-

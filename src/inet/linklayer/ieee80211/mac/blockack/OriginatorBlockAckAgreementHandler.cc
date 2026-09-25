@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -38,11 +39,15 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     // IEEE Std 802.11-2024, 11.5.4: inactivity expiry requires DELBA with TIMEOUT.
     // Remove all due agreements before callbacks can restart HCF or alter the map.
     simtime_t now = simTime();
-    std::vector<Ptr<Ieee80211Delba>> expiredAgreements;
+    std::vector<Packet *> expiredAgreements;
     for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end(); ) {
         auto agreement = it->second;
         if (agreement->getIsAddbaResponseReceived() && agreement->getExpirationTime() != SIMTIME_MAX && agreement->getExpirationTime() <= now) {
-            expiredAgreements.push_back(buildDelba(it->first.first, it->first.second, 39));
+            auto packet = new Packet("Delba", buildDelba(it->first.first, it->first.second, 39));
+            auto transactionId = packet->getTreeId();
+            packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+            pendingTeardowns.emplace(it->first, PendingTeardown{static_cast<uint64_t>(transactionId), nullptr});
+            expiredAgreements.push_back(packet);
             it = blockAckAgreements.erase(it);
             delete agreement;
         }
@@ -50,8 +55,8 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
             ++it;
     }
     agreementHandlerCallback->scheduleInactivityTimer();
-    for (const auto& delba : expiredAgreements)
-        procedureCallback->processMgmtFrame(new Packet("Delba", delba), delba);
+    for (auto packet : expiredAgreements)
+        procedureCallback->processMgmtFrame(packet, packet->peekAtFront<Ieee80211Delba>());
 }
 
 const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
@@ -120,6 +125,12 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
     auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
         auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
+        auto pending = pendingTeardowns.find({dataHeader->getReceiverAddress(), dataHeader->getTid()});
+        if (pending != pendingTeardowns.end()) {
+            if (pending->second.deferredRequest == nullptr)
+                pending->second.deferredRequest = addbaReq;
+            return;
+        }
         createAgreement(addbaReq);
         auto addbaPacket = new Packet("AddbaReq", addbaReq);
         callback->processMgmtFrame(addbaPacket, addbaReq);
@@ -129,7 +140,7 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
 void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto agreement = getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
+    if (agreement != nullptr && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
         updateAgreement(agreement, addbaResp);
         callback->scheduleInactivityTimer();
     }
@@ -154,12 +165,29 @@ void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<co
 
 void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    // Expiry already removed the agreement. Individual attempts cannot remove a replacement.
+}
+
+void OriginatorBlockAckAgreementHandler::processDelbaFrameFinished(const Packet *packet, IProcedureCallback *callback)
+{
+    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    auto pending = pendingTeardowns.find({delba->getReceiverAddress(), delba->getTid()});
+    auto tag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    if (pending == pendingTeardowns.end() || tag == nullptr || pending->second.transactionId != tag->getTransactionId())
+        return;
+    auto request = pending->second.deferredRequest;
+    pendingTeardowns.erase(pending);
+    if (request != nullptr) {
+        createAgreement(request);
+        callback->processMgmtFrame(new Packet("AddbaReq", request), request);
+    }
 }
 
 void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
-    if (blockAckAgreementPolicy->isDelbaAccepted(delba))
+    auto agreement = getAgreement(delba->getTransmitterAddress(), delba->getTid());
+    // A peer's old DELBA can precede the response to a new setup request.
+    if (agreement != nullptr && agreement->getIsAddbaResponseReceived() && blockAckAgreementPolicy->isDelbaAccepted(delba))
         terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
 }
 
@@ -171,4 +199,3 @@ OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()
 
 } // namespace ieee80211
 } // namespace inet
-

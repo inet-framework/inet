@@ -162,6 +162,7 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     if (signalID == packetDroppedSignal) {
         Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast<Packet *>(obj);
+        processDelbaFrameFinished(packet);
         if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
             FrameTransmissionDetails transmissionDetails;
             transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
@@ -176,6 +177,25 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
     Enter_Method("scheduleStartRxTimer");
     scheduleAfter(timeout, startRxTimer);
+}
+
+void Hcf::processDelbaFrameFinished(const Packet *packet, bool acknowledged)
+{
+    auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+    if (delba == nullptr || (acknowledged && delba->getMoreFragments()))
+        return;
+    if (delba->getInitiator()) {
+        if (originatorBlockAckAgreementHandler)
+            originatorBlockAckAgreementHandler->processDelbaFrameFinished(packet, this);
+    }
+    else if (recipientBlockAckAgreementHandler) {
+        auto previous = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
+        recipientBlockAckAgreementHandler->processDelbaFrameFinished(packet, recipientBlockAckAgreementPolicy, this);
+        auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
+        if (agreement != nullptr && agreement != previous)
+            emit(blockAckAgreementAddedSignal, agreement);
+    }
+    scheduleInactivityTimer();
 }
 
 void Hcf::scheduleInactivityTimer()
@@ -307,6 +327,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             emit(packetDroppedSignal, internallyCollidedFrame, &details);
             emit(linkBrokenSignal, internallyCollidedFrame);
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(internallyCollidedHeader)) {
+                processDelbaFrameFinished(internallyCollidedFrame);
                 FrameTransmissionDetails transmissionDetails;
                 transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
                 emit(Ieee80211Mac::frameTransmissionOutcomeSignal, internallyCollidedFrame, &transmissionDetails);
@@ -413,22 +434,25 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
         if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
             auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
-            emit(blockAckAgreementAddedSignal, agreement);
+            if (agreement != nullptr)
+                emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-            emit(blockAckAgreementAddedSignal, agreement);
+            if (agreement != nullptr)
+                emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
             if (delba->getInitiator()) {
-                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
+                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getTransmitterAddress());
                 emit(blockAckAgreementDeletedSignal, agreement);
                 recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
             }
             else {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid());
-                emit(blockAckAgreementDeletedSignal, agreement);
+                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getTransmitterAddress(), delba->getTid());
+                if (agreement != nullptr && agreement->getIsAddbaResponseReceived())
+                    emit(blockAckAgreementDeletedSignal, agreement);
                 originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy);
             }
         }
@@ -487,6 +511,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             emit(packetDroppedSignal, packet, &details);
             emit(linkBrokenSignal, packet);
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
+                processDelbaFrameFinished(packet);
                 FrameTransmissionDetails transmissionDetails;
                 transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
                 emit(Ieee80211Mac::frameTransmissionOutcomeSignal, packet, &transmissionDetails);
@@ -616,6 +641,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             emit(packetDroppedSignal, failedPacket, &details);
             emit(linkBrokenSignal, failedPacket);
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader)) {
+                processDelbaFrameFinished(failedPacket);
                 FrameTransmissionDetails transmissionDetails;
                 transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
                 emit(Ieee80211Mac::frameTransmissionOutcomeSignal, failedPacket, &transmissionDetails);
@@ -687,6 +713,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
+            processDelbaFrameFinished(lastTransmittedPacket, true);
             FrameTransmissionDetails transmissionDetails;
             transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
             emit(Ieee80211Mac::frameTransmissionOutcomeSignal, lastTransmittedPacket, &transmissionDetails);

@@ -17,6 +17,7 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
 {
   public:
     using OriginatorBlockAckAgreementHandler::createAgreement;
+    using OriginatorBlockAckAgreementHandler::terminateAgreement;
 };
 
 class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
@@ -35,6 +36,7 @@ class TestAgreementCallback : public IProcedureCallback, public IBlockAckAgreeme
   public:
     RecipientBlockAckAgreementHandler& handler;
     Ptr<const Ieee80211AddbaResponse> response;
+    std::unique_ptr<Packet> lastDelba;
     simtime_t deadline = SIMTIME_MAX;
     int expirations = 0;
 
@@ -49,6 +51,7 @@ class TestAgreementCallback : public IProcedureCallback, public IBlockAckAgreeme
         else {
             auto delba = CHK(dynamicPtrCast<const Ieee80211Delba>(header));
             ASSERT(delba->getReasonCode() == 39);
+            lastDelba.reset(packet->dup());
             ++expirations;
         }
         delete packet;
@@ -96,7 +99,20 @@ for (int i = 0; i < 2; ++i) {
 }
 
 auto replacementResponse = install(0, 42, SimTime(10, SIMTIME_MS));
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+auto oldDelba = callback.lastDelba->peekAtFront<Ieee80211Delba>();
+handler.processTransmittedDelba(oldDelba);
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+Packet unrelatedDelba("other transaction", oldDelba);
+handler.processDelbaFrameFinished(&unrelatedDelba, &policy, &callback);
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+handler.processDelbaFrameFinished(callback.lastDelba.get(), &policy, &callback);
+replacementResponse = callback.response;
 auto replacement = handler.getAgreement(0, peer);
+ASSERT(replacement != nullptr);
+handler.processDelbaFrameFinished(callback.lastDelba.get(), &policy, &callback);
+handler.processTransmittedDelba(oldDelba);
+ASSERT(handler.getAgreement(0, peer) == replacement);
 auto replacementDeadline = replacement->getExpirationTime();
 auto otherResponse = install(3, 77, SimTime(5, SIMTIME_MS));
 auto other = handler.getAgreement(3, peer);
@@ -128,7 +144,7 @@ ASSERT(originator.getAgreement(peer, 0) != nullptr);
 auto delba = makeShared<Ieee80211Delba>();
 delba->setReceiverAddress(peer);
 delba->setTid(0);
-originator.processTransmittedDelba(delba);
+originator.terminateAgreement(peer, 0);
 for (int i = 0; i < 2; ++i) {
     originator.processTransmittedAddbaReq(request);
     ASSERT(originator.getAgreement(peer, 0) == nullptr);
@@ -143,6 +159,7 @@ originator.createAgreement(replacementRequest);
 auto originatorReplacement = originator.getAgreement(peer, 0);
 auto originatorDeadline = originatorReplacement->getExpirationTime();
 originator.processTransmittedAddbaReq(request);
+originator.processTransmittedDelba(delba);
 ASSERT(originator.getAgreement(peer, 0) == originatorReplacement);
 ASSERT(originatorReplacement->getStartingSequenceNumber() == SequenceNumberCyclic(42));
 ASSERT(originatorReplacement->getBufferSize() == 16);

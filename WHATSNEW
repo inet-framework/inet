@@ -6,6 +6,10 @@ INET-4.7.x (in development)
 
 Notable backward incompatible changes are the following:
 
+IEEE 802.11 Block Ack teardown now completes before replacement setup.
+Late DELBA transmission callbacks cannot remove a replacement agreement.
+Custom agreement handlers must implement processDelbaFrameFinished().
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate
