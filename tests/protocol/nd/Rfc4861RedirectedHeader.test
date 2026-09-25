@@ -8,14 +8,6 @@ doc/project/evidence/protocol/nd/checks/redirect.md#redirect-fields;
 the program steps below map onto its expected observations. Step 1 is the stimulus, and step 2
 observations 1 and 3. The other observations are in Rfc4861RedirectFields.test.
 
-Defect: sendRedirect adds no Redirected Header option
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:2379), and the model has no class for
-that option. RFC 4861 section 4.5: "Redirected Header As much as possible of the IP packet that
-triggered the sending of the Redirect without making the redirect packet exceed the minimum MTU
-specified in [IPv6]." Observation 1 holds; observation 3 fails. This test FAILS, and the
-failure is deliberately NOT declared expected: the model has the mechanism, and the mechanism
-does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

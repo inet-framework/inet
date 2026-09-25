@@ -2425,6 +2425,37 @@ void Ipv6NeighbourDiscovery::sendRedirect(Packet *redirectedPacket, const Ipv6Ad
     redirect->setDestinationAddress(destAddr);
     redirect->setChunkLength(B(40)); // fixed part of Redirect message
 
+    // Target Link-Layer Address option: the link-layer address of the target, if known
+    Neighbour *targetEntry = neighbourCache.lookup(targetAddr, ie->getInterfaceId());
+    if (targetEntry != nullptr && !targetEntry->macAddress.isUnspecified()) {
+        auto tlla = new Ipv6NdTargetLinkLayerAddress();
+        tlla->setLinkLayerAddress(targetEntry->macAddress);
+        redirect->getOptionsForUpdate().appendOption(tlla);
+        redirect->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    }
+
+    // Redirected Header option: as much of the invoking packet as fits into a Redirect of at
+    // most 1280 octets, the minimum MTU of IPv6 (RFC 4861 sections 4.6.3 and 8.2)
+    B maxDataLength = B(IPv6_MIN_MTU) - IPv6_HEADER_BYTES - redirect->getChunkLength() - IPv6ND_REDIRECTED_HEADER_OPTION_LENGTH;
+    B dataLength = std::min(B(redirectedPacket->getDataLength()), maxDataLength);
+    try {
+        std::vector<uint8_t> data = redirectedPacket->peekDataAt<BytesChunk>(b(0), dataLength)->getBytes();
+        auto redirectedHeader = new Ipv6NdRedirectedHeader();
+        redirectedHeader->setRedirectedDataArraySize(data.size());
+        for (size_t i = 0; i < data.size(); i++)
+            redirectedHeader->setRedirectedData(i, data[i]);
+        size_t paddingLength = (8 - data.size() % 8) % 8;
+        redirectedHeader->setPaddingBytesArraySize(paddingLength);
+        for (size_t i = 0; i < paddingLength; i++)
+            redirectedHeader->setPaddingBytes(i, 0);
+        redirectedHeader->setOptionLength(1 + (data.size() + paddingLength) / 8);
+        redirect->getOptionsForUpdate().appendOption(redirectedHeader);
+        redirect->addChunkLength(B(8 * redirectedHeader->getOptionLength()));
+    }
+    catch (std::exception& e) {
+        EV_WARN << "The invoking packet cannot be serialized, the Redirect carries no Redirected Header option: " << e.what() << "\n";
+    }
+
     Icmpv6::insertChecksum(checksumMode, redirect, packet);
     packet->insertAtFront(redirect);
 
