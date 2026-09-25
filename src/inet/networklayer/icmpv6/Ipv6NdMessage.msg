@@ -78,6 +78,21 @@ class Ipv6NdPrefixInformation extends Ipv6NdOption
     Ipv6Address prefix;
 }
 
+//
+// IPv6ND Redirected Header
+// RFC 4861 Section 4.6.3: the IP header and data of the invoking packet, truncated so that the
+// Redirect does not exceed the minimum MTU of IPv6; the padding bytes make the option a multiple
+// of 8 octets
+//
+class Ipv6NdRedirectedHeader extends Ipv6NdOption
+{
+    type = IPv6ND_REDIRECTED_HEADER;
+    optionLength = 1;
+    uint16_t reserved1 = 0;
+    uint32_t reserved2 = 0;
+    uint8_t redirectedData[];    // the invoking packet
+}
+
 class Ipv6NdMtu extends Ipv6NdOption
 {
     type = IPv6ND_MTU;

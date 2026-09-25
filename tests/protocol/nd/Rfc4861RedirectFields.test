@@ -9,15 +9,6 @@ the program steps below map onto its expected observations. Step 1 is the stimul
 observations 1, 4 and 2, in that order. Observation 3 is in Rfc4861RedirectedHeader.test, so
 that one missing option does not hide the other.
 
-Defect: sendRedirect builds the Redirect with its fixed part only,
-"redirect->setChunkLength(B(40))", and adds no option
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:2379). RFC 4861 section 4.5: "Target
-link-layer address The link-layer address for the target. It SHOULD be included (if known)." R1
-knows it, because it has just forwarded the echo request to R2. Observations 1 and 4 hold;
-observation 2 fails. This test FAILS, and the failure is deliberately NOT declared expected:
-the model has the mechanism, and the mechanism does the wrong thing, which is a defect. See
-results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

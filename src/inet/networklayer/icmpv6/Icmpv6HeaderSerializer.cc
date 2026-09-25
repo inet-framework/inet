@@ -55,6 +55,14 @@ void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& opt
                 stream.writeIpv6Address(pi->getPrefix());
                 break;
             }
+            case IPv6ND_REDIRECTED_HEADER: {
+                auto rh = check_and_cast<const Ipv6NdRedirectedHeader *>(option);
+                stream.writeUint16Be(rh->getReserved1());
+                stream.writeUint32Be(rh->getReserved2());
+                for (size_t j = 0; j < rh->getRedirectedDataArraySize(); j++)
+                    stream.writeByte(rh->getRedirectedData(j));
+                break;
+            }
             case IPv6ND_MTU: {
                 auto mtu = check_and_cast<const Ipv6NdMtu *>(option);
                 stream.writeUint16Be(mtu->getReserved());
@@ -135,6 +143,18 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 4); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
+                options.appendOption(option);
+                break;
+            }
+            case IPv6ND_REDIRECTED_HEADER: {
+                // the padding cannot be told apart from the data, so all octets are data
+                auto option = new Ipv6NdRedirectedHeader();
+                option->setOptionLength(length);
+                option->setReserved1(stream.readUint16Be());
+                option->setReserved2(stream.readUint32Be());
+                option->setRedirectedDataArraySize(8 * (length - 1));
+                for (int i = 0; i < 8 * (length - 1); i++)
+                    option->setRedirectedData(i, stream.readByte());
                 options.appendOption(option);
                 break;
             }

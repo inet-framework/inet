@@ -349,6 +349,13 @@ Notable backward incompatible changes are the following:
    default router. The prefixes of such an advertisement still wait for an
    advertisement after the detection.
 
+   A Redirect now carries the Target Link-Layer Address option, when the
+   router knows the link-layer address of the target, and the Redirected
+   Header option, with as much of the invoking packet as fits into 1280
+   octets (RFC 4861 sections 4.5, 4.6.3 and 8.2). Before, it carried no
+   option. The new message class Ipv6NdRedirectedHeader holds the octets of
+   the invoking packet, and the ICMPv6 serializer writes and reads it.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
