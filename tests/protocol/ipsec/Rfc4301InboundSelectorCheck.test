@@ -8,11 +8,6 @@ doc/project/evidence/protocol/ipsec/checks/security-associations.md#inbound-sele
 program steps below map onto its expected observations. The guards are observations 2 and 3; step
 1 is observation 1.
 
-Model gap: IPsec::processIngressPacket accepts an ESP or AH packet by its SPI and the protocol of
-the SA, and never matches the packet against the selectors of the SA
-(src/inet/networklayer/ipsec/IPsec.cc:803-927). B therefore delivers flow 3000, which SA 101 does
-not cover.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
