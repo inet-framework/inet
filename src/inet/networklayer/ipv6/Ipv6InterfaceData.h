@@ -34,7 +34,7 @@ class Ipv6RoutingTable;
 #define IPv6_DEFAULT_MAX_RTR_ADV_INT            600 // seconds-decrease to enable more periodic RAs
 #define IPv6_DEFAULT_MIN_TO_MAX_RTR_ADV_RATIO   0.33 // RFC 4861: default MinRtrAdvInterval = 0.33 * MaxRtrAdvInterval
 #define IPv6_DEFAULT_ADV_REACHABLE_TIME         3600 // seconds
-#define IPv6_DEFAULT_ADV_RETRANS_TIMER          1   // seconds
+#define IPv6_DEFAULT_ADV_RETRANS_TIMER          0   // milliseconds; 0 = unspecified (RFC 4861 section 6.2.1)
 #define IPv6__INET_DEFAULT_ROUTER_HOPLIMIT      64
 
 /**************RFC 2461: Section 10 Protocol Constants*************************/
@@ -333,7 +333,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  reachability of a neighbor.
          *  Default: RETRANS_TIMER milliseconds
          */
-        uint retransTimer;
+        simtime_t retransTimer;
     };
     HostVariables hostVars;
     /***************END of RFC 2461 Host Variables*****************************/
@@ -641,13 +641,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     short getCurHopLimit() const { return hostVars.curHopLimit; }
     uint getBaseReachableTime() const { return hostVars.baseReachableTime; }
     simtime_t getReachableTime() const { return hostVars.reachableTime; }
-    uint getRetransTimer() const { return hostVars.retransTimer; }
+    simtime_t getRetransTimer() const { return hostVars.retransTimer; }
     /************Setters for Host Variables************************************/
     virtual void setLinkMtu(uint d) { hostVars.linkMTU = d; }
     virtual void setCurHopLimit(short d) { hostVars.curHopLimit = d; }
     virtual void setBaseReachableTime(uint d) { hostVars.baseReachableTime = d; }
     virtual void setReachableTime(simtime_t d) { hostVars.reachableTime = d; }
-    virtual void setRetransTimer(uint d) { hostVars.retransTimer = d; }
+    virtual void setRetransTimer(simtime_t d) { hostVars.retransTimer = d; }
     /************End of Host Variables getters and setters*********************/
 
     /************Getters for Router Configuration Variables********************/
