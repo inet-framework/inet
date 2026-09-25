@@ -1,0 +1,79 @@
+%description:
+
+LogNormalShadowing with the default correlation distance (NaN), both nodes
+stationary: every computation draws a new shadowing value, so all eight
+receptions have different powers, as before the parameter existed.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 4.5s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host1.mobility.initialX = 400m
+*.host2.mobility.initialX = 500m
+
+*.radioMedium.backgroundNoise.power = -110dBm
+*.radioMedium.pathLoss.typename = "LogNormalShadowing"
+*.radioMedium.pathLoss.sigma = 8
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.transmitter.power = 100mW
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.receiver.energyDetection = -95dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -95dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 4dB
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].count = 4
+*.host1.app[0].sendInterval = 1s
+*.host1.app[0].startTime = 0.5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -a "Reception started.*WHOLE as Reception" test.out | sed -E 's/.*receiverdRadioId = ([0-9]+),.*analogModel = \{ ScalarSignalAnalogModel, power = ([^,]*),.*/\1 \2/' | sort -u > powers.out; echo "receptions=$(grep -a -c 'Reception started.*WHOLE as Reception' test.out) distinct=$(wc -l < powers.out) links=$(cut -d' ' -f1 powers.out | sort -u | wc -l)" > summary.out
+%contains: summary.out
+receptions=8 distinct=8 links=2
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

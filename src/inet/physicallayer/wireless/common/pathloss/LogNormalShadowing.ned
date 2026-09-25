@@ -19,6 +19,7 @@ module LogNormalShadowing extends FreeSpacePathLoss
 {
     parameters:
         double sigma = default(1);
+        double correlationDistance @unit(m) = default(nan m); // NaN: a new shadowing value on every computation; otherwise the value is kept per link until the receiver has moved farther than this distance from where it was drawn
         @class(LogNormalShadowing);
 }
 
