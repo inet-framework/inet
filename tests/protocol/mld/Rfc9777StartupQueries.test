@@ -49,13 +49,13 @@ static simtime_t prevAt;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9777_startup_queries")
-        // Expected observation 1: within 1 s, a General Query to ff02::1 with Maximum Response Code 10000.
+        // Expected observation 1: within 3 s, when R is up, a General Query to ff02::1 with Maximum Response Code 10000.
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return require(destOf(p) == ALL_NODES && maxRespCode(p) == 10000, "the General Query of R went to " + destOf(p).str() + " with Maximum Response Code " + num(maxRespCode(p)) + " (RFC2710-ROUTER-5)"); })
                   .assertEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; prevAt = c.event.time; return true; })
-                  .describe("within 1 s of the start, a General Query of R (RFC2710-ROUTER-6)")
-                  .within(1.0))
+                  .describe("within 3 s of the start, a General Query of R (RFC2710-ROUTER-6)")
+                  .within(3.0))
         // Expected observation 2: the second, 31.25 s after the first.
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isGeneralQuery(p); })

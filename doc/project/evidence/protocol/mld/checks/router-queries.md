@@ -27,8 +27,10 @@ query timer expires.
 
 ### Size or value arithmetic
 
-With R up at the start, the General Queries come at 0 and 31.25 seconds, then at 156.25 and
-281.25 seconds.
+R is up when it has booted and tested its link-local address, the source of every Query
+(RFC9777-GEN-2); in the model that is at most about 2.3 seconds after the start. From that
+instant t0, the General Queries come at t0 and t0 + 31.25 seconds, then at t0 + 156.25 and
+t0 + 281.25 seconds.
 
 ### Procedure
 
@@ -37,8 +39,8 @@ With R up at the start, the General Queries come at 0 and 31.25 seconds, then at
 
 ### Expected observations
 
-1. On L1, from R, within 1 second of the start, a General Query to ff02::1 with a Maximum
-   Response Code of 10000 (RFC2710-ROUTER-5, ROUTER-6). This confirms the stimulus.
+1. On L1, from R, within 3 seconds of the start, when R is up, a General Query to ff02::1 with
+   a Maximum Response Code of 10000 (RFC2710-ROUTER-5, ROUTER-6). This confirms the stimulus.
 2. The second General Query comes 31.25 seconds after the first (RFC9777-RQRY-7, TIMER-9,
    TIMER-10).
 3. The third comes 125 seconds after the second, and the fourth 125 seconds after the third
@@ -84,7 +86,8 @@ Queries at 0 and 31.25 seconds before it leaves L1, so R2 becomes the querier at
 
 ### Expected observations
 
-1. On L1, from R1, the General Query at the start, which R2 hears. This confirms the stimulus.
+1. On L1, from R1, the General Query when R1 is up, within 3 seconds of the start, which R2
+   hears. This confirms the stimulus.
 2. From that Query until 255 seconds after the last General Query of R1, no General Query
    leaves R2 (RFC9777-RQRY-6, RQRY-8, RQRY-11, RFC2710-ROUTER-8, ROUTER-10).
 3. A General Query of R2 comes 255 seconds after the last General Query of R1, with a margin of
