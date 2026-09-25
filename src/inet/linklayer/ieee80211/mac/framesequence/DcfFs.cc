@@ -27,7 +27,9 @@ DcfFs::DcfFs() :
                                                                         ALTERNATIVESFS_SELECTOR(selectSelfCtsOrRtsCts)),
                                                      OPTIONALFS_PREDICATE(isCtsOrRtsCtsNeeded)),
                                       new RepeatingFs(new FragFrameAckFs(), REPEATINGFS_PREDICATE(hasMoreFragments)),
-                                      new LastFrameAckFs()})},
+                                      new LastFrameAckFs()}),
+                    new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isRtsCtsNeeded)),
+                                      new ManagementFs()})},
                    ALTERNATIVESFS_SELECTOR(selectDcfSequence))
 {
 }
@@ -37,7 +39,11 @@ int DcfFs::selectDcfSequence(AlternativesFs *frameSequence, FrameSequenceContext
     bool multicastMgmtOrDataSequence = isBroadcastManagementOrGroupDataSequenceNeeded(frameSequence, context);
     bool fragFrameSequence = isFragFrameSequenceNeeded(frameSequence, context);
     if (multicastMgmtOrDataSequence) return 0;
-    else if (fragFrameSequence) return 1;
+    else if (fragFrameSequence) {
+        auto header = context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        // IEEE Std 802.11-2024, 10.3.2.11: do not schedule an ACK wait for Action No Ack.
+        return context->getNonQoSContext()->ackPolicy->isAckNeeded(header) ? 1 : 2;
+    }
     else throw cRuntimeError("One alternative must be chosen");
 }
 

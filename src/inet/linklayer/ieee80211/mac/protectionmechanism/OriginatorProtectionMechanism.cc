@@ -35,6 +35,9 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
+    // No response follows Action No Ack (IEEE Std 802.11-2024, 10.3.2.11).
+    if (pendingHeader->getType() == ST_NOACKACTION)
+        return ctsFrameDuration + pendingFrameDuration + 2 * modeSet->getSifsTime();
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
     simtime_t durationId = ctsFrameDuration + pendingFrameDuration + ackFrameDuration;
     return durationId + 3 * modeSet->getSifsTime();
@@ -78,6 +81,9 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
 //
 simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
+    // No modeled response or protected continuation remains after this Action No Ack transmission.
+    if (mgmtHeader->getType() == ST_NOACKACTION)
+        return 0;
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
     if (mgmtHeader->getReceiverAddress().isMulticast())
         return 0;

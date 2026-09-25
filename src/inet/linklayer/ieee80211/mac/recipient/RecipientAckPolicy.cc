@@ -34,8 +34,8 @@ simtime_t RecipientAckPolicy::computeAckDuration(Packet *dataOrMgmtPacket, const
 //
 bool RecipientAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    // TODO add mgmt NoAck check
-    return !header->getReceiverAddress().isMulticast();
+    // IEEE Std 802.11-2024, 10.3.2.11: Action No Ack elicits no ACK.
+    return header->getType() != ST_NOACKACTION && !header->getReceiverAddress().isMulticast();
 }
 
 //
