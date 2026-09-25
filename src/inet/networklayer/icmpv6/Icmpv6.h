@@ -49,6 +49,11 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
      */
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0);
 
+    /**
+     * Checks the checksum of the ICMPv6 message at the front of the packet. In
+     * CHECKSUM_COMPUTED mode it takes the addresses of the pseudo-header from the
+     * L3AddressInd tag; without the tag, only the chunks are checked.
+     */
     static bool verifyChecksum(const Packet *packet);
 
   protected:
@@ -103,7 +108,19 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
+    /**
+     * Sets the checksum mode of the message and, in the declared modes, the checksum. In
+     * CHECKSUM_COMPUTED mode the checksum stays 0: it covers the pseudo-header of the IPv6
+     * datagram (RFC 4443 section 2.3), so the Ipv6 module computes it with
+     * insertComputedChecksum() when the source address is final.
+     */
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
+    /**
+     * Computes and sets the checksum of a message in CHECKSUM_COMPUTED mode, over the
+     * pseudo-header of RFC 8200 section 8.1 and the message. The packet holds the data
+     * that follows the ICMPv6 header.
+     */
+    static void insertComputedChecksum(const Ipv6Address& srcAddress, const Ipv6Address& destAddress, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
     void insertChecksum(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertChecksum(checksumMode, icmpHeader, packet); }
 
   protected:
