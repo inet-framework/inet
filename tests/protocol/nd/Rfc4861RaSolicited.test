@@ -8,17 +8,6 @@ doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement
 the program steps below map onto its expected observations. The guard is observation 4; steps 1
 and 2 are observations 1 to 3.
 
-Defect: the router answers a solicitation only when the answer comes before nextScheduledRATime
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1210), and sendSolicitedRa
-(Ipv6NeighbourDiscovery.cc:1723) neither moves that time forward nor restarts the timer. After
-the answer to A, nextScheduledRATime stays in the past, and the router drops the answer to
-every later solicitation until its first periodic advertisement. RFC 4861 section 6.2.6: "In
-addition to sending periodic, unsolicited advertisements, a router sends advertisements in
-response to valid solicitations received on an advertising interface." Observation 1 holds;
-observation 2 fails; observation 3 has no verdict; observation 4 held while the test ran. This
-test FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism,
-and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
