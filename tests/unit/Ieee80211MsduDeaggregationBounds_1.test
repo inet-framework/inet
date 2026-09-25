@@ -1,0 +1,163 @@
+%description:
+Malformed A-MSDU subframe lengths are rejected without consuming the caller-owned
+aggregate.  The valid control verifies that a well-formed subframe is still
+deaggregated and consumed normally.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+static Packet *makeAmsduPacket()
+{
+    const MacAddress ra("02:00:00:00:00:01");
+    const MacAddress ta("02:00:00:00:00:02");
+    const MacAddress bssid("02:00:00:00:00:03");
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setToDS(false);
+    header->setFromDS(false);
+    header->setReceiverAddress(ra);
+    header->setTransmitterAddress(ta);
+    header->setAddress3(bssid);
+    header->setDurationField(SIMTIME_ZERO);
+    header->setSequenceNumber(SequenceNumberCyclic(0));
+    header->setTid(3);
+    header->setAMsduPresent(true);
+    header->addChunkLength(QOSCONTROL_PART_LENGTH);
+    auto packet = new Packet("amsdu");
+    packet->insertAtBack(header);
+    return packet;
+}
+
+static Ptr<Ieee80211MsduSubframeHeader> makeSubframeHeader(int length)
+{
+    auto header = makeShared<Ieee80211MsduSubframeHeader>();
+    header->setSa(MacAddress("02:00:00:00:00:12"));
+    header->setDa(MacAddress("02:00:00:00:00:11"));
+    header->setLength(length);
+    return header;
+}
+
+static void appendTrailer(Packet *packet)
+{
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+}
+
+%activity:
+MsduDeaggregation deaggregation;
+
+auto expectMalformed = [&](const char *name, Packet *packet) {
+    const auto beforeFrontOffset = packet->getFrontOffset();
+    const auto beforeBackOffset = packet->getBackOffset();
+    const auto beforeLength = packet->getDataLength();
+    const auto headerLength = packet->peekAtFront<Ieee80211DataHeader>()->getChunkLength();
+    const auto bodyLength = beforeLength - headerLength - B(4);
+    const auto beforeBody = packet->peekDataAt<BytesChunk>(headerLength, bodyLength)->getBytes();
+    try {
+        auto frames = deaggregation.deaggregateFrame(packet);
+        if (frames != nullptr) {
+            for (auto frame : *frames)
+                delete frame;
+            delete frames;
+        }
+        ASSERT(frames == nullptr);
+    }
+    catch (const cRuntimeError&) {
+        delete packet;
+        throw;
+    }
+    ASSERT(packet->getDataLength() == beforeLength);
+    ASSERT(packet->getFrontOffset() == beforeFrontOffset);
+    ASSERT(packet->getBackOffset() == beforeBackOffset);
+    ASSERT(packet->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+    ASSERT(packet->peekDataAt<BytesChunk>(headerLength, bodyLength)->getBytes() == beforeBody);
+    delete packet;
+    EV_INFO << name << " rejected without consuming the aggregate.\n";
+};
+
+// A subframe header is exactly 14 octets; only 13 octets are available.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(13, 0)));
+    appendTrailer(packet);
+    expectMalformed("short subframe header", packet);
+}
+
+// Empty MSDUs are rejected before an empty packet-data peek can throw.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(0));
+    appendTrailer(packet);
+    expectMalformed("zero-length MSDU", packet);
+}
+
+// The declared MSDU payload is longer than the remaining aggregate body.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(4));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3}));
+    appendTrailer(packet);
+    expectMalformed("payload longer than remaining body", packet);
+}
+
+// The first subframe requires three octets of padding, but only two are present.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(3));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3}));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0, 0}));
+    appendTrailer(packet);
+    expectMalformed("truncated padding", packet);
+}
+
+// A valid first subframe is followed by fewer than 14 octets of a next header.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(2));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2}));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(5, 0)));
+    appendTrailer(packet);
+    expectMalformed("truncated next header", packet);
+}
+
+// A valid first subframe must not be returned when the second one is malformed.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(2));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2}));
+    packet->insertAtBack(makeSubframeHeader(4));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{3}));
+    appendTrailer(packet);
+    expectMalformed("valid first and malformed second subframe", packet);
+}
+
+// A well-formed aggregate still succeeds and consumes its input packet.
+{
+    auto packet = makeAmsduPacket();
+    packet->insertAtBack(makeSubframeHeader(4));
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{4, 5, 6, 7}));
+    appendTrailer(packet);
+    auto frames = deaggregation.deaggregateFrame(packet);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    auto frame = frames->at(0);
+    auto header = frame->popAtFront<Ieee80211DataHeader>();
+    ASSERT(header->getReceiverAddress() == MacAddress("02:00:00:00:00:01"));
+    ASSERT(header->getTransmitterAddress() == MacAddress("02:00:00:00:00:02"));
+    ASSERT(!header->getAMsduPresent());
+    frame->popAtBack<Ieee80211MacTrailer>(B(4));
+    ASSERT(frame->peekAtFront<BytesChunk>()->getBytes() == std::vector<uint8_t>({4, 5, 6, 7}));
+    delete frame;
+    delete frames;
+}
+
+EV << "A-MSDU malformed lengths are rejected without partial deaggregation.\n";
+
+%contains: stdout
+A-MSDU malformed lengths are rejected without partial deaggregation.
