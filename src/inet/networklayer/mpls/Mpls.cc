@@ -38,6 +38,7 @@ void Mpls::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
         pct.reference(this, "classifierModule", true);
+        icmp.reference(this, "icmpModule", false);
 
         WATCH(delay1);
         WATCH(numReceived);
@@ -364,6 +365,16 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 void Mpls::sendToLink(Packet *packet, const NetworkInterface *networkInterface)
 {
     packet->trim();
+    // RFC 3032 section 3.3: a labeled IP datagram that is longer than the payload of the link
+    // is too big (an MTU of 0 means no limit)
+    int mtu = networkInterface->getMtu();
+    if (mtu > 0 && packet->getByteLength() > mtu) {
+        const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::mpls || protocol == &Protocol::ipv4) {
+            processTooBigDatagram(packet, networkInterface, mtu);
+            return;
+        }
+    }
     packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     if (networkInterface->isBroadcast() && !networkInterface->getMacAddress().isUnspecified() && packet->findTag<MacAddressReq>() == nullptr)
@@ -375,6 +386,68 @@ void Mpls::sendToLink(Packet *packet, const NetworkInterface *networkInterface)
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
     sendToL2(packet);
+}
+
+void Mpls::processTooBigDatagram(Packet *packet, const NetworkInterface *networkInterface, int mtu)
+{
+    // the label stack comes off, and each fragment gets a copy of it
+    std::vector<Ptr<MplsHeader>> labelStack; // top entry first
+    bool labeled = packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mpls;
+    while (labeled) {
+        auto mplsHeader = packet->removeAtFront<MplsHeader>();
+        labeled = !mplsHeader->getS();
+        labelStack.push_back(mplsHeader);
+    }
+    int stackLength = 0;
+    for (auto& mplsHeader : labelStack)
+        stackLength += B(mplsHeader->getChunkLength()).get();
+    int maxDatagramLength = mtu - stackLength;
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+
+    if (ipv4Header->getDontFragment()) {
+        // RFC 3032 section 3.4: the datagram is not forwarded, and its source gets an ICMP
+        // Destination Unreachable message whose Next-Hop MTU leaves room for the label stack
+        EV_WARN << "discarding a too-big datagram with the DF bit, sending ICMP_DESTINATION_UNREACHABLE" << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        if (icmp != nullptr)
+            icmp->sendPtbMessage(packet, maxDatagramLength);
+        delete packet;
+        return;
+    }
+
+    // RFC 3032 section 3.4: each fragment is at least as many octets shorter than the payload
+    // of the link as the label stack is long, and carries the same label stack
+    int headerLength = B(ipv4Header->getHeaderLength()).get();
+    int payloadLength = B(packet->getDataLength()).get() - headerLength;
+    int fragmentLength = ((maxDatagramLength - headerLength) / 8) * 8;
+    if (fragmentLength <= 0)
+        throw cRuntimeError("Cannot fragment datagram: MTU=%d too small for the label stack (%d bytes) and the header (%d bytes)", mtu, stackLength, headerLength);
+    int offsetBase = ipv4Header->getFragmentOffset();
+    EV_DETAIL << "Breaking a too-big datagram into " << (payloadLength + fragmentLength - 1) / fragmentLength << " fragments\n";
+    for (int offset = 0; offset < payloadLength; offset += fragmentLength) {
+        bool lastFragment = offset + fragmentLength >= payloadLength;
+        int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
+        std::string fragmentName = std::string(packet->getName()) + "-frag-" + std::to_string(offset);
+        if (lastFragment)
+            fragmentName += "-last";
+        Packet *fragment = new Packet(fragmentName.c_str());
+        fragment->copyTags(*packet);
+        fragment->insertAtBack(packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength)));
+        auto fragmentHeader = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());
+        if (!lastFragment)
+            fragmentHeader->setMoreFragments(true);
+        fragmentHeader->setFragmentOffset(offsetBase + offset);
+        fragmentHeader->setTotalLengthField(B(headerLength + thisFragmentLength));
+        fragmentHeader->updateChecksum();
+        fragment->insertAtFront(fragmentHeader);
+        for (auto it = labelStack.rbegin(); it != labelStack.rend(); ++it)
+            fragment->insertAtFront(staticPtrCast<MplsHeader>((*it)->dupShared()));
+        fragment->addTagIfAbsent<PacketProtocolTag>()->setProtocol(labelStack.empty() ? &Protocol::ipv4 : &Protocol::mpls);
+        sendToLink(fragment, networkInterface);
+    }
+    delete packet;
 }
 
 void Mpls::sendToL2(Packet *msg)

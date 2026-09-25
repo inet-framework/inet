@@ -8,13 +8,6 @@ doc/project/evidence/protocol/mpls/checks/fragmentation.md#a-labeled-datagram-to
 the program steps below map onto its expected observations. The guards are observations 3 to 5;
 step 1 is observation 2, on the first datagram of flow 2000, and step 2 observation 1.
 
-Expected result FAIL, missing feature: the MPLS module has no MTU check and no fragmentation.
-Mpls::processMplsPacketFromL2 sends a labeled packet to the link whatever its length
-(src/inet/networklayer/mpls/Mpls.cc:217-285), and PPP sends a frame longer than its mtu
-parameter. See results.md.
-
-%# expected-result: FAIL
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"

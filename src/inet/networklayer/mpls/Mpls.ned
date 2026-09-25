@@ -50,6 +50,7 @@ simple Mpls extends SimpleModule like IProtocolLayer
         string interfaceTableModule;   // The path to the InterfaceTable module
         string libTableModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
+        string icmpModule = default("^.ipv4.icmp"); // The path to the Icmp module that reports a too-big labeled datagram; optional
         @display("i=block/switch");
     gates:
         input upperLayerIn;
