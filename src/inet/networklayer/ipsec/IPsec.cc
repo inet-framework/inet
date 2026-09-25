@@ -22,6 +22,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/XMLUtils.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -532,8 +533,14 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
     // encrypting:
     if (tfcPadding > 0)
         transport->insertAtBack(makeShared<ByteCountChunk>(B(tfcPadding)));
-    if (padLength > 0)
-        transport->insertAtBack(makeShared<ByteCountChunk>(B(padLength)));
+    if (padLength > 0) {
+        // RFC 4303 section 2.4: with no other rule of the cipher, the padding octets are the
+        // monotonically increasing sequence 1, 2, 3, ...
+        std::vector<uint8_t> padding(padLength);
+        for (unsigned int i = 0; i < padLength; i++)
+            padding[i] = i + 1;
+        transport->insertAtBack(makeShared<BytesChunk>(padding));
+    }
     const auto& espTrailer = makeShared<IPsecEspTrailer>();
     espTrailer->setPadLength(padLength);
     espTrailer->setNextHeader(transportType);
