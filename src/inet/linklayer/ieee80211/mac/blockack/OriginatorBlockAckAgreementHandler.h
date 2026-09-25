@@ -26,6 +26,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
         Ptr<const Ieee80211AddbaRequest> deferredRequest;
     };
     std::map<std::pair<MacAddress, Tid>, PendingTeardown> pendingTeardowns;
+    uint8_t nextDialogToken = 1;
 
   protected:
     virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);

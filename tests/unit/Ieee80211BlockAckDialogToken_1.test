@@ -1,0 +1,141 @@
+%description:
+An old ADDBA response cannot establish a replacement Block Ack agreement.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+class DialogTokenOriginatorPolicy : public IOriginatorBlockAckAgreementPolicy
+{
+  public:
+    virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override { return true; }
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& response, OriginatorBlockAckAgreement *agreement) override { return true; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override { return true; }
+    virtual bool isMsduSupported() const override { return false; }
+    virtual simtime_t computeAddbaFailureTimeout() const override { return SimTime(1); }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return SimTime(1, SIMTIME_MS); }
+    virtual bool isDelayedAckPolicySupported() const override { return false; }
+    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+};
+
+class DialogTokenRecipientPolicy : public IRecipientBlockAckAgreementPolicy
+{
+  public:
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& request) override { return true; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override { return true; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return SimTime(1, SIMTIME_MS); }
+    virtual bool aMsduSupported() const override { return false; }
+    virtual bool delayedBlockAckPolicySupported() const override { return false; }
+    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+};
+
+class DialogTokenCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    Ptr<const Ieee80211AddbaRequest> request;
+    Ptr<const Ieee80211AddbaResponse> response;
+    std::unique_ptr<Packet> delba;
+    int timerUpdates = 0;
+
+    virtual void scheduleInactivityTimer() override { ++timerUpdates; }
+
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+            request = addbaRequest;
+        else if (auto addbaResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(header))
+            response = addbaResponse;
+        else if (dynamicPtrCast<const Ieee80211Delba>(header))
+            delba.reset(packet->dup());
+        delete packet;
+    }
+
+    virtual void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
+    {
+        delete packet;
+        throw cRuntimeError("Unexpected control response");
+    }
+};
+
+%activity:
+OriginatorBlockAckAgreementHandler originator;
+RecipientBlockAckAgreementHandler recipient;
+DialogTokenOriginatorPolicy originatorPolicy;
+DialogTokenRecipientPolicy recipientPolicy;
+DialogTokenCallback originatorCallback;
+DialogTokenCallback recipientCallback;
+const MacAddress peer("02:00:00:00:00:01");
+auto data = makeShared<Ieee80211DataHeader>();
+data->setReceiverAddress(peer);
+data->setTid(3);
+data->setSequenceNumber(SequenceNumberCyclic(10));
+
+originator.processTransmittedDataFrame(nullptr, data, &originatorPolicy, &originatorCallback);
+auto requestA = originatorCallback.request;
+ASSERT(requestA != nullptr);
+ASSERT(requestA->getDialogToken() != 0);
+
+auto peerRequest = makeShared<Ieee80211AddbaRequest>();
+peerRequest->setTransmitterAddress(peer);
+peerRequest->setTid(3);
+peerRequest->setStartingSequenceNumber(SequenceNumberCyclic(11));
+peerRequest->setBufferSize(32);
+peerRequest->setDialogToken(requestA->getDialogToken());
+recipient.processReceivedAddbaRequest(peerRequest, &recipientPolicy, &recipientCallback);
+ASSERT(recipientCallback.response->getDialogToken() == requestA->getDialogToken());
+
+auto responseA = makeShared<Ieee80211AddbaResponse>();
+responseA->setTransmitterAddress(peer);
+responseA->setTid(3);
+responseA->setDialogToken(requestA->getDialogToken());
+responseA->setBufferSize(32);
+responseA->setBlockAckTimeoutValue(SimTime(1, SIMTIME_MS));
+originator.processReceivedAddbaResp(responseA, &originatorPolicy, &originatorCallback);
+ASSERT(originator.getAgreement(peer, 3)->getIsAddbaResponseReceived());
+
+wait(SimTime(1, SIMTIME_MS));
+originator.blockAckAgreementExpired(&originatorCallback, &originatorCallback);
+ASSERT(originator.getAgreement(peer, 3) == nullptr);
+ASSERT(originatorCallback.delba != nullptr);
+
+data->setSequenceNumber(SequenceNumberCyclic(20));
+originator.processTransmittedDataFrame(nullptr, data, &originatorPolicy, &originatorCallback);
+ASSERT(originator.getAgreement(peer, 3) == nullptr);
+originator.processDelbaFrameFinished(originatorCallback.delba.get(), &originatorCallback);
+auto requestB = originatorCallback.request;
+auto replacement = originator.getAgreement(peer, 3);
+ASSERT(replacement != nullptr);
+ASSERT(requestB->getDialogToken() != requestA->getDialogToken());
+ASSERT(replacement->getDialogToken() == requestB->getDialogToken());
+ASSERT(!replacement->getIsAddbaResponseReceived());
+
+int timerUpdates = originatorCallback.timerUpdates;
+originator.processReceivedAddbaResp(responseA, &originatorPolicy, &originatorCallback);
+ASSERT(!replacement->getIsAddbaResponseReceived());
+ASSERT(replacement->getBufferSize() == 64);
+ASSERT(replacement->getBlockAckTimeoutValue() == -1);
+ASSERT(originatorCallback.timerUpdates == timerUpdates);
+
+auto responseB = makeShared<Ieee80211AddbaResponse>();
+responseB->setTransmitterAddress(peer);
+responseB->setTid(3);
+responseB->setDialogToken(requestB->getDialogToken());
+responseB->setBufferSize(16);
+responseB->setBlockAckTimeoutValue(SimTime(2, SIMTIME_MS));
+originator.processReceivedAddbaResp(responseB, &originatorPolicy, &originatorCallback);
+ASSERT(replacement->getIsAddbaResponseReceived());
+ASSERT(replacement->getBufferSize() == 16);
+ASSERT(replacement->getBlockAckTimeoutValue() == SimTime(2, SIMTIME_MS));
+ASSERT(originatorCallback.timerUpdates == timerUpdates + 1);
+
+originator.processReceivedAddbaResp(responseA, &originatorPolicy, &originatorCallback);
+ASSERT(replacement->getBufferSize() == 16);
+ASSERT(replacement->getBlockAckTimeoutValue() == SimTime(2, SIMTIME_MS));
+ASSERT(originatorCallback.timerUpdates == timerUpdates + 1);

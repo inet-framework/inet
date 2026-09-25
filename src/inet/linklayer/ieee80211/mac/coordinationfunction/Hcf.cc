@@ -448,9 +448,11 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
                 emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+            auto previous = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
+            bool wasEstablished = previous != nullptr && previous->getIsAddbaResponseReceived();
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-            if (agreement != nullptr)
+            if (!wasEstablished && agreement != nullptr && agreement->getIsAddbaResponseReceived())
                 emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {

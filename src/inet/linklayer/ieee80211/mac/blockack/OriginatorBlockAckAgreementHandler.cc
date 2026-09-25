@@ -15,7 +15,7 @@ namespace ieee80211 {
 
 void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest)
 {
-    OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0);
+    OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0, addbaRequest->getDialogToken());
     auto agreementId = std::make_pair(addbaRequest->getReceiverAddress(), addbaRequest->getTid());
     blockAckAgreements[agreementId] = blockAckAgreement;
 }
@@ -62,6 +62,9 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
 const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     auto addbaRequest = makeShared<Ieee80211AddbaRequest>();
+    // IEEE Std 802.11-2024, 9.6.4.2: a solicited ADDBA request uses a nonzero dialog token.
+    addbaRequest->setDialogToken(nextDialogToken);
+    nextDialogToken = nextDialogToken == 255 ? 1 : nextDialogToken + 1;
     addbaRequest->setReceiverAddress(receiverAddr);
     addbaRequest->setTid(tid);
     addbaRequest->setAMsduSupported(blockAckAgreementPolicy->isMsduSupported());
@@ -140,7 +143,9 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
 void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto agreement = getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-    if (agreement != nullptr && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
+    if (agreement != nullptr && !agreement->getIsAddbaResponseReceived() &&
+            agreement->getDialogToken() == addbaResp->getDialogToken() &&
+            blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
         updateAgreement(agreement, addbaResp);
         callback->scheduleInactivityTimer();
     }

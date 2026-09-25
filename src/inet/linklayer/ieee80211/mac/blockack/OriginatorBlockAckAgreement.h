@@ -26,17 +26,19 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     bool isAMsduSupported = false;
     bool isDelayedBlockAckPolicySupported = false;
     bool isAddbaResponseReceived = false;
+    uint8_t dialogToken = 0;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
 
   public:
-    OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
+    OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported, uint8_t dialogToken) :
         receiverAddr(receiverAddr),
         tid(tid),
         startingSequenceNumber(startingSequenceNumber),
         bufferSize(bufferSize),
         isAMsduSupported(isAMsduSupported),
-        isDelayedBlockAckPolicySupported(isDelayedBlockAckPolicySupported)
+        isDelayedBlockAckPolicySupported(isDelayedBlockAckPolicySupported),
+        dialogToken(dialogToken)
     {
     }
 
@@ -46,6 +48,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }
     virtual void setStartingSequenceNumber(SequenceNumberCyclic sequenceNumber) { startingSequenceNumber = sequenceNumber; }
     virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
+    virtual uint8_t getDialogToken() const { return dialogToken; }
     virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
     virtual MacAddress getReceiverAddr() const { return receiverAddr; }
@@ -68,4 +71,3 @@ class INET_API OriginatorBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

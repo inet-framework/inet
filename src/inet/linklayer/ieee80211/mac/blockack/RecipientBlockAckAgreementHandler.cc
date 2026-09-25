@@ -114,6 +114,8 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddre
 const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
+    // IEEE Std 802.11-2024, 9.6.4.3: copy the token from the corresponding request.
+    addbaResponse->setDialogToken(addbaRequest->getDialogToken());
     addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
     // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
     Tid tid = addbaRequest->getTid();
