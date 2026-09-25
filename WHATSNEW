@@ -304,6 +304,17 @@ Notable backward incompatible changes are the following:
    the first interface of the router, and was lost; so trajectories of RIPng
    simulations with requests change.
 
+18. The IPv6 routes of the configuration return with the carrier
+
+   When an interface goes down or loses its carrier, Ipv6RoutingTable now
+   keeps the static (MANUAL) and the own advertised prefix (OWN_ADV_PREFIX)
+   routes of the interface aside, and adds them again when the interface is up
+   with a carrier. Before, it deleted them for good: after a link failure, a
+   router had no on-link route to the network of that link, and no link-local
+   route on that interface. The other routes of the interface are deleted as
+   before. Trajectories of IPv6 simulations whose links go down and come back
+   can change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

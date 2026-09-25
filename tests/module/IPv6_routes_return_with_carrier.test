@@ -1,0 +1,88 @@
+%description:
+Tests that the IPv6 routing table of a router adds the routes of its configuration again when
+the carrier of their interface returns.
+
+    hostA -- R1 -- hostB
+
+Ipv6NetworkConfigurator gives R1 the on-link route of the network of hostA as a static route.
+The link between hostA and R1 goes down at 2s and comes back at 4s. The routing table of R1
+removes the routes of eth0 when the carrier goes, and keeps the routes of the configuration
+aside. At 6s, hostB sends one UDP datagram to hostA.
+
+Expected: R1 forwards the datagram, and the sink of hostA receives it. Before the repair, the
+routing table deleted the routes of the configuration and never added them again, so R1 found
+no route to hostA and sent an ICMPv6 Destination Unreachable.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+network RoutesReturnTest6
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        scenarioManager: ScenarioManager;
+        hostA: StandardHost6;
+        R1: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> R1.ethg++;
+        R1.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = RoutesReturnTest6
+sim-time-limit = 8s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+*.configurator.config = xml("<config>\
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>\
+    <interface hosts='R1' names='eth0' address='2001:db8:1::1'/>\
+    <interface hosts='R1' names='eth1' address='2001:db8:2::1'/>\
+    <interface hosts='hostB' names='eth0' address='2001:db8:2::10'/>\
+    </config>")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+*.scenarioManager.script = xml("<scenario>\
+    <at t='2'><disconnect src-module='hostA' src-gate='ethg$o[0]'/><disconnect src-module='R1' src-gate='ethg$o[0]'/></at>\
+    <at t='4'><connect src-module='hostA' src-gate='ethg[0]' dest-module='R1' dest-gate='ethg[0]' channel-type='inet.node.ethernet.Eth100M'/></at>\
+    </scenario>")
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpBasicApp"
+*.hostB.app[0].destAddresses = "2001:db8:1::10"
+*.hostB.app[0].destPort = 1000
+*.hostB.app[0].messageLength = 64B
+*.hostB.app[0].startTime = 6s
+*.hostB.app[0].stopTime = 6.5s
+*.hostB.app[0].sendInterval = 1s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpSink"
+*.hostA.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RoutesReturnTest6.hostA.app[0]: Received packet: (inet::Packet)UdpBasicAppData-0
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+unroutable, sending ICMPv6_DESTINATION_UNREACHABLE
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
