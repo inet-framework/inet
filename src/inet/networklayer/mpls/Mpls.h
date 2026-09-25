@@ -51,7 +51,12 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void processPacketFromL2(Packet *msg);
     virtual void processMplsPacketFromL2(Packet *mplsPacket);
 
-    virtual bool tryLabelAndForwardIpv4Datagram(Packet *ipdatagram);
+    /**
+     * Labels the datagram when the classifier maps it to a FEC. A datagram that arrives from a
+     * link is forwarded by this LSR as an IP router, so its TTL is decremented first
+     * (RFC 3032 section 2.4.3); one with TTL 1 or less is left to the network layer.
+     */
+    virtual bool tryLabelAndForwardIpv4Datagram(Packet *ipdatagram, bool fromLink = false);
     virtual void labelAndForwardIpv4Datagram(Packet *ipdatagram);
 
     virtual void sendToL2(Packet *msg);
@@ -61,6 +66,7 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void popLabel(Packet *packet);
     void setTopLabelTtl(Packet *packet, int ttl);
+    void setIpv4Ttl(Packet *packet, int ttl);
 
     /**
      * Applies the label operations. The outgoing TTL is that of RFC 3032 section 2.4.1; -1 means

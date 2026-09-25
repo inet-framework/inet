@@ -6,11 +6,6 @@ Checks RFC3031-TTL-1 from the catalogs under doc/project/evidence/standard/. The
 procedure is in doc/project/evidence/protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label;
 the program steps below map onto its expected observations. Step 1 is observation 4.
 
-Model gap: the IPv4 TTL does not change across the LSP. The ingress labels a datagram as it
-arrives from the link, before IPv4 forwards it (Mpls::processPacketFromL2, Mpls.cc:202-208), and
-the egress pops the last label and sends the datagram to the link (Mpls.cc:269-283), so no LSR of
-the LSP counts as a hop and no pop writes the IPv4 TTL. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"

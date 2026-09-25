@@ -94,10 +94,8 @@ void Mpls::processPacketFromL3(Packet *msg)
     labelAndForwardIpv4Datagram(msg);
 }
 
-bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
+bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet, bool fromLink)
 {
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    (void)ipv4Header; // unused variable
     LabelOpVector outLabel;
     std::string outInterface; // FIXME set based on interfaceID
     int color;
@@ -110,11 +108,24 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 
     ASSERT(outLabel.size() > 0);
 
+    if (fromLink) {
+        // the ingress forwards the datagram as an IP router: the TTL is decremented before
+        // the first label copies it (RFC 3032 section 2.4.3); an expiring datagram goes to
+        // the network layer, which reports it
+        int ttl = packet->peekAtFront<Ipv4Header>()->getTimeToLive();
+        if (ttl <= 1)
+            return false;
+        setIpv4Ttl(packet, ttl - 1);
+    }
+
     doStackOps(packet, outLabel);
 
     EV_INFO << "forwarding packet to " << outInterface << endl;
 
-    packet->addPar("color") = color;
+    if (packet->hasPar("color"))
+        packet->par("color") = color;
+    else
+        packet->addPar("color") = color;
 
     packet->trim();
     packet->removeTagIfPresent<DispatchProtocolReq>();
@@ -170,6 +181,15 @@ void Mpls::setTopLabelTtl(Packet *packet, int ttl)
     packet->insertAtFront(mplsHeader);
 }
 
+void Mpls::setIpv4Ttl(Packet *packet, int ttl)
+{
+    packet->trimFront();
+    auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+    ipv4Header->setTimeToLive(ttl);
+    ipv4Header->updateChecksum();
+    packet->insertAtFront(ipv4Header);
+}
+
 void Mpls::popLabel(Packet *packet)
 {
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
@@ -208,9 +228,15 @@ void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outgoin
                 break;
         }
         // RFC 3032 section 2.4.2: the top entry leaves with the outgoing TTL, whatever labels
-        // were pushed or popped; a pushed entry then copies it (RFC 3443 section 3.6)
-        if (outgoingTtl >= 0 && packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())
-            setTopLabelTtl(packet, outgoingTtl);
+        // were pushed or popped; a pushed entry then copies it (RFC 3443 section 3.6), and a
+        // pop that empties the stack gives it to the IP header (RFC 3032 section 2.4.3)
+        if (outgoingTtl >= 0) {
+            int protocolId = packet->getTag<PacketProtocolTag>()->getProtocol()->getId();
+            if (protocolId == Protocol::mpls.getId())
+                setTopLabelTtl(packet, outgoingTtl);
+            else if (protocolId == Protocol::ipv4.getId())
+                setIpv4Ttl(packet, outgoingTtl);
+        }
     }
 }
 
@@ -224,7 +250,7 @@ void Mpls::processPacketFromL2(Packet *packet)
         // Ipv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
-        if (!tryLabelAndForwardIpv4Datagram(packet)) {
+        if (!tryLabelAndForwardIpv4Datagram(packet, true)) {
             sendToL3(packet);
         }
     }
