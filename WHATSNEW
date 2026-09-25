@@ -32,6 +32,19 @@ Notable backward incompatible changes are the following:
    This change requires the modification of C++ code that derives from Radio
    and accesses these members or overrides these methods.
 
+2. The arrival knows its receiver
+
+   IArrival gained getReceiverRadio(), the radio the arrival was computed for.
+   Together with the transmission's transmitter radio it identifies the
+   link, so a model can now keep per-link state (for example a path loss
+   whose shadowing is correlated over distance). To provide it,
+   IPropagation::computeArrival() takes the receiver radio instead of its
+   mobility, and the Arrival constructor takes the receiver radio as its
+   first argument.
+
+   This change requires the modification of C++ code that implements
+   IPropagation, calls computeArrival(), or constructs Arrival objects.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
