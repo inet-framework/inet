@@ -7,11 +7,6 @@ The English procedure is in doc/project/evidence/protocol/mpls/checks/ttl.md#the
 the program steps below map onto its expected observations. The guard records the TTL on L2; step
 1 is observations 1 and 3.
 
-Model gap: the TTL field of every label stack entry is 0. Mpls::pushLabel and Mpls::swapLabel
-build a new MplsHeader, set its label and its S bit, and never set its TTL
-(src/inet/networklayer/mpls/Mpls.cc:139-153); the ingress never reads the IPv4 TTL
-(Mpls.cc:98-99). See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"

@@ -13,6 +13,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/Utils.h"
@@ -139,7 +140,14 @@ void Mpls::labelAndForwardIpv4Datagram(Packet *ipdatagram)
 void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
 {
     packet->trimFront();
-    newMplsHeader->setS(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId());
+    int protocolId = packet->getTag<PacketProtocolTag>()->getProtocol()->getId();
+    newMplsHeader->setS(protocolId != Protocol::mpls.getId());
+    // the Uniform Model (RFC 3443 section 3.6): a pushed entry copies the TTL of the entry below
+    // it, or of the IP header when it is the first label (RFC 3032 section 2.4.3)
+    if (protocolId == Protocol::mpls.getId())
+        newMplsHeader->setTtl(packet->peekAtFront<MplsHeader>()->getTtl());
+    else if (protocolId == Protocol::ipv4.getId())
+        newMplsHeader->setTtl(packet->peekAtFront<Ipv4Header>()->getTimeToLive());
     packet->insertAtFront(newMplsHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
 }
@@ -150,7 +158,16 @@ void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
     packet->trimFront();
     auto oldMplsHeader = packet->removeAtFront<MplsHeader>();
     newMplsHeader->setS(oldMplsHeader->getS());
+    newMplsHeader->setTtl(oldMplsHeader->getTtl());
     packet->insertAtFront(newMplsHeader);
+}
+
+void Mpls::setTopLabelTtl(Packet *packet, int ttl)
+{
+    packet->trimFront();
+    auto mplsHeader = packet->removeAtFront<MplsHeader>();
+    mplsHeader->setTtl(ttl);
+    packet->insertAtFront(mplsHeader);
 }
 
 void Mpls::popLabel(Packet *packet)
@@ -162,7 +179,7 @@ void Mpls::popLabel(Packet *packet)
     }
 }
 
-void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
+void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outgoingTtl)
 {
     unsigned int n = outLabel.size();
 
@@ -190,6 +207,10 @@ void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
                 throw cRuntimeError("Unknown MPLS OptCode %d", outLabel[i].optcode);
                 break;
         }
+        // RFC 3032 section 2.4.2: the top entry leaves with the outgoing TTL, whatever labels
+        // were pushed or popped; a pushed entry then copies it (RFC 3443 section 3.6)
+        if (outgoingTtl >= 0 && packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())
+            setTopLabelTtl(packet, outgoingTtl);
     }
 }
 
@@ -247,7 +268,11 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     NetworkInterface *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
-    doStackOps(packet, outLabel);
+    // RFC 3032 section 2.4.1: the outgoing TTL is one less than the TTL of the top entry
+    int incomingTtl = mplsHeader->getTtl();
+    int outgoingTtl = incomingTtl > 0 ? incomingTtl - 1 : 0;
+
+    doStackOps(packet, outLabel, outgoingTtl);
 
     if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
         // forward labeled packet
