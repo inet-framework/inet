@@ -1,6 +1,6 @@
 # Enforcement
 
-> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), [pull-request.md](../rule/pull-request.md), [release.md](../rule/release.md), [sealing.md](../rule/sealing.md)
+> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), [planning.md](../rule/planning.md), [pull-request.md](../rule/pull-request.md), [release.md](../rule/release.md), [sealing.md](../rule/sealing.md)
 
 The machinery that checks the rules. This document holds two things: the **tier ladder**, which every
 rule document cites, and the **gate inventory**, which lists the checks that really exist.
@@ -26,6 +26,17 @@ T4 needs its own discipline, and [checklist/general.md](checklist/general.md) st
 over recall**. The reviewer flags only a clear violation, asks a question only for a plausible rule
 conflict requiring human judgment, and never re-flags a deviation that a ledger already records. A
 noisy gate gets ignored, and an ignored gate enforces nothing.
+
+## Implementation plan review
+
+The draft [plan procedure](../guide/write-an-implementation-plan.md) includes a
+[review checklist](../guide/write-an-implementation-plan.md#review-checklist) for agent assessment
+at T4. Human approval belongs to T5 under
+[PLR-APPROVAL](../rule/planning.md#plr-approval). The draft
+[plan rules](../rule/planning.md) state when this process applies.
+
+This is a manual review procedure. No automated gate checks plan approval. A successful document
+check establishes neither design quality nor human approval.
 
 ## The gate inventory
 

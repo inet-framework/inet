@@ -105,6 +105,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 
 | Rule | Statement |
 | --- | --- |
+| [AR-EXT-REUSE](#ar-ext-reuse) | Reuse existing mechanisms unless the required behavior justifies an addition |
 | [AR-EXT-NOCORE](#ar-ext-nocore) | New protocols are added purely through existing contracts and registration points |
 | [AR-EXT-ATTACH](#ar-ext-attach) | Shared core structures are extended by attaching protocol-specific data |
 | [AR-EXT-FEATURES](#ar-ext-features) | Optional functionality is partitioned into independently disableable features |
@@ -173,6 +174,13 @@ with confidence that it satisfies the same contract, and that the contract can b
 and reasoned about independently of any one implementation (`IInterfaceTable`, for example,
 lets the interface table be replaced without recompiling the modules that use it).
 
+A new interface needs a concrete substitution requirement. Identify an existing or expected
+alternative implementation. A documented extension point for external models also satisfies this
+requirement when its replacement role is clear.
+One current implementation is sufficient when that replacement role is clear. Speculative
+flexibility alone does not justify an interface. Check existing contracts under
+[AR-EXT-REUSE](#ar-ext-reuse) before you define another role.
+
 The paired contract also declares the meaning of each caller-visible operation and which outcome
 distinctions exist. Where applicable, those distinctions may include a valid empty result, absence
 or unsupported capability, invalid or out-of-range input, refusal, and failure. Implementations,
@@ -181,7 +189,7 @@ implementation, return value, or argument must not silently collapse or change t
 semantics according to the selected implementation or the caller's static type.
 
 *Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3);
-T4 for semantic substitutability.*
+T4 for the substitution requirement and semantic substitutability.*
 
 ### AR-ORG-CONTRACT-PURITY
 
@@ -764,6 +772,27 @@ turns configuration into guesswork.
 ## Extensibility (AR-EXT)
 
 *Enforced at T1+T4 — **units library + `@unit` (compile-time dimensional analysis)**; agent review for single-meaning fields.*
+
+### AR-EXT-REUSE
+
+**Reuse existing mechanisms unless the required behavior justifies an addition**
+
+Each new mechanism creates a maintenance obligation. Assess the relevant existing mechanisms before
+you propose an addition. This applies to each new class, interface, or signal. Apply the same check
+to other additions, such as parameters and public methods.
+
+A justified addition states:
+
+- The responsibility or required behavior that it provides.
+- The caller, observer, or documented external extension that needs it.
+- The specific reason that an existing mechanism cannot meet the need cleanly.
+
+Reuse must preserve the existing contract. Similar names or code do not establish the same meaning.
+Choose the smallest complete design that respects
+[AR-MOD-COMPOSITION](#ar-mod-composition) and the existing state owner under
+[QR-STATE-OWNER](quality.md#qr-state-owner).
+
+*Enforced at T4 — agent review through the [general checklist](../enforcement/checklist/general.md).*
 
 ### AR-EXT-NOCORE
 
