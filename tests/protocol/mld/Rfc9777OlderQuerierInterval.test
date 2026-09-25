@@ -14,14 +14,6 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 A node joins or leaves L1 through its link: the ScenarioManager enables or disables the channel
 between the node and the switch (the rules of checks.md).
 
-Defect: the Older-Version-Querier-Present Timer of a host runs for the Other Querier Present
-Interval, 255 s (src/inet/networklayer/icmpv6/Mldv2.cc:1116,
-src/inet/networklayer/icmpv6/Mldv2.ned:77), not for [Robustness Variable] x [Query Interval] +
-[Query Response Interval], 260 s (RFC 9777 section 9.12). A is in MLDv2 mode again at 286.25 s,
-so its Report at 290 s is a Version 2 Report. This test FAILS, and the failure is deliberately
-NOT declared expected: the model has the mechanism, and the mechanism does the wrong thing,
-which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

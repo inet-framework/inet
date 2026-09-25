@@ -369,6 +369,11 @@ Notable backward incompatible changes are the following:
    Query, 350 s with the defaults. Before, it lasted for
    otherQuerierPresentInterval, 255 s, the interval of the querier election.
 
+   The MLDv1 mode of an Mldv2 node now lasts for the Older Version Querier
+   Present Interval of RFC 9777 section 9.12: [Robustness Variable] x [Query
+   Interval] + [Query Response Interval], 260 s with the defaults. Before, it
+   lasted for otherQuerierPresentInterval, 255 s.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

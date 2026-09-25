@@ -1180,7 +1180,10 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing MLDv1 compatibility.\n";
         interfaceData->olderVersionPresent = true;
-        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+        // the Older Version Querier Present Interval (RFC 9777 section 9.12): [Robustness
+        // Variable] x [Query Interval] + [Query Response Interval]; an MLDv1 Query carries no
+        // Query Interval, so the node's own one stands for it
+        startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + queryResponseInterval);
 
         // Answer the General Query in MLDv1 style for every joined group.
         for (auto& elem : interfaceData->groups) {
