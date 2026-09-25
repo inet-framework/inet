@@ -42,6 +42,7 @@ module RadioMedium extends Module like IRadioMedium
         bool recordReceptionLog = default(false);    // When enabled, the medium writes one line per reception into the communication log file
 
         string sameTransmissionStartTimeCheck @enum("ignore", "warning", "error") = default("error"); // Specifies what should happen if two transmissions start at the same moment
+        string transmissionPurgeMode @enum("timer", "onTransmission") = default("timer"); // When transmissions that can no longer interfere are removed from the cache: "timer" schedules a self-message at the earliest interference end time; "onTransmission" removes them whenever a new transmission is added, and adds no events of its own
 
         @class(RadioMedium);
         @display("i=misc/sun");

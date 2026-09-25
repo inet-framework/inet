@@ -104,6 +104,7 @@ void RadioMedium::initialize(int stage)
         if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
         sameTransmissionStartTimeCheck = par("sameTransmissionStartTimeCheck");
+        purgeOnTransmission = !strcmp(par("transmissionPurgeMode"), "onTransmission");
 
         WATCH(transmissionCount);
         WATCH(signalSendCount);
@@ -245,13 +246,18 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 
 void RadioMedium::removeNonInterferingTransmissions()
 {
-    communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
-        emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
-    });
+    purgeNonInterferingTransmissions();
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         auto interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
         if (!removeNonInterferingTransmissionsTimer->isScheduled() && interferenceEndTime > simTime())
             scheduleAt(interferenceEndTime, removeNonInterferingTransmissionsTimer);
+    });
+}
+
+void RadioMedium::purgeNonInterferingTransmissions()
+{
+    communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
+        emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
     });
 }
 
@@ -481,6 +487,8 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 {
     Enter_Method("addTransmission");
     transmissionCount++;
+    if (purgeOnTransmission)
+        purgeNonInterferingTransmissions();
     if (*sameTransmissionStartTimeCheck != 'i') {
         int count = 0;
         communicationCache->mapTransmissions([&] (const ITransmission *ongoingTransmission) {
@@ -516,7 +524,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         }
     });
     communicationCache->setCachedInterferenceEndTime(transmission, maxArrivalEndTime + mediumLimitCache->getMaxTransmissionDuration());
-    if (!removeNonInterferingTransmissionsTimer->isScheduled())
+    if (!purgeOnTransmission && !removeNonInterferingTransmissionsTimer->isScheduled())
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmission), removeNonInterferingTransmissionsTimer);
     emit(signalAddedSignal, check_and_cast<const cObject *>(transmission));
 }

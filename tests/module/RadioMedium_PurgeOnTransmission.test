@@ -1,0 +1,118 @@
+%description:
+
+RadioMedium with transmissionPurgeMode = "onTransmission": transmissions
+that can no longer interfere are removed from the cache whenever a new
+transmission is added, so the medium schedules no purge timer (no event of
+its own), and after twenty pings the cache still holds only the last few
+transmissions.
+
+%file: test.cc
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace RadioMedium_PurgeOnTransmission {
+
+// Prints how many transmissions the medium's cache holds after the traffic.
+class Probe : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(2.5, new cMessage("count")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto medium = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"));
+        std::cout << "probe: " << medium->getCommunicationCache()->getNumTransmissions() << " cached transmissions" << std::endl;
+        delete msg;
+    }
+};
+
+Define_Module(Probe);
+
+} // namespace RadioMedium_PurgeOnTransmission
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+simple Probe
+{
+    @class(Probe);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 3s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-event-banners = true
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host1.mobility.initialX = 400m
+*.host2.mobility.initialX = 500m
+
+*.radioMedium.backgroundNoise.power = -110dBm
+*.radioMedium.transmissionPurgeMode = "onTransmission"
+
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.transmitter.power = 100mW
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 4dB
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].count = 20
+*.host1.app[0].sendInterval = 0.1s
+*.host1.app[0].startTime = 0.5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+probe: 2 cached transmissions
+%not-contains: stdout
+removeNonInterferingTransmissions
+%postrun-command: echo "replies=$(grep -a -c 'Reception started.*ping[0-9]*-reply' test.out)" > summary.out
+%contains: summary.out
+replies=20
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

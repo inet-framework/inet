@@ -69,6 +69,17 @@ Notable backward compatible changes are the following:
    distance from where the link's last value was drawn, which is how
    shadowing behaves physically.
 
+2. Radio medium purge without a timer
+
+   RadioMedium has a new transmissionPurgeMode parameter. The default,
+   "timer", removes transmissions that can no longer interfere with a
+   self-message scheduled at the earliest interference end time, as before.
+   "onTransmission" removes them whenever a new transmission is added
+   instead, so the medium schedules no events of its own; this keeps the
+   medium out of the event sequence entirely, which matters for a model
+   whose fingerprints must not depend on the medium's bookkeeping.
+   Interference is computed identically in both modes.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
