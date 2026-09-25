@@ -12,13 +12,6 @@ Rfc9777ReportChecksum.test.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: the Report of A leaves from its global address, 2001:db8:1::10. Mldv2::sendToIPv6 gives
-the IPv6 layer the destination, the interface and the Hop Limit, and no source address
-(src/inet/networklayer/icmpv6/Mldv2.cc:1420-1430), so IPv6 takes the global address of the
-interface. RFC 9777 section 5 sends every MLDv2 message from a link-local address. This test
-FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism, and
-the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

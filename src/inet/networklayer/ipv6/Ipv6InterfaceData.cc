@@ -393,6 +393,8 @@ void Ipv6InterfaceData::permanentlyAssign(const Ipv6Address& addr)
     ASSERT(k != -1);
     addresses[k].tentative = false;
     choosePreferredAddress();
+    // the address is valid now: listeners such as MLD, which needs a valid link-local address, learn it
+    changed1(F_IP_ADDRESS);
 }
 
 void Ipv6InterfaceData::tentativelyAssign(int i)
@@ -400,6 +402,7 @@ void Ipv6InterfaceData::tentativelyAssign(int i)
     ASSERT(i >= 0 && i < (int)addresses.size());
     addresses[i].tentative = true;
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 
