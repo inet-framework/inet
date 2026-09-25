@@ -59,13 +59,16 @@ suggests; "forwarding" in the checks is the arrival of those datagrams on L1.
 lower than that of R2, so the link-local address of R1 is the lower one (RFC9777-RQRY-11).
 
 **The link with an older querier.** The link with a source, but R runs MLDv1 (RFC 2710), so its
-Queries are MLDv1 Queries.
+Queries are MLDv1 Queries. R is up at the start with its link-local address, the source of every
+Query (RFC9777-GEN-2): it skips Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862
+§5.1), so its first General Query leaves at the start.
 
 **The link with an older host.** The link with a source, and a third host C on L1 that runs
 MLDv1 only.
 
 **The two routers of different versions.** The two routers, where R1 runs MLDv2 and R2 runs
-MLDv1.
+MLDv1. R2 is up at the start with its link-local address, as R of the link with an older
+querier.
 
 ### The default values
 

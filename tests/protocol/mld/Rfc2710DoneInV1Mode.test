@@ -156,6 +156,10 @@ sim-time-limit = 72s
 seed-set = 0
 **.mld.unsolicitedReportInterval = 1s
 *.router.ipv6.mld.typename = "Mldv1"
+# the MLDv1 router is up at the start with its link-local address (checks.md): no boot delay,
+# and no Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 section 5.1)
+*.router.ipv6.neighbourDiscovery.routerBootupTime = 0s
+*.router.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 **.ipv6.hasMld = true

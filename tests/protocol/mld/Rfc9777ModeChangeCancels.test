@@ -63,10 +63,10 @@ Define_ProtocolTestProgram()
 {
     nV2 = 0;
     return ProtocolTest("rfc9777_mode_change_cancels")
-        // Counts the Version 2 Reports of A before the Query.
+        // Counts the Version 2 Reports of A for G before the Query.
         .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isV2Report(p) && c.event.time < 406.25) nV2++; return false; })
-                  .describe("(a counter of the Version 2 Reports of A)")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (isV2Report(p) && hasRecord(p, G) && c.event.time < 406.25) nV2++; return false; })
+                  .describe("(a counter of the Version 2 Reports of A for G)")
                   .within(407.0)))
         // Expected observation 1: at 406.2 s, the Version 2 Report of A ...
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
@@ -183,6 +183,10 @@ sim-time-limit = 422s
 seed-set = 0
 **.mld.unsolicitedReportInterval = 1s
 *.router.ipv6.mld.typename = "Mldv1"
+# the MLDv1 router is up at the start with its link-local address (checks.md): no boot delay,
+# and no Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 section 5.1)
+*.router.ipv6.neighbourDiscovery.routerBootupTime = 0s
+*.router.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 **.ipv6.hasMld = true
