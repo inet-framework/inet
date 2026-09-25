@@ -14,17 +14,6 @@ sends a frame to the lower layer.
 The link between host A and R1 goes down at 100 s and comes back at 130 s, and R1 fails at 200
 s by a crash, all from the scenario manager.
 
-Defect: when the link of netA comes back at 130 s, R1 never advertises netA again. The IPv6
-routing table deletes the on-link routes of an interface when its carrier goes down
-(src/inet/networklayer/ipv6/Ipv6RoutingTable.cc:187-189) and adds nothing back when the carrier
-returns, and RIP re-imports an interface route only on the routeAdded signal
-(src/inet/routing/rip/Rip.cc:357-371). The IPv4 routing table restores the routes
-(Ipv4RoutingTable::updateNetmaskRoutes), which is why the IPv4 twin passes. The new route of
-observation 3 never arrives, so the check never reaches observation 4, the garbage-collection
-rule of RFC 2080 section 2.3 that it exists for. The defect belongs to the router as a whole:
-RFC 2080 section 2 has the router set up the entries of its directly-connected networks. This
-test FAILS, and the failure is deliberately NOT declared expected. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"
