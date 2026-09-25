@@ -474,6 +474,9 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
                 auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getTransmitterAddress());
                 emit(blockAckAgreementDeletedSignal, agreement);
                 recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                // IEEE Std 802.11-2024, 10.25.4: release resources only for the terminated recipient agreement.
+                if (agreement != nullptr && recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getTransmitterAddress()) == nullptr)
+                    recipientDataService->blockAckAgreementTerminated(delba->getTid(), delba->getTransmitterAddress());
             }
             else {
                 auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getTransmitterAddress(), delba->getTid());
