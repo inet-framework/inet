@@ -287,6 +287,8 @@ void Hcf::startFrameSequence(AccessCategory ac)
     emit(IFrameSequenceHandler::frameSequenceStartedSignal, context);
     // A synchronous stop invalidates this grant even if the listener restarts HCF.
     if (stopped || revision != stopRevision) {
+        context->setOutcome(FrameSequenceOutcome::STOPPED);
+        emit(IFrameSequenceHandler::frameSequenceFinishedSignal, context);
         delete context;
         return;
     }

@@ -217,6 +217,7 @@ class Ieee80211TxopExchangeTest : public cSimpleModule, public cListener
     int receivedBlockAck = 0;
     int sequenceStarted = 0;
     int sequenceFinished = 0;
+    int canceledBeforeStart = 0;
     int txopStarted = 0;
     int txopEnded = 0;
     int admitted = 0;
@@ -445,6 +446,10 @@ class Ieee80211TxopExchangeTest : public cSimpleModule, public cListener
         else if (signalID == IFrameSequenceHandler::frameSequenceFinishedSignal) {
             auto context = check_and_cast<FrameSequenceContext *>(value);
             sequenceFinished++;
+            if (context->getOutcome() == FrameSequenceOutcome::STOPPED && context->getNumSteps() == 0) {
+                ASSERT(context->getDuration() == SIMTIME_ZERO);
+                ++canceledBeforeStart;
+            }
             if (context->getOutcome() == FrameSequenceOutcome::RATE_STATE_CHANGED) {
                 rateChangeCancellations++;
                 if (scenario == 15 || scenario == 16) {
@@ -915,17 +920,18 @@ class Ieee80211TxopExchangeTest : public cSimpleModule, public cListener
                 if (scenario == 25) {
                     ASSERT(hcf->isStopped());
                     ASSERT(sequenceStarted == 1);
-                    ASSERT(sequenceFinished == 0);
+                    ASSERT(sequenceFinished == 1);
                     ASSERT(admitted == 0);
                     ASSERT(sentPayload == 0);
                     hcf->start();
                 }
-                for (int i = 0; i < 100 && sequenceFinished == 0; ++i)
+                for (int i = 0; i < 100 && sequenceFinished < 2; ++i)
                     wait(SimTime(100, SIMTIME_US));
                 ASSERT(!hcf->isStopped());
                 ASSERT(channelAccessGrants == 2);
                 ASSERT(sequenceStarted == 2);
-                ASSERT(sequenceFinished == 1);
+                ASSERT(sequenceFinished == 2);
+                ASSERT(canceledBeforeStart == 1);
                 ASSERT(admitted == 1);
                 ASSERT(rejected == 0);
                 ASSERT(sentPayload == 1);
