@@ -17,14 +17,6 @@ section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 An answer that leaves less than 1 ms after the Query leaves at the instant of the Query (the
 rules of checks.md).
 
-Defect: in IGMPv2 mode, a host answers a Query at the instant that the Query arrives.
-Igmpv3::processOlderVersionQuery sends the IGMPv2 Reports in the same event, with no timer
-(src/inet/networklayer/ipv4/Igmpv3.cc:1128-1133). RFC 2236 section 3 sets a timer to a random
-value in the Max Response Time. Observations 1, 2 and 5 hold; observation 4 fails with an
-answer 12 microseconds after the Query. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"

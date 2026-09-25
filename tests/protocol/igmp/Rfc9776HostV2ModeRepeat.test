@@ -11,13 +11,6 @@ the program steps below map onto its expected observations. Steps 1 to 3 are obs
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
 section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 
-Defect: in IGMPv2 mode, a host sends the IGMPv2 Report for a join once, and no repetition
-follows. Igmpv3::multicastSourceListChanged sends one Report and returns
-(src/inet/networklayer/ipv4/Igmpv3.cc:198-216). RFC 2236 section 3: the host should repeat the
-unsolicited Report once or twice after short delays. Observations 1 and 2 hold; observation 3
-fails. This test FAILS, and the failure is deliberately NOT declared expected: the model has
-the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"
