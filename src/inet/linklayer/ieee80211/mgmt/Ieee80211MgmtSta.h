@@ -109,7 +109,13 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     };
 
   protected:
-    cModule *host;
+    opp_component_ptr<cModule> scanningRadio;
+    enum ScanPhase { SCAN_IDLE, SCAN_WAIT_CHANNEL, SCAN_PROBE_DELAY, SCAN_WAIT_PROBE, SCAN_MIN_DWELL, SCAN_MAX_DWELL };
+    ScanPhase scanPhase = SCAN_IDLE;
+    uint64_t nextProbeTransactionId = 0;
+    uint64_t pendingProbeTransactionId = 0;
+    void stopScanListening();
+    void startScanDwell();
 
     // number of channels in RadioMedium -- used if we're told to scan "all" channels
     int numChannels;
@@ -130,7 +136,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     AssociatedApInfo assocAP;
 
   public:
-    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), scanTimer(nullptr), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSta() : numChannels(-1), isScanning(false), scanTimer(nullptr), assocTimeoutMsg(nullptr) {}
     virtual ~Ieee80211MgmtSta();
 
     virtual const ApInfo *getAssociatedAp() { return &assocAP; }
@@ -227,6 +233,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** lifecycle support */
     virtual void stop() override;

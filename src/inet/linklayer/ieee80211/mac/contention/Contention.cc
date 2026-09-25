@@ -160,6 +160,9 @@ void Contention::mediumStateChanged(bool mediumFree)
     this->mediumFree = mediumFree;
     lastChannelBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED);
+    // An idle contender otherwise has no transition that applies a deferred channel change.
+    if (mediumFree)
+        mac->scheduleRadioConfigRetry();
 }
 
 void Contention::handleMessage(cMessage *msg)
