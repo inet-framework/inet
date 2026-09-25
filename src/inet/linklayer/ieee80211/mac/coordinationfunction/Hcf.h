@@ -167,7 +167,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
     // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    virtual void scheduleInactivityTimer() override;
 
     std::string getFrameSequenceInfo() const;
 

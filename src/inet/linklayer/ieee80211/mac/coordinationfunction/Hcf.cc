@@ -104,7 +104,8 @@ void Hcf::handleMessage(cMessage *msg)
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
             originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
-            recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            if (!stopped)
+                recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
         }
         else
             throw cRuntimeError("Unknown event");
@@ -147,7 +148,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
     pendingQueue->enqueuePacket(packet);
-    if (!pendingQueue->isEmpty()) {
+    if (!stopped && !pendingQueue->isEmpty()) {
         auto edcaf = edca->getChannelOwner();
         if (edcaf == nullptr || edcaf->getAccessCategory() != ac) {
             EV_DETAIL << "Requesting channel for access category " << printAccessCategory(ac) << endl;
@@ -177,10 +178,19 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
     scheduleAfter(timeout, startRxTimer);
 }
 
-void Hcf::scheduleInactivityTimer(simtime_t timeout)
+void Hcf::scheduleInactivityTimer()
 {
     Enter_Method("scheduleInactivityTimer");
-    rescheduleAfter(timeout, inactivityTimer);
+    cancelEvent(inactivityTimer);
+    if (stopped)
+        return;
+    simtime_t expirationTime = SIMTIME_MAX;
+    if (originatorBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, originatorBlockAckAgreementHandler->computeEarliestExpirationTime());
+    if (recipientBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, recipientBlockAckAgreementHandler->computeEarliestExpirationTime());
+    if (expirationTime != SIMTIME_MAX)
+        scheduleAt(std::max(simTime(), expirationTime), inactivityTimer);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -938,6 +948,7 @@ void Hcf::start()
         return;
     stopped = false;
     auto revision = stopRevision;
+    scheduleInactivityTimer();
     for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac) {
         if (stopped || revision != stopRevision)
             break;

@@ -22,13 +22,6 @@ simtime_t RecipientBlockAckAgreementHandler::computeEarliestExpirationTime()
     return earliestTime;
 }
 
-void RecipientBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback)
-{
-    simtime_t earliestExpirationTime = computeEarliestExpirationTime();
-    if (earliestExpirationTime != SIMTIME_MAX)
-        callback->scheduleInactivityTimer(earliestExpirationTime);
-}
-
 // The inactivity timer at a recipient is reset when MPDUs corresponding to the TID for which the Block Ack
 // policy is set are received and the Ack Policy subfield in the QoS Control field of that MPDU header is
 // Block Ack or Implicit Block Ack Request.
@@ -40,28 +33,29 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
         if (agreement)
-            scheduleInactivityTimer(callback);
+            callback->scheduleInactivityTimer();
     }
 }
 
 void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
 {
-    // When a timeout of BlockAckTimeout is detected, the STA shall send a DELBA frame to the
-    // peer STA with the Reason Code field set to TIMEOUT and shall issue a MLME-DELBA.indication
-    // primitive with the ReasonCode parameter having a value of TIMEOUT.
-    // The procedure is illustrated in Figure 10-14.
+    // IEEE Std 802.11-2024, 11.5.4: inactivity expiry requires DELBA with TIMEOUT.
+    // Remove all due agreements before callbacks can restart HCF or alter the map.
     simtime_t now = simTime();
-    for (auto id : blockAckAgreements) {
-        auto agreement = id.second;
-        if (agreement->getExpirationTime() == now) {
-            MacAddress receiverAddr = id.first.first;
-            Tid tid = id.first.second;
-            const auto& delba = buildDelba(receiverAddr, tid, 39);
-            auto delbaPacket = new Packet("Delba", delba);
-            procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
+    std::vector<Ptr<Ieee80211Delba>> expiredAgreements;
+    for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end(); ) {
+        auto agreement = it->second;
+        if (agreement->getExpirationTime() != SIMTIME_MAX && agreement->getExpirationTime() <= now) {
+            expiredAgreements.push_back(buildDelba(it->first.first, it->first.second, 39));
+            it = blockAckAgreements.erase(it);
+            delete agreement;
         }
+        else
+            ++it;
     }
-    scheduleInactivityTimer(agreementHandlerCallback);
+    agreementHandlerCallback->scheduleInactivityTimer();
+    for (const auto& delba : expiredAgreements)
+        procedureCallback->processMgmtFrame(new Packet("Delba", delba), delba);
 }
 
 //
@@ -116,18 +110,6 @@ const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaR
     return addbaResponse;
 }
 
-void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
-{
-    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it != blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = it->second;
-        agreement->addbaResposneSent();
-    }
-    else
-        throw cRuntimeError("Agreement is not found");
-}
-
 void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
@@ -148,8 +130,9 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid 
 
 void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback)
 {
-    updateAgreement(addbaResp);
-    scheduleInactivityTimer(callback);
+    // The response can complete after expiry or replacement of its agreement.
+    // Refresh the shared timer from current agreements without a response-based update.
+    callback->scheduleInactivityTimer();
 }
 
 void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)

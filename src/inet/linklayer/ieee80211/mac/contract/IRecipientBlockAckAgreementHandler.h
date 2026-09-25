@@ -31,6 +31,9 @@ class INET_API IRecipientBlockAckAgreementHandler
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
+    // Return the earliest active absolute deadline, or SIMTIME_MAX if none exists.
+    virtual simtime_t computeEarliestExpirationTime() = 0;
+
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) = 0;
 };
 

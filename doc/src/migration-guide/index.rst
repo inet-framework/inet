@@ -48,6 +48,37 @@ HCF stop retains packets whose normal ACK or Block Ack wait was interrupted.
 Restart retries these packets with the Retry bit set. Administrative stop does
 not consume a retry attempt or report a failed transmission.
 
+HCF also retains Block Ack agreements and their absolute inactivity deadlines.
+Restart restores the earliest finite deadline across originator and recipient
+agreements. A deadline that expires during downtime triggers expiry at restart.
+Expiry removes the local agreement before HCF queues its timeout DELBA.
+The modeled stop and crash operations share this retention policy.
+
+Custom Block Ack agreement handlers must implement
+``computeEarliestExpirationTime()``. It returns an absolute deadline, or
+``SIMTIME_MAX`` when no finite deadline exists. The callback
+``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` now takes no
+argument. It requests a timer refresh from both agreement owners.
+
+ADDBA response completion now only requests this timer refresh. A queued or
+retried response can complete after its agreement expires or a new agreement
+replaces it. The completion does not create or change an agreement.
+``RecipientBlockAckAgreementHandler::updateAgreement()`` is removed without
+a deprecation interval because its lookup can fail after expiry or select a
+replacement agreement. Its only state update had no consumer.
+``RecipientBlockAckAgreement::addbaResposneSent()`` and the protected
+``isAddbaResponseSent`` flag are also removed. Custom handlers must use
+``processTransmittedAddbaResp()`` for completion callbacks.
+
+ADDBA request completion also leaves agreements unchanged. A request can still
+retry after agreement removal. ``OriginatorBlockAckAgreement`` no longer exposes
+``getIsAddbaRequestSent()``, ``setIsAddbaRequestSent()``, or the protected
+``isAddbaRequestSent`` flag. This state also had no consumer. Its completion
+update is unsafe for removed or replacement agreements, so these symbols are
+removed without a deprecation interval. The
+``OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq()`` callback
+remains available for custom handlers.
+
 Response-rate overrides must match the primary response mode. A conflicting
 override now fails explicitly. Only DCF ``RateSelection`` provides
 ``useNonstandardResponseModes`` to permit nonstandard response overrides.

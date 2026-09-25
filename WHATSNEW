@@ -306,6 +306,14 @@ Notable backward incompatible changes are the following:
    Zero-limit Block Ack traffic can now send one BAR/Block Ack exchange per
    data frame, even with queued data. See the migration guide for this policy.
 
+   HCF restart preserves Block Ack inactivity deadlines. Expiry uses the
+   earliest absolute deadline across both agreement owners. Agreements that
+   expire during downtime trigger timeout DELBA after restart.
+   Queued or retried ADDBA requests and responses can complete after expiry
+   without a crash or a change to a replacement agreement. The unused
+   transmission-state flags and recipient update hook are removed.
+   See the migration guide for custom handler changes.
+
    Custom frame sequences, rate selectors, acknowledgment policies, contention
    implementations, and transmission callbacks require API updates.
    Prepared receive steps retain response values without a transmit-step pointer.
