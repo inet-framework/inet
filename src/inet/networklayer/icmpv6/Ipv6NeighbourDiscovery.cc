@@ -1397,18 +1397,22 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
             return;
         }
 
-        if (ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->isDadInProgress()) {
-            // in case we are currently performing DAD we ignore this RA
-            // TODO improve this procedure in order to allow reinitiating DAD
-            // (which means cancel current DAD, start new DAD)
-            delete packet;
-            return;
-        }
-
         cancelRouterDiscovery(ie); // Cancel router discovery if it is in progress.
         EV_INFO << "Interface is a host, processing RA.\n";
 
+        // the Default Router List and the parameters of the link follow every valid advertisement,
+        // also one during Duplicate Address Detection (RFC 4861 section 6.3.4)
         processRaForRouterUpdates(packet, ra); // See RFC2461: Section 6.3.4
+
+        if (ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->isDadInProgress()) {
+            // the prefixes wait for an advertisement after the Duplicate Address Detection,
+            // because a new address would start a second detection on the interface
+            // TODO improve this procedure in order to allow reinitiating DAD
+            // (which means cancel current DAD, start new DAD)
+            EV_INFO << "Duplicate Address Detection is in progress, ignoring the prefixes of the RA\n";
+            delete packet;
+            return;
+        }
 
         // Possible options
         for (size_t i = 0; i < ra->getOptions().getOptionArraySize(); i++) {
