@@ -14,14 +14,6 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 Host A sends each State-Change Report once: its Robustness Variable is 1. Each repetition would
 start the query sequence again (RFC 9777 section 7.6.3; the rules of checks.md).
 
-Defect: Mldv2::sendGroupAndSourceSpecificQuery sends the Query and schedules the
-retransmission, but does not lower the Source Timers of the queried sources to the Last
-Listener Query Time (src/inet/networklayer/icmpv6/Mldv2.cc:1368-1405); RFC 9777 section 7.6.3.2
-lowers them. The Source Timer of S1 keeps its value, so R forwards S1 after the stop for much
-more than 2 s. Observation 1 holds; observation 2 fails with a datagram at 52.5 s. This test
-FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism, and
-the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

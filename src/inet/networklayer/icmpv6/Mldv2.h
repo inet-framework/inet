@@ -155,13 +155,13 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         cMessage *timer;
         SourceToSourceRecordMap sources;
 
-        // Last-Listener/Multicast-Address-Specific Query retransmission (RFC 3810 7.6.3):
-        // a Multicast-Address-Specific or -and-Source-Specific Query is sent [Last
-        // Listener Query Count] times in total, lastMemberQueryInterval apart.
+        // Query retransmission (RFC 9777 section 7.6.3): a Multicast Address Specific Query is
+        // sent [Last Listener Query Count] times, and a source of a Multicast Address and
+        // Source Specific Query is in [Last Listener Query Count] of them,
+        // lastMemberQueryInterval apart. A Report changes only the timers, and so the S flags.
         cMessage *rexmtTimer; // fires at lastMemberQueryInterval
-        int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
-        bool rexmtGroupAndSource = false; // false=Multicast-Address-Specific, true=-and-Source-Specific
-        Ipv6AddressVector rexmtSources; // for the address-and-source case: sources to resend; sorted
+        int groupRexmtCount = 0; // Multicast Address Specific Queries still to send
+        std::map<Ipv6Address, int> sourceRexmtCounts; // per source: Multicast Address and Source Specific Queries still to hold it
 
         // Older Version Host Present (RFC 3810 8.3.2): while olderVersionTimer is
         // scheduled, an MLDv1 host is present for this group. The group is forwarded as
@@ -308,6 +308,8 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void setQuerierFields(const Ptr<Mldv2Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv6AddressVector& sources);
+    virtual void sendSourceSpecificQueries(RouterGroupData *group);
+    virtual void scheduleQueryRetransmission(RouterGroupData *group);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<Mldv2MulticastAddressRecord>& records);
     virtual void sendStateChangeReport(HostGroupData *group);
     virtual std::vector<Mldv2MulticastAddressRecord> buildStateChangeRecords(HostGroupData *group);
