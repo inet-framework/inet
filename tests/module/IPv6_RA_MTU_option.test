@@ -1,8 +1,10 @@
 %description:
 Tests that the MTU option in Router Advertisements is processed correctly.
 
-A router sends RAs containing an MTU option (default value 1280). The host
-receives the RA and updates its LinkMTU from the option value.
+A router configured with AdvLinkMTU 1280 sends RAs containing an MTU option.
+The host receives the RA and updates its LinkMTU from the option value. A
+router with the default AdvLinkMTU, 0, sends no MTU option (RFC 4861 section
+6.2.1).
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -35,6 +37,9 @@ network = MtuTestNetwork
 sim-time-limit = 5s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
+
+# the default AdvLinkMTU is 0, which sends no MTU option
+*.router.ipv6.routingTable.advLinkMtu = 1280
 
 # Ethernet NIC configuration
 **.eth[*].queue.typename = "EthernetQosQueue"
