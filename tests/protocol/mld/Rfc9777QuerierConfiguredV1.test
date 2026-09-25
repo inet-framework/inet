@@ -122,6 +122,10 @@ network = MldTwoRouters
 sim-time-limit = 202s
 seed-set = 0
 *.r2.ipv6.mld.typename = "Mldv1"
+# the MLDv1 router is up at the start with its link-local address (checks.md): no boot delay,
+# and no Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 section 5.1)
+*.r2.ipv6.neighbourDiscovery.routerBootupTime = 0s
+*.r2.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 **.ipv6.hasMld = true
