@@ -14,14 +14,6 @@ section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 A node joins or leaves L1 through its link: the ScenarioManager enables or disables the channel
 between the node and the switch (the rules of checks.md).
 
-Defect: a host that enters IGMPv2 mode keeps its pending IGMPv3 retransmissions.
-Igmpv3::processOlderVersionQuery sets the compatibility mode and starts its timer
-(src/inet/networklayer/ipv4/Igmpv3.cc:1125-1126), and cancels no timer. A answers the Query
-with an IGMPv2 Report, and then its pending Version 3 Report leaves at 406.53 s. Observation 1
-holds; observation 2 fails. This test FAILS, and the failure is deliberately NOT declared
-expected: the model has the mechanism, and the mechanism does the wrong thing, which is a
-defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"
