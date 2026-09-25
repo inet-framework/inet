@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/propagation/ConstantSpeedPropagation.h"
 
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/signal/Arrival.h"
 
 namespace inet {
@@ -52,9 +53,10 @@ std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int 
     return PropagationBase::printToStream(stream, level);
 }
 
-const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const
+const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *transmission, const IRadio *receiverRadio) const
 {
     arrivalComputationCount++;
+    IMobility *mobility = receiverRadio->getAntenna()->getMobility();
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();
     const Coord& startPosition = transmission->getStartPosition();
@@ -71,7 +73,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         const simtime_t headerDuration = transmission->getHeaderDuration();
         const simtime_t dataDuration = transmission->getDataDuration();
         const Quaternion& endArrivalOrientation = mobility->getCurrentAngularPosition();
-        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+        return new Arrival(receiverRadio, startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
     else {
         const Coord& endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
@@ -81,7 +83,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         const simtime_t headerDuration = transmission->getHeaderDuration();
         const simtime_t dataDuration = transmission->getDataDuration();
         const Quaternion& endArrivalOrientation = mobility->getCurrentAngularPosition();
-        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+        return new Arrival(receiverRadio, startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
 }
 

@@ -397,7 +397,7 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
 
             const IRadioMedium *radioMedium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
-            const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio);
             return arrival->getStartPropagationTime().dbl();
         }
         else if (!strcmp(metric, "dataRate")) {
@@ -425,7 +425,7 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
 
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
-            const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio);
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);

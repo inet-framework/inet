@@ -16,6 +16,7 @@ namespace physicallayer {
 class INET_API Arrival : public virtual IArrival
 {
   protected:
+    const IRadio *receiverRadio;
     const simtime_t startPropagationTime;
     const simtime_t endPropagationTime;
     const simtime_t startTime;
@@ -29,9 +30,11 @@ class INET_API Arrival : public virtual IArrival
     const Quaternion endOrientation;
 
   public:
-    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
+    Arrival(const IRadio *receiverRadio, const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
+    virtual const IRadio *getReceiverRadio() const override { return receiverRadio; }
 
     virtual const simtime_t getStartPropagationTime() const override { return startPropagationTime; }
     virtual const simtime_t getEndPropagationTime() const override { return endPropagationTime; }
