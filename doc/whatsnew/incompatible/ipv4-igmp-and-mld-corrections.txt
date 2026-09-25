@@ -35,3 +35,5 @@ The MLDv1 mode of an Mldv2 node follows the node state machine of RFC 2710 secti
 A change of the compatibility mode of an Igmpv3 host now cancels all its pending response and retransmission timers on the interface (RFC 9776 section 7.2.1). Before, an IGMPv3 host that entered the IGMPv2 mode still sent the pending repetitions of its IGMPv3 State-Change Report.
 
 A change of the compatibility mode of an Mldv2 node cancels its pending timers in the same way (RFC 9777 section 8.2.1), and deletes the Reports of the old mode that wait for the link-local address of the interface.
+
+An Igmpv3 host now leaves out of its answers to Queries a group that it has left, and sends no record with an empty set of sources (RFC 9776 section 5.2). Before, it answered every General Query with a MODE_IS_INCLUDE record with no sources for each group that it had left, and a source-specific Query for sources that it did not want with such a record too.
