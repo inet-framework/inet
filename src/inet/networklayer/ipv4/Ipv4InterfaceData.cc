@@ -345,7 +345,7 @@ bool Ipv4InterfaceData::hasMulticastListener(Ipv4Address multicastAddress) const
 bool Ipv4InterfaceData::hasMulticastListener(Ipv4Address multicastAddress, Ipv4Address sourceAddress) const
 {
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
-    return groupData && !groupData->sourceList.contains(sourceAddress);
+    return groupData && groupData->sourceList.contains(sourceAddress);
 }
 
 void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress)
