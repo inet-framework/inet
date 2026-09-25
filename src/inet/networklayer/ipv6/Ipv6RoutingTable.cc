@@ -42,6 +42,8 @@ Ipv6RoutingTable::~Ipv6RoutingTable()
 {
     for (auto& elem : routeList)
         delete elem;
+    for (auto& elem : suspendedRoutes)
+        delete elem;
     for (auto& elem : multicastRoutes)
         delete elem;
 }
@@ -185,9 +187,12 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
 
         // an interface went down
         if (!networkInterface->isUp() || !networkInterface->hasCarrier()) {
-            deleteInterfaceRoutes(networkInterface);
+            suspendInterfaceRoutes(networkInterface);
             purgeDestCacheForInterfaceId(networkInterfaceId);
         }
+        // an interface is up: the routes of its configuration return
+        else
+            restoreInterfaceRoutes(networkInterface);
     }
     else if (signalID == interfaceConfigChangedSignal) {
         // TODO invalidate routing cache (?)
@@ -1021,12 +1026,67 @@ void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
             ++it;
     }
 
+    // forget the routes that were kept aside for this interface
+    for (auto it = suspendedRoutes.begin(); it != suspendedRoutes.end();) {
+        if ((*it)->getInterface() == entry) {
+            delete *it;
+            it = suspendedRoutes.erase(it);
+        }
+        else
+            ++it;
+    }
+
     // TODO delete or update multicast routes:
     //   1. delete routes has entry as parent
     //   2. remove entry from children list
 
     if (changed) {
         //TODO
+    }
+}
+
+void Ipv6RoutingTable::suspendInterfaceRoutes(const NetworkInterface *entry)
+{
+    for (auto it = routeList.begin(); it != routeList.end();) {
+        Ipv6Route *route = *it;
+        if (route->getInterface() != entry)
+            ++it;
+        else if (route->getSourceType() == IRoute::MANUAL || route->getSourceType() == IRoute::OWN_ADV_PREFIX) {
+            it = routeList.erase(it);
+            emit(routeDeletedSignal, route);
+            route->setRoutingTable(nullptr);
+            suspendedRoutes.push_back(route);
+        }
+        else
+            it = internalDeleteRoute(it);
+    }
+}
+
+void Ipv6RoutingTable::restoreInterfaceRoutes(const NetworkInterface *entry)
+{
+    RouteList routes;
+    for (auto it = suspendedRoutes.begin(); it != suspendedRoutes.end();) {
+        if ((*it)->getInterface() == entry) {
+            routes.push_back(*it);
+            it = suspendedRoutes.erase(it);
+        }
+        else
+            ++it;
+    }
+    for (auto route : routes) {
+        bool found = false;
+        for (auto existing : routeList) {
+            if (existing->getDestPrefix() == route->getDestPrefix() && existing->getPrefixLength() == route->getPrefixLength() &&
+                existing->getNextHop() == route->getNextHop() && existing->getInterface() == route->getInterface())
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            delete route;
+        else
+            addRoute(route);
     }
 }
 
@@ -1045,16 +1105,22 @@ bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDone
         }
     }
     else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER) {
             while (!routeList.empty())
                 delete removeRoute(routeList[0]);
-
+            for (auto route : suspendedRoutes)
+                delete route;
+            suspendedRoutes.clear();
+        }
     }
     else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH) {
             while (!routeList.empty())
                 delete removeRoute(routeList[0]);
-
+            for (auto route : suspendedRoutes)
+                delete route;
+            suspendedRoutes.clear();
+        }
     }
     return true;
 }
