@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -297,6 +298,16 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
     // RFC 3032 section 2.4.1: the outgoing TTL is one less than the TTL of the top entry
     int incomingTtl = mplsHeader->getTtl();
     int outgoingTtl = incomingTtl > 0 ? incomingTtl - 1 : 0;
+    if (outgoingTtl == 0) {
+        // RFC 3032 section 2.4.2: a packet whose outgoing TTL is zero is not forwarded, with or
+        // without its label stack
+        EV_WARN << "discarding packet, the outgoing TTL is zero" << endl;
+        PacketDropDetails details;
+        details.setReason(HOP_LIMIT_REACHED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
 
     doStackOps(packet, outLabel, outgoingTtl);
 

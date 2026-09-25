@@ -304,6 +304,8 @@ Notable backward incompatible changes are the following:
    labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports
    it; a pop that empties the label stack writes the outgoing TTL into the IPv4
    header. Before, a datagram left an LSP with the TTL it had at the ingress.
+   An LSR now discards a labeled packet whose outgoing TTL is zero, with a
+   packetDropped signal; before, no LSR looked at the TTL.
 
 Notable backward compatible changes are the following:
 

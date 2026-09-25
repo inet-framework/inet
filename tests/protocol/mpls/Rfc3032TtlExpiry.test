@@ -7,11 +7,6 @@ The English procedure is in
 doc/project/evidence/protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero; the program steps below
 map onto its expected observations. The guards are observations 2 to 4; step 1 is observation 1.
 
-Model gap: no LSR checks the TTL of a labeled packet. Mpls::processMplsPacketFromL2 applies the
-operations of the LIB entry and forwards the packet with no look at a TTL
-(src/inet/networklayer/mpls/Mpls.cc:217-285), so the datagrams of flow 2001 cross the whole LSP.
-See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"
