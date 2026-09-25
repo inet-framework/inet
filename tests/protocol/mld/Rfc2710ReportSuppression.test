@@ -68,20 +68,20 @@ Define_ProtocolTestProgram()
                   .within(160.0))
         // Expected observation 2: no second Report for G from A or B within the Maximum Response Delay.
         .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isV1Report(p) || c.event.time > tq + 10) return false; nA++; return nA + nB > 1; })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isV1Report(p) || messageAddress(p) != G || c.event.time > tq + 10) return false; nA++; return nA + nB > 1; })
                   .describe("a second MLDv1 Report for G, this one from A (RFC2710-NODE-21)")
                   .within(10.0)))
         .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isV1Report(p) || c.event.time > tq + 10) return false; nB++; return nA + nB > 1; })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; if (!isV1Report(p) || messageAddress(p) != G || c.event.time > tq + 10) return false; nB++; return nA + nB > 1; })
                   .describe("a second MLDv1 Report for G, this one from B (RFC2710-NODE-21)")
                   .within(10.0)))
         // Expected observation 1: an MLDv1 Report for G from A or B.
         .anyOf({on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p); })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p) && messageAddress(p) == G; })
                   .describe("an MLDv1 Report of A for G")
                   .within(10.0),
                 on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p); })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p) && messageAddress(p) == G; })
                   .describe("an MLDv1 Report of B for G")
                   .within(10.0)});
 }
