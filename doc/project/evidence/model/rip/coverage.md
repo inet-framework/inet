@@ -8,20 +8,22 @@ changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
-State of the ledger, from this run:
+State of the ledger, from the run after the repairs of 2026-09-25 (the level 2 run of
+2026-09-24 was at `7969452e2d`, src `5c4f41c600`, with 20 PASS and 10 FAIL):
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-rip-level2-fixes`, commit `06af064900`, tree clean
+- Trees: src `533b256702`, tests/protocol `32bfe2dfb9`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/rip$'`
-- Suite: 30 tests, 20 PASS, 10 FAIL (unexpected), 0 FAIL (expected), so the suite reports FAIL
+- Suite: 30 tests, 30 PASS, so the suite reports PASS
 - Target level: 2
 
-The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
+The analysis of every failure of the level 2 run, and the repair of each gap, is in
+[`results.md`](results.md#the-model-gaps).
 
 ## Statement coverage
 
@@ -87,9 +89,9 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2453-TIMER-1](../../standard/rfc2453/catalog.md#rfc2453-timer-1) | selected | [Periodic update interval (RIP version 2)](../../protocol/rip/checks/periodic-update.md#periodic-update-interval-rip-version-2) | `Rfc2453PeriodicUpdate` | PASS | — |
 | [RFC2453-TIMER-2](../../standard/rfc2453/catalog.md#rfc2453-timer-2) | selected | [Periodic update interval (RIP version 2)](../../protocol/rip/checks/periodic-update.md#periodic-update-interval-rip-version-2) | `Rfc2453PeriodicUpdate` | PASS | the bounds; the random offset is `later`, a statistical test |
 | [RFC2453-TIMER-3](../../standard/rfc2453/catalog.md#rfc2453-timer-3) | covered | [Garbage collection after an expiry (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-rip-version-2) | `Rfc2453ExpiryGarbageCollection` | PASS | — |
-| [RFC2453-TIMER-4](../../standard/rfc2453/catalog.md#rfc2453-timer-4) | selected | [Route expiry after a silent neighbor (RIP version 2)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2) | `Rfc2453RouteExpiry` | FAIL | the withdrawal comes 15 s late, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) |
-| [RFC2453-TIMER-5](../../standard/rfc2453/catalog.md#rfc2453-timer-5) | selected | [Route expiry after a silent neighbor (RIP version 2)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2); [Garbage collection of a lost network (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2) | `Rfc2453RouteExpiry`, `Rfc2453LostNetworkGarbageCollection` | FAIL | late in `Rfc2453RouteExpiry`, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent); no end to the 120 s in `Rfc2453LostNetworkGarbageCollection`, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost) |
-| [RFC2453-TIMER-6](../../standard/rfc2453/catalog.md#rfc2453-timer-6) | selected | [Garbage collection after an expiry (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-rip-version-2); [Garbage collection of a lost network (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2); [Garbage collection while the next hop still withdraws (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-rip-version-2) | `Rfc2453ExpiryGarbageCollection`, `Rfc2453LostNetworkGarbageCollection`, `Rfc2453WithdrawnRouteGarbageCollection` | FAIL | holds after a timeout (`Rfc2453ExpiryGarbageCollection`); fails for a lost network, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost), and for a route the next hop withdraws, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
+| [RFC2453-TIMER-4](../../standard/rfc2453/catalog.md#rfc2453-timer-4) | selected | [Route expiry after a silent neighbor (RIP version 2)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2) | `Rfc2453RouteExpiry` | PASS | repaired, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) |
+| [RFC2453-TIMER-5](../../standard/rfc2453/catalog.md#rfc2453-timer-5) | selected | [Route expiry after a silent neighbor (RIP version 2)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2); [Garbage collection of a lost network (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2) | `Rfc2453RouteExpiry`, `Rfc2453LostNetworkGarbageCollection` | PASS | repaired, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) and [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost) |
+| [RFC2453-TIMER-6](../../standard/rfc2453/catalog.md#rfc2453-timer-6) | selected | [Garbage collection after an expiry (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-rip-version-2); [Garbage collection of a lost network (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-rip-version-2); [Garbage collection while the next hop still withdraws (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-rip-version-2) | `Rfc2453ExpiryGarbageCollection`, `Rfc2453LostNetworkGarbageCollection`, `Rfc2453WithdrawnRouteGarbageCollection` | PASS | repaired for a lost network, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost), and for a route the next hop withdraws, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
 | [RFC2453-TIMER-7](../../standard/rfc2453/catalog.md#rfc2453-timer-7) | selected | [Garbage collection ended by a new route (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-ended-by-a-new-route-rip-version-2) | `Rfc2453GarbageCollection` | PASS | — |
 | [RFC2453-REQ-1](../../standard/rfc2453/catalog.md#rfc2453-req-1) | selected | [Table request of a restarted router (RIP version 2)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-rip-version-2) | `Rfc2453TableRequest` | PASS | — |
 | [RFC2453-REQ-2](../../standard/rfc2453/catalog.md#rfc2453-req-2) | later | — | — | — | level 3: needs a crafted message: a querier |
@@ -108,7 +110,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2453-RESP-7](../../standard/rfc2453/catalog.md#rfc2453-resp-7) | selected | [Garbage collection after an expiry (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-rip-version-2) | `Rfc2453ExpiryGarbageCollection` | PASS | — |
 | [RFC2453-RESP-8](../../standard/rfc2453/catalog.md#rfc2453-resp-8) | covered | [Route expiry after a silent neighbor (RIP version 2)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-rip-version-2) | `Rfc2453RouteExpiry` | PASS | observation 3 of `Rfc2453RouteExpiry` holds; the test fails at observation 4 |
 | [RFC2453-RESP-9](../../standard/rfc2453/catalog.md#rfc2453-resp-9) | selected | [Shorter path kept (RIP version 2)](../../protocol/rip/checks/route-learning.md#shorter-path-kept-rip-version-2); [Triggered update for a lost network (RIP version 2)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-rip-version-2) | `Rfc2453ShorterPath`, `Rfc2453LostNetwork` | PASS | — |
-| [RFC2453-RESP-10](../../standard/rfc2453/catalog.md#rfc2453-resp-10) | selected | [Garbage collection while the next hop still withdraws (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-rip-version-2) | `Rfc2453WithdrawnRouteGarbageCollection` | FAIL | [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
+| [RFC2453-RESP-10](../../standard/rfc2453/catalog.md#rfc2453-resp-10) | selected | [Garbage collection while the next hop still withdraws (RIP version 2)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-rip-version-2) | `Rfc2453WithdrawnRouteGarbageCollection` | PASS | repaired, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
 | [RFC2453-RESP-11](../../standard/rfc2453/catalog.md#rfc2453-resp-11) | owed | — | — | — | two equal paths and a next hop that goes silent; the model claims it with a bare TODO, `Rip.cc:712` |
 | [RFC2453-RESP-12](../../standard/rfc2453/catalog.md#rfc2453-resp-12) | selected | [Shorter path kept (RIP version 2)](../../protocol/rip/checks/route-learning.md#shorter-path-kept-rip-version-2) | `Rfc2453ShorterPath` | PASS | — |
 | [RFC2453-OUT-1](../../standard/rfc2453/catalog.md#rfc2453-out-1) | selected | [Table request of a restarted router (RIP version 2)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-rip-version-2) | `Rfc2453TableRequest` | PASS | — |
@@ -148,7 +150,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2080-MSG-1](../../standard/rfc2080/catalog.md#rfc2080-msg-1) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | — |
 | [RFC2080-MSG-2](../../standard/rfc2080/catalog.md#rfc2080-msg-2) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | — |
 | [RFC2080-MSG-3](../../standard/rfc2080/catalog.md#rfc2080-msg-3) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | — |
-| [RFC2080-MSG-4](../../standard/rfc2080/catalog.md#rfc2080-msg-4) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | FAIL | the answer never arrives, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
+| [RFC2080-MSG-4](../../standard/rfc2080/catalog.md#rfc2080-msg-4) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | repaired, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
 | [RFC2080-MSG-5](../../standard/rfc2080/catalog.md#rfc2080-msg-5) | later | — | — | — | level 3: needs a crafted message: a querier from another port |
 | [RFC2080-MSG-6](../../standard/rfc2080/catalog.md#rfc2080-msg-6) | later | — | — | — | serializer test: the bit layout; the model has no RIPng serializer |
 | [RFC2080-MSG-7](../../standard/rfc2080/catalog.md#rfc2080-msg-7) | later | — | — | — | serializer test: the bit layout |
@@ -181,16 +183,16 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2080-TIMER-1](../../standard/rfc2080/catalog.md#rfc2080-timer-1) | selected | [Periodic update interval (RIPng)](../../protocol/rip/checks/periodic-update.md#periodic-update-interval-ripng) | `Rfc2080PeriodicUpdate` | PASS | — |
 | [RFC2080-TIMER-2](../../standard/rfc2080/catalog.md#rfc2080-timer-2) | selected | [Periodic update interval (RIPng)](../../protocol/rip/checks/periodic-update.md#periodic-update-interval-ripng) | `Rfc2080PeriodicUpdate` | PASS | the bounds; the random offset is `later`, a statistical test |
 | [RFC2080-TIMER-3](../../standard/rfc2080/catalog.md#rfc2080-timer-3) | covered | [Garbage collection after an expiry (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-ripng) | `Rfc2080ExpiryGarbageCollection` | PASS | — |
-| [RFC2080-TIMER-4](../../standard/rfc2080/catalog.md#rfc2080-timer-4) | selected | [Route expiry after a silent neighbor (RIPng)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng) | `Rfc2080RouteExpiry` | FAIL | the withdrawal comes 15 s late, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) |
-| [RFC2080-TIMER-5](../../standard/rfc2080/catalog.md#rfc2080-timer-5) | selected | [Route expiry after a silent neighbor (RIPng)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng); [Garbage collection of a lost network (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-ripng); [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080RouteExpiry`, `Rfc2080LostNetworkGarbageCollection`, `Rfc2080LostNetwork` | FAIL | late after a timeout, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent); no end to the 120 s for a lost network, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost) |
-| [RFC2080-TIMER-6](../../standard/rfc2080/catalog.md#rfc2080-timer-6) | selected | [Garbage collection after an expiry (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-ripng); [Garbage collection of a lost network (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-ripng); [Garbage collection while the next hop still withdraws (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-ripng) | `Rfc2080ExpiryGarbageCollection`, `Rfc2080LostNetworkGarbageCollection`, `Rfc2080WithdrawnRouteGarbageCollection` | FAIL | holds after a timeout; fails for a lost network, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost), and for a route the next hop withdraws, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
-| [RFC2080-TIMER-7](../../standard/rfc2080/catalog.md#rfc2080-timer-7) | selected | [Garbage collection ended by a new route (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-ended-by-a-new-route-ripng) | `Rfc2080GarbageCollection` | FAIL | not reached: the new route never arrives, [gap 3](results.md#gap-3-defect--an-ipv6-router-does-not-advertise-its-network-again-after-the-link-returns) |
+| [RFC2080-TIMER-4](../../standard/rfc2080/catalog.md#rfc2080-timer-4) | selected | [Route expiry after a silent neighbor (RIPng)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng) | `Rfc2080RouteExpiry` | PASS | repaired, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) |
+| [RFC2080-TIMER-5](../../standard/rfc2080/catalog.md#rfc2080-timer-5) | selected | [Route expiry after a silent neighbor (RIPng)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng); [Garbage collection of a lost network (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-ripng); [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080RouteExpiry`, `Rfc2080LostNetworkGarbageCollection`, `Rfc2080LostNetwork` | PASS | repaired, [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent) and [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost) |
+| [RFC2080-TIMER-6](../../standard/rfc2080/catalog.md#rfc2080-timer-6) | selected | [Garbage collection after an expiry (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-ripng); [Garbage collection of a lost network (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-of-a-lost-network-ripng); [Garbage collection while the next hop still withdraws (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-ripng) | `Rfc2080ExpiryGarbageCollection`, `Rfc2080LostNetworkGarbageCollection`, `Rfc2080WithdrawnRouteGarbageCollection` | PASS | repaired for a lost network, [gap 5](results.md#gap-5-defect--a-router-never-removes-a-network-it-lost), and for a route the next hop withdraws, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
+| [RFC2080-TIMER-7](../../standard/rfc2080/catalog.md#rfc2080-timer-7) | selected | [Garbage collection ended by a new route (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-ended-by-a-new-route-ripng) | `Rfc2080GarbageCollection` | PASS | reached since the repair of [gap 3](results.md#gap-3-defect--an-ipv6-router-does-not-advertise-its-network-again-after-the-link-returns) |
 | [RFC2080-REQ-1](../../standard/rfc2080/catalog.md#rfc2080-req-1) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | observation 2 of `Rfc2080TableRequest` holds; the test fails at observation 4 |
 | [RFC2080-REQ-2](../../standard/rfc2080/catalog.md#rfc2080-req-2) | later | — | — | — | level 3: needs a crafted message: a querier |
 | [RFC2080-REQ-3](../../standard/rfc2080/catalog.md#rfc2080-req-3) | later | — | — | — | level 3: needs a crafted message: an empty request |
-| [RFC2080-REQ-4](../../standard/rfc2080/catalog.md#rfc2080-req-4) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | FAIL | the request holds; the answer never arrives, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
+| [RFC2080-REQ-4](../../standard/rfc2080/catalog.md#rfc2080-req-4) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | the answer repaired, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
 | [RFC2080-REQ-5](../../standard/rfc2080/catalog.md#rfc2080-req-5) | later | — | — | — | level 3: needs a crafted message: a specific request |
-| [RFC2080-REQ-6](../../standard/rfc2080/catalog.md#rfc2080-req-6) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | FAIL | not reached: the answer never arrives, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
+| [RFC2080-REQ-6](../../standard/rfc2080/catalog.md#rfc2080-req-6) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | reached since the repair of [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
 | [RFC2080-REQ-7](../../standard/rfc2080/catalog.md#rfc2080-req-7) | later | — | — | — | level 3: needs a crafted message: a specific request |
 | [RFC2080-REQ-8](../../standard/rfc2080/catalog.md#rfc2080-req-8) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | observation 3 holds |
 | [RFC2080-RESP-1](../../standard/rfc2080/catalog.md#rfc2080-resp-1) | covered | [Metric through a chain (RIPng)](../../protocol/rip/checks/route-learning.md#metric-through-a-chain-ripng) | `Rfc2080MetricChain` | PASS | — |
@@ -204,10 +206,10 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2080-RESP-9](../../standard/rfc2080/catalog.md#rfc2080-resp-9) | selected | [Garbage collection after an expiry (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-after-an-expiry-ripng) | `Rfc2080ExpiryGarbageCollection` | PASS | — |
 | [RFC2080-RESP-10](../../standard/rfc2080/catalog.md#rfc2080-resp-10) | covered | [Route expiry after a silent neighbor (RIPng)](../../protocol/rip/checks/route-expiry.md#route-expiry-after-a-silent-neighbor-ripng) | `Rfc2080RouteExpiry` | PASS | observation 3 of `Rfc2080RouteExpiry` holds |
 | [RFC2080-RESP-11](../../standard/rfc2080/catalog.md#rfc2080-resp-11) | selected | [Shorter path kept (RIPng)](../../protocol/rip/checks/route-learning.md#shorter-path-kept-ripng); [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080ShorterPath`, `Rfc2080LostNetwork` | PASS | observation 4 of `Rfc2080LostNetwork` holds |
-| [RFC2080-RESP-12](../../standard/rfc2080/catalog.md#rfc2080-resp-12) | selected | [Garbage collection while the next hop still withdraws (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-ripng) | `Rfc2080WithdrawnRouteGarbageCollection` | FAIL | [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
+| [RFC2080-RESP-12](../../standard/rfc2080/catalog.md#rfc2080-resp-12) | selected | [Garbage collection while the next hop still withdraws (RIPng)](../../protocol/rip/checks/route-expiry.md#garbage-collection-while-the-next-hop-still-withdraws-ripng) | `Rfc2080WithdrawnRouteGarbageCollection` | PASS | repaired, [gap 6](results.md#gap-6-defect--a-withdrawn-route-stays-while-its-next-hop-repeats-the-withdrawal) |
 | [RFC2080-RESP-13](../../standard/rfc2080/catalog.md#rfc2080-resp-13) | owed | — | — | — | two equal paths and a next hop that goes silent; the bare TODO at `Rip.cc:712` names RIPng |
 | [RFC2080-RESP-14](../../standard/rfc2080/catalog.md#rfc2080-resp-14) | selected | [Shorter path kept (RIPng)](../../protocol/rip/checks/route-learning.md#shorter-path-kept-ripng) | `Rfc2080ShorterPath` | PASS | — |
-| [RFC2080-OUT-1](../../standard/rfc2080/catalog.md#rfc2080-out-1) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | FAIL | the answer leaves on the wrong interface, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
+| [RFC2080-OUT-1](../../standard/rfc2080/catalog.md#rfc2080-out-1) | selected | [Table request of a restarted router (RIPng)](../../protocol/rip/checks/table-request.md#table-request-of-a-restarted-router-ripng) | `Rfc2080TableRequest` | PASS | repaired, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
 | [RFC2080-OUT-2](../../standard/rfc2080/catalog.md#rfc2080-out-2) | selected | [Periodic update interval (RIPng)](../../protocol/rip/checks/periodic-update.md#periodic-update-interval-ripng); [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080PeriodicUpdate`, `Rfc2080LostNetwork` | PASS | — |
 | [RFC2080-OUT-3](../../standard/rfc2080/catalog.md#rfc2080-out-3) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | — |
 | [RFC2080-TRIG-1](../../standard/rfc2080/catalog.md#rfc2080-trig-1) | selected | [Rate of triggered updates (RIPng)](../../protocol/rip/checks/triggered-update.md#rate-of-triggered-updates-ripng) | `Rfc2080TriggeredRate` | PASS | — |
@@ -217,10 +219,10 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2080-TRIG-5](../../standard/rfc2080/catalog.md#rfc2080-trig-5) | selected | [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080LostNetwork` | PASS | observation 4 holds |
 | [RFC2080-TRIG-6](../../standard/rfc2080/catalog.md#rfc2080-trig-6) | covered | [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080LostNetwork` | PASS | a permission |
 | [RFC2080-TRIG-7](../../standard/rfc2080/catalog.md#rfc2080-trig-7) | owed | — | — | — | two changes some seconds apart; the model has the code, `Rip.cc:452` |
-| [RFC2080-TRIG-8](../../standard/rfc2080/catalog.md#rfc2080-trig-8) | selected | [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080LostNetwork` | FAIL | the version is 2, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2); the other rules, observation 3, hold |
-| [RFC2080-GEN-1](../../standard/rfc2080/catalog.md#rfc2080-gen-1) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | for the updates; for the answer to a request not reached, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
+| [RFC2080-TRIG-8](../../standard/rfc2080/catalog.md#rfc2080-trig-8) | selected | [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng) | `Rfc2080LostNetwork` | PASS | the version repaired, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2) |
+| [RFC2080-GEN-1](../../standard/rfc2080/catalog.md#rfc2080-gen-1) | selected | [Update transport and addressing (RIPng)](../../protocol/rip/checks/update-message.md#update-transport-and-addressing-ripng) | `Rfc2080UpdateTransport` | PASS | for the updates, and for the answer to a request since the repair of [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface) |
 | [RFC2080-GEN-2](../../standard/rfc2080/catalog.md#rfc2080-gen-2) | owed | — | — | — | an interface with two link-local addresses |
-| [RFC2080-GEN-3](../../standard/rfc2080/catalog.md#rfc2080-gen-3) | selected | [Update message fields (RIPng)](../../protocol/rip/checks/update-message.md#update-message-fields-ripng) | `Rfc2080UpdateFields` | FAIL | the version is 2, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2) |
+| [RFC2080-GEN-3](../../standard/rfc2080/catalog.md#rfc2080-gen-3) | selected | [Update message fields (RIPng)](../../protocol/rip/checks/update-message.md#update-message-fields-ripng) | `Rfc2080UpdateFields` | PASS | repaired, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2) |
 | [RFC2080-GEN-4](../../standard/rfc2080/catalog.md#rfc2080-gen-4) | selected | [Messages limited by the MTU (RIPng)](../../protocol/rip/checks/response-contents.md#messages-limited-by-the-mtu-ripng) | `Rfc2080MtuMessages` | PASS | — |
 | [RFC2080-GEN-5](../../standard/rfc2080/catalog.md#rfc2080-gen-5) | selected | [Update message fields (RIPng)](../../protocol/rip/checks/update-message.md#update-message-fields-ripng) | `Rfc2080UpdateFields` | PASS | observation 5 holds |
 | [RFC2080-GEN-6](../../standard/rfc2080/catalog.md#rfc2080-gen-6) | covered | [Update message fields (RIPng)](../../protocol/rip/checks/update-message.md#update-message-fields-ripng) | `Rfc2080UpdateFields` | PASS | — |
@@ -245,8 +247,8 @@ only, so each is level 2 work for a later pass:
 | an interface with two link-local addresses | RFC2080-GEN-2 |
 
 Two of them will fail when their check exists, from what the code shows: RFC2453-RESP-11 and
-RFC2080-RESP-13 are a bare TODO (`Rip.cc:712`), and the route tag and the metric of an import
-are parameters that every caller leaves at the default (`Rip.cc:266`).
+RFC2080-RESP-13 are a bare TODO (`Rip.cc:748`), and the route tag and the metric of an import
+are parameters that every caller leaves at the default (`Rip.cc:272`).
 
 ## Feature support
 
@@ -256,19 +258,19 @@ when every core check that ran failed, `untested` when no core check exists.
 
 | Feature | Level | Support | Core statements that fail or have no check |
 | --- | --- | --- | --- |
-| [RIP-F-MESSAGE-FORMAT](../../protocol/rip/features.md#rip-f-message-format) | mandatory | partial | RFC2080-GEN-3 fails ([gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2)) |
-| [RIP-F-TRANSPORT](../../protocol/rip/features.md#rip-f-transport) | mandatory | partial | RFC2080-MSG-4 fails ([gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface)) |
+| [RIP-F-MESSAGE-FORMAT](../../protocol/rip/features.md#rip-f-message-format) | mandatory | supported | — (RFC2080-GEN-3 repaired, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2)) |
+| [RIP-F-TRANSPORT](../../protocol/rip/features.md#rip-f-transport) | mandatory | supported | — (RFC2080-MSG-4 repaired, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface)) |
 | [RIP-F-UPDATE-ADDRESSING](../../protocol/rip/features.md#rip-f-update-addressing) | mandatory | supported | — |
 | [RIP-F-METRIC](../../protocol/rip/features.md#rip-f-metric) | mandatory | supported | — |
 | [RIP-F-DESTINATION-PREFIX](../../protocol/rip/features.md#rip-f-destination-prefix) | mandatory | supported | — |
 | [RIP-F-PERIODIC-UPDATE](../../protocol/rip/features.md#rip-f-periodic-update) | mandatory | supported | — |
 | [RIP-F-ROUTE-LEARNING](../../protocol/rip/features.md#rip-f-route-learning) | mandatory | supported | — |
 | [RIP-F-SPLIT-HORIZON](../../protocol/rip/features.md#rip-f-split-horizon) | mandatory | supported | — |
-| [RIP-F-TRIGGERED-UPDATE](../../protocol/rip/features.md#rip-f-triggered-update) | mandatory | partial | RFC2080-TRIG-8 fails ([gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2)) |
-| [RIP-F-ROUTE-EXPIRY](../../protocol/rip/features.md#rip-f-route-expiry) | mandatory | partial | RFC2453-TIMER-4, TIMER-5, TIMER-6 and RFC2080-TIMER-4, TIMER-5, TIMER-6 fail ([gaps 4, 5, 6](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent)); RFC2080-TIMER-7 not reached ([gap 3](results.md#gap-3-defect--an-ipv6-router-does-not-advertise-its-network-again-after-the-link-returns)); only RFC2453-TIMER-7 passes |
+| [RIP-F-TRIGGERED-UPDATE](../../protocol/rip/features.md#rip-f-triggered-update) | mandatory | supported | — (RFC2080-TRIG-8 repaired, [gap 1](results.md#gap-1-defect--ripng-messages-carry-version-2)) |
+| [RIP-F-ROUTE-EXPIRY](../../protocol/rip/features.md#rip-f-route-expiry) | mandatory | supported | — (TIMER-4, TIMER-5 and TIMER-6 of both documents repaired, [gaps 4, 5, 6](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent); RFC2080-TIMER-7 reached since the repair of [gap 3](results.md#gap-3-defect--an-ipv6-router-does-not-advertise-its-network-again-after-the-link-returns)) |
 | [RIP-F-RESPONSE-CONTENTS](../../protocol/rip/features.md#rip-f-response-contents) | mandatory | supported | — |
 | [RIP-F-RESPONSE-VALIDATION](../../protocol/rip/features.md#rip-f-response-validation) | mandatory | untested | every core statement is `later`, level 3 |
-| [RIP-F-TABLE-REQUEST](../../protocol/rip/features.md#rip-f-table-request) | unstated | partial | RFC2080-REQ-4, REQ-6, OUT-1 fail ([gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface)) |
+| [RIP-F-TABLE-REQUEST](../../protocol/rip/features.md#rip-f-table-request) | unstated | supported | — (RFC2080-REQ-4, REQ-6, OUT-1 repaired, [gap 2](results.md#gap-2-defect--the-ripng-answer-to-a-request-leaves-on-the-wrong-interface)) |
 | [RIP-F-SPECIFIC-QUERY](../../protocol/rip/features.md#rip-f-specific-query) | unstated | untested | every core statement is `later`, level 3 |
 | [RIP-F-NEXT-HOP](../../protocol/rip/features.md#rip-f-next-hop) | optional | partial | RFC2080-NH-4, NH-5 are `later`, level 3 |
 | [RIP-F-ROUTE-TAG](../../protocol/rip/features.md#rip-f-route-tag) | mandatory | untested | RFC2453-TAG-1, RFC2080-TAG-1 are `later`, level 3 |
@@ -276,7 +278,8 @@ when every core check that ran failed, `untested` when no core check exists.
 | [RIP-F-HOST-ROUTES](../../protocol/rip/features.md#rip-f-host-routes) | optional | untested | every core statement is `owed` |
 | [RIP-F-VERSION-1-INTERWORKING](../../protocol/rip/features.md#rip-f-version-1-interworking) | mandatory | untested | RFC2453-ADDR-2, ADDR-4 are `later`, level 5; MASK-2, QRY-1 are `no check`: the model has no version 1 |
 
-Seven features are supported, six partial, six untested, and none is not supported.
+Twelve features are supported, one partial, six untested, and none is not supported. In the
+level 2 run of 2026-09-24, before the repairs, seven were supported and six partial.
 
 ## Achieved level
 
@@ -288,7 +291,7 @@ The exit criterion of level 2 has two halves, and both hold:
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 2453 §3 and §4.2 to §4.6 and of RFC 2080 §2, 168 entries; the feature map has 19 features and places every entry but the forwarding rule RFC2453-ADDR-8 |
-| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 11 of the 14 mandatory features have core checks that ran: 30 tests, 20 PASS, 10 FAIL |
+| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 11 of the 14 mandatory features have core checks that ran: 30 tests, 30 PASS since the repairs (20 PASS, 10 FAIL in the level 2 run) |
 
 The three mandatory features without a core check have no normal path, so the criterion does
 not reach them at this level, and the ledger says so rather than count them:
@@ -297,9 +300,9 @@ reaches a router only in a crafted response, because no import in the model sets
 is level 3; RIP-F-VERSION-1-INTERWORKING needs a version 1 router, which the standards map
 puts at level 5.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Ten tests
-fail, and six gaps of the model stand behind them; the level holds because each of those
-checks ran.
+A level is a measure of how deeply the pass looked, not of how well the model did. In the level
+2 run ten tests failed, and six gaps of the model stood behind them; the level held because each
+of those checks ran. The repairs of 2026-09-25 closed the six gaps, and all 30 tests pass.
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -321,6 +324,7 @@ level 1 for RIP-F-VERSION-1-INTERWORKING.
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-23 | **1, reached** | RFC 2453 and RFC 2080 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 1058), one declined area (authentication) |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 2453 (88) and RFC 2080 (80); 19 features; 30 checks; 30 tests; the conformance matrix | 20 PASS, 10 FAIL, none declared; six gaps of the model, three of them in RIPng alone; 21 statements owed |
+| repairs | 2026-09-25 | 2, held | the six gaps, on `topic/standards-tests-rip-level2-fixes`; one test error of the split-horizon checks | 30 PASS; 21 statements still owed |
 
 The read record of pass 1 named commit `97f4559eee` of the wave 0 branch; its trees, src
 `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.

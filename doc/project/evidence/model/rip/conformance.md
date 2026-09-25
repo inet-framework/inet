@@ -8,9 +8,9 @@ with the feature support of the ledger, feature by feature.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-rip-level2-fixes`, commit `06af064900`, tree clean
+- Trees: src `533b256702`, tests/protocol `32bfe2dfb9`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -18,8 +18,8 @@ Run record of the ledger state that part 2 comes from:
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/rip$'`
 
 Part 1 was first read by the level 1 pass, at src `16dc528e10`. The RIP code is the same in
-both trees; the two trees differ only in seven files of IEEE 802.11 and one line of
-`src/inet/common/InitStages.cc`.
+`5c4f41c600`, the tree of the level 2 run; the two trees differ only in seven files of IEEE
+802.11. The repairs of this branch change the RIP code, so part 1 describes the code before them.
 
 ## Part 1 — the claims
 
@@ -61,7 +61,8 @@ The guide counts code as a claim: an effort for a behavior claims it. The level 
 the code only to decide the status of each statement in the ledger, and these are the claims
 it found beyond the named documents. None enters part 2 on its own, because part 2 works on
 documents, not on lines of code; they decide the `owed`, `later` and `no check` rows of
-[`coverage.md`](coverage.md#statement-coverage).
+[`coverage.md`](coverage.md#statement-coverage). The line numbers are those of the code that the
+pass read, src `5c4f41c600`; the repairs of 2026-09-25 moved them.
 
 | Behavior | Code | What it decides |
 | --- | --- | --- |
@@ -82,19 +83,19 @@ support comes from [`coverage.md`](coverage.md#feature-support).
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
-| [RIP-F-MESSAGE-FORMAT](../../protocol/rip/features.md#rip-f-message-format) | mandatory | yes | partial | `partial` — RFC2080-GEN-3: RIPng carries version 2 |
-| [RIP-F-TRANSPORT](../../protocol/rip/features.md#rip-f-transport) | mandatory | yes | partial | `partial` — RFC2080-MSG-4: the RIPng answer to a request never arrives |
+| [RIP-F-MESSAGE-FORMAT](../../protocol/rip/features.md#rip-f-message-format) | mandatory | yes | supported | `confirmed` — since the repair of gap 1 |
+| [RIP-F-TRANSPORT](../../protocol/rip/features.md#rip-f-transport) | mandatory | yes | supported | `confirmed` — since the repair of gap 2 |
 | [RIP-F-UPDATE-ADDRESSING](../../protocol/rip/features.md#rip-f-update-addressing) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-METRIC](../../protocol/rip/features.md#rip-f-metric) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-DESTINATION-PREFIX](../../protocol/rip/features.md#rip-f-destination-prefix) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-PERIODIC-UPDATE](../../protocol/rip/features.md#rip-f-periodic-update) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-ROUTE-LEARNING](../../protocol/rip/features.md#rip-f-route-learning) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-SPLIT-HORIZON](../../protocol/rip/features.md#rip-f-split-horizon) | mandatory | yes | supported | `confirmed` |
-| [RIP-F-TRIGGERED-UPDATE](../../protocol/rip/features.md#rip-f-triggered-update) | mandatory | yes | partial | `partial` — RFC2080-TRIG-8: the triggered update of RIPng carries version 2 |
-| [RIP-F-ROUTE-EXPIRY](../../protocol/rip/features.md#rip-f-route-expiry) | mandatory | yes | partial | `partial` — TIMER-4, TIMER-5, TIMER-6 of both documents fail and RFC2080-TIMER-7 is not reached; only RFC2453-TIMER-7 holds |
+| [RIP-F-TRIGGERED-UPDATE](../../protocol/rip/features.md#rip-f-triggered-update) | mandatory | yes | supported | `confirmed` — since the repair of gap 1 |
+| [RIP-F-ROUTE-EXPIRY](../../protocol/rip/features.md#rip-f-route-expiry) | mandatory | yes | supported | `confirmed` — since the repairs of gaps 3 to 6 |
 | [RIP-F-RESPONSE-CONTENTS](../../protocol/rip/features.md#rip-f-response-contents) | mandatory | yes | supported | `confirmed` |
 | [RIP-F-RESPONSE-VALIDATION](../../protocol/rip/features.md#rip-f-response-validation) | mandatory | yes | untested | `unverified` — level 3 |
-| [RIP-F-TABLE-REQUEST](../../protocol/rip/features.md#rip-f-table-request) | unstated | yes | partial | `partial` — RFC2080-REQ-4, REQ-6, OUT-1: the RIPng answer never arrives |
+| [RIP-F-TABLE-REQUEST](../../protocol/rip/features.md#rip-f-table-request) | unstated | yes | supported | `confirmed` — since the repair of gap 2 |
 | [RIP-F-SPECIFIC-QUERY](../../protocol/rip/features.md#rip-f-specific-query) | unstated | yes | untested | `unverified` — level 3 |
 | [RIP-F-NEXT-HOP](../../protocol/rip/features.md#rip-f-next-hop) | optional | yes | partial | `partial` — the RIPng next hop entry, level 3 |
 | [RIP-F-ROUTE-TAG](../../protocol/rip/features.md#rip-f-route-tag) | mandatory | yes | untested | `unverified` — level 3 |
@@ -102,21 +103,25 @@ support comes from [`coverage.md`](coverage.md#feature-support).
 | [RIP-F-HOST-ROUTES](../../protocol/rip/features.md#rip-f-host-routes) | optional | yes | untested | `unverified` — owed at level 2 |
 | [RIP-F-VERSION-1-INTERWORKING](../../protocol/rip/features.md#rip-f-version-1-interworking) | mandatory | yes | untested | `unverified` — level 5; the code makes no effort for version 1 beyond the TODO of `Rip.h:77-78` |
 
-Seven features are `confirmed`, six `partial` and six `unverified`. No feature is a `defect`
-in the sense of the matrix: every mandatory feature that failed a check passed another one.
-The statement-level defects sit inside features that otherwise work, which is the case the
-guide describes; [`results.md`](results.md#the-model-gaps) holds all six.
+Twelve features are `confirmed`, one `partial` and six `unverified`. The matrix follows the run
+after the repairs of 2026-09-25. In the level 2 run, seven features were `confirmed` and six
+`partial`. No feature was a `defect` in the sense of the matrix: every mandatory feature that
+failed a check passed another one. The statement-level defects sat inside features that
+otherwise work, which is the case the guide describes; [`results.md`](results.md#the-model-gaps)
+holds all six, with the repair of each.
 
 ### How to read the matrix
 
-- **RIP version 2 alone** would read differently: of the six `partial` verdicts, only
-  RIP-F-ROUTE-EXPIRY holds a failure of RFC 2453. The other five `partial` verdicts are RIPng
+- **The one `partial` verdict**, RIP-F-NEXT-HOP, is the RIPng next hop entry of level 3, not a
+  failure.
+- **In the level 2 run**, RIP version 2 alone would have read differently: of the six `partial`
+  verdicts, only RIP-F-ROUTE-EXPIRY held a failure of RFC 2453. The other five were RIPng
   failures, gaps 1 to 3, and the RIPng next hop entry of level 3.
-- **RIP-F-ROUTE-EXPIRY** is the feature where both documents fail, and the reason is the same
-  code: the timeout is looked at only when an update goes out (gap 4), a network the router
-  itself lost is never purged (gap 5), and a learned route is purged 300 s after the last
-  entry from its next hop, not 120 s after the deletion (gap 6). Together, gaps 5 and 6 keep
-  every withdrawn network in every update of the RIP domain for good.
+- **RIP-F-ROUTE-EXPIRY** was the feature where both documents failed, and the reason was the
+  same code: the timeout was looked at only when an update went out (gap 4), a network the
+  router itself lost was never purged (gap 5), and a learned route was purged 300 s after the
+  last entry from its next hop, not 120 s after the deletion (gap 6). Together, gaps 5 and 6
+  kept every withdrawn network in every update of the RIP domain for good.
 - **The `unverified` verdicts** are the level 3 work and the owed checks, not verdicts on the
   model.
 
@@ -124,8 +129,9 @@ guide describes; [`results.md`](results.md#the-model-gaps) holds all six.
 
 1. **Two mandatory features are `unverified` and claimed in code**: RIP-F-RESPONSE-VALIDATION
    and RIP-F-ROUTE-TAG. Level 3 reaches both with crafted responses.
-2. **The six gaps** of [`results.md`](results.md#the-model-gaps) are repairs, not tests: none is
-   declared, so the suite stays red until they are repaired. After a repair of gap 3, the
-   check of RFC2080-TIMER-7 reaches its own observation for the first time.
+2. **The six gaps** of [`results.md`](results.md#the-model-gaps) are repaired, and the suite
+   passes. One new finding waits for a check: RIP deletes a static route of the IPv4
+   configuration when its interface goes down
+   ([Other findings](results.md#other-findings)).
 3. **The obsolete claim of level 1 stands**: the serializer names RFC 1058 for the version 2
    layout.

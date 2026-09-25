@@ -10,12 +10,17 @@ list of what to do next.
 
 The tooling quirks that apply to every protocol are in
 [`ipv4/notes.md`](../ipv4/notes.md#tooling-quirks). What follows is what RIP added, in one pass:
-level 2 on 2026-09-24, RIP version 2 and RIPng together, one twin test for each check. The gaps
-themselves are in [`results.md`](results.md#the-model-gaps).
+level 2 on 2026-09-24, RIP version 2 and RIPng together, one twin test for each check, and the
+repairs of the six gaps on 2026-09-25. The gaps themselves are in
+[`results.md`](results.md#the-model-gaps).
 
 ## Model quirks
 
 ### One module plays both protocols, and RIPng inherits the fields of version 2
+
+**Fixed on** 2026-09-25 for the version (gap 1): `Rip::getMessageVersion` gives 1 for RIPng, and
+every message takes its version from it. The address family 2 of the RIPng entries stays. What
+follows describes the model before the repair.
 
 `Rip` runs RIP version 2 or RIPng by its `mode` parameter, with one message class for both.
 `RipPacket` has `version = 2` by default
@@ -27,6 +32,10 @@ of version 2 names RFC 1058
 
 ### A RIPng answer to a unicast address has no interface
 
+**Fixed on** 2026-09-25 (gap 2): for RIPng, `Rip::sendPacket` binds a unicast answer to the
+interface of the request and gives it the link-local source address of that interface. What
+follows describes the model before the repair.
+
 `Rip::sendPacket` attaches the outgoing interface, and for RIPng the link-local source address,
 only when the destination is multicast
 ([Rip.cc:982-992](../../../../../src/inet/routing/rip/Rip.cc#L982)). The answer to a table request
@@ -35,6 +44,15 @@ the first interface, where neighbor discovery fails, and drops it (gap 2). RIP v
 such problem, because an IPv4 address routes.
 
 ### The IPv6 routing table forgets the network of a link that comes back
+
+**Fixed on** 2026-09-25 (gap 3), in two parts. `Ipv6RoutingTable` keeps the static (`MANUAL`)
+and own-prefix (`OWN_ADV_PREFIX`) routes of an interface aside while the interface is down, and
+adds them again when it is up with a carrier. RIP attaches a returning static route to its RIP
+route again. The second part was needed because the route of netA is not an interface route, as
+the text below assumes: `Ipv6NetworkConfigurator` adds it as a static route, and RIPng imports
+it as one. OMNeT++ calls the listeners of a signal in the order of subscription, and the routing
+table subscribes before RIP, so the table removes the route first and RIP only detaches it. What
+follows describes the model before the repair.
 
 When the carrier of an interface goes down, `Ipv6RoutingTable` deletes its routes, and it adds
 nothing back when the carrier returns
@@ -46,6 +64,14 @@ routes, which is why the IPv4 twin passes. The repair belongs to the IPv6 routin
 can change other IPv6 suites.
 
 ### The timers of a route are one function, called when the router sends
+
+**Fixed on** 2026-09-25 (gaps 4, 5 and 6), in three commits, one for each gap, because each is a
+decision of its own. `Rip` has an expiry timer at the earliest expiry or purge; a lost route of
+the router itself is purged too; and every invalid route is purged 120 s after its first
+invalidation. The last rule ended a chain of triggered updates that no check saw: the function
+invalidated an expired route again at each update, and each time triggered an update, so a
+router sent one every 1 to 5 s from the expiry to the purge. What follows describes the model
+before the repair.
 
 `Rip::checkExpiredRoutes` does the expiry and the garbage collection of every route. It runs only
 from `Rip::sendRoutes` ([Rip.cc:537, 551](../../../../../src/inet/routing/rip/Rip.cc#L537)), and
@@ -159,6 +185,11 @@ entries of a message for that sentence.
   [`ipv4/notes.md`](../ipv4/notes.md#tooling-quirks).
 - The RIPng request test read the zero prefix of a whole-table request as `::`, and the model
   holds the unspecified address. Both are 16 zero octets on the wire, and the test accepts both.
+- Found by the repair of gap 2: the split-horizon checks waited for the first periodic update of
+  R3 after R2 had learned netC, and assumed that it comes before the update of R2 at 47.8 s. The
+  triggered update of R3 draws a random delay, so that order was luck. The checks now wait for
+  the update of R2 on L1 that holds netC at metric 2. A repair can show a test error that a
+  defect hid.
 
 ### The generated tests and ledger
 
@@ -168,6 +199,14 @@ templates, IPv4 and IPv6, and writes the tests from `rip-specs-1.py` and `rip-sp
 statements, and refuses to run when a statement has no row. The `README.md` there lists the
 scripts.
 
+### The statistical runner keeps only the last filter
+
+`inet_run_statistical_tests -f a -f b` runs only the tests that `b` selects. The repairs first
+ran the statistics of gaps 1 and 2 with `-f examples/rip -f tutorials/rip`, saw 18 tests of
+`tutorials/rip` and none of `examples/rip`, and wrote that nothing moved. The full run of a later
+commit found the move of `examples/rip/simpletest -c IPv6`, which gap 2 caused. Give one filter
+with an alternation, `-f '(examples/rip|tutorials/rip)'`, and check the count of tests: 28.
+
 ### Put a field that the model gets wrong last
 
 Gap 1 fails the version of every RIPng message. The RIPng checks read the version last, so the
@@ -176,27 +215,20 @@ the late expiry of gap 4, so the garbage collection became a check of its own.
 
 ## Follow-ups, in the order I would do them
 
-1. **Set the version of RIPng to 1** (gap 1): one line where the message is made. Then run
-   `Rfc2080UpdateFields` and `Rfc2080LostNetwork` again.
-2. **Send a RIPng answer on the interface of the request** (gap 2): attach the interface and
-   the link-local source address in `Rip::sendPacket` also for a link-local unicast
-   destination. Then run `Rfc2080TableRequest` again.
-3. **Give the route timers their own events** (gaps 4, 5 and 6, in one change): an expiry timer
-   per route, a purge of the interface routes that the router lost, and no refresh of the last
-   update time by a metric of 16. Then run both `RouteExpiry`, both
-   `LostNetworkGarbageCollection` and both `WithdrawnRouteGarbageCollection` tests again, and
-   the two `ExpiryGarbageCollection` tests, which pass now by accident.
-4. **Restore the on-link routes of IPv6 when the carrier returns** (gap 3), in
-   `Ipv6RoutingTable`, as `Ipv4RoutingTable::updateNetmaskRoutes` does. Then run
-   `Rfc2080GarbageCollection` again: its observation 4, RFC2080-TIMER-7, gets its first verdict.
-   Run the IPv6 and ND suites too.
-5. **Add ports 520 and 521 to the UDP port table**, so that the dissector reaches RIP and a
+The six gaps are repaired, on `topic/standards-tests-rip-level2-fixes`; the follow-ups that
+repaired them are gone from this list.
+
+1. **Delete only the routes that RIP added** in `Rip::invalidateRoute`. Today a carrier loss
+   makes RIP delete a static route of the IPv4 configuration, which the IPv4 routing table
+   keeps otherwise and never adds again ([Other findings](results.md#other-findings)). Write the
+   check first: a static route through a link that goes down and comes back, in RIP version 2.
+2. **Add ports 520 and 521 to the UDP port table**, so that the dissector reaches RIP and a
    filter expression can read it.
-6. **Level 3**: the validation of a response, the specific request, the route tag, the next hop
+3. **Level 3**: the validation of a response, the specific request, the route tag, the next hop
    of a received entry, and the three malformed inputs that stop the run. See
    [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes) for the 21 owed
    statements, and the closing list of
    [`checks.md`](../../protocol/rip/checks.md#statements-this-pass-wrote-no-check-for) for the
    level 2 statements that this pass left.
-7. **Level 4**: the random timer of the triggered update, and a check of the precaution against
+4. **Level 4**: the random timer of the triggered update, and a check of the precaution against
    synchronization that accepts either precaution.
