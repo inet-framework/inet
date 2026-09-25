@@ -26,6 +26,17 @@
 
 namespace inet {
 
+// true when the interface has a link-local address that Duplicate Address Detection has tested:
+// every MLD Query leaves from such an address (RFC 3810 section 5.1.13, RFC 9777 section 5.1.14)
+static bool hasValidLinkLocalAddress(const NetworkInterface *ie)
+{
+    auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+    if (ipv6Data == nullptr)
+        return false;
+    const Ipv6Address& linkLocalAddress = ipv6Data->getLinkLocalAddress();
+    return !linkLocalAddress.isUnspecified() && !ipv6Data->isTentativeAddress(linkLocalAddress);
+}
+
 using namespace std;
 
 Define_Module(Mldv2);
@@ -47,6 +58,8 @@ static bool isSorted(const Ipv6AddressVector& v)
 
 Mldv2::~Mldv2()
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
 
@@ -107,6 +120,7 @@ void Mldv2::initialize(int stage)
         host->subscribe(interfaceCreatedSignal, this);
         host->subscribe(interfaceDeletedSignal, this);
         host->subscribe(ipv6MulticastChangeSignal, this);
+        host->subscribe(interfaceIpv6ConfigChangedSignal, this);
 
         // in multicast routers: join the all-MLDv2-routers address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
@@ -153,6 +167,22 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         info = check_and_cast<const Ipv6MulticastGroupSourceInfo *>(obj);
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
+    else if (signalID == interfaceIpv6ConfigChangedSignal) {
+        // a router interface that waited for a tested link-local address starts its querier
+        ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface());
+        if (hasValidLinkLocalAddress(ie))
+            sendHeldMessages(ie);
+        auto it = routerData.find(ie->getInterfaceId());
+        if (it != routerData.end() && it->second->waitsForLinkLocalAddress && hasValidLinkLocalAddress(ie)) {
+            RouterInterfaceData *data = it->second;
+            data->waitsForLinkLocalAddress = false;
+            if (data->state == MLDV2_RS_QUERIER && !data->generalQueryTimer->isScheduled()) {
+                EV_INFO << "Interface '" << ie->getInterfaceName() << "' has a valid link-local address, starting the querier.\n";
+                sendGeneralQuery(data, queryResponseInterval);
+                startTimer(data->generalQueryTimer, startupQueryInterval);
+            }
+        }
+    }
     else if (signalID == interfaceCreatedSignal) {
         ie = check_and_cast<NetworkInterface *>(obj);
         if (ie->isMulticast())
@@ -164,6 +194,7 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
             deleteRouterInterfaceData(interfaceId);
+            deleteHeldMessages(interfaceId);
         }
     }
 }
@@ -285,10 +316,15 @@ void Mldv2::configureInterface(NetworkInterface *ie)
 {
     if (enabled && rt->isMulticastForwardingEnabled()) {
         // start querier on this interface
-        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
-                << (simTime() + startupQueryInterval) << "'.\n";
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->state = MLDV2_RS_QUERIER;
+        if (!hasValidLinkLocalAddress(ie)) {
+            EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet; the querier starts when it has one.\n";
+            routerData->waitsForLinkLocalAddress = true;
+            return;
+        }
+        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
+                << (simTime() + startupQueryInterval) << "'.\n";
 
         sendGeneralQuery(routerData, queryResponseInterval);
         startTimer(routerData->generalQueryTimer, startupQueryInterval);
@@ -385,8 +421,33 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
 // --- Lifecycle ---
 
+void Mldv2::sendHeldMessages(NetworkInterface *ie)
+{
+    auto it = heldMessages.find(ie->getInterfaceId());
+    if (it == heldMessages.end())
+        return;
+    std::vector<Packet *> messages = it->second;
+    heldMessages.erase(it);
+    for (auto msg : messages) {
+        msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
+        send(msg, "ipOut");
+    }
+}
+
+void Mldv2::deleteHeldMessages(int interfaceId)
+{
+    auto it = heldMessages.find(interfaceId);
+    if (it == heldMessages.end())
+        return;
+    for (auto msg : it->second)
+        delete msg;
+    heldMessages.erase(it);
+}
+
 void Mldv2::handleStopOperation(LifecycleOperation *operation)
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     // Clear per-interface state and cancel timers. Signal subscriptions are NOT
     // removed here: like Mldv1/Igmpv2, MLD subscribes once in initialize() and
     // keeps the subscription for the module's lifetime, so a stop/start cycle does
@@ -399,6 +460,8 @@ void Mldv2::handleStopOperation(LifecycleOperation *operation)
 
 void Mldv2::handleCrashOperation(LifecycleOperation *operation)
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
     while (!routerData.empty())
@@ -1431,6 +1494,22 @@ void Mldv2::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    // every MLD message from a link-local address (RFC 2710 section 3, RFC 9777 section 5). While
+    // the interface has no tested one, a Query is not sent, and a Report or a Done waits for it
+    if (hasValidLinkLocalAddress(ie))
+        msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
+    else if (msg->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLD_QUERY) {
+        EV_WARN << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address, dropping the Query.\n";
+        delete msg;
+        return;
+    }
+    else {
+        // RFC 3810 section 5.2.13 sends it from the unspecified address, which the IPv6 layer of
+        // the model replaces with its preferred address; so it waits for the link-local address
+        EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet, holding the message.\n";
+        heldMessages[ie->getInterfaceId()].push_back(msg);
+        return;
+    }
     send(msg, "ipOut");
 }
 

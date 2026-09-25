@@ -3,3 +3,5 @@ IGMP and MLD corrections
 An IGMPv3 Query now carries the QRV and the QQIC of its querier: the Robustness Variable (0 above 7) and the code of the Query Interval (RFC 9776 sections 4.1.6 and 4.1.7). Before, both fields were 0. An MLDv2 Query now carries them too (RFC 9777 sections 5.1.8 and 5.1.9).
 
 An IGMPv3 Report and Leave, also the IGMPv2 messages of a host in IGMPv2 mode, now leave with the precedence of Internetwork Control, Type of Service 0xc0 (RFC 9776 section 4), as the Queries already did.
+
+Every MLD message, of Mldv1 and of Mldv2, now leaves from the link-local address of its interface (RFC 2710 section 3, RFC 9777 section 5), once Duplicate Address Detection has tested it. Before, it left from the global address. So the querier of an interface now starts when the interface has a tested link-local address, up to about 2 seconds after the start, and a Report or a Done waits until then. Ipv6InterfaceData now emits the interfaceIpv6ConfigChanged signal when an address becomes tentative or valid.
