@@ -135,6 +135,14 @@ seed-set = 0
 *.hostA.app[0].destAddr = "2001:db8:2::800:ff:fe00:c"
 *.hostA.app[0].startTime = 10s
 *.hostA.app[0].count = 1
+# R1 resolves the link-local address of R2, the target of the Redirect, before the echo request of A:
+# a router builds the Redirect before it forwards the packet, so without this ping it would not
+# know the link-layer address of R2 yet (RFC 4861 section 4.5: "if known")
+*.r1.numApps = 1
+*.r1.app[0].typename = "PingApp"
+*.r1.app[0].destAddr = "fe80::800:ff:fe00:2"
+*.r1.app[0].startTime = 8s
+*.r1.app[0].count = 1
 
 %contains: stdout
 PROTOCOLTEST rfc4861_redirect_fields: PASS
