@@ -18,8 +18,15 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
   private:
     std::string name;
 
+  protected:
+    // Maps stream 1 modulation and code rate; returns NaN for an unsupported pair.
+    static bps computeNonHtReferenceRate(unsigned int constellationSize, double codeRate);
+
   public:
     Ieee80211ModeBase(const char *name) : name(name) {}
+    virtual bps getNonHtReferenceRate() const override { return bps(NaN); }
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::UNKNOWN; }
+    virtual PreambleType getLegacyPreambleType() const override { return PreambleType::UNKNOWN; }
     virtual int getHtMcsIndex() const override { return -1; }
     virtual bool isHtShortGuardInterval() const override { return false; }
     virtual const char *getName() const override { return name.c_str(); }

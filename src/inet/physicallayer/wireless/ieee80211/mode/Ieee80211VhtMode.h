@@ -263,6 +263,9 @@ class INET_API Ieee80211VhtMode : public Ieee80211ModeBase
     virtual ~Ieee80211VhtMode() { delete preambleMode; delete dataMode; }
 
     virtual const Ieee80211VhtDataMode *getDataMode() const override { return dataMode; }
+    virtual bps getNonHtReferenceRate() const override;
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::VHT; }
+    virtual PreambleType getLegacyPreambleType() const override { return PreambleType::NOT_APPLICABLE; }
     virtual const Ieee80211VhtPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211VhtSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
     virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
