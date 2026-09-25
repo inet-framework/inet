@@ -942,8 +942,6 @@ void Ipv6::encapsulate(Packet *transportPacket)
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
 
-    ipv6Header->setPayloadLength(transportPacket->getDataLength());
-
     // set source and destination address
     ipv6Header->setDestAddress(dest);
     ipv6Header->setSrcAddress(src);
@@ -990,6 +988,8 @@ void Ipv6::encapsulate(Packet *transportPacket)
     // Insert extension headers (in reverse order, each at front, so they end up in correct order)
     for (int i = (int)extHeaders.size() - 1; i >= 0; i--)
         transportPacket->insertAtFront(Ptr<Ipv6ExtensionHeader>(extHeaders[i]->dup()));
+    // the Payload Length counts the extension headers too (RFC 8200 section 3)
+    ipv6Header->setPayloadLength(transportPacket->getDataLength());
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
     // Clean up owned ext headers from tag (originals)
     for (auto *eh : extHeaders)
