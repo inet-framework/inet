@@ -8,12 +8,6 @@ doc/project/evidence/protocol/mld/checks/message-format.md#timer-relations-in-th
 the program steps below map onto its expected observations. Step 1 is observations 1 and 2.
 Observation 3 is in Rfc9777QueryTimerRelations.test.
 
-Defect: the QRV of every Query is 0, the value that means a Robustness Variable above 7
-(RFC9777-QRY-13); the Robustness Variable of R is 2. Mldv2::sendGeneralQuery does not set the
-field (src/inet/networklayer/icmpv6/Mldv2.cc:1291-1298). This test FAILS, and the failure is
-deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
-wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

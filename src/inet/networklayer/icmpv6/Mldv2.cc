@@ -534,6 +534,7 @@ void Mldv2::processRexmtTimer(cMessage *msg)
         query->setType(ICMPv6_MLD_QUERY);
         query->setMulticastAddress(groupData->groupAddr);
         query->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        setQuerierFields(query);
         if (groupData->rexmtGroupAndSource) {
             query->setSourceList(sourcesToQuery);
             query->setChunkLength(B(28 + (16 * sourcesToQuery.size())));
@@ -1295,6 +1296,7 @@ void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespT
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(maxRespTime * 1000.0))); // milliseconds
+        setQuerierFields(msg);
         msg->setChunkLength(B(28));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
@@ -1320,6 +1322,7 @@ void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMulticastAddress(groupData->groupAddr);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        setQuerierFields(msg);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(28));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
@@ -1377,6 +1380,7 @@ void Mldv2::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ip
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMulticastAddress(groupData->groupAddr);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        setQuerierFields(msg);
         msg->setSourceList(sources);
         msg->setChunkLength(B(28 + (16 * sources.size())));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
@@ -1759,6 +1763,30 @@ Ipv6AddressVector Mldv2::set_union(const Ipv6AddressVector& first, const Ipv6Add
     auto it = std::set_union(first.begin(), first.end(), second.begin(), second.end(), result.begin());
     result.resize(it - result.begin());
     return result;
+}
+
+void Mldv2::setQuerierFields(const Ptr<Mldv2Query>& query)
+{
+    // a Robustness Variable above 7 does not fit, and the QRV is then zero (RFC 9777 section 5.1.8)
+    query->setRobustnessVariable(robustnessVariable <= 7 ? robustnessVariable : 0);
+    query->setQueryIntervalCode(codeQqic((uint16_t)queryInterval));
+}
+
+// the QQIC in seconds (RFC 9777 section 5.1.9): the value itself below 128, and above it
+// 1eeemmmm, which stands for (mant | 0x10) << (exp + 3)
+uint8_t Mldv2::codeQqic(uint16_t value)
+{
+    if (value < 128)
+        return (uint8_t)value;
+    if (value >= (0x1f << 10))
+        return 0xff;
+    unsigned exp = 0;
+    value >>= 3;
+    while (value > 0x1f) {
+        value >>= 1;
+        exp++;
+    }
+    return (uint8_t)(0x80 | ((exp << 4) & 0x70) | (value & 0x0f));
 }
 
 // --- 16-bit MLDv2 Max Response Code / QQIC codec (RFC 3810 §5.1.3) ---
