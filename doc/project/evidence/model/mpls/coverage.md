@@ -10,12 +10,12 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:34 +0200
+- INET: branch `topic/standards-tests-mpls-level2-fixes`, commit `db2fd89622`, tree clean
+- Trees: src `8006b0e093`, tests/protocol `31f57dca8a`
 - OMNeT++: 6.4.0, debug build from this commit, Ubuntu clang 23.0.0, Ubuntu 26.04.1 LTS
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/mpls$'`
-- Suite: 21 tests, 5 PASS, 10 FAIL (unexpected), 6 FAIL (expected), so the suite reports FAIL
+- Suite: 21 tests, 20 PASS, 1 FAIL (expected), so the suite reports PASS
 - Target level: 2
 
 The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
@@ -89,15 +89,15 @@ the statement limits.
 | [RFC3031-PHP-8](../../standard/rfc3031/catalog.md#rfc3031-php-8) | no check | — | — | — | label distribution, a protocol of its own (LDP, RSVP-TE) out of the in-scope set |
 | [RFC3031-INV-1](../../standard/rfc3031/catalog.md#rfc3031-inv-1) | later | — | — | — | level 3: a packet that no binding covers |
 | [RFC3031-NOL-1](../../standard/rfc3031/catalog.md#rfc3031-nol-1) | later | — | — | — | level 3: a packet that no binding covers |
-| [RFC3031-TTL-1](../../standard/rfc3031/catalog.md#rfc3031-ttl-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | FAIL | observation 4: B gets TTL 32, and 31 with penultimate hop popping, where three routers give 29, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3031-TTL-2](../../standard/rfc3031/catalog.md#rfc3031-ttl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlWithPush` | FAIL | observation 3: the top entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
+| [RFC3031-TTL-1](../../standard/rfc3031/catalog.md#rfc3031-ttl-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
+| [RFC3031-TTL-2](../../standard/rfc3031/catalog.md#rfc3031-ttl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
 | [RFC3031-TTL-3](../../standard/rfc3031/catalog.md#rfc3031-ttl-3) | selected | [The label stack entry](../../protocol/mpls/checks/encoding.md#the-label-stack-entry) | `Rfc3032LabelStackEntry` | PASS |  |
-| [RFC3031-TTL-4](../../standard/rfc3031/catalog.md#rfc3031-ttl-4) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | FAIL | observation 2: the entry has TTL 0 above an IPv4 TTL of 32, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3031-TTL-5](../../standard/rfc3031/catalog.md#rfc3031-ttl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3031-TTL-6](../../standard/rfc3031/catalog.md#rfc3031-ttl-6) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop` | FAIL | observation 2: the IPv4 TTL on L4 is 32 after an entry of 0 on L3, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
+| [RFC3031-TTL-4](../../standard/rfc3031/catalog.md#rfc3031-ttl-4) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | PASS |  |
+| [RFC3031-TTL-5](../../standard/rfc3031/catalog.md#rfc3031-ttl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3031-TTL-6](../../standard/rfc3031/catalog.md#rfc3031-ttl-6) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
 | [RFC3031-TTL-7](../../standard/rfc3031/catalog.md#rfc3031-ttl-7) | no check | — | — | — | no link of INET lacks a TTL field; `Mpls.ned:39-40` names Frame Relay and ATM, which INET does not have |
 | [RFC3031-TTL-8](../../standard/rfc3031/catalog.md#rfc3031-ttl-8) | no check | — | — | — | no link of INET lacks a TTL field; `Mpls.ned:39-40` names Frame Relay and ATM, which INET does not have |
-| [RFC3031-NULL-1](../../standard/rfc3031/catalog.md#rfc3031-null-1) | selected | [The Implicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-implicit-null-label) | `Rfc3032ImplicitNull` | FAIL (expected) | not reached: the frame of observation 2 carries the label 3, where observation 3 needs none, [gap 5](results.md#gap-5-unimplemented-feature--no-reserved-label-values) |
+| [RFC3031-NULL-1](../../standard/rfc3031/catalog.md#rfc3031-null-1) | selected | [The Implicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-implicit-null-label) | `Rfc3032ImplicitNull` | PASS |  |
 | [RFC3031-NULL-2](../../standard/rfc3031/catalog.md#rfc3031-null-2) | no check | — | — | — | label distribution, a protocol of its own (LDP, RSVP-TE) out of the in-scope set |
 | [RFC3031-NULL-3](../../standard/rfc3031/catalog.md#rfc3031-null-3) | covered | [Penultimate hop popping](../../protocol/mpls/checks/forwarding.md#penultimate-hop-popping) | `Rfc3031PenultimateHopPopping` | PASS |  |
 
@@ -115,11 +115,11 @@ the statement limits.
 | [RFC3032-ENC-8](../../standard/rfc3032/catalog.md#rfc3032-enc-8) | selected | [A label stack of two entries](../../protocol/mpls/checks/encoding.md#a-label-stack-of-two-entries) | `Rfc3032TwoLabelStack` | PASS |  |
 | [RFC3032-ENC-9](../../standard/rfc3032/catalog.md#rfc3032-enc-9) | selected | [The label stack entry](../../protocol/mpls/checks/encoding.md#the-label-stack-entry) | `Rfc3032LabelStackEntry` | PASS |  |
 | [RFC3032-ENC-10](../../standard/rfc3032/catalog.md#rfc3032-enc-10) | selected | [A label stack of two entries](../../protocol/mpls/checks/encoding.md#a-label-stack-of-two-entries) | `Rfc3032TwoLabelStack` | PASS |  |
-| [RFC3032-ENC-11](../../standard/rfc3032/catalog.md#rfc3032-enc-11) | selected | [The IPv4 Explicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-ipv4-explicit-null-label) | `Rfc3032ExplicitNull` | FAIL (expected) | the LIB refuses the label 0, and the run stops at initialization, [gap 5](results.md#gap-5-unimplemented-feature--no-reserved-label-values) |
+| [RFC3032-ENC-11](../../standard/rfc3032/catalog.md#rfc3032-enc-11) | selected | [The IPv4 Explicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-ipv4-explicit-null-label) | `Rfc3032ExplicitNull` | PASS |  |
 | [RFC3032-ENC-12](../../standard/rfc3032/catalog.md#rfc3032-enc-12) | owed | — | — | — | the Router Alert label, which `MplsPacket.msg:16` names: local software in the LSR, and a rule for it |
 | [RFC3032-ENC-13](../../standard/rfc3032/catalog.md#rfc3032-enc-13) | owed | — | — | — | the Router Alert label, which `MplsPacket.msg:16` names: local software in the LSR, and a rule for it |
 | [RFC3032-ENC-14](../../standard/rfc3032/catalog.md#rfc3032-enc-14) | no check | — | — | — | not claimed: the model labels IPv4 only (`Mpls.cc:69-73`), and the User's Guide names plain IPv4 |
-| [RFC3032-ENC-15](../../standard/rfc3032/catalog.md#rfc3032-enc-15) | selected | [The Implicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-implicit-null-label) | `Rfc3032ImplicitNull` | FAIL (expected) | observation 2: R2 sends the label 3 onto L3, [gap 5](results.md#gap-5-unimplemented-feature--no-reserved-label-values) |
+| [RFC3032-ENC-15](../../standard/rfc3032/catalog.md#rfc3032-enc-15) | selected | [The Implicit NULL label](../../protocol/mpls/checks/reserved-labels.md#the-implicit-null-label) | `Rfc3032ImplicitNull` | PASS |  |
 | [RFC3032-ENC-16](../../standard/rfc3032/catalog.md#rfc3032-enc-16) | no check | — | — | — | label distribution, a protocol of its own (LDP, RSVP-TE) out of the in-scope set |
 | [RFC3032-NLP-1](../../standard/rfc3032/catalog.md#rfc3032-nlp-1) | selected | [Label switching along an LSP](../../protocol/mpls/checks/forwarding.md#label-switching-along-an-lsp) | `Rfc3031LabelSwitching` | PASS |  |
 | [RFC3032-NLP-2](../../standard/rfc3032/catalog.md#rfc3032-nlp-2) | selected | [Label switching along an LSP](../../protocol/mpls/checks/forwarding.md#label-switching-along-an-lsp) | `Rfc3031LabelSwitching` | PASS |  |
@@ -134,31 +134,31 @@ the statement limits.
 | [RFC3032-ICMP-4](../../standard/rfc3032/catalog.md#rfc3032-icmp-4) | later | — | — | — | level 3: an ICMP message about a labeled packet (RFC 3032 §2.3) |
 | [RFC3032-ICMP-5](../../standard/rfc3032/catalog.md#rfc3032-icmp-5) | later | — | — | — | level 3: an ICMP message about a labeled packet (RFC 3032 §2.3) |
 | [RFC3032-ICMP-6](../../standard/rfc3032/catalog.md#rfc3032-icmp-6) | later | — | — | — | level 3: an ICMP message about a labeled packet (RFC 3032 §2.3) |
-| [RFC3032-TTL-1](../../standard/rfc3032/catalog.md#rfc3032-ttl-1) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3032-TTL-2](../../standard/rfc3032/catalog.md#rfc3032-ttl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3032-TTL-3](../../standard/rfc3032/catalog.md#rfc3032-ttl-3) | selected | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | FAIL | observation 3: the datagrams of flow 2001, sent with TTL 2, cross L3, [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on) |
-| [RFC3032-TTL-4](../../standard/rfc3032/catalog.md#rfc3032-ttl-4) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | FAIL | no LSR looks at the TTL, [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on) |
-| [RFC3032-TTL-5](../../standard/rfc3032/catalog.md#rfc3032-ttl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3032-TTL-6](../../standard/rfc3032/catalog.md#rfc3032-ttl-6) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlWithPush` | FAIL | observation 3: the top entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
+| [RFC3032-TTL-1](../../standard/rfc3032/catalog.md#rfc3032-ttl-1) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3032-TTL-2](../../standard/rfc3032/catalog.md#rfc3032-ttl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3032-TTL-3](../../standard/rfc3032/catalog.md#rfc3032-ttl-3) | selected | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS |  |
+| [RFC3032-TTL-4](../../standard/rfc3032/catalog.md#rfc3032-ttl-4) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS |  |
+| [RFC3032-TTL-5](../../standard/rfc3032/catalog.md#rfc3032-ttl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3032-TTL-6](../../standard/rfc3032/catalog.md#rfc3032-ttl-6) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
 | [RFC3032-TTL-7](../../standard/rfc3032/catalog.md#rfc3032-ttl-7) | covered | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlWithPush` | PASS | the check reads the top entry only, as the statement allows |
 | [RFC3032-TTL-8](../../standard/rfc3032/catalog.md#rfc3032-ttl-8) | covered | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | PASS |  |
-| [RFC3032-TTL-9](../../standard/rfc3032/catalog.md#rfc3032-ttl-9) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | FAIL | observation 2: the entry has TTL 0 above an IPv4 TTL of 32, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3032-TTL-10](../../standard/rfc3032/catalog.md#rfc3032-ttl-10) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop` | FAIL | observation 2: the IPv4 TTL on L4 is 32 after an entry of 0 on L3; observation 3: 32 on L3 after 0 on L2, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3032-FRAG-1](../../standard/rfc3032/catalog.md#rfc3032-frag-1) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | observation 1: the labeled packet is 4 octets longer than the datagram |
+| [RFC3032-TTL-9](../../standard/rfc3032/catalog.md#rfc3032-ttl-9) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | PASS |  |
+| [RFC3032-TTL-10](../../standard/rfc3032/catalog.md#rfc3032-ttl-10) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
+| [RFC3032-FRAG-1](../../standard/rfc3032/catalog.md#rfc3032-frag-1) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
 | [RFC3032-FRAG-2](../../standard/rfc3032/catalog.md#rfc3032-frag-2) | no check | — | — | — | not claimed: no parameter for the Maximum Initially Labeled IP Datagram Size |
 | [RFC3032-FRAG-3](../../standard/rfc3032/catalog.md#rfc3032-frag-3) | no check | — | — | — | not claimed: no parameter for the Maximum Initially Labeled IP Datagram Size |
 | [RFC3032-FRAG-4](../../standard/rfc3032/catalog.md#rfc3032-frag-4) | no check | — | — | — | not claimed: no parameter for the Maximum Initially Labeled IP Datagram Size |
 | [RFC3032-FRAG-5](../../standard/rfc3032/catalog.md#rfc3032-frag-5) | no check | — | — | — | not claimed: no parameter for the Maximum Initially Labeled IP Datagram Size |
 | [RFC3032-FRAG-6](../../standard/rfc3032/catalog.md#rfc3032-frag-6) | no check | — | — | — | not claimed: no parameter for the Maximum Initially Labeled IP Datagram Size |
-| [RFC3032-FRAG-7](../../standard/rfc3032/catalog.md#rfc3032-frag-7) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | with no weight: a permission that the model does not use |
-| [RFC3032-FRAG-8](../../standard/rfc3032/catalog.md#rfc3032-frag-8) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | FAIL (expected) | observation 3: a labeled packet of 1032 octets on L3, whose frames carry 500, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
-| [RFC3032-FRAG-9](../../standard/rfc3032/catalog.md#rfc3032-frag-9) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | observation 2: the datagrams of flow 2000 go whole; the test fails at observation 3 |
-| [RFC3032-FRAG-10](../../standard/rfc3032/catalog.md#rfc3032-frag-10) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | with no weight: a permission that the model does not use |
-| [RFC3032-FRAG-11](../../standard/rfc3032/catalog.md#rfc3032-frag-11) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | FAIL (expected) | observation 3: a labeled packet of 1032 octets on L3, whose frames carry 500, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
-| [RFC3032-FRAG-12](../../standard/rfc3032/catalog.md#rfc3032-frag-12) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | FAIL (expected) | not reached: no fragment exists, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
-| [RFC3032-FRAG-13](../../standard/rfc3032/catalog.md#rfc3032-frag-13) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigDontFragment` | FAIL (expected) | observation 2: the datagrams of flow 2002, with the DF bit, cross L3, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
-| [RFC3032-FRAG-14](../../standard/rfc3032/catalog.md#rfc3032-frag-14) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigIcmp` | FAIL (expected) | observation 3: A gets no ICMP message, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
-| [RFC3032-FRAG-15](../../standard/rfc3032/catalog.md#rfc3032-frag-15) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigIcmp` | FAIL (expected) | observation 3: A gets no ICMP message, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
+| [RFC3032-FRAG-7](../../standard/rfc3032/catalog.md#rfc3032-frag-7) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | with no weight: a permission that the model does not use; it fragments |
+| [RFC3032-FRAG-8](../../standard/rfc3032/catalog.md#rfc3032-frag-8) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
+| [RFC3032-FRAG-9](../../standard/rfc3032/catalog.md#rfc3032-frag-9) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
+| [RFC3032-FRAG-10](../../standard/rfc3032/catalog.md#rfc3032-frag-10) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS | with no weight: a permission that the model does not use; it fragments |
+| [RFC3032-FRAG-11](../../standard/rfc3032/catalog.md#rfc3032-frag-11) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
+| [RFC3032-FRAG-12](../../standard/rfc3032/catalog.md#rfc3032-frag-12) | selected | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
+| [RFC3032-FRAG-13](../../standard/rfc3032/catalog.md#rfc3032-frag-13) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigDontFragment`, `Rfc3032TooBigIcmp` | PASS |  |
+| [RFC3032-FRAG-14](../../standard/rfc3032/catalog.md#rfc3032-frag-14) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigDontFragment`, `Rfc3032TooBigIcmp` | PASS |  |
+| [RFC3032-FRAG-15](../../standard/rfc3032/catalog.md#rfc3032-frag-15) | selected | [A too-big labeled datagram that may not be fragmented](../../protocol/mpls/checks/fragmentation.md#a-too-big-labeled-datagram-that-may-not-be-fragmented) | `Rfc3032TooBigDontFragment`, `Rfc3032TooBigIcmp` | PASS |  |
 | [RFC3032-FRAG-16](../../standard/rfc3032/catalog.md#rfc3032-frag-16) | no check | — | — | — | not claimed: the model labels IPv4 only (`Mpls.cc:69-73`), and the User's Guide names plain IPv4 |
 | [RFC3032-FRAG-17](../../standard/rfc3032/catalog.md#rfc3032-frag-17) | no check | — | — | — | not claimed: the model labels IPv4 only (`Mpls.cc:69-73`), and the User's Guide names plain IPv4 |
 | [RFC3032-FRAG-18](../../standard/rfc3032/catalog.md#rfc3032-frag-18) | no check | — | — | — | not claimed: the model labels IPv4 only (`Mpls.cc:69-73`), and the User's Guide names plain IPv4 |
@@ -179,11 +179,11 @@ the statement limits.
 | [RFC3032-PPP-12](../../standard/rfc3032/catalog.md#rfc3032-ppp-12) | selected | [Labeled packets on a PPP link](../../protocol/mpls/checks/links.md#labeled-packets-on-a-ppp-link) | `Rfc3032PppEncapsulation` | PASS |  |
 | [RFC3032-PPP-13](../../standard/rfc3032/catalog.md#rfc3032-ppp-13) | selected | [Labeled packets on a PPP link](../../protocol/mpls/checks/links.md#labeled-packets-on-a-ppp-link) | `Rfc3032PppEncapsulation` | PASS |  |
 | [RFC3032-PPP-14](../../standard/rfc3032/catalog.md#rfc3032-ppp-14) | no check | — | — | — | not claimed: multicast, and the LLC/SNAP encapsulation |
-| [RFC3032-PPP-15](../../standard/rfc3032/catalog.md#rfc3032-ppp-15) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | FAIL (expected) | observation 3: a labeled packet of 1032 octets on L3, whose frames carry 500, [gap 6](results.md#gap-6-unimplemented-feature--no-mtu-check-and-no-fragmentation-of-a-labeled-datagram) |
+| [RFC3032-PPP-15](../../standard/rfc3032/catalog.md#rfc3032-ppp-15) | covered | [A labeled datagram too big for the next link](../../protocol/mpls/checks/fragmentation.md#a-labeled-datagram-too-big-for-the-next-link) | `Rfc3032TooBigFragments` | PASS |  |
 | [RFC3032-PPP-16](../../standard/rfc3032/catalog.md#rfc3032-ppp-16) | selected | [Labeled packets on a PPP link](../../protocol/mpls/checks/links.md#labeled-packets-on-a-ppp-link) | `Rfc3032PppEncapsulation` | PASS |  |
-| [RFC3032-LAN-1](../../standard/rfc3032/catalog.md#rfc3032-lan-1) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | FAIL | the run stops at 0.008 s, before observation 1, [gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run) |
-| [RFC3032-LAN-2](../../standard/rfc3032/catalog.md#rfc3032-lan-2) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | FAIL | the run stops at 0.008 s, before observation 1, [gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run) |
-| [RFC3032-LAN-3](../../standard/rfc3032/catalog.md#rfc3032-lan-3) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | FAIL | the run stops at 0.008 s, before observation 1, [gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run) |
+| [RFC3032-LAN-1](../../standard/rfc3032/catalog.md#rfc3032-lan-1) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | PASS |  |
+| [RFC3032-LAN-2](../../standard/rfc3032/catalog.md#rfc3032-lan-2) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | PASS |  |
+| [RFC3032-LAN-3](../../standard/rfc3032/catalog.md#rfc3032-lan-3) | selected | [Labeled packets on an Ethernet link](../../protocol/mpls/checks/links.md#labeled-packets-on-an-ethernet-link) | `Rfc3032EthernetEncapsulation` | PASS |  |
 | [RFC3032-LAN-4](../../standard/rfc3032/catalog.md#rfc3032-lan-4) | no check | — | — | — | not claimed: multicast, and the LLC/SNAP encapsulation |
 | [RFC3032-LAN-5](../../standard/rfc3032/catalog.md#rfc3032-lan-5) | no check | — | — | — | not claimed: multicast, and the LLC/SNAP encapsulation |
 
@@ -191,29 +191,29 @@ the statement limits.
 
 | Statement | Status | Check | Test | Verdict | Note |
 | --- | --- | --- | --- | --- | --- |
-| [RFC3443-TERM-1](../../standard/rfc3443/catalog.md#rfc3443-term-1) | covered | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | PASS | with no weight: the model checks no TTL at all |
-| [RFC3443-TERM-2](../../standard/rfc3443/catalog.md#rfc3443-term-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3443-TERM-3](../../standard/rfc3443/catalog.md#rfc3443-term-3) | selected | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | FAIL | observation 3: the datagrams of flow 2001, sent with TTL 2, cross L3, [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on) |
-| [RFC3443-TERM-4](../../standard/rfc3443/catalog.md#rfc3443-term-4) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | FAIL | no LSR looks at the TTL, [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on) |
-| [RFC3443-MOD-1](../../standard/rfc3443/catalog.md#rfc3443-mod-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032FirstLabelTtl`, `Rfc3032TtlAfterPop` | FAIL | the TTL of the first label is 0 ([gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0)), and the pop leaves the IPv4 TTL as it was ([gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl)) |
+| [RFC3443-TERM-1](../../standard/rfc3443/catalog.md#rfc3443-term-1) | covered | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3443-TERM-2](../../standard/rfc3443/catalog.md#rfc3443-term-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3443-TERM-3](../../standard/rfc3443/catalog.md#rfc3443-term-3) | selected | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS |  |
+| [RFC3443-TERM-4](../../standard/rfc3443/catalog.md#rfc3443-term-4) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS |  |
+| [RFC3443-MOD-1](../../standard/rfc3443/catalog.md#rfc3443-mod-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
 | [RFC3443-MOD-2](../../standard/rfc3443/catalog.md#rfc3443-mod-2) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 | [RFC3443-MOD-3](../../standard/rfc3443/catalog.md#rfc3443-mod-3) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 | [RFC3443-MOD-4](../../standard/rfc3443/catalog.md#rfc3443-mod-4) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 | [RFC3443-ITTL-1](../../standard/rfc3443/catalog.md#rfc3443-ittl-1) | covered | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | PASS |  |
-| [RFC3443-ITTL-2](../../standard/rfc3443/catalog.md#rfc3443-ittl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
+| [RFC3443-ITTL-2](../../standard/rfc3443/catalog.md#rfc3443-ittl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
 | [RFC3443-ITTL-3](../../standard/rfc3443/catalog.md#rfc3443-ittl-3) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
-| [RFC3443-ITTL-4](../../standard/rfc3443/catalog.md#rfc3443-ittl-4) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop` | FAIL | observation 2: the IPv4 TTL on L4 is 32 after an entry of 0 on L3, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3443-ITTL-5](../../standard/rfc3443/catalog.md#rfc3443-ittl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3443TtlAfterTwoPops` | FAIL | observation 4: the IPv4 TTL on L4 is 32 after a top entry of 0 on L3, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3443-OTTL-1](../../standard/rfc3443/catalog.md#rfc3443-ottl-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop` | FAIL | observation 2: the IPv4 TTL on L4 is 32 after an entry of 0 on L3, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3443-OTTL-2](../../standard/rfc3443/catalog.md#rfc3443-ottl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr` | FAIL | observation 2: the entry on L3 has TTL 0, the same as on L2, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
-| [RFC3443-OTTL-3](../../standard/rfc3443/catalog.md#rfc3443-ottl-3) | covered | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3443TtlAfterPenultimatePop` | FAIL | the penultimate LSR checks no TTL, [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on) |
+| [RFC3443-ITTL-4](../../standard/rfc3443/catalog.md#rfc3443-ittl-4) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
+| [RFC3443-ITTL-5](../../standard/rfc3443/catalog.md#rfc3443-ittl-5) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3443-OTTL-1](../../standard/rfc3443/catalog.md#rfc3443-ottl-1) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
+| [RFC3443-OTTL-2](../../standard/rfc3443/catalog.md#rfc3443-ottl-2) | selected | [The TTL at each LSR](../../protocol/mpls/checks/ttl.md#the-ttl-at-each-lsr) | `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`, `Rfc3443TtlAfterTwoPops` | PASS |  |
+| [RFC3443-OTTL-3](../../standard/rfc3443/catalog.md#rfc3443-ottl-3) | covered | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
 | [RFC3443-OTTL-4](../../standard/rfc3443/catalog.md#rfc3443-ottl-4) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
-| [RFC3443-OTTL-5](../../standard/rfc3443/catalog.md#rfc3443-ottl-5) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3443TtlAfterPenultimatePop` | FAIL | observation 3: the IPv4 TTL on L3 is 32 after an entry of 0 on L2, [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl) |
-| [RFC3443-PUSH-1](../../standard/rfc3443/catalog.md#rfc3443-push-1) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | FAIL | observation 2: the entry has TTL 0 above an IPv4 TTL of 32, [gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0) |
+| [RFC3443-OTTL-5](../../standard/rfc3443/catalog.md#rfc3443-ottl-5) | selected | [The TTL after the last label](../../protocol/mpls/checks/ttl.md#the-ttl-after-the-last-label) | `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` | PASS |  |
+| [RFC3443-PUSH-1](../../standard/rfc3443/catalog.md#rfc3443-push-1) | selected | [The TTL of the first label](../../protocol/mpls/checks/ttl.md#the-ttl-of-the-first-label) | `Rfc3032FirstLabelTtl` | PASS |  |
 | [RFC3443-PUSH-2](../../standard/rfc3443/catalog.md#rfc3443-push-2) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 | [RFC3443-PUSH-3](../../standard/rfc3443/catalog.md#rfc3443-push-3) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 | [RFC3443-IMPL-1](../../standard/rfc3443/catalog.md#rfc3443-impl-1) | no check | — | — | — | a permission that no observation can fail |
-| [RFC3443-IMPL-2](../../standard/rfc3443/catalog.md#rfc3443-impl-2) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS | with no weight: the model decrements no TTL, so none becomes negative |
+| [RFC3443-IMPL-2](../../standard/rfc3443/catalog.md#rfc3443-impl-2) | covered | [A TTL that reaches zero](../../protocol/mpls/checks/ttl.md#a-ttl-that-reaches-zero) | `Rfc3032TtlExpiry` | PASS | observation 3: the TTL stops at zero, and the LSR discards the packet |
 | [RFC3443-IMPL-3](../../standard/rfc3443/catalog.md#rfc3443-impl-3) | no check | — | — | — | not claimed: the Pipe and the Short Pipe Models, an optional TTL treatment |
 
 ### RFC 5462
@@ -254,26 +254,27 @@ and some failed or have no check, `not supported` when every core statement that
 | Feature | Level | Support | Why |
 | --- | --- | --- | --- |
 | [MPLS-F-LABEL-STACK-ENCODING](../../protocol/mpls/features.md#mpls-f-label-stack-encoding) | mandatory | supported | every core statement passed |
-| [MPLS-F-RESERVED-LABELS](../../protocol/mpls/features.md#mpls-f-reserved-labels) | mandatory | not supported | every core statement that ran failed (2); 2 have no check |
+| [MPLS-F-RESERVED-LABELS](../../protocol/mpls/features.md#mpls-f-reserved-labels) | mandatory | partial | 2 core statements passed, 0 failed, 2 have no check |
 | [MPLS-F-LABEL-FORWARDING](../../protocol/mpls/features.md#mpls-f-label-forwarding) | mandatory | supported | every core statement passed |
 | [MPLS-F-INGRESS-LABELING](../../protocol/mpls/features.md#mpls-f-ingress-labeling) | mandatory | supported | every core statement passed |
 | [MPLS-F-EGRESS-DECAPSULATION](../../protocol/mpls/features.md#mpls-f-egress-decapsulation) | mandatory | supported | every core statement passed |
 | [MPLS-F-PENULTIMATE-HOP-POPPING](../../protocol/mpls/features.md#mpls-f-penultimate-hop-popping) | mandatory | supported | every core statement passed |
-| [MPLS-F-TTL](../../protocol/mpls/features.md#mpls-f-ttl) | mandatory | partial | 1 core statement passed, 6 failed |
+| [MPLS-F-TTL](../../protocol/mpls/features.md#mpls-f-ttl) | mandatory | supported | every core statement passed |
 | [MPLS-F-PIPE-MODELS](../../protocol/mpls/features.md#mpls-f-pipe-models) | optional | untested | no core statement has a check: no check |
 | [MPLS-F-TRAFFIC-CLASS](../../protocol/mpls/features.md#mpls-f-traffic-class) | optional | untested | no core statement has a check: no check |
 | [MPLS-F-INVALID-LABEL](../../protocol/mpls/features.md#mpls-f-invalid-label) | mandatory | untested | no core statement has a check: later |
 | [MPLS-F-ICMP](../../protocol/mpls/features.md#mpls-f-icmp) | optional | untested | no core statement has a check: later |
-| [MPLS-F-FRAGMENTATION](../../protocol/mpls/features.md#mpls-f-fragmentation) | mandatory | partial | 1 core statement passed, 4 failed, 2 have no check |
+| [MPLS-F-FRAGMENTATION](../../protocol/mpls/features.md#mpls-f-fragmentation) | mandatory | partial | 5 core statements passed, 0 failed, 2 have no check |
 | [MPLS-F-PPP](../../protocol/mpls/features.md#mpls-f-ppp) | mandatory | partial | 3 core statements passed, 2 failed |
-| [MPLS-F-LAN](../../protocol/mpls/features.md#mpls-f-lan) | mandatory | not supported | every core statement that ran failed (3) |
+| [MPLS-F-LAN](../../protocol/mpls/features.md#mpls-f-lan) | mandatory | supported | every core statement passed |
 
-- **MPLS-F-TTL is partial with one pass**: the entry has a TTL field (RFC3031-TTL-3), and every
-  rule about the value of that field failed ([gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0),
-  [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl),
-  [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on)).
-- **MPLS-F-LAN is not supported**: the run stops before a labeled packet reaches the Ethernet link
-  ([gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run)).
+- **Since the repairs of 2026-09-25**, MPLS-F-TTL and MPLS-F-LAN are supported; in the level 2
+  run they were partial and not supported ([gaps 1 to 4](results.md#the-model-gaps)).
+- **MPLS-F-RESERVED-LABELS and MPLS-F-FRAGMENTATION are partial only by statements without a
+  check**: the IPv6 Explicit NULL label and the IPv6 rules of fragmentation, which the model does
+  not claim, and the reserved values 4 to 15, which belong to label distribution.
+- **MPLS-F-PPP is partial by the MPLS Control Protocol**
+  ([gap 7](results.md#gap-7-unimplemented-feature--no-mpls-control-protocol)).
 - **MPLS-F-INVALID-LABEL is untested at this level**: its two core statements are level 3 by the
   standards map, as [`checks.md`](../../protocol/mpls/checks.md#statements-this-pass-wrote-no-check-for) says.
 
@@ -285,7 +286,7 @@ and some failed or have no check, `not supported` when every core statement that
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of the in-scope sections of RFC 3031, RFC 3032, RFC 3443 and RFC 5462, 157 entries; the feature map has 14 features and places every entry |
-| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 10 of the 11 mandatory features have core checks that ran: 21 tests, 5 PASS, 16 FAIL. The eleventh, the discard of a label without a binding, is level 3 by the standards map |
+| Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 10 of the 11 mandatory features have core checks that ran: 21 tests, 20 PASS, 1 FAIL (expected). The eleventh, the discard of a label without a binding, is level 3 by the standards map |
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -301,6 +302,7 @@ and some failed or have no check, `not supported` when every core statement that
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-23 | **1, reached** | RFC 3031, RFC 3032, RFC 3443, RFC 5462 downloaded; the standards map; the claims of the model | no run; zero claims of any kind, and one verified TTL defect found while checking the claim question |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 3031 (49), RFC 3032 (81), RFC 3443 (24) and RFC 5462 (3); 14 features; 15 checks; 21 tests; the conformance matrix | 5 PASS, 16 FAIL, 6 of them declared expected; seven gaps of the model: four defects and three unimplemented features; 2 statements owed |
+| 2, repairs | 2026-09-25 | **2, reached** | six gaps repaired on `topic/standards-tests-mpls-level2-fixes`: the TTL (gaps 1 to 3), Ethernet (gap 4), the reserved labels (gap 5), fragmentation (gap 6); gap 7 has a plan | 20 PASS, 1 FAIL declared expected (the MPLS Control Protocol); no fingerprint and no statistical result moves; 2 statements owed |
 
 ## Out of scope
 

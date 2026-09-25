@@ -17,6 +17,12 @@ are in [`results.md`](results.md#the-model-gaps).
 
 ### The TTL of a label is a placeholder, and the LSP is invisible to the IPv4 TTL
 
+**Fixed on** 2026-09-25 (gaps 1, 2 and 3): a push copies the TTL of the entry below it or of the
+IPv4 header, each LSR forwards with the incoming TTL minus one and discards a packet whose
+outgoing TTL is zero, the ingress decrements the IPv4 TTL before the first label, and a pop that
+empties the stack writes the outgoing TTL into the IPv4 header. What follows describes the model
+before the repair.
+
 `Mpls::pushLabel` and `Mpls::swapLabel` build a new `MplsHeader` and never set its TTL
 ([Mpls.cc:139-153](../../../../../src/inet/networklayer/mpls/Mpls.cc#L139)), so every entry on the
 wire has TTL 0 (gap 1). The IPv4 TTL does not help: the ingress labels a datagram as it comes up
@@ -31,6 +37,13 @@ to cover the three together; any one alone leaves the others visible.
 
 ### The MPLS models run on PPP links only
 
+**Fixed on** 2026-09-25 (gap 4): a packet of another protocol goes up, and `Mpls` tags a packet
+for a link as IPv4 does, so the Ethernet layer encapsulates it. One limit stays: a LIB entry has
+no next hop, so the frame goes to the broadcast address of the link. On a point-to-point link
+that is the neighbor; on a shared LAN every station gets the frame, and `Icmp` sends no error
+about a datagram that arrived in a link-layer broadcast. What follows describes the model before
+the repair.
+
 `Mpls::processPacketFromL2` knows two protocols, MPLS and IPv4, and throws "Unknown message
 received" for every other one, with a note "FIXME remove throw above"
 ([Mpls.cc:210-214](../../../../../src/inet/networklayer/mpls/Mpls.cc#L210)). On an Ethernet link
@@ -38,7 +51,8 @@ the first ARP request stops the run at 0.008 s (gap 4). With `GlobalArp`, which 
 packet, the run goes further and stops at the MAC: the labeled packet arrives without an
 Ethernet header, "Cannot convert chunk from type inet::MplsHeader to type
 inet::EthernetMacHeader". The same throw stops an MPLS router that gets an IPv6 packet from a
-link, a Neighbor Solicitation included. Every example of INET that uses MPLS has PPP links.
+link, a Neighbor Solicitation included; since the repair it goes up to the network layer. Every
+example of INET that uses MPLS has PPP links.
 
 ### IPv4 only, and the pop says so
 
@@ -63,6 +77,12 @@ packet that arrives with that value on any interface.
 
 ### The LIB refuses the label 0, in a debug build
 
+**Fixed on** 2026-09-25 (gap 5): the LIB accepts the reserved values as outgoing labels, the label
+0 at the bottom is popped with no binding, a swap to the label 3 pops the stack, and the LIB
+allocates labels from 16. The allocation mattered: RSVP-TE got the labels 1, 2 and 3 before, and
+the Implicit NULL rule alone popped the label 3 of two examples. What follows describes the model
+before the repair.
+
 `LibTable::readTableFromXML` asserts that each label value is above 0
 ([LibTable.cc:132, 142, 152](../../../../../src/inet/networklayer/mpls/LibTable.cc#L132)). A
 debug build stops at initialization on a swap to 0, which is how `Rfc3032ExplicitNull` fails. A
@@ -71,6 +91,12 @@ binding for 0, discards the datagram (gap 5). The label 3 is legal to the LIB an
 wire as an ordinary label.
 
 ### No MTU in MPLS, and none in PPP either
+
+**Fixed on** 2026-09-25 for MPLS (gap 6): `Mpls` compares the length of a packet with the MTU of
+the outgoing interface, fragments an IPv4 datagram with the DF bit clear, each fragment with the
+label stack, and reports one with the DF bit through the ICMP module that its new parameter
+`icmpModule` names. `Ppp` still sends a frame longer than its `mtu`. What follows describes the
+model before the repair.
 
 `Mpls` sends a labeled packet of any length, and `Ppp` sends a frame longer than its `mtu`
 parameter; the parameter only tells IPv4 the MTU of the interface. IPv4 fragments for the MTU of
@@ -163,33 +189,29 @@ Protocol 0281 hex, the octets `00 06 41 00` of the label 100, the refusal of the
 label 3 on the wire, and the ARP stop on Ethernet before any test read them. Never commit it.
 `gen-mpls-tests.py` holds the mockups, the bindings, the step builders and the 21 tests with the
 gap paragraphs of the failing ones; `gen-mpls-ledger.py` and `gen-mpls-conformance.py` write the
-ledger and the matrix.
+ledger and the matrix. The copies of the two for the repairs of 2026-09-25, with the verdicts of
+their run, are in `audit/mpls-level2-fixes/`.
 
 ## Follow-ups, in the order I would do them
 
-1. **Give the labels a TTL, and the LSP its hops** (gaps 1, 2 and 3): set the TTL of the first
-   entry from the IPv4 TTL after the decrement of the ingress, decrement it at each LSR, discard a
-   packet whose outgoing TTL is 0, and copy the TTL into the IPv4 header at the last pop. Then run
-   the nine TTL tests: `Rfc3032FirstLabelTtl`, `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`,
-   `Rfc3443TtlAfterTwoPops`, `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`,
-   `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate` and `Rfc3032TtlExpiry`.
-2. **Let an MPLS router live on an Ethernet link** (gap 4): pass a packet of another protocol up
-   in place of the throw of `Mpls.cc:210-214`, and then find why a labeled packet reaches the MAC
-   without an Ethernet header. Then run `Rfc3032EthernetEncapsulation`.
-3. **The reserved labels, with their declaration** (gap 5): accept 0 and 3 in the LIB, pop the
-   label 0 at the bottom with no binding, and pop where a swap would give 3. Then remove the
-   declaration of `Rfc3032ExplicitNull` and `Rfc3032ImplicitNull`.
-4. **The MTU check and fragmentation, with their declaration** (gap 6): compare the length of a
-   labeled packet with the MTU of the outgoing interface; fragment an IPv4 datagram without DF with
-   the same stack on each fragment, and send the ICMP message for one with DF. Then remove the
-   declaration of the three `Rfc3032TooBig*` tests.
-5. **The MPLS Control Protocol** (gap 7): it needs LCP in the PPP model first, a larger change.
-   Then remove the declaration of `Rfc3032PppMplscp`.
-6. **Level 3**: a label without a binding (the model discards it), a pop of an unlabeled packet,
+1. **Done on 2026-09-25: the labels have a TTL, and the LSP its hops** (gaps 1, 2 and 3). The nine
+   TTL tests pass.
+2. **Done on 2026-09-25: an MPLS router lives on an Ethernet link** (gap 4).
+   `Rfc3032EthernetEncapsulation` passes.
+3. **Done on 2026-09-25: the reserved labels** (gap 5). `Rfc3032ExplicitNull` and
+   `Rfc3032ImplicitNull` pass, and their declarations are gone.
+4. **Done on 2026-09-25: the MTU check and fragmentation** (gap 6). The three `Rfc3032TooBig*`
+   tests pass, and their declarations are gone.
+5. **The MPLS Control Protocol** (gap 7): it needs LCP in the PPP model first, and IPCP beside it;
+   the plan is `plan/pending/ppp-lcp-and-mplscp.md`. Then remove the declaration of
+   `Rfc3032PppMplscp`.
+6. **A next hop in the NHLFE** (RFC 3031 §3.10), filled by RSVP-TE, LDP and the XML of the LIB, and
+   resolved by ARP, so that a labeled frame on an Ethernet link goes to its neighbor only.
+7. **Level 3**: a label without a binding (the model discards it), a pop of an unlabeled packet,
    the ICMP message of RFC 3032 §2.3, a second NHLFE for one label, and wrong MPLS Control
    Protocol packets.
-7. **The 2 owed statements**: a check of the Router Alert label, which `MplsPacket.msg:16` names,
+8. **The 2 owed statements**: a check of the Router Alert label, which `MplsPacket.msg:16` names,
    with a rule for the local software from the document of a protocol that uses it; see
    [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes).
-8. **Correct the documentation**: name RFC 3031 and RFC 3032 in `Mpls.ned`, say that the model
+9. **Correct the documentation**: name RFC 3031 and RFC 3032 in `Mpls.ned`, say that the model
    labels IPv4 only, and take out Frame Relay and ATM, which INET does not have.

@@ -25,7 +25,8 @@ baselines live in the statistics repository, on a branch of the same name.
   objects were rebuilt: 1752 tests, equal to the expected results, one expected error.
 - **Statistics**: in the GitHub-job copy (`ghci-statistical`), baseline at `7772a7e4ef`, then the
   tip of the branch; each changed result is attributed to the commit that moves it.
-- **Module tests**: the MPLS, RSVP-TE and LDP module tests, debug, before the last commit.
+- **Module tests**: none of the module suite uses an MPLS router, and no protocol test outside
+  `tests/protocol/mpls` does; the repairs change `Mpls` and `LibTable` only.
 
 ## Steps
 
@@ -33,9 +34,9 @@ baselines live in the statistics repository, on a branch of the same name.
 2. [x] **Gap 1** — the TTL of each label stack entry: the first label copies the IPv4 TTL, each
    LSR forwards with one less, and a pushed label copies the TTL below it (the Uniform Model).
    Tests: `Rfc3032FirstLabelTtl`, `Rfc3032TtlAtEachLsr`, `Rfc3032TtlWithPush`.
-3. [x] **Gap 2** — the LSP counts its hops in the IPv4 TTL: the ingress labels a datagram after
-   IPv4 forwards it, and a pop that empties the stack writes the outgoing TTL into the IPv4
-   header. Tests: `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3443TtlAfterTwoPops`,
+3. [x] **Gap 2** — the LSP counts its hops in the IPv4 TTL: the ingress decrements the IPv4 TTL
+   before it labels a datagram, and a pop that empties the stack writes the outgoing TTL into the
+   IPv4 header. Tests: `Rfc3032TtlAfterPop`, `Rfc3443TtlAfterPenultimatePop`, `Rfc3443TtlAfterTwoPops`,
    `Rfc3031TtlAcrossLsp`, `Rfc3031TtlAcrossLspPenultimate`.
 4. [x] **Gap 3** — an LSR does not forward a labeled packet whose outgoing TTL is zero. Test:
    `Rfc3032TtlExpiry`.
@@ -47,8 +48,8 @@ baselines live in the statistics repository, on a branch of the same name.
    message for one with the DF bit. Tests: the three `Rfc3032TooBig*`; their declarations go.
 8. [x] **Gap 7, a plan only** — PPP LCP and the MPLS Control Protocol:
    `plan/pending/ppp-lcp-and-mplscp.md`.
-9. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
-   `notes.md` ("Fixed on" entries) follow it; the statistics branch.
+9. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
+   `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
 10. [ ] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
@@ -80,3 +81,14 @@ baselines live in the statistics repository, on a branch of the same name.
   `Ipv4::fragmentAndSend`, with the room for the label stack.
 - **Gap 7 has its plan**, `plan/pending/ppp-lcp-and-mplscp.md`: LCP must come first, and with it
   IPCP, or IPv4 stops on every PPP link.
+- **The whole branch moves no statistical result.** The full suite at `db2fd89622` (930 tasks,
+  release, GitHub-job copy) gives 890 PASS and the same 27 unexpected failures as the baseline,
+  all of 802.11 EDCA. So the branch needs no commit in the statistics repository.
+- **The documents follow a fresh run** at `db2fd89622`: 20 PASS, 1 FAIL declared expected. The
+  ledger and the matrix come from `audit/mpls-level2-fixes/` of `inet-master` (outside git),
+  the scripts of the level 2 pass with the verdicts of this run: 7 features supported, 3 partial,
+  4 untested; the matrix has 7 `confirmed`, 3 `partial`, 3 `unverified`, 1 `out of claim`, and
+  no `defect`.
+- **Large run copies go to disk.** The fingerprint runs write a 2.8 GB copy of
+  `tests/fingerprint`; they now live in `/var/tmp/claude-standards-fixes/` and each copy is
+  deleted when its summary is read, because `/tmp` is a RAM file system.
