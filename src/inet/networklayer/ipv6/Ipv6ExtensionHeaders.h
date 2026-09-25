@@ -61,6 +61,12 @@ inline Ptr<const Ipv6ExtensionHeader> peekIpv6ExtensionHeaderAt(const Packet *pa
     }
 }
 
+/**
+ * Returns a new Hop-by-Hop Options header that holds the Router Alert option of
+ * RFC 2711 with the given value, and a PadN option that fills it to 8 octets.
+ */
+INET_API Ipv6HopByHopOptionsHeader *createIpv6RouterAlertHeader(uint16_t value);
+
 } // namespace inet
 
 #endif

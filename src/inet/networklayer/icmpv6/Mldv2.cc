@@ -21,6 +21,8 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h" // MLDv1 MldQuery/MldReport/MldDone for older-version interop
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
@@ -1494,6 +1496,9 @@ void Mldv2::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    // every MLD message carries the Router Alert option in a Hop-by-Hop Options header (RFC 2710
+    // section 3, RFC 9777 section 5)
+    msg->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(createIpv6RouterAlertHeader(IPv6_ROUTER_ALERT_MLD));
     // every MLD message from a link-local address (RFC 2710 section 3, RFC 9777 section 5). While
     // the interface has no tested one, a Query is not sent, and a Report or a Done waits for it
     if (hasValidLinkLocalAddress(ie))
