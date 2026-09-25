@@ -11,14 +11,6 @@ observation 5. Observations 2 to 4 are in Rfc9777GeneralQueryResponse.test.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: the answer to a General Query holds one record for each address that the host knows,
-also for an address with INCLUDE({}) state. Mldv2::processHostGeneralQueryTimer makes a record
-for every entry of the address table (src/inet/networklayer/icmpv6/Mldv2.cc:583-590), and a
-stop keeps the entry. RFC 9777 section 6.3 sends a record for each address with listening state
-only. Observation 1 holds; observation 5 fails with a MODE_IS_INCLUDE record for K without
-sources. This test FAILS, and the failure is deliberately NOT declared expected: the model has
-the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
