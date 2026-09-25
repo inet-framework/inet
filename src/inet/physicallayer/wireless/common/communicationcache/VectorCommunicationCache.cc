@@ -186,7 +186,11 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
         else
             break;
     }
-    ASSERT(baseTransmissionId != -1);
+    if (baseTransmissionId == -1) {
+        // no transmission was ever added: nothing to remove
+        ASSERT(transmissionIndex == 0);
+        return;
+    }
     baseTransmissionId += transmissionIndex;
     transmissionCache.erase(transmissionCache.begin(), transmissionCache.begin() + transmissionIndex);
     EV_DEBUG << "Removed " << transmissionIndex << " non interfering transmissions\n";
