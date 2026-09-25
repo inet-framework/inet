@@ -318,6 +318,14 @@ Notable backward incompatible changes are the following:
    section 3). Before, the Payload Length counted only the upper-layer message,
    so the receiver cut off the end of the message.
 
+   Every MLD message, of Mldv1 and of Mldv2, now carries the Router Alert
+   option of RFC 2711 in a Hop-by-Hop Options header (RFC 2710 section 3, RFC
+   9777 section 5). The new Ipv6RouterAlertOption class holds the option, and
+   the serializer reads and writes it. A multicast router now delivers a
+   multicast datagram locally when the datagram carries the option. Before, it
+   delivered every ICMPv6 multicast datagram locally, to receive the MLD
+   messages.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

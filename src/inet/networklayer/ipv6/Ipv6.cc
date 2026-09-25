@@ -613,6 +613,17 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     fragmentPostRouting(packet, ie, macAddr, fromHL);
 }
 
+// True when the datagram carries the Router Alert option of RFC 2711, in the Hop-by-Hop
+// Options header, which immediately follows the IPv6 header (RFC 8200 section 4.1).
+static bool hasRouterAlertOption(const Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_HOP)
+        return false;
+    const auto& hopByHopHeader = packet->peekDataAt<Ipv6HopByHopOptionsHeader>(ipv6Header->getChunkLength());
+    return hopByHopHeader->getTlvOptions().findByType(IPv6TLVOPTION_ROUTER_ALERT) != -1;
+}
+
 void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
@@ -647,13 +658,15 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     // preassigned addresses (all-nodes/all-routers/solicited-node) used by ND, while
     // the incoming interface's membership covers application groups joined on it
     // (e.g. a routing protocol's LL-MANET-Routers group) -- mirroring Ipv4.
-    // Additionally, multicast routers must receive MLD messages (ICMPv6 types 130-132)
-    // regardless of group membership, mirroring the IPv4 rule that multicast routers
+    // Additionally, a multicast router examines every datagram that carries the Router
+    // Alert option (RFC 2711), regardless of group membership. Every MLD message carries
+    // it (RFC 2710 section 3, RFC 9777 section 5), also a Report to the address of a group
+    // that the router does not listen to. This mirrors the IPv4 rule that multicast routers
     // always receive IGMP datagrams (see Ipv4.cc: IP_PROT_IGMP special case).
     auto fromIeIpv6Data = fromIE->findProtocolData<Ipv6InterfaceData>();
     if (rt->isLocalAddress(destAddr) ||
         (fromIeIpv6Data && fromIeIpv6Data->isMemberOfMulticastGroup(destAddr)) ||
-        (rt->isMulticastForwardingEnabled() && ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP))
+        (rt->isMulticastForwardingEnabled() && hasRouterAlertOption(packet)))
     {
         EV_INFO << "local delivery of multicast packet\n";
         numLocalDeliver++;
@@ -1202,6 +1215,10 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
                         const TlvOptionBase *opt = opts.getTlvOption(j);
                         int optType = opt->getType();
                         if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                            continue;
+                        // the Router Alert option (RFC 2711) asks a router to examine the
+                        // datagram; routeMulticastPacket already delivered it for that
+                        if (optType == IPv6TLVOPTION_ROUTER_ALERT)
                             continue;
                         auto it = hopByHopOptionHandlers.find(optType);
                         if (it != hopByHopOptionHandlers.end()) {

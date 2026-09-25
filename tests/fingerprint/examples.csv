@@ -181,7 +181,7 @@
 /examples/inet/ipsec/,               -f omnetpp.ini -c Multicast -r 0,              200s,            e53d-f92e/tplx;6ac3-ef6b/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c UDPTraffic6 -r 0,              200s,            bac2-fae6/tplx;d5ee-ccc0/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c TCPTraffic6 -r 0,              200s,            50b3-6ddd/tplx;c410-879b/~tNl, PASS, IPSec
-/examples/inet/ipsec/,               -f ipv6.ini -c Multicast6 -r 0,               200s,            e6f7-0820/tplx;1222-ffd8/~tNl, PASS, IPSec
+/examples/inet/ipsec/,               -f ipv6.ini -c Multicast6 -r 0,               200s,            f2e5-eb22/tplx;1222-ffd8/~tNl, PASS, IPSec
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            1afb-5eeb/tplx;3df8-bb36/~tNl;2891-5a4e/~tND;48e1-2966/tyf, PASS, EthernetMac Ipv4
 
@@ -473,7 +473,7 @@
 /examples/pim/sm/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            a4d4-39b0/tplx;2e76-520f/~tNl;eb91-fabc/~tND;4f37-e2c3/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/sm/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            1bbc-ce82/tplx;90c6-efdf/~tNl;3c6f-feb9/~tND;015c-b31f/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/sm_ipv6/,              -f omnetpp.ini -c General -r 0,                120s,            0a21-bad8/~tNlb, PASS, MLD EthernetMac Ipv6
-/examples/pim/ssm_ipv6/,             -f omnetpp.ini -c General -r 0,                60s,             13a0-f760/~tNl, PASS, MLD EthernetMac Ipv6
+/examples/pim/ssm_ipv6/,             -f omnetpp.ini -c General -r 0,                60s,             4901-6c1c/~tNl, PASS, MLD EthernetMac Ipv6
 
 /examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           32cb-156a/tplx;fcf4-00cd/~tNl;e3e9-834d/tyf, PASS, igmp EthernetMac Ipv4
 
