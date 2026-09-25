@@ -1,6 +1,6 @@
 # ND level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-nd-level2-fixes`, on top of
+**Status:** done on 2026-09-25: eleven gaps repaired; not merged, not pushed. Started 2026-09-25 on `topic/standards-tests-nd-level2-fixes`, on top of
 `topic/standards-tests-nd-level2` at `03f8e313c5`. Worktree:
 `/home/levy/workspace/inet-standards-tests-nd-level2-fixes`.
 
@@ -46,9 +46,9 @@ can change other suites.
     same repair closes gap 5 of MLD, on the IGMP and MLD branch.
 11. [x] **Gap 10** — a router tests its configured address. Test: `Rfc4862RouterDad`.
 12. [x] **Gap 11** — an expired address is not used. Test: `Rfc4862AddressLifetime`.
-13. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
+13. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
     `notes.md` ("Fixed on" entries) follow it; the statistics branch.
-14. [ ] Gates, then move this plan to `plan/done/`.
+14. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -102,3 +102,6 @@ can change other suites.
   has one commit for each commit that moves a result: gaps 2, 5, 6, 7, 8, 9 and 10. The selective
   update script `update_selected.py` of the GitHub-job copy regenerates exactly the moved
   configurations.
+- **The documents** (`4e1a4bfd5c`): a fresh run at `dfc67c34f4`, 37 of 37 PASS. The ledger
+  script is a copy in `audit/nd-level2-fixes/` of `inet-master` whose verdicts mark the repaired
+  statements; 5 features supported, 13 partial, 5 untested.
