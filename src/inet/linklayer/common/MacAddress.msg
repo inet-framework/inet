@@ -17,5 +17,5 @@ class MacAddress
     @existingClass;
     @opaque;
     @toString(.str());
-    @fromString(MacAddress($));
+    @fromString(inet::MacAddress($));
 }
