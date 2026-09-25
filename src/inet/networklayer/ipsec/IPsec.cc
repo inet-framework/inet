@@ -159,7 +159,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
     for (cXMLElement *spdEntryElem : spdConfig->getChildrenByTagName("SecurityPolicy")) {
         SecurityPolicy *spdEntry = new SecurityPolicy();
 
-        checkTags(spdEntryElem, "Selector Direction Action Protection EspMode EncryptionAlg AuthenticationAlg MaxTfcPadLength SecurityAssociation");
+        checkTags(spdEntryElem, "Selector Direction Action Protection EspMode EncryptionAlg AuthenticationAlg MaxTfcPadLength HardLifetimeSeconds HardLifetimeBytes SecurityAssociation");
 
         // Selector
         PacketSelector selector;
@@ -210,7 +210,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
-                checkTags(saEntryElem, "SPI Protection Selector");
+                checkTags(saEntryElem, "SPI Protection HardLifetimeSeconds HardLifetimeBytes Selector");
 
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
@@ -233,6 +233,23 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
                     IPsecRule rule = sadEntry->getRule();
                     rule.setProtection(saProtection);
                     sadEntry->setRule(rule);
+                }
+
+                // the hard lifetime of RFC 4301 section 4.4.2.1, in seconds from the start and in
+                // bytes; an element of the SA overrides the one of its policy
+                for (const char *name : {"HardLifetimeSeconds", "HardLifetimeBytes"}) {
+                    const cXMLElement *lifetimeElem = getUniqueChildIfExists(saEntryElem, name);
+                    if (lifetimeElem == nullptr)
+                        lifetimeElem = getUniqueChildIfExists(spdEntryElem, name);
+                    if (lifetimeElem == nullptr)
+                        continue;
+                    double value = atof(lifetimeElem->getNodeValue());
+                    if (value <= 0)
+                        throw cRuntimeError("%s must be positive, at %s", name, lifetimeElem->getSourceLocation());
+                    if (!strcmp(name, "HardLifetimeSeconds"))
+                        sadEntry->setHardLifetimeEnd(simTime() + value);
+                    else
+                        sadEntry->setHardLifetimeBytes((int64_t)value);
                 }
 
                 if (const cXMLElement *selectorElem = getUniqueChildIfExists(saEntryElem, "Selector")) {
@@ -759,9 +776,14 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
     // one ESP SA and one AH SA can protect a packet; ESP comes first, so that AH covers it
     // (RFC 4301 section 4.1, RFC 4303 section 3.1.1), whatever the order of the SAs in the entry
     SecurityAssociation *espSa = nullptr, *ahSa = nullptr;
+    int64_t protectedBytes = packet->getByteLength();
     for (auto saEntry : spdEntry->getEntries()) {
         if (!saEntry->getRule().getSelector().matches(&packetInfo))
             continue;
+        if (!saEntry->isUsable(simTime(), protectedBytes)) {
+            EV_INFO << "IPsec OUT, the hard lifetime of SA " << saEntry->getSpi() << " has ended, packet: " << packetInfo.str() << std::endl;
+            continue;
+        }
         if (saEntry->getProtection() == Protection::ESP && espSa == nullptr)
             espSa = saEntry;
         else if (saEntry->getProtection() == Protection::AH && ahSa == nullptr)
@@ -773,6 +795,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
     if (espSa != nullptr) {
         EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
         int transportType = networkHeaderProtocol(netHeader);
+        espSa->addBytesProcessed(protectedBytes);
         espProtect(packet, espSa, transportType, tfcEnabled);
         setNetworkHeaderProtocol(netHeader, IP_PROT_ESP);
         delay += espProtectOutDelay->doubleValue();
@@ -782,6 +805,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
         EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
         int transportType = networkHeaderProtocol(netHeader);
         setNetworkHeaderProtocol(netHeader, IP_PROT_AH);
+        ahSa->addBytesProcessed(protectedBytes);
         ahProtect(packet, ahSa, transportType);
         delay += ahProtectOutDelay->doubleValue();
         ahProtected = true;
@@ -865,6 +889,14 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             B icvFieldLength = B((ah->getPayloadLength() + 2) * 4) - ah->getChunkLength();
             if (icvFieldLength > B(0))
                 packet->removeAtFront(icvFieldLength);
+            // RFC 4301 section 4.4.2.1: an SA whose hard lifetime has ended accepts nothing
+            if (!sadEntry->isUsable(simTime(), packet->getByteLength())) {
+                EV_INFO << "IPsec IN DROP AH, the hard lifetime of the SA has ended, packet: " << ingressPacketInfo.str() << std::endl;
+                emit(inProtectedDropSignal, 1L);
+                inDrop++;
+                return INetfilter::IHook::DROP;
+            }
+            sadEntry->addBytesProcessed(packet->getByteLength());
             setNetworkHeaderProtocol(netHeader, (IpProtocolId)ah->getNextHeader());
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);
@@ -940,6 +972,14 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             auto espTrailer = packet->removeAtBack<IPsecEspTrailer>(B(ESP_FIXED_PAYLOAD_TRAILER_BYTES));
             if (espTrailer->getPadLength() > 0)
                 packet->removeAtBack(B(espTrailer->getPadLength()));
+            // RFC 4301 section 4.4.2.1: an SA whose hard lifetime has ended accepts nothing
+            if (!sadEntry->isUsable(simTime(), packet->getByteLength())) {
+                EV_INFO << "IPsec IN DROP ESP, the hard lifetime of the SA has ended, packet: " << ingressPacketInfo.str() << std::endl;
+                emit(inProtectedDropSignal, 1L);
+                inDrop++;
+                return INetfilter::IHook::DROP;
+            }
+            sadEntry->addBytesProcessed(packet->getByteLength());
             setNetworkHeaderProtocol(netHeader, (IpProtocolId)espTrailer->getNextHeader());
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);

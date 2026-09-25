@@ -27,6 +27,10 @@ std::string SecurityAssociation::str() const
     out << "SPI: " << spi;
     out << " " << rule;
     out << " SeqNum: " << seqNum;
+    if (hardLifetimeEnd != SIMTIME_MAX)
+        out << " HardLifetimeEnd: " << hardLifetimeEnd;
+    if (hardLifetimeBytes >= 0)
+        out << " Bytes: " << bytesProcessed << "/" << hardLifetimeBytes;
 
     return out.str();
 }

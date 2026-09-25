@@ -35,8 +35,8 @@ import inet.common.SimpleModule;
 //   As a consequence, encryption keys, certificates, and other cryptography-related
 //   data do not appear in the model's data structures.
 // - Key exchange protocols are not implemented. Instead, security associations (SAs)
-//   are statically configured and remain in effect for the entire duration of the
-//   simulation.
+//   are statically configured. An SA remains in effect for the entire duration of the
+//   simulation, unless it has a hard lifetime; then it ends, and no new SA replaces it.
 // - Transport mode only. Tunnel mode is not supported.
 // - Multicast traffic is not supported. (Any multicast packet is let through unchanged.)
 // - Anti-replay mechanism is not implemented.
@@ -63,9 +63,10 @@ import inet.common.SimpleModule;
 //
 // - root: `SecurityPolicy*`
 // - `SecurityPolicy`: Selector, Direction, Action, Protection?, `EspMode`?,
-//   `EncryptionAlg`?, `AuthenticationAlg`?, `MaxTfcPadLength`?, `SecurityAssociation*`
+//   `EncryptionAlg`?, `AuthenticationAlg`?, `MaxTfcPadLength`?, `HardLifetimeSeconds`?,
+//   `HardLifetimeBytes`?, `SecurityAssociation*`
 // - Selector: `LocalAddress`?, `RemoteAddress`?, Protocol?, `LocalPort`?, `RemotePort`?, ICMPType?, ICMPCode?
-// - `SecurityAssociation`: SPI, Protection?, Selector?
+// - `SecurityAssociation`: SPI, Protection?, `HardLifetimeSeconds`?, `HardLifetimeBytes`?, Selector?
 //
 // Contained elements may occur in any order.
 //
@@ -86,6 +87,11 @@ import inet.common.SimpleModule;
 //   AES_256_GMAC, HMAC_SHA2_256_128, HMAC_SHA2_384_192, HMAC_SHA2_512_256.
 // - `MaxTfcPadLength`: Maximum length of random Traffic Confidentiality (TFC) padding.
 //   The actual TFC pad length will be drawn with uniform distribution over [0,max].
+// - `HardLifetimeSeconds`, `HardLifetimeBytes`: the hard lifetime of an SA (RFC 4301
+//   section 4.4.2.1), in seconds from the start of the simulation, and in bytes that the
+//   SA has protected. An SA whose hard lifetime has ended is not used any more: an
+//   outgoing packet for it is discarded, and an incoming one too. In a `SecurityPolicy`,
+//   the value is the default of its SAs.
 // - `LocalAddress`, `RemoteAddress`: comma-separated list of addresses / address ranges
 // - Protocol: comma-separated list of protocol names/numbers and/or their ranges.
 //   Recognized names are TCP, UDP, and ICMP.

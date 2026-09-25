@@ -327,6 +327,11 @@ Notable backward incompatible changes are the following:
    receiver processes the ESP header that follows an AH header. Before, the
    documentation named a Protection AH_ESP that the configuration refused.
 
+   An SA can now have a hard lifetime (RFC 4301 section 4.4.2.1): the new
+   elements HardLifetimeSeconds and HardLifetimeBytes of a SecurityAssociation
+   or of its SecurityPolicy. With no key management to replace it, an SA whose
+   lifetime has ended is not used any more, and its packets are discarded.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
