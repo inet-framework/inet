@@ -293,6 +293,12 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IGMP and MLD corrections
+
+   An IGMPv3 Query now carries the QRV and the QQIC of its querier: the
+   Robustness Variable (0 above 7) and the code of the Query Interval (RFC 9776
+   sections 4.1.6 and 4.1.7). Before, both fields were 0.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

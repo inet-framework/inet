@@ -303,6 +303,9 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void startTimer(cMessage *timer, double interval);
 
     virtual void sendGeneralQuery(RouterInterfaceData *interface, double maxRespTime);
+    // the QRV and the QQIC of every Query: the Robustness Variable and the Query Interval of the
+    // querier (RFC 9776 sections 4.1.6 and 4.1.7)
+    virtual void setQuerierFields(const Ptr<Igmpv3Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);
