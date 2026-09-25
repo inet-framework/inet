@@ -99,7 +99,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         // Older Version Querier Present (RFC 3810 8.2.1): while olderVersionTimer is
         // scheduled, an MLDv1 querier is present on this interface and the host emits
         // MLDv1 Reports/Dones instead of MLDv2 reports.
-        cMessage *olderVersionTimer; // fires at otherQuerierPresentInterval
+        cMessage *olderVersionTimer; // fires at the Older Version Querier Present Interval
         bool olderVersionPresent = false;
 
         HostInterfaceData(Mldv2 *owner, NetworkInterface *ie);
