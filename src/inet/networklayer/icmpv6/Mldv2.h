@@ -289,6 +289,9 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void startTimer(cMessage *timer, double interval);
 
     virtual void sendGeneralQuery(RouterInterfaceData *interface, double maxRespTime);
+    // the QRV and the QQIC of every Query: the Robustness Variable and the Query Interval of the
+    // querier (RFC 9777 sections 5.1.8 and 5.1.9)
+    virtual void setQuerierFields(const Ptr<Mldv2Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv6AddressVector& sources);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<Mldv2MulticastAddressRecord>& records);
@@ -335,6 +338,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
      */
     static uint16_t decodeMaxRespCode(uint16_t code);
     static uint16_t codeMaxRespCode(uint16_t value);
+    static uint8_t codeQqic(uint16_t value); // the 8-bit code of the Querier's Query Interval
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Ipv6AddressVector addresses)

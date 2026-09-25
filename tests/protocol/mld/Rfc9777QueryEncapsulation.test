@@ -11,13 +11,6 @@ destination and fields of observation 3, 4, the Code and Reserved fields of obse
 last 5: the QRV and the QQIC come last. The source of observation 3 is in
 Rfc9777QuerySource.test, and the checksum of observation 6 in Rfc9777QueryChecksum.test.
 
-Defect: the QRV and the QQIC of every Query are 0. Mldv2::sendGeneralQuery sets the Maximum
-Response Code and the length, and nothing else
-(src/inet/networklayer/icmpv6/Mldv2.cc:1291-1298), and the specific Queries are built the same
-way. Observations 1 to 4 and 6 hold; observation 5 fails with QRV 0 and QQIC 0. This test
-FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism, and
-the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
