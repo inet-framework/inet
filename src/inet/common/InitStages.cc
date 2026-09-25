@@ -37,6 +37,7 @@ Define_InitStage_Dependency(POWER, LOCAL);
 Define_InitStage(PHYSICAL_LAYER);
 Define_InitStage_Dependency(PHYSICAL_LAYER, POWER);
 Define_InitStage_Dependency(PHYSICAL_LAYER, GROUP_MOBILITY);
+Define_InitStage_Dependency(PHYSICAL_LAYER, SINGLE_MOBILITY);
 Define_InitStage_Dependency(PHYSICAL_LAYER, PHYSICAL_ENVIRONMENT);
 
 Define_InitStage(PHYSICAL_LAYER_NEIGHBOR_CACHE);
