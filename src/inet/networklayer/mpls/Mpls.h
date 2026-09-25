@@ -20,6 +20,7 @@
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
 
 namespace inet {
@@ -40,6 +41,7 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIngressClassifier> pct;
+    ModuleRefByPar<Icmp> icmp;
 
   protected:
     virtual void initialize(int stage) override;
@@ -60,6 +62,7 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void labelAndForwardIpv4Datagram(Packet *ipdatagram);
 
     virtual void sendToLink(Packet *packet, const NetworkInterface *networkInterface);
+    virtual void processTooBigDatagram(Packet *packet, const NetworkInterface *networkInterface, int mtu);
     virtual void sendToL2(Packet *msg);
     virtual void sendToL3(Packet *msg);
 

@@ -325,6 +325,16 @@ Notable backward incompatible changes are the following:
    and the label 3 went onto the wire. The LIB now allocates labels from 16,
    after the reserved values; before, RSVP-TE and LDP got labels from 1.
 
+20. MPLS fragments a labeled datagram that is too big for the next link
+
+   An LSR sent a labeled packet of any length, also onto a link with a smaller
+   MTU. It now compares the length with the MTU of the outgoing interface, as
+   RFC 3032 section 3 states. It fragments an IPv4 datagram with the DF bit
+   clear, and each fragment carries the label stack; for a datagram with the DF
+   bit set, it sends an ICMP Destination Unreachable message whose Next-Hop MTU
+   is the MTU minus the label stack. The new parameter icmpModule of Mpls names
+   the ICMP module, by default the one of the node's IPv4 layer.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
