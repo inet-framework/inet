@@ -199,7 +199,7 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     nodeVars.dupAddrDetectTransmits = IPv6_DEFAULT_DUPADDRDETECTTRANSMITS;
 
     hostVars.linkMTU = IPv6_MIN_MTU;
-    hostVars.curHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT; // value specified in RFC 1700-can't find it
+    hostVars.curHopLimit = IPv6_DEFAULT_CURHOPLIMIT;
     hostVars.baseReachableTime = IPv6_REACHABLE_TIME;
     hostVars.reachableTime = generateReachableTime(_getMinRandomFactor(),
                 _getMaxRandomFactor(), getBaseReachableTime());
