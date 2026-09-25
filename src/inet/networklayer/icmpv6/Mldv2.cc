@@ -673,12 +673,15 @@ void Mldv2::processHostGeneralQueryTimer(cMessage *msg)
     unsigned int byteLength = 8; // Mldv2Report header size
     report->setType(ICMPv6_MLDv2_REPORT);
     int counter = 0;
-    report->setMulticastAddressRecordArraySize(interfaceData->groups.size());
 
     // FIXME Do not create reports larger than the interface MTU.
 
-    // Create a Multicast Address Record for each group on the interface.
+    // Create a Multicast Address Record for each group on the interface that has listening
+    // state: an entry in INCLUDE mode with no sources is an address that the node has stopped
+    // listening to (RFC 9777 section 6.3)
     for (auto& elem : interfaceData->groups) {
+        if (elem.second->filter == MLDV2_FM_INCLUDE && elem.second->sourceAddressList.empty())
+            continue;
         Mldv2MulticastAddressRecord gr;
         if (elem.second->filter == MLDV2_FM_INCLUDE) {
             gr.setRecordType(MLD_MODE_IS_INCLUDE);
@@ -688,7 +691,8 @@ void Mldv2::processHostGeneralQueryTimer(cMessage *msg)
         }
         gr.setGroupAddress(elem.second->groupAddr);
         gr.setSourceList(elem.second->sourceAddressList);
-        report->setMulticastAddressRecord(counter++, gr);
+        report->appendMulticastAddressRecord(gr);
+        counter++;
         byteLength += 20 + gr.getSourceList().size() * 16; // 20 byte record header + n * 16 byte (Ipv6Address)
     }
     report->setChunkLength(B(byteLength));
@@ -722,7 +726,9 @@ void Mldv2::processHostGroupQueryTimer(cMessage *msg)
         records[0].setGroupAddress(group->groupAddr);
         records[0].setRecordType(group->filter == MLDV2_FM_INCLUDE ? MLD_MODE_IS_INCLUDE : MLD_MODE_IS_EXCLUDE);
         records[0].setSourceList(group->sourceAddressList);
-        sendGroupReport(ie, records);
+        // only if the interface has listening state for the address (RFC 9777 section 6.3)
+        if (group->filter == MLDV2_FM_EXCLUDE || !group->sourceAddressList.empty())
+            sendGroupReport(ie, records);
     }
     else {
         // Send report for a Multicast-Address-and-Source-Specific Query
@@ -732,7 +738,9 @@ void Mldv2::processHostGroupQueryTimer(cMessage *msg)
         records[0].setRecordType(MLD_MODE_IS_INCLUDE);
         records[0].setSourceList(group->filter == MLDV2_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
             set_complement(group->queriedSources, group->sourceAddressList));
-        sendGroupReport(ie, records);
+        // a Current State Record with no sources is not sent (RFC 9777 section 6.3)
+        if (!records[0].getSourceList().empty())
+            sendGroupReport(ie, records);
     }
 
     group->queriedSources.clear();
