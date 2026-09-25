@@ -114,6 +114,11 @@ Requests that repeat the same dialog token retain the accepted interval and curr
 They also retain the accepted buffer size, Block Ack policy, and A-MSDU support.
 A request with a new dialog token replaces the recipient agreement and receive buffer.
 This applies even when the recipient did not receive the old DELBA.
+DELBA carries no dialog token. The current model cannot distinguish a delayed
+DELBA for an earlier agreement from teardown of the current agreement with the
+same peer, TID, and direction. Such a DELBA terminates the replacement agreement
+and clears its receive buffer. A DELBA for the opposite direction does not clear
+that buffer.
 A new agreement stores the buffer size that its response advertises.
 Custom recipient handlers now use ``IRecipientBlockAckAgreementHandler::ICallback``
 for ``processReceivedAddbaRequest()`` and ``processDelbaFrameFinished()``.
