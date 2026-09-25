@@ -8,17 +8,6 @@ doc/project/evidence/protocol/nd/checks/router-discovery.md#a-router-with-router
 the program steps below map onto its expected observations. Steps 1 and 2 are observations 1
 and 2.
 
-Defect: a host drops every Router Advertisement while it runs Duplicate Address Detection
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1380). The advertisement of R2 starts
-the detection for the global address of A, and the advertisement of R1 comes 45 ms later and is
-dropped; R1 sends no other advertisement in the window (see Rfc4861RaUnsolicited.test), so A
-has no default router and sends no echo request at all. RFC 4861 section 6.3.4: "If the address
-is not already present in the host's Default Router List, and the advertisement's Router
-Lifetime is non-zero, create a new entry in the list [...]". Observation 1 holds; observation 2
-fails, and the rule of the check, RFC4861-RA-17, has no verdict. This test FAILS, and the
-failure is deliberately NOT declared expected: the model has the mechanism, and the mechanism
-does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
