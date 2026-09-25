@@ -8,10 +8,16 @@ Each such Query is sent [Last Member Query Count] times in total,
 [Last Member Query Interval] apart (the initial send plus
 lastMemberQueryCount-1 retransmissions). With lastMemberQueryCount=2 and
 lastMemberQueryInterval=1s, every Group-/Group-and-Source-Specific Query
-below appears twice, 1s apart. The exception at t=8 (TO_IN while in EXCLUDE
-mode): the record sends Q(G,X-A) then Q(G); the later Q(G) re-arms the single
-per-group retransmission timer, so the Q(G,X-A) is sent only once while the
-following Q(G) is the one that gets retransmitted.
+below appears twice, 1s apart.
+
+Q(G) and Q(G,X) keep their own retransmission state, and Q(G,X) names only
+the sources of X whose Source Timer is larger than the Last Member Query Time,
+here 2 s, and lowers them to it (RFC 9776 sections 6.6.3.1 and 6.6.3.2). So the
+TO_IN at t=3 queries 10.0.0.2 alone, because 10.0.0.1 is in the query period
+of the BLOCK at t=2; the TO_EX at t=7 queries 10.0.0.1 alone, because the timer
+of 10.0.0.3 ended at t=6 and put it into the exclude list; and the TO_IN at t=8
+sends only Q(G), because X-A is empty. The states in the comments of the
+scenario leave out these ends of timers.
 
 %#--------------------------------------------------------------------------------------------------------------
 
@@ -92,34 +98,31 @@ seed-set = 0
 %postrun-command: grep "IGMPTester: Received" test.out > tester.out || true
 %contains-regex: tester.out
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.1\),.*>.
-IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.1,10.0.0.2\),.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.2\),.*>.
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.3\),.*>.
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.4\),.*>.
-IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.1,10.0.0.3\),.*>.
-IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.3\),.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(10.0.0.1\),.*>.
 IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=\(\),.*>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %#
 %# Each Group-/Group-and-Source-Specific Query is sent lastMemberQueryCount (=2)
 %# times. Reduce every received group query to its source-list and assert the
-%# exact ordered sequence: each query content appears twice, except the t=8
-%# Q(G,10.0.0.3) which is superseded by the following Q(G) on the shared
-%# per-group retransmission timer (see %description).
+%# exact ordered sequence: each query content appears twice (see %description
+%# for the sources that each query names).
 %#
 %postrun-command: grep "IGMPTester: Received" test.out | grep -v "unspec" | sed -E 's/.*sourceList=(\([^)]*\)).*/\1/' > query_sources.out || true
 %contains: query_sources.out
 (10.0.0.1)
 (10.0.0.1)
-(10.0.0.1,10.0.0.2)
-(10.0.0.1,10.0.0.2)
+(10.0.0.2)
+(10.0.0.2)
 (10.0.0.3)
 (10.0.0.3)
 (10.0.0.4)
 (10.0.0.4)
-(10.0.0.1,10.0.0.3)
-(10.0.0.1,10.0.0.3)
-(10.0.0.3)
+(10.0.0.1)
+(10.0.0.1)
 ()
 ()
 

@@ -3,6 +3,13 @@
 Checks router state transitions in response to Filter-Mode-Change and Source-List-Change records.
 See RFC 3376 6.4.2.
 
+The Group-and-Source-Specific Queries lower the Source Timers of the queried sources to the Last
+Member Query Time, 2 s with the defaults (RFC 9776 section 6.6.3.2), so a queried source that no
+Report names again ends 2 s after its Query: 10.0.0.1 before the TO_EX at t=4, and 10.0.0.3
+before the BLOCK at t=6, which puts it into the exclude list. The Group-Specific Query of the
+TO_IN at t=8 lowers the group timer, and the group goes back to INCLUDE 2 s later (RFC 9776
+section 6.5). The states in the comments of the scenario leave out these ends of timers.
+
 %#--------------------------------------------------------------------------------------------------------------
 
 %inifile: omnetpp.ini
@@ -85,21 +92,23 @@ New Router State is INCLUDE(10.0.0.1,10.0.0.2).
 Router State is INCLUDE(10.0.0.1,10.0.0.2).
 Received TO_IN(10.0.0.3) report.
 New Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
-Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
+Router State is INCLUDE(10.0.0.2,10.0.0.3).
 Received TO_EX(10.0.0.3,10.0.0.4) report.
 New Router State is EXCLUDE(10.0.0.3;10.0.0.4).
 Router State is EXCLUDE(10.0.0.3;10.0.0.4).
 Received ALLOW(10.0.0.4) report.
 New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+Router State is EXCLUDE(10.0.0.4;10.0.0.3).
 Received BLOCK(10.0.0.4) report.
-New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+New Router State is EXCLUDE(10.0.0.4;10.0.0.3).
+Router State is EXCLUDE(10.0.0.4;10.0.0.3).
 Received TO_EX(10.0.0.1,10.0.0.3) report.
-New Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
-Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
+New Router State is EXCLUDE(10.0.0.1;10.0.0.3).
+Router State is EXCLUDE(10.0.0.1;10.0.0.3).
 Received TO_IN(10.0.0.1,10.0.0.2) report.
-New Router State is EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;).
+New Router State is EXCLUDE(10.0.0.1,10.0.0.2;10.0.0.3).
+Router State is EXCLUDE(10.0.0.1,10.0.0.2;10.0.0.3).
+New Router State is INCLUDE(10.0.0.1,10.0.0.2).
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
