@@ -1,0 +1,40 @@
+%description:
+Verify the explicit Basic Block Ack record boundary, holes, fragments, and wrap.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+const MacAddress peer("02:00:00:00:00:01");
+for (int initial : {0, 17, 4095}) {
+    SequenceNumberCyclic start(initial);
+    RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+    auto record = agreement.getBlockAckRecord();
+    ASSERT(!record->getAckState(start, 0));
+    ASSERT(!record->getAckState(start + 1, 0));
+    ASSERT(record->getAckState(start + 4095, 0));
+    auto received = makeShared<Ieee80211DataHeader>();
+    received->setSequenceNumber(start + 1);
+    received->setFragmentNumber(1);
+    record->blockAckPolicyFrameReceived(received);
+    ASSERT(!record->getAckState(start, 0));
+    ASSERT(!record->getAckState(start + 1, 0));
+    ASSERT(record->getAckState(start + 1, 1));
+    ASSERT(!record->getAckState(start + 1, 2));
+    record->removeAckStates(start + 1);
+    ASSERT(record->getAckState(start, 0));
+    ASSERT(!record->getAckState(start + 1, 0));
+    ASSERT(record->getAckState(start + 1, 1));
+    record->removeAckStates(start + 2);
+    ASSERT(record->getAckState(start + 1, 0));
+    ASSERT(!record->getAckState(start + 2, 0));
+    record->removeAckStates(start); // A stale removal cannot move the boundary backward.
+    ASSERT(record->getAckState(start + 1, 0));
+    ASSERT(!record->getAckState(start + 2, 0));
+}
+EV << "Block Ack record boundaries passed.\n";
+
+%contains: stdout
+Block Ack record boundaries passed.

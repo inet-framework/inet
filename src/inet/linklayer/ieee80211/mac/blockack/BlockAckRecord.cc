@@ -12,9 +12,10 @@
 namespace inet {
 namespace ieee80211 {
 
-BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
+BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber) :
     originatorAddress(originatorAddress),
-    tid(tid)
+    tid(tid),
+    startingSequenceNumber(startingSequenceNumber)
 {
 }
 
@@ -30,20 +31,15 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
     // The status of MPDUs that are considered “old” and prior to the sequence number
     // range for which the receiver maintains status shall be reported as successfully
     // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    if (containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber))) {
-        return true;
-    }
-    else if (acknowledgmentState.size() == 0) {
-        return true; // TODO old?
-    }
-    else {
-        auto earliest = acknowledgmentState.begin();
-        return SequenceNumberCyclic(earliest->first.getSequenceNumber()) > sequenceNumber; // old = true
-    }
+    return sequenceNumber < startingSequenceNumber ||
+           containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber));
 }
 
 void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 {
+    if (sequenceNumber < startingSequenceNumber)
+        return;
+    startingSequenceNumber = sequenceNumber;
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
         if (SequenceNumberCyclic(it->first.getSequenceNumber()) < sequenceNumber)
@@ -55,4 +51,3 @@ void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
