@@ -30,9 +30,11 @@ routes with metric 16 are included in the updates.
 
 ### Expected observations
 
-1. On L2, from R2, an update that holds netA with metric 2. This confirms the stimulus: R2
-   has learned netA over L1.
-2. On L1, from R2, the next three periodic updates after that one: none of them holds netA
+1. On L2, from R2, an update that holds netA with metric 2, and after it, on L1, from R2, an
+   update that holds netC with metric 2. This confirms the stimulus: R2 has learned netA over L1
+   and netC over L2. The second update comes when R3 has sent its routes, which no timer of
+   the standard puts before any given update of R2.
+2. On L1, from R2, the next three periodic updates after these: none of them holds netA
    with a metric below 16 (RFC2453-SH-1, SH-2). Where one holds netA, the metric is 16
    (covers RFC2453-GEN-5).
 3. The same periodic updates hold netC with metric 2: split horizon leaves out only the routes
@@ -70,8 +72,11 @@ with metric 16 are included in the updates.
 
 ### Expected observations
 
-1. On L2, from R2, an update that holds netA with metric 2. This confirms the stimulus.
-2. On L1, from R2, the next three periodic updates after that one: none of them holds netA
+1. On L2, from R2, an update that holds netA with metric 2, and after it, on L1, from R2, an
+   update that holds netC with metric 2. This confirms the stimulus: R2 has learned netA over L1
+   and netC over L2. The second update comes when R3 has sent its routes, which no timer of
+   the standard puts before any given update of R2.
+2. On L1, from R2, the next three periodic updates after these: none of them holds netA
    with a metric below 16 (RFC2080-SH-1, SH-2). Where one holds netA, the metric is 16
    (covers RFC2080-GEN-7).
 3. The same periodic updates hold netC with metric 2.
