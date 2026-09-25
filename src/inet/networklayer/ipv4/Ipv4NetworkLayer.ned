@@ -113,6 +113,9 @@ module Ipv4NetworkLayer extends Module like INetworkLayer
         icmp.ipOut --> mp.in++;
         icmp.ipIn <-- mp.out++;
 
+        ipsec.ipOut --> mp.in++ if hasIpsec;
+        ipsec.ipIn <-- mp.out++ if hasIpsec;
+
         mp.out++ --> ip.transportIn;
         mp.in++ <-- ip.transportOut;
 

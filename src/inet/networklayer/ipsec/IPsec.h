@@ -18,6 +18,9 @@
 #ifndef __INET_IPSEC_H_
 #define __INET_IPSEC_H_
 
+#include <set>
+#include <vector>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -63,6 +66,11 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     simtime_t lastProtectedIn = 0;
     simtime_t lastProtectedOut = 0;
 
+    // dummy packets (RFC 4303 section 2.6): one timer for each SA that sends them, and the
+    // packets on their way through the IP layer, which the post-routing hook lets pass
+    std::vector<cMessage *> dummyPacketTimers;
+    std::set<const Packet *> dummyPackets;
+
     int inAccept = 0;
     int inDrop = 0;
     int inBypass = 0;
@@ -103,6 +111,7 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
 
     virtual INetfilter::IHook::Result protectDatagram(Packet *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
     virtual bool matchesSelectorsOfSa(Packet *packet, SecurityAssociation *sadEntry);
+    virtual void sendDummyPacket(SecurityAssociation *sadEntry);
 
     virtual int getIntegrityCheckValueBitLength(EncryptionAlg alg);
     virtual int getInitializationVectorBitLength(EncryptionAlg alg);

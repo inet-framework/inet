@@ -47,6 +47,9 @@ class INET_API SecurityAssociation
     int64_t hardLifetimeBytes = -1; // -1: no byte lifetime
     int64_t bytesProcessed = 0; // the bytes that AH or ESP processing has protected with this SA
     rangelist<unsigned int> dscps; // the DSCP values of the SA; empty: any value (RFC 4301 section 4.4.2.1)
+    simtime_t dummyPacketInterval = SIMTIME_ZERO; // 0: no dummy packets (RFC 4303 section 2.6)
+    L3Address lastLocalAddress; // the addresses of the last packet that the SA protected,
+    L3Address lastRemoteAddress; // which a dummy packet of the SA uses
 
   public:
     typedef IPsecRule::Action Action;
@@ -98,6 +101,11 @@ class INET_API SecurityAssociation
     void setDscps(const rangelist<unsigned int>& dscps) { this->dscps = dscps; }
     /** True when the SA may carry a packet with this DSCP (RFC 4301 section 4.1). */
     bool matchesDscp(unsigned int dscp) const { return dscps.empty() || dscps.contains(dscp); }
+    simtime_t getDummyPacketInterval() const { return dummyPacketInterval; }
+    void setDummyPacketInterval(simtime_t dummyPacketInterval) { this->dummyPacketInterval = dummyPacketInterval; }
+    const L3Address& getLastLocalAddress() const { return lastLocalAddress; }
+    const L3Address& getLastRemoteAddress() const { return lastRemoteAddress; }
+    void setLastAddresses(const L3Address& localAddress, const L3Address& remoteAddress) { lastLocalAddress = localAddress; lastRemoteAddress = remoteAddress; }
     std::string str() const;
 };
 
