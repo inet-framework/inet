@@ -8,14 +8,6 @@ doc/project/evidence/protocol/nd/checks/router-discovery.md#router-advertisement
 the program steps below map onto its expected observations. Step 1 is observations 1 and 6; the
 other observations of the check are in Rfc4861RaFields.test and Rfc4861RaMtuOption.test.
 
-Defect: the default of AdvCurHopLimit is 30
-(src/inet/networklayer/ipv6/Ipv6RoutingTable.ned:102), not the value of the Assigned Numbers
-registry, 64. RFC 4861 section 6.2.1, AdvCurHopLimit: "Default: The value specified in the
-"Assigned Numbers" [ASSIGNED] that was in effect at the time of implementation." Observation 1
-holds; observation 6 fails with Cur Hop Limit 30. This test FAILS, and the failure is
-deliberately NOT declared expected: a value that the model sets wrong is a defect, not a
-missing feature. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

@@ -1304,11 +1304,13 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         ra->getOptionsForUpdate().appendOption(sla);
         ra->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 
-        // set MTU option
-        auto mtu = new Ipv6NdMtu();
-        mtu->setMtu(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
-        ra->getOptionsForUpdate().appendOption(mtu);
-        ra->addChunkLength(IPv6ND_MTU_OPTION_LENGTH);
+        // set MTU option: only for a nonzero AdvLinkMTU (RFC 4861 section 6.2.1)
+        if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu() != 0) {
+            auto mtu = new Ipv6NdMtu();
+            mtu->setMtu(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
+            ra->getOptionsForUpdate().appendOption(mtu);
+            ra->addChunkLength(IPv6ND_MTU_OPTION_LENGTH);
+        }
 
         // Add all Advertising Prefixes to the RA
         int numAdvPrefixes = ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes();

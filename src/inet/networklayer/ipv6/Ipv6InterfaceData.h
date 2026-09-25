@@ -28,7 +28,7 @@ class Ipv6RoutingTable;
 #define IPv6_DEFAULT_DUPADDRDETECTTRANSMITS     1   // send NS once (RFC2462:Section 5.1)
 
 #define IPv6_MIN_MTU                            1280 // octets
-#define IPv6_DEFAULT_ADVCURHOPLIMIT             30
+#define IPv6_DEFAULT_ADVCURHOPLIMIT             64 // the value of the Assigned Numbers registry (RFC 4861 section 6.2.1)
 #define IPv6_DEFAULT_CURHOPLIMIT                64 // the value of the Assigned Numbers registry (RFC 4861 section 6.3.2)
 
 #define IPv6_DEFAULT_MAX_RTR_ADV_INT            600 // seconds-decrease to enable more periodic RAs

@@ -211,7 +211,7 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     rtrVars.advManagedFlag = false;
     rtrVars.advOtherConfigFlag = false;
 
-    rtrVars.advLinkMTU = IPv6_MIN_MTU;
+    rtrVars.advLinkMTU = 0; // no MTU option (RFC 4861 section 6.2.1)
     rtrVars.advReachableTime = IPv6_DEFAULT_ADV_REACHABLE_TIME;
     rtrVars.advRetransTimer = IPv6_DEFAULT_ADV_RETRANS_TIMER;
     rtrVars.advCurHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;
