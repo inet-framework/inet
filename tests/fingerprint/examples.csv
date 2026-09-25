@@ -521,11 +521,11 @@
 /examples/quic/zerortt/,                -f omnetpp.ini -c sendInvalidToken -r 0,         0.2s,            018e-e06f/tplx;c172-bbc7/~tNl, PASS, quic Ipv4
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            98ee-282c/tplx;52f0-1d63/~tNl;480e-bf21/~tND;faf1-de52/tyf, PASS, EthernetMac Ipv4
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            26c6-3f9d/tplx;9adc-785a/~tNl;a606-4e5a/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            80fa-e969/tplx;6e74-74b1/~tNl;a3e7-0003/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            512c-57f0/tplx;aa3f-de9b/~tNl;e1b2-c359/~tND;5abf-7954/tyf, PASS, EthernetMac Ipv4
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            4d96-c07d/tplx;3b9f-c5fe/~tNl;139f-f984/~tND;fcd9-0439/tyf, PASS, EthernetMac Ipv4
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            9e01-9ba6/tplx;0ae5-2d64/~tNl;6a01-4a86/~tND;73f0-641b/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            cff2-9525/tplx;ba53-ebda/~tNl;fa7d-05a5/~tND;65b9-9e8c/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            82eb-2f38/tplx;d944-8a47/~tNl;c86b-e1b0/~tND;65b9-9e8c/tyf, PASS, EthernetMac Ipv4
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            3f15-0c9c/tplx;0916-8bd0/~tNl;d7b7-042f/~tND;3d73-91e0/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            e4b8-5591/tplx;eede-9ed7/~tNl;a16a-0e30/~tND;bac1-99b5/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            7e39-1bbf/tplx;82d6-da04/~tNl;883f-6d71/tyf, PASS, EthernetMac

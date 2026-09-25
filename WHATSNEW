@@ -324,6 +324,15 @@ Notable backward incompatible changes are the following:
    simulations in which a link of a router goes down for more than 120
    seconds change.
 
+   The garbage collection of an invalid route now runs 120 seconds from the
+   invalidation of the route, and nothing restarts it (RFC 2453 section
+   3.9.2). Before, a learned route was purged 300 seconds after its last
+   update, so a repeated withdrawal from its next hop kept it without end,
+   and a single withdrawal kept it for 300 seconds. Before, the router also
+   invalidated an expired route again at each update, and each time
+   triggered an update, so it sent a triggered update every 1 to 5 seconds
+   until the purge.
+
 18. The IPv6 routes of the configuration return with the carrier
 
    When an interface goes down or loses its carrier, Ipv6RoutingTable now
