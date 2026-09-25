@@ -36,11 +36,6 @@ using namespace std;
 
 Define_Module(Igmpv3);
 
-static bool isEmptyRecord(const GroupRecord& record)
-{
-    return record.getSourceList().empty();
-}
-
 static bool isSorted(const Ipv4AddressVector& v)
 {
     int n = (int)v.size();
@@ -216,73 +211,93 @@ void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group,
 
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
-        vector<GroupRecord> records;
-        // INCLUDE(A) -> INCLUDE(B): Send ALLOW(B-A), BLOCK(A-B)
-        if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources) {
+        // RFC 9776 section 5.1: the sources of the difference between the old and the new state
+        // (Table 3) get retransmission state for [Robustness Variable] State-Change Reports, and
+        // a filter-mode change makes the next [Robustness Variable] Reports hold a
+        // Filter-Mode-Change record. The Report built from this state merges the pending one.
+        Ipv4AddressVector changedSources;
+        if (groupData->filter == filter) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_ALLOW);
-            records[0].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(IGMPV3_RT_BLOCK);
-            records[1].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+            Ipv4AddressVector added = set_complement(sourceList.sources, groupData->sourceAddressList);
+            Ipv4AddressVector removed = set_complement(groupData->sourceAddressList, sourceList.sources);
+            changedSources.insert(changedSources.end(), added.begin(), added.end());
+            changedSources.insert(changedSources.end(), removed.begin(), removed.end());
         }
-        // EXCLUDE(A) -> EXCLUDE(B): Send ALLOW(A-B), BLOCK(B-A)
-        else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources) {
-            EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_ALLOW);
-            records[0].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(IGMPV3_RT_BLOCK);
-            records[1].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+        else {
+            EV_DETAIL << (filter == IGMPV3_FM_EXCLUDE ? "Sending TO_EX report.\n" : "Sending TO_IN report.\n");
+            groupData->filterModeChangeCount = robustnessVariable;
+            changedSources = sourceList.sources;
         }
-        // INCLUDE(A) -> EXCLUDE(B): Send TO_EX(B)
-        else if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE) {
-            EV_DETAIL << "Sending TO_EX report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_TO_EX);
-            records[0].setSourceList(sourceList.sources);
-        }
-        // EXCLUDE(A) -> INCLUDE(B): Send TO_IN(B)
-        else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_INCLUDE) {
-            EV_DETAIL << "Sending TO_IN report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_TO_IN);
-            records[0].setSourceList(sourceList.sources);
-        }
-
-        if (!records.empty()) {
-            sendGroupReport(ie, records);
-
-            // RFC 3376 6.1: the State-Change Report is (re)transmitted [Robustness
-            // Variable] times in total, i.e. robustnessVariable - 1 additional times,
-            // at intervals chosen at random from (0, Unsolicited Report Interval].
-            //
-            // If a new change arrives while a retransmission is still pending, the
-            // records above were recomputed from the current (just-updated) interface
-            // state, so they already reflect the merged result: we simply replace the
-            // pending records and restart the retransmission counter (this is the
-            // 6.1 "merge by recomputation" of the old and new pending reports).
-            groupData->pendingRecords = records;
-            groupData->retransmitCount = robustnessVariable - 1;
-            if (groupData->retransmitCount > 0)
-                startTimer(groupData->retransmitTimer, uniform(0, unsolicitedReportInterval));
-            else
-                cancelEvent(groupData->retransmitTimer); // RV<=1: nothing to retransmit, drop any leftover schedule
-        }
+        for (const auto& source : changedSources)
+            groupData->sourceChangeCounts[source] = robustnessVariable;
 
         // Go to new state
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
+
+        // the merged Report ends the retransmissions of the earlier ones, and is the first of
+        // [Robustness Variable] transmissions
+        sendStateChangeReport(groupData);
     }
+}
+
+// RFC 9776 section 5.1, Table 4: the records of the next State-Change Report of the group. Every
+// State-Change Report counts once for the retransmission state of each source.
+std::vector<GroupRecord> Igmpv3::buildStateChangeRecords(HostGroupData *group)
+{
+    vector<GroupRecord> records;
+    if (group->filterModeChangeCount > 0) {
+        GroupRecord record;
+        record.setGroupAddress(group->groupAddr);
+        record.setRecordType(group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_TO_IN : IGMPV3_RT_TO_EX);
+        record.setSourceList(group->sourceAddressList);
+        records.push_back(record);
+        group->filterModeChangeCount--;
+    }
+    else {
+        // a source that must be forwarded goes into ALLOW, one that must be blocked into BLOCK
+        Ipv4AddressVector allowSources, blockSources;
+        for (const auto& elem : group->sourceChangeCounts) {
+            bool listed = std::binary_search(group->sourceAddressList.begin(), group->sourceAddressList.end(), elem.first);
+            bool forwarded = (group->filter == IGMPV3_FM_INCLUDE) == listed;
+            (forwarded ? allowSources : blockSources).push_back(elem.first);
+        }
+        if (!allowSources.empty()) {
+            GroupRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(IGMPV3_RT_ALLOW);
+            record.setSourceList(allowSources);
+            records.push_back(record);
+        }
+        if (!blockSources.empty()) {
+            GroupRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(IGMPV3_RT_BLOCK);
+            record.setSourceList(blockSources);
+            records.push_back(record);
+        }
+    }
+    for (auto it = group->sourceChangeCounts.begin(); it != group->sourceChangeCounts.end(); ) {
+        if (--it->second <= 0)
+            it = group->sourceChangeCounts.erase(it);
+        else
+            ++it;
+    }
+    return records;
+}
+
+// Sends the next State-Change Report of the group, and schedules the one after it while
+// retransmission state is left, at a random interval from (0, [Unsolicited Report Interval]).
+void Igmpv3::sendStateChangeReport(HostGroupData *group)
+{
+    vector<GroupRecord> records = buildStateChangeRecords(group);
+    if (!records.empty())
+        sendGroupReport(group->parent->ie, records);
+    if (group->filterModeChangeCount > 0 || !group->sourceChangeCounts.empty())
+        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
+    else
+        cancelEvent(group->retransmitTimer);
 }
 
 void Igmpv3::configureInterface(NetworkInterface *ie)
@@ -616,26 +631,22 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
     group->queriedSources.clear();
 }
 
-// RFC 3376 6.1: retransmit a pending State-Change Report. The report is sent
-// [Robustness Variable] times in total; this handler covers the extra
-// transmissions after the initial one done in multicastSourceListChanged().
+// RFC 9776 section 5.1: retransmit the State-Change Report of the group while retransmission
+// state is left; the first transmission is done in multicastSourceListChanged().
 void Igmpv3::processHostStateChangeTimer(cMessage *msg)
 {
     HostGroupData *group = (HostGroupData *)msg->getContextPointer();
     NetworkInterface *ie = group->parent->ie;
-    ASSERT(group->retransmitCount > 0);
-    ASSERT(!group->pendingRecords.empty());
+    int transmissionsLeft = group->filterModeChangeCount;
+    for (const auto& elem : group->sourceChangeCounts)
+        transmissionsLeft = std::max(transmissionsLeft, elem.second);
+    ASSERT(transmissionsLeft > 0);
 
     EV_INFO << "Retransmitting State-Change Report for group '" << group->groupAddr
-            << "' on interface '" << ie->getInterfaceName() << "' (" << group->retransmitCount
+            << "' on interface '" << ie->getInterfaceName() << "' (" << transmissionsLeft
             << " transmission(s) left).\n";
 
-    sendGroupReport(ie, group->pendingRecords);
-
-    if (--group->retransmitCount > 0)
-        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
-    else
-        group->pendingRecords.clear();
+    sendStateChangeReport(group);
 }
 
 void Igmpv3::startTimer(cMessage *timer, double interval)

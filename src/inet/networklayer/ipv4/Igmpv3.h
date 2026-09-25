@@ -95,10 +95,12 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         cMessage *timer; // for scheduling responses to Group-Specific and Group-and-Source-Specific Queries
         Ipv4AddressVector queriedSources; // saved from last Group-Specific or Group-and-Source-Specific Query; sorted
 
-        // State-Change Report retransmission (RFC 3376 6.1): the last State-Change
-        // Report is (re)transmitted [Robustness Variable] times in total.
-        std::vector<GroupRecord> pendingRecords; // records of the pending State-Change Report
-        int retransmitCount = 0; // remaining retransmissions (0 = nothing pending)
+        // State-Change Report retransmission (RFC 9776 section 5.1): a State-Change Report holds
+        // a Filter-Mode-Change record while filterModeChangeCount is positive, else the
+        // Source-List-Change records of the sources with a positive count. Every State-Change
+        // Report that leaves decrements the counts.
+        int filterModeChangeCount = 0; // State-Change Reports that must still hold a Filter-Mode-Change record
+        std::map<Ipv4Address, int> sourceChangeCounts; // per source: State-Change Reports that must still hold it
         cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
 
         HostGroupData(HostInterfaceData *parent, Ipv4Address group);
@@ -310,6 +312,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);
+    virtual void sendStateChangeReport(HostGroupData *group);
+    virtual std::vector<GroupRecord> buildStateChangeRecords(HostGroupData *group);
     virtual void sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
     virtual void sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
 

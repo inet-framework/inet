@@ -374,6 +374,13 @@ Notable backward incompatible changes are the following:
    Interval] + [Query Response Interval], 260 s with the defaults. Before, it
    lasted for otherQuerierPresentInterval, 255 s.
 
+   An Igmpv3 host that changes the state of a group again before the
+   repetitions of its State-Change Report end now merges the pending records,
+   as RFC 9776 section 5.1 asks: each source of a change stays in the next
+   [Robustness Variable] State-Change Reports, and a filter-mode change stays
+   in them as a TO_IN or TO_EX record. Before, the second change replaced the
+   pending records, so a source of the first change could leave fewer times.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
