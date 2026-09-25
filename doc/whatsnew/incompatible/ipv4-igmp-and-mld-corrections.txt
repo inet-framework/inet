@@ -39,3 +39,5 @@ A change of the compatibility mode of an Mldv2 node cancels its pending timers i
 An Igmpv3 host now leaves out of its answers to Queries a group that it has left, and sends no record with an empty set of sources (RFC 9776 section 5.2). Before, it answered every General Query with a MODE_IS_INCLUDE record with no sources for each group that it had left, and a source-specific Query for sources that it did not want with such a record too.
 
 An Mldv2 node leaves such records out in the same way (RFC 9777 section 6.3).
+
+The S flag (Suppress Router-Side Processing) of a Group-Specific Query of Igmpv3 now comes from the group timer after it is lowered to the Last Member Query Time (RFC 9776 section 6.6.3.1), for the first Query and for each retransmission. Before, the first Query took the flag from the timer before it was lowered, so the flag was set after the leave of the only member, and every retransmission had the flag set.
