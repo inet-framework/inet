@@ -26,11 +26,9 @@ Define_Module(RateSelection);
 
 void RateSelection::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
-        mib.reference(this, "mibModule", true);
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    RateSelectionBase::initialize(stage);
+    if (stage == INITSTAGE_LINK_LAYER) {
+        useNonstandardResponseModes = par("useNonstandardResponseModes");
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
@@ -44,12 +42,10 @@ void RateSelection::initialize(int stage)
         responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
         double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
         responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
-        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
 //        WATCH(dataOrMgmtRateControl);
 
 //        WATCH(*((cObject**)&fastestMandatoryMode));
 //        WATCH(*((cObject**)&modeSet));
-        WATCH(lastTransmittedFrameMode);
 //        WATCH(*((cObject**)&multicastFrameMode));
 //        WATCH(*((cObject**)&dataFrameMode));
 //        WATCH(*((cObject**)&mgmtFrameMode));
@@ -103,43 +99,43 @@ const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Iee
 //
 const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    if (responseAckFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseAckFrameMode);
-    else {
-        auto mode = getMode(packet, dataOrMgmtHeader);
-        ASSERT(modeSet->containsMode(mode));
-        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
-        return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
-    }
+    if (useNonstandardResponseModes && responseAckFrameMode != nullptr)
+        return responseAckFrameMode;
+    auto mode = getMode(packet, dataOrMgmtHeader);
+    const auto& peer = getResponsePeer(dataOrMgmtHeader);
+    auto computed = computeResponseMode(mode, Ieee80211ResponseFrameKind::ACK, peer);
+    return validateResponseOverride(computed, responseAckFrameMode, Ieee80211ResponseFrameKind::ACK, peer);
 }
 
 const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
-    if (responseCtsFrameMode)
-        return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseCtsFrameMode);
-    else {
-        auto mode = getMode(packet, rtsFrame);
-        ASSERT(modeSet->containsMode(mode));
-        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
-        return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
-    }
+    if (useNonstandardResponseModes && responseCtsFrameMode != nullptr)
+        return responseCtsFrameMode;
+    auto mode = getMode(packet, rtsFrame);
+    const auto& peer = getResponsePeer(rtsFrame);
+    auto computed = computeResponseMode(mode, Ieee80211ResponseFrameKind::CTS, peer);
+    return validateResponseOverride(computed, responseCtsFrameMode, Ieee80211ResponseFrameKind::CTS, peer);
 }
 
-// 802.11-1999 Std.
-//
-// All frames with multicast and broadcast RA shall be transmitted at one of the rates included in the
-// BSSBasicRateSet, regardless of their type.
-//
-// TODO Data and/or management MPDUs with a unicast immediate address shall be sent on any supported data rate
-// selected by the rate switching mechanism (whose output is an internal MAC variable called MACCurrentRate,
-// defined in units of 500 kbit/s, which is used for calculating the Duration/ID field of each frame). A STA shall
-// not transmit at a rate that is known not to be supported by the destination STA, as reported in the supported
-// rates element in the management frames. For frames of type Data+CF-ACK, Data+CF-Poll+CF-ACK, and CF-
-// Poll+CF-ACK, the rate chosen to transmit the frame must be supported by both the addressed recipient STA
-// and the STA to which the ACK is intended.
-//
+const IIeee80211Mode *RateSelection::computeResponseMode(const IIeee80211Mode *elicitingMode,
+        Ieee80211ResponseFrameKind responseKind, const MacAddress& receiver)
+{
+    if (useNonstandardResponseModes) {
+        if (responseKind == Ieee80211ResponseFrameKind::ACK && responseAckFrameMode != nullptr)
+            return responseAckFrameMode;
+        if (responseKind == Ieee80211ResponseFrameKind::CTS && responseCtsFrameMode != nullptr)
+            return responseCtsFrameMode;
+    }
+    return computePrimaryResponseMode(elicitingMode, responseKind, receiver);
+}
+
+// IEEE Std 802.11-2024, 10.6.5.4 and 10.6.5.8: group and unicast rate restrictions.
 const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+        auto preferredMode = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) ? dataFrameMode : mgmtFrameMode;
+        return selectGroupMode(multicastFrameMode, preferredMode);
+    }
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
     // frames are left to the existing rules below.
@@ -147,33 +143,34 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
         ensurePerReceiverModesResolved();
         auto it = perReceiverDataFrameMode.find(dataOrMgmtHeader->getReceiverAddress());
         if (it != perReceiverDataFrameMode.end())
-            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), it->second);
+            return validateConfiguredMode(it->second, dataOrMgmtHeader->getReceiverAddress(), "unicast data");
     }
-    if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), multicastFrameMode);
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
+        return validateConfiguredMode(dataFrameMode, dataOrMgmtHeader->getReceiverAddress(), "unicast data");
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
-    // Rate control adapts to the feedback of one peer, and a group-addressed frame has no peer:
-    // it is never acknowledged, so nothing would ever correct a rate chosen for it. Group-addressed
-    // frames therefore take a mandatory rate, as the clause above requires.
-    if (dataOrMgmtRateControl && !dataOrMgmtHeader->getReceiverAddress().isMulticast())
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress()));
+        return validateConfiguredMode(mgmtFrameMode, dataOrMgmtHeader->getReceiverAddress(), "management");
+    if (dataOrMgmtRateControl)
+        return selectAllowedMode(dataOrMgmtHeader->getReceiverAddress(),
+                getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress())));
     else
-        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
+        return selectAllowedMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
 
-// 802.11-1999 Std.
-//
-// All Control frames shall be transmitted at one of the rates in the BSSBasicRateSet
-// (see 10.3.10.1), or at one of the rates in the PHY mandatory rate set so they will
-// be understood by all STAs.
-//
+// IEEE Std 802.11-2024, 10.6.6.2: a DCF RTS starts its TXOP.
 const IIeee80211Mode *RateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header)
 {
-    // TODO BSSBasicRateSet
-    return getPeerCompatibleMode(header->getReceiverAddress(), fastestMandatoryMode);
+    if (controlFrameMode != nullptr) {
+        auto receiver = header->getReceiverAddress();
+        validateConfiguredMode(controlFrameMode, receiver, "control");
+        const auto& basic = getBssRateSetForReceiver(receiver).basic;
+        auto rate = controlFrameMode->getDataMode()->getNetBitrate();
+        bool eligible = basic.known && !basic.legacyRates.empty() ? basic.legacyRates.count(rate) != 0 : modeSet->getIsMandatory(controlFrameMode);
+        if (!eligible || controlFrameMode->getHtMcsIndex() >= 0 ||
+                controlFrameMode->getModulationClass() == IIeee80211Mode::ModulationClass::VHT)
+            throw cRuntimeError("Configured control mode '%s' violates the BSS basic rate rule", controlFrameMode->getName());
+        return controlFrameMode;
+    }
+    return selectBasicMode(nullptr, header->getReceiverAddress(), false);
 }
 
 const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -182,22 +179,6 @@ const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
         return computeControlFrameMode(header);
-}
-
-void RateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        fastestMandatoryMode = modeSet->getFastestMandatoryMode();
-    }
-}
-
-void RateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
-{
-    auto receiverAddr = header->getReceiverAddress();
-    lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
 }
 
 void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
@@ -217,13 +198,6 @@ void RateSelection::emitDatarateSelected(cComponent *emitter, const Ptr<const Ie
     }
     else
         emitter->emit(IRateSelection::datarateSelectedSignal, rate);
-}
-
-const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
-{
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
-        return mode;
-    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
 }
 
 } // namespace ieee80211

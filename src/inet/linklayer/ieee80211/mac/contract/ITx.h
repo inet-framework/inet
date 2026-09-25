@@ -26,6 +26,7 @@ class INET_API ITx
         virtual ~ICallback() {}
 
         virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        virtual bool transmissionStarting(Packet *packet) = 0;
     };
 
   public:
@@ -34,6 +35,9 @@ class INET_API ITx
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
     virtual void radioTransmissionFinished() = 0;
+    // Returns true if a frame was already submitted to the MAC for transmission.
+    // Cancels local completion only; a radio transmission can still reach its peer.
+    virtual bool cancelTransmission() = 0;
 };
 
 } // namespace ieee80211

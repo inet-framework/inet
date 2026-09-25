@@ -1,26 +1,87 @@
 %description:
-802.11e TXOP burst: within a single TXOP multiple QoS data frames are sent back-to-back
-without re-contending for the channel. Approximated here by two type-40 frames within
-1 ms (a coarse proxy; the framework cannot observe SIFS-vs-backoff spacing directly). [CONFORMS]
-
-A short sendInterval and a positive txopLimit on the BE access category allows bursting.
+IEEE Std 802.11-2024, 9.2.5.2 and 10.23.2.8-9: two complete exchanges
+share a TXOP. Check fixed modes, exact SIFS, final Duration, a passive
+station's NAV, and fresh contention after the limit excludes a third exchange.
 
 %file: N_TxopBurst.cc
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace protocoltest {
+using namespace ieee80211;
+using namespace physicallayer;
 
-// 40 = ST_DATA_WITH_QOS. Assert at least 2 QoS data frames sent within 0.5 ms (burst).
+struct BurstEvidence {
+    simtime_t start;
+    simtime_t duration;
+    simtime_t ackEnd;
+    const IIeee80211Mode *mode = nullptr;
+    const IIeee80211Mode *ackMode = nullptr;
+};
+static TxopProcedure *txop(const MatchContext& c)
+{
+    return check_and_cast<TxopProcedure *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")
+            ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 1)->getSubmodule("txopProcedure"));
+}
+static simtime_t rounded(simtime_t value)
+{
+    auto us = value.inUnit(SIMTIME_US);
+    return SimTime(us + (SimTime(us, SIMTIME_US) < value ? 1 : 0), SIMTIME_US);
+}
 Define_ProtocolTest(wifi_qos_txop_burst)
 {
+    auto evidence = std::make_shared<BurstEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
     return ProtocolTest("wifi_qos_txop_burst")
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 40")
-                  .describe("first QoS data frame of TXOP burst").within(2.5))
+            .filterPacket("ieee80211mac.type == 40").describe("initial frame while the burst enters the queue").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("ieee80211mac.type == 40")
-                  .describe("a second QoS data frame within 1 ms (TXOP burst)").within(0.001));
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->start = txop(c)->getStart();
+                evidence->mode = c.event.packet->getTag<Ieee80211ModeReq>()->getMode();
+                evidence->duration = c.event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField();
+                return evidence->start == c.event.time && evidence->mode->getDataMode()->getNetBitrate() == Mbps(6.5);
+            }).within(2.5))
+        .once(on("sta2.wlan[0].mac.rx").signal("navChanged").filterValueAtLeast(0.000001)
+            .assertEvent([evidence](const MatchContext& c) {
+                return SimTime(c.event.value) == evidence->duration;
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                evidence->ackMode = c.event.packet->getTag<Ieee80211ModeInd>()->getMode();
+                return true;
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto mode = c.event.packet->getTag<Ieee80211ModeReq>()->getMode();
+                auto ack = evidence->ackMode->getDuration(LENGTH_ACK);
+                auto frame = mode->getDuration(c.event.packet->getDataLength());
+                EV << "TXOP evidence: start=" << txop(c)->getStart() << " prior=" << evidence->start
+                   << " interval=" << c.event.time - evidence->ackEnd << " sifs=" << sifs
+                   << " reservation=" << evidence->duration << " expected=" << rounded(3 * sifs + 2 * ack + frame)
+                   << " final=" << c.event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField()
+                   << " expectedFinal=" << rounded(sifs + ack) << " sameMode=" << (mode == evidence->mode) << endl;
+                return txop(c)->getStart() == evidence->start && mode == evidence->mode &&
+                        c.event.time - evidence->ackEnd == sifs &&
+                        evidence->duration == rounded(3 * sifs + 2 * ack + frame) &&
+                        c.event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField() == rounded(sifs + ack);
+            }).within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) { evidence->ackEnd = c.event.time; return true; }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                return txop(c)->getStart() > evidence->start && txop(c)->getStart() == c.event.time &&
+                        c.event.time - evidence->ackEnd > sifs;
+            }).within(0.003));
 }
 } // namespace protocoltest
 } // namespace inet
@@ -28,10 +89,15 @@ Define_ProtocolTest(wifi_qos_txop_burst)
 %inifile: test.ini
 [General]
 *.tester.testName = "wifi_qos_txop_burst"
-# Very fast send interval so frames queue up; TXOP allows burst after single contention win.
-*.sta1.app[0].sendInterval = 0.05ms
-# edcaf[1] = AC_BE; set a 3 ms TXOP limit so multiple frames transmit in one burst.
+*.sta1.app[0].sendInterval = 1us
+*.sta1.app[0].stopTime = 1.00001s
+*.sta*.wlan[*].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
 *.sta*.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 3ms
+*.sta*.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.typename = ""
+*.ap.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.typename = ""
+*.sta*.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+*.sta*.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 **.wlan[*].radio.receiver.energyDetection = -105dBm

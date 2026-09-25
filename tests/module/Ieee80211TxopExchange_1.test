@@ -1,0 +1,1170 @@
+%description:
+Exercise prepared HCF exchanges with real EDCA, TX, and tester MAC peers.
+The test covers TXOP limits, peer identity, RTS, timeout, stop, and rate revision.
+
+%extraargs: -r 0..107
+
+%file: TestIeee80211TxopExchange.cc
+
+#include <algorithm>
+#include <cstdint>
+#include <vector>
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/common/TxopAdmissionDetails.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "ieee80211retransmissiontest/Ieee80211TesterMac.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestTxopPeerMac : public Ieee80211TesterMac
+{
+  public:
+    bool suppressNextBar = false;
+    int receivedPayloads = 0;
+    int receivedRetries = 0;
+    int deliveredPayloads = 0;
+
+    virtual void sendUpFrame(Packet *packet) override
+    {
+        if (packet->isName("qos-800B") || packet->isName("mgmt-800B"))
+            ++deliveredPayloads;
+        // The synthetic action frame tests MAC acknowledgment only.
+        if (packet->isName("mgmt-800B")) {
+            Enter_Method("sendUpFrame");
+            take(packet);
+            delete packet;
+        }
+        else
+            Ieee80211TesterMac::sendUpFrame(packet);
+    }
+
+  protected:
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        if (packet->isName("qos-800B") || packet->isName("mgmt-800B")) {
+            ++receivedPayloads;
+            if (packet->peekAtFront<Ieee80211DataOrMgmtHeader>()->getRetry())
+                ++receivedRetries;
+        }
+        if (suppressNextBar && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BLOCKACK_REQ) {
+            suppressNextBar = false;
+            delete packet;
+        }
+        else
+            Ieee80211TesterMac::handleLowerPacket(packet);
+    }
+};
+
+Define_Module(TestTxopPeerMac);
+
+class TestTxopMgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    virtual void start() override
+    {
+        Ieee80211MgmtApBase::start();
+    }
+};
+
+Define_Module(TestTxopMgmtAp);
+
+class TestTxopHcf : public Hcf
+{
+  public:
+    bool stopAtNextSifs = false;
+    bool stopAtNextRx = false;
+    bool stopAtNextBlockAckRx = false;
+    bool updateRateAtNextSifs = false;
+    bool rateUpdated = false;
+    bool stoppedByTest = false;
+    bool dataFrameCompleted = false;
+    bool activeStepIdentityOk = true;
+    cMessage *sifsActionTimer = nullptr;
+
+    Edcaf *getEdcafForTest(AccessCategory ac) const { return edca->getEdcaf(ac); }
+    const FrameSequenceContext *getSequenceContextForTest() const
+    {
+        return frameSequenceHandler == nullptr ? nullptr : frameSequenceHandler->getContext();
+    }
+    Ieee80211Mib *getMibForTest() const { return mib; }
+    bool hasBlockAckAgreement(const MacAddress& peer) const
+    {
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, 0);
+        return agreement != nullptr && agreement->getIsAddbaResponseReceived();
+    }
+
+    virtual ~TestTxopHcf()
+    {
+        if (sifsActionTimer != nullptr)
+            cancelAndDelete(sifsActionTimer);
+    }
+
+    void queueQosFrame(const MacAddress& receiver, int sequenceNumber, const char *name = "qos-800B", int payloadBytes = 800)
+    {
+        Enter_Method("queueQosFrame");
+        auto packet = new Packet(name);
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTid(0);
+        header->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        header->setAckPolicy(NORMAL_ACK);
+        header->setReceiverAddress(receiver);
+        header->setTransmitterAddress(mib->address);
+        packet->insertAtBack(header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(payloadBytes, 0)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+
+    void queueManagementFrame(const MacAddress& receiver, int sequenceNumber, const char *name = "mgmt-800B")
+    {
+        Enter_Method("queueManagementFrame");
+        auto packet = new Packet(name);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ACTION);
+        header->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        header->setReceiverAddress(receiver);
+        header->setTransmitterAddress(mib->address);
+        packet->insertAtBack(header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(800, 0)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+
+  protected:
+    virtual void transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        auto context = getSequenceContextForTest();
+        auto active = context == nullptr ? nullptr : context->getActiveStep();
+        auto activeTransmit = dynamic_cast<ITransmitStep *>(active);
+        if (activeTransmit == nullptr || activeTransmit->getFrameToTransmit() != packet)
+            activeStepIdentityOk = false;
+        bool armSifsAction = ifs > SIMTIME_ZERO &&
+                ((updateRateAtNextSifs && dataFrameCompleted && !rateUpdated) || stopAtNextSifs);
+        Hcf::transmitFrame(packet, ifs);
+        if (armSifsAction) {
+            if (sifsActionTimer == nullptr)
+                sifsActionTimer = new cMessage("sifsAction");
+            scheduleAt(simTime() + std::max(SimTime(1, SIMTIME_NS), ifs / 2), sifsActionTimer);
+        }
+    }
+
+    virtual void originatorProcessTransmittedFrame(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        Hcf::originatorProcessTransmittedFrame(packet);
+        if (header->getType() == ST_DATA_WITH_QOS || header->getType() == ST_ACTION)
+            dataFrameCompleted = true;
+    }
+
+    virtual void scheduleStartRxTimer(simtime_t timeout) override
+    {
+        auto receive = dynamic_cast<IReceiveStep *>(frameSequenceHandler->getContext()->getActiveStep());
+        if ((stopAtNextRx || (stopAtNextBlockAckRx && receive->getExpectedFrameType() == ST_BLOCKACK)) && !stoppedByTest) {
+            stoppedByTest = true;
+            stop();
+            return;
+        }
+        Hcf::scheduleStartRxTimer(timeout);
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message == sifsActionTimer) {
+            if (updateRateAtNextSifs && !rateUpdated) {
+                rateUpdated = true;
+                mib->clearBssRateSet();
+            }
+            if (stopAtNextSifs && !stoppedByTest) {
+                stoppedByTest = true;
+                stop();
+            }
+        }
+        else
+            Hcf::handleMessage(message);
+    }
+};
+
+Define_Module(TestTxopHcf);
+
+class Ieee80211TxopExchangeTest : public cSimpleModule, public cListener
+{
+  protected:
+    TestTxopHcf *hcf = nullptr;
+    cModule *peer1 = nullptr;
+    cModule *peer2 = nullptr;
+    cMessage *stopMessage = nullptr;
+    int scenario = 0;
+    bool cancelNextRestart = false;
+    int sentPayload = 0;
+    int retriedPayload = 0;
+    int sentRts = 0;
+    int receivedAck = 0;
+    int receivedBlockAck = 0;
+    int sequenceStarted = 0;
+    int sequenceFinished = 0;
+    int txopStarted = 0;
+    int txopEnded = 0;
+    int admitted = 0;
+    int rejected = 0;
+    int dataRateSelections = 0;
+    int callbackRateChanges = 0;
+    int rateChangeCancellations = 0;
+    Ieee80211RateSetState previousBssRateSet;
+    int channelAccessGrants = 0;
+    int synchronousStops = 0;
+    int admissionStops = 0;
+    int backoffStops = 0;
+    int grantEntryStops = 0;
+    int grantExitStops = 0;
+    int grantStateChanges = 0;
+    int contentionRestartStops = 0;
+    bool grantEntrySeen = false;
+    bool contentionRestartRequested = false;
+    bool contentionRestartStarted = false;
+    bool corruptionIssued = false;
+    int preparedSteps = 0;
+    int preparedPayloadLength = 0;
+    int preparedResponseLength = 0;
+    int preparedResponseCount = 0;
+    bool preparedModesOk = true;
+    bool preparedIntervalsOk = true;
+    bool admittedContextMatches = true;
+    int finalDurationChecks = 0;
+    int ownershipStops = 0;
+    int ownershipStarts = 0;
+    int sequenceStartStops = 0;
+    int sentBar = 0;
+    std::vector<TxopFrameIdentity> admittedIdentities;
+    std::vector<int> txopEndPayloadCounts;
+    std::vector<simtime_t> finishedDurations;
+
+  public:
+    Ieee80211TxopExchangeTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        cSimpleModule::initialize(stage);
+        if (stage == INITSTAGE_LAST) {
+            hcf = check_and_cast<TestTxopHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
+            peer1 = getModuleByPath("^.peer1.wlan[0].mac");
+            peer2 = getModuleByPath("^.peer2.wlan[0].mac");
+            scenario = par("scenario");
+            hcf->subscribe(packetSentToPeerSignal, this);
+            hcf->subscribe(packetReceivedFromPeerSignal, this);
+            hcf->subscribe(IFrameSequenceHandler::frameSequenceStartedSignal, this);
+            hcf->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
+            hcf->subscribe(IRateSelection::datarateSelectedSignal, this);
+            for (int i = 0; i < 4; i++) {
+                auto edcaf = hcf->getEdcafForTest(AccessCategory(i));
+                edcaf->subscribe(IChannelAccess::channelOwnershipChangedSignal, this);
+                edcaf->getSubmodule("contention")->subscribe(IContention::channelAccessGrantedSignal, this);
+                edcaf->getSubmodule("contention")->subscribe(IContention::backoffPeriodGeneratedSignal, this);
+                edcaf->getSubmodule("contention")->subscribe(IContention::backoffStartedSignal, this);
+                edcaf->getSubmodule("contention")->subscribe(IContention::backoffStoppedSignal, this);
+                edcaf->getSubmodule("contention")->subscribe(Contention::stateChangedSignal, this);
+                edcaf->getTxopProcedure()->subscribe(TxopProcedure::txopStartedSignal, this);
+                edcaf->getTxopProcedure()->subscribe(TxopProcedure::txopEndedSignal, this);
+                edcaf->getTxopProcedure()->subscribe(TxopProcedure::txopExchangeAdmittedSignal, this);
+                edcaf->getTxopProcedure()->subscribe(TxopProcedure::txopExchangeRejectedSignal, this);
+            }
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value, cObject *details) override
+    {
+        if (signalID == IRateSelection::datarateSelectedSignal) {
+            dataRateSelections++;
+            if (scenario == 16)
+                changeCallbackRateState();
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        if (scenario >= 33 && signalID == IChannelAccess::channelOwnershipChangedSignal) {
+            int owners = 0;
+            for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac)
+                owners += hcf->getEdcafForTest(static_cast<AccessCategory>(ac))->isOwning();
+            ASSERT(owners <= 1);
+        }
+        if (scenario == 28 && signalID == IChannelAccess::channelOwnershipChangedSignal) {
+            if (value && ownershipStops == 0) {
+                ++ownershipStops;
+                hcf->stop();
+            }
+            else if (!value && ownershipStops == 1 && ownershipStarts == 0) {
+                ++ownershipStarts;
+                hcf->start();
+            }
+        }
+        if (signalID == IChannelAccess::channelOwnershipChangedSignal && value && scenario == 22) {
+            ownershipStarts++;
+            hcf->start();
+            hcf->start();
+        }
+        if (signalID == IChannelAccess::channelOwnershipChangedSignal && value &&
+                (scenario == 20 || scenario == 21) && ownershipStops == 0) {
+            ownershipStops++;
+            hcf->stop();
+            if (scenario == 21)
+                hcf->start();
+        }
+    }
+
+    void changeCallbackRateState()
+    {
+        if (callbackRateChanges != 0)
+            return;
+        callbackRateChanges++;
+        auto mib = hcf->getMibForTest();
+        auto revision = mib->getRateSetRevision();
+        auto rates = mib->getBssRateSet();
+        previousBssRateSet = rates;
+        rates.operational.known = true;
+        rates.operational.legacyRates = {Mbps(6)};
+        rates.operational.htMcs.clear();
+        rates.basic = rates.operational;
+        mib->setBssRateSet(rates);
+        ASSERT(mib->getRateSetRevision() != revision);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, const simtime_t& value, cObject *details) override
+    {
+        if (signalID == IContention::backoffStartedSignal && scenario == 13 && !contentionRestartRequested) {
+            contentionRestartRequested = true;
+            contentionRestartStops++;
+            hcf->stop();
+        }
+        if (signalID == IContention::backoffStoppedSignal && scenario == 9 && !hcf->isStopped()) {
+            backoffStops++;
+            hcf->stop();
+        }
+        if (signalID == IContention::backoffStoppedSignal && scenario == 14 && !contentionRestartRequested) {
+            contentionRestartRequested = true;
+            contentionRestartStops++;
+            hcf->stop();
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override
+    {
+        if (signalID == IContention::backoffPeriodGeneratedSignal && cancelNextRestart) {
+            Enter_Method_Silent();
+            cancelNextRestart = false;
+            hcf->stop();
+            return;
+        }
+        if (signalID == IContention::backoffPeriodGeneratedSignal && scenario == 12 && !contentionRestartRequested) {
+            contentionRestartRequested = true;
+            contentionRestartStops++;
+            hcf->stop();
+            return;
+        }
+        if (signalID != Contention::stateChangedSignal || scenario < 10 || hcf->isStopped())
+            return;
+        if (value == Contention::IFS_AND_BACKOFF) {
+            grantStateChanges++;
+            if (grantStateChanges == 2) {
+                if (scenario == 10) {
+                    grantEntryStops++;
+                    hcf->stop();
+                }
+                else
+                    grantEntrySeen = true;
+            }
+        }
+        else if (scenario == 11 && grantEntrySeen && value == Contention::IDLE) {
+            grantExitStops++;
+            hcf->stop();
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_RTS) {
+                sentRts++;
+                if (scenario == 31 || scenario == 32) {
+                    ASSERT(sentPayload == 1);
+                    ASSERT(packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode()->getDataMode()->getNetBitrate() == Mbps(6));
+                }
+            }
+            if (header->getType() == ST_BLOCKACK_REQ)
+                sentBar++;
+            if (header->getType() == ST_DATA_WITH_QOS || header->getType() == ST_ACTION) {
+                sentPayload++;
+                if (packet->peekAtFront<Ieee80211DataOrMgmtHeader>()->getRetry())
+                    retriedPayload++;
+                inspectPreparedPlan();
+            }
+        }
+        else if (signalID == packetReceivedFromPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_BLOCKACK)
+                receivedBlockAck++;
+            if (header->getType() == ST_ACK) {
+                receivedAck++;
+                if (scenario == 7 && hcf->isStopped() == false) {
+                    synchronousStops++;
+                    hcf->stop();
+                }
+            }
+        }
+        else if (signalID == IFrameSequenceHandler::frameSequenceStartedSignal) {
+            Enter_Method_Silent();
+            sequenceStarted++;
+            if ((scenario == 24 || scenario == 25) && sequenceStartStops == 0) {
+                sequenceStartStops++;
+                hcf->stop();
+                if (scenario == 24)
+                    hcf->start();
+            }
+        }
+        else if (signalID == IFrameSequenceHandler::frameSequenceFinishedSignal) {
+            auto context = check_and_cast<FrameSequenceContext *>(value);
+            sequenceFinished++;
+            if (context->getOutcome() == FrameSequenceOutcome::RATE_STATE_CHANGED) {
+                rateChangeCancellations++;
+                if (scenario == 15 || scenario == 16) {
+                    ASSERT(sentPayload == 0);
+                    ASSERT(dataRateSelections == (scenario == 15 ? 0 : 1));
+                    hcf->getMibForTest()->setBssRateSet(previousBssRateSet);
+                }
+            }
+            finishedDurations.push_back(context->getDuration());
+            inspectFinalDuration(context);
+        }
+        else if (signalID == IContention::channelAccessGrantedSignal) {
+            channelAccessGrants++;
+            if ((scenario == 33 || scenario == 35) && channelAccessGrants == 1) {
+                Enter_Method_Silent();
+                hcf->stop();
+                hcf->stop();
+                if (scenario == 33)
+                    hcf->start();
+            }
+        }
+        else if (signalID == IContention::backoffStoppedSignal) {
+            if (scenario == 9 && !hcf->isStopped()) {
+                backoffStops++;
+                hcf->stop();
+            }
+        }
+        else if (signalID == TxopProcedure::txopStartedSignal) {
+            txopStarted++;
+            if (scenario == 15)
+                changeCallbackRateState();
+        }
+        else if (signalID == TxopProcedure::txopEndedSignal)
+        {
+            txopEnded++;
+            txopEndPayloadCounts.push_back(sentPayload);
+        }
+        else if (signalID == TxopProcedure::txopExchangeAdmittedSignal) {
+            auto admission = check_and_cast<TxopAdmissionDetails *>(details);
+            admitted++;
+            admittedIdentities.push_back(admission->getIdentity());
+            auto context = hcf->getSequenceContextForTest();
+            if (context == nullptr || context->getExchangePlan() == nullptr ||
+                    !(context->getExchangePlan()->identity == admission->getIdentity()) ||
+                    !context->getExchangePlan()->admission.accepted)
+                admittedContextMatches = false;
+            if (scenario == 8 && !hcf->isStopped()) {
+                admissionStops++;
+                hcf->stop();
+            }
+            if (scenario == 26 && admissionStops == 0) {
+                Enter_Method_Silent();
+                admissionStops++;
+                hcf->stop();
+                hcf->start();
+                hcf->start();
+            }
+        }
+        else if (signalID == TxopProcedure::txopExchangeRejectedSignal)
+        {
+            rejected++;
+        }
+    }
+
+    void inspectPreparedPlan()
+    {
+        auto context = hcf->getSequenceContextForTest();
+        if (context == nullptr || context->getExchangePlan() == nullptr)
+            return;
+        auto plan = context->getExchangePlan();
+        for (size_t stepIndex = 0; stepIndex < plan->steps.size(); stepIndex++) {
+            auto step = plan->steps[stepIndex];
+            auto interval = step->getPreparedInterval();
+            auto sifs = context->getModeSet()->getSifsTime();
+            preparedIntervalsOk = preparedIntervalsOk &&
+                    (stepIndex == 0 ? (interval == SIMTIME_ZERO || interval == sifs) : interval == sifs);
+            if (step->getType() == IFrameSequenceStep::Type::TRANSMIT && step->getPreparedLength() >= B(800)) {
+                preparedSteps++;
+                preparedPayloadLength = step->getPreparedLength().get<b>();
+                preparedModesOk = preparedModesOk && step->getPreparedMode() != nullptr;
+            }
+            else if (step->getType() == IFrameSequenceStep::Type::RECEIVE) {
+                preparedResponseCount++;
+                preparedResponseLength = step->getPreparedLength().get<b>();
+                preparedModesOk = preparedModesOk && step->getPreparedMode() != nullptr;
+            }
+        }
+    }
+
+    void inspectFinalDuration(const FrameSequenceContext *context)
+    {
+        auto plan = context->getExchangePlan();
+        if (plan == nullptr || plan->steps.empty())
+            return;
+        auto last = plan->steps.back();
+        auto receive = dynamic_cast<const IReceiveStep *>(last);
+        if (receive == nullptr || receive->getExpectedFrameType() != ST_ACK)
+            return;
+        if (context->getContinuationPlan() != nullptr)
+            return;
+        for (auto step : plan->steps) {
+            auto transmit = dynamic_cast<const ITransmitStep *>(step);
+            if (transmit == nullptr)
+                continue;
+            auto header = const_cast<ITransmitStep *>(transmit)->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() != ST_DATA_WITH_QOS && header->getType() != ST_ACTION)
+                continue;
+            auto expected = receive->getPreparedInterval() + receive->getPpduDuration();
+            if (header->getDurationField() >= expected &&
+                    header->getDurationField() <= expected + SimTime(1, SIMTIME_US))
+                finalDurationChecks++;
+        }
+    }
+
+    void waitForTxopEnd(int expected)
+    {
+        for (int i = 0; i < 200 && txopEnded < expected; i++)
+            wait(SimTime(100, SIMTIME_US));
+        ASSERT(txopEnded >= expected);
+    }
+
+    void queueFrame(const MacAddress& receiver, int sequenceNumber, bool management)
+    {
+        if (management)
+            hcf->queueManagementFrame(receiver, sequenceNumber);
+        else
+            hcf->queueQosFrame(receiver, sequenceNumber);
+    }
+
+    virtual void activity() override
+    {
+        const MacAddress firstPeer("02:00:00:00:00:02");
+        const MacAddress secondPeer("02:00:00:00:00:03");
+        auto limit = hcf->getEdcafForTest(AC_BE)->getTxopProcedure()->getLimit();
+        bool management = false;
+
+        switch (scenario) {
+            case 33:
+            case 34:
+            case 35: {
+                // Equal access times force the replacement requests to collide.
+                queueFrame(firstPeer, 1, false);
+                queueFrame(firstPeer, 2, true);
+                if (scenario == 35) {
+                    wait(SimTime(1, SIMTIME_MS));
+                    ASSERT(hcf->isStopped());
+                    ASSERT(sentPayload == 0);
+                    ASSERT(channelAccessGrants == 1);
+                    for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac)
+                        ASSERT(!hcf->getEdcafForTest(static_cast<AccessCategory>(ac))->isOwning());
+                    hcf->start();
+                }
+                wait(SimTime(5, SIMTIME_MS));
+                ASSERT(sentPayload == 2);
+                ASSERT(receivedAck == 2);
+                break;
+            }
+            case 0: {
+                queueFrame(firstPeer, 1, management);
+                queueFrame(firstPeer, 2, management);
+                waitForTxopEnd(1);
+                int expected = limit == SIMTIME_ZERO || limit < SimTime(1, SIMTIME_MS) ? 1 : 2;
+                ASSERT(!txopEndPayloadCounts.empty());
+                ASSERT(txopEndPayloadCounts.front() == expected);
+                ASSERT(preparedPayloadLength >= 800);
+                ASSERT(preparedResponseCount > 0);
+                ASSERT(preparedResponseLength > 0);
+                ASSERT(finalDurationChecks > 0);
+                ASSERT(channelAccessGrants > 0);
+                break;
+            }
+            case 1: {
+                queueFrame(firstPeer, 1, false);
+                waitForTxopEnd(1);
+                queueFrame(secondPeer, 2, false);
+                waitForTxopEnd(2);
+                ASSERT(sentPayload == 2);
+                ASSERT(admitted >= 2);
+                ASSERT(admittedIdentities.size() >= 2);
+                ASSERT(admittedIdentities[0].receiver != admittedIdentities[1].receiver);
+                ASSERT(sequenceStarted >= 2);
+                ASSERT(finalDurationChecks > 0);
+                break;
+            }
+            case 2: {
+                hcf->queueQosFrame(firstPeer, 1, "rts-1200B", 1200);
+                waitForTxopEnd(1);
+                ASSERT(sentRts > 0);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck > 0);
+                ASSERT(finalDurationChecks > 0);
+                break;
+            }
+            case 3: {
+                queueFrame(MacAddress("02:00:00:00:00:04"), 1, false);
+                for (int i = 0; i < 100 && sequenceFinished == 0; i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(sequenceFinished > 0);
+                ASSERT(sentPayload > 0);
+                ASSERT(receivedAck == 0);
+                break;
+            }
+            case 4: {
+                hcf->updateRateAtNextSifs = true;
+                queueFrame(firstPeer, 1, false);
+                queueFrame(firstPeer, 2, false);
+                waitForTxopEnd(1);
+                if (limit >= SimTime(2, SIMTIME_MS)) {
+                    ASSERT(hcf->rateUpdated);
+                    ASSERT(sentPayload == 1);
+                    ASSERT(sequenceFinished > 0);
+                }
+                else
+                    ASSERT(!hcf->rateUpdated);
+                break;
+            }
+            case 5: {
+                hcf->stopAtNextSifs = true;
+                queueFrame(firstPeer, 1, false);
+                queueFrame(firstPeer, 2, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(sentPayload <= 1);
+                auto frames = hcf->getEdcafForTest(AC_BE)->getInProgressFrames();
+                auto pending = frames->findPreparedCandidate();
+                ASSERT(pending != nullptr);
+                ASSERT(!pending->peekAtFront<Ieee80211DataOrMgmtHeader>()->getRetry());
+                hcf->start();
+                wait(SimTime(2, SIMTIME_MS));
+                ASSERT(sentPayload == 2);
+                ASSERT(receivedAck == 2);
+                ASSERT(retriedPayload == 0);
+                break;
+            }
+            case 6: {
+                hcf->stopAtNextRx = true;
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(sentPayload <= 1);
+                break;
+            }
+            case 7: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && synchronousStops == 0; i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(synchronousStops == 1);
+                ASSERT(hcf->isStopped());
+                break;
+            }
+            case 8: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(admissionStops == 1);
+                ASSERT(sentPayload == 0);
+                break;
+            }
+            case 9: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(backoffStops > 0);
+                ASSERT(sentPayload == 0);
+                break;
+            }
+            case 10: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(grantEntryStops == 1);
+                ASSERT(sentPayload == 0);
+                break;
+            }
+            case 11: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->isStopped(); i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                ASSERT(grantExitStops == 1);
+                ASSERT(sentPayload == 0);
+                break;
+            }
+            case 12: {
+                queueFrame(firstPeer, 1, false);
+                if (contentionRestartRequested && !contentionRestartStarted) {
+                    contentionRestartStarted = true;
+                    hcf->start();
+                }
+                for (int i = 0; i < 300 && sequenceFinished == 0; i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(contentionRestartStops == 1);
+                ASSERT(sequenceFinished > 0);
+                ASSERT(sentPayload > 0);
+                ASSERT(receivedAck > 0);
+                ASSERT(!hcf->isStopped());
+                break;
+            }
+            case 13: {
+                queueFrame(firstPeer, 1, false);
+                if (contentionRestartRequested && !contentionRestartStarted) {
+                    contentionRestartStarted = true;
+                    hcf->start();
+                }
+                for (int i = 0; i < 300 && sequenceFinished == 0; i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(contentionRestartStops == 1);
+                ASSERT(sequenceFinished > 0);
+                ASSERT(sentPayload > 0);
+                ASSERT(receivedAck > 0);
+                ASSERT(!hcf->isStopped());
+                break;
+            }
+            case 14: {
+                queueFrame(firstPeer, 1, false);
+                wait(SimTime(1, SIMTIME_US));
+                auto contention = check_and_cast<Contention *>(hcf->getEdcafForTest(AC_BE)->getSubmodule("contention"));
+                corruptionIssued = true;
+                contention->corruptedFrameReceived();
+                if (contentionRestartRequested && !contentionRestartStarted) {
+                    contentionRestartStarted = true;
+                    hcf->start();
+                }
+                for (int i = 0; i < 300 && sequenceFinished == 0; i++)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(corruptionIssued);
+                ASSERT(contentionRestartStops == 1);
+                ASSERT(sequenceFinished > 0);
+                ASSERT(sentPayload > 0);
+                ASSERT(receivedAck > 0);
+                ASSERT(!hcf->isStopped());
+                break;
+            }
+            case 15:
+            case 16: {
+                queueFrame(firstPeer, 1, false);
+                waitForTxopEnd(1);
+                ASSERT(callbackRateChanges == 1);
+                ASSERT(rateChangeCancellations == 1);
+                ASSERT(txopEndPayloadCounts.front() == 0);
+                // A fresh exchange must recover after the cancelled transmission.
+                waitForTxopEnd(2);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                break;
+            }
+            case 17:
+            case 18:
+            case 19: {
+                bool management = scenario == 18;
+                if (scenario == 19) {
+                    queueFrame(firstPeer, 1, false);
+                    for (int i = 0; i < 100 && !hcf->hasBlockAckAgreement(firstPeer); ++i)
+                        wait(SimTime(100, SIMTIME_US));
+                    ASSERT(hcf->hasBlockAckAgreement(firstPeer));
+                    wait(SimTime(1, SIMTIME_MS));
+                    // Suppress the first BAR response. Restart must recover its frames.
+                    check_and_cast<TestTxopPeerMac *>(peer1)->suppressNextBar = true;
+                    hcf->stopAtNextBlockAckRx = true;
+                }
+                else
+                    hcf->stopAtNextRx = true;
+                queueFrame(firstPeer, 2, management);
+                for (int i = 0; i < 100 && !hcf->isStopped(); ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->isStopped());
+                auto edcaf = hcf->getEdcafForTest(management ? AC_VO : AC_BE);
+                auto frames = edcaf->getInProgressFrames();
+                ASSERT(frames->getLength() == 1);
+                ASSERT(frames->findPreparedCandidate() != nullptr);
+                ASSERT(frames->getFrames(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getRetry());
+                auto retainedPacket = frames->getFrames(0);
+                auto retainedHeader = retainedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                try {
+                    int retryCount = management ?
+                            edcaf->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(retainedPacket, retainedHeader) :
+                            edcaf->getRecoveryProcedure()->getRetryCount(retainedPacket, CHK(dynamicPtrCast<const Ieee80211DataHeader>(retainedHeader)));
+                    ASSERT(retryCount == 0);
+                }
+                catch (const cRuntimeError& error) {
+                    // The recovery procedures create an entry on the first failure.
+                    ASSERT(strstr(error.what(), "The retry counter entry doesn't exist for message id:") != nullptr);
+                }
+                int sentBeforeRestart = sentPayload;
+                int responsesBeforeRestart = scenario == 19 ? receivedBlockAck : receivedAck;
+                hcf->stop(); // Repeated stop must preserve the recovered frame.
+                wait(SimTime(1, SIMTIME_MS));
+                // MAC lifecycle start restores the radio before HCF start.
+                auto radio = check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.sender.wlan[0].radio"));
+                radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+                hcf->start();
+                for (int i = 0; i < 100 && frames->getLength() != 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(frames->getLength() == 0);
+                ASSERT(sentPayload == sentBeforeRestart + 1);
+                ASSERT(retriedPayload == 1);
+                ASSERT((scenario == 19 ? receivedBlockAck : receivedAck) == responsesBeforeRestart + 1);
+                ASSERT(!hcf->isStopped());
+                break;
+            }
+            case 20:
+            case 21: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && ownershipStops == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(ownershipStops == 1);
+                if (scenario == 20) {
+                    ASSERT(hcf->isStopped());
+                    ASSERT(sequenceStarted == 0);
+                    ASSERT(sentPayload == 0);
+                    hcf->start();
+                }
+                for (int i = 0; i < 100 && sequenceFinished == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(!hcf->isStopped());
+                ASSERT(sequenceStarted == 1);
+                ASSERT(sequenceFinished == 1);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                ASSERT(hcf->getEdcafForTest(AC_BE)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 22: {
+                queueFrame(firstPeer, 1, false);
+                hcf->start();
+                hcf->start();
+                for (int i = 0; i < 100 && sequenceFinished == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(ownershipStarts == 1);
+                ASSERT(sequenceStarted == 1);
+                ASSERT(sequenceFinished == 1);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                ASSERT(!hcf->isStopped());
+                ASSERT(hcf->getEdcafForTest(AC_BE)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 23: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && !hcf->hasBlockAckAgreement(firstPeer); ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(hcf->hasBlockAckAgreement(firstPeer));
+                wait(SimTime(1, SIMTIME_MS));
+                int payloadBefore = sentPayload;
+                int barBefore = sentBar;
+                int baBefore = receivedBlockAck;
+                for (int i = 2; i <= 4; ++i)
+                    queueFrame(firstPeer, i, false);
+                for (int i = 0; i < 100 && receivedBlockAck < baBefore + 3; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(sentPayload == payloadBefore + 3);
+                ASSERT(sentBar == barBefore + 3);
+                ASSERT(receivedBlockAck == baBefore + 3);
+                ASSERT(hcf->getEdcafForTest(AC_BE)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 24:
+            case 25: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && sequenceStartStops == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(sequenceStartStops == 1);
+                if (scenario == 25) {
+                    ASSERT(hcf->isStopped());
+                    ASSERT(sequenceStarted == 1);
+                    ASSERT(sequenceFinished == 0);
+                    ASSERT(admitted == 0);
+                    ASSERT(sentPayload == 0);
+                    hcf->start();
+                }
+                for (int i = 0; i < 100 && sequenceFinished == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(!hcf->isStopped());
+                ASSERT(channelAccessGrants == 2);
+                ASSERT(sequenceStarted == 2);
+                ASSERT(sequenceFinished == 1);
+                ASSERT(admitted == 1);
+                ASSERT(rejected == 0);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                ASSERT(hcf->getEdcafForTest(AC_BE)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 29:
+            case 30: {
+                queueFrame(firstPeer, 1, scenario == 30);
+                for (int i = 0; i < 1000 && txopStarted == 0; ++i)
+                    wait(SimTime(1, SIMTIME_US));
+                ASSERT(txopStarted == 1);
+                wait(SimTime(50, SIMTIME_US));
+                auto radio = check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.sender.wlan[0].radio"));
+                ASSERT(radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING);
+                hcf->stop();
+                wait(SimTime(1, SIMTIME_MS));
+                auto peer = check_and_cast<TestTxopPeerMac *>(peer1);
+                ASSERT(peer->receivedPayloads == 1);
+                ASSERT(peer->receivedRetries == 0);
+                radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+                hcf->start();
+                wait(SimTime(2, SIMTIME_MS));
+                ASSERT(peer->receivedPayloads == 2);
+                ASSERT(peer->deliveredPayloads == 1);
+                ASSERT(peer->receivedRetries == 1);
+                ASSERT(retriedPayload == 1);
+                auto ac = scenario == 30 ? AC_VO : AC_BE;
+                ASSERT(hcf->getEdcafForTest(ac)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 28: {
+                queueFrame(firstPeer, 1, false);
+                wait(SimTime(3, SIMTIME_MS));
+                ASSERT(ownershipStops == 1);
+                ASSERT(ownershipStarts == 1);
+                ASSERT(!hcf->isStopped());
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                ASSERT(hcf->getEdcafForTest(AC_BE)->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 27: {
+                queueFrame(firstPeer, 1, false);
+                queueFrame(firstPeer, 2, true);
+                hcf->stop();
+                cancelNextRestart = true;
+                hcf->start();
+                wait(SimTime(1, SIMTIME_MS));
+                ASSERT(hcf->isStopped());
+                ASSERT(channelAccessGrants == 0);
+                for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac)
+                    ASSERT(!hcf->getEdcafForTest(static_cast<AccessCategory>(ac))->isOwning());
+                hcf->start();
+                wait(SimTime(3, SIMTIME_MS));
+                ASSERT(sentPayload == 2);
+                ASSERT(receivedAck == 2);
+                ASSERT(!hcf->isStopped());
+                break;
+            }
+            case 26: {
+                queueFrame(firstPeer, 1, false);
+                for (int i = 0; i < 100 && receivedAck == 0; ++i)
+                    wait(SimTime(100, SIMTIME_US));
+                ASSERT(admissionStops == 1);
+                ASSERT(!hcf->isStopped());
+                ASSERT(channelAccessGrants == 2);
+                ASSERT(sequenceStarted == 2);
+                ASSERT(sequenceFinished == 2);
+                ASSERT(admitted == 2);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck == 1);
+                ASSERT(retriedPayload == 0);
+                auto edcaf = hcf->getEdcafForTest(AC_BE);
+                ASSERT(!edcaf->isOwning());
+                ASSERT(edcaf->getPendingQueue()->isEmpty());
+                ASSERT(edcaf->getInProgressFrames()->getLength() == 0);
+                break;
+            }
+            case 31:
+            case 32: {
+                // The first payload needs no RTS. The later RTS has no BSS basic rate at or below 6 Mbps.
+                hcf->queueQosFrame(firstPeer, 1);
+                hcf->queueQosFrame(firstPeer, 2, "rts-1200B", 1200);
+                waitForTxopEnd(1);
+                ASSERT(sentRts > 0);
+                ASSERT(sentPayload == 1);
+                ASSERT(receivedAck > 0);
+                break;
+            }
+            default:
+                throw cRuntimeError("Unknown TXOP test scenario %d", scenario);
+        }
+
+        if (scenario < 8)
+            ASSERT(dataRateSelections > 0);
+        if (scenario < 8)
+            ASSERT(txopStarted >= 1);
+        ASSERT(preparedModesOk);
+        ASSERT(preparedIntervalsOk);
+        ASSERT(admittedContextMatches);
+        ASSERT(txopStarted == txopEnded);
+        ASSERT(hcf->activeStepIdentityOk);
+        std::cout << "Prepared TXOP exchange scenario " << scenario << " passed.\n";
+        endSimulation();
+    }
+};
+
+Define_Module(Ieee80211TxopExchangeTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.test.moduletest.lib.ieee80211retransmissiontest.Ieee80211TesterMac;
+
+simple TestTxopMgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestTxopMgmtAp);
+}
+
+module TestTxopPeerMac extends Ieee80211TesterMac
+{
+    parameters:
+        @class(::inet::ieee80211::TestTxopPeerMac);
+}
+
+module TestTxopHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::TestTxopHcf);
+}
+
+simple Ieee80211TxopExchangeTest extends SimpleModule
+{
+    parameters:
+        int scenario = default(0);
+        @class(::inet::ieee80211::Ieee80211TxopExchangeTest);
+}
+
+network Ieee80211TxopExchangeTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestTxopMgmtAp";
+                wlan[*].mac.qosStation = true;
+                wlan[*].mac.hcf.typename = "TestTxopHcf";
+                wlan[*].mgmt.beaconInterval = 10s;
+        }
+        peer1: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "TestTxopPeerMac";
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        peer2: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        peer3: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211TxopExchangeTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211TxopExchangeTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 30ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.test.scenario = ${scenario=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35}
+**.hcf.isBlockAckSupported = ${scenario} == 19 || ${scenario} == 23
+*.sender.wlan[0].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.peer1.wlan[0].address = "02:00:00:00:00:02"
+*.peer2.wlan[0].address = "02:00:00:00:00:03"
+*.peer*.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.peer1.wlan[0].mac.actions = "AAAAAAAAAAAAAAAA"
+*.peer2.wlan[0].mac.actions = "AAAAAAAAAAAAAAAA"
+*.peer3.wlan[0].address = "02:00:00:00:00:04"
+*.peer3.wlan[0].mac.actions = "BBBBBBBBBBBBBBBB"
+*.peer*.wlan[0].mac.qosStation = true
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 24Mbps
+*.sender.wlan[0].mgmt.basicRates = ${scenario} == 31 || ${scenario} == 32 ? "24Mbps" : ""
+*.sender.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} == 31 || ${scenario} == 32 ? 6Mbps : -1bps
+*.sender.wlan[0].mac.hcf.rateSelection.controlFrameBitrate = ${scenario} == 32 ? 6Mbps : -1bps
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 31 || ${scenario} == 32 ? 8ms : (${scenario} == 23 ? 0s : (${scenario} == 5 ? 2ms : ${txopLimit=600us,2ms,0s}))
+*.sender.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 2 || ${scenario} == 31 || ${scenario} == 32 ? 1000B : 4096B
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = ${scenario} == 27 || ${scenario} >= 33 ? 7 : 1
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].cwMin = ${scenario} >= 33 ? 0 : -1
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].cwMax = ${scenario} >= 33 ? 0 : -1
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].aifsn = ${scenario} >= 33 ? 2 : -1
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 1
+*.sender.wlan[0].mac.qosStation = true
+*.sender.wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+*.sender.wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+*.sender.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 4096B
+**.radio.bandName = "2.4 GHz"
+**.radio.centerFrequency = 2.4GHz
+**.radio.transmitter.power = 100mW
+**.radio.receiver.sensitivity = -85dBm
+**.radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.peer1.mobility.initialX = 1m
+*.peer1.mobility.initialY = 0m
+*.peer2.mobility.initialX = 2m
+*.peer2.mobility.initialY = 0m
+*.peer3.mobility.initialX = 3m
+*.peer3.mobility.initialY = 0m
+
+%contains: stdout
+Prepared TXOP exchange scenario

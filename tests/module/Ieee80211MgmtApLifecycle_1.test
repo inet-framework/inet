@@ -65,10 +65,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         auto packet = new Packet("AssociationRequest");
         auto body = makeShared<Ieee80211AssociationRequestFrame>();
         body->setSSID(ssid.c_str());
-        Ieee80211SupportedRatesElement rates;
-        rates.numRates = 1;
-        rates.rate[0] = 6;
-        body->setSupportedRates(rates);
+        setSupportedRateElements(body);
         if (mib->isHtOperationSupported()) {
             body->setHtCapabilitiesPresent(true);
             body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));

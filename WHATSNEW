@@ -293,6 +293,34 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IEEE 802.11 prepared exchanges and rate selection
+
+   The MAC now prepares complete exchanges before transmission opportunity
+   (TXOP) admission. The Duration reservation includes the selected response.
+   Basic, operational, and peer rate sets constrain transmission choices.
+   Invalid response overrides fail explicitly. These changes can alter results
+   and fingerprints.
+   An oversized first exchange above a positive TXOP limit now stops the
+   simulation unless a supported exception applies. A Duration reservation
+   above 32767 microseconds also causes a runtime error.
+   Zero-limit Block Ack traffic can now send one BAR/Block Ack exchange per
+   data frame, even with queued data. See the migration guide for this policy.
+
+   Custom frame sequences, rate selectors, acknowledgment policies, contention
+   implementations, and transmission callbacks require API updates.
+   Prepared receive steps retain response values without a transmit-step pointer.
+   Custom MAC implementations must provide IIeee80211ModeSetProvider for
+   management rate initialization. See the migration guide for details.
+
+   Stop retains packets with interrupted acknowledgment waits for retry after
+   restart. This lifecycle transition does not consume a retry attempt.
+
+   Detailed stations now use the target AP's advertised rates before
+   authentication and association. Failed reassociation preserves the current
+   BSS rate policy. ACK and CTS predictions use the remote peer's rate context.
+   Explicit rates for later RTS frames now accept the standard mandatory-rate
+   fallback. Initial control frames still require an eligible basic rate.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

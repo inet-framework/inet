@@ -1,0 +1,78 @@
+%description:
+IEEE Std 802.11-2024, 9.2.5.2 and 10.23.2.9: one exchange fits in
+1.5 ms, but two do not. The final data reserves only its ACK.
+A passive third station observes that reservation. The next data uses fresh contention.
+
+%file: N_TxopBoundary.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+using namespace physicallayer;
+struct BoundaryEvidence { simtime_t start; simtime_t duration; simtime_t ackEnd; simtime_t airtime; };
+static TxopProcedure *txop(const MatchContext& c)
+{
+    return check_and_cast<TxopProcedure *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")
+            ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 1)->getSubmodule("txopProcedure"));
+}
+Define_ProtocolTest(wifi_qos_txop_boundary)
+{
+    auto evidence = std::make_shared<BoundaryEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
+    return ProtocolTest("wifi_qos_txop_boundary")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40").describe("initial frame while the burst enters the queue").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->start = txop(c)->getStart();
+                evidence->duration = c.event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField();
+                auto mode = c.event.packet->getTag<Ieee80211ModeReq>()->getMode();
+                evidence->airtime = mode->getDuration(c.event.packet->getDataLength());
+                return evidence->start == c.event.time && mode->getDataMode()->getNetBitrate() == Mbps(6.5);
+            }).within(0.01))
+        .once(on("sta2.wlan[0].mac.rx").signal("navChanged").filterValueAtLeast(0.000001)
+            .assertEvent([evidence](const MatchContext& c) { return SimTime(c.event.value) == evidence->duration; }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                auto ackMode = c.event.packet->getTag<Ieee80211ModeInd>()->getMode();
+                auto response = sifs + ackMode->getDuration(LENGTH_ACK);
+                return evidence->duration == response && evidence->airtime + response <= SimTime(1500, SIMTIME_US) &&
+                        2 * (evidence->airtime + response) + sifs > SimTime(1500, SIMTIME_US);
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                return txop(c)->getStart() == c.event.time && txop(c)->getStart() > evidence->start &&
+                        c.event.time - evidence->ackEnd > sifs;
+            }).within(0.003));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_qos_txop_boundary"
+*.sta1.app[0].sendInterval = 1us
+*.sta1.app[0].stopTime = 1.00001s
+*.sta*.wlan[*].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.sta*.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 1.5ms
+*.sta*.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.typename = ""
+*.ap.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.typename = ""
+*.sta*.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+*.sta*.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_txop_boundary: PASS

@@ -8,6 +8,8 @@
 #ifndef __INET_FRAMESEQUENCECONTEXT_H
 #define __INET_FRAMESEQUENCECONTEXT_H
 
+#include <memory>
+
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
@@ -16,6 +18,8 @@
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/linklayer/ieee80211/mac/originator/RtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
@@ -38,6 +42,9 @@ class INET_API QoSContext
     IOriginatorBlockAckProcedure *blockAckProcedure = nullptr;
     IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
     TxopProcedure *txopProcedure = nullptr;
+    IQosRateSelection *rateSelection = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    const simtime_t *txnavEnd = nullptr;
 };
 
 class INET_API NonQoSContext
@@ -54,10 +61,15 @@ class INET_API FrameSequenceContext : public cObject
 {
   protected:
     simtime_t startTime = simTime();
+    FrameSequenceOutcome outcome = FrameSequenceOutcome::RUNNING;
     MacAddress address = MacAddress::UNSPECIFIED_ADDRESS;
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     InProgressFrames *inProgressFrames = nullptr;
     std::vector<IFrameSequenceStep *> steps;
+    std::vector<std::unique_ptr<IFrameSequenceStep>> ownedSteps;
+    std::unique_ptr<TxopExchangePlan> exchangePlan;
+    std::unique_ptr<TxopExchangePlan> continuationPlan;
+    std::map<MacAddress, const physicallayer::IIeee80211Mode *> transmittedModes;
 
     IRtsProcedure *rtsProcedure = nullptr;
     IRtsPolicy *rtsPolicy = nullptr;
@@ -70,8 +82,20 @@ class INET_API FrameSequenceContext : public cObject
     virtual ~FrameSequenceContext();
 
     virtual simtime_t getDuration() const { return simTime() - startTime; }
+    FrameSequenceOutcome getOutcome() const { return outcome; }
+    void setOutcome(FrameSequenceOutcome value) { outcome = value; }
 
-    virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }
+    virtual void addStep(IFrameSequenceStep *step);
+    IFrameSequenceStep *ownPreparedStep(std::unique_ptr<IFrameSequenceStep> step);
+    IFrameSequenceStep *getActiveStep() const;
+    const physicallayer::Ieee80211ModeSet *getModeSet() const { return modeSet; }
+    TxopExchangePlan *getExchangePlan() const { return exchangePlan.get(); }
+    TxopExchangePlan *getContinuationPlan() const { return continuationPlan.get(); }
+    void setExchangePlan(std::unique_ptr<TxopExchangePlan> plan) { exchangePlan = std::move(plan); }
+    void setContinuationPlan(std::unique_ptr<TxopExchangePlan> plan) { continuationPlan = std::move(plan); }
+    std::unique_ptr<TxopExchangePlan> takeContinuationPlan() { return std::move(continuationPlan); }
+    const physicallayer::IIeee80211Mode *getPreviousMode(const MacAddress& receiver) const;
+    void recordTransmission();
     virtual int getNumSteps() const { return steps.size(); }
     virtual IFrameSequenceStep *getStep(int i) const { return steps[i]; }
     virtual IFrameSequenceStep *getLastStep() const { return steps.size() > 0 ? steps.back() : nullptr; }

@@ -4,6 +4,75 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 TXOP and rate selection
+----------------------------------
+
+Management modules accept ``basicRates`` and ``operationalRates`` as lists
+with units, for example ``"6Mbps 12Mbps"``. ``"auto"`` retains the automatic
+policy. An empty string means a known empty set. Custom association frames
+must advertise support for every BSS basic rate. The AP rejects incomplete
+advertisements instead of silently assuming PHY support.
+
+The MIB stores accepted rate sets. Detailed management learns peer rates from
+accepted frames. Simplified stations use the AP's BSS policy and retain their
+separate local rate limits.
+
+Custom MAC implementations must implement ``IIeee80211ModeSetProvider``.
+Management queries this read-only catalog contract after link-layer initialization.
+The built-in ``Ieee80211Mac`` implements it through ``getModeSet()``.
+Management now starts at ``INITSTAGE_NETWORK_CONFIGURATION`` so the MAC mode
+set exists first. This moves beacon and association startup to a later stage.
+The different order of random draws can change results outside the TXOP examples.
+
+``IQosRateSelection::computeMode`` takes explicit ``startsTxop`` and
+``previousModeForReceiver`` arguments. Its optional ``useFastestMode`` flag
+requests the highest eligible rate for a permitted TXOP overrun.
+Explicit configured rates retain precedence. Selectors no longer own holder
+transmission history. Custom PHY modes must implement the non-HT reference
+rate, modulation-class, and legacy-preamble queries.
+
+Custom ACK and RTS policies must provide the explicit response-mode timeout
+queries. ``IFrameSequence`` steps expose prepared mode, length, interval,
+and PPDU duration. Custom transmit callbacks must implement
+``transmissionStarting``; false cancels the pending packet before transmission.
+Custom contention implementations must support cancellation.
+
+``SingleProtectionMechanism`` no longer has a rate-selection module parameter.
+It reads the prepared plan. The former TXOP boundary stubs and selector
+``frameTransmitted`` history hooks are removed. Use the context's active plan
+and actual transmission history. Cancellation requires a sequence outcome.
+Prepared ``ReceiveStep`` construction takes the response values directly;
+it does not retain a pointer to the transmit step.
+
+HCF stop retains packets whose normal ACK or Block Ack wait was interrupted.
+Restart retries these packets with the Retry bit set. Administrative stop does
+not consume a retry attempt or report a failed transmission.
+
+Response-rate overrides must match the primary response mode. A conflicting
+override now fails explicitly. Only DCF ``RateSelection`` provides
+``useNonstandardResponseModes`` to permit nonstandard response overrides.
+HCF ``QosRateSelection`` has no such option. For example, a conflicting
+``**.hcf.rateSelection.responseAckFrameBitrate`` fails when the selector first
+uses it. Remove conflicting overrides from QoS configurations.
+Response selection uses the BSS basic rates or the applicable mandatory rates,
+without the local operational-rate restriction used for data transmission.
+
+The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
+candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then
+takes priority over queued data if a group awaits a request.
+With a zero limit, this can produce one BAR/Block Ack exchange per data frame.
+This is an INET policy choice. A positive limit permits threshold-based groups
+while data candidates remain available; a final BAR can still bypass the threshold.
+
+A positive TXOP limit no longer permits an
+arbitrarily oversized first exchange. Configure a legal fragment size or
+increase the limit when no supported exception applies.
+An unsupported oversized first exchange stops the simulation with a runtime error.
+A Duration reservation above 32767 microseconds also stops the simulation.
+
+These changes can alter EDCA reservations, response modes, and event timing.
+Recheck experiment results and fingerprints before use.
+
 IEEE 802.11 EDCA Management Recovery
 -----------------------------------
 

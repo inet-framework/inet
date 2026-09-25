@@ -30,6 +30,8 @@ simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
         @class(Ieee80211MgmtSta);
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // Number of channels to scan
+        string basicRates = default("auto");
+        string operationalRates = default("auto");
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");

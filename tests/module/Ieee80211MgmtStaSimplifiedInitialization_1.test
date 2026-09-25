@@ -4,16 +4,23 @@ configuration while negotiated HT peer state is installed only at the last
 initialization stage. Verify shutdown removes the AP-side association and HT
 peer state and startup restores both. Verify crash performs the same cleanup,
 and remains safe when the recorded AP can no longer be resolved.
+Check advertised peer rates and rejection of a forbidden AP data rate in DCF and HCF.
 
 %file: TestInitializationObserver.cc
 
+#include <set>
+
 #include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
 
 namespace inet {
+
+using namespace units::values;
 
 class TestIpv4NetworkConfigurator : public Ipv4NetworkConfigurator
 {
@@ -28,6 +35,63 @@ class TestInitializationObserver : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    void checkRatePolicy(const char *name, const ieee80211::Ieee80211RateSetState& state,
+            const std::set<bps>& expectedOperational, const std::set<bps>& expectedBasic)
+    {
+        if (!state.supported.known || !state.operational.known || !state.basic.known)
+            throw cRuntimeError("Rate state '%s' is not fully known", name);
+        if (state.operational.legacyRates != expectedOperational || state.basic.legacyRates != expectedBasic)
+            throw cRuntimeError("Rate state '%s' has an unexpected policy", name);
+    }
+
+    void checkConfiguredRates(ieee80211::Ieee80211Mib *apMib, ieee80211::Ieee80211Mib *staMib)
+    {
+        const auto apOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12)), bps(Mbps(24))};
+        const auto apBasic = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
+        const auto staOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
+        const auto staBasic = std::set<bps>{bps(Mbps(6))};
+        checkRatePolicy("AP local", apMib->getLocalRateSet(), apOperational, apBasic);
+        checkRatePolicy("AP BSS", apMib->getBssRateSet(), apOperational, apBasic);
+        checkRatePolicy("STA local", staMib->getLocalRateSet(), staOperational, staBasic);
+        checkRatePolicy("STA BSS", staMib->getBssRateSet(), apOperational, apBasic);
+        auto stationRates = apMib->findPeerRateSet(staMib->address);
+        auto accessPointRates = staMib->findPeerRateSet(apMib->address);
+        ASSERT(stationRates != nullptr && accessPointRates != nullptr);
+        ASSERT(stationRates->supported.legacyRates == staOperational);
+        ASSERT(accessPointRates->supported.legacyRates == apOperational);
+        ASSERT(staMib->getLocalRateSet().supported.legacyRates.count(Mbps(24)) == 1);
+        ASSERT(stationRates->supported.htMcs == staMib->getLocalRateSet().supported.htMcs);
+        ASSERT(accessPointRates->supported.htMcs == apMib->getLocalRateSet().supported.htMcs);
+
+        auto mac = apMib->getParentModule()->getSubmodule("mac");
+        bool qos = mac->par("qosStation");
+        auto selection = mac->getSubmodule(qos ? "hcf" : "dcf")->getSubmodule("rateSelection");
+        auto header = makeShared<ieee80211::Ieee80211DataHeader>();
+        header->setReceiverAddress(staMib->address);
+        Packet packet("rateProbe", header);
+        bool rejected = false;
+        try {
+            if (qos)
+                check_and_cast<ieee80211::IQosRateSelection *>(selection)->computeMode(&packet, header, true, nullptr);
+            else
+                check_and_cast<ieee80211::IRateSelection *>(selection)->computeMode(&packet, header);
+        }
+        catch (const cRuntimeError& error) {
+            rejected = std::string(error.what()).find("violates local, BSS, or peer rate restrictions") != std::string::npos;
+        }
+        ASSERT(rejected);
+    }
+
+    void checkLocalRates(ieee80211::Ieee80211Mib *apMib, ieee80211::Ieee80211Mib *staMib)
+    {
+        const auto apOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12)), bps(Mbps(24))};
+        const auto apBasic = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
+        const auto staOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
+        const auto staBasic = std::set<bps>{bps(Mbps(6))};
+        checkRatePolicy("AP local", apMib->getLocalRateSet(), apOperational, apBasic);
+        checkRatePolicy("STA local", staMib->getLocalRateSet(), staOperational, staBasic);
+    }
+
     virtual void initialize(int stage) override
     {
         if (stage == INITSTAGE_NETWORK_CONFIGURATION || stage == INITSTAGE_LAST) {
@@ -36,6 +100,15 @@ class TestInitializationObserver : public cSimpleModule
             auto staInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.sta.wlan[0]"));
             auto apMib = check_and_cast<ieee80211::Ieee80211Mib *>(apInterface->getSubmodule("mib"));
             auto staMib = check_and_cast<ieee80211::Ieee80211Mib *>(staInterface->getSubmodule("mib"));
+
+            if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+                checkLocalRates(apMib, staMib);
+                ASSERT(!staMib->getBssRateSet().operational.known);
+                ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
+                ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
+            }
+            else
+                checkConfiguredRates(apMib, staMib);
 
             ASSERT(staInterface->getSubmodule("agent") == nullptr);
             ASSERT(apMib->hasPrimaryChannel());
@@ -75,13 +148,18 @@ class TestInitializationObserver : public cSimpleModule
         auto staMib = check_and_cast<ieee80211::Ieee80211Mib *>(staInterface->getSubmodule("mib"));
         if (!strcmp(message->getName(), "checkShutdown")) {
             ASSERT(!staMib->bssStationData.isAssociated);
+            checkLocalRates(apMib, staMib);
+            ASSERT(!staMib->getBssRateSet().operational.known);
             ASSERT(apMib->bssAccessPointData.stations.find(staMib->address) == apMib->bssAccessPointData.stations.end());
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
+            ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
+            ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
             std::cout << "Simplified STA AP-side association and HT peer state removed after shutdown.\n";
         }
         else if (!strcmp(message->getName(), "checkShutdownRestart")) {
             ASSERT(staMib->bssStationData.isAssociated);
+            checkConfiguredRates(apMib, staMib);
             ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
             ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
@@ -90,13 +168,18 @@ class TestInitializationObserver : public cSimpleModule
         }
         else if (!strcmp(message->getName(), "checkResolvableCrash")) {
             ASSERT(!staMib->bssStationData.isAssociated);
+            checkLocalRates(apMib, staMib);
+            ASSERT(!staMib->getBssRateSet().operational.known);
             ASSERT(apMib->bssAccessPointData.stations.find(staMib->address) == apMib->bssAccessPointData.stations.end());
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
+            ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
+            ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
             std::cout << "Simplified STA AP-side association and HT peer state removed after resolvable crash.\n";
         }
         else if (!strcmp(message->getName(), "checkCrashRestart")) {
             ASSERT(staMib->bssStationData.isAssociated);
+            checkConfiguredRates(apMib, staMib);
             ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
             ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
@@ -114,10 +197,14 @@ class TestInitializationObserver : public cSimpleModule
         }
         else if (!strcmp(message->getName(), "checkMissingApCrash")) {
             ASSERT(!staMib->bssStationData.isAssociated);
+            checkLocalRates(apMib, staMib);
+            ASSERT(!staMib->getBssRateSet().operational.known);
             ASSERT(staMib->bssData.bssid == MacAddress("02:00:00:00:00:ff"));
             ASSERT(L3AddressResolver().findHostWithAddress(staMib->bssData.bssid) == nullptr);
             ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
             ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
+            ASSERT(apMib->findPeerRateSet(staMib->address) != nullptr);
             ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
             std::cout << "Simplified STA crash tolerated missing AP lookup and cleared local HT peer state.\n";
         }
@@ -184,12 +271,17 @@ record-scalar-results = false
 *.ap.wlan[0].address = "02:00:00:00:00:01"
 *.sta.wlan[0].address = "auto"
 *.ap.wlan[0].mgmt.ssid = "review-ssid"
+*.ap.wlan[0].mgmt.basicRates = "6Mbps 12Mbps"
+*.ap.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
 *.ap.wlan[0].radio.channelNumber = 6
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.sta.wlan[0].mgmt.basicRates = "6Mbps"
+*.sta.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
-**.wlan[0].bitrate = 65Mbps
+**.wlan[0].bitrate = 24Mbps
+**.wlan[0].mac.qosStation = ${qos=false,true}
 **.wlan[0].radio.bandName = "2.4 GHz"
 **.wlan[0].radio.centerFrequency = 2.4GHz
 **.mobility.initFromDisplayString = false

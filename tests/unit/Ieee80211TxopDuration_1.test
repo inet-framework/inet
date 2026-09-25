@@ -1,0 +1,221 @@
+%description:
+Tests Duration/ID values from prepared TXOP steps.
+
+%includes:
+#include <memory>
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
+#include "inet/linklayer/ieee80211/mac/recipient/QosCtsPolicy.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211TxopDuration_1 {
+
+class TestCtsPolicy : public QosCtsPolicy
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+    }
+
+    virtual simtime_t computeCtsDuration(Packet *, const Ptr<const Ieee80211RtsFrame>&) const override
+    {
+        return modeSet->getMode(Mbps(6))->getDuration(LENGTH_CTS);
+    }
+};
+
+Define_Module(TestCtsPolicy);
+
+template<typename T>
+static std::vector<uint8_t> serializeHeader(const Ptr<T>& header)
+{
+    Ieee80211MacHeaderSerializer serializer;
+    MemoryOutputStream stream;
+    const Ptr<const Chunk> chunk = staticPtrCast<const Chunk>(header);
+    serializer.serialize(stream, chunk, B(0), header->getChunkLength());
+    return stream.getData();
+}
+
+} // namespace Ieee80211TxopDuration_1
+
+%file: TestNetwork.ned
+
+import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
+import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
+
+simple TestCtsPolicy extends QosCtsPolicy
+{
+    parameters:
+        rxModule = "";
+        rateSelectionModule = "";
+        @class(::Ieee80211TxopDuration_1::TestCtsPolicy);
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        protection: SingleProtectionMechanism;
+        ctsPolicy: TestCtsPolicy;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%activity:
+
+auto protection = check_and_cast<SingleProtectionMechanism *>(cSimulation::getActiveSimulation()->getModuleByPath("protection"));
+const auto *mode = Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(6));
+const auto sifs = mode->getSifsTime();
+const MacAddress peer("02:00:00:00:00:01");
+
+{
+    auto dataPacket = std::make_unique<Packet>("data", makeShared<ByteCountChunk>(B(100)));
+    auto rtsPacket = new Packet("rts", makeShared<ByteCountChunk>(LENGTH_RTS));
+    RtsTransmitStep rts(dataPacket.get(), rtsPacket, SIMTIME_ZERO, mode);
+    ReceiveStep cts(SimTime(1, SIMTIME_MS), ST_CTS, peer, mode, LENGTH_CTS, sifs);
+    TransmitStep data(dataPacket.get(), sifs, mode, false);
+    ReceiveStep ack(SimTime(1, SIMTIME_MS), ST_ACK, peer, mode, LENGTH_ACK, sifs);
+
+    TxopExchangePlan plan;
+    plan.steps = {&rts, &cts, &data, &ack};
+    plan.payload = dataPacket.get();
+    auto duration = protection->computeDurationField(&rts, plan, nullptr);
+    auto expected = cts.getPreparedInterval() + cts.getPpduDuration() +
+            data.getPreparedInterval() + data.getPpduDuration() +
+            ack.getPreparedInterval() + ack.getPpduDuration();
+    ASSERT(duration == expected);
+    ASSERT(duration > SIMTIME_ZERO);
+
+    auto nextPacket = std::make_unique<Packet>("next", makeShared<ByteCountChunk>(B(100)));
+    TransmitStep nextData(nextPacket.get(), sifs, mode, false);
+    ReceiveStep nextAck(SimTime(1, SIMTIME_MS), ST_ACK, peer, mode, LENGTH_ACK, sifs);
+    TxopExchangePlan continuation;
+    continuation.steps = {&nextData, &nextAck};
+    continuation.payload = nextPacket.get();
+    // IEEE Std 802.11-2024, 9.2.5.2(a)(1): single-protection RTS reserves its pending exchange.
+    ASSERT(protection->computeDurationField(&rts, plan, &continuation) == expected);
+    // 9.2.5.2(a)(8)(ii): the non-final data frame also reserves the next exchange.
+    ASSERT(protection->computeDurationField(&data, plan, &continuation) ==
+            sifs + ack.getPpduDuration() + continuation.getDuration());
+    auto ctsPolicy = check_and_cast<QosCtsPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("ctsPolicy"));
+    auto rtsHeader = makeShared<Ieee80211RtsFrame>();
+    rtsHeader->setDurationField(protection->computeDurationField(&rts, plan, &continuation));
+    // 9.2.5.7: the recipient subtracts CTS airtime and SIFS from the RTS reservation.
+    ASSERT(ctsPolicy->computeCtsDurationField(rtsPacket, rtsHeader) ==
+            sifs + data.getPpduDuration() + sifs + ack.getPpduDuration());
+}
+
+{
+    auto groupPacket = std::make_unique<Packet>("group", makeShared<ByteCountChunk>(B(100)));
+    TransmitStep groupStep(groupPacket.get(), SIMTIME_ZERO, mode, false);
+    TxopExchangePlan groupPlan;
+    groupPlan.steps = {&groupStep};
+    groupPlan.payload = groupPacket.get();
+    groupPlan.group = true;
+    auto duration = protection->computeDurationField(&groupStep, groupPlan, nullptr);
+    ASSERT(duration == SIMTIME_ZERO);
+
+    auto groupHeader = makeShared<Ieee80211DataHeader>();
+    groupHeader->setType(ST_DATA);
+    groupHeader->setSequenceNumber(SequenceNumberCyclic(0));
+    groupHeader->setDurationField(duration);
+    groupHeader->setReceiverAddress(MacAddress("01:00:00:00:00:01"));
+    groupHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:10"));
+    groupHeader->setAddress3(MacAddress("02:00:00:00:00:10"));
+    groupHeader->setChunkLength(B(24));
+    auto bytes = serializeHeader(groupHeader);
+    ASSERT(bytes.at(2) == 0 && bytes.at(3) == 0);
+}
+
+{
+    auto currentPacket = std::make_unique<Packet>("current", makeShared<ByteCountChunk>(B(100)));
+    auto nextPacket = std::make_unique<Packet>("next", makeShared<ByteCountChunk>(B(100)));
+    TransmitStep currentData(currentPacket.get(), SIMTIME_ZERO, mode, false);
+    ReceiveStep currentAck(SimTime(1, SIMTIME_MS), ST_ACK, peer, mode, LENGTH_ACK, sifs);
+    TransmitStep nextData(nextPacket.get(), sifs, mode, false);
+    ReceiveStep nextAck(SimTime(1, SIMTIME_MS), ST_ACK, peer, mode, LENGTH_ACK, sifs);
+
+    TxopExchangePlan current;
+    current.steps = {&currentData, &currentAck};
+    current.payload = currentPacket.get();
+    TxopExchangePlan continuation;
+    continuation.steps = {&nextData, &nextAck};
+    continuation.payload = nextPacket.get();
+    auto duration = protection->computeDurationField(&currentData, current, &continuation);
+    auto expected = currentAck.getPreparedInterval() + currentAck.getPpduDuration() + continuation.getDuration();
+    ASSERT(duration == expected);
+}
+
+{
+    auto barHeader = makeShared<Ieee80211BasicBlockAckReq>();
+    barHeader->setDurationField(SIMTIME_ZERO);
+    barHeader->setReceiverAddress(peer);
+    barHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:10"));
+    barHeader->setTidInfo(3);
+    barHeader->setStartingSequenceNumber(SequenceNumberCyclic(17));
+    auto barPacket = std::make_unique<Packet>("bar", barHeader);
+    TransmitStep bar(barPacket.get(), SIMTIME_ZERO, mode, false);
+    ReceiveStep ba(SimTime(1, SIMTIME_MS), ST_BLOCKACK, peer, mode, LENGTH_BASIC_BLOCKACK, sifs);
+    TxopExchangePlan plan;
+    plan.steps = {&bar, &ba};
+    auto duration = protection->computeDurationField(&bar, plan, nullptr);
+    auto expected = ba.getPreparedInterval() + ba.getPpduDuration();
+    ASSERT(duration == expected);
+
+    barHeader = makeShared<Ieee80211BasicBlockAckReq>(*barHeader);
+    barHeader->setDurationField(duration);
+    auto bytes = serializeHeader(barHeader);
+    auto micros = duration.inUnit(SIMTIME_US);
+    ASSERT(bytes.at(2) == uint8_t(micros));
+    ASSERT(bytes.at(3) == uint8_t(micros >> 8));
+}
+
+{
+    const auto *dsss11 = Ieee80211ModeSet::getModeSet("b")->getMode(Mbps(11));
+    auto packet = std::make_unique<Packet>("dsss", makeShared<ByteCountChunk>(B(100)));
+    TransmitStep data(packet.get(), SIMTIME_ZERO, dsss11, false);
+    // One fractional tick isolates Duration/ID rounding from PHY symbol rounding.
+    ReceiveStep ack(SimTime(1, SIMTIME_MS), ST_ACK, peer, dsss11, LENGTH_ACK,
+            dsss11->getSifsTime() + SimTime::fromRaw(1));
+    TxopExchangePlan plan;
+    plan.steps = {&data, &ack};
+    plan.payload = packet.get();
+    auto exact = ack.getPreparedInterval() + ack.getPpduDuration();
+    auto wholeMicros = exact.inUnit(SIMTIME_US);
+    ASSERT(SimTime(wholeMicros, SIMTIME_US) < exact);
+    auto rounded = protection->computeDurationField(&data, plan, nullptr);
+    ASSERT(rounded == SimTime(wholeMicros + 1, SIMTIME_US));
+
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA);
+    header->setSequenceNumber(SequenceNumberCyclic(0));
+    header->setDurationField(rounded);
+    header->setReceiverAddress(peer);
+    header->setTransmitterAddress(MacAddress("02:00:00:00:00:10"));
+    header->setAddress3(MacAddress("02:00:00:00:00:10"));
+    header->setChunkLength(B(24));
+    auto bytes = serializeHeader(header);
+    auto serializedMicros = wholeMicros + 1;
+    ASSERT(bytes.at(2) == uint8_t(serializedMicros));
+    ASSERT(bytes.at(3) == uint8_t(serializedMicros >> 8));
+}
+
+EV << "Prepared RTS, group, continuation, BAR/BA, and rounded Duration fields are correct.\n";
+
+%contains: stdout
+Prepared RTS, group, continuation, BAR/BA, and rounded Duration fields are correct.

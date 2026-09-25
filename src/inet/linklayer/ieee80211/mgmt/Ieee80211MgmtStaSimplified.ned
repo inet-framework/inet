@@ -15,12 +15,16 @@ import inet.common.SimpleModule;
 // This management module variant does not implement scanning, nor does
 // it send or expect to receive any management frames. It simply treats the
 // station as associated to the configured AP all the time.
+// It adopts the AP's BSS rate policy after initialization and on startup.
+// The station's configured local operational rate limits still apply.
 //
 simple Ieee80211MgmtStaSimplified extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
         @class(Ieee80211MgmtStaSimplified);
         string accessPointAddress; // MAC address of associated AP
+        string basicRates = default("auto");
+        string operationalRates = default("auto");
         string interfaceTableModule;
         string mibModule;
         string macModule;               // The path to the MAC module

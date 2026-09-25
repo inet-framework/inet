@@ -73,6 +73,18 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
     apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
     mib->bssData.ssid = apMib->bssData.ssid;
     mib->bssStationData.isAssociated = true;
+    // Share the AP's BSS policy once rate initialization is complete. Local transmit
+    // restrictions remain in the local rate set, separate from the BSS basic rates.
+    if (mib->getLocalRateSet().operational.known && apMib->getLocalRateSet().operational.known) {
+        // Detailed management advertises operational legacy rates in Supported Rates.
+        // Preserve HT receive capabilities separately from those legacy restrictions.
+        auto stationRates = mib->getLocalRateSet();
+        stationRates.supported.legacyRates = stationRates.operational.legacyRates;
+        auto accessPointRates = apMib->getLocalRateSet();
+        accessPointRates.supported.legacyRates = accessPointRates.operational.legacyRates;
+        mib->installBssAndPeerRateSets(apMib->getBssRateSet(), accessPointAddress, accessPointRates);
+        apMib->installBssAndPeerRateSets(apMib->getBssRateSet(), mib->address, stationRates);
+    }
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
     if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
@@ -88,7 +100,10 @@ void Ieee80211MgmtStaSimplified::stop()
     if (apMib != nullptr) {
         apMib->bssAccessPointData.stations.erase(mib->address);
         apMib->removePeerHtCapabilities(mib->address);
+        apMib->removePeerRateSet(mib->address);
     }
+    mib->removePeerRateSet(mib->bssData.bssid);
+    mib->clearBssRateSet();
     Ieee80211MgmtBase::stop();
 }
 

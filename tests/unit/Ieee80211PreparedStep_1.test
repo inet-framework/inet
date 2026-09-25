@@ -1,0 +1,140 @@
+%description:
+Prepared steps retain mode, length, and interval through execution.
+Response airtime differs from the receive timeout. Preparation has no received packet.
+Control steps own packets; data steps borrow packets.
+
+%includes:
+#include <memory>
+
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+class CountedPacket : public Packet
+{
+  public:
+    static int destroyed;
+    CountedPacket() : Packet("counted", makeShared<ByteCountChunk>(B(100))) {}
+    virtual ~CountedPacket() { destroyed++; }
+};
+int CountedPacket::destroyed = 0;
+
+%activity:
+const auto *mode = Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(6));
+auto packet = new CountedPacket();
+{
+    TransmitStep transmit(packet, SIMTIME_ZERO, mode, false);
+    IFrameSequenceStep *step = &transmit;
+    ASSERT(step->getType() == IFrameSequenceStep::Type::TRANSMIT);
+    ASSERT(step->getPreparedMode() == mode);
+    ASSERT(step->getPreparedLength() == B(100));
+    ASSERT(step->getPreparedInterval() == SIMTIME_ZERO);
+    ASSERT(step->getPpduDuration() == mode->getDuration(B(100)));
+    ASSERT(step->getCompletion() == IFrameSequenceStep::Completion::UNDEFINED);
+    const auto peer = MacAddress("02:00:00:00:00:01");
+    ReceiveStep receive(SimTime(1, SIMTIME_MS), ST_ACK, peer, mode, LENGTH_ACK, mode->getSifsTime());
+    const IReceiveStep *response = &receive;
+    ASSERT(response->getExpectedFrameType() == ST_ACK);
+    ASSERT(response->getExpectedPeer() == peer);
+    ASSERT(response->getPpduDuration() == mode->getDuration(LENGTH_ACK));
+    ASSERT(receive.getTimeout() != receive.getPpduDuration());
+    ASSERT(receive.getReceivedFrame() == nullptr);
+    receive.setFrameToReceive(new CountedPacket());
+    receive.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+    transmit.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+    ASSERT(response->getPreparedLength() == LENGTH_ACK);
+    ASSERT(response->getPreparedInterval() == mode->getSifsTime());
+    ASSERT(step->getPreparedMode() == mode);
+}
+ASSERT(CountedPacket::destroyed == 1);
+delete packet;
+ASSERT(CountedPacket::destroyed == 2);
+{
+    auto protectedPacket = new CountedPacket();
+    {
+        RtsTransmitStep rts(protectedPacket, new CountedPacket(), SIMTIME_ZERO, mode);
+        ASSERT(rts.getProtectedFrame() == protectedPacket);
+        ASSERT(rts.getPreparedMode() == mode);
+    }
+    ASSERT(CountedPacket::destroyed == 3);
+    delete protectedPacket;
+}
+ASSERT(CountedPacket::destroyed == 4);
+{
+    TransmitStep bar(new CountedPacket(), mode->getSifsTime(), mode, true);
+}
+ASSERT(CountedPacket::destroyed == 5);
+ReceiveStep legacy;
+ASSERT(legacy.getPreparedMode() == nullptr);
+bool rejected = false;
+try { legacy.getPpduDuration(); }
+catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+rejected = false;
+try { legacy.getExpectedFrameType(); }
+catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+
+int destroyedBeforeContext = CountedPacket::destroyed;
+{
+    int destroyedBefore = CountedPacket::destroyed;
+    FrameSequenceContext context(MacAddress("02:00:00:00:00:10"),
+            const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a")),
+            nullptr, nullptr, nullptr, nullptr, nullptr);
+    auto prepared = std::make_unique<TransmitStep>(new CountedPacket(), SIMTIME_ZERO, mode, true);
+    auto same = context.ownPreparedStep(std::move(prepared));
+    ASSERT(context.getNumSteps() == 0);
+    ASSERT(context.getLastStep() == nullptr);
+    ASSERT(context.getActiveStep() == nullptr);
+
+    context.addStep(same);
+    ASSERT(context.getNumSteps() == 1);
+    ASSERT(context.getStep(0) == same);
+    ASSERT(context.getLastStep() == same);
+    ASSERT(context.getActiveStep() == same);
+
+    bool duplicateRejected = false;
+    try {
+        context.addStep(same);
+    }
+    catch (const cRuntimeError&) {
+        duplicateRejected = true;
+    }
+    ASSERT(duplicateRejected);
+
+    same->setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+    ASSERT(context.getActiveStep() == nullptr);
+    ASSERT(context.getLastStep() == same);
+    ASSERT(CountedPacket::destroyed == destroyedBefore);
+}
+ASSERT(CountedPacket::destroyed == destroyedBeforeContext + 1);
+
+int destroyedBeforeTeardown = CountedPacket::destroyed;
+{
+    int destroyedBefore = CountedPacket::destroyed;
+    FrameSequenceContext context(MacAddress("02:00:00:00:00:10"),
+            const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a")),
+            nullptr, nullptr, nullptr, nullptr, nullptr);
+    auto control = std::make_unique<TransmitStep>(new CountedPacket(), SIMTIME_ZERO, mode, true);
+    context.ownPreparedStep(std::move(control));
+    auto response = std::make_unique<ReceiveStep>(SimTime(1, SIMTIME_MS), ST_ACK,
+            MacAddress("02:00:00:00:00:01"), mode, LENGTH_ACK, mode->getSifsTime());
+    response->setFrameToReceive(new CountedPacket());
+    context.ownPreparedStep(std::move(response));
+    ASSERT(context.getNumSteps() == 0);
+    ASSERT(context.getLastStep() == nullptr);
+    ASSERT(context.getActiveStep() == nullptr);
+    ASSERT(CountedPacket::destroyed == destroyedBefore);
+}
+ASSERT(CountedPacket::destroyed == destroyedBeforeTeardown + 2);
+
+EV << "Prepared values, context history, duplicate activation, and teardown ownership verified.\n";
+
+%contains: stdout
+Prepared values, context history, duplicate activation, and teardown ownership verified.

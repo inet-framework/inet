@@ -101,6 +101,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
     // Edcaf
     virtual bool isOwning() { return owning; }
+    virtual void cancelChannelAccess();
     virtual bool isInternalCollision();
     virtual AccessCategory getAccessCategory() { return ac; }
 };

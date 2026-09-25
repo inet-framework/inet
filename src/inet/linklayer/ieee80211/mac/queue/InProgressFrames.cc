@@ -55,27 +55,71 @@ bool InProgressFrames::hasEligibleFrameToTransmit()
     return false;
 }
 
+TxopFrameIdentity InProgressFrames::getFrameIdentity(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+    return {header->getReceiverAddress(), data && data->getType() == ST_DATA_WITH_QOS ? data->getTid() : -1,
+            header->getSequenceNumber().get()};
+}
+
+Packet *InProgressFrames::findPreparedCandidate(const Packet *excluded) const
+{
+    for (auto frame : inProgressFrames)
+        if (frame != excluded && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+            return frame;
+    return nullptr;
+}
+
+void InProgressFrames::prepareCandidate(const Packet *excluded)
+{
+    if (findPreparedCandidate(excluded) != nullptr)
+        return;
+    auto frames = dataService->extractFramesToTransmit(pendingQueue);
+    if (frames == nullptr)
+        return;
+    for (auto frame : *frames) {
+        take(frame);
+        auto header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        ackHandler->frameGotInProgress(header);
+        auto& history = fragmentHistory[getFrameIdentity(header)];
+        history.fragmentCount = std::max(history.fragmentCount, header->getFragmentNumber() + 1);
+        inProgressFrames.push_back(frame);
+        frame->setArrivalTime(simTime());
+        emit(packetEnqueuedSignal, frame);
+    }
+    delete frames;
+}
+
+void InProgressFrames::describeTransmission(TxopExchangePlan& plan) const
+{
+    auto header = plan.payload->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    plan.identity = getFrameIdentity(header);
+    plan.fragmentNumber = header->getFragmentNumber();
+    plan.packetId = plan.payload->getId();
+    plan.dataOrManagement = true;
+    plan.group = header->getReceiverAddress().isMulticast();
+    plan.retry = header->getRetry();
+    auto it = fragmentHistory.find(plan.identity);
+    if (it != fragmentHistory.end()) {
+        const auto& history = it->second;
+        auto length = history.transmittedLengths.find(header->getFragmentNumber());
+        plan.unchangedRetry = plan.retry && length != history.transmittedLengths.end() && length->second == plan.payload->getDataLength();
+        plan.initialFragmentAfterRetry = !plan.retry && history.retried && history.fragmentCount > 1;
+        plan.sixteenFragments = history.fragmentCount == 16;
+    }
+}
+
+void InProgressFrames::recordTransmission(Packet *packet)
+{
+    auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    auto& history = fragmentHistory[getFrameIdentity(header)];
+    history.transmittedLengths.emplace(header->getFragmentNumber(), packet->getDataLength());
+    history.retried |= header->getRetry();
+}
+
 void InProgressFrames::ensureHasFrameToTransmit()
 {
-//    TODO delete old frames from inProgressFrames
-//    if (auto dataFrame = dynamic_cast<Ieee80211DataHeader*>(frame)) {
-//        if (transmitLifetimeHandler->isLifetimeExpired(dataFrame))
-//            return frame;
-//    }
-    if (!hasEligibleFrameToTransmit()) {
-        auto frames = dataService->extractFramesToTransmit(pendingQueue);
-        if (frames) {
-            for (auto frame : *frames) {
-                EV_DEBUG << "Inserting frame " << frame->getName() << " extracted from MAC data service.\n";
-                take(frame);
-                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
-                inProgressFrames.push_back(frame);
-                frame->setArrivalTime(simTime());
-                emit(packetEnqueuedSignal, frame);
-            }
-            delete frames;
-        }
-    }
+    prepareCandidate();
 }
 
 Packet *InProgressFrames::getFrameToTransmit()
@@ -90,32 +134,9 @@ Packet *InProgressFrames::getFrameToTransmit()
 
 Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 {
-    auto frameToTransmit = getFrameToTransmit();
     if (dynamicPtrCast<const Ieee80211RtsFrame>(frame->peekAtFront<Ieee80211MacHeader>()))
-        return frameToTransmit;
-    else {
-        for (auto frame : inProgressFrames) {
-            if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
-                return frame;
-        }
-        auto frames = dataService->extractFramesToTransmit(pendingQueue);
-        if (frames) {
-            auto firstFrame = (*frames)[0];
-            for (auto frame : *frames) {
-                take(frame);
-                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
-                inProgressFrames.push_back(frame);
-                frame->setArrivalTime(simTime());
-                emit(packetEnqueuedSignal, frame);
-            }
-            delete frames;
-            // FIXME If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
-            // a wrong pending frame.
-            return firstFrame;
-        }
-        else
-            return nullptr;
-    }
+        return findPreparedCandidate();
+    return findPreparedCandidate(frame);
 }
 
 void InProgressFrames::dropFrame(Packet *packet)
@@ -160,6 +181,15 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 void InProgressFrames::clearDroppedFrames()
 {
     Enter_Method("clearDroppedFrames");
+    for (auto it = fragmentHistory.begin(); it != fragmentHistory.end();) {
+        bool retained = false;
+        for (auto frame : inProgressFrames)
+            retained |= getFrameIdentity(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) == it->first;
+        if (!retained)
+            it = fragmentHistory.erase(it);
+        else
+            ++it;
+    }
     for (auto frame : droppedFrames)
         delete frame;
     droppedFrames.clear();
