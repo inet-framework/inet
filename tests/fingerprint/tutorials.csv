@@ -24,8 +24,8 @@
 /tutorials/rip/,                     -f omnetpp.ini -c Step2 -r 0,                              100s,           6019-f318/tplx;9372-788f/~tNl;8293-fb18/~tND;a345-d423/tyf, PASS,   # Step2 extended
 /tutorials/rip/,                     -f omnetpp.ini -c Step3 -r 0,                              200s,           7f1f-0336/tplx;720c-57ac/~tNl;24ee-cca2/~tND;5dfa-d0b2/tyf, PASS,   # Step3 extended
 /tutorials/rip/,                     -f omnetpp.ini -c Step4A -r 0,                             1000s,           7712-cd7d/tplx;1cc5-3096/~tNl;2c72-b877/~tND;fa9c-4bec/tyf, PASS,
-/tutorials/rip/,                     -f omnetpp.ini -c Step4B -r 0,                             1000s,           95fd-64f3/tplx;1f8e-f147/~tNl;06f3-a6e7/~tND;62af-ed66/tyf, PASS,
-/tutorials/rip/,                     -f omnetpp.ini -c Step4C -r 0,                             1000s,           7c1a-43d8/tplx;5b30-9f5b/~tNl;8be0-a658/~tND;c5a1-efcf/tyf, PASS,
+/tutorials/rip/,                     -f omnetpp.ini -c Step4B -r 0,                             1000s,           a318-cb9a/tplx;5f15-8aab/~tNl;b693-3c21/~tND;62af-ed66/tyf, PASS,
+/tutorials/rip/,                     -f omnetpp.ini -c Step4C -r 0,                             1000s,           9ab6-ea8e/tplx;6a53-56a0/~tNl;8d1f-1739/~tND;c5a1-efcf/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step5 -r 0,                              200s,           bb2f-c09f/tplx;8f8b-9a9b/~tNl;b7f8-2ab5/~tND;e3a8-7bcd/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step6 -r 0,                              500s,           dee8-af05/tplx;28f9-08d7/~tNl;8e09-1310/~tND;5107-1caf/tyf, PASS,   # Step6 extended
 /tutorials/rip/,                     -f omnetpp.ini -c Step6Solution1 -r 0,                     200s,           3cf6-8748/tplx;aee7-edca/~tNl;53a9-f08a/~tND;7388-299d/tyf, PASS,
@@ -35,7 +35,7 @@
 /tutorials/rip/,                     -f omnetpp.ini -c Step7SplitHorizon -r 0,                  500s,           24fb-1d1f/tplx;4629-6b51/~tNl;5940-b976/~tND;36fb-9379/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step7TriggeredUpdates -r 0,              200s,           67cd-48fa/tplx;b2ab-ca2f/~tNl;5fdf-d594/~tND;6ddf-3916/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step8 -r 0,                              500s,           d061-d69d/tplx;15a6-b39d/~tNl;a8fc-a45a/~tND;9f85-5586/tyf, PASS,
-/tutorials/rip/,                     -f omnetpp.ini -c Step9 -r 0,                              1500s,           2d2f-ca2a/tplx;4ec9-481b/~tNl;4a16-480e/~tND;1e82-a567/tyf, PASS,   # Step9 extended
+/tutorials/rip/,                     -f omnetpp.ini -c Step9 -r 0,                              1500s,           62a1-4f59/tplx;4ec9-481b/~tNl;4a16-480e/~tND;1e82-a567/tyf, PASS,   # Step9 extended
 /tutorials/rip/,                     -f omnetpp.ini -c Step9NoNetmaskRoutes -r 0,               1500s,           9e4e-3c63/tplx;faf3-e550/~tNl;529f-5c52/~tND;5f1f-77a4/tyf, PASS,
 /tutorials/rip/,                     -f omnetpp.ini -c Step10 -r 0,                             100s,           fbaa-fc94/tplx;9a06-ebb7/~tNl;f150-18b6/~tND;6332-75bc/tyf, PASS,
 

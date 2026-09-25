@@ -15,19 +15,6 @@ R1 fails at 100 s by a crash of the node; R3 is down from the start (status.init
 starts at 300 s, both from the scenario manager. RIP starts at 1 s on R1 and at 16 s on R2
 (rip.startupTime), so that the periodic updates of R2 fall about 15 s after those of R1.
 
-Defect: R2 notices the expiry of the route only when it next sends an update.
-Rip::checkExpiredRoutes, which compares the age of each route with routeExpiryTime, runs only
-from Rip::sendRoutes (src/inet/routing/rip/Rip.cc:537 and 551); no timer of its own fires at
-the expiry. With R2 starting 15 s after R1, the expiry at t_last + 180 s falls between two
-periodic updates of R2, and the withdrawal leaves with the next one, 15 s late. RFC 2080
-section 2.3: "If 180 seconds elapse from the last time the timeout was initialized, the route
-is considered to have expired, and the deletion process described below begins for that route."
-The deletion signals the output process for a triggered update, so the withdrawal is due within
-the 5 s of the rate limit. Observations 1 to 3 hold; observation 4 fails. The garbage
-collection that follows has a test of its own, Rfc2080ExpiryGarbageCollection.test. This test
-FAILS, and the failure is deliberately NOT declared expected: the model has the timeout and
-applies it at the wrong instant, a mechanism present with the wrong timing. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"

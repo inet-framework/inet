@@ -310,6 +310,12 @@ Notable backward incompatible changes are the following:
    the route at the metric 16. With the IPv6 routes of entry 18, a RIPng
    router now advertises the network of a link again after the link returns.
 
+   A learned route now expires 180 seconds (routeExpiryTime) after its last
+   update, when a timer of its own fires. Before, the router looked at the
+   age of its routes only when it sent an update, so it noticed an expiry up
+   to one update interval late. Trajectories of RIP simulations in which a
+   route expires change.
+
 18. The IPv6 routes of the configuration return with the carrier
 
    When an interface goes down or loses its carrier, Ipv6RoutingTable now

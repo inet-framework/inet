@@ -79,6 +79,7 @@ Rip::~Rip()
     cancelAndDelete(triggeredUpdateTimer);
     cancelAndDelete(startupTimer);
     cancelAndDelete(shutdownTimer);
+    cancelAndDelete(expiryTimer);
 }
 
 simsignal_t Rip::sentRequestSignal = registerSignal("sentRequest");
@@ -122,6 +123,7 @@ void Rip::initialize(int stage)
         triggeredUpdateTimer = new cMessage("RIP-trigger");
         startupTimer = new cMessage("RIP-startup");
         shutdownTimer = new cMessage("RIP-shutdown");
+        expiryTimer = new cMessage("RIP-expiry");
 
         WATCH(ripInterfaces);
         WATCH(ripRoutingTable);
@@ -144,6 +146,9 @@ void Rip::handleMessageWhenUp(cMessage *msg)
         else if (msg == shutdownTimer) {
             ASSERT(operationalState == State::STOPPING_OPERATION);
             finishActiveOperation();
+        }
+        else if (msg == expiryTimer) {
+            checkExpiredRoutes();
         }
         else
             throw cRuntimeError("unknown self message");
@@ -251,6 +256,7 @@ void Rip::stopRIPRouting()
     // cancel timers
     cancelEvent(updateTimer);
     cancelEvent(triggeredUpdateTimer);
+    cancelEvent(expiryTimer);
 
     // clear data
     for (auto& elem : ripRoutingTable)
@@ -735,6 +741,7 @@ void Rip::processResponse(Packet *packet)
         }
     }
 
+    rescheduleExpiryTimer();
     delete packet;
 }
 
@@ -937,6 +944,29 @@ void Rip::checkExpiredRoutes()
 
         iter++;
     }
+
+    rescheduleExpiryTimer();
+}
+
+/**
+ * Schedules the expiry timer at the next instant at which a learned route expires (RFC 2453
+ * section 3.8, the timeout) or is purged, so that the router notices the event when it occurs,
+ * not at its next update.
+ */
+void Rip::rescheduleExpiryTimer()
+{
+    simtime_t next = SIMTIME_MAX;
+    for (auto& ripRoute : ripRoutingTable) {
+        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
+            simtime_t expiryTime = ripRoute->getLastUpdateTime() + routeExpiryTime;
+            next = std::min(next, ripRoute->getMetric() == RIP_INFINITE_METRIC ? expiryTime + routePurgeTime : expiryTime);
+        }
+    }
+
+    if (next == SIMTIME_MAX)
+        cancelEvent(expiryTimer);
+    else if (!expiryTimer->isScheduled() || expiryTimer->getArrivalTime() != next)
+        rescheduleAt(std::max(next, simTime()), expiryTimer);
 }
 
 /*
