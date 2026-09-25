@@ -490,78 +490,45 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
     }
 }
 
-// RFC 3376 6.4.2: retransmit a pending Group-Specific or Group-and-Source-Specific
-// Query. The Query is sent [Last Member Query Count] times in total; this handler
-// covers the extra transmissions after the initial one in sendGroup[AndSource]SpecificQuery().
+// RFC 9776 section 6.6.3: retransmit the pending Group-Specific Query and the pending sources of
+// the Group-and-Source-Specific Queries; the first transmission is done in
+// sendGroup[AndSource]SpecificQuery().
 void Igmpv3::processRexmtTimer(cMessage *msg)
 {
     RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
     NetworkInterface *ie = groupData->parent->ie;
-    ASSERT(groupData->rexmtCount > 0);
-
-    Ipv4AddressVector sourcesToQuery;
-    if (groupData->rexmtGroupAndSource) {
-        // RFC 3376 6.4.2: on retransmission, query only the sources that are still
-        // being queried, i.e. those with a source timer still running above LMQT.
-        // A Report that moved a source back (raising its timer) or away (deleting it)
-        // thus drops it from the retransmitted Query; if none remain, stop.
-        simtime_t lmqt = simTime() + lastMemberQueryTime;
-        for (auto& src : groupData->rexmtSources) {
-            auto it = groupData->sources.find(src);
-            if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
-                && it->second->sourceTimer->getArrivalTime() > lmqt)
-                sourcesToQuery.push_back(src);
-        }
-        if (sourcesToQuery.empty()) {
-            EV_INFO << "No sources are still being queried for group '" << groupData->groupAddr
-                    << "', stopping Group-and-Source-Specific Query retransmission.\n";
-            groupData->rexmtCount = 0;
-            groupData->rexmtSources.clear();
-            return;
-        }
-        EV_INFO << "Retransmitting Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
-    else {
-        EV_INFO << "Retransmitting Group-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
+    ASSERT(groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty());
 
     RouterInterfaceData *interfaceData = groupData->parent;
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
-        Packet *packet = new Packet("Igmpv3 query");
-        const auto& query = makeShared<Igmpv3Query>();
-        query->setType(IGMP_MEMBERSHIP_QUERY);
-        query->setGroupAddress(groupData->groupAddr);
-        query->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
-        setQuerierFields(query);
-        if (groupData->rexmtGroupAndSource) {
-            query->setSourceList(sourcesToQuery);
-            query->setChunkLength(B(12 + (4 * sourcesToQuery.size())));
-        }
-        else {
+    if (groupData->groupRexmtCount > 0) {
+        EV_INFO << "Retransmitting Group-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->groupRexmtCount
+                << " transmission(s) left).\n";
+        if (interfaceData->state == IGMPV3_RS_QUERIER) {
+            Packet *packet = new Packet("Igmpv3 query");
+            const auto& query = makeShared<Igmpv3Query>();
+            query->setType(IGMP_MEMBERSHIP_QUERY);
+            query->setGroupAddress(groupData->groupAddr);
+            query->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+            setQuerierFields(query);
             // the S flag is set when the group timer is larger than LMQT, which a Report since
             // the first Query makes it (RFC 9776 section 6.6.3.1)
             query->setSuppressRouterProc(groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime);
             query->setChunkLength(B(12));
-        }
-        insertChecksum(query, packet);
-        packet->insertAtFront(query);
-        sendQueryToIP(packet, ie, groupData->groupAddr);
-
-        numQueriesSent++;
-        if (groupData->rexmtGroupAndSource)
-            numGroupAndSourceSpecificQueriesSent++;
-        else
+            insertChecksum(query, packet);
+            packet->insertAtFront(query);
+            sendQueryToIP(packet, ie, groupData->groupAddr);
+            numQueriesSent++;
             numGroupSpecificQueriesSent++;
+        }
+        groupData->groupRexmtCount--;
     }
-
-    if (--groupData->rexmtCount > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else
-        groupData->rexmtSources.clear();
+    if (!groupData->sourceRexmtCounts.empty()) {
+        EV_INFO << "Retransmitting Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        sendSourceSpecificQueries(groupData);
+    }
+    scheduleQueryRetransmission(groupData);
 }
 
 // RFC3376 5.2  report generation, point 1.
@@ -884,15 +851,6 @@ void Igmpv3::processReport(Packet *packet)
             groupData->collectForwardedSources(oldSourceList);
 
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
-
-            // RFC 3376 6.4.2: a new Report for this group supersedes any in-progress
-            // Last-Member Query retransmission. Cancel it; if this record still needs
-            // a Query, the send below re-arms the retransmission from scratch.
-            if (groupData->rexmtCount > 0) {
-                groupData->rexmtCount = 0;
-                groupData->rexmtSources.clear();
-                cancelEvent(groupData->rexmtTimer);
-            }
 
             // RFC 3376 6.4.1: Reception of Current State Record
             if (gr.getRecordType() == IGMPV3_RT_IS_IN) {
@@ -1486,17 +1444,10 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         numGroupSpecificQueriesSent++;
     }
 
-    // RFC 3376 6.4.2: the Group-Specific Query is (re)transmitted [Last Member
-    // Query Count] times in total, lastMemberQueryInterval apart.
-    groupData->rexmtGroupAndSource = false;
-    groupData->rexmtSources.clear();
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else {
-        groupData->rexmtCount = 0;
-        cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
-    }
+    // RFC 9776 section 6.6.3.1: [Last Member Query Count] - 1 retransmissions follow,
+    // lastMemberQueryInterval apart
+    groupData->groupRexmtCount = lastMemberQueryCount - 1;
+    scheduleQueryRetransmission(groupData);
 }
 
 void Igmpv3::sendGroupReport(NetworkInterface *ie, const vector<GroupRecord>& records)
@@ -1520,20 +1471,50 @@ void Igmpv3::sendGroupReport(NetworkInterface *ie, const vector<GroupRecord>& re
     numReportsSent++;
 }
 
-// See RFC 3376 6.6.3.2.
+// See RFC 9776 section 6.6.3.2: each source of the Query whose Source Timer is larger than LMQT
+// gets [Last Member Query Count] transmissions and its timer lowered to LMQT, and the Queries
+// leave at once.
 void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ipv4AddressVector& sources)
 {
     ASSERT(!sources.empty());
+    for (const auto& source : sources) {
+        auto it = groupData->sources.find(source);
+        if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime)
+        {
+            groupData->sourceRexmtCounts[source] = lastMemberQueryCount;
+            startTimer(it->second->sourceTimer, lastMemberQueryTime);
+        }
+    }
+    sendSourceSpecificQueries(groupData);
+    scheduleQueryRetransmission(groupData);
+}
 
+// RFC 9776 section 6.6.3.2: two Group-and-Source-Specific Queries for the sources with
+// retransmission state, one with the S flag for the sources whose timer is larger than LMQT, and
+// one without it for the others; a Query with no sources is not sent. Each source counts one
+// transmission.
+void Igmpv3::sendSourceSpecificQueries(RouterGroupData *groupData)
+{
     RouterInterfaceData *interfaceData = groupData->parent;
-
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    Ipv4AddressVector suppressedSources, otherSources;
+    for (const auto& elem : groupData->sourceRexmtCounts) {
+        auto it = groupData->sources.find(elem.first);
+        bool aboveLmqt = it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime;
+        (aboveLmqt ? suppressedSources : otherSources).push_back(elem.first);
+    }
+    for (bool suppressFlag : {true, false}) {
+        const Ipv4AddressVector& sources = suppressFlag ? suppressedSources : otherSources;
+        if (sources.empty() || interfaceData->state != IGMPV3_RS_QUERIER)
+            continue;
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
         setQuerierFields(msg);
+        msg->setSuppressRouterProc(suppressFlag);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
         insertChecksum(msg, packet);
@@ -1543,19 +1524,22 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         numQueriesSent++;
         numGroupAndSourceSpecificQueriesSent++;
     }
+    for (auto it = groupData->sourceRexmtCounts.begin(); it != groupData->sourceRexmtCounts.end(); ) {
+        if (--it->second <= 0)
+            it = groupData->sourceRexmtCounts.erase(it);
+        else
+            ++it;
+    }
+}
 
-    // RFC 3376 6.4.2: the Group-and-Source-Specific Query is (re)transmitted
-    // [Last Member Query Count] times in total, lastMemberQueryInterval apart.
-    // On each retransmission the set of queried sources is recomputed (see
-    // processRexmtTimer), so remember the queried sources here.
-    groupData->rexmtGroupAndSource = true;
-    groupData->rexmtSources = sources;
-    sort(groupData->rexmtSources.begin(), groupData->rexmtSources.end());
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
+// Schedules the next retransmission of the Queries of the group while any is left.
+void Igmpv3::scheduleQueryRetransmission(RouterGroupData *groupData)
+{
+    if ((groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty()) && lastMemberQueryInterval > 0)
         startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
     else {
-        groupData->rexmtCount = 0;
+        groupData->groupRexmtCount = 0;
+        groupData->sourceRexmtCounts.clear();
         cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
     }
 }
