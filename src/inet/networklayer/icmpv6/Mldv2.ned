@@ -73,13 +73,14 @@ simple Mldv2 extends SimpleModule like IMld
         int    robustnessVariable = default(2);  // loss tolerance; only supplies the defaults of the params marked (RV) below
         double queryInterval @unit(s) = default(125s);  // querier: interval between periodic General Queries
         double queryResponseInterval @unit(s) = default(10s);  // querier: max delay a host may wait before answering a General Query
-        double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a group stays active without a new Report (RV)
+        double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + 2 * queryResponseInterval);  // querier: how long a group stays active without a new Report (RV); the Multicast Address Listening Interval of RFC 9777 section 9.4
         double otherQuerierPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));  // querier: wait this long for another querier before taking over (RV)
+        double olderVersionHostPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a multicast address stays in the MLDv1 compatibility mode without an MLDv1 Report (RV); RFC 9777 section 9.13
         double startupQueryInterval @unit(s) = default(queryInterval / 4);  // querier: interval between the initial General Queries at startup
         int    startupQueryCount = default(robustnessVariable);  // querier: number of General Queries sent at startup (RV)
         double lastMemberQueryInterval @unit(s) = default(1s);  // querier: interval between Multicast-Address-/-and-Source-Specific Queries after a leave
         int    lastMemberQueryCount = default(robustnessVariable);  // querier: number of such Queries sent after a leave (RV)
-        double unsolicitedReportInterval @unit(s) = default(10s);  // host: delay between repeated State-Change Reports
+        double unsolicitedReportInterval @unit(s) = default(1s);  // host: delay between repeated State-Change Reports; RFC 9777 section 9.11
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::Mldv2TimerKind);
 

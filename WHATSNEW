@@ -355,6 +355,14 @@ Notable backward incompatible changes are the following:
    olderHostPresentInterval, which keeps the value of RFC 9776 section 8.13,
    260 s with the defaults.
 
+   The same two defaults of Mldv2 now have the values of RFC 9777 (sections
+   9.11 and 9.4): unsolicitedReportInterval is 1 s, before 10 s, and
+   groupMembershipInterval, the Multicast Address Listening Interval, adds
+   twice the Query Response Interval, 270 s with the other defaults, before
+   260 s. The new olderVersionHostPresentInterval keeps the value of RFC 9777
+   section 9.13 for the timer of a router for an MLDv1 host, 260 s with the
+   defaults.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

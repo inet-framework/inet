@@ -76,14 +76,15 @@ void Mldv2::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
         // robustnessVariable also seeds the NED default() expressions of
-        // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
-        // lastMemberQueryCount; in addition it controls how many times a host
+        // groupMembershipInterval / otherQuerierPresentInterval / olderVersionHostPresentInterval /
+        // startupQueryCount / lastMemberQueryCount; in addition it controls how many times a host
         // (re)transmits a State-Change Report (RFC 3810 6.1).
         robustnessVariable = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
+        olderVersionHostPresentInterval = par("olderVersionHostPresentInterval");
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -1315,7 +1316,7 @@ void Mldv2::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData 
                 << "' on interface '" << ie->getInterfaceName() << "'.\n";
 
     groupData->olderVersionPresent = true;
-    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+    startTimer(groupData->olderVersionTimer, olderVersionHostPresentInterval);
 
     // Force EXCLUDE{} forwarding and the v2 router group/filter state.
     Ipv6MulticastSourceList oldSourceList;
