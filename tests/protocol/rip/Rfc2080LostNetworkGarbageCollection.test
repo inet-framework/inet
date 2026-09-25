@@ -15,14 +15,6 @@ layer.
 The link between host A1 and R1 goes down at 100 s by a disconnect of both directions from the
 scenario manager.
 
-Defect: R1 never removes the route to the network it lost. Rip::checkExpiredRoutes purges only
-learned routes, of type RIP_ROUTE_RTE (src/inet/routing/rip/Rip.cc:909-918); the route to a
-network of the router itself stays in its table at metric 16 after Rip::invalidateRoute
-(Rip.cc:936-948), and every update holds it. RFC 2080 section 2.3: "When the garbage-collection
-timer expires, the route is deleted from the routing table." Observations 1 to 3 hold;
-observation 4 fails. This test FAILS, and the failure is deliberately NOT declared expected:
-the model has the garbage collection and leaves this route out of it. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"
