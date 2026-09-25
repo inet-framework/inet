@@ -202,19 +202,15 @@ class Ieee80211MgmtFrame extends FieldsChunk
 //
 // Authentication frame body format.
 //
-// Note: the "isLast" field is not part of the standard.
-// The authentication procedure is simulated by this model by exchanging
-// a number of "dummy" authentication frames without real contents;
-// the "isLast" field gets set by the AP to signal the STA that
-// the authentication procedure has completed and it does not need to
-// send any more Authentication frames.
+// Open System uses wire transaction numbers 1 and 2 (IEEE 802.11-2024, 12.3.3.2).
 //
 class Ieee80211AuthenticationFrame extends Ieee80211MgmtFrame
 {
     chunkLength = B(6); // add 2+len bytes for challenge text if present
+    uint16_t algorithmNumber = 0; // Open System; preserve unsupported wire values for rejection
     unsigned short sequenceNumber;
     Ieee80211StatusCode statusCode;
-    bool isLast; // not part of the standard; see above
+    bool isLast; // deprecated compatibility field, not serialized or used by management
 }
 
 //

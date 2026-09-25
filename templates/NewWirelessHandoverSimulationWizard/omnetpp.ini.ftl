@@ -25,7 +25,7 @@ tkenv-plugin-path = ../../../etc/plugins
 **.ap${i}.wlan[*].radio.channelNumber = ${i+1}
 </#list>
 **.ap*.wlan[*].mgmt.beaconInterval = 100ms
-**.wlan[*].mgmt.numAuthSteps = 4
+**.wlan[*].mgmt.numAuthSteps = 2
 
 **.mgmt.frameCapacity = 10
 
