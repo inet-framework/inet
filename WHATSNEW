@@ -411,6 +411,9 @@ Notable backward incompatible changes are the following:
    with no sources for each group that it had left, and a source-specific Query
    for sources that it did not want with such a record too.
 
+   An Mldv2 node leaves such records out in the same way (RFC 9777 section
+   6.3).
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

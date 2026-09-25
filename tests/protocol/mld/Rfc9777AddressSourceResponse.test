@@ -12,14 +12,6 @@ step 4 the first half of observation 5.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: the answer to a Multicast Address and Source Specific Query holds a MODE_IS_INCLUDE
-record with no sources when the host wants none of the queried sources.
-Mldv2::processHostGroupQueryTimer builds IS_IN(A * B) and sends it without a look at its size
-(src/inet/networklayer/icmpv6/Mldv2.cc:632-637); RFC 9777 section 6.3 sends no record with an
-empty source list. Observations 1 to 4 hold; observation 5 fails with the answer of A at 55.96
-s. This test FAILS, and the failure is deliberately NOT declared expected: the model has the
-mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
