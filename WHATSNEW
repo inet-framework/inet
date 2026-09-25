@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IEEE 802.11 PHY mode properties for response-rate selection
+
+   The physical layer (PHY) mode interface now exposes the mode family,
+   legacy preamble type, and non-HT reference rate. Custom rate selectors can
+   query these properties without a dependency on a concrete mode class.
+   HT means High Throughput; VHT means Very High Throughput. The reference rate
+   for HT and VHT modes depends on the modulation and code rate of stream 1.
+   An unsupported reference-rate mapping returns bps(NaN), where NaN means
+   not a number.
+
+   IIeee80211Mode gains three pure virtual methods: getModulationClass(),
+   getLegacyPreambleType(), and getNonHtReferenceRate(). Direct implementations
+   outside INET must implement these methods before they compile again.
+   Ieee80211ModeBase supplies default unknown values for custom subclasses.
+   The migration guide explains the return values and required overrides.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
