@@ -8,12 +8,6 @@ doc/project/evidence/protocol/mpls/checks/links.md#labeled-packets-on-an-etherne
 program steps below map onto its expected observations. The guards are observation 3; step 1 is
 observation 1, and step 2 observation 2.
 
-Model gap: an MPLS router on an Ethernet link stops the run at the first ARP packet.
-Mpls::processPacketFromL2 throws "Unknown message received" for a packet that is neither MPLS nor
-IPv4 (src/inet/networklayer/mpls/Mpls.cc:210-214), and the ARP request of R1 reaches the MPLS
-module of R2 at 0.008 s. The documentation of Mpls names Ethernet as a link layer
-(src/inet/networklayer/mpls/Mpls.ned:39-40). See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MplsChecks.h"
