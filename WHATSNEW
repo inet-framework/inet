@@ -313,6 +313,11 @@ Notable backward incompatible changes are the following:
    interfaceIpv6ConfigChanged signal when an address becomes tentative or
    valid.
 
+   The Ipv6 module now counts the extension headers that a sender asks for with
+   an Ipv6ExtHeaderReq tag in the Payload Length of the datagram (RFC 8200
+   section 3). Before, the Payload Length counted only the upper-layer message,
+   so the receiver cut off the end of the message.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
