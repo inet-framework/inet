@@ -159,9 +159,9 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
             // IEEE Std 802.11-2024, 11.3.5.3(p) for association and 11.3.5.5(n)
             // for same-AP reassociation therefore require the existing association
             // state to be cleared after this acknowledged refusal.
-            mib->releaseAssociationId(address);
             mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
             clearPendingAssociation(&sta->second);
+            mib->releaseAssociationId(address);
             // Signal delivery is synchronous; observers must see the complete
             // downgraded state and no pending response transaction.
             sendDisAssocNotification(address);
@@ -517,10 +517,11 @@ void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const 
     if (sta) {
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;
         if (wasAssociated)
             mib->releaseAssociationId(sta->address);
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;
         mib->removePeerHtCapabilities(sta->address);
+        mib->removePeerRateSet(sta->address);
         if (wasAssociated)
             sendDisAssocNotification(sta->address);
     }

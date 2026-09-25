@@ -59,16 +59,28 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         handleAuthenticationFrame(packet, header);
     }
 
-    void submitAssociationRequest(const MacAddress& address)
+    void submitAssociationRequest(const MacAddress& address, bool refuse = false)
     {
         Enter_Method("submitAssociationRequest");
         auto packet = new Packet("AssociationRequest");
         auto body = makeShared<Ieee80211AssociationRequestFrame>();
-        body->setSSID(ssid.c_str());
+        body->setSSID(refuse ? "different-network" : ssid.c_str());
         setSupportedRateElements(body);
+        if (refuse) {
+            auto rates = body->getSupportedRates();
+            rates.numRates = 1;
+            rates.rate[0] = 6;
+            body->setSupportedRates(rates);
+            body->setExtendedSupportedRatesPresent(false);
+        }
         if (mib->isHtOperationSupported()) {
             body->setHtCapabilitiesPresent(true);
             body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
+            if (refuse) {
+                auto capabilities = body->getHtCapabilities();
+                capabilities.smPowerSave = 2; // Reserved encoding forces a refused response.
+                body->setHtCapabilities(capabilities);
+            }
         }
         body->setChunkLength(B(100));
         packet->insertAtBack(body);
@@ -83,6 +95,16 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
     {
         auto it = staList.find(address);
         return it == staList.end() ? 0 : it->second.pendingAssociationTransactionId;
+    }
+
+    void submitDisassociation(const MacAddress& address)
+    {
+        Enter_Method("submitDisassociation");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_DISASSOCIATION);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mib->address);
+        handleDisassociationFrame(new Packet("Disassociation"), header);
     }
 
     void finishAssociationResponse(const MacAddress& address)
@@ -127,10 +149,24 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
 Define_Module(TestIeee80211MgmtAp);
 
-class Ieee80211MgmtApLifecycleTest : public cSimpleModule
+class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
 {
+    TestIeee80211MgmtAp *observedMgmt = nullptr;
+    Ieee80211Mib *observedMib = nullptr;
+    MacAddress observedPeer;
+    int teardownNotifications = 0;
+
   public:
     Ieee80211MgmtApLifecycleTest() : cSimpleModule(65536) {}
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override
+    {
+        ASSERT(observedMgmt->getStationStatus(observedPeer) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(!observedMgmt->hasCommittedAid(observedPeer));
+        ASSERT(!observedMgmt->hasPeerHtState(observedPeer));
+        ASSERT(observedMgmt->getPendingTransactionId(observedPeer) == 0);
+        ASSERT(observedMib->findPeerRateSet(observedPeer) == nullptr);
+        ++teardownNotifications;
+    }
 
   protected:
     virtual void activity() override
@@ -196,6 +232,40 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule
         ASSERT(mgmt->hasCommittedAid(staAddress));
         ASSERT(mgmt->hasPeerHtState(staAddress));
         std::cout << "Former station successfully re-authenticated and re-associated after AP restart.\n";
+
+        const MacAddress otherPeer("02:00:00:00:00:0a");
+        mgmt->submitAuthenticationRequest(otherPeer);
+        mgmt->submitAssociationRequest(otherPeer);
+        mgmt->finishAssociationResponse(otherPeer);
+        auto otherRates = *mib->findPeerRateSet(otherPeer);
+        auto bssRates = mib->getBssRateSet();
+        observedMgmt = mgmt;
+        observedMib = mib;
+        observedPeer = staAddress;
+        for (bool refusal : {false, true}) {
+            ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
+            auto revision = mib->getRateSetRevision();
+            mib->subscribe("peerRateSetChanged", this);
+            mgmt->subscribe("l2ApDisassociated", this);
+            if (refusal) {
+                mgmt->submitAssociationRequest(staAddress, true);
+                mgmt->finishAssociationResponse(staAddress);
+            }
+            else
+                mgmt->submitDisassociation(staAddress);
+            mib->unsubscribe("peerRateSetChanged", this);
+            mgmt->unsubscribe("l2ApDisassociated", this);
+            ASSERT(mib->getRateSetRevision() == revision + 2); // HT state and rate state each change.
+            ASSERT(mib->findPeerRateSet(staAddress) == nullptr);
+            ASSERT(mib->getBssRateSet() == bssRates);
+            ASSERT(*mib->findPeerRateSet(otherPeer) == otherRates);
+            ASSERT(mgmt->hasPeerHtState(otherPeer));
+            // Reassociate directly from authenticated state; no new authentication can hide stale rates.
+            mgmt->submitAssociationRequest(staAddress);
+            mgmt->finishAssociationResponse(staAddress);
+            ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
+        }
+        ASSERT(teardownNotifications == 4);
     }
 };
 
