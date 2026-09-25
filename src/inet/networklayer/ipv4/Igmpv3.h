@@ -175,13 +175,13 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         SourceToSourceRecordMap sources; // TODO should map source addresses to source timers
                                          // i.e. map<Ipv4Address,cMessage*>
 
-        // Last-Member/Group-Specific Query retransmission (RFC 3376 6.4.2): a
-        // Group-Specific or Group-and-Source-Specific Query is sent [Last Member
-        // Query Count] times in total, lastMemberQueryInterval apart.
+        // Query retransmission (RFC 9776 section 6.6.3): a Group-Specific Query is sent [Last
+        // Member Query Count] times, and a source of a Group-and-Source-Specific Query is in
+        // [Last Member Query Count] of them, lastMemberQueryInterval apart. A Report changes only
+        // the timers, and so the S flags.
         cMessage *rexmtTimer; // fires at lastMemberQueryInterval
-        int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
-        bool rexmtGroupAndSource = false; // false=Group-Specific, true=Group-and-Source-Specific
-        Ipv4AddressVector rexmtSources; // for the group-and-source case: sources to resend; sorted
+        int groupRexmtCount = 0; // Group-Specific Queries still to send
+        std::map<Ipv4Address, int> sourceRexmtCounts; // per source: Group-and-Source-Specific Queries still to hold it
 
         // Older Version Host Present (RFC 3376 7.3.2): while olderVersionTimer is
         // scheduled, an older-version (v1/v2) host is present for this group. The group
@@ -317,6 +317,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void setQuerierFields(const Ptr<Igmpv3Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
+    virtual void sendSourceSpecificQueries(RouterGroupData *group);
+    virtual void scheduleQueryRetransmission(RouterGroupData *group);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);
     virtual void sendStateChangeReport(HostGroupData *group);
     virtual std::vector<GroupRecord> buildStateChangeRecords(HostGroupData *group);
