@@ -316,6 +316,14 @@ Notable backward incompatible changes are the following:
    to one update interval late. Trajectories of RIP simulations in which a
    route expires change.
 
+   A router now removes a network of its own that it lost (an interface,
+   static or default route) 120 seconds (routePurgeTime) after the loss.
+   Before, it kept the network at the metric 16 and advertised it in every
+   update without end. When the route of such a network returns after the
+   removal, RIP imports it again and triggers an update. Trajectories of RIP
+   simulations in which a link of a router goes down for more than 120
+   seconds change.
+
 18. The IPv6 routes of the configuration return with the carrier
 
    When an interface goes down or loses its carrier, Ipv6RoutingTable now

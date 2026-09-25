@@ -521,7 +521,7 @@
 /examples/quic/zerortt/,                -f omnetpp.ini -c sendInvalidToken -r 0,         0.2s,            018e-e06f/tplx;c172-bbc7/~tNl, PASS, quic Ipv4
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            98ee-282c/tplx;52f0-1d63/~tNl;480e-bf21/~tND;faf1-de52/tyf, PASS, EthernetMac Ipv4
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            4826-dcad/tplx;75e3-d75f/~tNl;18d2-a442/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            26c6-3f9d/tplx;9adc-785a/~tNl;a606-4e5a/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            512c-57f0/tplx;aa3f-de9b/~tNl;e1b2-c359/~tND;5abf-7954/tyf, PASS, EthernetMac Ipv4
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            4d96-c07d/tplx;3b9f-c5fe/~tNl;139f-f984/~tND;fcd9-0439/tyf, PASS, EthernetMac Ipv4
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            9e01-9ba6/tplx;0ae5-2d64/~tNl;6a01-4a86/~tND;73f0-641b/tyf, PASS, EthernetMac Ipv4

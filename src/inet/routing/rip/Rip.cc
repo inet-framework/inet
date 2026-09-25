@@ -379,8 +379,11 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 }
                 else {
                     RipNetworkInterface *ripIe = findRipInterfaceById(ie->getInterfaceId());
-                    if (!ripIe || ripIe->mode != NO_RIP)
-                        importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                    if (!ripIe || ripIe->mode != NO_RIP) {
+                        ripRoute = importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                        ripRoute->setChanged(true);
+                        triggerUpdate();
+                    }
                 }
             }
             else {
@@ -394,6 +397,15 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     ripRoute->setMetric(1);
                     ripRoute->setChanged(true);
                     triggerUpdate();
+                }
+                else if (!ripRoute && (route->getSourceType() == IRoute::MANUAL || route->getSourceType() == IRoute::OWN_ADV_PREFIX)) {
+                    // a route of the configuration that returns after its RIP route was purged
+                    const L3Address& destAddr = route->getDestinationAsGeneric();
+                    if (type == RipRoute::RIP_ROUTE_DEFAULT || (!destAddr.isMulticast() && !destAddr.isLinkLocal())) {
+                        ripRoute = importRoute(route, type);
+                        ripRoute->setChanged(true);
+                        triggerUpdate();
+                    }
                 }
                 // TODO import external routes from other routing daemons
             }
@@ -941,6 +953,13 @@ void Rip::checkExpiredRoutes()
             else if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
                 invalidateRoute(ripRoute);
         }
+        // a route of the router itself that it lost is deleted after the garbage-collection time
+        else if (ripRoute->getMetric() == RIP_INFINITE_METRIC && ripRoute->getRoute() == nullptr &&
+                 simTime() >= ripRoute->getLastInvalidationTime() + routePurgeTime)
+        {
+            iter = purgeRoute(ripRoute);
+            continue;
+        }
 
         iter++;
     }
@@ -950,8 +969,8 @@ void Rip::checkExpiredRoutes()
 
 /**
  * Schedules the expiry timer at the next instant at which a learned route expires (RFC 2453
- * section 3.8, the timeout) or is purged, so that the router notices the event when it occurs,
- * not at its next update.
+ * section 3.8, the timeout) or a route is purged, so that the router notices the event when it
+ * occurs, not at its next update.
  */
 void Rip::rescheduleExpiryTimer()
 {
@@ -961,6 +980,8 @@ void Rip::rescheduleExpiryTimer()
             simtime_t expiryTime = ripRoute->getLastUpdateTime() + routeExpiryTime;
             next = std::min(next, ripRoute->getMetric() == RIP_INFINITE_METRIC ? expiryTime + routePurgeTime : expiryTime);
         }
+        else if (ripRoute->getMetric() == RIP_INFINITE_METRIC && ripRoute->getRoute() == nullptr)
+            next = std::min(next, ripRoute->getLastInvalidationTime() + routePurgeTime);
     }
 
     if (next == SIMTIME_MAX)
@@ -993,6 +1014,7 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
     ripRoute->setChanged(true);
     ripRoute->setLastInvalidationTime(simTime());
     triggerUpdate();
+    rescheduleExpiryTimer();
 }
 
 /**
@@ -1000,8 +1022,6 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
  */
 Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
 {
-    ASSERT(ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
-
     EV_INFO << "purging route dest:" << ripRoute->getDestination() << "\n";
 
     IRoute *route = ripRoute->getRoute();
