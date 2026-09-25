@@ -194,15 +194,25 @@ void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group,
     if (interfaceData->compatVersion != IGMP_COMPAT_NONE) {
         bool wasJoined = groupData->filter == IGMPV3_FM_EXCLUDE || !groupData->sourceAddressList.empty();
         bool nowJoined = filter == IGMPV3_FM_EXCLUDE || !sourceList.sources.empty();
-        if (!wasJoined && nowJoined)
+        if (!wasJoined && nowJoined) {
+            // RFC 2236 section 6, "join group": send a Report, set the flag, and start the timer
+            // with a value from (0, [Unsolicited Report Interval]] for the repetition
             sendOlderVersionReport(ie, group, interfaceData->compatVersion);
-        else if (wasJoined && !nowJoined) {
-            // leaving the group: send an older-version Leave (suppressed under v1 compat)
-            if (interfaceData->compatVersion == IGMP_COMPAT_V2)
-                sendOlderVersionLeave(ie, group);
+            groupData->lastReporter = true;
+            startTimer(groupData->olderVersionReportTimer, uniform(0, unsolicitedReportInterval));
         }
-        else if (nowJoined)
+        else if (wasJoined && !nowJoined) {
+            // "leave group": stop the timer, and send a Leave if the flag is set (no Leave under
+            // v1 compat)
+            cancelEvent(groupData->olderVersionReportTimer);
+            if (interfaceData->compatVersion == IGMP_COMPAT_V2 && groupData->lastReporter)
+                sendOlderVersionLeave(ie, group);
+            groupData->lastReporter = false;
+        }
+        else if (nowJoined) {
             sendOlderVersionReport(ie, group, interfaceData->compatVersion); // refresh membership
+            groupData->lastReporter = true;
+        }
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
@@ -380,6 +390,10 @@ void Igmpv3::handleMessage(cMessage *msg)
 
             case IGMPV3_H_OLDER_VERSION_TIMER:
                 processHostOlderVersionTimer(msg);
+                break;
+
+            case IGMPV3_H_OLDER_VERSION_REPORT_TIMER:
+                processHostOlderVersionReportTimer(msg);
                 break;
 
             default:
@@ -1126,6 +1140,12 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
+    // An IGMPv1 Query has no Max Response Time, and a host reads it as 10 s (RFC 2236 section 4).
+    double maxResponseTime = 10;
+    auto v2Query = dynamicPtrCast<const Igmpv2Query>(query);
+    if (v2Query != nullptr && v2Query->getMaxRespTimeCode() != 0)
+        maxResponseTime = v2Query->getMaxRespTimeCode() / 10.0;
+
     // For a General Query, start/refresh the Older Version Querier Present timer.
     // (A v1/v2 group-specific Query does not change the present-version state per RFC.)
     if (groupAddr.isUnspecified()) {
@@ -1137,20 +1157,16 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
                     << "', refreshing IGMPv" << (int)version << " compatibility.\n";
         interfaceData->compatVersion = version;
         // the Older Version Querier Present Interval (RFC 9776 section 8.12): [Robustness
-        // Variable] x [Query Interval] + 10 x the Max Response Time of this Query. An IGMPv1
-        // Query has no Max Response Time, and a host reads it as 10 s (RFC 2236 section 4)
-        double maxResponseTime = 10;
-        auto v2Query = dynamicPtrCast<const Igmpv2Query>(query);
-        if (v2Query != nullptr && v2Query->getMaxRespTimeCode() != 0)
-            maxResponseTime = v2Query->getMaxRespTimeCode() / 10.0;
+        // Variable] x [Query Interval] + 10 x the Max Response Time of this Query
         startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + 10 * maxResponseTime);
 
-        // Answer the General Query in older-version style for every joined group.
+        // Answer the General Query in older-version style for every joined group, after the
+        // report delay of RFC 2236 section 6.
         for (auto& elem : interfaceData->groups) {
             HostGroupData *g = elem.second;
             bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, g->groupAddr, version);
+                startOlderVersionReportTimer(g, maxResponseTime);
         }
     }
     else {
@@ -1162,7 +1178,7 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
             HostGroupData *g = it->second;
             bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, groupAddr, interfaceData->compatVersion != IGMP_COMPAT_NONE ? interfaceData->compatVersion : version);
+                startOlderVersionReportTimer(g, maxResponseTime);
         }
     }
 
@@ -1249,6 +1265,18 @@ void Igmpv3::processOlderVersionReport(NetworkInterface *ie, Packet *packet, Com
         RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
         RouterGroupData *groupData = interfaceData->getOrCreateGroupData(group);
         enterRouterOlderVersionCompat(ie, groupData, version);
+    }
+
+    // RFC 2236 section 6, "report received" in the Delaying Member state: another member
+    // answered for the group, so stop the timer and clear the flag
+    auto hostIt = hostData.find(ie->getInterfaceId());
+    if (hostIt != hostData.end()) {
+        auto groupIt = hostIt->second->groups.find(group);
+        if (groupIt != hostIt->second->groups.end() && groupIt->second->olderVersionReportTimer->isScheduled()) {
+            EV_INFO << "Another member reported group '" << group << "', suppressing the own Report.\n";
+            cancelEvent(groupIt->second->olderVersionReportTimer);
+            groupIt->second->lastReporter = false;
+        }
     }
 
     delete packet;
@@ -1342,6 +1370,31 @@ void Igmpv3::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to IGMPv3.\n";
     interfaceData->compatVersion = IGMP_COMPAT_NONE;
+    for (auto& elem : interfaceData->groups) {
+        cancelEvent(elem.second->olderVersionReportTimer);
+        elem.second->lastReporter = false;
+    }
+}
+
+// RFC 2236 section 6, "timer expired" in the Delaying Member state: send the Report and set the
+// flag. A Group-Specific Query is IGMPv2 only, so it is answered in IGMPv2 outside the modes.
+void Igmpv3::processHostOlderVersionReportTimer(cMessage *msg)
+{
+    HostGroupData *group = (HostGroupData *)msg->getContextPointer();
+    HostInterfaceData *interfaceData = group->parent;
+    CompatVersion version = interfaceData->compatVersion != IGMP_COMPAT_NONE ? interfaceData->compatVersion : IGMP_COMPAT_V2;
+    sendOlderVersionReport(interfaceData->ie, group->groupAddr, version);
+    group->lastReporter = true;
+}
+
+// RFC 2236 section 6, "query received": in the Idle Member state start the report delay timer
+// with a value from (0, Max Response Time]; in the Delaying Member state reset it only if the Max
+// Response Time is less than the time left.
+void Igmpv3::startOlderVersionReportTimer(HostGroupData *group, double maxResponseTime)
+{
+    cMessage *timer = group->olderVersionReportTimer;
+    if (!timer->isScheduled() || maxResponseTime < (timer->getArrivalTime() - simTime()).dbl())
+        startTimer(timer, uniform(0, maxResponseTime));
 }
 
 // RFC 3376 7.3.2: the Older Version Host Present timer for a group expired; revert that
@@ -1581,12 +1634,16 @@ Igmpv3::HostGroupData::HostGroupData(HostInterfaceData *parent, Ipv4Address grou
 
     retransmitTimer = new cMessage("Igmpv3 Host State-Change Retransmit Timer", IGMPV3_H_STATE_CHANGE_TIMER);
     retransmitTimer->setContextPointer(this);
+
+    olderVersionReportTimer = new cMessage("Igmpv3 Host Older Version Report Timer", IGMPV3_H_OLDER_VERSION_REPORT_TIMER);
+    olderVersionReportTimer->setContextPointer(this);
 }
 
 Igmpv3::HostGroupData::~HostGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(retransmitTimer);
+    parent->owner->cancelAndDelete(olderVersionReportTimer);
 }
 
 string Igmpv3::HostGroupData::getStateInfo() const

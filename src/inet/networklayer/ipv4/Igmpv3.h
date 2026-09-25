@@ -75,6 +75,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         IGMPV3_H_GROUP_TIMER,
         IGMPV3_H_STATE_CHANGE_TIMER,
         IGMPV3_H_OLDER_VERSION_TIMER, // Older Version Querier Present timer (RFC 3376 7.2.1), per HostInterfaceData
+        IGMPV3_H_OLDER_VERSION_REPORT_TIMER, // report delay timer of the IGMPv1 and IGMPv2 modes (RFC 2236 section 6), per HostGroupData
     };
 
     // Older-version compatibility level (RFC 3376 7.2/7.3). NONE means native v3.
@@ -102,6 +103,11 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         int filterModeChangeCount = 0; // State-Change Reports that must still hold a Filter-Mode-Change record
         std::map<Ipv4Address, int> sourceChangeCounts; // per source: State-Change Reports that must still hold it
         cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
+
+        // The IGMPv1 and IGMPv2 modes (RFC 2236 section 6): the report delay timer runs in the
+        // Delaying Member state, and the flag tells that this host sent the last Report.
+        cMessage *olderVersionReportTimer;
+        bool lastReporter = false;
 
         HostGroupData(HostInterfaceData *parent, Ipv4Address group);
         virtual ~HostGroupData();
@@ -321,6 +327,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void processHostGroupQueryTimer(cMessage *msg);
     virtual void processHostStateChangeTimer(cMessage *msg);
     virtual void processHostOlderVersionTimer(cMessage *msg);
+    virtual void processHostOlderVersionReportTimer(cMessage *msg);
+    virtual void startOlderVersionReportTimer(HostGroupData *group, double maxResponseTime);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
