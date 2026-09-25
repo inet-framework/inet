@@ -355,7 +355,7 @@ void Mldv1::processMldMessage(Packet *packet)
         return;
     }
 
-    const auto& mldMsg = packet->peekAtFront<MldMessage>();
+    const auto& mldMsg = packet->peekAtFront<Icmpv6Header>();
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     EV_INFO << "Received MLD message, type=" << (int)mldMsg->getType() << endl;  // keep for MLD_smoke.test
     switch (mldMsg->getType()) {
@@ -367,6 +367,12 @@ void Mldv1::processMldMessage(Packet *packet)
             break;
         case ICMPv6_MLD_DONE:
             processDone(ie, packet);
+            break;
+        case ICMPv6_MLDv2_REPORT:
+            // an MLDv1 node does not know the type, so it discards the message silently
+            // (RFC 4443 section 2.4 (b)); an MLDv2 host sends one before it hears an MLDv1 Query
+            EV_INFO << "Ignoring an MLDv2 Report.\n";
+            delete packet;
             break;
         default:
             throw cRuntimeError("Mldv1: Unknown MLD message type %d", (int)mldMsg->getType());
