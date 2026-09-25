@@ -210,7 +210,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
-                checkTags(saEntryElem, "SPI Selector");
+                checkTags(saEntryElem, "SPI Protection Selector");
 
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
@@ -220,6 +220,20 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
                 SecurityAssociation *sadEntry = new SecurityAssociation();
                 sadEntry->setRule(spdEntry->getRule());
                 sadEntry->setSpi(spi);
+
+                // an SA can override the Protection of its entry, so that one entry can protect a
+                // packet with ESP and AH together (RFC 4301 section 4.1): an AH SA takes the
+                // AuthenticationAlg of the entry, and an ESP SA needs the ESP elements of the entry
+                if (getUniqueChildIfExists(saEntryElem, "Protection") != nullptr) {
+                    Protection saProtection = parseEnumElem(protectionEnum, saEntryElem, "Protection");
+                    if (saProtection == Protection::AH && spdEntry->getAuthenticationAlg() == AuthenticationAlg::NONE)
+                        throw cRuntimeError("An AH SA needs an AuthenticationAlg other than NONE in its SecurityPolicy, at %s", saEntryElem->getSourceLocation());
+                    if (saProtection == Protection::ESP && spdEntry->getEspMode() == EspMode::NONE)
+                        throw cRuntimeError("An ESP SA needs the EspMode of an ESP SecurityPolicy, at %s", saEntryElem->getSourceLocation());
+                    IPsecRule rule = sadEntry->getRule();
+                    rule.setProtection(saProtection);
+                    sadEntry->setRule(rule);
+                }
 
                 if (const cXMLElement *selectorElem = getUniqueChildIfExists(saEntryElem, "Selector")) {
                     IPsecRule rule = sadEntry->getRule();
@@ -742,33 +756,35 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
 
     double delay = 0;
 
-    bool espProtected = false, ahProtected = false;
+    // one ESP SA and one AH SA can protect a packet; ESP comes first, so that AH covers it
+    // (RFC 4301 section 4.1, RFC 4303 section 3.1.1), whatever the order of the SAs in the entry
+    SecurityAssociation *espSa = nullptr, *ahSa = nullptr;
     for (auto saEntry : spdEntry->getEntries()) {
-        if (saEntry->getRule().getSelector().matches(&packetInfo)) {
-            if (saEntry->getProtection() == Protection::ESP && !espProtected && !ahProtected) { // ESP protection must precede possible AH protection
-                EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
-
-                int transportType = networkHeaderProtocol(netHeader);
-                espProtect(packet, (saEntry), transportType, tfcEnabled);
-                setNetworkHeaderProtocol(netHeader, IP_PROT_ESP);
-
-                delay += espProtectOutDelay->doubleValue();
-                espProtected = true;
-            }
-            else if (saEntry->getProtection() == Protection::AH && !ahProtected) {
-                EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
-
-                int transportType = networkHeaderProtocol(netHeader);
-                setNetworkHeaderProtocol(netHeader, IP_PROT_AH);
-                ahProtect(packet, saEntry, transportType);
-
-                delay += ahProtectOutDelay->doubleValue();
-                ahProtected = true;
-            }
-            else {
-                EV_WARN << "IPsec OUT PROTECT packet " << packetInfo.str() << ": matching but unused SA (repeated AH or ESP protection, or swapped AH/ESP SAs)" << std::endl;
-            }
-        }
+        if (!saEntry->getRule().getSelector().matches(&packetInfo))
+            continue;
+        if (saEntry->getProtection() == Protection::ESP && espSa == nullptr)
+            espSa = saEntry;
+        else if (saEntry->getProtection() == Protection::AH && ahSa == nullptr)
+            ahSa = saEntry;
+        else
+            EV_WARN << "IPsec OUT PROTECT packet " << packetInfo.str() << ": matching but unused SA (repeated AH or ESP protection)" << std::endl;
+    }
+    bool espProtected = false, ahProtected = false;
+    if (espSa != nullptr) {
+        EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
+        int transportType = networkHeaderProtocol(netHeader);
+        espProtect(packet, espSa, transportType, tfcEnabled);
+        setNetworkHeaderProtocol(netHeader, IP_PROT_ESP);
+        delay += espProtectOutDelay->doubleValue();
+        espProtected = true;
+    }
+    if (ahSa != nullptr) {
+        EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
+        int transportType = networkHeaderProtocol(netHeader);
+        setNetworkHeaderProtocol(netHeader, IP_PROT_AH);
+        ahProtect(packet, ahSa, transportType);
+        delay += ahProtectOutDelay->doubleValue();
+        ahProtected = true;
     }
 
     updateNetworkHeaderLength(netHeader, packet);
@@ -823,6 +839,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
     }
 
     double delay = 0.0;
+    SecurityAssociation *ahSadEntry = nullptr; // the AH SA of a packet whose AH covers ESP
     if (transportProtocol == IP_PROT_AH) {
         auto netHeader = removeNetworkHeader(packet);
 
@@ -883,6 +900,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
                     return INetfilter::IHook::ACCEPT;
                 }
             }
+            // AH covers ESP: the ESP header comes next, and the selectors of this SA are checked
+            // on the packet that ESP processing gives back
+            ahSadEntry = sadEntry;
+            transportProtocol = IP_PROT_ESP;
         }
 
         if (sadEntry == nullptr) {
@@ -923,7 +944,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);
 
-            if (!matchesSelectorsOfSa(packet, sadEntry)) {
+            if (!matchesSelectorsOfSa(packet, sadEntry) || (ahSadEntry != nullptr && !matchesSelectorsOfSa(packet, ahSadEntry))) {
                 EV_INFO << "IPsec IN DROP ESP, the packet does not match the selectors of its SA, packet: " << ingressPacketInfo.str() << std::endl;
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;

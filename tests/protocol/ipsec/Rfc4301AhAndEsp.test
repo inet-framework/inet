@@ -7,12 +7,6 @@ English procedure is in
 doc/project/evidence/protocol/ipsec/checks/modes.md#ah-and-esp-on-one-packet; the program steps
 below map onto its expected observations. Step 1 is observation 1; the guard is observation 2.
 
-The check protects flow 2000 with ESP SA 101 and AH SA 103 together. The model has code for both
-headers on one packet (IPsec::protectDatagram applies ESP before AH), but its SPD configuration
-gives each PROTECT entry one protection, AH or ESP, and every SA of the entry takes it. The test
-can therefore configure only SA 101; the missing configuration is the finding, and the test fails
-on it.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
@@ -91,8 +85,8 @@ seed-set = 0
 *.hostB.numApps = 1
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 2000
-*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
-*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation><SecurityAssociation><SPI>103</SPI><Protection>AH</Protection></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation><SecurityAssociation><SPI>103</SPI><Protection>AH</Protection></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
 
 %contains: stdout
 PROTOCOLTEST rfc4301_ah_and_esp: PASS
