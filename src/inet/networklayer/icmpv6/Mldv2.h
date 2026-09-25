@@ -158,7 +158,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         // Older Version Host Present (RFC 3810 8.3.2): while olderVersionTimer is
         // scheduled, an MLDv1 host is present for this group. The group is forwarded as
         // EXCLUDE{} (any-source) and MLDv2 per-source processing is bypassed.
-        cMessage *olderVersionTimer; // fires at groupMembershipInterval
+        cMessage *olderVersionTimer; // fires at olderVersionHostPresentInterval
         bool olderVersionPresent = false;
 
         RouterGroupData(RouterInterfaceData *parent, const Ipv6Address& group);
@@ -217,6 +217,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     double queryResponseInterval;
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
+    double olderVersionHostPresentInterval;
     double startupQueryInterval;
     int startupQueryCount;
     double lastMemberQueryInterval;

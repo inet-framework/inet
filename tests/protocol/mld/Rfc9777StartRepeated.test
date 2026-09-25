@@ -12,13 +12,6 @@ standard.
 The test keeps the default Unsolicited Report Interval of the model: the default is the subject
 of the check.
 
-Defect: the default Unsolicited Report Interval of the model is 10 s
-(src/inet/networklayer/icmpv6/Mldv2.ned:82), not the 1 second of RFC 9777 section 9.11. The
-repetition comes at a random instant up to 10 s after the first Report, so step 2 misses its
-window of 1 second. This test FAILS, and the failure is deliberately NOT declared expected: the
-model has the mechanism, and the mechanism does the wrong thing, which is a defect. See
-results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
