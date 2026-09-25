@@ -68,14 +68,15 @@ void Igmpv3::initialize(int stage)
 
         enabled = par("enabled");
         // robustnessVariable also seeds the NED default() expressions of
-        // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
-        // lastMemberQueryCount; in addition it controls how many times a host
+        // groupMembershipInterval / otherQuerierPresentInterval / olderHostPresentInterval /
+        // startupQueryCount / lastMemberQueryCount; in addition it controls how many times a host
         // (re)transmits a State-Change Report (RFC 3376 6.1).
         robustnessVariable = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
+        olderHostPresentInterval = par("olderHostPresentInterval");
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -1297,7 +1298,7 @@ void Igmpv3::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData
     if (!(groupData->olderVersionCompat == IGMP_COMPAT_V1 && version == IGMP_COMPAT_V2 && groupData->olderVersionTimer->isScheduled()))
         groupData->olderVersionCompat = version;
 
-    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+    startTimer(groupData->olderVersionTimer, olderHostPresentInterval);
 
     // Force EXCLUDE{} forwarding and the v3 router group/filter state.
     Ipv4MulticastSourceList oldSourceList;

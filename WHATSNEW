@@ -347,6 +347,14 @@ Notable backward incompatible changes are the following:
    now sends Reports for its solicited-node groups, and the group lists of an
    interface hold them.
 
+   Two defaults of Igmpv3 now have the values of RFC 9776 (sections 8.11 and
+   8.4): unsolicitedReportInterval is 1 s, before 10 s, and
+   groupMembershipInterval adds twice the Query Response Interval, 270 s with
+   the other defaults, before 260 s. The timer of a router for an older host
+   used groupMembershipInterval; it now has its own parameter,
+   olderHostPresentInterval, which keeps the value of RFC 9776 section 8.13,
+   260 s with the defaults.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
