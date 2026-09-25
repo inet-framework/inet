@@ -77,10 +77,12 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         cMessage *timer; // for scheduling responses to Multicast-Address-Specific and -and-Source-Specific Queries
         Ipv6AddressVector queriedSources; // saved from last Multicast-Address-Specific or -and-Source-Specific Query; sorted
 
-        // State-Change Report retransmission (RFC 3810 6.1): the last State-Change
-        // Report is (re)transmitted [Robustness Variable] times in total.
-        std::vector<Mldv2MulticastAddressRecord> pendingRecords; // records of the pending State-Change Report
-        int retransmitCount = 0; // remaining retransmissions (0 = nothing pending)
+        // State-Change Report retransmission (RFC 9777 section 6.1): a State-Change Report holds
+        // a Filter-Mode-Change record while filterModeChangeCount is positive, else the
+        // Source-List-Change records of the sources with a positive count. Every State-Change
+        // Report that leaves decrements the counts.
+        int filterModeChangeCount = 0; // State-Change Reports that must still hold a Filter-Mode-Change record
+        std::map<Ipv6Address, int> sourceChangeCounts; // per source: State-Change Reports that must still hold it
         cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
 
         HostGroupData(HostInterfaceData *parent, const Ipv6Address& group);
@@ -301,6 +303,8 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv6AddressVector& sources);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<Mldv2MulticastAddressRecord>& records);
+    virtual void sendStateChangeReport(HostGroupData *group);
+    virtual std::vector<Mldv2MulticastAddressRecord> buildStateChangeRecords(HostGroupData *group);
     virtual void sendQueryToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest);
     virtual void sendReportToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest);
     virtual void sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest);
