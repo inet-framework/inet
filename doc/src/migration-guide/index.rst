@@ -110,6 +110,8 @@ before it requests the shared timer update. Block Ack data reception follows the
 The recipient stores the timeout it accepts in its ADDBA response.
 A zero recipient policy disables expiry; a nonzero policy accepts the requested timeout.
 Duplicate requests and response retries retain the accepted interval and current deadline.
+Duplicate requests also retain the accepted buffer size, Block Ack policy, and
+A-MSDU support. A new agreement stores the buffer size that its response advertises.
 
 ``BlockAckRecord`` construction now requires the agreement's initial sequence number.
 The record uses this cyclic boundary to distinguish missing frames from old frames.

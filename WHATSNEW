@@ -398,6 +398,12 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. IEEE 802.11 Block Ack responses retain accepted agreement limits
+
+   A repeated ADDBA request now receives the buffer size and policy of the
+   existing agreement. A new agreement also stores the accepted buffer size
+   when the recipient limits the requested size. The sender and recipient
+   therefore use the same Block Ack window.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

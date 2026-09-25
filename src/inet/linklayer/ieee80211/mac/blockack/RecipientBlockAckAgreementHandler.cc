@@ -89,7 +89,6 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(cons
     if (it == blockAckAgreements.end()) {
         RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), acceptedTimeout);
         blockAckAgreements[id] = agreement;
-        EV_DETAIL << "Block Ack Agreement is added with the following parameters: " << *agreement << endl;
         return agreement;
     }
     else
@@ -162,10 +161,17 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
     if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
         EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
         auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
+        auto existingAgreement = getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
         auto agreement = addAgreement(addbaRequest, addbaResponse->getBlockAckTimeoutValue());
+        if (existingAgreement == nullptr)
+            agreement->setNegotiatedParameters(addbaResponse->getBufferSize(), addbaResponse->getBlockAckPolicy(), addbaResponse->getAMsduSupported());
         EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
         EV_DETAIL << "Building Addba Response" << endl;
-        // A duplicate request must describe the retained agreement without a deadline refresh.
+        // IEEE Std 802.11-2024, 11.5.2.3: the response describes the established agreement.
+        // A duplicate request does not refresh its deadline or change its parameters.
+        addbaResponse->setBufferSize(agreement->getBufferSize());
+        addbaResponse->setBlockAckPolicy(agreement->getBlockAckPolicy());
+        addbaResponse->setAMsduSupported(agreement->getAMsduSupported());
         addbaResponse->setBlockAckTimeoutValue(agreement->getBlockAckTimeoutValue());
         auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
         callback->processMgmtFrame(addbaResponsePacket, addbaResponse);

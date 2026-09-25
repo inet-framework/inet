@@ -33,6 +33,8 @@ std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agr
        << "tid = " << agreement.blockAckRecord->getTid() << ", "
        << "starting sequence number = " << agreement.startingSequenceNumber << ", "
        << "buffer size = " << agreement.bufferSize << ", "
+       << "block ack policy = " << agreement.blockAckPolicy << ", "
+       << "A-MSDU supported = " << agreement.aMsduSupported << ", "
        << "block ack timeout value = " << agreement.blockAckTimeoutValue;
     return os;
 }

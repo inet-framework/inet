@@ -20,6 +20,8 @@ class INET_API RecipientBlockAckAgreement : public cObject
 
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
+    bool blockAckPolicy = true;
+    bool aMsduSupported = false;
     simtime_t blockAckTimeoutValue = 0;
     simtime_t expirationTime = -1;
 
@@ -32,6 +34,14 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
+    bool getBlockAckPolicy() const { return blockAckPolicy; }
+    bool getAMsduSupported() const { return aMsduSupported; }
+    void setNegotiatedParameters(int acceptedBufferSize, bool acceptedBlockAckPolicy, bool acceptedAMsduSupported)
+    {
+        bufferSize = acceptedBufferSize;
+        blockAckPolicy = acceptedBlockAckPolicy;
+        aMsduSupported = acceptedAMsduSupported;
+    }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
     virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
@@ -43,4 +53,3 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-
