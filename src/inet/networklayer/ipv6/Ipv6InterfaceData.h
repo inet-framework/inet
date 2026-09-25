@@ -477,6 +477,11 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * Returns ith address of the interface.
      */
     const Ipv6Address& getAddress(int i) const;
+
+    /**
+     * Returns the end of the valid lifetime of the ith address, or 0 for an infinite lifetime.
+     */
+    simtime_t getAddressExpiryTime(int i) const;
     /*
      * Returns Global address of the interface.
      * */
