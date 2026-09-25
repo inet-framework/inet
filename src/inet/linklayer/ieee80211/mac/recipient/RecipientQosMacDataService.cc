@@ -117,8 +117,10 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     Enter_Method("managementFrameReceived");
     take(mgmtPacket);
     // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader)) {
+        delete mgmtPacket;
         return std::vector<Packet *>();
+    }
     if (basicReassembly) { // FIXME defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
@@ -196,4 +198,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
