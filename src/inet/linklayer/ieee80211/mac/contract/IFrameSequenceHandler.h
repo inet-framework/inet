@@ -52,4 +52,3 @@ class INET_API IFrameSequenceHandler
 } // namespace inet
 
 #endif
-

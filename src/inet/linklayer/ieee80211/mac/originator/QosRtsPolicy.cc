@@ -57,4 +57,3 @@ simtime_t QosRtsPolicy::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211R
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

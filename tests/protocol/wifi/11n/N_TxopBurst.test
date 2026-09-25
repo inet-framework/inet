@@ -6,7 +6,6 @@ without re-contending for the channel. Approximated here by two type-40 frames w
 A short sendInterval and a positive txopLimit on the BE access category allows bursting.
 
 %file: N_TxopBurst.cc
-
 #include "ProtocolTest.h"
 
 namespace inet {
@@ -23,12 +22,10 @@ Define_ProtocolTest(wifi_qos_txop_burst)
                   .filterPacket("ieee80211mac.type == 40")
                   .describe("a second QoS data frame within 1 ms (TXOP burst)").within(0.001));
 }
-
 } // namespace protocoltest
 } // namespace inet
 
 %inifile: test.ini
-
 [General]
 *.tester.testName = "wifi_qos_txop_burst"
 # Very fast send interval so frames queue up; TXOP allows burst after single contention win.

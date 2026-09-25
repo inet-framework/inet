@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_SINGLEPROTECTIONMECHANISM_H
 #define __INET_SINGLEPROTECTIONMECHANISM_H
 
@@ -51,4 +50,3 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
 } /* namespace inet */
 
 #endif
-

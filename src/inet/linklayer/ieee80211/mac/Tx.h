@@ -48,4 +48,3 @@ class INET_API Tx : public SimpleModule, public ITx
 } // namespace inet
 
 #endif
-

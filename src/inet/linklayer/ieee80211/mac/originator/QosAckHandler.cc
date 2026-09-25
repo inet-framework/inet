@@ -291,4 +291,3 @@ void QosAckHandler::printAckStatuses()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

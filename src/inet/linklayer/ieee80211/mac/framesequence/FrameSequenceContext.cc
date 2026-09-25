@@ -78,4 +78,3 @@ void FrameSequenceNumPacketsFilter::receiveSignal(cResultFilter *prev, simtime_t
 
 } // namespace ieee80211
 } // namespace inet
-

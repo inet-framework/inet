@@ -269,4 +269,3 @@ void Contention::updateDisplayString(simtime_t expectedChannelAccess) const
 
 } // namespace ieee80211
 } // namespace inet
-

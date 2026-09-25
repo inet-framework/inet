@@ -1072,4 +1072,3 @@ const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

@@ -23,4 +23,3 @@ simple SingleProtectionMechanism extends SimpleModule
         string rateSelectionModule;
         @display("i=block/encrypt");
 }
-

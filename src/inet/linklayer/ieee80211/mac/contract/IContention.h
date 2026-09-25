@@ -57,4 +57,3 @@ class INET_API IContention
 } // namespace inet
 
 #endif
-

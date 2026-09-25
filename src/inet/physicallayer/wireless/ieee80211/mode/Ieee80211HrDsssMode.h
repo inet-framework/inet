@@ -177,4 +177,3 @@ class INET_API Ieee80211HrDsssCompliantModes
 } // namespace inet
 
 #endif
-

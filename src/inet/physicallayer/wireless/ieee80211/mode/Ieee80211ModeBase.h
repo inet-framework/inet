@@ -29,4 +29,3 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
 } /* namespace inet */
 
 #endif
-

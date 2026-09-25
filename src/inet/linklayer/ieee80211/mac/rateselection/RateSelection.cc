@@ -228,4 +228,3 @@ const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& pee
 
 } // namespace ieee80211
 } // namespace inet
-

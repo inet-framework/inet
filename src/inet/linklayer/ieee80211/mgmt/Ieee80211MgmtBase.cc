@@ -197,4 +197,3 @@ void Ieee80211MgmtBase::stop()
 } // namespace ieee80211
 
 } // namespace inet
-

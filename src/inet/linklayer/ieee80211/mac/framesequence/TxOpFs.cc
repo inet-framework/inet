@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/linklayer/ieee80211/mac/framesequence/TxOpFs.h"
 
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
@@ -79,4 +78,3 @@ bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceC
 
 } // namespace ieee80211
 } // namespace inet
-

@@ -109,4 +109,3 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 } /* namespace inet */
 
 #endif
-

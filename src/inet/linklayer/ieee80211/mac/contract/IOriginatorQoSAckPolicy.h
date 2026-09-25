@@ -35,4 +35,3 @@ class INET_API IOriginatorQoSAckPolicy
 } // namespace inet
 
 #endif
-

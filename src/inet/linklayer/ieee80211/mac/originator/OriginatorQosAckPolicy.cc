@@ -140,4 +140,3 @@ simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<c
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
