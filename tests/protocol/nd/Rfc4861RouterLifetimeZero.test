@@ -103,7 +103,10 @@ network NdTwoRouters
         hostA: StandardHost6 { @display("p=350,250"); }
         hostC: StandardHost6 { @display("p=750,100"); }
     connections:
-        r1.ethg++ <--> Eth100M <--> sw.ethg++;
+        // 250 ms on the link of R1: the answer of R2 to the solicitation of A arrives 0 to 0.5 s
+        // after the solicitation, the answer of R1 0.5 to 1 s after it, so always after the answer
+        // of R2 and during the Duplicate Address Detection that it starts (1 to 2 s)
+        r1.ethg++ <--> Eth100M { delay = 250ms; } <--> sw.ethg++;
         hostA.ethg++ <--> Eth100M <--> sw.ethg++;
         r2.ethg++ <--> Eth100M <--> sw.ethg++;
         r2.ethg++ <--> Eth100M <--> hostC.ethg++;
