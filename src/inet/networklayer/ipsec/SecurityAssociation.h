@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/rangelist.h"
 
 namespace inet {
 namespace ipsec {
@@ -45,6 +46,7 @@ class INET_API SecurityAssociation
     simtime_t hardLifetimeEnd = SIMTIME_MAX; // the time when the hard lifetime ends
     int64_t hardLifetimeBytes = -1; // -1: no byte lifetime
     int64_t bytesProcessed = 0; // the bytes that AH or ESP processing has protected with this SA
+    rangelist<unsigned int> dscps; // the DSCP values of the SA; empty: any value (RFC 4301 section 4.4.2.1)
 
   public:
     typedef IPsecRule::Action Action;
@@ -92,6 +94,10 @@ class INET_API SecurityAssociation
      * in time, or in bytes with this packet (RFC 4301 section 4.4.2.1).
      */
     bool isUsable(simtime_t now, int64_t bytes) const { return now < hardLifetimeEnd && (hardLifetimeBytes < 0 || bytesProcessed + bytes <= hardLifetimeBytes); }
+    const rangelist<unsigned int>& getDscps() const { return dscps; }
+    void setDscps(const rangelist<unsigned int>& dscps) { this->dscps = dscps; }
+    /** True when the SA may carry a packet with this DSCP (RFC 4301 section 4.1). */
+    bool matchesDscp(unsigned int dscp) const { return dscps.empty() || dscps.contains(dscp); }
     std::string str() const;
 };
 

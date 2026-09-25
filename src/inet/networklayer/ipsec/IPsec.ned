@@ -40,7 +40,6 @@ import inet.common.SimpleModule;
 // - Transport mode only. Tunnel mode is not supported.
 // - Multicast traffic is not supported. (Any multicast packet is let through unchanged.)
 // - Anti-replay mechanism is not implemented.
-// - DSCP-based SA selection is not implemented.
 // - For IPv6, AH/ESP are modelled as transport-mode headers inserted after the base
 //   header (next-header 51/50); selectors match on protocol number for ICMPv6 (ICMPv6
 //   type/code selectors are not supported).
@@ -66,7 +65,8 @@ import inet.common.SimpleModule;
 //   `EncryptionAlg`?, `AuthenticationAlg`?, `MaxTfcPadLength`?, `HardLifetimeSeconds`?,
 //   `HardLifetimeBytes`?, `SecurityAssociation*`
 // - Selector: `LocalAddress`?, `RemoteAddress`?, Protocol?, `LocalPort`?, `RemotePort`?, ICMPType?, ICMPCode?
-// - `SecurityAssociation`: SPI, Protection?, `HardLifetimeSeconds`?, `HardLifetimeBytes`?, Selector?
+// - `SecurityAssociation`: SPI, Protection?, `HardLifetimeSeconds`?, `HardLifetimeBytes`?, DSCP?,
+//   Selector?
 //
 // Contained elements may occur in any order.
 //
@@ -92,6 +92,9 @@ import inet.common.SimpleModule;
 //   SA has protected. An SA whose hard lifetime has ended is not used any more: an
 //   outgoing packet for it is discarded, and an incoming one too. In a `SecurityPolicy`,
 //   the value is the default of its SAs.
+// - DSCP: comma-separated list of DSCP values / ranges of an SA (RFC 4301 section 4.4.2.1).
+//   Of the SAs of a policy that match a packet, the sender uses the first one whose list
+//   holds the DSCP of the packet; an SA without the element takes any DSCP.
 // - `LocalAddress`, `RemoteAddress`: comma-separated list of addresses / address ranges
 // - Protocol: comma-separated list of protocol names/numbers and/or their ranges.
 //   Recognized names are TCP, UDP, and ICMP.

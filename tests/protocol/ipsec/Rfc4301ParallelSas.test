@@ -8,16 +8,6 @@ doc/project/evidence/protocol/ipsec/checks/security-associations.md#parallel-sas
 the program steps below map onto its expected observations. Step 1 is observation 1; the guards
 are observations 2 and 3.
 
-The check gives SA 101 the DSCP value 0 and SA 102 the DSCP value 46. The SPD configuration of
-the model has no element for the DSCP values of an SA, so both SAs are under one PROTECT entry
-without them.
-
-Expected result FAIL, missing feature: the model does not choose an SA by the DSCP of a packet
-("DSCP-based SA selection is not implemented", src/inet/networklayer/ipsec/IPsec.ned:43). A
-PROTECT entry with two ESP SAs applies the first one to every packet. See results.md.
-
-%# expected-result: FAIL
-
 %includes:
 #include "ProtocolTest.h"
 #include "IpsecChecks.h"
@@ -111,7 +101,7 @@ seed-set = 0
 *.hostB.numApps = 1
 *.hostB.app[0].typename = "UdpSink"
 *.hostB.app[0].localPort = 2000
-*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
+*.hostA.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI><DSCP>0</DSCP></SecurityAssociation><SecurityAssociation><SPI>102</SPI><DSCP>46</DSCP></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
 *.hostB.ipv4.ipsec.spdConfig = xml("<spd><SecurityPolicy><Selector><Protocol>UDP</Protocol><LocalPort>2000</LocalPort></Selector><Direction>IN</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>COMBINED</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><AuthenticationAlg>HMAC_SHA2_256_128</AuthenticationAlg><SecurityAssociation><SPI>101</SPI></SecurityAssociation><SecurityAssociation><SPI>102</SPI></SecurityAssociation></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy><SecurityPolicy><Selector></Selector><Direction>IN</Direction><Action>DISCARD</Action></SecurityPolicy></spd>")
 
 %contains: stdout

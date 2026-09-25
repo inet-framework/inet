@@ -210,7 +210,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
-                checkTags(saEntryElem, "SPI Protection HardLifetimeSeconds HardLifetimeBytes Selector");
+                checkTags(saEntryElem, "SPI Protection HardLifetimeSeconds HardLifetimeBytes DSCP Selector");
 
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
@@ -251,6 +251,11 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
                     else
                         sadEntry->setHardLifetimeBytes((int64_t)value);
                 }
+
+                // the DSCP values of the SA (RFC 4301 section 4.4.2.1): of the SAs of one policy,
+                // the sender picks the one whose values hold the DSCP of the packet
+                if (const cXMLElement *dscpElem = getUniqueChildIfExists(saEntryElem, "DSCP"))
+                    sadEntry->setDscps(rangelist<unsigned int>::parse(dscpElem->getNodeValue(), [](std::string s) { return (unsigned int)atoi(s.c_str()); }));
 
                 if (const cXMLElement *selectorElem = getUniqueChildIfExists(saEntryElem, "Selector")) {
                     IPsecRule rule = sadEntry->getRule();
@@ -398,6 +403,10 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const L3Address& local
 
     IpProtocolId protocol = networkHeaderProtocol(datagram);
     packetInfo.setNextProtocol(protocol);
+    if (auto ipv4Header = dynamicPtrCast<const Ipv4Header>(datagram))
+        packetInfo.setDscp(ipv4Header->getDscp());
+    else if (auto ipv6Header = dynamicPtrCast<const Ipv6Header>(datagram))
+        packetInfo.setDscp(ipv6Header->getDscp());
     b transportOffset = datagram->getChunkLength();
 
     if (false) ;
@@ -779,6 +788,8 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
     int64_t protectedBytes = packet->getByteLength();
     for (auto saEntry : spdEntry->getEntries()) {
         if (!saEntry->getRule().getSelector().matches(&packetInfo))
+            continue;
+        if (!saEntry->matchesDscp(packetInfo.getDscp()))
             continue;
         if (!saEntry->isUsable(simTime(), protectedBytes)) {
             EV_INFO << "IPsec OUT, the hard lifetime of SA " << saEntry->getSpi() << " has ended, packet: " << packetInfo.str() << std::endl;

@@ -38,6 +38,7 @@ class INET_API PacketInfo
     unsigned int remotePort = 0;
     unsigned int icmpType = 0;
     unsigned int icmpCode = 0;
+    unsigned int dscp = 0; // the DSCP of the IP header, for the choice of an SA (RFC 4301 section 4.1)
     bool tfcSupported = false;
 
   public:
@@ -56,6 +57,8 @@ class INET_API PacketInfo
     void setIcmpType(unsigned int icmpType) { this->icmpType = icmpType; }
     unsigned int getIcmpCode() const { return icmpCode; }
     void setIcmpCode(unsigned int icmpCode) { this->icmpCode = icmpCode; }
+    unsigned int getDscp() const { return dscp; }
+    void setDscp(unsigned int dscp) { this->dscp = dscp; }
     bool isTfcSupported() const { return tfcSupported; }
     void setTfcSupported(bool tfcSupported) { this->tfcSupported = tfcSupported; }
     std::string str() const;
