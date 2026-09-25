@@ -18,5 +18,5 @@ class L3Address
     @opaque;
     @editable;
     @toString(.str());
-    @fromString(L3Address($));
+    @fromString(inet::L3Address($));
 }

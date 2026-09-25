@@ -21,7 +21,7 @@ class Ipv4Address
     @existingClass;
     @opaque;
     @toString(.str());
-    @fromString(Ipv4Address($));
+    @fromString(inet::Ipv4Address($));
 }
 
 class Ipv4AddressVector
