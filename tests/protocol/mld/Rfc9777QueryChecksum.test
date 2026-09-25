@@ -13,13 +13,6 @@ The checksum is the ICMPv6 checksum of RFC 4443 section 2.3 over the pseudo-head
 section 8.1 and the message, as RFC 9777 section 5.1.2 says; mldChecksumOk of MldChecks.h
 computes it from the octets that the serializer writes.
 
-Defect: Icmpv6::insertChecksum sums the serialized ICMPv6 message alone, without the pseudo-
-header of RFC 8200 section 8.1 (src/inet/networklayer/icmpv6/Icmpv6.cc:452-475); RFC 9777
-sections 5.1.2 and 5.2.2 take the pseudo-header into the checksum. Every ICMPv6 message of the
-model has this checksum, not only MLD. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
