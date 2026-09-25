@@ -110,9 +110,16 @@ for Basic Block Ack Requests. This callback updates the matching inactivity dead
 before it requests the shared timer update. Block Ack data reception follows the same order.
 The recipient stores the timeout it accepts in its ADDBA response.
 A zero recipient policy disables expiry; a nonzero policy accepts the requested timeout.
-Duplicate requests and response retries retain the accepted interval and current deadline.
-Duplicate requests also retain the accepted buffer size, Block Ack policy, and
-A-MSDU support. A new agreement stores the buffer size that its response advertises.
+Requests that repeat the same dialog token retain the accepted interval and current deadline.
+They also retain the accepted buffer size, Block Ack policy, and A-MSDU support.
+A request with a new dialog token replaces the recipient agreement and receive buffer.
+This applies even when the recipient did not receive the old DELBA.
+A new agreement stores the buffer size that its response advertises.
+Custom recipient handlers now use ``IRecipientBlockAckAgreementHandler::ICallback``
+for ``processReceivedAddbaRequest()`` and ``processDelbaFrameFinished()``.
+They call ``recipientAgreementReplaced()`` after they install the new agreement
+and before they release the previous one. HCF uses this callback to clear the
+old receive buffer and publish the agreement transition.
 
 ``BlockAckRecord`` construction now requires the agreement's initial sequence number.
 The record uses this cyclic boundary to distinguish missing frames from old frames.

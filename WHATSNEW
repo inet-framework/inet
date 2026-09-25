@@ -13,6 +13,7 @@ Recipient handlers must also implement blockAckRequestReceived().
 Recipient activity now refreshes the accepted inactivity timeout.
 Recipient timeout DELBA also removes the old Block Ack receive buffer.
 A replacement agreement can deliver frames from its new sequence window.
+An accepted ADDBA request with a new dialog token replaces the old recipient agreement.
 A zero accepted timeout disables expiry at both peers.
 Block Ack records preserve missing frames across empty records and sequence wrap.
 Repeated Block Ack Requests release complete buffered data after a lost frame retransmits.
@@ -400,10 +401,11 @@ Notable backward compatible changes are the following:
 
 6. IEEE 802.11 Block Ack responses retain accepted agreement limits
 
-   A repeated ADDBA request now receives the buffer size and policy of the
-   existing agreement. A new agreement also stores the accepted buffer size
-   when the recipient limits the requested size. The sender and recipient
-   therefore use the same Block Ack window.
+   An ADDBA retry with the same dialog token receives the buffer size and policy
+   of the existing agreement. A new dialog replaces the old recipient agreement
+   and receive buffer, even if the old DELBA did not arrive. A new agreement
+   stores the accepted buffer size when the recipient limits the requested size.
+   The sender and recipient therefore use the same Block Ack window.
 
 7. IEEE 802.11 automatic basic rates follow the selected operational rates
 

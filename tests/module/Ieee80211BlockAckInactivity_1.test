@@ -4,9 +4,10 @@ Cover both agreement owners, overdue deadlines, node stop/crash, zero timeout,
 and simultaneous originator and recipient agreements with different deadlines.
 Cover ADDBA response retries and queued responses after agreement expiry.
 Verify that local recipient expiry clears the old receive window before replacement.
+Verify that a new ADDBA dialog replaces an old receive window while the old agreement remains.
 IEEE Std 802.11-2024, 11.5.4 requires timeout DELBA for inactive agreements.
 
-%extraargs: -r 0..27
+%extraargs: -r 0..28
 
 %file: TestIeee80211BlockAckInactivity.cc
 
@@ -106,7 +107,7 @@ class TestBlockAckHcf : public Hcf
         processLowerFrame(packet, header);
     }
 
-    void receiveAddbaRequest(const MacAddress& peer, SequenceNumberCyclic start)
+    void receiveAddbaRequest(const MacAddress& peer, SequenceNumberCyclic start, uint8_t dialogToken = 1, bool dispatchManagementOnly = false)
     {
         Enter_Method("receiveAddbaRequest");
         auto header = makeShared<Ieee80211AddbaRequest>();
@@ -117,7 +118,12 @@ class TestBlockAckHcf : public Hcf
         header->setBufferSize(64);
         header->setBlockAckTimeoutValue(SimTime(20, SIMTIME_MS));
         header->setStartingSequenceNumber(start);
+        header->setDialogToken(dialogToken);
         header->setSequenceNumber(start);
+        if (dispatchManagementOnly) {
+            recipientProcessReceivedManagementFrame(header);
+            return;
+        }
         auto packet = new Packet("isolated ADDBA request", header);
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
         packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(Mbps(24)));
@@ -225,6 +231,21 @@ class Ieee80211BlockAckInactivityTest : public cSimpleModule, public LifecycleCo
         const MacAddress senderAddress("02:00:00:00:00:01");
         const MacAddress recipientAddress("02:00:00:00:00:02");
         int scenario = par("scenario");
+        if (scenario == 28) {
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            auto mac = check_and_cast<TestBlockAckMac *>(getModuleByPath("^.node[1].wlan[0].mac"));
+            int deliveredBefore = mac->delivered;
+            auto oldStart = recipient->getRecipientStartingSequenceNumber(senderAddress);
+            ASSERT(oldStart != SequenceNumberCyclic(100));
+            recipient->receiveAddbaRequest(senderAddress, SequenceNumberCyclic(100), 2, true);
+            ASSERT(recipient->getRecipientStartingSequenceNumber(senderAddress) == SequenceNumberCyclic(100));
+            wait(SimTime(2, SIMTIME_MS));
+            recipient->receiveData(senderAddress, SequenceNumberCyclic(100));
+            ASSERT(mac->delivered == deliveredBefore + 1);
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario == 27) {
             sender->queueFrame(recipientAddress);
             wait(SimTime(5, SIMTIME_MS));
@@ -535,7 +556,7 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..27}
+*.test.scenario = ${scenario=0..28}
 *.node[*].hasStatus = true
 *.node[*].wlan[0].mac.typename = "TestBlockAckMac"
 *.node[*].wlan[0].mac.qosStation = true

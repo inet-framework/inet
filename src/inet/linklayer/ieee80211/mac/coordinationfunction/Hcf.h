@@ -48,7 +48,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IRecipientBlockAckAgreementHandler::ICallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
@@ -167,8 +167,10 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
-    // IProcedureCallback
+    // IBlockAckAgreementHandlerCallback
     virtual void scheduleInactivityTimer() override;
+    // IRecipientBlockAckAgreementHandler::ICallback
+    virtual void recipientAgreementReplaced(RecipientBlockAckAgreement *previous, RecipientBlockAckAgreement *current) override;
 
     std::string getFrameSequenceInfo() const;
 

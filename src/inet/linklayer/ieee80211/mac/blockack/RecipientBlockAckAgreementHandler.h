@@ -42,12 +42,12 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual ~RecipientBlockAckAgreementHandler();
     virtual simtime_t computeEarliestExpirationTime() override;
     virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
+    virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, ICallback *callback) override;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void blockAckRequestReceived(const Ptr<const Ieee80211BasicBlockAckReq>& request, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
-    virtual void processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback) override;
+    virtual void processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, ICallback *callback) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;

@@ -35,7 +35,7 @@ class DialogTokenRecipientPolicy : public IRecipientBlockAckAgreementPolicy
     virtual int getMaximumAllowedBufferSize() const override { return 64; }
 };
 
-class DialogTokenCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+class DialogTokenCallback : public IRecipientBlockAckAgreementHandler::ICallback, public IBlockAckAgreementHandlerCallback
 {
   public:
     Ptr<const Ieee80211AddbaRequest> request;
@@ -44,6 +44,10 @@ class DialogTokenCallback : public IProcedureCallback, public IBlockAckAgreement
     int timerUpdates = 0;
 
     virtual void scheduleInactivityTimer() override { ++timerUpdates; }
+    virtual void recipientAgreementReplaced(RecipientBlockAckAgreement *previous, RecipientBlockAckAgreement *current) override
+    {
+        throw cRuntimeError("Unexpected recipient agreement replacement");
+    }
 
     virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
     {

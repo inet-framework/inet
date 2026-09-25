@@ -87,12 +87,12 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(cons
     auto id = std::make_pair(originatorAddr, addbaReq->getTid());
     auto it = blockAckAgreements.find(id);
     if (it == blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), acceptedTimeout);
+        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), acceptedTimeout, addbaReq->getDialogToken());
         blockAckAgreements[id] = agreement;
         return agreement;
     }
     else
-        // TODO update?
+        // An ADDBA retry retains the accepted agreement.
         return it->second;
 }
 
@@ -152,7 +152,7 @@ void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<co
     callback->scheduleInactivityTimer();
 }
 
-void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
+void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, ICallback *callback)
 {
     auto pending = pendingTeardowns.find({addbaRequest->getTransmitterAddress(), addbaRequest->getTid()});
     if (pending != pendingTeardowns.end()) {
@@ -164,8 +164,11 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
         EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
         auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
         auto existingAgreement = getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+        bool replacing = existingAgreement != nullptr && existingAgreement->getDialogToken() != addbaRequest->getDialogToken();
+        if (replacing)
+            blockAckAgreements.erase({addbaRequest->getTransmitterAddress(), addbaRequest->getTid()});
         auto agreement = addAgreement(addbaRequest, addbaResponse->getBlockAckTimeoutValue());
-        if (existingAgreement == nullptr)
+        if (existingAgreement == nullptr || replacing)
             agreement->setNegotiatedParameters(addbaResponse->getBufferSize(), addbaResponse->getBlockAckPolicy(), addbaResponse->getAMsduSupported());
         EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
         EV_DETAIL << "Building Addba Response" << endl;
@@ -175,6 +178,14 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
         addbaResponse->setBlockAckPolicy(agreement->getBlockAckPolicy());
         addbaResponse->setAMsduSupported(agreement->getAMsduSupported());
         addbaResponse->setBlockAckTimeoutValue(agreement->getBlockAckTimeoutValue());
+        if (replacing) {
+            // IEEE Std 802.11-2024, 10.25.2: a successful modification replaces the old agreement.
+            callback->recipientAgreementReplaced(existingAgreement, agreement);
+            delete existingAgreement;
+            // A listener may tear down the new agreement during the replacement signal.
+            if (getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress()) != agreement)
+                return;
+        }
         auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
         callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
     }
@@ -185,7 +196,7 @@ void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const 
     // Expiry already removed the agreement. Individual attempts cannot remove a replacement.
 }
 
-void RecipientBlockAckAgreementHandler::processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback)
+void RecipientBlockAckAgreementHandler::processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, ICallback *callback)
 {
     auto delba = packet->peekAtFront<Ieee80211Delba>();
     auto pending = pendingTeardowns.find({delba->getReceiverAddress(), delba->getTid()});

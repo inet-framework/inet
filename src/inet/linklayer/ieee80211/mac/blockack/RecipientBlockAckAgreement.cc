@@ -12,10 +12,11 @@
 namespace inet {
 namespace ieee80211 {
 
-RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
+RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue, uint8_t dialogToken) :
     startingSequenceNumber(startingSequenceNumber),
     bufferSize(bufferSize),
-    blockAckTimeoutValue(lastUsedTime)
+    dialogToken(dialogToken),
+    blockAckTimeoutValue(blockAckTimeoutValue)
 {
     calculateExpirationTime();
     blockAckRecord = new BlockAckRecord(originatorAddress, tid, startingSequenceNumber);

@@ -35,7 +35,7 @@ class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
     virtual int getMaximumAllowedBufferSize() const override { return maximumBufferSize; }
 };
 
-class TestAgreementCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+class TestAgreementCallback : public IRecipientBlockAckAgreementHandler::ICallback, public IBlockAckAgreementHandlerCallback
 {
   public:
     RecipientBlockAckAgreementHandler& handler;
@@ -43,10 +43,19 @@ class TestAgreementCallback : public IProcedureCallback, public IBlockAckAgreeme
     std::unique_ptr<Packet> lastDelba;
     simtime_t deadline = SIMTIME_MAX;
     int expirations = 0;
+    int replacements = 0;
 
     explicit TestAgreementCallback(RecipientBlockAckAgreementHandler& handler) : handler(handler) {}
 
     virtual void scheduleInactivityTimer() override { deadline = handler.computeEarliestExpirationTime(); }
+
+    virtual void recipientAgreementReplaced(RecipientBlockAckAgreement *previous, RecipientBlockAckAgreement *current) override
+    {
+        ASSERT(previous != current);
+        ASSERT(handler.getAgreement(current->getBlockAckRecord()->getTid(), current->getBlockAckRecord()->getOriginatorAddress()) == current);
+        ++replacements;
+        scheduleInactivityTimer();
+    }
 
     virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
     {
@@ -202,6 +211,7 @@ auto firstRequest = makeShared<Ieee80211AddbaRequest>();
 firstRequest->setTransmitterAddress(peer);
 firstRequest->setTid(0);
 firstRequest->setStartingSequenceNumber(SequenceNumberCyclic(10));
+firstRequest->setDialogToken(1);
 firstRequest->setBufferSize(8);
 firstRequest->setBlockAckPolicy(false);
 firstRequest->setBlockAckTimeoutValue(SimTime(10, SIMTIME_MS));
@@ -217,6 +227,7 @@ auto duplicateRequest = makeShared<Ieee80211AddbaRequest>();
 duplicateRequest->setTransmitterAddress(peer);
 duplicateRequest->setTid(0);
 duplicateRequest->setStartingSequenceNumber(SequenceNumberCyclic(20));
+duplicateRequest->setDialogToken(1);
 duplicateRequest->setBufferSize(64);
 duplicateRequest->setBlockAckPolicy(true);
 duplicateRequest->setBlockAckTimeoutValue(SimTime(20, SIMTIME_MS));
@@ -229,6 +240,24 @@ ASSERT(duplicateCallback.response->getBufferSize() == 8);
 ASSERT(!duplicateCallback.response->getBlockAckPolicy());
 ASSERT(duplicateCallback.response->getAMsduSupported());
 ASSERT(duplicateCallback.response->getBlockAckTimeoutValue() == SimTime(10, SIMTIME_MS));
+ASSERT(duplicateCallback.replacements == 0);
+
+auto newDialog = makeShared<Ieee80211AddbaRequest>();
+newDialog->setTransmitterAddress(peer);
+newDialog->setTid(0);
+newDialog->setStartingSequenceNumber(SequenceNumberCyclic(100));
+newDialog->setDialogToken(2);
+newDialog->setBufferSize(16);
+newDialog->setBlockAckTimeoutValue(SimTime(30, SIMTIME_MS));
+duplicateHandler.processReceivedAddbaRequest(newDialog, &duplicatePolicy, &duplicateCallback);
+auto newRecipientAgreement = duplicateHandler.getAgreement(0, peer);
+ASSERT(duplicateCallback.replacements == 1);
+ASSERT(newRecipientAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(100));
+ASSERT(newRecipientAgreement->getDialogToken() == 2);
+ASSERT(newRecipientAgreement->getBufferSize() == 16);
+ASSERT(duplicateCallback.response->getDialogToken() == 2);
+ASSERT(duplicateCallback.response->getBufferSize() == 16);
+ASSERT(duplicateCallback.deadline == newRecipientAgreement->getExpirationTime());
 
 RecipientBlockAckAgreementHandler cappedHandler;
 TestAgreementCallback cappedCallback(cappedHandler);
