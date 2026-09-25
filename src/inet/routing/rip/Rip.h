@@ -133,6 +133,8 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     virtual void stopRIPRouting();
 
     virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16_t routeTag = 0);
+    // the version of a message: 1 for RIPng (RFC 2080 section 2.1), 2 for RIP (RFC 2453 section 4)
+    short getMessageVersion() const { return mode == RIPng ? 1 : 2; }
     virtual void sendRIPRequest(const RipNetworkInterface& ripInterface);
 
     virtual void processRequest(Packet *pk);
