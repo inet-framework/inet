@@ -1,6 +1,7 @@
 # IPsec level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-ipsec-level2-fixes`, on top of
+**Status:** done on 2026-09-25: ten gaps repaired, gaps 8 and 12 have a plan each; not merged,
+not pushed. Started 2026-09-25 on `topic/standards-tests-ipsec-level2-fixes`, on top of
 `topic/standards-tests-ipsec-level2` at `6d57390964`. Worktree:
 `/home/levy/workspace/inet-standards-tests-ipsec-level2-fixes`.
 
@@ -47,7 +48,7 @@ statistics repository has not followed since `c0314ff5aa`).
     `plan/pending/ipv6-path-mtu.md`.
 13. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
     `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
-14. [ ] Gates, then move this plan to `plan/done/`.
+14. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
