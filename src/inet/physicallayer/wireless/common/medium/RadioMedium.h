@@ -103,6 +103,11 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
      * Specifies what should happen if two transmissions start at the same moment
      */
     const char *sameTransmissionStartTimeCheck = nullptr;
+    /**
+     * When true, transmissions that can no longer interfere are removed from
+     * the cache whenever a new transmission is added, instead of by a timer.
+     */
+    bool purgeOnTransmission = false;
     //@}
 
     /** @name Timer */
@@ -289,6 +294,12 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
      * interference for another.
      */
     virtual void removeNonInterferingTransmissions();
+    /**
+     * Schedules the timer that removes non-interfering transmissions at the
+     * interference end time of the oldest cached transmission that can still
+     * interfere, unless the timer is already scheduled.
+     */
+    virtual void scheduleRemoveNonInterferingTransmissionsTimer();
 
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening) const;
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception) const;
