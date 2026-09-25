@@ -7,14 +7,6 @@ doc/project/evidence/standard/rfc4861/catalog.md. The English procedure is in
 doc/project/evidence/protocol/nd/checks/parameters.md#hop-limit-without-a-router;
 the program steps below map onto its expected observations. Step 1 is observations 1 and 2.
 
-Defect: the hop limit of a host is the constant IPv6_DEFAULT_ADVCURHOPLIMIT, 30
-(src/inet/networklayer/ipv6/Ipv6.cc:964, src/inet/networklayer/ipv6/Ipv6InterfaceData.h:31),
-not the value of the Assigned Numbers registry, 64. RFC 4861 section 6.3.2, CurHopLimit:
-"Default: The value specified in the "Assigned Numbers" [ASSIGNED] that was in effect at the
-time of implementation." Observation 1 holds; observation 2 fails with hop limit 30. This test
-FAILS, and the failure is deliberately NOT declared expected: a value that the model sets wrong
-is a defect, not a missing feature. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
