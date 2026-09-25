@@ -8,15 +8,6 @@ doc/project/evidence/protocol/nd/checks/parameters.md#mtu-from-the-router;
 the program steps below map onto its expected observations. Step 1 is observation 1; the guard
 and step 2 are observation 2.
 
-Defect: the host copies the MTU option into LinkMTU
-(src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1536), but Ipv6::fragmentPostRouting
-fragments to the MTU of the interface, "int mtu = ie->getMtu();"
-(src/inet/networklayer/ipv6/Ipv6.cc:1059), and never reads LinkMTU. RFC 4861 section 6.3.4: "If
-the MTU option is present, hosts SHOULD copy the option's value into LinkMTU [...]".
-Observation 1 holds; observation 2 fails: the echo request leaves whole, 1500 octets. This test
-FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism, and
-the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
