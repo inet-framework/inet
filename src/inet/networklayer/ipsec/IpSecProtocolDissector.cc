@@ -20,27 +20,16 @@ Register_Protocol_Dissector(&Protocol::ipsecEsp, IpSecEspProtocolDissector);
 
 void IpSecAhProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto originalTrailerPopOffset = packet->getBackOffset();
-    auto ipSecAhHeaderOffset = packet->getFrontOffset();
     const auto& header = packet->popAtFront<IPsecAuthenticationHeader>();
     callback.startProtocolDataUnit(&Protocol::ipsecAh);
     callback.visitChunk(header, &Protocol::ipsecAh);
-    auto ipSecPayloadEndOffset = ipSecAhHeaderOffset + header->getChunkLength() + B(header->getPayloadLength());
+    // the ICV field ends the header (RFC 4302 section 2), and the Payload Length is the length of
+    // AH in 32-bit words, minus 2; the payload follows the header
+    B icvFieldLength = B((header->getPayloadLength() + 2) * 4) - header->getChunkLength();
+    if (icvFieldLength > B(0))
+        callback.visitChunk(packet->popAtFront(icvFieldLength), &Protocol::ipsecAh);
     auto dataProtocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(header->getNextHeader());
-    packet->setBackOffset(ipSecPayloadEndOffset);
-    auto encrypted = packet->popAtFront<EncryptedChunk>();
-    Ptr<const Chunk> icv;
-    if (header->getIcvBytes() > 0)
-        icv = packet->popAtBack(B(header->getIcvBytes()));
-    ASSERT(packet->getDataLength() == B(0));
-    callback.visitChunk(encrypted, &Protocol::ipsecAh);
-    auto subPacket = new Packet(packet->getName(), encrypted->getChunk());
-    callback.dissectPacket(subPacket, dataProtocol);
-    delete subPacket;
-    if (header->getIcvBytes() > 0)
-        callback.visitChunk(icv, &Protocol::ipsecAh);
-    packet->setBackOffset(originalTrailerPopOffset);
-    packet->setFrontOffset(ipSecPayloadEndOffset);
+    callback.dissectPacket(packet, dataProtocol);
     callback.endProtocolDataUnit(&Protocol::ipsecAh);
 }
 

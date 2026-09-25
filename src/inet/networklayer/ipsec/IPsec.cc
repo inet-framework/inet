@@ -563,24 +563,31 @@ void IPsec::ahProtect(Packet *transport, SecurityAssociation *sadEntry, int tran
     unsigned int icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
     unsigned int ivBytes  = getInitializationVectorBitLength(sadEntry->getAuthenticationAlg()) / 8;
 
-    unsigned int len = IP_AH_HEADER_BYTES + transport->getByteLength() + ivBytes + icvBytes;
+    // RFC 4302 section 2: the ICV field is the last field of the AH header, before the payload;
+    // an algorithm with an IV carries it in the same field (RFC 4543 section 3). The header is a
+    // multiple of 32 bits in IPv4 and of 64 bits in IPv6, with padding in the ICV field
+    // (section 3.3.3.2.1).
+    unsigned int alignmentBytes = networkProtocol == &Protocol::ipv6 ? 8 : 4;
+    unsigned int icvFieldBytes = ivBytes + icvBytes;
+    unsigned int headerBytes = IP_AH_HEADER_BYTES + icvFieldBytes;
+    unsigned int paddingBytes = (alignmentBytes - headerBytes % alignmentBytes) % alignmentBytes;
+    icvFieldBytes += paddingBytes;
+    headerBytes += paddingBytes;
 
-    // encrypting:
-    auto data = transport->removeData();
-    data->markImmutable();
-    auto encryptedData = makeShared<EncryptedChunk>(data, data->getChunkLength() + B(ivBytes));
-    transport->insertData(encryptedData);
+    unsigned int len = headerBytes + transport->getByteLength();
+
+    // AH authenticates and does not encrypt, so the payload stays as it is
+    if (icvFieldBytes > 0)
+        transport->insertAtFront(makeShared<ByteCountChunk>(B(icvFieldBytes)));
 
     const auto& ahHeader = makeShared<IPsecAuthenticationHeader>();
     ahHeader->setSequenceNumber(sadEntry->incrementAndGetSeqNum());
     ahHeader->setSpi(sadEntry->getSpi());
     ahHeader->setNextHeader(transportType);
-    ahHeader->setIcvBytes(icvBytes);
+    // section 2.2: the length of AH in 32-bit words, minus 2
+    ahHeader->setPayloadLength(headerBytes / 4 - 2);
+    ahHeader->setIcvBytes(icvFieldBytes);
     transport->insertAtFront(ahHeader);
-
-    // Add integrity check value if needed
-    if (icvBytes)
-        transport->insertAtBack(makeShared<ByteCountChunk>(B(icvBytes)));
 
     ASSERT(transport->getByteLength() == len);
 }
@@ -820,11 +827,11 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             // mirroring the ESP branch; removing it a second time here would try to
             // convert the following EncryptedChunk to an AH header and crash)
 
-            // decrypting:
-            auto encryptedData = packet->removeAtFront<EncryptedChunk>();
-            packet->removeData(Chunk::PF_ALLOW_EMPTY);
-            auto data = encryptedData->getChunk();
-            packet->insertData(data);
+            // the ICV field ends the AH header (RFC 4302 section 2); its length follows from the
+            // Payload Length, the length of AH in 32-bit words minus 2
+            B icvFieldLength = B((ah->getPayloadLength() + 2) * 4) - ah->getChunkLength();
+            if (icvFieldLength > B(0))
+                packet->removeAtFront(icvFieldLength);
             setNetworkHeaderProtocol(netHeader, (IpProtocolId)ah->getNextHeader());
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);
