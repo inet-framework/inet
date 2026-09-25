@@ -192,5 +192,38 @@ for (int i = 0; i < 4; ++i) {
 }
 EV << "ADDBA transmission completion preserves current agreements.\n";
 
+RecipientBlockAckAgreementHandler active;
+TestAgreementCallback activityCallback(active);
+TestRecipientPolicy activePolicy;
+auto activeRequest = makeShared<Ieee80211AddbaRequest>();
+activeRequest->setTransmitterAddress(peer);
+activeRequest->setTid(0);
+activeRequest->setStartingSequenceNumber(SequenceNumberCyclic(1));
+activeRequest->setBlockAckTimeoutValue(SimTime(10, SIMTIME_MS));
+activeRequest->setBufferSize(16);
+active.processReceivedAddbaRequest(activeRequest, &activePolicy, &activityCallback);
+auto activeAgreement = active.getAgreement(0, peer);
+auto initialDeadline = activeAgreement->getExpirationTime();
+wait(SimTime(1, SIMTIME_MS));
+auto activityHeader = makeShared<Ieee80211DataHeader>();
+activityHeader->setType(ST_DATA_WITH_QOS);
+activityHeader->setTransmitterAddress(peer);
+activityHeader->setTid(0);
+activityHeader->setAckPolicy(NORMAL_ACK);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setAckPolicy(BLOCK_ACK);
+activityHeader->setTid(3);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setTid(0);
+activityHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setTransmitterAddress(peer);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == simTime() + SimTime(10, SIMTIME_MS));
+ASSERT(activityCallback.deadline == activeAgreement->getExpirationTime());
+
 %contains: stdout
 ADDBA transmission completion preserves current agreements.

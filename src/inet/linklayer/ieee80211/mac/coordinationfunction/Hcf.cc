@@ -427,8 +427,10 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
     else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
-        if (recipientBlockAckProcedure)
+        if (recipientBlockAckProcedure) {
+            recipientBlockAckAgreementHandler->blockAckRequestReceived(blockAckRequest, this);
             recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
+        }
     }
     else if (dynamicPtrCast<const Ieee80211AckFrame>(header))
         EV_WARN << "ACK frame received after timeout, ignoring it.\n"; // drop it, it is an ACK frame that is received after the ACKTimeout

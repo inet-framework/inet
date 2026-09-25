@@ -31,6 +31,7 @@ class INET_API IRecipientBlockAckAgreementHandler
     // Report a terminal queue drop, acknowledgment, or retry exhaustion, not an individual attempt.
     virtual void processDelbaFrameFinished(const Packet *packet, IRecipientBlockAckAgreementPolicy *policy, IProcedureCallback *callback) = 0;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual void blockAckRequestReceived(const Ptr<const Ieee80211BasicBlockAckReq>& request, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
     // Return the earliest active absolute deadline, or SIMTIME_MAX if none exists.

@@ -33,8 +33,19 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
         Tid tid = qosHeader->getTid();
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
-        if (agreement)
+        if (agreement) {
+            agreement->calculateExpirationTime();
             callback->scheduleInactivityTimer();
+        }
+    }
+}
+
+void RecipientBlockAckAgreementHandler::blockAckRequestReceived(const Ptr<const Ieee80211BasicBlockAckReq>& request, IBlockAckAgreementHandlerCallback *callback)
+{
+    auto agreement = getAgreement(request->getTidInfo(), request->getTransmitterAddress());
+    if (agreement) {
+        agreement->calculateExpirationTime();
+        callback->scheduleInactivityTimer();
     }
 }
 
