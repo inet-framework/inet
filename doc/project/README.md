@@ -58,6 +58,9 @@ history/       How did the current state come to be?
 8. **About to derive protocol tests from a standard** —
    [guide/derive-tests-from-a-standard.md](guide/derive-tests-from-a-standard.md).
 9. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
+10. **About to write or review an implementation plan** —
+    [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) and its
+    [plan rules](rule/planning.md). Both documents are drafts.
 
 ## Every document
 
@@ -80,6 +83,7 @@ In the order of the chain.
 | [rule/naming.md](rule/naming.md) | rule | `NR-*` | How is every kind of artifact named? |
 | [rule/quality.md](rule/quality.md) | rule | `QR-*` | How does the code read? |
 | [rule/testing.md](rule/testing.md) | rule | `TR-*` | Which test backs which claim, and when may a baseline change? |
+| [rule/planning.md](rule/planning.md) | rule · draft | `PLR-*` | What must an implementation plan contain for human approval? |
 | [rule/pull-request.md](rule/pull-request.md) | rule | `PR-*` | How is a change divided into commits, and what must a pull request hold? |
 | [rule/classification.md](rule/classification.md) | rule | `CR-*` | What is a commit, in scope, depth, obligation and group? |
 | [rule/release.md](rule/release.md) | rule | `RR-*` | What does a release owe its users? |
@@ -100,6 +104,7 @@ In the order of the chain.
 | [evidence/protocol/](evidence/protocol/ipv4/features.md) | what · procedure | `<PROTO>-F-*` | Which features does a protocol have, and how is each one checked? One folder per protocol, free of INET names. |
 | [evidence/model/](evidence/model/ipv4/coverage.md) | ledger · report · decision | — | What did the run show, what does the model claim, and which test category fits? One folder per protocol. |
 | [guide/contribute-a-change.md](guide/contribute-a-change.md) | procedure | — | The nine steps from scope to seal. |
+| [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) | procedure · draft | — | How do I prepare a plan for review and approval? |
 | [guide/add-a-protocol.md](guide/add-a-protocol.md) | procedure | — | How do I add a protocol without touching the core? |
 | [guide/audit-a-subsystem.md](guide/audit-a-subsystem.md) | procedure | — | How do I audit a directory and take it to a seal? |
 | [guide/review-a-code-change.md](guide/review-a-code-change.md) | procedure | — | How do I review a code change for correctness and rule compliance? |

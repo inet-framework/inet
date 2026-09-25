@@ -163,6 +163,7 @@ decision, not a free choice at writing time.
 | `NR-…` | a naming rule | [naming.md](naming.md) |
 | `QR-…` | a code quality rule | [quality.md](quality.md) |
 | `TR-…` | a test rule | [testing.md](testing.md) |
+| `PLR-…` | an implementation plan rule | [planning.md](planning.md) |
 | `PR-…` | a commit and pull request rule | [pull-request.md](pull-request.md) |
 | `CR-…` | a change classification rule | [classification.md](classification.md) |
 | `RR-…` | a release rule | [release.md](release.md) |

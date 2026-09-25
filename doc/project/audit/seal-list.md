@@ -78,10 +78,11 @@ section indexes them so the registry stays one place to look.
 | `design/test-anatomy.md` | by section | 0 | 0 | 6 |
 | `domain/ieee80211.md` | by rule | 0 | 0 | 14 |
 | `requirement/accepted-requirements.md` | by requirement, complete | 0 | 27 | 0 |
-| `rule/architecture.md` | by rule | 0 | 0 | 44 |
+| `rule/architecture.md` | by rule | 0 | 0 | 45 |
 | `rule/classification.md` | by rule | 0 | 0 | 18 |
 | `rule/documentation.md` | whole | 0 | 0 | 1 |
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
+| `rule/planning.md` | by rule | 0 | 0 | 8 |
 | `rule/pull-request.md` | by rule | 0 | 0 | 23 |
 | `rule/quality.md` | by rule | 0 | 0 | 14 |
 | `rule/release.md` | by rule | 0 | 0 | 9 |

@@ -7,6 +7,10 @@ item. Run it as a CI step on every change (and locally before pushing). For diff
 `src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`, additionally run
 the [IEEE 802.11 checklist](ieee80211.md).
 
+For a proposed implementation plan, use the draft
+[plan review checklist](../../guide/write-an-implementation-plan.md#review-checklist).
+Its [plan rules](../../rule/planning.md) state when that procedure applies.
+
 ## How to run
 
 Input: the change under review (a diff, commit, range, branch, pull request, staged diff, or working
@@ -42,6 +46,11 @@ Ground rules:
    correction direction.
 
 ## Checklist
+
+**[AR-ORG-CONTRACTS] Does a new interface define a concrete replacement role?**
+Check the stated alternative implementation or documented external extension point.
+FLAG an interface whose only justification is speculative flexibility.
+One current implementation is sufficient when the replacement role is clear.
 
 **[AR-ORG-CONTRACTS] Do substitutable implementations preserve the contract's declared outcomes?**
 FLAG a changed implementation, adapter, caller, or default that deviates from or collapses an
@@ -124,6 +133,12 @@ sharing, or retention by a defined owner or holder with a defined cleanup path.
 **[AR-CFG-PARAMS] Are new parameters/fields well-formed?**
 FLAG a physical-quantity parameter without `@unit`, a parameter without a `default()`, or one field
 that means both "user override" and "computed value." *Not a violation:* a dimensionless count.
+
+**[AR-EXT-REUSE] Does each new mechanism need to exist?**
+Check its responsibility, required consumer, and reason to reject the relevant reuse option.
+FLAG an addition with no required responsibility or consumer.
+FLAG a duplicate mechanism when an existing contract meets the same need without a change in meaning.
+Similar code alone does not establish equivalent responsibilities or contracts.
 
 **[AR-EXT-NOCORE] Does adding a protocol require editing core code?**
 FLAG a change that adds a protocol by modifying `common/` or a dispatcher/registry switch, rather than
