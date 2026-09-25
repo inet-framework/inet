@@ -33,3 +33,5 @@ The IGMPv1 and IGMPv2 modes of an Igmpv3 host now follow the host state machine 
 The MLDv1 mode of an Mldv2 node follows the node state machine of RFC 2710 section 5 in the same way, with the Maximum Response Delay of the MLDv1 Query and a Done only from the node that sent the last Report.
 
 A change of the compatibility mode of an Igmpv3 host now cancels all its pending response and retransmission timers on the interface (RFC 9776 section 7.2.1). Before, an IGMPv3 host that entered the IGMPv2 mode still sent the pending repetitions of its IGMPv3 State-Change Report.
+
+A change of the compatibility mode of an Mldv2 node cancels its pending timers in the same way (RFC 9777 section 8.2.1), and deletes the Reports of the old mode that wait for the link-local address of the interface.
