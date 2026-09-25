@@ -11,15 +11,6 @@ and the gap guard are observations 2 and 3.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: the MLDv1 host C stops the simulation at the first MLDv2 Query of R, at the start:
-Mldv1::processQuery reads every Query as an MLDv1 Query of 24 octets
-(src/inet/networklayer/icmpv6/Mldv1.cc:351), and the 28 octets of an MLDv2 Query cannot be read
-so ("Cannot convert chunk from type inet::Mldv2Query to type inet::MldQuery"). RFC 2710 section
-5 accepts every Query of at least 24 octets (RFC2710-NODE-2). The run stops before observation
-1, so the statements of the router have no verdict. This test FAILS, and the failure is
-deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
-wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

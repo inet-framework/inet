@@ -14,9 +14,8 @@ runs R1 with its defaults, as an administrator of the model would have to.
 Expected result FAIL, model gap: Mldv2 has no configuration option to act in MLDv1 mode
 (src/inet/networklayer/icmpv6/Mldv2.ned), and it builds only MLDv2 Queries
 (src/inet/networklayer/icmpv6/Mldv2.cc:1291-1298). The router half of RFC 9777 section 8.3.1 is
-not in the model. In the run, R1 sends an MLDv2 Query at the start, and R2, the MLDv1 router,
-stops the simulation on it (src/inet/networklayer/icmpv6/Mldv1.cc:351, the defect of
-Rfc9777RouterV1Listener.test). The assertion stays as the standard states it; see results.md.
+not in the model. In the run, R1 sends an MLDv2 Query of 28 octets when it is up, and the guard
+of observation 2 fails on it. The assertion stays as the standard states it; see results.md.
 
 %# expected-result: FAIL
 

@@ -447,6 +447,11 @@ Notable backward incompatible changes are the following:
    interface has a listener of its source in the same way (RFC 9777 section
    7.3).
 
+   An Mldv1 node now accepts an MLDv2 Query and reads its first 24 octets as an
+   MLDv1 Query (RFC 2710 section 5, RFC 9777 section 8.1). Before, the
+   simulation stopped with an error when an Mldv1 node received a Query from an
+   Mldv2 querier.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
