@@ -349,6 +349,12 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     virtual void resetRaTimer(NetworkInterface *ie);
     virtual void sendPeriodicRa(cMessage *msg);
     virtual void sendSolicitedRa(cMessage *msg);
+    /**
+     * Returns the interval of the advertising timer of the interface, a random value between
+     * MinRtrAdvInterval and MaxRtrAdvInterval, and at most MAX_INITIAL_RTR_ADVERT_INTERVAL for
+     * the first MAX_INITIAL_RTR_ADVERTISEMENTS advertisements (RFC 4861 section 6.2.4).
+     */
+    virtual simtime_t computeRaInterval(NetworkInterface *ie, AdvIfEntry *advIfEntry);
     virtual bool validateRaPacket(Packet *packet, const Ipv6RouterAdvertisement *ra);
     /************End of Router Advertisement Stuff*************************/
 

@@ -331,6 +331,17 @@ Notable backward incompatible changes are the following:
    first periodic advertisement, 198 to 600 seconds after the start, because
    the time of its next advertisement stayed at the time of the first answer.
 
+   The first three Router Advertisements of an interface now come at most
+   MAX_INITIAL_RTR_ADVERT_INTERVAL, 16 seconds, apart (RFC 4861 section
+   6.2.4), and a multicast answer to a solicitation restarts the advertising
+   timer as if an unsolicited advertisement had been sent (section 6.2.6).
+   Before, the first periodic advertisement came 198 to 600 seconds after the
+   start, the cap applied from the second to the fourth one, and an answer did
+   not touch the timer. The advertising timer of a router starts when the
+   router has booted (routerBootupTime), so that routers that start together
+   do not advertise in step. Simulations with routers of IPv6 now see their
+   first advertisements in the first seconds.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

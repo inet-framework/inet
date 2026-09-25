@@ -783,8 +783,23 @@ void Ipv6NeighbourDiscovery::sendQueuedPacketsToIpv6Module(Neighbour *nce)
 
 void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 {
-    // Node has booted up. Start assigning a link-local address for each
-    // interface in this node.
+    // Node has booted up. An interface becomes an advertising interface now: create
+    // its RA timer, so that routers that start together advertise with the random
+    // phases of their bootup times, not in step (the first intervals are capped at
+    // MAX_INITIAL_RTR_ADVERT_INTERVAL, RFC 4861 section 6.2.4).
+    // NED defaults were applied at INITSTAGE_NETWORK_CONFIGURATION;
+    // per-interface XML overrides were applied by Ipv6NodeConfigurator.
+    // On restart, Ipv6NodeConfigurator re-applies XML config.
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+
+        auto *ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data && ipv6Data->getAdvSendAdvertisements() && !(ie->isLoopback())) {
+            createRaTimer(ie);
+        }
+    }
+
+    // Start assigning a link-local address for each interface in this node.
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
 
@@ -1150,7 +1165,10 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
 
     // RFC 2461: Section 6.2.6
     // A host MUST silently discard any received Router Solicitation messages.
-    if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements()) {
+    if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() && advIfEntry == nullptr) {
+        EV_INFO << "The router has not booted yet, discarding RS\n";
+    }
+    else if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements()) {
         EV_INFO << "This is an advertising interface, processing RS\n";
 
         if (validateRsPacket(packet, rs) == false) {
@@ -1646,7 +1664,7 @@ void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
     advIfEntry->interfaceId = ie->getInterfaceId();
     advIfEntry->numRASent = 0;
 
-    simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
+    simtime_t interval = computeRaInterval(ie, advIfEntry);
     advIfEntry->raTimeoutMsg = msg;
 
     simtime_t nextScheduledTime = simTime() + interval;
@@ -1695,25 +1713,7 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
 
     EV_DEBUG << "\n+=+=+= MIPv6 Feature: " << rt6->hasMipv6Support() << " +=+=+=\n";
 
-    simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
-
-    EV_DETAIL << "\n +=+=+= The random calculated interval is: " << interval << " +=+=+=\n";
-
-    /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
-       sent from an interface when it becomes an advertising interface,*/
-    EV_DETAIL << "Num RA sent is: " << advIfEntry->numRASent << endl;
-    EV_DETAIL << "maxInitialRtrAdvertisements is: " << ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertisements() << endl;
-
-    if (advIfEntry->numRASent <= ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertisements()) {
-        if (interval > ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval()) {
-            // if the randomly chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL,
-            // the timer SHOULD be set to MAX_INITIAL_RTR_ADVERT_INTERVAL instead.
-            interval = ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
-            EV_INFO << "Sending initial RA but interval is too long. Using default value." << endl;
-        }
-        else
-            EV_INFO << "Sending initial RA. Using randomly generated interval." << endl;
-    }
+    simtime_t interval = computeRaInterval(ie, advIfEntry);
 
     simtime_t nextScheduledTime = simTime() + interval;
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
@@ -1730,11 +1730,30 @@ void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
     EV_DETAIL << "Testing condition!\n";
     createAndSendRaPacket(destAddr, ie);
     delete msg;
-    // the next advertisement is the periodic one again; processRsPacket() compares the answer
-    // to a later solicitation with this time (RFC 4861 section 6.2.6)
+    // a multicast answer resets the interval timer to a new random value, as if an unsolicited
+    // advertisement had just been sent (RFC 4861 section 6.2.6); processRsPacket() compares the
+    // answer to a later solicitation with the time of that next advertisement
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);
-    if (advIfEntry != nullptr && advIfEntry->raTimeoutMsg != nullptr && advIfEntry->raTimeoutMsg->isScheduled())
-        advIfEntry->nextScheduledRATime = advIfEntry->raTimeoutMsg->getArrivalTime();
+    if (advIfEntry != nullptr && advIfEntry->raTimeoutMsg != nullptr) {
+        advIfEntry->numRASent++;
+        simtime_t interval = computeRaInterval(ie, advIfEntry);
+        advIfEntry->nextScheduledRATime = simTime() + interval;
+        rescheduleAfter(interval, advIfEntry->raTimeoutMsg);
+    }
+}
+
+simtime_t Ipv6NeighbourDiscovery::computeRaInterval(NetworkInterface *ie, AdvIfEntry *advIfEntry)
+{
+    auto ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
+    simtime_t interval = uniform(ipv6Data->getMinRtrAdvInterval(), ipv6Data->getMaxRtrAdvInterval());
+    EV_DETAIL << "Random advertising interval: " << interval << ", advertisements sent: " << advIfEntry->numRASent << endl;
+    // the timers before the first MAX_INITIAL_RTR_ADVERTISEMENTS advertisements are at most
+    // MAX_INITIAL_RTR_ADVERT_INTERVAL long
+    if (advIfEntry->numRASent < (unsigned int)ipv6Data->_getMaxInitialRtrAdvertisements() && interval > ipv6Data->_getMaxInitialRtrAdvertInterval()) {
+        interval = ipv6Data->_getMaxInitialRtrAdvertInterval();
+        EV_INFO << "Initial advertisement, interval limited to " << interval << endl;
+    }
+    return interval;
 }
 
 bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAdvertisement *ra)
@@ -2649,21 +2668,9 @@ void Ipv6NeighbourDiscovery::handleCrashOperation(LifecycleOperation *operation)
 
 void Ipv6NeighbourDiscovery::start()
 {
-    // Create RA timers for all advertising interfaces.
-    // NED defaults were applied at INITSTAGE_NETWORK_CONFIGURATION;
-    // per-interface XML overrides were applied by Ipv6NodeConfigurator.
-    // On restart, Ipv6NodeConfigurator re-applies XML config.
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        NetworkInterface *ie = ift->getInterface(i);
-
-        auto *ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
-        if (ipv6Data && ipv6Data->getAdvSendAdvertisements() && !(ie->isLoopback())) {
-            createRaTimer(ie);
-        }
-    }
-
     // This simulates random node bootup time. Link local address assignment
-    // takes place during this time.
+    // takes place during this time, and the advertising interfaces start
+    // their RA timers at its end (see assignLinkLocalAddress()).
     assignLinkLocalAddrTimer = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
 
     // Routers boot up faster than hosts (routerBootupTime/hostBootupTime NED
