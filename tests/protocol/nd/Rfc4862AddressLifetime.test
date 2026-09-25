@@ -8,16 +8,6 @@ doc/project/evidence/protocol/nd/checks/autoconfiguration.md#address-after-its-v
 the program steps below map onto its expected observations. The guard is observation 2, and
 step 1 observation 1.
 
-Defect: an expired address leaves the interface only when choosePreferredAddress runs
-(src/inet/networklayer/ipv6/Ipv6InterfaceData.cc:446), which happens when an address is added
-or removed, and getPreferredAddress returns the cached address with the comment "FIXME TODO
-check expiry time!" (src/inet/networklayer/ipv6/Ipv6InterfaceData.h:559). RFC 4862 section
-5.5.4: "An invalid address MUST NOT be used as a source address in outgoing communications".
-Observation 1 holds; observation 2 fails: from 44 s on, A sends its Neighbor Solicitations for
-R from the expired global address. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"

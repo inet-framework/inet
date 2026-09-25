@@ -37,6 +37,7 @@ namespace inet {
 #define MK_RD_TIMEOUT                  5
 #define MK_NUD_TIMEOUT                 6
 #define MK_AR_TIMEOUT                  7
+#define MK_ADDRESS_EXPIRY              8
 
 Define_Module(Ipv6NeighbourDiscovery);
 
@@ -52,6 +53,7 @@ Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
 Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 {
     cancelAndDelete(assignLinkLocalAddrTimer);
+    cancelAndDelete(addressExpiryTimer);
 
     for (auto *msg : raTimerList)
         cancelAndDelete(msg);
@@ -154,6 +156,10 @@ void Ipv6NeighbourDiscovery::handleMessageWhenUp(cMessage *msg)
         else if (msg->getKind() == MK_ASSIGN_LINKLOCAL_ADDRESS) {
             EV_INFO << "Assigning Link Local Address\n";
             assignLinkLocalAddress(msg);
+        }
+        else if (msg->getKind() == MK_ADDRESS_EXPIRY) {
+            EV_INFO << "Removing expired addresses\n";
+            processAddressExpiry();
         }
         else if (msg->getKind() == MK_DAD_TIMEOUT) {
             EV_INFO << "DAD Timeout message received\n";
@@ -921,6 +927,8 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     if (sendGratuitousNa)
         sendUnsolicitedNa(ie, tentativeAddr);
 
+    rescheduleAddressExpiryTimer();
+
     // another detection may still run on the interface
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(std::any_of(dadList.begin(), dadList.end(),
             [ie](const DadEntry *entry) { return entry->interfaceId == ie->getInterfaceId(); }));
@@ -1451,8 +1459,57 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
                 ie->getProtocolDataForUpdate<Mipv6InterfaceData>()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); // populate the HoA of MN, the HA global scope address and the home network prefix
             }
         }
+        // the prefixes may have added addresses or changed their lifetimes
+        rescheduleAddressExpiryTimer();
     }
     delete packet;
+}
+
+void Ipv6NeighbourDiscovery::rescheduleAddressExpiryTimer()
+{
+    simtime_t next = SIMTIME_MAX;
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data == nullptr)
+            continue;
+        for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+            simtime_t expiryTime = ipv6Data->getAddressExpiryTime(j);
+            if (expiryTime != SIMTIME_ZERO && expiryTime < next)
+                next = expiryTime;
+        }
+    }
+    if (next == SIMTIME_MAX) {
+        if (addressExpiryTimer != nullptr)
+            cancelEvent(addressExpiryTimer);
+        return;
+    }
+    if (addressExpiryTimer == nullptr)
+        addressExpiryTimer = new cMessage("addressExpiry", MK_ADDRESS_EXPIRY);
+    rescheduleAt(std::max(next, simTime()), addressExpiryTimer);
+}
+
+void Ipv6NeighbourDiscovery::processAddressExpiry()
+{
+    // RFC 4862 section 5.5.4: an address whose valid lifetime ended is invalid; it is neither a
+    // source nor a destination any more, so the interface loses it
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data == nullptr)
+            continue;
+        std::vector<Ipv6Address> expiredAddresses;
+        for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+            simtime_t expiryTime = ipv6Data->getAddressExpiryTime(j);
+            if (expiryTime != SIMTIME_ZERO && expiryTime <= simTime())
+                expiredAddresses.push_back(ipv6Data->getAddress(j));
+        }
+        for (const auto& address : expiredAddresses) {
+            EV_INFO << "The valid lifetime of address " << address << " on " << ie->getInterfaceName() << " ended, removing it\n";
+            if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(address))
+                ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(address);
+        }
+    }
+    rescheduleAddressExpiryTimer();
 }
 
 void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv6RouterAdvertisement *ra)
@@ -2735,6 +2792,8 @@ void Ipv6NeighbourDiscovery::stop()
     // cancel and delete the link-local address assignment timer
     cancelAndDelete(assignLinkLocalAddrTimer);
     assignLinkLocalAddrTimer = nullptr;
+    cancelAndDelete(addressExpiryTimer);
+    addressExpiryTimer = nullptr;
 
     // cancel and delete all RA timers
     for (auto *msg : raTimerList)

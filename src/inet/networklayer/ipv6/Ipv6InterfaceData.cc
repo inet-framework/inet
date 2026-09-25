@@ -370,6 +370,12 @@ Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(const Ipv6Addre
     return getAddressType(findAddress(addr));
 }
 
+simtime_t Ipv6InterfaceData::getAddressExpiryTime(int i) const
+{
+    ASSERT(i >= 0 && i < (int)addresses.size());
+    return addresses[i].expiryTime;
+}
+
 bool Ipv6InterfaceData::hasAddress(const Ipv6Address& addr) const
 {
     return findAddress(addr) != -1;
@@ -468,15 +474,19 @@ void Ipv6InterfaceData::choosePreferredAddress()
     // remove expired addresses (expiryTime == 0 means infinite lifetime)
     simtime_t now = simTime();
     bool changed = false;
+    std::vector<Ipv6Address> expiredAddresses;
     for (auto it = addresses.begin(); it != addresses.end(); ) {
         if (it->expiryTime != SIMTIME_ZERO && it->expiryTime <= now) {
             EV_INFO << "Address " << it->address << " has expired, removing\n";
+            expiredAddresses.push_back(it->address);
             it = addresses.erase(it);
             changed = true;
         }
         else
             ++it;
     }
+    for (const auto& address : expiredAddresses)
+        updateSolicitedNodeGroup(address, false);
 
     if (addresses.empty()) {
         preferredAddr = Ipv6Address();

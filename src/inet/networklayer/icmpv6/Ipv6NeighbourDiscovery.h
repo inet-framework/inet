@@ -133,6 +133,9 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     // Timer for link-local address assignment at boot
     cMessage *assignLinkLocalAddrTimer = nullptr;
 
+    // Timer that removes the addresses whose valid lifetime ended (RFC 4862 section 5.5.4)
+    cMessage *addressExpiryTimer = nullptr;
+
     // List of periodic RA msgs(used only for router interfaces)
     RaTimerList raTimerList;
 
@@ -349,6 +352,12 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     virtual void resetRaTimer(NetworkInterface *ie);
     virtual void sendPeriodicRa(cMessage *msg);
     virtual void sendSolicitedRa(cMessage *msg);
+    /**
+     * Schedules addressExpiryTimer at the earliest end of a valid lifetime among the addresses
+     * of all interfaces, and removes the addresses whose valid lifetime ended.
+     */
+    virtual void rescheduleAddressExpiryTimer();
+    virtual void processAddressExpiry();
     /**
      * Returns the interval of the advertising timer of the interface, a random value between
      * MinRtrAdvInterval and MaxRtrAdvInterval, and at most MAX_INITIAL_RTR_ADVERT_INTERVAL for
