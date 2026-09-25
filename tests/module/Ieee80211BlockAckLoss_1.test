@@ -2,7 +2,7 @@
 Verify pending Block Ack recovery through real radios and MAC handlers.
 Force internal collisions after final BAR deferral and stop/restart.
 
-%extraargs: -r 0..11
+%extraargs: -r 0..15
 
 %file: TestBlockAckLoss.cc
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -18,12 +18,15 @@ class LossTestMac : public Ieee80211Mac
 {
   public:
     int delivered = 0;
+    std::vector<int> deliveredSequences;
     virtual void sendUpFrame(Packet *packet) override
     {
         Enter_Method("sendUpFrame");
         take(packet);
-        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>()))
+        if (auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
             ++delivered;
+            deliveredSequences.push_back(header->getSequenceNumber().get());
+        }
         delete packet;
     }
 };
@@ -223,6 +226,23 @@ class BlockAckLossTest : public cSimpleModule
         wait(SimTime(5, SIMTIME_MS));
         ASSERT(sender->hasAgreement(peer));
         ASSERT(receiver->delivered == 1);
+        if (scenario >= 12) {
+            auto recipient = check_and_cast<LossTestHcf *>(getModuleByPath("^.node[1].wlan[0].mac.hcf"));
+            recipient->dropData = scenario == 12 || scenario == 14 ? 1 : 0;
+            recipient->dropBlockAck = scenario == 15 ? 1 : 0;
+            int count = scenario == 14 ? 3 : 2;
+            for (int i = 0; i < count; ++i)
+                sender->queueFrame(peer);
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->empty());
+            ASSERT(recipient->dropped == (scenario == 13 ? 0 : 1));
+            ASSERT(scenario == 13 ? sender->repeatedData == 0 : sender->repeatedData > 0);
+            ASSERT(receiver->delivered == count + 1);
+            for (int i = 0; i <= count; ++i)
+                ASSERT(receiver->deliveredSequences.at(i) == (SequenceNumberCyclic(receiver->deliveredSequences.front()) + i).get());
+            std::cout << "Block Ack recovery scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario >= 6) {
             auto recipient = check_and_cast<LossTestHcf *>(getModuleByPath("^.node[1].wlan[0].mac.hcf"));
             if (scenario == 11) {
@@ -339,7 +359,7 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..11}
+*.test.scenario = ${scenario=0..15}
 *.node[*].wlan[0].mac.typename = "LossTestMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "LossTestHcf"

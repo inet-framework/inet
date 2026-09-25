@@ -1,0 +1,124 @@
+%description:
+Verify Basic Block Ack buffer progress after a BAR repeats a delivered sequence.
+Cover true holes, incomplete fragments, cyclic delivery order, and independent buffers.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class ReorderingProbe : public BlockAckReordering
+{
+  public:
+    ReceiveBuffer *buffer(RecipientBlockAckAgreement *agreement) { return createReceiveBufferIfNecessary(agreement); }
+};
+
+static void checkFrames(BlockAckReordering::ReorderBuffer frames, std::vector<int> expected)
+{
+    ASSERT(frames.size() == expected.size());
+    size_t i = 0;
+    for (const auto& entry : frames) {
+        ASSERT(entry.first == expected.at(i++));
+        for (auto packet : entry.second) {
+            ASSERT(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() == entry.first);
+            delete packet;
+        }
+    }
+}
+
+static BlockAckReordering::ReorderBuffer receiveData(ReorderingProbe& reordering, RecipientBlockAckAgreement& agreement,
+        SequenceNumberCyclic sequence, int fragment = 0, bool more = false)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setTransmitterAddress(agreement.getBlockAckRecord()->getOriginatorAddress());
+    header->setTid(agreement.getBlockAckRecord()->getTid());
+    header->setAckPolicy(BLOCK_ACK);
+    header->setSequenceNumber(sequence);
+    header->setFragmentNumber(fragment);
+    header->setMoreFragments(more);
+    return reordering.processReceivedQoSFrame(&agreement, new Packet("data", header), header);
+}
+
+static BlockAckReordering::ReorderBuffer request(ReorderingProbe& reordering, RecipientBlockAckAgreement& agreement,
+        SequenceNumberCyclic sequence)
+{
+    auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+    bar->setTransmitterAddress(agreement.getBlockAckRecord()->getOriginatorAddress());
+    bar->setTidInfo(agreement.getBlockAckRecord()->getTid());
+    bar->setStartingSequenceNumber(sequence);
+    return reordering.processReceivedBlockAckReq(&agreement, bar);
+}
+
+%activity:
+const MacAddress peer("02:00:00:00:00:01");
+for (int initial : {0, 17, 4094, 4095}) {
+    SequenceNumberCyclic start(initial);
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+        checkFrames(receiveData(reordering, agreement, start), {start.get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 2);
+        checkFrames(request(reordering, agreement, start), {(start + 1).get(), (start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start + 3);
+        checkFrames(request(reordering, agreement, start), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(request(reordering, agreement, start), {});
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start);
+        checkFrames(request(reordering, agreement, start + 2), {(start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1, 0, true), {});
+        checkFrames(receiveData(reordering, agreement, start), {start.get()});
+        checkFrames(request(reordering, agreement, start), {});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 2);
+        checkFrames(receiveData(reordering, agreement, start + 1, 1), {(start + 1).get()});
+        checkFrames(request(reordering, agreement, start), {(start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+        checkFrames(receiveData(reordering, agreement, start + 3), {});
+        checkFrames(request(reordering, agreement, start + 3), {(start + 1).get(), (start + 2).get(), (start + 3).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start + 4);
+    }
+}
+{
+    ReorderingProbe reordering;
+    RecipientBlockAckAgreement first(peer, 0, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    RecipientBlockAckAgreement otherTid(peer, 3, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    RecipientBlockAckAgreement otherPeer(MacAddress("02:00:00:00:00:02"), 0, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    for (auto agreement : {&first, &otherTid, &otherPeer})
+        checkFrames(receiveData(reordering, *agreement, SequenceNumberCyclic(1)), {});
+    checkFrames(receiveData(reordering, first, SequenceNumberCyclic(0)), {0});
+    checkFrames(request(reordering, first, SequenceNumberCyclic(0)), {1});
+    ASSERT(reordering.buffer(&otherTid)->getLength() == 1);
+    ASSERT(reordering.buffer(&otherPeer)->getLength() == 1);
+    auto delba = makeShared<Ieee80211Delba>();
+    delba->setTransmitterAddress(peer);
+    delba->setTid(3);
+    reordering.processReceivedDelba(delba);
+    reordering.processReceivedDelba(delba);
+    ASSERT(reordering.buffer(&otherPeer)->getLength() == 1);
+}
+EV << "Block Ack buffer progress passed.\n";
+
+%contains: stdout
+Block Ack buffer progress passed.

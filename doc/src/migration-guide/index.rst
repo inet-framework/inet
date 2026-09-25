@@ -115,6 +115,15 @@ Duplicate requests and response retries retain the accepted interval and current
 The record uses this cyclic boundary to distinguish missing frames from old frames.
 Its missing-frame bitmap can cause retransmission where the old model silently removed data.
 
+Basic Block Ack receive buffers now resume a repeated BAR at the next expected sequence
+when its original start precedes data already delivered after retransmission.
+The scan still stops at an incomplete or missing frame.
+This progress rule is a model interpretation of the legacy receive-buffer procedure.
+Buffer release and delivery also preserve cyclic sequence order across 4095 to 0.
+``BlockAckReordering::ReorderBuffer`` is now a vector of sequence/fragment pairs in
+delivery order. Custom consumers must iterate that order instead of using map lookup.
+These corrections can change delivery counts and simulation fingerprints after packet loss.
+
 HCF now reports ``STOPPED`` and a finish signal when a start listener cancels a grant.
 Statistics based on starts minus finishes therefore return to zero after cancellation.
 AP disassociation and acknowledged refusal now commit station status before rate removal signals.

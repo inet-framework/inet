@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 
+#include <algorithm>
+
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
@@ -80,7 +82,11 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         // Upon arrival of a BlockAckReq frame, the recipient shall pass up the MSDUs and A-MSDUs starting with
         // the starting sequence number sequentially until there is an incomplete or missing MSDU
         // or A-MSDU in the buffer.
-        auto consecutiveCompleteFollowingMpdus = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, startingSequenceNumber);
+        // A repeated BAR can start before frames already delivered after a retransmission.
+        // Resume at the first sequence still eligible for delivery, not at a removed frame.
+        auto nextExpectedSequenceNumber = receiveBuffer->getNextExpectedSequenceNumber();
+        auto firstFollowingSequenceNumber = startingSequenceNumber < nextExpectedSequenceNumber ? nextExpectedSequenceNumber : startingSequenceNumber;
+        auto consecutiveCompleteFollowingMpdus = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, firstFollowingSequenceNumber);
         // If no MSDUs or A-MSDUs are passed up to the next MAC process after the receipt
         // of the BlockAckReq frame and the starting sequence number of the BlockAckReq frame is newer than the
         // NextExpectedSequenceNumber for that Block Ack agreement, then the NextExpectedSequenceNumber for
@@ -93,7 +99,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         releaseReceiveBuffer(agreement, receiveBuffer, consecutiveCompleteFollowingMpdus);
         // The recipient shall pass MSDUs and A-MSDUs up to the next MAC process in order of increasing sequence
         // number.
-        completePrecedingMpdus.insert(consecutiveCompleteFollowingMpdus.begin(), consecutiveCompleteFollowingMpdus.end());
+        completePrecedingMpdus.insert(completePrecedingMpdus.end(), consecutiveCompleteFollowingMpdus.begin(), consecutiveCompleteFollowingMpdus.end());
         return completePrecedingMpdus;
     }
     return ReorderBuffer();
@@ -113,8 +119,11 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
         auto fragments = it.second;
         if (SequenceNumberCyclic(sequenceNumber) < startingSequenceNumber)
             if (isComplete(fragments))
-                completePrecedingMpdus[sequenceNumber] = fragments;
+                completePrecedingMpdus.emplace_back(sequenceNumber, fragments);
     }
+    std::sort(completePrecedingMpdus.begin(), completePrecedingMpdus.end(), [](const auto& first, const auto& second) {
+        return SequenceNumberCyclic(first.first) < SequenceNumberCyclic(second.first);
+    });
     return completePrecedingMpdus;
 }
 
@@ -140,7 +149,7 @@ bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, Reorder
     if (it != buffer.end()) {
         auto fragments = it->second;
         if (isComplete(fragments)) {
-            reorderBuffer[seqNum.get()] = fragments;
+            reorderBuffer.emplace_back(seqNum.get(), fragments);
             return true;
         }
     }
@@ -244,4 +253,3 @@ BlockAckReordering::~BlockAckReordering()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

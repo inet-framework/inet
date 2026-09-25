@@ -24,7 +24,8 @@ class INET_API BlockAckReordering
 {
   public:
     typedef std::vector<Packet *> Fragments;
-    typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+    // Complete frames in delivery order, including across sequence-number wrap.
+    typedef std::vector<std::pair<SequenceNumber, Fragments>> ReorderBuffer;
 
   protected:
     std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;

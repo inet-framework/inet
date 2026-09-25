@@ -13,6 +13,8 @@ Recipient handlers must also implement blockAckRequestReceived().
 Recipient activity now refreshes the accepted inactivity timeout.
 A zero accepted timeout disables expiry at both peers.
 Block Ack records preserve missing frames across empty records and sequence wrap.
+Repeated Block Ack Requests release complete buffered data after a lost frame retransmits.
+Block Ack buffer release and delivery preserve sequence order across 4095 to 0.
 An internal collision with a pending BAR preserves the outstanding data.
 Canceled HCF grants now emit a matching sequence finish signal.
 AP teardown publishes authenticated status before peer-rate removal signals.
