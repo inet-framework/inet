@@ -12,17 +12,6 @@ Rfc9776SourceSpecificForwarding.test.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
 section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 
-Defect: the forwarding of a multicast datagram onto a leaf interface asks only whether the
-interface has a listener for the group (src/inet/networklayer/ipv4/Ipv4.cc:534 and 803, the
-one-argument Ipv4InterfaceData::hasMulticastListener). The IGMPv3 router stores the forwarded
-sources of each group (Igmpv3::processReport, src/inet/networklayer/ipv4/Igmpv3.cc:1093,
-setMulticastListeners), and the interface data has the question for one source
-(hasMulticastListener with a source, src/inet/networklayer/ipv4/Ipv4InterfaceData.h:169), but
-the forwarding does not ask it. So R forwards every source of a group that has a member.
-Observation 1 holds; observation 3 fails with the first datagram of S2. This test FAILS, and
-the failure is deliberately NOT declared expected: the model has the mechanism, and the
-mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"

@@ -531,7 +531,8 @@ void Ipv4::datagramLocalOut(Packet *packet)
             for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
                 Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
                 const NetworkInterface *destIE = outInterface->getInterface();
-                if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
+                // a leaf needs a listener of the source (RFC 9776 section 6.3)
+                if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr, ipv4Header->getSrcAddress()))
                     EV_WARN << "Not sending to " << destIE->getInterfaceName() << " (no listeners)\n";
                 else {
                     EV_DETAIL << "Sending out on " << destIE->getInterfaceName() << "\n";
@@ -800,7 +801,8 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
                 int ttlThreshold = destIE->getProtocolData<Ipv4InterfaceData>()->getMulticastTtlThreshold();
                 if (ipv4Header->getTimeToLive() <= ttlThreshold)
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (ttl threshold reached)\n";
-                else if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
+                // a leaf needs a listener of the source (RFC 9776 section 6.3)
+                else if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr, srcAddr))
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (no listeners)\n";
                 else {
                     EV_DETAIL << "Forwarding to " << destIE->getInterfaceName() << "\n";
