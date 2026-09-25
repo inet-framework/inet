@@ -848,6 +848,12 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             delay = ahProtectInDelay->doubleValue();
 
             if (ah->getNextHeader() != IP_PROT_ESP) {
+                if (!matchesSelectorsOfSa(packet, sadEntry)) {
+                    EV_INFO << "IPsec IN DROP AH, the packet does not match the selectors of its SA, packet: " << ingressPacketInfo.str() << std::endl;
+                    emit(inProtectedDropSignal, 1L);
+                    inDrop++;
+                    return INetfilter::IHook::DROP;
+                }
                 emit(inProtectedAcceptSignal, 1L);
                 inAccept++;
 
@@ -892,10 +898,6 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
                 return INetfilter::IHook::DROP;
             }
 
-            // found SA
-            emit(inProtectedAcceptSignal, 1L);
-            inAccept++;
-
             // TODO calculate icv bytes length from SPI and use espHeader.icvBytes for verify it
             auto icvBytes = espHeader->getIcvBytes();
             if (icvBytes > 0)
@@ -911,6 +913,17 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             setNetworkHeaderProtocol(netHeader, (IpProtocolId)espTrailer->getNextHeader());
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);
+
+            if (!matchesSelectorsOfSa(packet, sadEntry)) {
+                EV_INFO << "IPsec IN DROP ESP, the packet does not match the selectors of its SA, packet: " << ingressPacketInfo.str() << std::endl;
+                emit(inProtectedDropSignal, 1L);
+                inDrop++;
+                return INetfilter::IHook::DROP;
+            }
+
+            // found SA
+            emit(inProtectedAcceptSignal, 1L);
+            inAccept++;
 
             delay += espProtectInDelay->doubleValue();
 
@@ -967,6 +980,14 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
     emit(inUnprotectedDropSignal, 1L);
     inDrop++;
     return INetfilter::IHook::DROP;
+}
+
+bool IPsec::matchesSelectorsOfSa(Packet *packet, SecurityAssociation *sadEntry)
+{
+    // RFC 4301 section 5.2, step 4: after AH or ESP processing, the packet must match the
+    // selectors of the SA that protected it; the SAD entry holds them
+    PacketInfo packetInfo = extractIngressPacketInfo(packet);
+    return sadEntry->getRule().getSelector().matches(&packetInfo);
 }
 
 INetfilter::IHook::Result IPsec::datagramLocalOutHook(Packet *packet)

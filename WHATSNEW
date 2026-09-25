@@ -312,6 +312,11 @@ Notable backward incompatible changes are the following:
    RFC 4303 section 2.4 states; before, every octet held the default 63 of a
    ByteCountChunk.
 
+   After AH or ESP processing, the receiver now checks that the packet matches
+   the selectors of the SA that protected it, and discards it if not (RFC 4301
+   section 5.2). Before, an SA accepted every packet with its SPI, so a
+   sender could reach any port of the receiver through one SA.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

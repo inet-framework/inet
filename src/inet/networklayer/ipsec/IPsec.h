@@ -102,6 +102,7 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     virtual void ahProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
 
     virtual INetfilter::IHook::Result protectDatagram(Packet *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
+    virtual bool matchesSelectorsOfSa(Packet *packet, SecurityAssociation *sadEntry);
 
     virtual int getIntegrityCheckValueBitLength(EncryptionAlg alg);
     virtual int getInitializationVectorBitLength(EncryptionAlg alg);
