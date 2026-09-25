@@ -1,15 +1,42 @@
 # Plan to fix the TXOP, Block Ack, and rate-state defects
 
-Status: accepted implementation plan.
+Status: complete.
 Plan date: 2026-09-25.
+Completion date: 2026-09-25.
 Reviewed head: `96008e2c7c5be2bc1303231e2c0125ba07388eac`.
 
 The [consolidated report](../../audit/pull-request/branch-96008e2c7c-consolidated.md) defines defects B1 through B7 and preserves their evidence.
 This plan covers those seven defects and their direct regression tests.
 The [Devin assessment](../../audit/pull-request/branch-96008e2c7c-devin-assessment.md) adds B6 and B7 and resolves each submitted comment.
 The [implementation report](../../audit/pull-request/branch-96008e2c7c-implementation.md) records the fix commits, direct tests, and fingerprint cause.
-The contracts below record the source owners and direct tests for each fix.
-The implementation report records the final results and any approved baseline changes.
+All seven source fixes and the review controls are implemented.
+The B6 trace corrects the original diagnosis: peer cleanup already exists, but its notification precedes the station transition.
+The debug tests pass nine unit fixtures, 148 scenarios across four module fixtures, and five protocol fixtures.
+The exact [fingerprint patch](../../audit/pull-request/branch-96008e2c7c-fingerprints.patch) changes three CSV rows because B4 corrects false acknowledgments.
+The user approved this exact patch on 2026-09-25 with the reply “approved”.
+All five scoped fingerprint cases pass after the approved update; the command exits 0.
+Commit `49a59d53e3` contains B4 and all eight approved fingerprint values.
+The source tree matches the tested source; the final update changes only the approved baselines and plan records.
+The scoped architecture, naming, source-seal, commit, classification, and whitespace checks pass.
+The implementation report retains all commands, logs, final commit identifiers, and the separate receive-buffer observation.
+Release compilation and whole-project gates remain prerequisites for a future push.
+
+## Completed fix commits
+
+| Item | Commit |
+| --- | --- |
+| Accepted plan | `32835e8603` |
+| B1: teardown identity and deferred replacement | `22b386c191` |
+| B2: recipient inactivity refresh | `c7dbc3fcbf` |
+| B3: internal collision with a pending BAR | `498502cc4b` |
+| B4: missing-frame acknowledgment and approved fingerprints | `49a59d53e3` |
+| B5: accepted timeout interval | `b7332f9030` |
+| B6: AP teardown notification order | `a4c184054c` |
+| B7: canceled sequence signals | `6aa354b57f` |
+| Related B1 duplicate-packet ownership | `3a4b28bb7b` |
+| Review controls | `13a74a8b8e` |
+
+The following sections retain the implementation contracts and acceptance criteria for this completed work.
 
 ## B3 implementation contract — validated before source edits
 
@@ -63,7 +90,7 @@ No wire layout, serializer, lifecycle, or initialization changes apply.
 Both timeout regression fixtures reproduce different stored intervals before this fix.
 The completion unit test covers duplicate requests; inactivity scenarios 17–20 cover real negotiation and idle expiry.
 
-B3 passes its initial three radio scenarios in commit `294c89e8f8`.
+B3 passes its initial three radio scenarios in commit `498502cc4b`.
 
 ## B4 implementation contract — validated before source edits
 
