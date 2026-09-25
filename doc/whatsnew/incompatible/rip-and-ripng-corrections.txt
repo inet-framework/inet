@@ -1,0 +1,3 @@
+RIP and RIPng corrections
+
+A RIPng message now carries the version 1 of RFC 2080; before, every RIPng message carried the version 2 of RIP.
