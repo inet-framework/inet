@@ -11,13 +11,6 @@ guards are observation 2, and step 2 is observation 1.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: in MLDv1 mode, A and B both answer the General Query at the instant that it arrives
-(the defect of Rfc9777ListenerV1Mode.test, src/inet/networklayer/icmpv6/Mldv2.cc:1115-1136).
-With no delay, neither host can hear the Report of the other first, so both Reports leave.
-Observation 2 fails with the Report of B. This test FAILS, and the failure is deliberately NOT
-declared expected: the model has the mechanism, and the mechanism does the wrong thing, which
-is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

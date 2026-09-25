@@ -38,6 +38,7 @@ enum Mldv2TimerKind {
     MLDV2_H_GROUP_TIMER,
     MLDV2_H_STATE_CHANGE_TIMER,
     MLDV2_H_OLDER_VERSION_TIMER, // Older Version Querier Present timer (RFC 3810 8.2.1), per HostInterfaceData
+    MLDV2_H_OLDER_VERSION_REPORT_TIMER, // report delay timer of the MLDv1 mode (RFC 2710 section 5), per HostGroupData
 };
 
 class INET_API Mldv2 : public OperationalBase, protected cListener
@@ -84,6 +85,11 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         int filterModeChangeCount = 0; // State-Change Reports that must still hold a Filter-Mode-Change record
         std::map<Ipv6Address, int> sourceChangeCounts; // per source: State-Change Reports that must still hold it
         cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
+
+        // The MLDv1 mode (RFC 2710 section 5): the report delay timer runs in the Delaying
+        // Listener state, and the flag tells that this node sent the last Report.
+        cMessage *olderVersionReportTimer;
+        bool lastReporter = false;
 
         HostGroupData(HostInterfaceData *parent, const Ipv6Address& group);
         virtual ~HostGroupData();
@@ -313,6 +319,8 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void processHostGroupQueryTimer(cMessage *msg);
     virtual void processHostStateChangeTimer(cMessage *msg);
     virtual void processHostOlderVersionTimer(cMessage *msg);
+    virtual void processHostOlderVersionReportTimer(cMessage *msg);
+    virtual void startOlderVersionReportTimer(HostGroupData *group, double maxResponseDelay);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
