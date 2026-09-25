@@ -56,10 +56,51 @@ bool FrameSequenceContext::isSentByUs(const Ptr<const Ieee80211MacHeader>& heade
 
 FrameSequenceContext::~FrameSequenceContext()
 {
-    for (auto step : steps)
-        delete step;
     delete nonQoSContext;
     delete qosContext;
+}
+
+IFrameSequenceStep *FrameSequenceContext::ownPreparedStep(std::unique_ptr<IFrameSequenceStep> step)
+{
+    auto result = step.get();
+    ownedSteps.push_back(std::move(step));
+    return result;
+}
+
+void FrameSequenceContext::addStep(IFrameSequenceStep *step)
+{
+    if (std::find(steps.begin(), steps.end(), step) != steps.end())
+        throw cRuntimeError("A frame sequence step cannot execute twice");
+    bool owned = false;
+    for (const auto& candidate : ownedSteps)
+        owned |= candidate.get() == step;
+    if (!owned)
+        ownedSteps.emplace_back(step);
+    steps.push_back(step);
+}
+
+IFrameSequenceStep *FrameSequenceContext::getActiveStep() const
+{
+    auto step = getLastStep();
+    return step && step->getCompletion() == IFrameSequenceStep::Completion::UNDEFINED ? step : nullptr;
+}
+
+const IIeee80211Mode *FrameSequenceContext::getPreviousMode(const MacAddress& receiver) const
+{
+    auto it = transmittedModes.find(receiver);
+    return it == transmittedModes.end() ? nullptr : it->second;
+}
+
+void FrameSequenceContext::recordTransmission()
+{
+    auto step = check_and_cast<ITransmitStep *>(getActiveStep());
+    auto packet = step->getFrameToTransmit();
+    auto header = packet->peekAtFront<Ieee80211MacHeader>();
+    transmittedModes[header->getReceiverAddress()] = step->getPreparedMode();
+    bool dataOrManagement = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header) != nullptr;
+    qosContext->txopProcedure->recordTransmission(*exchangePlan, dataOrManagement);
+    if (dataOrManagement)
+        inProgressFrames->recordTransmission(packet);
 }
 
 Register_ResultFilter("frameSequenceDuration", FrameSequenceDurationFilter);
@@ -78,4 +119,3 @@ void FrameSequenceNumPacketsFilter::receiveSignal(cResultFilter *prev, simtime_t
 
 } // namespace ieee80211
 } // namespace inet
-

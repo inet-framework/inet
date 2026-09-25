@@ -65,6 +65,7 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     virtual void ctsFrameReceived();
     virtual void ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader);
     virtual void blockAckFrameReceived();
+    virtual void blockAckRequestInternalCollision();
 
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& protectedHeader);
     virtual void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
@@ -83,4 +84,3 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 } /* namespace inet */
 
 #endif
-

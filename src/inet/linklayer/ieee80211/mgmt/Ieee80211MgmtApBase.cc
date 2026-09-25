@@ -39,6 +39,8 @@ void Ieee80211MgmtApBase::initialize(int stage)
         radio = getModuleFromPar<cModule>(par("radioModule"), this);
         radio->subscribe(ieee80211RadioChannelChangedSignal, this);
     }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+        mib->setBssRateSet(localRateSet);
     else if (stage == INITSTAGE_LINK_LAYER)
         mib->bssData.bssid = mib->address;
     else if (stage == INITSTAGE_LAST && mib->isHtOperationSupported()) {

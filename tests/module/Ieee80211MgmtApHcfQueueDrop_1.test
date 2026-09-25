@@ -55,10 +55,7 @@ class TestIeee80211MgmtApHcfQueueDrop : public Ieee80211MgmtAp
         auto packet = new Packet("AssociationRequest");
         auto body = makeShared<Ieee80211AssociationRequestFrame>();
         body->setSSID("SSID");
-        Ieee80211SupportedRatesElement rates;
-        rates.numRates = 1;
-        rates.rate[0] = 1;
-        body->setSupportedRates(rates);
+        setSupportedRateElements(body);
         body->setChunkLength(B(1));
         packet->insertAtBack(body);
         auto header = makeShared<Ieee80211MgmtHeader>();
@@ -73,10 +70,7 @@ class TestIeee80211MgmtApHcfQueueDrop : public Ieee80211MgmtAp
         auto body = makeShared<Ieee80211ReassociationRequestFrame>();
         body->setSSID("SSID");
         body->setCurrentAP(currentAp);
-        Ieee80211SupportedRatesElement rates;
-        rates.numRates = 1;
-        rates.rate[0] = 1;
-        body->setSupportedRates(rates);
+        setSupportedRateElements(body);
         body->setChunkLength(B(1));
         packet->insertAtBack(body);
         auto header = makeShared<Ieee80211MgmtHeader>();

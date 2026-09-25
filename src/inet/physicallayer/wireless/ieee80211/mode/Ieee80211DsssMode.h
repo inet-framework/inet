@@ -98,6 +98,9 @@ class INET_API Ieee80211DsssMode : public Ieee80211ModeBase
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }
+    virtual bps getNonHtReferenceRate() const override { return dataMode->getNetBitrate(); }
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::DSSS_HRDSSS; }
+    virtual PreambleType getLegacyPreambleType() const override { return PreambleType::LONG; }
 
     virtual Hz getChannelSpacing() const { return MHz(5); }
     virtual Hz getBandwidth() const { return MHz(22); }
@@ -143,4 +146,3 @@ class INET_API Ieee80211DsssCompliantModes
 } // namespace inet
 
 #endif
-

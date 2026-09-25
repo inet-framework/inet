@@ -4,6 +4,167 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 TXOP and rate selection
+----------------------------------
+
+Management modules accept ``basicRates`` and ``operationalRates`` as lists
+with units, for example ``"6Mbps 12Mbps"``. ``"auto"`` retains the automatic
+policy. Automatic basic rates include only mandatory rates in the selected
+operational set. An empty string means a known empty set. Custom association frames
+must advertise support for every BSS basic rate. The AP rejects incomplete
+advertisements instead of silently assuming PHY support.
+
+The MIB stores accepted rate sets. Detailed management learns peer rates from
+accepted frames. Simplified stations use the AP's BSS policy and retain their
+separate local rate limits.
+
+Custom MAC implementations must implement ``IIeee80211ModeSetProvider``.
+Management queries this read-only catalog contract after link-layer initialization.
+The built-in ``Ieee80211Mac`` implements it through ``getModeSet()``.
+Management now starts at ``INITSTAGE_NETWORK_CONFIGURATION`` so the MAC mode
+set exists first. This moves beacon and association startup to a later stage.
+The different order of random draws can change results outside the TXOP examples.
+
+``IQosRateSelection::computeMode`` takes explicit ``startsTxop`` and
+``previousModeForReceiver`` arguments. Its optional ``useFastestMode`` flag
+requests the highest eligible rate for a permitted TXOP overrun.
+Explicit configured rates retain precedence. Selectors no longer own holder
+transmission history. Custom PHY modes must implement the non-HT reference
+rate, modulation-class, and legacy-preamble queries.
+
+The fastest-mode retry does not override a configured QoS rate during an overrun.
+IEEE 802.11 recommends a high rate for this case; it does not require a fixed-rate override.
+
+Custom ACK and RTS policies must provide the explicit response-mode timeout
+queries. ``IFrameSequence`` steps expose prepared mode, length, interval,
+and PPDU duration. Custom transmit callbacks must implement
+``transmissionStarting``; false cancels the pending packet before transmission.
+Custom contention implementations must support cancellation.
+
+``SingleProtectionMechanism`` no longer has a rate-selection module parameter.
+It reads the prepared plan. The former TXOP boundary stubs and selector
+``frameTransmitted`` history hooks are removed. Use the context's active plan
+and actual transmission history. Cancellation requires a sequence outcome.
+Prepared ``ReceiveStep`` construction takes the response values directly;
+it does not retain a pointer to the transmit step.
+
+HCF stop retains packets whose normal ACK or Block Ack wait was interrupted.
+Restart retries these packets with the Retry bit set. Administrative stop does
+not consume a retry attempt or report a failed transmission.
+
+HCF also retains Block Ack agreements and their absolute inactivity deadlines.
+Restart restores the earliest finite deadline across originator and recipient
+agreements. A deadline that expires during downtime triggers expiry at restart.
+Expiry removes the local agreement before HCF queues its timeout DELBA.
+The modeled stop and crash operations share this retention policy.
+
+Block Ack handlers retain pending DELBA transactions across stop and restart.
+Replacement ADDBA setup waits until the old DELBA receives an acknowledgment
+or reaches a terminal drop. Individual transmission attempts do not remove
+an agreement. Custom originator and recipient handlers must implement
+``processDelbaFrameFinished()``. HCF calls it for final acknowledgment,
+queue drop, or retry exhaustion. The existing management transaction tag
+identifies the local teardown across packet copies. Late terminal callbacks
+must not complete another teardown transaction.
+
+Custom Block Ack agreement handlers must implement
+``computeEarliestExpirationTime()``. It returns an absolute deadline, or
+``SIMTIME_MAX`` when no finite deadline exists. The callback
+``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` now takes no
+argument. It requests a timer refresh from both agreement owners.
+
+ADDBA response completion now only requests this timer refresh. A queued or
+retried response can complete after its agreement expires or a new agreement
+replaces it. The completion does not create or change an agreement.
+``RecipientBlockAckAgreementHandler::updateAgreement()`` is removed without
+a deprecation interval because its lookup can fail after expiry or select a
+replacement agreement. Its only state update had no consumer.
+``RecipientBlockAckAgreement::addbaResposneSent()`` and the protected
+``isAddbaResponseSent`` flag are also removed. Custom handlers must use
+``processTransmittedAddbaResp()`` for completion callbacks.
+
+ADDBA request completion also leaves agreements unchanged. A request can still
+retry after agreement removal. ``OriginatorBlockAckAgreement`` no longer exposes
+``getIsAddbaRequestSent()``, ``setIsAddbaRequestSent()``, or the protected
+``isAddbaRequestSent`` flag. This state also had no consumer. Its completion
+update is unsafe for removed or replacement agreements, so these symbols are
+removed without a deprecation interval. The
+``OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq()`` callback
+remains available for custom handlers.
+
+Response-rate overrides must match the primary response mode. A conflicting
+override now fails explicitly. Only DCF ``RateSelection`` provides
+``useNonstandardResponseModes`` to permit nonstandard response overrides.
+HCF ``QosRateSelection`` has no such option. For example, a conflicting
+``**.hcf.rateSelection.responseAckFrameBitrate`` fails when the selector first
+uses it. Remove conflicting overrides from QoS configurations.
+Response selection uses the BSS basic rates or the applicable mandatory rates,
+without the local operational-rate restriction used for data transmission.
+
+Explicit DCF experimental ACK/CTS overrides also bypass known peer-rate restrictions.
+Configure compatible experimental response modes at both peers.
+Unspecified overrides retain primary response selection and its receive-mode requirements.
+
+Custom recipient agreement handlers must implement ``blockAckRequestReceived()``
+for Basic Block Ack Requests. This callback updates the matching inactivity deadline
+before it requests the shared timer update. Block Ack data reception follows the same order.
+The recipient stores the timeout it accepts in its ADDBA response.
+A zero recipient policy disables expiry; a nonzero policy accepts the requested timeout.
+Requests that repeat the same dialog token retain the accepted interval and current deadline.
+They also retain the accepted buffer size, Block Ack policy, and A-MSDU support.
+A request with a new dialog token replaces the recipient agreement and receive buffer.
+This applies even when the recipient did not receive the old DELBA.
+DELBA carries no dialog token. The current model cannot distinguish a delayed
+DELBA for an earlier agreement from teardown of the current agreement with the
+same peer, TID, and direction. Such a DELBA terminates the replacement agreement
+and clears its receive buffer. A DELBA for the opposite direction does not clear
+that buffer.
+A new agreement stores the buffer size that its response advertises.
+Custom recipient handlers now use ``IRecipientBlockAckAgreementHandler::ICallback``
+for ``processReceivedAddbaRequest()`` and ``processDelbaFrameFinished()``.
+They call ``recipientAgreementReplaced()`` after they install the new agreement
+and before they release the previous one. HCF uses this callback to clear the
+old receive buffer and publish the agreement transition.
+
+``BlockAckRecord`` construction now requires the agreement's initial sequence number.
+The record uses this cyclic boundary to distinguish missing frames from old frames.
+Its missing-frame bitmap can cause retransmission where the old model silently removed data.
+
+Basic Block Ack receive buffers now resume a repeated BAR at the next expected sequence
+when its original start precedes data already delivered after retransmission.
+The scan still stops at an incomplete or missing frame.
+This progress rule is a model interpretation of the legacy receive-buffer procedure.
+Buffer release and delivery also preserve cyclic sequence order across 4095 to 0.
+``BlockAckReordering::ReorderBuffer`` is now a vector of sequence/fragment pairs in
+delivery order. Custom consumers must iterate that order instead of using map lookup.
+These corrections can change delivery counts and simulation fingerprints after packet loss.
+
+Local recipient DELBA now removes the corresponding Block Ack receive buffer.
+Custom ``IRecipientQosMacDataService`` implementations must implement
+``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
+The next ADDBA agreement starts with a new receive window.
+
+HCF now reports ``STOPPED`` and a finish signal when a start listener cancels a grant.
+Statistics based on starts minus finishes therefore return to zero after cancellation.
+AP disassociation and acknowledged refusal now commit station status before rate removal signals.
+The MIB already removes peer rate and HT state when it releases an association ID.
+
+The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
+candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then
+takes priority over queued data if a group awaits a request.
+With a zero limit, this can produce one BAR/Block Ack exchange per data frame.
+This is an INET policy choice. A positive limit permits threshold-based groups
+while data candidates remain available; a final BAR can still bypass the threshold.
+
+A positive TXOP limit no longer permits an
+arbitrarily oversized first exchange. Configure a legal fragment size or
+increase the limit when no supported exception applies.
+An unsupported oversized first exchange stops the simulation with a runtime error.
+A Duration reservation above 32767 microseconds also stops the simulation.
+
+These changes can alter EDCA reservations, response modes, and event timing.
+Recheck experiment results and fingerprints before use.
+
 IEEE 802.11 EDCA Management Recovery
 -----------------------------------
 

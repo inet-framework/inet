@@ -51,10 +51,7 @@ class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
         auto body = makeShared<Ieee80211ReassociationRequestFrame>();
         body->setCurrentAP(mib->address);
         body->setSSID("SSID");
-        Ieee80211SupportedRatesElement rates;
-        rates.numRates = 1;
-        rates.rate[0] = 1;
-        body->setSupportedRates(rates);
+        setSupportedRateElements(body);
         body->setHtCapabilitiesPresent(true);
         body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
         body->setChunkLength(B(1));

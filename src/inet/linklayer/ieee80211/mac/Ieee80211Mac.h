@@ -11,6 +11,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
+#include "inet/linklayer/ieee80211/mac/contract/IIeee80211ModeSetProvider.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -35,7 +36,7 @@ class Ieee80211MacHeader;
  * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
  * IRx, ITx, IContention and other interface classes).
  */
-class INET_API Ieee80211Mac : public MacProtocolBase
+class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211ModeSetProvider
 {
   public:
     static simsignal_t frameTransmissionOutcomeSignal;
@@ -102,6 +103,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
+    virtual const physicallayer::Ieee80211ModeSet *getModeSet() const override { return modeSet; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
@@ -115,4 +117,3 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 } // namespace inet
 
 #endif
-

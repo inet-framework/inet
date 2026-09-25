@@ -20,6 +20,12 @@
 namespace inet {
 namespace physicallayer {
 
+bps Ieee80211VhtMode::getNonHtReferenceRate() const
+{
+    return computeNonHtReferenceRate(dataMode->getModulation()->getSubcarrierModulation()->getConstellationSize(),
+            dataMode->getCode()->getForwardErrorCorrection()->getCodeRate());
+}
+
 OPP_THREAD_LOCAL const Ieee80211VhtCompliantModes Ieee80211VhtCompliantModes::singleton;
 
 Ieee80211VhtMode::Ieee80211VhtMode(const char *name, const Ieee80211VhtPreambleMode *preambleMode, const Ieee80211VhtDataMode *dataMode, const BandMode centerFrequencyMode) :
@@ -1072,4 +1078,3 @@ const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

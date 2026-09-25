@@ -23,6 +23,7 @@ class INET_API Ieee80211ErpOfdmMode : public Ieee80211OfdmMode
     Ieee80211ErpOfdmMode(const char *name, bool isErpOnly, const Ieee80211OfdmPreambleMode *preambleMode, const Ieee80211OfdmSignalMode *signalMode, const Ieee80211OfdmDataMode *dataMode);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ErpOfdmMode"; }
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::ERP_OFDM; }
 
     // The slot time is 20 μs in accordance with 17.3.3, except that an optional 9 μs
     // slot time may be used when the BSS consists of only ERP STAs.
@@ -62,4 +63,3 @@ class INET_API Ieee80211ErpOfdmCompliantModes
 } /* namespace inet */
 
 #endif
-

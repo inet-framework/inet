@@ -25,12 +25,16 @@ simple QosRateSelection extends SimpleModule
         string rateControlModule;
         string mibModule = default("^.^.^.mib");
 
+        // A positive value must be a legal group rate. Otherwise, retain the data or management
+        // rate if it is legal for group frames, or select the highest eligible basic rate.
         double multicastFrameBitrate @unit(bps) = default(-1bps);
 
         double responseAckFrameBitrate @unit(bps) = default(-1bps);
         double responseBlockAckFrameBitrate @unit(bps) = default(-1bps);
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
+        // A configured rate retains precedence during a permitted TXOP overrun.
+        // The fastest-mode retry applies only when no fixed rate selects the transmission mode.
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
@@ -47,4 +51,3 @@ simple QosRateSelection extends SimpleModule
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-

@@ -10,6 +10,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/TxopExchangePlan.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -21,6 +22,8 @@ class INET_API TxopProcedure : public ModeSetListener
   public:
     static simsignal_t txopStartedSignal;
     static simsignal_t txopEndedSignal;
+    static simsignal_t txopExchangeAdmittedSignal;
+    static simsignal_t txopExchangeRejectedSignal;
 
   public:
     // [...] transmitted under EDCA by a STA that initiates a TXOP, there are
@@ -34,6 +37,12 @@ class INET_API TxopProcedure : public ModeSetListener
   protected:
     simtime_t start = -1;
     simtime_t limit = -1;
+    simtime_t lastDuration = 0;
+    bool acquired = false;
+    AccessCategory accessCategory = AC_BE;
+    int dataOrManagementTransmissions = 0;
+    bool hasIdentity = false;
+    TxopFrameIdentity identity;
     ProtectionMechanism protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
 
   protected:
@@ -52,9 +61,13 @@ class INET_API TxopProcedure : public ModeSetListener
     virtual simtime_t getRemaining() const;
     virtual simtime_t getDuration() const;
 
-    virtual bool isFinalFragment(const Ptr<const Ieee80211MacHeader>& header) const;
-    virtual bool isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header) const;
-    virtual bool isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const;
+    virtual void transmissionStarted();
+    virtual void recordTransmission(const TxopExchangePlan& plan, bool dataOrManagement);
+    virtual TxopAdmissionDecision evaluate(const TxopExchangePlan& plan, simtime_t exchangeStart,
+            simtime_t txnavEnd, bool continuation, const TxopExchangePlan *projectedCurrent = nullptr) const;
+    virtual void commitAdmission(TxopExchangePlan& plan, const TxopAdmissionDecision& decision);
+    bool isAcquired() const { return acquired; }
+    bool hasStarted() const { return start >= SIMTIME_ZERO; }
 
     virtual ProtectionMechanism getProtectionMechanism() const { return protectionMechanism; }
 };
@@ -70,4 +83,3 @@ class INET_API TxopDurationFilter : public cObjectResultFilter
 } /* namespace inet */
 
 #endif
-

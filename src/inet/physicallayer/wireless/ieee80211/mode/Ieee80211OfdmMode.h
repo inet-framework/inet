@@ -152,6 +152,9 @@ class INET_API Ieee80211OfdmMode : public Ieee80211ModeBase, public Ieee80211Ofd
     virtual const Ieee80211OfdmPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211OfdmSignalMode *getHeaderMode() const override { return signalMode; }
     virtual const Ieee80211OfdmDataMode *getDataMode() const override { return dataMode; }
+    virtual bps getNonHtReferenceRate() const override { return dataMode->getNetBitrate(); }
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::OFDM; }
+    virtual PreambleType getLegacyPreambleType() const override { return PreambleType::NOT_APPLICABLE; }
     virtual const Ieee80211OfdmSignalMode *getSignalMode() const { return signalMode; }
 
     virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataLength); }
@@ -265,4 +268,3 @@ class INET_API Ieee80211OfdmCompliantModes
 } // namespace inet
 
 #endif
-

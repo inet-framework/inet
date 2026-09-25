@@ -1,0 +1,87 @@
+%description:
+IEEE Std 802.11-2024, 10.23.2.9: a zero-limit TXOP retains one fragment family.
+The next MSDU uses fresh contention. Duration covers only the admitted continuation.
+
+%file: N_TxopFragments.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+using namespace physicallayer;
+struct FragmentEvidence { simtime_t start; simtime_t duration; simtime_t ackEnd; int sequence = -1; };
+static TxopProcedure *fragmentTxop(const MatchContext& c)
+{
+    return check_and_cast<TxopProcedure *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")
+            ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 1)->getSubmodule("txopProcedure"));
+}
+Define_ProtocolTest(wifi_qos_txop_fragments)
+{
+    auto evidence = std::make_shared<FragmentEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
+    return ProtocolTest("wifi_qos_txop_fragments")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40 && ieee80211mac.moreFragments == true")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->start = fragmentTxop(c)->getStart();
+                evidence->sequence = header->getSequenceNumber().get();
+                return header->getFragmentNumber() == 0 && evidence->start == c.event.time &&
+                        header->getDurationField() > 2 * sifs;
+            }).within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) { evidence->ackEnd = c.event.time; return true; }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getSequenceNumber().get() == evidence->sequence && header->getFragmentNumber() == 1 &&
+                        fragmentTxop(c)->getStart() == evidence->start && c.event.time == evidence->ackEnd + sifs;
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40 && ieee80211mac.moreFragments == false")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->duration = header->getDurationField();
+                return header->getSequenceNumber().get() == evidence->sequence && fragmentTxop(c)->getStart() == evidence->start;
+            }).within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                return evidence->duration == sifs + c.event.packet->getTag<Ieee80211ModeInd>()->getMode()->getDuration(LENGTH_ACK);
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                return c.event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() != evidence->sequence &&
+                        fragmentTxop(c)->getStart() == c.event.time && c.event.time > evidence->ackEnd + sifs;
+            }).within(0.02));
+}
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_qos_txop_fragments"
+*.sta1.app[0].sendInterval = 1us
+*.sta1.app[0].stopTime = 1.000002s
+*.sta*.wlan[*].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.sta*.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 300B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.hcf.originatorBlockAckAgreementPolicy.typename = ""
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_txop_fragments: PASS

@@ -440,6 +440,9 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
                 simTime() + 3.5 * mgmt->getBeaconIntervalForTest());
 
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        const auto acceptedBssRates = staMib->getBssRateSet();
+        ASSERT(staMib->findPeerRateSet(address) != nullptr);
+        const auto acceptedPeerRates = *staMib->findPeerRateSet(address);
 
         // IEEE Std 802.11-2024, 11.3.5.4(f): a refused or timed-out
         // reassociation to another AP keeps the current association and
@@ -461,6 +464,9 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->isReassociationInProgressForTest());
         ASSERT(mgmt->reassociationConfirms == 1);
         ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+        ASSERT(staMib->getBssRateSet() == acceptedBssRates);
+        ASSERT(*staMib->findPeerRateSet(address) == acceptedPeerRates);
+        ASSERT(staMib->findPeerRateSet(probeAddress) == nullptr);
 
         staMib->setPeerHtCapabilities(probeAddress, staMib->localHtCapabilities, staMib->getHtOperation());
         mgmt->clearChangedChannelsForTest();
@@ -486,7 +492,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         dataHeader->setReceiverAddress(address);
         Packet ratePacket("rate-selection");
         const auto *dcfHtMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
-        const auto *qosHtMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
+        const auto *qosHtMode = qosRateSelection->computeMode(&ratePacket, dataHeader, true, nullptr);
         ASSERT(dcfHtMode->getHtMcsIndex() >= 0);
         ASSERT(qosHtMode->getHtMcsIndex() >= 0);
 
@@ -502,7 +508,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         sparseOperation.basicMcsSupported[0] = true;
         staMib->setPeerHtCapabilities(address, sparsePeer, sparseOperation);
         const auto *dcfSparseMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
-        const auto *qosSparseMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
+        const auto *qosSparseMode = qosRateSelection->computeMode(&ratePacket, dataHeader, true, nullptr);
         ASSERT(dcfSparseMode == qosSparseMode);
         ASSERT(dcfSparseMode->getHtMcsIndex() == 0);
         ASSERT(dcfSparseMode->getDataMode()->getBandwidth() == MHz(20));
@@ -512,9 +518,10 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // selection policy.
         staMib->removePeerHtCapabilities(address);
         const auto *dcfLegacyMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
-        const auto *qosLegacyMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
-        ASSERT(dcfLegacyMode == modeSet->getFastestLegacyOperationalMode());
-        ASSERT(qosLegacyMode == modeSet->getFastestLegacyOperationalMode());
+        const auto *qosLegacyMode = qosRateSelection->computeMode(&ratePacket, dataHeader, true, nullptr);
+        // The accepted peer advertises only 6 Mbps as a legacy rate.
+        ASSERT(dcfLegacyMode == modeSet->getMode(Mbps(6)));
+        ASSERT(qosLegacyMode == modeSet->getMode(Mbps(6)));
         ASSERT(dcfLegacyMode->getHtMcsIndex() < 0);
         ASSERT(qosLegacyMode->getHtMcsIndex() < 0);
 
@@ -538,12 +545,12 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         auto multicastHeader = makeShared<Ieee80211DataHeader>();
         multicastHeader->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
         const auto *dcfMulticastMode = dcfRateSelection->computeMode(&ratePacket, multicastHeader);
-        const auto *qosMulticastMode = qosRateSelection->computeMode(&ratePacket, multicastHeader, nullptr);
+        const auto *qosMulticastMode = qosRateSelection->computeMode(&ratePacket, multicastHeader, true, nullptr);
         ASSERT(dcfMulticastMode->getHtMcsIndex() >= 0);
         ASSERT(qosMulticastMode->getHtMcsIndex() >= 0);
         staMib->setPeerHtCapabilities(address, staMib->localHtCapabilities, staMib->getHtOperation());
         ASSERT(dcfRateSelection->computeMode(&ratePacket, dataHeader)->getHtMcsIndex() >= 0);
-        ASSERT(qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr)->getHtMcsIndex() >= 0);
+        ASSERT(qosRateSelection->computeMode(&ratePacket, dataHeader, true, nullptr)->getHtMcsIndex() >= 0);
 
         mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
@@ -569,6 +576,8 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->associationConfirms == 6);
         ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
         ASSERT(!mgmt->hasPeerHtState(address));
+        ASSERT(staMib->findPeerRateSet(address) == nullptr);
+        ASSERT(!staMib->getBssRateSet().supported.known);
         ASSERT(htNegotiationFailures == 2);
 
         // The same policy applies to reassociation responses, and its
@@ -582,6 +591,8 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->reassociationConfirms == 3);
         ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(probeAddress));
+        ASSERT(staMib->findPeerRateSet(probeAddress) != nullptr);
+        ASSERT(staMib->findPeerRateSet(address) == nullptr);
         ASSERT(htNegotiationFailures == 3);
         ASSERT(lastFailureWasReassociation);
 

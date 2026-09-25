@@ -47,6 +47,28 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         associationConfirms++;
     }
 
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        ASSERT(resultCode == PRC_REFUSED || resultCode == PRC_TIMEOUT);
+    }
+
+    void beginReassociation(const MacAddress& address)
+    {
+        Enter_Method("beginReassociation");
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr);
+        ap->isAuthenticated = true;
+        startReassociation(ap, SimTime(1, SIMTIME_MS));
+    }
+
+    void expireReassociation()
+    {
+        Enter_Method("expireReassociation");
+        ASSERT(assocTimeoutMsg != nullptr);
+        cancelEvent(assocTimeoutMsg);
+        handleTimer(assocTimeoutMsg);
+    }
+
     void setPrimaryChannelForTest(int channel)
     {
         Enter_Method("setPrimaryChannelForTest");
@@ -147,7 +169,8 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
             const std::vector<int>& supportedMcs = {0, 1, 2, 3, 4, 5, 6, 7},
             const std::vector<int>& basicMcs = {0, 1, 2, 3, 4, 5, 6, 7},
             simtime_t beaconInterval = SimTime(100, SIMTIME_MS),
-            bool malformedOperation = false)
+            bool malformedOperation = false,
+            const std::vector<int>& legacyRates = {6}, bool markBasic = false)
     {
         Enter_Method("deliverBeaconFrame");
         auto body = makeShared<Ieee80211BeaconFrame>();
@@ -156,8 +179,11 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         body->setChannelNumber(primaryChannel);
         body->setBeaconInterval(beaconInterval);
         Ieee80211SupportedRatesElement rates;
-        rates.numRates = 1;
-        rates.rate[0] = 6;
+        rates.numRates = legacyRates.size();
+        for (int i = 0; i < rates.numRates; ++i) {
+            rates.rate[i] = legacyRates[i];
+            rates.basicRate[i] = markBasic;
+        }
         body->setSupportedRates(rates);
 
         if (htPresent) {
@@ -206,6 +232,15 @@ class TestIeee80211MgmtStaBeaconUpdate : public Ieee80211MgmtSta
         header->setType(ST_BEACON);
         header->setTransmitterAddress(address);
         handleBeaconFrame(packet, header);
+    }
+
+    void disassociateForTest(const MacAddress& address)
+    {
+        Enter_Method("disassociateForTest");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        header->setAddress3(address);
+        handleDisassociationFrame(new Packet("Disassociation"), header);
     }
 
     void deliverProbeResponseFrame(const MacAddress& address,
@@ -283,7 +318,7 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
 
         auto checkUnicastMode = [&](Hz expectedBandwidth, bool expectedSgi, int expectedMcs) {
             const auto *dcfMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
-            const auto *qosMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
+            const auto *qosMode = qosRateSelection->computeMode(&ratePacket, dataHeader, true, nullptr);
             ASSERT(dcfMode == qosMode);
             if (expectedMcs >= 0) {
                 ASSERT(dcfMode->getHtMcsIndex() == expectedMcs);
@@ -292,7 +327,8 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
             }
             else {
                 ASSERT(dcfMode->getHtMcsIndex() < 0);
-                ASSERT(dcfMode == modeSet->getFastestLegacyOperationalMode());
+                // The accepted beacon advertises only 6 Mbps as a legacy rate.
+                ASSERT(dcfMode == modeSet->getMode(Mbps(6)));
             }
         };
 
@@ -413,6 +449,54 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
         ASSERT(mgmt->getAssocApForTest().htOperation.operatingChannelWidth == MHz(40));
         ASSERT(mgmt->getPeerHtState(apAddress)->negotiatedCapabilities.operation.operatingChannelWidth == MHz(40));
         checkUnicastMode(MHz(40), true, 7);
+
+        // Accepted current-BSS rates change response selection; foreign discovery does not.
+        auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        mgmt->deliverBeaconFrame(apAddress, false, 20, 0, false, false, {}, {},
+                newBeaconInterval, false, {6, 12}, true);
+        ASSERT(mib->getBssRateSet().basic.legacyRates == std::set<bps>({Mbps(6), Mbps(12)}));
+        auto revision = mib->getRateSetRevision();
+        mgmt->deliverBeaconFrame(apAddress, false, 20, 0, false, false, {}, {},
+                newBeaconInterval, false, {6, 12}, true);
+        ASSERT(mib->getRateSetRevision() == revision);
+        mgmt->deliverBeaconFrame(MacAddress("02:00:00:00:00:02"), false, 20, 0, false, false, {}, {},
+                newBeaconInterval, false, {6}, true);
+        ASSERT(mib->getRateSetRevision() == revision);
+        ASSERT(qosRateSelection->computeResponseMode(modeSet->getMode(Mbps(24)),
+                Ieee80211ResponseFrameKind::ACK, apAddress) == modeSet->getMode(Mbps(12)));
+
+        // A foreign target supplies its own response policy without replacing the current BSS.
+        const MacAddress targetAddress("02:00:00:00:00:02");
+        auto currentBss = mib->getBssRateSet();
+        auto currentPeer = *mib->findPeerRateSet(apAddress);
+        for (bool timeout : {false, true}) {
+            mgmt->beginReassociation(targetAddress);
+            ASSERT(mib->getBssRateSet() == currentBss);
+            ASSERT(*mib->findPeerRateSet(apAddress) == currentPeer);
+            ASSERT(qosRateSelection->computeResponseMode(modeSet->getMode(Mbps(24)),
+                    Ieee80211ResponseFrameKind::ACK, targetAddress) == modeSet->getMode(Mbps(6)));
+            ASSERT(dcfRateSelection->computeResponseMode(modeSet->getMode(Mbps(24)),
+                    Ieee80211ResponseFrameKind::ACK, apAddress) == modeSet->getMode(Mbps(12)));
+            if (timeout)
+                mgmt->expireReassociation();
+            else
+                mgmt->deliverResponse(targetAddress, true, SC_UNSPECIFIED);
+            ASSERT(mgmt->isAssociatedForTest());
+            ASSERT(mgmt->getAssocApForTest().address == apAddress);
+            ASSERT(mib->getBssRateSet() == currentBss);
+            ASSERT(*mib->findPeerRateSet(apAddress) == currentPeer);
+            ASSERT(mib->findPeerRateSet(targetAddress) == nullptr);
+        }
+
+        // Teardown clears accepted rates before the same address associates again.
+        mgmt->disassociateForTest(apAddress);
+        ASSERT(!mib->getBssRateSet().supported.known);
+        ASSERT(mib->findPeerRateSet(apAddress) == nullptr);
+        mgmt->prepareResponse(apAddress, false);
+        mgmt->deliverResponse(apAddress, false, SC_SUCCESSFUL, 20, 0, false, false);
+        ASSERT(mgmt->isAssociatedForTest());
+        ASSERT(mib->getBssRateSet().supported.legacyRates == std::set<bps>({Mbps(6)}));
+        ASSERT(mib->findPeerRateSet(apAddress) != nullptr);
 
         std::cout << "Subsequent Beacon updates authoritative associated-AP snapshot and MIB peer HT state.\n";
         std::cout << "Unicast rate selection follows dynamic channel-width, guard-interval, and MCS updates.\n";

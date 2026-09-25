@@ -44,6 +44,8 @@ class INET_API IFrameSequenceHandler
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
     virtual void processResponse(Packet *frame) = 0;
     virtual void transmissionComplete() = 0;
+    virtual void recordTransmission() = 0;
+    virtual void cancelFrameSequence(FrameSequenceOutcome outcome) = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;
 };
@@ -52,4 +54,3 @@ class INET_API IFrameSequenceHandler
 } // namespace inet
 
 #endif
-

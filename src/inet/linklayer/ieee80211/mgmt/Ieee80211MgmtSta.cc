@@ -278,9 +278,12 @@ void Ieee80211MgmtSta::clearAPList()
 {
     cancelPendingAssociation();
 
-    for (auto& elem : apList)
+    for (auto& elem : apList) {
         if (elem.authTimeoutMsg)
             cancelAndDelete(elem.authTimeoutMsg);
+        if (mib != nullptr && (!mib->bssStationData.isAssociated || elem.address != assocAP.address))
+            mib->removePeerRateSet(elem.address);
+    }
 
     apList.clear();
 }
@@ -324,6 +327,17 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
     sendDown(packet);
 }
 
+void Ieee80211MgmtSta::prepareTargetRateSet(const ApInfo *ap)
+{
+    if (mib->bssStationData.isAssociated && ap->address == assocAP.address)
+        return;
+    // IEEE Std 802.11-2024, 10.6.6.5.2: responses use the target BSS basic rates before association succeeds.
+    // Keep discovered legacy facts per AP; HT negotiation still requires a successful association response.
+    auto targetRateSet = makeRateSetState(ap->supportedRates, ap->extendedSupportedRatesPresent,
+            ap->extendedSupportedRates, nullptr, nullptr);
+    mib->installBssAndPeerRateSets(mib->getBssRateSet(), ap->address, targetRateSet);
+}
+
 void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
 {
     if (ap->authTimeoutMsg)
@@ -331,6 +345,7 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     if (ap->isAuthenticated)
         throw cRuntimeError("startAuthentication: already authenticated with AP address='%s'", ap->address.str().c_str());
 
+    prepareTargetRateSet(ap);
     changeChannel(ap->channel);
 
     EV << "Sending initial Authentication frame with seqNum=1\n";
@@ -357,6 +372,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     if (!ap->isAuthenticated)
         throw cRuntimeError("startAssociation: not yet authenticated with AP address='%s'", ap->address.str().c_str());
 
+    prepareTargetRateSet(ap);
     // switch to that channel
     changeChannel(ap->channel);
 
@@ -382,6 +398,7 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
         throw cRuntimeError("startReassociation: not associated or association currently in progress");
     if (!ap->isAuthenticated)
         throw cRuntimeError("startReassociation: not authenticated with AP address='%s'", ap->address.str().c_str());
+    prepareTargetRateSet(ap);
     changeChannel(ap->channel);
     const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
     body->setCurrentAP(assocAP.address);
@@ -623,6 +640,8 @@ void Ieee80211MgmtSta::clearCurrentAssociation()
     ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
     mib->removePeerHtCapabilities(assocAP.address);
+    mib->removePeerRateSet(assocAP.address);
+    mib->clearBssRateSet();
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
@@ -826,6 +845,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
             pendingAp->authTimeoutMsg = nullptr;
         }
         mib->removePeerHtCapabilities(address);
+        mib->removePeerRateSet(address);
         cancelPendingAssociation();
         if (pendingReassociation)
             sendReassociationConfirm(pendingAp, PRC_REFUSED);
@@ -851,6 +871,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
     mib->removePeerHtCapabilities(address);
+    mib->removePeerRateSet(address);
     delete packet;
 }
 
@@ -900,6 +921,8 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
     Ieee80211HtCapabilities responseHtCapabilities;
     Ieee80211HtOperation responseHtOperation;
     std::string responseHtReason;
+    Ieee80211RateSetState responseRateSet;
+    Ieee80211RateSetState bssRateSet;
     const auto& channelInd = packet->findTag<Ieee80211ChannelInd>();
     const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
     const auto *band = receivedChannel != nullptr ? receivedChannel->getBand() : nullptr;
@@ -914,6 +937,15 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
                 "successful HT association response has no received channel indication" :
                 "HT Operation primary channel does not match the received channel";
     }
+    responseRateSet = makeRateSetState(responseBody->getSupportedRates(),
+            responseBody->getExtendedSupportedRatesPresent(), responseBody->getExtendedSupportedRates(),
+            responseHtStatus == HtAssociationResponseStatus::VALID_HT ? &responseHtCapabilities : nullptr,
+            responseHtStatus == HtAssociationResponseStatus::VALID_HT ? &responseHtOperation : nullptr);
+    // The accepted response, rather than an older scan record, defines current BSS rates.
+    bssRateSet = responseRateSet;
+    for (auto rate : bssRateSet.basic.legacyRates)
+        if (mib->getLocalRateSet().supported.legacyRates.count(rate) == 0)
+            statusCode = SC_DATARATE_UNSUP;
     delete packet;
 
     cancelPendingAssociation();
@@ -924,6 +956,8 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
             handleReassociationFailure(ap);
         else if (!mib->bssStationData.isAssociated || assocAP.address != ap->address)
             mib->removePeerHtCapabilities(ap->address);
+        if (!mib->bssStationData.isAssociated || assocAP.address != ap->address)
+            mib->removePeerRateSet(ap->address);
     }
     else {
         EV << "Association successful, AP address=" << ap->address << "\n";
@@ -932,6 +966,7 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
             mib->bssStationData.isAssociated = false;
             mib->removePeerHtCapabilities(assocAP.address);
+            mib->removePeerRateSet(assocAP.address);
             cancelAndDelete(assocAP.beaconTimeoutMsg);
             assocAP.beaconTimeoutMsg = nullptr;
             assocAP = AssociatedApInfo();
@@ -958,6 +993,7 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
             }
         }
 
+        mib->installBssAndPeerRateSets(bssRateSet, ap->address, responseRateSet);
         emit(l2AssociatedSignal, myIface, ap);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
@@ -1062,6 +1098,7 @@ void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
         disassociate();
     else {
         mib->removePeerHtCapabilities(ap->address);
+        mib->removePeerRateSet(ap->address);
         if (mib->bssStationData.isAssociated)
             changeChannel(assocAP.channel);
     }
@@ -1226,6 +1263,21 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     if (signalPowerInd != nullptr)
         candidate.rxPower = signalPowerInd->getPower().get<W>();
 
+    bool currentAssociatedAp = mib != nullptr && mib->bssStationData.isAssociated && address == assocAP.address;
+    bool isBeacon = header->getType() == ST_BEACON ||
+            (header->getType() != ST_PROBERESPONSE && dynamicPtrCast<const Ieee80211ProbeResponseFrame>(body) == nullptr);
+    Ieee80211RateSetState bssRateSet;
+    if (currentAssociatedAp && isBeacon) {
+        bssRateSet = makeRateSetState(candidate.supportedRates, candidate.extendedSupportedRatesPresent,
+                candidate.extendedSupportedRates, nullptr, nullptr);
+        for (auto rate : bssRateSet.basic.legacyRates) {
+            if (mib->getLocalRateSet().supported.legacyRates.count(rate) == 0) {
+                EV_WARN << "Rejecting active beacon with unsupported basic legacy rate " << rate << endl;
+                return false;
+            }
+        }
+    }
+
     if (ap == nullptr) {
         apList.push_back(ApInfo());
         ap = &apList.back();
@@ -1249,9 +1301,6 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->isAuthenticated = candidate.isAuthenticated;
     ap->authSeqExpected = candidate.authSeqExpected;
     ap->authTimeoutMsg = candidate.authTimeoutMsg;
-    bool currentAssociatedAp = mib != nullptr && mib->bssStationData.isAssociated && address == assocAP.address;
-    bool isBeacon = header->getType() == ST_BEACON ||
-            (header->getType() != ST_PROBERESPONSE && dynamicPtrCast<const Ieee80211ProbeResponseFrame>(body) == nullptr);
     if (currentAssociatedAp && isBeacon) {
         (ApInfo&)assocAP = *ap;
         mib->bssData.ssid = ap->ssid;
@@ -1261,6 +1310,8 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
                     negotiated.localTxPeerRx.valid && negotiated.localRxPeerTx.valid) {
                 EV_INFO << "Refreshing authoritative HT state for associated AP address=" << address << "\n";
                 mib->setPeerHtCapabilities(address, candidate.htCapabilities, candidate.htOperation);
+                bssRateSet = makeRateSetState(candidate.supportedRates, candidate.extendedSupportedRatesPresent,
+                        candidate.extendedSupportedRates, &candidate.htCapabilities, &candidate.htOperation);
             }
             else {
                 EV_WARN << "Beacon from associated AP has unusable HT advertisement: removing peer HT state for AP address=" << address << "\n";
@@ -1271,6 +1322,7 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
             EV_INFO << "Beacon from associated AP has no usable HT advertisement or STA is legacy: removing peer HT state for AP address=" << address << "\n";
             mib->removePeerHtCapabilities(address);
         }
+        mib->installBssAndPeerRateSets(bssRateSet, address, bssRateSet);
     }
     else if (signalPowerInd != nullptr && currentAp)
         assocAP.rxPower = candidate.rxPower;

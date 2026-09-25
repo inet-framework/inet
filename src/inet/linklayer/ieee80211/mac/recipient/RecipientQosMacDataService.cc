@@ -67,7 +67,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         return std::vector<Packet *>();
     }
     BlockAckReordering::ReorderBuffer frames;
-    frames[dataHeader->getSequenceNumber().get()].push_back(dataPacket);
+    frames.emplace_back(dataHeader->getSequenceNumber().get(), BlockAckReordering::Fragments{dataPacket});
     if (blockAckReordering && blockAckAgreementHandler) {
         Tid tid = dataHeader->getTid();
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();
@@ -117,13 +117,13 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     Enter_Method("managementFrameReceived");
     take(mgmtPacket);
     // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader)) {
+        delete mgmtPacket;
         return std::vector<Packet *>();
+    }
     if (basicReassembly) { // FIXME defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
-    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
-        blockAckReordering->processReceivedDelba(delba);
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
     if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
         delete mgmtPacket;
@@ -131,6 +131,12 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     }
     else
         return std::vector<Packet *>({ mgmtPacket });
+}
+
+void RecipientQosMacDataService::blockAckAgreementTerminated(Tid tid, const MacAddress& originatorAddr)
+{
+    Enter_Method("blockAckAgreementTerminated");
+    blockAckReordering->removeReceiveBuffer(tid, originatorAddr);
 }
 
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
@@ -196,4 +202,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

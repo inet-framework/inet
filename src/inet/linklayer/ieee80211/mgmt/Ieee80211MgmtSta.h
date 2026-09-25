@@ -152,6 +152,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     virtual void startAssociation(ApInfo *ap, simtime_t timeout);
     virtual void startReassociation(ApInfo *ap, simtime_t timeout);
 
+    /** Publishes target AP rates without replacing the current association's BSS policy. */
+    void prepareTargetRateSet(const ApInfo *ap);
+
     /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
     virtual ApInfo *lookupAP(const MacAddress& address);
 

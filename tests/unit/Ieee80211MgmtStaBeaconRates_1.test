@@ -1,0 +1,168 @@
+%description:
+Rejected active beacons preserve the cached AP, associated snapshot, rate sets,
+and beacon deadline. Valid beacons and probe responses still update discovery.
+
+%includes:
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211MgmtStaBeaconRates_1 {
+class TestSta : public Ieee80211MgmtSta
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            mib.reference(this, "mibModule", true);
+    }
+
+  public:
+    void run()
+    {
+        Enter_Method("run");
+        const MacAddress address("02:00:00:00:00:01");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        rates.basicRate[0] = true;
+        Ieee80211ExtendedSupportedRatesElement extended;
+        auto initialRates = makeRateSetState(rates, false, extended, nullptr, nullptr);
+        mib->setLocalRateSet(initialRates);
+        mib->installBssAndPeerRateSets(initialRates, address, initialRates);
+        mib->bssStationData.isAssociated = true;
+        mib->bssData.ssid = "accepted";
+        assocAP.address = address;
+        assocAP.ssid = "accepted";
+        assocAP.channel = 0;
+        assocAP.supportedRates = rates;
+        assocAP.beaconInterval = SimTime(100, SIMTIME_MS);
+        assocAP.rxPower = mW(1).get<W>();
+        assocAP.isAuthenticated = true;
+        apList.push_back(assocAP);
+        assocAP.beaconTimeoutMsg = new cMessage("beacon-timeout");
+        scheduleAfter(SimTime(1), assocAP.beaconTimeoutMsg);
+        auto deadline = assocAP.beaconTimeoutMsg->getArrivalTime();
+        auto revision = mib->getRateSetRevision();
+
+        auto deliver = [&](bool probe, bool unsupported, bool extendedRate) {
+            Ptr<Ieee80211BeaconFrame> body = probe ?
+                    staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) :
+                    makeShared<Ieee80211BeaconFrame>();
+            body->setSSID("candidate");
+            body->setChannelNumber(6);
+            body->setBeaconInterval(SimTime(200, SIMTIME_MS));
+            auto candidateRates = rates;
+            candidateRates.rate[0] = unsupported && !extendedRate ? 12 : 6;
+            body->setSupportedRates(candidateRates);
+            if (extendedRate) {
+                auto candidateExtended = extended;
+                candidateExtended.numRates = 1;
+                candidateExtended.rate[0] = unsupported ? 12 : 6;
+                candidateExtended.basicRate[0] = true;
+                body->setExtendedSupportedRatesPresent(true);
+                body->setExtendedSupportedRates(candidateExtended);
+            }
+            body->setChunkLength(B(64));
+            auto packet = new Packet("advertisement", body);
+            packet->addTag<SignalPowerInd>()->setPower(mW(7));
+            Ieee80211Channel channel(&Ieee80211CompliantBands::band2_4GHz, 0);
+            packet->addTag<Ieee80211ChannelInd>()->setChannel(&channel);
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(probe ? ST_PROBERESPONSE : ST_BEACON);
+            header->setTransmitterAddress(address);
+            if (probe)
+                handleProbeResponseFrame(packet, header);
+            else
+                handleBeaconFrame(packet, header);
+        };
+        auto checkSnapshot = [&](const ApInfo& ap) {
+            ASSERT(ap.address == address);
+            ASSERT(ap.ssid == "accepted");
+            ASSERT(ap.channel == 0);
+            ASSERT(ap.supportedRates.numRates == 1);
+            ASSERT(ap.supportedRates.rate[0] == 6);
+            ASSERT(ap.supportedRates.basicRate[0]);
+            ASSERT(!ap.extendedSupportedRatesPresent);
+            ASSERT(!ap.htCapabilitiesPresent && !ap.htOperationPresent);
+            ASSERT(ap.beaconInterval == SimTime(100, SIMTIME_MS));
+            ASSERT(ap.rxPower == mW(1).get<W>());
+            ASSERT(ap.isAuthenticated);
+            ASSERT(ap.authSeqExpected == -1 && ap.authTimeoutMsg == nullptr);
+        };
+        // Both rate elements must reject before an update or insertion.
+        for (bool cached : {true, false}) {
+            if (!cached)
+                apList.clear();
+            for (bool extendedRate : {false, true}) {
+                deliver(false, true, extendedRate);
+                ASSERT(apList.size() == (cached ? 1 : 0));
+                if (cached)
+                    checkSnapshot(*lookupAP(address));
+                checkSnapshot(assocAP);
+                ASSERT(mib->bssStationData.isAssociated);
+                ASSERT(mib->bssData.ssid == "accepted");
+                ASSERT(mib->getBssRateSet() == initialRates);
+                ASSERT(*mib->findPeerRateSet(address) == initialRates);
+                ASSERT(mib->getRateSetRevision() == revision);
+                ASSERT(assocAP.beaconTimeoutMsg->getArrivalTime() == deadline);
+            }
+        }
+        // A valid beacon updates both snapshots and refreshes the deadline.
+        deliver(false, false, false);
+        ASSERT(lookupAP(address)->channel == 5);
+        ASSERT(assocAP.channel == 5);
+        ASSERT(assocAP.ssid == "candidate");
+        ASSERT(assocAP.beaconInterval == SimTime(200, SIMTIME_MS));
+        ASSERT(assocAP.beaconTimeoutMsg->getArrivalTime() == simTime() + SimTime(700, SIMTIME_MS));
+        auto acceptedDeadline = assocAP.beaconTimeoutMsg->getArrivalTime();
+        revision = mib->getRateSetRevision();
+        // Probe responses remain discovery input, not active beacon updates.
+        deliver(true, true, false);
+        ASSERT(lookupAP(address)->supportedRates.rate[0] == 12);
+        ASSERT(assocAP.supportedRates.rate[0] == 6);
+        ASSERT(mib->getRateSetRevision() == revision);
+        ASSERT(assocAP.beaconTimeoutMsg->getArrivalTime() == acceptedDeadline);
+        cancelEvent(assocAP.beaconTimeoutMsg);
+    }
+};
+Define_Module(TestSta);
+}
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+simple TestSta extends SimpleModule
+{
+    parameters:
+        @class(TestSta);
+        string mibModule = "^.mib";
+}
+
+network TestNetwork
+{
+    submodules:
+        mib: Ieee80211Mib;
+        sta: TestSta;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+check_and_cast<Ieee80211MgmtStaBeaconRates_1::TestSta *>(getModuleByPath("sta"))->run();
+EV << "PASS" << endl;
+
+%contains: stdout
+PASS

@@ -6,6 +6,22 @@ INET-4.7.x (in development)
 
 Notable backward incompatible changes are the following:
 
+IEEE 802.11 Block Ack teardown now completes before replacement setup.
+Late DELBA transmission callbacks cannot remove a replacement agreement.
+Custom agreement handlers must implement processDelbaFrameFinished().
+Recipient handlers must also implement blockAckRequestReceived().
+Recipient activity now refreshes the accepted inactivity timeout.
+Recipient timeout DELBA also removes the old Block Ack receive buffer.
+A replacement agreement can deliver frames from its new sequence window.
+An accepted ADDBA request with a new dialog token replaces the old recipient agreement.
+A zero accepted timeout disables expiry at both peers.
+Block Ack records preserve missing frames across empty records and sequence wrap.
+Repeated Block Ack Requests release complete buffered data after a lost frame retransmits.
+Block Ack buffer release and delivery preserve sequence order across 4095 to 0.
+An internal collision with a pending BAR preserves the outstanding data.
+Canceled HCF grants now emit a matching sequence finish signal.
+AP teardown publishes authenticated status before peer-rate removal signals.
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate
@@ -293,6 +309,42 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IEEE 802.11 prepared exchanges and rate selection
+
+   The MAC now prepares complete exchanges before transmission opportunity
+   (TXOP) admission. The Duration reservation includes the selected response.
+   Basic, operational, and peer rate sets constrain transmission choices.
+   Invalid response overrides fail explicitly. These changes can alter results
+   and fingerprints.
+   An oversized first exchange above a positive TXOP limit now stops the
+   simulation unless a supported exception applies. A Duration reservation
+   above 32767 microseconds also causes a runtime error.
+   Zero-limit Block Ack traffic can now send one BAR/Block Ack exchange per
+   data frame, even with queued data. See the migration guide for this policy.
+
+   HCF restart preserves Block Ack inactivity deadlines. Expiry uses the
+   earliest absolute deadline across both agreement owners. Agreements that
+   expire during downtime trigger timeout DELBA after restart.
+   Queued or retried ADDBA requests and responses can complete after expiry
+   without a crash or a change to a replacement agreement. The unused
+   transmission-state flags and recipient update hook are removed.
+   See the migration guide for custom handler changes.
+
+   Custom frame sequences, rate selectors, acknowledgment policies, contention
+   implementations, and transmission callbacks require API updates.
+   Prepared receive steps retain response values without a transmit-step pointer.
+   Custom MAC implementations must provide IIeee80211ModeSetProvider for
+   management rate initialization. See the migration guide for details.
+
+   Stop retains packets with interrupted acknowledgment waits for retry after
+   restart. This lifecycle transition does not consume a retry attempt.
+
+   Detailed stations now use the target AP's advertised rates before
+   authentication and association. Failed reassociation preserves the current
+   BSS rate policy. ACK and CTS predictions use the remote peer's rate context.
+   Explicit rates for later RTS frames now accept the standard mandatory-rate
+   fallback. Initial control frames still require an eligible basic rate.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -347,6 +399,19 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. IEEE 802.11 Block Ack responses retain accepted agreement limits
+
+   An ADDBA retry with the same dialog token receives the buffer size and policy
+   of the existing agreement. A new dialog replaces the old recipient agreement
+   and receive buffer, even if the old DELBA did not arrive. A new agreement
+   stores the accepted buffer size when the recipient limits the requested size.
+   The sender and recipient therefore use the same Block Ack window.
+
+7. IEEE 802.11 automatic basic rates follow the selected operational rates
+
+   A station with ``basicRates="auto"`` can now start when ``operationalRates``
+   excludes a mandatory PHY rate. Its basic set contains only mandatory rates
+   that remain operational. The old combination failed at initialization.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

@@ -30,6 +30,7 @@ class INET_API Contention : public SimpleModule, public IContention
   protected:
     Ieee80211Mac *mac = nullptr;
     ICallback *callback = nullptr;
+    uint64_t cancellationRevision = 0;
     cMessage *startTxEvent = nullptr;
     cMessage *channelGrantedEvent = nullptr;
 
@@ -74,10 +75,10 @@ class INET_API Contention : public SimpleModule, public IContention
     virtual void mediumStateChanged(bool mediumFree) override;
     virtual void corruptedFrameReceived() override;
     virtual bool isContentionInProgress() override { return fsm.getState() != IDLE; }
+    virtual void cancelContention() override;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

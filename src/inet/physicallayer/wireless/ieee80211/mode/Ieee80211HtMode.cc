@@ -21,6 +21,12 @@ namespace physicallayer {
 
 OPP_THREAD_LOCAL const Ieee80211HtCompliantModes Ieee80211HtCompliantModes::singleton;
 
+bps Ieee80211HtMode::getNonHtReferenceRate() const
+{
+    return computeNonHtReferenceRate(dataMode->getModulation()->getSubcarrierModulation()->getConstellationSize(),
+            dataMode->getCode()->getForwardErrorCorrection()->getCodeRate());
+}
+
 Ieee80211HtMode::Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode *preambleMode, const Ieee80211HtDataMode *dataMode, const BandMode centerFrequencyMode) :
     Ieee80211ModeBase(name),
     preambleMode(preambleMode),
@@ -544,4 +550,3 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW40MHz([](){ return new Ie
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

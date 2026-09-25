@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
+namespace physicallayer { class IIeee80211Mode; }
 namespace ieee80211 {
 
 class INET_API IRtsPolicy
@@ -21,6 +22,7 @@ class INET_API IRtsPolicy
 
     virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const = 0;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
+    virtual simtime_t getCtsTimeout(const physicallayer::IIeee80211Mode *responseMode) const = 0;
     virtual int getRtsThreshold() const = 0;
 };
 
@@ -28,4 +30,3 @@ class INET_API IRtsPolicy
 } // namespace inet
 
 #endif
-

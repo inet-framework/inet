@@ -1,0 +1,128 @@
+%description:
+Explicit experimental response modes agree at the sender and receiver.
+Strict selection rejects invalid overrides and missing receive-mode metadata.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211RateSelectionNonstandard_1 {
+class TestRateSelection : public RateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            mib.reference(this, "mibModule", true);
+            modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("g(mixed)"));
+        }
+    }
+  public:
+    void configure(bool nonstandard, const IIeee80211Mode *ack, const IIeee80211Mode *cts)
+    {
+        useNonstandardResponseModes = nonstandard;
+        responseAckFrameMode = ack;
+        responseCtsFrameMode = cts;
+    }
+};
+Define_Module(TestRateSelection);
+}
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+simple TestRateSelection extends SimpleModule
+{
+    parameters:
+        @class(TestRateSelection);
+        string mibModule = "^.mib";
+}
+
+network TestNetwork
+{
+    submodules:
+        mib: Ieee80211Mib;
+        selection: TestRateSelection;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+using namespace Ieee80211RateSelectionNonstandard_1;
+auto selection = check_and_cast<TestRateSelection *>(getModuleByPath("selection"));
+auto modes = Ieee80211ModeSet::getModeSet("g(mixed)");
+auto rate1 = modes->getMode(Mbps(1));
+auto rate6 = modes->getMode(Mbps(6));
+auto rate24 = modes->getMode(Mbps(24));
+auto rate54 = modes->getMode(Mbps(54));
+MacAddress peer("02:00:00:00:00:02");
+auto data = makeShared<Ieee80211DataHeader>();
+data->setTransmitterAddress(peer);
+auto rts = makeShared<Ieee80211RtsFrame>();
+rts->setTransmitterAddress(peer);
+Packet packet("eliciting");
+
+auto rejects = [](auto operation) {
+    bool rejected = false;
+    try { operation(); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+};
+
+// Strict selection requires receive-mode metadata.
+selection->configure(false, rate1, rate6);
+rejects([&] { selection->computeResponseAckFrameMode(&packet, data); });
+rejects([&] { selection->computeResponseCtsFrameMode(&packet, rts); });
+
+// Explicit experimental rates require no receive-mode metadata.
+selection->configure(true, rate1, rate6);
+ASSERT(selection->computeResponseAckFrameMode(&packet, data) == rate1);
+ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate6);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::ACK, peer) == rate1);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::CTS, peer) == rate6);
+
+// Explicit experimental overrides also bypass known peer capability restrictions.
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+Ieee80211RateSetState peerRates;
+peerRates.supported.known = true;
+peerRates.supported.legacyRates = {Mbps(6)};
+mib->installBssAndPeerRateSets(mib->getBssRateSet(), peer, peerRates);
+selection->configure(true, rate24, rate24);
+ASSERT(selection->computeResponseAckFrameMode(&packet, data) == rate24);
+ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::ACK, peer) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::CTS, peer) == rate24);
+mib->removePeerRateSet(peer);
+
+// An unspecified override retains automatic selection, even with the option enabled.
+selection->configure(true, nullptr, nullptr);
+rejects([&] { selection->computeResponseAckFrameMode(&packet, data); });
+rejects([&] { selection->computeResponseCtsFrameMode(&packet, rts); });
+packet.addTag<Ieee80211ModeInd>()->setMode(rate54);
+ASSERT(selection->computeResponseAckFrameMode(&packet, data) == rate24);
+ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::ACK, peer) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::CTS, peer) == rate24);
+
+// Strict selection rejects explicit rates that differ from the primary rate.
+selection->configure(false, rate1, rate6);
+rejects([&] { selection->computeResponseAckFrameMode(&packet, data); });
+rejects([&] { selection->computeResponseCtsFrameMode(&packet, rts); });
+selection->configure(false, rate24, rate24);
+ASSERT(selection->computeResponseAckFrameMode(&packet, data) == rate24);
+ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate24);
+EV << "PASS" << endl;
+
+%contains: stdout
+PASS

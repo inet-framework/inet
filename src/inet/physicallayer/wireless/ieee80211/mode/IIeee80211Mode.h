@@ -51,6 +51,18 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
 class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 {
   public:
+    // IEEE Std 802.11-2024, Table 10-9. UNKNOWN denotes an unsupported class.
+    enum class ModulationClass { UNKNOWN, DSSS_HRDSSS, OFDM, ERP_OFDM, HT, VHT };
+    enum class PreambleType { UNKNOWN, LONG, SHORT, NOT_APPLICABLE };
+
+    virtual ModulationClass getModulationClass() const = 0;
+    // LONG/SHORT describe the legacy DSSS/HR-DSSS preamble only.
+    virtual PreambleType getLegacyPreambleType() const = 0;
+
+    // Returns the response-rate bound in bps, or bps(NaN) for an unsupported mapping.
+    // HT/VHT use IEEE Std 802.11-2024, 10.6.11 and Table 10-10.
+    // Supported legacy modes return their data rate. The query changes no state.
+    virtual bps getNonHtReferenceRate() const = 0;
     // Returns the HT MCS index represented by this mode, or -1 for modes from
     // other PHY generations. HT capability derivation must use this typed
     // mode contract rather than concrete-type or name-based inference.
@@ -84,4 +96,3 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 } // namespace inet
 
 #endif
-

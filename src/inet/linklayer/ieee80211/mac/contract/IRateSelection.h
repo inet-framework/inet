@@ -16,6 +16,12 @@
 namespace inet {
 namespace ieee80211 {
 
+enum class Ieee80211ResponseFrameKind {
+    CTS,
+    ACK,
+    BASIC_BLOCK_ACK
+};
+
 /**
  * Abstract interface for rate selection. Rate selection decides what bit rate
  * (or MCS) should be used for any particular frame. The rules of rate selection
@@ -29,6 +35,10 @@ class INET_API IRateSelection
   public:
     virtual ~IRateSelection() {}
 
+    virtual const physicallayer::IIeee80211Mode *computeResponseMode(
+            const physicallayer::IIeee80211Mode *elicitingMode,
+            Ieee80211ResponseFrameKind responseKind, const MacAddress& receiver) = 0;
+
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) = 0;
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
 
@@ -39,4 +49,3 @@ class INET_API IRateSelection
 } // namespace inet
 
 #endif
-

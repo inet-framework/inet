@@ -21,6 +21,8 @@ simple Ieee80211MgmtAdhoc extends SimpleModule like IIeee80211Mgmt
         string mibModule;
         string macModule;               // The path to the MAC module
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string basicRates = default("auto");
+        string operationalRates = default("auto");
         @display("i=block/cogwheel");
     gates:
         input macIn @labels(Ieee80211MacHeader);

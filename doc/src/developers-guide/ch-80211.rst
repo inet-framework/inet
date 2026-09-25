@@ -635,9 +635,63 @@ configured bit rates, the mode set, the peer's capabilities in the MIB, and
 the optional rate control. Rate control (``IRateControl``) adapts the data
 rate per receiver from the success and failure feedback that the
 coordination function gives it. The protection mechanism computes the
-duration field of every frame from the same rate selection, so that the NAV
-of the other stations covers the rest of the exchange. EDCA adds the block
-ack response rate and a TXOP-aware rule for control frames.
+duration field from the selected modes. EDCA prepares each complete exchange
+before admission. The protection mechanism reads those prepared steps.
+It does not select modes again or change packet tags during an estimate.
+
+Prepared EDCA exchanges
+^^^^^^^^^^^^^^^^^^^^^^^
+
+``TxopExchangePlanner`` prepares data, management, RTS/CTS, and explicit
+Basic BAR/BA exchanges. ``FrameSequenceContext`` owns their step objects.
+Admission and execution use the same objects. Only activated steps enter
+execution history. Data steps borrow packets from ``InProgressFrames``;
+control steps own their control packets. Receive steps own actual responses.
+
+Each prepared step stores its PHY mode, length, interval, and PPDU duration.
+The response timeout remains separate from response airtime.
+``TxopProcedure`` checks the complete exchange against the limit.
+HCF owns one TXNAV reservation timer across access categories.
+It updates TXNAV from the actual transmitted Duration field.
+TXOP accounting starts at the first actual holder transmission.
+
+The context stores actual holder modes by receiver. HCF records each mode
+before the handler advances. Recipient responses do not enter this history.
+A later RTS requires prior history for its receiver. Without that history,
+the candidate waits for fresh contention. A later BAR uses its separate
+peer-supported rate rule.
+
+The planner prepares at most one continuation for single protection.
+A final normal-ACK frame reserves SIFS plus ACK airtime.
+A final group or No-ACK frame reserves zero. BAR reserves its BA response.
+Duration rounds upward to whole microseconds before serialization.
+A rejected continuation remains available for a later TXOP.
+
+Management installs accepted local, BSS, and peer rate sets in the MIB.
+Unknown sets differ from known empty sets. Rate selectors read these sets
+through shared helpers. Primary response selection uses the eliciting mode,
+including the PHY's non-HT reference rate for HT and VHT.
+Explicit response overrides must equal this predictable primary response.
+
+A rate-state revision invalidates a prepared exchange before transmission.
+HCF cancels the pending send and ends the sequence with an explicit outcome.
+Stop and crash also cancel pending contention, interframe waits, and response
+waits. Sequence outcomes distinguish completion, response failure, rate-state
+change, and stop. Required state updates use direct calls, not signal listeners.
+
+Admission signals expose immutable ``TxopAdmissionDetails`` during the callback.
+They identify the access category, packet, fragment family, time bounds, and reason.
+Trial calculations emit no selection event. ``datarateSelected`` describes an
+actual transmission commitment. MIB rate-change notifications follow the complete
+state update. Identical advertisements do not emit a rate-change notification.
+
+The implementation follows IEEE Std 802.11-2024 sections 9.2.5.2, 10.6.6,
+10.6.11, 10.23.2.8, and 10.23.2.9 for these supported exchanges.
+It does not add multiple protection, CF-End, HCCA, compressed or implicit BA,
+A-MPDU transmission, or VHT capability negotiation.
+An oversized initial unicast exchange without a permitted exception fails
+explicitly. Automatic fragmentation from an airtime budget remains unsupported.
+Configure fragmentation so that the first fragment's complete exchange fits.
 
 A frame's journey
 ^^^^^^^^^^^^^^^^^
@@ -1627,6 +1681,5 @@ one commit, with file references, and it is the place to check the details.
    station table; the simplified station compensates with a direct write
    into the access point's MIB.
 
--  **Unused state.** The last transmitted mode maps of the rate selections,
-   the generation counter of the peer HT state, and two fields of the block
+-  **Unused state.** The generation counter of the peer HT state and two fields of the block
    ack agreements are written and never read, or never written.
