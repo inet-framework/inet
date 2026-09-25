@@ -17,5 +17,5 @@ class ClnsAddress
     @existingClass;
     @opaque;
     @toString(.str());
-    @fromString(ClnsAddress($));
+    @fromString(inet::ClnsAddress($));
 }

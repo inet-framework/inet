@@ -22,7 +22,7 @@ class Ipv6Address
     @opaque;
     @editable;
     @toString(.str());
-    @fromString(Ipv6Address($));
+    @fromString(inet::Ipv6Address($));
 }
 
 class Ipv6AddressVector
