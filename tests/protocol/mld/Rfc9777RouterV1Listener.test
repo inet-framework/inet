@@ -73,7 +73,7 @@ Define_ProtocolTestProgram()
                   .within(60.0)))
         // Expected observation 1: the MLDv1 Report of C for G.
         .once(on("hostC.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p); })
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV1Report(p) && messageAddress(p) == G; })
                   .describe("the MLDv1 Report of C for G")
                   .within(20.0))
         // Expected observation 2: within 1 s, a datagram of S1 on L1.
