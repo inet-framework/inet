@@ -87,8 +87,12 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      the prefix length in "address/prefixlen" notation (e.g. "2001:db8::/64")
 //    - `@prefixLength` - prefix length (default: 64); must not be combined with the
 //      "/prefixlen" notation in `@destination`
-//    - `@gateway` - next-hop address (L3AddressResolver syntax)
-//    - `@interface` - output interface name
+//    - `@gateway` - next-hop address (L3AddressResolver syntax); when unspecified,
+//      `@interface` must be specified
+//    - `@interface` - output interface name; when unspecified, `@gateway` must be
+//      specified, and the interface is the one on the link where the configurator
+//      assigned the gateway address; a gateway address the configurator did not
+//      assign, such as a link-local one, needs `@interface`
 //    - `@metric` - route metric (default: 0)
 //
 //  - `<autoroute>`

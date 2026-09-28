@@ -293,6 +293,16 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. Ipv6NetworkConfigurator installs a manual route that names only a gateway
+
+   A <route> element with a gateway and no interface was stored without an
+   interface and never installed, with no warning. The configurator now takes
+   the interface from the link on which it assigned the gateway address, as
+   Ipv4NetworkConfigurator does. When no link of the node carries that address,
+   initialization stops with 'has no interface towards "<gateway>"'. A gateway
+   the configurator did not assign, such as a link-local address or a module
+   name (which resolves to a link-local address), needs the interface attribute.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

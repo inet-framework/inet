@@ -636,15 +636,32 @@ void Ipv6NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                 if (!outInterface && gateway.isUnspecified())
                     throw cRuntimeError("Either 'gateway' or 'interface' must be specified in <route> at %s", routeElement->getSourceLocation());
 
+                // Deduce the interface from the gateway, as Ipv4NetworkConfigurator does:
+                // take this node's interface on the link where the gateway address is assigned
+                if (!outInterface) {
+                    for (auto& linkInfo : topology.linkInfos) {
+                        bool gatewayOnLink = false;
+                        for (auto& linkInterfaceInfo : linkInfo->interfaceInfos)
+                            if (static_cast<InterfaceInfo *>(linkInterfaceInfo)->globalAddress == gateway)
+                                gatewayOnLink = true;
+                        if (gatewayOnLink) {
+                            if (InterfaceInfo *nodeInterfaceInfo = findInterfaceOnLinkByNode(linkInfo, node->module)) {
+                                outInterface = nodeInterfaceInfo->networkInterface;
+                                break;
+                            }
+                        }
+                    }
+                    if (!outInterface)
+                        throw cRuntimeError("Host/router %s has no interface towards \"%s\"", hostFullPath.c_str(), gatewayAttr);
+                }
+
                 // Create route
                 Ipv6Route *route = new Ipv6Route(destination, prefixLength, IRoute::MANUAL);
                 route->setNextHop(gateway);
-                if (outInterface)
-                    route->setInterface(outInterface);
+                route->setInterface(outInterface);
                 route->setMetric(metric);
                 node->staticRoutes.push_back(route);
-                if (outInterface)
-                    node->routingTableNetworkInterfaces.push_back(outInterface);
+                node->routingTableNetworkInterfaces.push_back(outInterface);
             }
         }
         catch (std::exception& e) {
