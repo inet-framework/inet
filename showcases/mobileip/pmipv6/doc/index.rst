@@ -612,9 +612,9 @@ was taken after the move, so the gateway in it is ``ar2``; before the move
              on the anchor's link the two names are drawn rotated and on top of
              each other, which is illegible and says nothing the prose needs.
              The override affects the route arrows only: the data-link arrow
-             keeps its default label (%n, e.g. ping641-reply), on purpose. The
-             ini already limits the data-link visualizer to "ping*-reply", so
-             no request arrow is drawn.
+             keeps its default label (%n, e.g. ping641-reply), on purpose.
+             [Config Pmipv6] already limits the data-link visualizer to
+             "ping*-reply", so no request arrow is drawn.
    view:     set_canvas_view {module_path:"<root>", zoom:1.0}
    window:   run_simulation to 39.90 s in "express" mode, step one event in
              "normal" mode, wait ~4 s of real time, then run to 40.10 s in
@@ -725,10 +725,8 @@ Advertisement at 3.927 s, the node builds the same address as in the
 ``Pmipv6`` run, and the traffic flows directly between ``core`` and ``ar1``.
 
 At t = 20 s the node starts to drive toward ``ar2``. In the video, watch the
-node's address label and the arrows of the traffic path, including the reply's
-hop over the air from the node to its access point, drawn in cyan and labelled
-with the reply's name. Left of the node, above its
-address label, a Wi-Fi icon names the access point the node is associated with, ``AR1``
+node's address label and the arrows of the traffic path, which run from the
+node itself. Left of the node, above its address label, a Wi-Fi icon names the access point the node is associated with, ``AR1``
 or ``AR2``; it disappears while the node is associated with neither:
 
 .. video:: media/baseline-movement.mp4
@@ -738,19 +736,20 @@ or ``AR2``; it disappears while the node is associated with neither:
 ..
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   NoPmipv6        seed: seed-set = 1 (from [General])
-   shows:    the mobile node drives from ar1 to ar2; the route arrows and the
-             cyan mn -> ar1 data-link arrow (replies only, labelled pingN-reply)
-             stop together. On the node's hop two lines run side by side: the
-             dark-blue route line, which in this configuration starts at mn,
-             and the cyan data-link arrow. Meanwhile the address label (left
+   shows:    the mobile node drives from ar1 to ar2; the dark-blue route line
+             mn -> ar1 -> core -> cn (the reply's, labelled pingN-reply) starts
+             at the node itself -- no tunnel, so the route visualizer draws the
+             air hop -- and stops. No data-link arrow: the data-link visualizer
+             is set in [Config Pmipv6] only. Meanwhile the address label (left
              of the node) changes from 2001:db8:1:0:8aa:ff:fe00:b to
              2001:db8:2:0:8aa:ff:fe00:b, the association label (left of the
              node, above the right end of the address label) goes AR1 -> none
-             -> AR2, and no arrow comes back, over the air or wired
+             -> AR2, and no arrow comes back
    anchors:  last echo reply at t = 30.250258 (arrows stop within a frame of it:
              last full-strength frame 113 at t = 30.3, fading from frame 114,
              all arrows gone at frame 118, t = 30.8 -- the 0.5 s
-             simulation-time fade);
+             simulation-time fade of the route visualizer, set in [General]);
+             no cyan (data-link) pixel in any frame;
              re-association with ar2 at t = 31.25643; the new address is assigned
              at t = 33.945575, which is when the address label changes. If the
              address label changes more than ~0.3 s away from 33.95, the timeline
@@ -766,8 +765,9 @@ or ``AR2``; it disappears while the node is associated with neither:
              -85 dBm receiver sensitivity that floors every reception in the
              model.
    window:   express-run to 19.0 s, step one event in normal mode, then record
-             to 40.0 s. No wait is needed: both visualizers fade on simulation
-             time (fadeOutMode="simulationTime", fadeOutTime=0.5s in the ini)
+             to 40.0 s. No wait is needed: the route visualizer fades on
+             simulation time (fadeOutMode="simulationTime", fadeOutTime=0.5s in
+             [General])
    anim:     playback_speed=1, min_animation_speed=0.1   (normal profile)
              The min clamp is what makes this recordable: nothing in this model
              requests an animation speed, so without it Qtenv falls back to one
@@ -793,7 +793,9 @@ or ``AR2``; it disappears while the node is associated with neither:
              label added, then moved above the address label and recoloured.
              Re-recorded 2026-09-28 on 5ec57d6164: data-link arrows added, both
              labels placed left of the node; again on 499f82f27d: simulation-time
-             fade, replies only, default data-link colour and label. INET 4.7
+             fade, replies only, default data-link colour and label; again on
+             ee5632218a: data-link visualizer moved to [Config Pmipv6], so this
+             video has route arrows only. INET 4.7
 
 The video shows three moments, in this order.
 
@@ -955,8 +957,10 @@ Here is the same move, with Proxy Mobile IPv6 running:
              2026-09-28, not visible at page size). A longer fadeOutTime would
              shrink it further but would blur the 1.05 s gap.
 
-The arrows stop, and then reappear through ``ar2``, now also on the reply's hop
-over the air from the node to ``ar2``. The icon changes from
+The arrows stop, and then reappear through ``ar2``. The blue arrows of the
+route now start at the access router, because the tunnel carries the traffic
+from there; the node's own hop is the cyan arrow, labelled with the reply's
+name. The icon changes from
 ``AR1`` to ``AR2``, as in the baseline, but the address label does not change.
 Here are the replies around the move:
 
