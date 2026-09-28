@@ -1292,7 +1292,7 @@ Try It Yourself
 
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, navigate to the
-``inet/showcases/general/mipv6`` folder in the `Project Explorer`, and double-click the
+``inet/showcases/ipv6/mipv6`` folder in the `Project Explorer`, and double-click the
 ``omnetpp.ini`` file to open it. Select a configuration and press **Run**.
 
 If you don't have INET and OMNeT++ installed, you can quickly set them up
@@ -1303,7 +1303,7 @@ execute:
 .. code-block:: bash
 
     $ opp_env run inet-4.7 --init -w inet-workspace --install --build-modes=release --chdir \
-       -c 'cd inet-4.7.*/showcases/general/mipv6 && inet'
+       -c 'cd inet-4.7.*/showcases/ipv6/mipv6 && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
