@@ -602,28 +602,31 @@ was taken after the move, so the gateway in it is ``ar2``; before the move
    type:     Qtenv canvas screenshot with the network route and data-link
              visualizers
    config:   Pmipv6          seed: seed-set = 1
-   shows:    the reply's route after the handover -- the data-link arrow from
-             mn up to ar2, then the route arrows from ar2 into core, the two
-             parallel arrows on the core-anchor link (every packet crosses it
-             twice), and on to cn
+   shows:    the reply's route after the handover -- the cyan data-link arrow
+             from mn up to ar2, labelled with the reply's name, then the route
+             arrows from ar2 into core, the two parallel arrows on the
+             core-anchor link (every packet crosses it twice), and on to cn
    launch:   inet -u Qtenv -c Pmipv6 --mcp-server-address=localhost:<port>
              --'*.visualizer.networkRouteVisualizer.labelFormat'='""'
-             --'*.visualizer.dataLinkVisualizer.packetFilter'='"ping*-reply"'
-             Without the first override each arrow carries its packet name, and
+             Without that override each route arrow carries its packet name, and
              on the anchor's link the two names are drawn rotated and on top of
              each other, which is illegible and says nothing the prose needs.
-             The second keeps the air hop to the reply only, as the prose says;
-             without it a second, downward arrow (the request) sits beside it.
+             The override affects the route arrows only: the data-link arrow
+             keeps its default label (%n, e.g. ping641-reply), on purpose. The
+             ini already limits the data-link visualizer to "ping*-reply", so
+             no request arrow is drawn.
    view:     set_canvas_view {module_path:"<root>", zoom:1.0}
    window:   run_simulation to 39.90 s in "express" mode, step one event in
              "normal" mode, wait ~4 s of real time, then run to 40.10 s in
              "fast" mode so the visualizers have fresh paths on the canvas.
-             Skip the wait and the canvas keeps half-faded mn <-> ar1 arrows
-             from before 30.3 s and an "Associated with AP" bubble: both fade in
-             real time (fadeOutMode default), which express mode does not give.
+             Both visualizers fade on simulation time (fadeOutTime 0.5 s), so
+             old arrows are gone without the wait; the wait is for Qtenv's
+             "Associated with AP" bubble, which fades in real time and stays on
+             the canvas after an express run (checked 2026-09-28).
    capture:  get_canvas_image {module_path:"<root>", area:"module_rectangle",
              margin:5}; was 814x514
-   anchor:   one upward arrow from mn to ar2, then the route ar2 -> core ->
+   anchor:   one upward cyan arrow from mn to ar2 labelled pingN-reply (no
+             downward arrow), then the route ar2 -> core ->
              anchor -> core -> cn with its arrowhead at cn, two parallel arrows
              on the core-anchor link, no arrow touching ar1, the association
              icon reading AR2 (red), and the address label still reading
@@ -635,16 +638,18 @@ was taken after the move, so the gateway in it is ``ar2``; before the move
              -- the tunnel makes the gateway re-inject the packet
              (Ipv6::handleMessage -> packetReceivedFromUpper, Ipv6.cc:369),
              which starts a new path in PathVisualizerBase (217-224). The
-             data-link visualizer (wlan interfaces only) draws that hop instead;
-             route and data-link arrows share the darkBlue colour so the two
-             read as one path.
+             data-link visualizer (wlan interfaces only, replies only) draws
+             that hop instead, in its default darkcyan: a different colour for a
+             different visualizer.
              ar2's and cn's node labels are partly hidden behind the arrowheads
              that point at them.
              Qtenv draws a node's name under its icon and the path ends exactly
              there; lineWidth=2, a higher zoom and lineShiftMode="x" were all
              tried and none of them moves it.
    stamp:    captured 2026-09, INET 4.7. Re-captured 2026-09-28 on 5ec57d6164
-             with the data-link visualizer (event fingerprints unchanged).
+             with the data-link visualizer, and again on 499f82f27d with the
+             simulation-time fade, replies only, default colour and label
+             (event fingerprints unchanged).
 
 The reply leaves the node over the air to ``ar2``, then goes from ``ar2`` to
 ``core``, to the anchor, back to ``core``, and on to ``cn``. That is why the
@@ -720,8 +725,9 @@ Advertisement at 3.927 s, the node builds the same address as in the
 ``Pmipv6`` run, and the traffic flows directly between ``core`` and ``ar1``.
 
 At t = 20 s the node starts to drive toward ``ar2``. In the video, watch the
-node's address label and the arrows of the traffic path, including the hop over
-the air between the node and its access point. Left of the node, above its
+node's address label and the arrows of the traffic path, including the reply's
+hop over the air from the node to its access point, drawn in cyan and labelled
+with the reply's name. Left of the node, above its
 address label, a Wi-Fi icon names the access point the node is associated with, ``AR1``
 or ``AR2``; it disappears while the node is associated with neither:
 
@@ -733,14 +739,18 @@ or ``AR2``; it disappears while the node is associated with neither:
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   NoPmipv6        seed: seed-set = 1 (from [General])
    shows:    the mobile node drives from ar1 to ar2; the route arrows and the
-             mn <-> ar1 data-link arrows stop together, the address label (left
+             cyan mn -> ar1 data-link arrow (replies only, labelled pingN-reply)
+             stop together. On the node's hop two lines run side by side: the
+             dark-blue route line, which in this configuration starts at mn,
+             and the cyan data-link arrow. Meanwhile the address label (left
              of the node) changes from 2001:db8:1:0:8aa:ff:fe00:b to
              2001:db8:2:0:8aa:ff:fe00:b, the association label (left of the
              node, above the right end of the address label) goes AR1 -> none
              -> AR2, and no arrow comes back, over the air or wired
    anchors:  last echo reply at t = 30.250258 (arrows stop within a frame of it:
              last full-strength frame 113 at t = 30.3, fading from frame 114,
-             all mn <-> ar1 arrows gone at frame 116, t = 30.6);
+             all arrows gone at frame 118, t = 30.8 -- the 0.5 s
+             simulation-time fade);
              re-association with ar2 at t = 31.25643; the new address is assigned
              at t = 33.945575, which is when the address label changes. If the
              address label changes more than ~0.3 s away from 33.95, the timeline
@@ -748,14 +758,16 @@ or ``AR2``; it disappears while the node is associated with neither:
              label is the second thing that changes: last frame carrying AR1 at
              t = 30.60, first frame with no association label at t = 30.70, first
              frame reading AR2 at t = 31.30 -- the address label follows only
-             2.7 s later (frame 150, t = 34.0). Frame k is at t = 19.0 + 0.1 k. Both labels must change; if only one does, the wrong
-             configuration was recorded. The icon is the full one (signal_power_3,
-             a 21x24 px shape) and reads blue on AR1, red on AR2; a smaller icon
-             means minPower/maxPower no longer sit below the -85 dBm receiver
-             sensitivity that floors every reception in the model.
-   window:   express-run to 19.0 s, step one event in normal mode, wait 2 s for
-             the route visualizer to fade (fadeOutMode is realTime), then record
-             to 40.0 s
+             2.7 s later (frame 150, t = 34.0). Frame k is at t = 19.0 + 0.1 k;
+             frame 0 already shows the arrows. Both labels must change; if only
+             one does, the wrong configuration was recorded. The icon is the full
+             one (signal_power_3, a 21x24 px shape) and reads blue on AR1, red on
+             AR2; a smaller icon means minPower/maxPower no longer sit below the
+             -85 dBm receiver sensitivity that floors every reception in the
+             model.
+   window:   express-run to 19.0 s, step one event in normal mode, then record
+             to 40.0 s. No wait is needed: both visualizers fade on simulation
+             time (fadeOutMode="simulationTime", fadeOutTime=0.5s in the ini)
    anim:     playback_speed=1, min_animation_speed=0.1   (normal profile)
              The min clamp is what makes this recordable: nothing in this model
              requests an animation speed, so without it Qtenv falls back to one
@@ -770,9 +782,9 @@ or ``AR2``; it disappears while the node is associated with neither:
              at any other zoom the crop below is wrong
    capture:  fps=1, crop_area=with_padding; re-read crop_rect -- 824x524 on an
              1853x1010 window, at (810,155) for the shipped file (2026-09-28: all
-             210 frames 1853 px wide) and (837,155) on one earlier run. The size is stable; the x offset moves with the
-             Qtenv panel layout, so take it from the start_video_recording
-             response and not from here.
+             210 frames 1853 px wide) and (837,155) on one earlier run. The size
+             is stable; the x offset moves with the Qtenv panel layout, so take it
+             from the start_video_recording response and not from here.
    encode:   ffmpeg -r 10 -f image2 -i frames/v2_%04d.png
              -filter:v "crop=824:524:810:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
              -vcodec libx264 -pix_fmt yuv420p   -> 210 frames, 21.0 s
@@ -780,7 +792,8 @@ or ``AR2``; it disappears while the node is associated with neither:
    stamp:    recorded 2026-09, re-recorded twice the same month -- association
              label added, then moved above the address label and recoloured.
              Re-recorded 2026-09-28 on 5ec57d6164: data-link arrows added, both
-             labels placed left of the node. INET 4.7
+             labels placed left of the node; again on 499f82f27d: simulation-time
+             fade, replies only, default data-link colour and label. INET 4.7
 
 The video shows three moments, in this order.
 
@@ -876,8 +889,10 @@ Here is the same move, with Proxy Mobile IPv6 running:
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   Pmipv6          seed: seed-set = 1 (from [General])
    shows:    the same drive with the mechanism running: the route arrows and
-             the mn <-> ar1 data-link arrows stop, the route arrows reappear
-             through ar2 together with mn <-> ar2 data-link arrows, and the
+             the cyan mn -> ar1 data-link arrow (replies only, labelled
+             pingN-reply) fade out, the screen stays empty of arrows, then the
+             route arrows reappear through ar2 together with a cyan mn -> ar2
+             arrow, and the
              address label (left of the node) never changes, while the
              association label (left of the node, above the right end of the
              address label) goes AR1 -> none -> AR2.
@@ -894,14 +909,16 @@ Here is the same move, with Proxy Mobile IPv6 running:
              reply gap above; if either falls outside it, the timeline moved.
              Route arrows: last frame with ping445-reply at t = 30.275 (frame
              51), first with ping466-reply at t = 31.325 (frame 93). The
-             data-link arrows follow the same frames: mn <-> ar1 last at frame
-             52 (t = 30.300, fading), none from frame 53; mn <-> ar2 first at
-             frame 93. Frame k is at t = 29.0 + 0.025 k; frame 0 shows no
-             arrows (they faded during the wait).
+             data-link arrow follows the same frames: mn -> ar1 at full strength
+             to frame 52 (t = 30.300), fading from frame 53, gone at frame 71
+             (t = 30.775 = last reply + the 0.5 s fadeOutTime), together with
+             the route arrows; frames 71-92 (2.2 s of video) show no arrow at
+             all; mn -> ar2 first at frame 93. Frame k is at
+             t = 29.0 + 0.025 k; frame 0 already shows the arrows.
              Same icon check as the baseline recipe: the full icon, blue on AR1
              and red on AR2.
-   window:   express-run to 29.0 s, step one event in normal mode, wait 2 s for
-             the route visualizer to fade, then record to 34.0 s
+   window:   express-run to 29.0 s, step one event in normal mode, then record
+             to 34.0 s (no wait: both visualizers fade on simulation time)
    anim:     playback_speed=1, min_animation_speed=0.025  (normal profile)
              Four times finer than the baseline video because this clip is five
              simulated seconds rather than twenty-one, and the interruption is the
@@ -928,14 +945,18 @@ Here is the same move, with Proxy Mobile IPv6 running:
              Re-recorded 2026-09-24 at 9f312d7c13 after the destination-cache
              and binding-hold fixes (association 180 us later). Re-recorded
              2026-09-28 on 5ec57d6164: data-link arrows added, both labels
-             placed left of the node. INET 4.7
-   known:    the air-hop arrows shimmer: every other frame they are paler,
-             because the data-link visualizer fades in real time (fadeOutMode
-             default), and at animation speed 0.025 a 50 ms ping gap is
-             nominally 2 s of wall clock. They never disappear between pings.
+             placed left of the node; again on 499f82f27d: simulation-time fade
+             (removes the pale/solid alternation of the real-time fade), replies
+             only, default data-link colour and label. INET 4.7
+   fade:     both visualizers use fadeOutMode="simulationTime",
+             fadeOutTime=0.5s. The alpha is 1 - age/fadeOutTime; frames every
+             25 ms against pings every 50 ms leave a residual frame-to-frame
+             swing of <= 25/500 = 5% (measured 5-8% in arrow pixel weight on
+             2026-09-28, not visible at page size). A longer fadeOutTime would
+             shrink it further but would blur the 1.05 s gap.
 
-The arrows stop, and then reappear through ``ar2``, now also over the air
-between the node and ``ar2``. The icon changes from
+The arrows stop, and then reappear through ``ar2``, now also on the reply's hop
+over the air from the node to ``ar2``. The icon changes from
 ``AR1`` to ``AR2``, as in the baseline, but the address label does not change.
 Here are the replies around the move:
 
