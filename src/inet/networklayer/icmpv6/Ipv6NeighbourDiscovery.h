@@ -95,6 +95,12 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     ModuleRefByPar<Icmpv6> icmpv6;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
 
+    // token bucket that limits the rate of sent Redirects (RFC 4861 Section 8.2)
+    double redirectRate = NaN; // tokens added per second
+    int redirectBurst = -1; // bucket size
+    double redirectTokens = NaN;
+    simtime_t redirectTokensUpdated;
+
 #ifdef INET_WITH_MIPV6
     ModuleRefByPar<Mipv6> mipv6; // in case the node has MIP support
 #endif
