@@ -26,8 +26,13 @@ Notable backward incompatible changes are the following:
    members were replaced by the attemptedReceptionTimers and
    transmissionTimers vectors, and continueTransmission(), endTransmission()
    and abortTransmission() take the transmission timer as an argument.
-   IRadio::getTransmissionInProgress() and getReceptionInProgress() return
-   one of the transmissions or attempted receptions in progress.
+   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
+   which return every transmission and attempted reception in progress; by
+   default they wrap the singular getters (at most one element), so an IRadio
+   implementation that transmits and attempts one at a time needs no change.
+   getTransmissionInProgress() and getReceptionInProgress() keep their
+   meaning for such a radio; Radio throws an error from them when
+   allowConcurrentTransmissions or allowConcurrentReceptions is set.
 
    This change requires the modification of C++ code that derives from Radio
    and accesses these members or overrides these methods.

@@ -192,6 +192,8 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
 
 const ITransmission *Radio::getTransmissionInProgress() const
 {
+    if (allowConcurrentTransmissions)
+        throw cRuntimeError("getTransmissionInProgress() is ambiguous when allowConcurrentTransmissions is set, use getTransmissionsInProgress()");
     auto timer = getFirstScheduledTransmissionTimer();
     if (timer == nullptr)
         return nullptr;
@@ -199,12 +201,31 @@ const ITransmission *Radio::getTransmissionInProgress() const
         return static_cast<WirelessSignal *>(timer->getContextPointer())->getTransmission();
 }
 
+std::vector<const ITransmission *> Radio::getTransmissionsInProgress() const
+{
+    std::vector<const ITransmission *> transmissions;
+    for (auto timer : transmissionTimers)
+        if (timer->isScheduled())
+            transmissions.push_back(static_cast<WirelessSignal *>(timer->getContextPointer())->getTransmission());
+    return transmissions;
+}
+
 const ITransmission *Radio::getReceptionInProgress() const
 {
+    if (allowConcurrentReceptions)
+        throw cRuntimeError("getReceptionInProgress() is ambiguous when allowConcurrentReceptions is set, use getReceptionsInProgress()");
     if (attemptedReceptionTimers.empty())
         return nullptr;
     else
         return static_cast<WirelessSignal *>(attemptedReceptionTimers.front()->getControlInfo())->getTransmission();
+}
+
+std::vector<const ITransmission *> Radio::getReceptionsInProgress() const
+{
+    std::vector<const ITransmission *> transmissions;
+    for (auto timer : attemptedReceptionTimers)
+        transmissions.push_back(static_cast<WirelessSignal *>(timer->getControlInfo())->getTransmission());
+    return transmissions;
 }
 
 IRadioSignal::SignalPart Radio::getTransmittedSignalPart() const

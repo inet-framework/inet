@@ -246,18 +246,36 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
     virtual const IRadioMedium *getMedium() const = 0;
 
     /**
-     * Returns an ongoing transmission that the transmitter is currently
-     * transmitting or nullptr. A radio that transmits concurrently returns
-     * one of its transmissions in progress.
+     * Returns the ongoing transmission that the transmitter is currently
+     * transmitting or nullptr. Only for a radio that transmits one signal at
+     * a time: a radio that allows concurrent transmissions throws an error,
+     * see getTransmissionsInProgress().
      */
     virtual const ITransmission *getTransmissionInProgress() const = 0;
 
     /**
-     * Returns an ongoing reception that the receiver is currently receiving
-     * (attempting) or nullptr. A radio that attempts receptions concurrently
-     * returns one of its attempted receptions in progress.
+     * Returns the ongoing transmissions that the transmitter is currently
+     * transmitting, in no particular order, or an empty vector. The default
+     * implementation wraps getTransmissionInProgress() (at most one element),
+     * which is right for a radio that transmits one signal at a time.
+     */
+    virtual std::vector<const ITransmission *> getTransmissionsInProgress() const;
+
+    /**
+     * Returns the ongoing reception that the receiver is currently receiving
+     * (attempting) or nullptr. Only for a radio that attempts one reception
+     * at a time: a radio that allows concurrent receptions throws an error,
+     * see getReceptionsInProgress().
      */
     virtual const ITransmission *getReceptionInProgress() const = 0;
+
+    /**
+     * Returns the ongoing receptions that the receiver is currently receiving
+     * (attempting), in no particular order, or an empty vector. The default
+     * implementation wraps getReceptionInProgress() (at most one element),
+     * which is right for a radio that attempts one reception at a time.
+     */
+    virtual std::vector<const ITransmission *> getReceptionsInProgress() const;
 
     /**
      * Returns the signal part of the ongoing transmission that the transmitter

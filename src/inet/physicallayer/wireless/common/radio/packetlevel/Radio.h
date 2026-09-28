@@ -246,7 +246,9 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual TransmissionState getTransmissionState() const override { return transmissionState; }
 
     virtual const ITransmission *getTransmissionInProgress() const override;
+    virtual std::vector<const ITransmission *> getTransmissionsInProgress() const override;
     virtual const ITransmission *getReceptionInProgress() const override;
+    virtual std::vector<const ITransmission *> getReceptionsInProgress() const override;
 
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;

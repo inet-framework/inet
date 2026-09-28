@@ -41,6 +41,24 @@ Register_Enum(inet::physicallayer::IRadio::TransmissionState,
      IRadio::TRANSMISSION_STATE_IDLE,
      IRadio::TRANSMISSION_STATE_TRANSMITTING));
 
+std::vector<const ITransmission *> IRadio::getTransmissionsInProgress() const
+{
+    auto transmission = getTransmissionInProgress();
+    if (transmission == nullptr)
+        return {};
+    else
+        return { transmission };
+}
+
+std::vector<const ITransmission *> IRadio::getReceptionsInProgress() const
+{
+    auto transmission = getReceptionInProgress();
+    if (transmission == nullptr)
+        return {};
+    else
+        return { transmission };
+}
+
 const char *IRadio::getRadioModeName(RadioMode radioMode)
 {
     if (!radioModeEnum)
