@@ -612,7 +612,13 @@ was taken after the move, so the gateway in it is ``ar2``; before the move
              on the anchor's link the two names are drawn rotated and on top of
              each other, which is illegible and says nothing the prose needs.
              The override affects the route arrows only: the data-link arrow
-             keeps its default label (%n, e.g. ping641-reply), on purpose.
+             keeps its default label (%n, e.g. ping641-reply), on purpose, in
+             labelFont "<default>, 10px" (set in [Config Pmipv6]; the route
+             visualizer's labelFont in [General] matches). 10px renders at
+             6.8 px on the page (figure at :width: 80% = 551 px for 814 native,
+             scale 0.678); the ink of "ping641-reply", ascender to descender,
+             spans 13 px native = 8 px rendered, x-height ~5 px (measured on
+             the built page 2026-09-28; at 8px it was 5.4 px em, 11 px ink).
              [Config Pmipv6] already limits the data-link visualizer to
              "ping*-reply", so no request arrow is drawn.
    view:     set_canvas_view {module_path:"<root>", zoom:1.0}
@@ -642,14 +648,16 @@ was taken after the move, so the gateway in it is ``ar2``; before the move
              that hop instead, in its default darkcyan: a different colour for a
              different visualizer.
              ar2's and cn's node labels are partly hidden behind the arrowheads
-             that point at them.
+             that point at them; at 10px the data-link label's last letter also
+             reaches the left edge of ar2's name. The link visualizers have no
+             parameter that moves a label along its line.
              Qtenv draws a node's name under its icon and the path ends exactly
              there; lineWidth=2, a higher zoom and lineShiftMode="x" were all
              tried and none of them moves it.
    stamp:    captured 2026-09, INET 4.7. Re-captured 2026-09-28 on 5ec57d6164
              with the data-link visualizer, and again on 499f82f27d with the
-             simulation-time fade, replies only, default colour and label
-             (event fingerprints unchanged).
+             simulation-time fade, replies only, default colour and label, and
+             on 3dab9b2f56 with 10px labels (event fingerprints unchanged).
 
 The reply leaves the node over the air to ``ar2``, then goes from ``ar2`` to
 ``core``, to the anchor, back to ``core``, and on to ``cn``. That is why the
@@ -781,12 +789,13 @@ or ``AR2``; it disappears while the node is associated with neither:
    view:     set_canvas_view {module_path:"<root>", zoom:1.0} before recording;
              at any other zoom the crop below is wrong
    capture:  fps=1, crop_area=with_padding; re-read crop_rect -- 824x524 on an
-             1853x1010 window, at (810,155) for the shipped file (2026-09-28: all
-             210 frames 1853 px wide) and (837,155) on one earlier run. The size
+             1853x1010 window, at (810,155) on 2026-09-28 (5ec57d6164) and at
+             (837,155) on a 1920x1042 window for the shipped file (3dab9b2f56,
+             all 210 frames 1920 px wide). The size
              is stable; the x offset moves with the Qtenv panel layout, so take it
              from the start_video_recording response and not from here.
    encode:   ffmpeg -r 10 -f image2 -i frames/v2_%04d.png
-             -filter:v "crop=824:524:810:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+             -filter:v "crop=824:524:837:155,pad=ceil(iw/2)*2:ceil(ih/2)*2"
              -vcodec libx264 -pix_fmt yuv420p   -> 210 frames, 21.0 s
    post:     none
    stamp:    recorded 2026-09, re-recorded twice the same month -- association
@@ -795,7 +804,8 @@ or ``AR2``; it disappears while the node is associated with neither:
              labels placed left of the node; again on 499f82f27d: simulation-time
              fade, replies only, default data-link colour and label; again on
              ee5632218a: data-link visualizer moved to [Config Pmipv6], so this
-             video has route arrows only. INET 4.7
+             video has route arrows only; again on 3dab9b2f56: route labels in
+             10px (labelFont in [General]). INET 4.7
 
 The video shows three moments, in this order.
 
@@ -949,7 +959,8 @@ Here is the same move, with Proxy Mobile IPv6 running:
              2026-09-28 on 5ec57d6164: data-link arrows added, both labels
              placed left of the node; again on 499f82f27d: simulation-time fade
              (removes the pale/solid alternation of the real-time fade), replies
-             only, default data-link colour and label. INET 4.7
+             only, default data-link colour and label; again on 3dab9b2f56:
+             route and data-link labels in 10px (labelFont). INET 4.7
    fade:     both visualizers use fadeOutMode="simulationTime",
              fadeOutTime=0.5s. The alpha is 1 - age/fadeOutTime; frames every
              25 ms against pings every 50 ms leave a residual frame-to-frame
