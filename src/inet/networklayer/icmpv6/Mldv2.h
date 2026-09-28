@@ -189,6 +189,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         NetworkInterface *ie;
         GroupToRouterDataMap groups;
         RouterState state;
+        bool versionWarned = false; // the warning about a Query of another version is given once
         cMessage *generalQueryTimer;
         bool waitsForLinkLocalAddress = false; // the querier starts when the interface has a tested link-local address
 
@@ -226,6 +227,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
     double olderVersionHostPresentInterval;
+    int routerVersion;
     double startupQueryInterval;
     int startupQueryCount;
     double lastMemberQueryInterval;
@@ -309,6 +311,8 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv6AddressVector& sources);
     virtual void sendSourceSpecificQueries(RouterGroupData *group);
+    virtual void sendOlderVersionQuery(RouterInterfaceData *interfaceData, const Ipv6Address& groupAddr, double maxRespDelay);
+    virtual void warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion);
     virtual void scheduleQueryRetransmission(RouterGroupData *group);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<Mldv2MulticastAddressRecord>& records);
     virtual void sendStateChangeReport(HostGroupData *group);

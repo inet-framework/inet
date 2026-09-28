@@ -75,6 +75,7 @@ simple Mldv2 extends SimpleModule like IMld
         double queryResponseInterval @unit(s) = default(10s);  // querier: max delay a host may wait before answering a General Query
         double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + 2 * queryResponseInterval);  // querier: how long a group stays active without a new Report (RV); the Multicast Address Listening Interval of RFC 9777 section 9.4
         double otherQuerierPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));  // querier: wait this long for another querier before taking over (RV)
+        int    routerVersion = default(2);  // querier: the MLD version that the router acts in, 1 for the MLDv1 mode of RFC 9777 section 8.3.1, which the administrator sets on a link with an MLDv1 router
         double olderVersionHostPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);  // querier: how long a multicast address stays in the MLDv1 compatibility mode without an MLDv1 Report (RV); RFC 9777 section 9.13
         double startupQueryInterval @unit(s) = default(queryInterval / 4);  // querier: interval between the initial General Queries at startup
         int    startupQueryCount = default(robustnessVariable);  // querier: number of General Queries sent at startup (RV)
