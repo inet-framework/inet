@@ -10,9 +10,9 @@ rest of the network finds it. It also means that a host which moves to a
 different router gets a different address, and the exchanges that used the old
 address stop.
 
-Proxy Mobile IPv6 (PMIPv6) keeps the address stable, and it does so entirely in
-the network. The mobile node need not run any mobility protocol and holds no
-mobility state of its own. An access router, acting as a Mobile Access Gateway
+Proxy Mobile IPv6 (PMIPv6) keeps the address stable without any help from the
+mobile node: the network's routers do all of the mobility work. The mobile node
+need not run any mobility protocol and holds no mobility state of its own. An access router, acting as a Mobile Access Gateway
 (MAG), registers the node with a Local Mobility Anchor (LMA) on the node's
 behalf, and the anchor re-points the node's prefix into the new gateway's tunnel
 when the node moves.
