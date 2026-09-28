@@ -365,8 +365,9 @@ association completes, the node sends a second Router Solicitation. It asks any
 router on the link for a Router Advertisement, the message that carries the
 prefixes from which a host builds its addresses.
 
-The sequence chart below shows about 32 ms, from 3.650 s to 3.682 s, on the
-axes of the mobile node, ``ar1``, ``core`` and the anchor:
+The two sequence charts below show about 32 ms, from 3.650 s to 3.682 s. The
+first one shows the mobile node, ``ar1`` and ``core`` up to 3.652 s; the second
+one adds the anchor and continues to 3.682 s:
 
 .. figure:: media/sequence-first-registration.png
    :align: center
@@ -374,51 +375,89 @@ axes of the mobile node, ``ar1``, ``core`` and the anchor:
 
 ..
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart
+   type:     seqchart, first of two (steps 1-3 of the read-out)
    config:   Pmipv6          seed: seed-set = 1 (from [General])
-   shows:    the first registration message by message -- authentication and
-             association with ar1, the node's Router Solicitation and ar1's
-             re-broadcast copy of it, ar1's and core's address resolutions, the
-             Proxy Binding Update ar1 -> core -> anchor, the anchor's own address
-             resolution of core, the Proxy Binding Acknowledgement back to ar1,
-             ar1's unsolicited Router Advertisement, and the node's first Neighbor
-             Solicitation for its new address with ar1's re-broadcast copy
+   shows:    authentication and association with ar1, ar1's resolution of core
+             (Neighbor Solicitation/Advertisement on the ar1-core row), the Proxy
+             Binding Update leaving ar1 for core, and the node's Router
+             Solicitation with the access point's re-broadcast copy of it
    source:   inet -u Cmdenv -c Pmipv6 --record-eventlog=true --sim-time-limit=4.0s
              -> Pmipv6-#0.elog, 1.7 MB, recorded from t = 0 (no recording
-             intervals; see the handover chart's recipe for why). The limit must
-             reach past 3.927 s: the chart cannot scroll past the last event that
-             passes the filter, and with a 3.7 s log the last Neighbor
-             Solicitation lands on the right edge with its label cut. NOT
-             committed; regenerate it. The IDE resolves it only inside the
-             workspace -- link it into the inet project and call open_eventlog
-             twice (the first call can fail with "Could not resolve path" before
-             the folder refresh).
+             intervals; see the handover chart's recipe for why). NOT committed;
+             regenerate it. The IDE resolves it only inside the workspace --
+             symlink it into the inet project and open_eventlog it by its
+             absolute path (the /inet/... form can fail with "Could not resolve
+             path"). If a bad set_event_filter leaves the chart throwing
+             AssertionFailedException, open a second symlink to the same file.
+   size:     resize_window 1197x1000 -> chart widget 991x578. The page column
+             is 834 px at a 1440 px viewport, so the chart renders at 0.84x and
+             the 15 px label text at ~12.6 px. Do NOT capture wider: the old
+             2088 px capture rendered labels at ~6 px. Fonts do not scale.
+   axes:     mn, ar1, core   (this top-to-bottom order; set_axis_ordering_mode
+             MANUAL). No anchor axis: without it core's onward messages have
+             no arrow, so the chart can end after the Router Solicitation.
+   filter:   set_event_filter message_names = Auth, Auth-OK, Assoc,
+             AssocResp-OK, RouterSolicitation, NeighbourSolicitation,
+             NeighbourAdvertisement, ProxyBindingUpdate, move
+             "move" (mn's mobility self-message, every 0.1 s) draws nothing; it
+             is there so the viewport can start at 3.62 and give the first Auth
+             arrow a left margin -- without it the viewport snaps to 3.65 and
+             the first arrowhead lands on the "ar1" axis name.
+   window:   set_display_mode NETWORK_COMMUNICATION, set_timeline_mode NONLINEAR,
+             then zoom_to_simulation_time_range 3.62 .. 3.66
+   anchor:   AssocResp-OK at mn t = 3.651105; ar1's Neighbor Solicitation
+             3.651149, core's answer back 3.651165; Proxy Binding Update on the
+             wire 3.651165; Router Solicitation at ar1 3.651301 and its copy back
+             to mn 3.651438. If the update does not leave before the Router
+             Solicitation reaches ar1, the timeline moved.
+   capture:  screenshot 991x578; crop y 178..578 (drops the upper time ruler,
+             the Position/Range overlay and the empty band above mn's axis)
+             -> 991x400
+   stamp:    captured 2026-09-24, INET 4.7 (branch tip 7faed5c10d; no model
+             change since 9f312d7c13)
+
+.. figure:: media/sequence-first-registration-backhaul.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart, second of two (steps 4-7 of the read-out)
+   config:   Pmipv6          seed: seed-set = 1 (from [General])
+   shows:    core's resolution of the anchor, the Proxy Binding Update core ->
+             anchor, the anchor's resolution of core, the Proxy Binding
+             Acknowledgement anchor -> core -> ar1, ar1's unsolicited Router
+             Advertisement, and the node's first Neighbor Solicitation for its
+             new address with the access point's re-broadcast copy
+   source:   the same 4.0 s eventlog as the chart above
+   size:     resize_window 1197x1000 -> chart widget 991x578 (see above)
    axes:     mn, ar1, core, anchor   (this top-to-bottom order; core is a
              physical transit module and must stay)
-   filter:   set_event_filter message_names = Auth, Auth-OK, Assoc,
-             AssocResp-OK, RouterSolicitation, RouterAdvertisement,
+   filter:   set_event_filter message_names = RouterAdvertisement,
              NeighbourSolicitation, NeighbourAdvertisement, ProxyBindingUpdate,
-             ProxyBindingAck
+             ProxyBindingAck, move; from_simulation_time 3.65117,
+             to_simulation_time 3.91 (the dimensions AND together). The lower
+             bound removes ar1's resolution of core, which the chart above
+             shows and whose labels otherwise bleed in over the core axis. The
+             upper bound keeps ar1's periodic advertisement at 3.927 out; the
+             "move" events at 3.7 and 3.8 draw nothing but let the viewport run
+             past the last Neighbor Solicitation so its label is not cut.
    window:   set_display_mode NETWORK_COMMUNICATION, set_timeline_mode NONLINEAR,
-             then zoom_to_simulation_time_range 3.64995 .. 3.9275. The end takes
-             in ar1's periodic Router Advertisement at 3.927058 only so that the
-             compressed gap before it gives the last arrows room; the crop below
-             cuts that advertisement off.
-   anchor:   AssocResp-OK at mn t = 3.651105; Router Solicitation at ar1 3.651301
-             and its copy back to mn 3.651438; Proxy Binding Update on the wire
-             3.651165, at the anchor 3.666202; core's resolution of the anchor
-             3.651176 -> 3.661191 and the anchor's of core 3.666202 -> 3.676217;
-             Proxy Binding Acknowledgement at ar1 3.681238; Router Advertisement
-             at mn 3.681289; Neighbor Solicitation 3.681289, copy 3.681678. If the
-             two Neighbor Solicitation/Advertisement pairs on the anchor's row
-             do not bracket the Proxy Binding Update, the timeline moved.
-   capture:  IDE window 2600x1040 -> chart 2160x628; crop x 0..2088 (drops the
-             periodic advertisement at the right edge), y 145..628 (drops the
-             upper time ruler, the Position/Range overlay and the empty band
-             above mn's axis) -> 2088x483
-   stamp:    captured 2026-09-24, INET 4.7 (branch tip 9f312d7c13)
+             then zoom_to_simulation_time_range 3.6509 .. 3.85 (the start snaps
+             to 3.651176, the first event that passes the filter)
+   anchor:   core's resolution of the anchor 3.651176 -> 3.661191, update at the
+             anchor 3.666202, the anchor's resolution of core 3.666202 ->
+             3.676217; Proxy Binding Acknowledgement at ar1 3.681238; Router
+             Advertisement at mn 3.681289; Neighbor Solicitation 3.681289, copy
+             3.681678. If the two Neighbor Solicitation/Advertisement pairs on
+             the anchor's row do not bracket the update, the timeline moved.
+   known:    the first arrowhead ends just right of the "anchor" axis name;
+             the viewport cannot start earlier without letting the bleed back in
+   capture:  screenshot 991x578; crop y 138..578 -> 991x440
+   stamp:    captured 2026-09-24, INET 4.7 (branch tip 7faed5c10d)
 
-The chart reads from left to right as follows.
+The charts read from left to right: the first one shows steps 1 to 3, the
+second one steps 4 to 7.
 
 1. The node authenticates and associates with ``ar1``. ``ar1`` learns of the
    new station from its own access point at 3.651 s. It looks up the station's
@@ -953,10 +992,17 @@ requests, on the axes of ``ar1``, ``core``, the anchor and ``cn``:
              it holds the binding
    source:   the same 31.45 s eventlog as the handover chart below
    axes:     ar1, core, anchor, cn   (this top-to-bottom order)
+   size:     resize_window 1197x1000 -> chart widget 991x578; renders at 0.84x
+             in the 834 px page column (label text ~12.6 px). Do not capture
+             wider -- the old 2160 px capture rendered labels at ~6 px.
    filter:   set_event_filter message_names = ProxyBindingUpdate(dereg),
-             ProxyBindingAck, ping447, ping448
+             ProxyBindingAck, ping447, ping448, move
+             ("move", mn's mobility self-message at 30.3 and 30.4, draws
+             nothing; it lets the viewport start early enough that the first
+             arrowhead clears the "core" axis name, and end late enough that
+             the ping448 label is not cut)
    window:   NETWORK_COMMUNICATION, NONLINEAR, then
-             zoom_to_simulation_time_range 30.3172 .. 30.4060
+             zoom_to_simulation_time_range 30.305 .. 30.43
    anchor:   de-registration leaves ar1 at t = 30.317497 (same event as ping446's
              802.11 retry-limit drop), reaches the anchor 30.322518; the
              acknowledgement reaches ar1 30.327539; ping447 reaches the anchor
@@ -965,10 +1011,10 @@ requests, on the axes of ``ar1``, ``core``, the anchor and ``cn``:
    known:    ping446's death at ar1's radio is not a message and has no arrow;
              ar1 is the top axis so that its drop event (#65708) is where the
              de-registration arrow starts
-   capture:  IDE window 2600x1040 -> chart 2160x628; crop y 145..628 (drops the
-             upper time ruler, the Position/Range overlay and the empty band
-             above ar1's axis) -> 2160x483
-   stamp:    captured 2026-09-24, INET 4.7 (branch tip 9f312d7c13)
+   capture:  screenshot 991x578; crop y 138..578 (drops the upper time ruler,
+             the Position/Range overlay and the empty band above ar1's axis)
+             -> 991x440
+   stamp:    captured 2026-09-24, INET 4.7 (branch tip 7faed5c10d)
 
 The de-registration leaves ``ar1`` at 30.317 s, at the instant request 446 is
 dropped; that loss is not a message, so it has no arrow. The update crosses
@@ -1019,20 +1065,30 @@ step by step:
              it carries no message of its own in any window that keeps the scan,
              and dropping it removes the duplicated labels and the arrowhead
              overdraw. Approved at G5; plan section 6.3 records the change.
+   size:     resize_window 1197x1000 -> chart widget 991x578; renders at 0.84x
+             in the 834 px page column (label text ~12.6 px). Do not capture
+             wider -- the old 2160 px capture rendered labels at ~6 px.
    filter:   set_event_filter message_names = ProbeReq, ProbeResp, Auth, Auth-OK,
              Assoc, AssocResp-OK, ProxyBindingUpdate, ProxyBindingAck,
-             RouterSolicitation, RouterAdvertisement
-             (message_expression cannot select on the module in this build; only
-             message names are matchable)
-   window:   zoom_to_simulation_time_range 30.85 .. 31.354, applied AFTER
+             RouterSolicitation, RouterAdvertisement, move, arTimeout,
+             beaconTimeout, ping467; from_simulation_time 30.79,
+             to_simulation_time 31.3500001 (the dimensions AND together).
+             The lower bound drops ar2's periodic advertisement at t = 30.543,
+             whose label otherwise bleeds in over the core axis name; the upper
+             bound drops core's periodic advertisement to ar2 at t = 31.355.
+             The four extra names are self-messages or arrows to off-axis cn
+             that draw nothing on these axes: mn's "move" at 30.8 gives the first
+             ProbeReq a left margin off the "ar2" axis name, and arTimeout
+             (31.310), beaconTimeout (31.307) and ping467 (31.35, cn -> core)
+             let the viewport run past the last Router Advertisement so its
+             label is not cut. sendPing and beaconTimer do NOT work as padding:
+             they recur through the scan gap and squeeze the chart.
+             (message_expression did not work here: a plain name OR-list with
+             the time bounds emptied the chart, and the editor then threw
+             AssertionFailedException until reopened; use message_names)
+   window:   zoom_to_simulation_time_range 30.82 .. 31.35, applied AFTER
              set_timeline_mode NONLINEAR -- applied before it, the viewport lands
-             somewhere else. The start is 30.85 and not earlier because ar2's own
-             periodic Router Advertisement at t = 30.543 otherwise bleeds its label
-             in from the left edge, where it reads as an axis name. The end is
-             31.354: at 9f312d7c13 core's periodic advertisement to ar2 at
-             t = 31.355 falls inside the old 31.38 end and shows as a cut-off
-             arrow at the right edge; 31.34 is too short, it cuts the last
-             RouterAdvertisement label.
+             somewhere else.
    anchor:   the order along the chart must read ProbeReq/ProbeResp, Auth,
              Auth-OK, Assoc, AssocResp-OK (t = 31.256292), ProxyBindingUpdate
              (created 31.256336, on the wire 31.256352), ProxyBindingAck
@@ -1041,15 +1097,16 @@ step by step:
              31.256112 / 31.256156 / 31.266214 / 31.266264. If the Proxy Binding
              exchange does not sit between the association and the
              advertisement, the timeline moved.
-   capture:  display mode NETWORK_COMMUNICATION, timeline NONLINEAR, IDE window
-             2600x1040 -> chart 2160x628; crop the top 66 px to drop the upper
-             time ruler and the Position/Range overlay -> 2160x562
+   capture:  display mode NETWORK_COMMUNICATION, timeline NONLINEAR,
+             screenshot 991x578; crop y 138..578 (drops the upper time ruler, the
+             Position/Range overlay and the empty band above mn's axis) -> 991x440
    known:    the RouterAdvertisement on the anchor-core rows at about t = 31.10 is
              the anchor's own periodic advertisement on its backhaul link, not part
              of the handover. It cannot be filtered out by message name and cannot
              be windowed out without losing the scan.
    stamp:    captured 2026-09, INET 4.7; re-captured 2026-09-24 at 9f312d7c13
-             from a fresh 31.45 s eventlog (45.3 MB)
+             from a fresh 31.45 s eventlog (45.3 MB), and at 7faed5c10d from
+             the same log at 991 px for legibility
 
 The advertisement between ``core`` and the anchor at about 31.10 s is the
 anchor's own periodic advertisement on its link to ``core``, not part of the
