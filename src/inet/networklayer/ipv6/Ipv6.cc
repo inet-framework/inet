@@ -1228,7 +1228,11 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
                             return false;
                     }
                     else {
-                        throw cRuntimeError("No handler registered for routing header type %d", (int)rh->getRoutingType());
+                        // RFC 8200 section 4.4: discard the packet and send Parameter Problem,
+                        // code 0, pointing to the Routing Type, octet 2 of the Routing header.
+                        EV_INFO << "Discarding packet with unrecognized routing header type " << (int)rh->getRoutingType() << endl;
+                        sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD, 0, offset.get<B>() + 2);
+                        return false;
                     }
                 }
                 break;
@@ -1520,9 +1524,9 @@ INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code, int mtu)
+void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code, int mtu, int pointer)
 {
-    icmp->sendErrorMessage(packet, type, code, mtu);
+    icmp->sendErrorMessage(packet, type, code, mtu, pointer);
     delete packet;
 }
 

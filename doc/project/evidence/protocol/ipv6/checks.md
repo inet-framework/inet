@@ -40,11 +40,13 @@ the anchors that the coverage ledger links to. The catalog entries are in
 | [Zero UDP checksum](checks/input-validation.md#zero-udp-checksum) | `checks/input-validation.md` | RFC8200-CKSUM-1 (the discard) |
 | [Unrecognized next header](checks/input-validation.md#unrecognized-next-header) | `checks/input-validation.md` | RFC8504-NR-6 (governs RFC8200-EXT-3) |
 | [Unassigned next header](checks/input-validation.md#unassigned-next-header) | `checks/input-validation.md` | RFC8504-NR-6 (governs RFC8200-EXT-3), for an unassigned value |
+| [Unrecognized routing type](checks/input-validation.md#unrecognized-routing-type) | `checks/input-validation.md` | RFC8200-EXT-4, for Routing Type 0 (RFC8504-NR-7) |
 | [Error for an unknown protocol](checks/error-report.md#error-for-an-unknown-protocol) | `checks/error-report.md` | RFC4443-MPR-3, MPR-4 |
 | [Unknown ICMPv6 error type](checks/input-validation.md#unknown-icmpv6-error-type) | `checks/input-validation.md` | RFC4443-MPR-4 (the silence about it); notes MPR-1 |
 | [Unknown ICMPv6 informational type](checks/input-validation.md#unknown-icmpv6-informational-type) | `checks/input-validation.md` | RFC4443-MPR-2 |
 
-Twenty-seven checks: nine from the level 2 pass, eighteen added at level 3.
+Twenty-eight checks: nine from the level 2 pass, eighteen added at level 3, and the
+unrecognized routing type, added with the repair of that rule.
 
 ## Common mockup
 
