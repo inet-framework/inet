@@ -1,0 +1,77 @@
+%description:
+The Proxy Registration (P) flag of a Proxy Mobile IPv6 (PMIPv6, RFC 5213) Binding
+Acknowledgement is carried at 0x20 of the octet after the Status field. 0x40 in that octet is
+the Mobile Router (R) flag of the Network Mobility (NEMO) Basic Support Protocol, RFC 3963.
+RFC 5213 Section 10 assigns the Key Management Mobility Capability (K) flag 0x80, R 0x40 and
+P 0x20.
+
+A round trip cannot check this, because the serializer and the deserializer would agree on any
+bit. The test compares the bytes with the RFC layout instead, in both directions: a Binding
+Acknowledgement with only the P flag set serializes to 0x20, a received 0x20 decodes as the
+P flag, and a received 0x40 (a NEMO acknowledgement) does not.
+
+%includes:
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+
+using namespace inet;
+
+%global:
+// Offset of the flags octet in a Binding Acknowledgement: the 6-octet common Mobility
+// Header (RFC 6275 Section 6.1), then the Status octet (RFC 6275 Section 6.1.8).
+static const int FLAGS_OFFSET = 7;
+
+// A Binding Acknowledgement without proxy options: the common Mobility Header (no next
+// header, length 1 = 16 octets, type 6, reserved, checksum), then status 0, the flags
+// octet, sequence 1, lifetime 0, and padding.
+static std::vector<uint8_t> bindingAcknowledgement(uint8_t flags)
+{
+    return {59, 1, 6, 0, 0, 0, 0, flags, 0, 1, 0, 0, 0, 0, 0, 0};
+}
+
+// The same with the P flag set, followed by the proxy options in the model's fixed order:
+// Mobile Node Identifier (length-prefixed), Home Network Prefix (prefix length, prefix) and
+// Timestamp -- 6 + 6 + 16 + 17 + 8 = 53 octets, padded to 56 (length field 6).
+static std::vector<uint8_t> proxyBindingAcknowledgement()
+{
+    std::vector<uint8_t> bytes = {59, 6, 6, 0, 0, 0, 0, 0x20, 0, 1, 0, 0};
+    const char *nai = "mn1@example.com";
+    bytes.push_back(15);
+    bytes.insert(bytes.end(), nai, nai + 15);
+    bytes.push_back(64);
+    bytes.insert(bytes.end(), {0x20, 0x01, 0x0d, 0xb8, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    bytes.insert(bytes.end(), 8 + 3, 0); // timestamp, padding
+    return bytes;
+}
+
+%activity:
+auto pba = makeShared<BindingAcknowledgement>();
+pba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
+pba->setProxyRegistrationFlag(true);
+pba->setMobileNodeIdentifier("mn1@example.com");
+pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(15));
+Packet output("output", pba);
+auto bytes = output.peekAllAsBytes()->getBytes();
+EV << "serialized: type " << (int)bytes[2] << ", flags octet 0x" << std::hex << (int)bytes[FLAGS_OFFSET] << std::dec << "\n";
+
+Packet proxy("proxy", makeShared<BytesChunk>(proxyBindingAcknowledgement()));
+auto decodedProxy = proxy.peekAtFront<BindingAcknowledgement>();
+EV << "decoded 0x20: P " << decodedProxy->getProxyRegistrationFlag() << ", K " << decodedProxy->getKeyManagementFlag()
+   << ", identifier " << decodedProxy->getMobileNodeIdentifier() << "\n";
+
+Packet nemo("nemo", makeShared<BytesChunk>(bindingAcknowledgement(0x40)));
+auto decodedNemo = nemo.peekAtFront<BindingAcknowledgement>();
+EV << "decoded 0x40: P " << decodedNemo->getProxyRegistrationFlag() << "\n";
+
+%contains: stdout
+serialized: type 6, flags octet 0x20
+
+%contains: stdout
+decoded 0x20: P 1, K 0, identifier mn1@example.com
+
+%contains: stdout
+decoded 0x40: P 0

@@ -183,7 +183,7 @@ void MobilityHeaderSerializer::serializeFields(MemoryOutputStream& stream, const
             auto ba = staticPtrCast<const BindingAcknowledgement>(chunk);
             stream.writeByte(ba->getStatus());
             stream.writeByte((ba->getKeyManagementFlag() ? 0x80u : 0)
-                    | (ba->getProxyRegistrationFlag() ? 0x40u : 0)); // P-flag (RFC 5213)
+                    | (ba->getProxyRegistrationFlag() ? 0x20u : 0)); // P-flag (RFC 5213 Section 10); 0x40 is NEMO's R-flag
             stream.writeUint16Be(ba->getSequenceNumber());
             stream.writeUint16Be(std::min(ba->getLifetime() / BINDING_LIFETIME_UNIT, 0xFFFFu));
             // RFC 5213 proxy mobility options (only present when this is a Proxy Binding Acknowledgement)
@@ -315,7 +315,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserializeFields(MemoryInputStream& 
             ba->setStatus(static_cast<BaStatus>(stream.readByte()));
             uint8_t kFlag = stream.readByte();
             ba->setKeyManagementFlag((kFlag & 0x80u) != 0);
-            ba->setProxyRegistrationFlag((kFlag & 0x40u) != 0); // P-flag (RFC 5213)
+            ba->setProxyRegistrationFlag((kFlag & 0x20u) != 0); // P-flag (RFC 5213 Section 10); 0x40 is NEMO's R-flag
             ba->setSequenceNumber(stream.readUint16Be());
             ba->setLifetime(stream.readUint16Be() * BINDING_LIFETIME_UNIT);
             // RFC 5213 proxy mobility options (only present in a Proxy Binding Acknowledgement)
