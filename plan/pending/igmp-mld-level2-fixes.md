@@ -44,18 +44,23 @@ The twin gaps come next to each other, IGMP first.
    for G.
 8. [x] **IGMP gap 3, MLD gap 6** — the default intervals of RFC 9776 and RFC 9777.
 9. [x] **IGMP gap 4, MLD gap 7** — the Older Version Querier Present Interval.
-10. [ ] **IGMP gap 5, MLD gap 8** — a second change merges the pending records.
-11. [ ] **IGMP gap 6, MLD gap 9** — the older-version mode of a host has a report delay timer,
-    repeats its unsolicited Report and suppresses it.
-12. [ ] **IGMP gap 7, MLD gap 10** — a change of the compatibility mode cancels the pending timers.
-13. [ ] **IGMP gap 8, MLD gap 11** — an answer to a Query leaves out empty records.
-14. [ ] **IGMP gap 9, MLD gap 12** — the S flag comes from the lowered timer.
-15. [ ] **IGMP gap 10, MLD gap 13** — a Report does not cancel the retransmissions of the Queries.
-16. [ ] **IGMP gap 11, MLD gap 14** — a source-specific Query lowers the Source Timers.
-17. [ ] **IGMP gap 12, MLD gap 15** — the forwarding asks for a listener of the source.
-18. [ ] **MLD gap 16** — an MLDv1 node reads an MLDv2 Query.
-19. [ ] **IGMP gap 13** — the IGMPv2 querier mode of an IGMPv3 router (missing feature).
-20. [ ] **MLD gap 17** — the MLDv1 mode of an MLDv2 router (missing feature).
+10. [x] **IGMP gap 5, MLD gap 8** — a second change merges the pending records.
+11. [x] **IGMP gap 6, MLD gap 9** — the older-version mode of a host has a report delay timer,
+    repeats its unsolicited Report and suppresses it. A test repair comes before MLD gap 9:
+    `Rfc2710ReportSuppression` counts the Reports for G.
+12. [x] **IGMP gap 7, MLD gap 10** — a change of the compatibility mode cancels the pending timers.
+13. [x] **IGMP gap 8, MLD gap 11** — an answer to a Query leaves out empty records.
+14. [x] **IGMP gap 9, MLD gap 12** — the S flag comes from the lowered timer.
+15. [x] **IGMP gap 10, MLD gap 13** — a Report does not cancel the retransmissions of the Queries.
+16. [x] **IGMP gap 11, MLD gap 14** — a source-specific Query lowers the Source Timers. Gaps 10
+    and 11 are one commit for each protocol, after two commits for the source-map loops and the
+    BLOCK row of EXCLUDE mode.
+17. [x] **IGMP gap 12, MLD gap 15** — the forwarding asks for a listener of the source.
+18. [x] **MLD gap 16** — an MLDv1 node reads an MLDv2 Query. A test repair comes first:
+    `Rfc9777RouterV1Listener` waits for the Report of C for G.
+19. [x] **IGMP gap 13** — the IGMPv2 querier mode of an IGMPv3 router (missing feature), with the
+    IGMPv1 mode and a new check and test for it.
+20. [x] **MLD gap 17** — the MLDv1 mode of an MLDv2 router (missing feature).
 21. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
     `notes.md` of both protocols follow it; the statistics branch.
 22. [ ] Gates, then move this plan to `plan/done/`.
@@ -124,6 +129,32 @@ The twin gaps come next to each other, IGMP first.
 - **Statistics are cumulative.** Each run compares with the files of the statistics branch, so
   the results of one commit must be regenerated before the next commit runs.
   `stat-seq.sh` runs, regenerates and makes a WIP commit per step, in order.
+- **IGMP gap 5, MLD gap 8.** The retransmission state of RFC 9776 section 5.1: a count for the
+  Filter-Mode-Change record and a count for each source; every State-Change Report that leaves
+  decrements them all, and Table 4 builds each Report from the current state. The log lines that
+  the module tests read stay.
+- **IGMP gap 6, MLD gap 9.** The host state machine of RFC 2236 section 6 and RFC 2710 section 5
+  with its own timer, `olderVersionReportTimer`, and flag, `lastReporter`; the return to version 3
+  stops them. `IGMPv3_interop_host` sent its IGMPv1 Query before the answer to its IGMPv2 Query
+  of 10 s could leave; its IGMPv2 Query now has 1 s.
+- **IGMP gap 7, MLD gap 10.** `cancelHostTimers` at every change of the compatibility mode. MLD
+  also deletes the held Reports of the other version (MLD gap 2); without that,
+  `Rfc9777ListenerV1Mode` saw Version 2 Reports of the solicited-node groups in MLDv1 mode.
+- **IGMP gap 8, MLD gap 11.** An entry in INCLUDE mode with no sources has no reception state.
+- **IGMP gaps 10 and 11, MLD gaps 13 and 14.** One mechanism, RFC 9776 section 6.6.3: without
+  the lowering, the new retransmission state puts every source into the Query with the S flag;
+  with the lowering alone, the old retransmission queries no source. So one commit for each
+  protocol. The lowered timers now end in EXCLUDE mode, and the module tests found three old
+  defects of the source-map loops (erase and increment, and a loop that tested the next entry),
+  and a dead loop of the BLOCK row in EXCLUDE mode; two commits before repair them.
+  `IGMPv3_router2` and `IGMPv3_router3` now expect the sequence of RFC 9776.
+- **IGMP gap 12, MLD gap 15.** `Ipv4InterfaceData::hasMulticastListener(group, source)` returned
+  the negation of the answer; no caller used it until now.
+- **IGMP gap 13.** RFC 9776 has both an automatic rule (section 6.6.2, an older General Query
+  lowers the version) and a configuration option (section 7.3.1); `routerVersion` gives both, per
+  interface. The IGMPv1 mode needed a check of its own; the level 2 pass had put its statements
+  to level 5.
+- **MLD gap 17.** RFC 9777 section 8.3.1 has only the configuration option, and a warning.
 - **Open finding.** `Icmpv6` emits `packetDropped` when a checksum is wrong, but `Icmpv6.ned`
   does not declare the signal, so a debug run stops there. The drop path is not more reachable
   than before; not repaired on this branch.
