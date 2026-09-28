@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. Proxy Mobile IPv6 orders Proxy Binding Updates by timestamp
+
+   The local mobility anchor of Proxy Mobile IPv6 (PMIPv6) accepted Proxy
+   Binding Updates in arrival order, so an update from the mobile access
+   gateway a mobile node had left, delayed behind the one from the gateway it
+   had joined, re-pointed the node's home network prefix to the old gateway.
+   As RFC 5213 Section 5.5 requires, gateways now put their clock in the
+   Timestamp option, and the anchor refuses an update that is not newer than
+   the last one it accepted for the node, with the status
+   TIMESTAMP_LOWER_THAN_PREV_ACCEPTED or TIMESTAMP_MISMATCH.
+
+   Simulations behave differently only where two Proxy Binding Updates for
+   one mobile node arrive out of order. The serialized bytes of Proxy Binding
+   Updates and Acknowledgements change, because the Timestamp option is no
+   longer zero.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

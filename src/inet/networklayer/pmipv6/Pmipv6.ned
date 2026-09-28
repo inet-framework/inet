@@ -21,6 +21,13 @@ import inet.common.SimpleModule;
 //    sets up the tunnel to the LMA, and advertises the mobile node's home network
 //    prefix on the access link.
 //
+// Proxy Binding Updates are ordered by timestamp (RFC 5213 Section 5.5): the MAG
+// puts its clock (simulation time) into the Timestamp option, and the LMA refuses
+// a Proxy Binding Update that is not newer than the last one it accepted for the
+// mobile node. The sequence-number scheme that RFC 5213 offers instead is not
+// implemented: it needs a way for a MAG to learn the sequence number the previous
+// MAG sent, which RFC 5213 leaves out of scope.
+//
 // It is a submodule of ~Ipv6NetworkLayer (enabled by its `hasPmipv6` parameter).
 //
 // @see ~LocalMobilityAnchor, ~MobileAccessGateway
