@@ -8,16 +8,7 @@ doc/project/evidence/protocol/mld/checks/compatibility.md#querier-configured-for
 the program steps below map onto its expected observations. Step 1 is observation 1; the guard
 and step 2 are observations 2 and 3.
 
-The check configures R1 into MLDv1 mode. The model has no parameter for that mode, so the test
-runs R1 with its defaults, as an administrator of the model would have to.
-
-Expected result FAIL, model gap: Mldv2 has no configuration option to act in MLDv1 mode
-(src/inet/networklayer/icmpv6/Mldv2.ned), and it builds only MLDv2 Queries
-(src/inet/networklayer/icmpv6/Mldv2.cc:1291-1298). The router half of RFC 9777 section 8.3.1 is
-not in the model. In the run, R1 sends an MLDv2 Query of 28 octets when it is up, and the guard
-of observation 2 fails on it. The assertion stays as the standard states it; see results.md.
-
-%# expected-result: FAIL
+The check configures R1 into MLDv1 mode, with the routerVersion parameter of Mldv2.
 
 %includes:
 #include "ProtocolTest.h"
@@ -121,6 +112,7 @@ network = MldTwoRouters
 sim-time-limit = 202s
 seed-set = 0
 *.r2.ipv6.mld.typename = "Mldv1"
+*.r1.ipv6.mld.routerVersion = 1
 # the MLDv1 router is up at the start with its link-local address (checks.md): no boot delay,
 # and no Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 section 5.1)
 *.r2.ipv6.neighbourDiscovery.routerBootupTime = 0s

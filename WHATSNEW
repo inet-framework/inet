@@ -462,6 +462,13 @@ Notable backward incompatible changes are the following:
    router was not configured so. Before, an Igmpv3 router sent IGMPv3 Queries
    on a link with an IGMPv2 router.
 
+   Mldv2 has a new parameter, routerVersion (default 2), for the MLDv1 mode of
+   a router (RFC 9777 section 8.3.1). In MLDv1 mode the router sends Queries of
+   24 octets with the Maximum Response Delay in milliseconds in the Maximum
+   Response Code, and no Multicast Address and Source Specific Query. RFC 9777
+   leaves the mode to the administrator: an MLDv1 General Query does not change
+   it, and gets a warning when the router is not configured for it.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

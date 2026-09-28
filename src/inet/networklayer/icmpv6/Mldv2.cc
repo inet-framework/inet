@@ -80,6 +80,9 @@ void Mldv2::initialize(int stage)
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
         olderVersionHostPresentInterval = par("olderVersionHostPresentInterval");
+        routerVersion = par("routerVersion");
+        if (routerVersion < 1 || routerVersion > 2)
+            throw cRuntimeError("Mldv2: routerVersion must be 1 or 2, got %d", routerVersion);
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -600,7 +603,12 @@ void Mldv2::processRexmtTimer(cMessage *msg)
         EV_INFO << "Retransmitting Multicast-Address-Specific Query for group '" << groupData->groupAddr
                 << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->groupRexmtCount
                 << " transmission(s) left).\n";
-        if (interfaceData->state == MLDV2_RS_QUERIER) {
+        if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+            sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+            numQueriesSent++;
+            numGroupSpecificQueriesSent++;
+        }
+        else if (interfaceData->state == MLDV2_RS_QUERIER) {
             Packet *packet = new Packet("Mldv2 query");
             const auto& query = makeShared<Mldv2Query>();
             query->setType(ICMPv6_MLD_QUERY);
@@ -855,6 +863,8 @@ void Mldv2::processQuery(Packet *packet)
     // Router part | Querier Election
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        if (routerVersion == 1)
+            warnAboutQueryVersion(routerInterfaceData, 2);
         Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         if (srcAddr < ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
@@ -1209,6 +1219,10 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
     // Router/Querier election still applies (an older-version querier may win).
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        // RFC 9777 section 8.3.1: a router that is not configured to act in MLDv1 mode logs a
+        // warning about an MLDv1 General Query; only the administrator changes the mode
+        if (routerVersion == 2 && groupAddr.isUnspecified())
+            warnAboutQueryVersion(routerInterfaceData, 1);
         Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         if (srcAddr < ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
@@ -1424,7 +1438,12 @@ void Mldv2::processRouterOlderVersionTimer(cMessage *msg)
 
 void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespTime)
 {
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
+    if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+        sendOlderVersionQuery(interfaceData, Ipv6Address::UNSPECIFIED_ADDRESS, maxRespTime);
+        numQueriesSent++;
+        numGeneralQueriesSent++;
+    }
+    else if (interfaceData->state == MLDV2_RS_QUERIER) {
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
@@ -1450,7 +1469,12 @@ void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
     startTimer(groupData->timer, lastMemberQueryTime);
     bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
+    if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+        sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+        numQueriesSent++;
+        numGroupSpecificQueriesSent++;
+    }
+    else if (interfaceData->state == MLDV2_RS_QUERIER) {
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
@@ -1529,7 +1553,8 @@ void Mldv2::sendSourceSpecificQueries(RouterGroupData *groupData)
     }
     for (bool suppressFlag : {true, false}) {
         const Ipv6AddressVector& sources = suppressFlag ? suppressedSources : otherSources;
-        if (sources.empty() || interfaceData->state != MLDV2_RS_QUERIER)
+        // MLDv1 has no Multicast Address and Source Specific Query
+        if (sources.empty() || interfaceData->state != MLDV2_RS_QUERIER || routerVersion == 1)
             continue;
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
@@ -1553,6 +1578,32 @@ void Mldv2::sendSourceSpecificQueries(RouterGroupData *groupData)
         else
             ++it;
     }
+}
+
+// RFC 9777 section 8.3.1: in the MLDv1 mode a Query is 24 octets, with the Maximum Response Delay
+// in milliseconds in the Maximum Response Code, not the exponential code.
+void Mldv2::sendOlderVersionQuery(RouterInterfaceData *interfaceData, const Ipv6Address& groupAddr, double maxRespDelay)
+{
+    Packet *packet = new Packet("Mldv1 query");
+    const auto& msg = makeShared<MldQuery>();
+    msg->setType(ICMPv6_MLD_QUERY);
+    msg->setMulticastAddress(groupAddr);
+    msg->setMaxRespDelay((uint16_t)std::min(65535.0, std::round(1000.0 * maxRespDelay)));
+    msg->setChunkLength(B(24));
+    Icmpv6::insertChecksum(checksumMode, msg, packet);
+    packet->insertAtFront(msg);
+    sendQueryToIPv6(packet, interfaceData->ie, groupAddr.isUnspecified() ? Ipv6Address::ALL_NODES_2 : groupAddr);
+}
+
+// RFC 9777 section 8.3.1: a Query of another version than the configured one gets a warning; the
+// warning is rate-limited to one for each interface.
+void Mldv2::warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion)
+{
+    if (interfaceData->versionWarned)
+        return;
+    interfaceData->versionWarned = true;
+    EV_WARN << "Received an MLDv" << queryVersion << " Query on interface '" << interfaceData->ie->getInterfaceName()
+            << "', where the router is configured to act in MLDv" << routerVersion << " mode.\n";
 }
 
 // Schedules the next retransmission of the Queries of the multicast address while any is left.
