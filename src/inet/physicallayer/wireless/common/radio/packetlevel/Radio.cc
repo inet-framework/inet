@@ -463,7 +463,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
         EV_INFO << "Reception started: " << (isReceptionAttempted ? "\x1b[1mattempting\x1b[0m" : "\x1b[1mnot attempting\x1b[0m") << " " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if (isReceptionAttempted) {
             if (!allowConcurrentReceptions)
-                attemptedReceptionTimers.clear();
+                abandonAttemptedReceptions();
             attemptedReceptionTimers.push_back(timer);
             emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
         }
@@ -545,6 +545,16 @@ void Radio::abortReception(cMessage *timer)
     remove(attemptedReceptionTimers, timer);
     updateTransceiverState();
     updateTransceiverPart();
+}
+
+void Radio::abandonAttemptedReceptions()
+{
+    for (auto timer : attemptedReceptionTimers) {
+        auto signal = static_cast<WirelessSignal *>(timer->getControlInfo());
+        auto part = (IRadioSignal::SignalPart)timer->getKind();
+        EV_INFO << "Reception \x1b[1mabandoned\x1b[0m: for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << signal->getReception() << endl;
+    }
+    attemptedReceptionTimers.clear();
 }
 
 void Radio::captureReception(cMessage *timer)

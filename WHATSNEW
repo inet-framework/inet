@@ -25,7 +25,9 @@ Notable backward incompatible changes are the following:
    subclasses changed: the protected receptionTimer and transmissionTimer
    members were replaced by the attemptedReceptionTimers and
    transmissionTimers vectors, and continueTransmission(), endTransmission()
-   and abortTransmission() take the transmission timer as an argument.
+   and abortTransmission() take the transmission timer as an argument. A
+   subclass that dropped the attempted reception on a reconfiguration by
+   resetting receptionTimer calls abandonAttemptedReceptions() instead.
    IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
    which return every transmission and attempted reception in progress; by
    default they wrap the singular getters (at most one element), so an IRadio
