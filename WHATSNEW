@@ -309,6 +309,19 @@ Notable backward incompatible changes are the following:
    of their arrival interface send fewer Redirects, so their fingerprints may
    change.
 
+18. An IPv6 Redirect names a router by its link-local address
+
+   Ipv6NeighbourDiscovery::sendRedirect copied the next hop of the route into
+   the Target Address field as it was, so a route whose gateway was configured
+   as a global address produced a Redirect with a global Target Address. RFC
+   4861 sections 4.5 and 8.2 require the router's link-local address there, and
+   the receiving side of INET discarded every such Redirect. A router now sends
+   no Redirect in that case, and the Target Address is either the destination
+   itself or a link-local address.
+
+   Simulations with configured routes through a global gateway on a shared
+   link send fewer Redirects, so their fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
