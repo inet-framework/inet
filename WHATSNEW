@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. An IPv6 router sends a Redirect only to a neighbour
+
+   Ipv6::routePacket sent an Internet Control Message Protocol for IPv6
+   (ICMPv6) Redirect for every datagram it forwarded back out of the
+   interface it had arrived on, whatever its source. RFC 4861
+   section 8.2 also requires that the source of the datagram is a neighbour, so
+   that the better first hop is on the sender's link. A router now sends the
+   Redirect only when the source is a link-local address or matches an on-link
+   prefix of the arrival interface. A home agent that forwards a decapsulated,
+   reverse-tunneled datagram from a mobile node away from home is one of the
+   routers that no longer sends one.
+
+   Simulations where a router forwards datagrams from a distant source back out
+   of their arrival interface send fewer Redirects, so their fingerprints may
+   change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
