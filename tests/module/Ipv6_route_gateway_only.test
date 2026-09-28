@@ -1,0 +1,84 @@
+%description:
+Ipv6NetworkConfigurator installs a manual <route> that names a gateway but no
+interface: it takes the output interface from the link that the node shares
+with the gateway, as Ipv4NetworkConfigurator does.
+
+    hA -- r1 -- r2 -- hB
+
+Only direct routes are generated automatically. r1's route towards hB's prefix
+names only the gateway (r2's address on the r1-r2 link); every other manual
+route names its interface. hA pings hB, so the reply arrives only if r1's
+gateway-only route is in r1's routing table.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6RouteGatewayOnlyNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hA: StandardHost6;
+        r1: Router6;
+        r2: Router6;
+        hB: StandardHost6;
+    connections:
+        hA.ethg++ <--> ethline <--> r1.ethg++;
+        r1.ethg++ <--> ethline <--> r2.ethg++;
+        r2.ethg++ <--> ethline <--> hB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6RouteGatewayOnlyNetwork
+ned-path = .;../../../../src
+sim-time-limit = 2s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.configurator.addRemoteRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.config = xml("<config> \
+    <interface hosts='hA' towards='r1' address='2001:db8:1::1'/> \
+    <interface hosts='r1' towards='hA' address='2001:db8:1::2'/> \
+    <interface hosts='r1' towards='r2' address='2001:db8:2::1'/> \
+    <interface hosts='r2' towards='r1' address='2001:db8:2::2'/> \
+    <interface hosts='r2' towards='hB' address='2001:db8:3::1'/> \
+    <interface hosts='hB' towards='r2' address='2001:db8:3::2'/> \
+    <route hosts='hA' destination='2001:db8:3::/64' gateway='2001:db8:1::2' interface='eth0'/> \
+    <route hosts='hB' destination='2001:db8:1::/64' gateway='2001:db8:3::1' interface='eth0'/> \
+    <route hosts='r1' destination='2001:db8:3::/64' gateway='2001:db8:2::2'/> \
+    <route hosts='r2' destination='2001:db8:1::/64' gateway='2001:db8:2::1' interface='eth0'/> \
+  </config>")
+
+*.hA.numApps = 1
+*.hA.app[0].typename = "PingApp"
+*.hA.app[0].destAddr = "2001:db8:3::2"
+*.hA.app[0].startTime = 1s
+*.hA.app[0].count = 1
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# r1 forwards along the gateway-only route: the ping reply comes back
+%contains: stdout
+Ping reply #0 arrived
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
