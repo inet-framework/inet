@@ -175,9 +175,11 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         // TODO something like this: configureInterfaceForIPv6(ie)
     }
     else if (signalID == interfaceDeletedSignal) {
-        // remove all routes that point to that interface
+        // remove all routes that point to that interface, and the destination cache
+        // entries that name it: their interface id no longer resolves
         const NetworkInterface *entry = check_and_cast<const NetworkInterface *>(obj);
         deleteInterfaceRoutes(entry);
+        purgeDestCacheForInterfaceId(entry->getInterfaceId());
     }
     else if (signalID == interfaceStateChangedSignal) {
         const NetworkInterface *networkInterface = check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface();

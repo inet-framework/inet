@@ -293,6 +293,16 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. Deleting an interface removes the IPv6 destination cache entries naming it
+
+    Ipv6RoutingTable removed the routes of a deleted interface but kept the
+    destination cache entries that named it, so the next IPv6 datagram to a
+    destination last reached over that interface stopped the simulation with
+    "getInterfaceById(): no interface with ID=...". Those entries are now
+    removed, as they already were when an interface went down. Models that
+    delete a tunnel interface with deleteTunnelNetworkInterface() while
+    traffic flows are affected; no shipped example is.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
