@@ -1,0 +1,3 @@
+The Proxy Registration flag of a Binding Acknowledgement is at 0x20
+
+MobilityHeaderSerializer wrote and read the Proxy Mobile IPv6 (PMIPv6) Proxy Registration (P) flag of a Binding Acknowledgement at 0x40, which is the Mobile Router (R) flag of RFC 3963. It now uses 0x20, as RFC 5213 Section 10 assigns it. Simulations behave as before. The serialized bytes of every Proxy Binding Acknowledgement change, as a packet capture or the packet-data fingerprint ingredient shows, and a received Binding Acknowledgement with the R flag set is no longer read as a proxy one.
