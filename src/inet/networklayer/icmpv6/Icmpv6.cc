@@ -270,7 +270,7 @@ void Icmpv6::processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg
     delete packet;
 }
 
-void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, int mtu)
+void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, int mtu, int pointer)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
@@ -293,7 +293,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     else if (type == ICMPv6_TIME_EXCEEDED)
         errorMsg = createTimeExceededMsg(static_cast<Icmpv6TimeEx>(code));
     else if (type == ICMPv6_PARAMETER_PROBLEM)
-        errorMsg = createParamProblemMsg(static_cast<Icmpv6ParameterProblem>(code));
+        errorMsg = createParamProblemMsg(static_cast<Icmpv6ParameterProblem>(code), pointer);
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
@@ -376,12 +376,12 @@ Packet *Icmpv6::createTimeExceededMsg(Icmpv6TimeEx code)
     return packet;
 }
 
-Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProblem code)
+Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProblem code, int pointer)
 {
     auto errorMsg = makeShared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
-    // TODO What Pointer? section 3.4
+    errorMsg->setPointer(pointer);
     auto packet = new Packet("Parameter Problem");
     packet->insertAtBack(errorMsg);
     return packet;

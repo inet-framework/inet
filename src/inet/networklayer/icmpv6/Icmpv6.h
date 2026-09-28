@@ -45,9 +45,11 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     /**
      * Sends an ICMPv6 error message about the given datagram. mtu is the MTU of the
      * next-hop link and is only read for ICMPv6_PACKET_TOO_BIG, whose MTU field RFC 4443
-     * section 3.2 requires; every other type ignores it.
+     * section 3.2 requires; every other type ignores it. pointer is the octet offset of the
+     * field in error within the datagram and is only read for ICMPv6_PARAMETER_PROBLEM,
+     * whose Pointer field RFC 4443 section 3.4 defines.
      */
-    virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0);
+    virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0, int pointer = 0);
 
     static bool verifyChecksum(const Packet *packet);
 
@@ -59,7 +61,7 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual Packet *createDestUnreachableMsg(Icmpv6DestUnav code);
     virtual Packet *createPacketTooBigMsg(int mtu);
     virtual Packet *createTimeExceededMsg(Icmpv6TimeEx code);
-    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODOSection 3.4 describes a pointer. What is it?
+    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code, int pointer);
 
   protected:
     /**
