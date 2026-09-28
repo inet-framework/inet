@@ -18,7 +18,7 @@ Without Mobile IPv6 the session dies; with it, the traffic keeps flowing —
 first through a tunnel, then, with route optimization, on the direct path.
 
 | Verified with INET version: ``4.7``
-| Source files location: `inet/showcases/general/mipv6 <https://github.com/inet-framework/inet/tree/master/showcases/general/mipv6>`__
+| Source files location: `inet/showcases/ipv6/mipv6 <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/mipv6>`__
 
 About Mobile IPv6
 -----------------
@@ -77,12 +77,14 @@ When the mobile node (MN) walks out of its home network into a foreign one:
    access point.
 2. **Movement detection** — a Router Advertisement on the new link reveals an
    unfamiliar prefix: "I have moved."
-3. **Care-of address formation** — normal SLAAC on the new link, once
-   duplicate address detection there has finished.
+3. **Care-of address formation** — normal SLAAC on the new link. Before the
+   node uses its new addresses, duplicate address detection checks both its
+   link-local address and the new care-of address; the two checks may run at
+   the same time.
 4. **Registration** — the mobile node sends a *Binding Update (BU)* to its
    home agent (HA): "my home address is now reachable at this care-of
    address, for this lifetime." The home agent confirms with a *Binding
-   Acknowledgement (BAck)*. Every Binding Update carries a sequence number
+   Acknowledgement (BA)*. Every Binding Update carries a sequence number
    that counts up, and the acknowledgement echoes the number of the update it
    answers; each end discards anything below the highest number it has already
    seen as stale, which is how a retransmission is told apart from a newer
@@ -140,9 +142,10 @@ no routing information at all:
   collects both tokens, and only their combination yields the key that
   authenticates the *Binding Update* to the correspondent node.
 
-Note the built-in ordering: the Home Test Init needs the home-agent tunnel, so
-the home half of the procedure cannot start before the home registration is
-complete — the Care-of Test half is free to run immediately. The tokens are
+Note the built-in ordering: the mobile node sends the Home Test Init and the
+Care-of Test Init at the same time, but the home half travels through the home
+agent, so the mobile node must first have sent its Binding Update to the home
+agent. The Care-of Test half needs no home agent. The tokens are
 deliberately short-lived (three and a half minutes; the binding they authorize
 at a correspondent node lasts at most seven), so long sessions re-run the
 procedure periodically; a correspondent can also prompt a refresh with a
@@ -312,7 +315,7 @@ it is:
 
      The next bullet's one-second delay is the workaround for the missing
      first step, hardcoded as ``sendTime = existingBinding ? 0 : 1`` at
-     ``Mipv6.cc:859`` and applied at ``:645``, which carries its own
+     ``Mipv6.cc:867`` and applied at ``:656``, which carries its own
      ``// TODO solve the HA DAD problem in a different way``. Fixing this gap
      replaces that literal with a real probe, so the delay would then vary per
      seed the way the mobile node's own duplicate address detection does, and
@@ -336,46 +339,24 @@ it is:
      the reader meets it as a number, rather than in a list of things the
      simulation does not do.
 - Until that acknowledgement lands the mobile node's reverse tunnel is not up,
-  and the replies it sends from its home address are dropped instead of being
+  and the packets it sends from its home address — ping replies, and the
+  first Home Test Init of route optimization — are dropped instead of being
   queued or tunneled. The node refuses to emit a packet whose home-address
   source would look spoofed outside the home network — its private version of
   the ingress filtering discussed earlier. This is the part that departs from
   the standard, and it costs one or two extra lost pings at the tail of each
   handover outage.
-- The mobile node's one-second retransmission timer fires just before the
-  delayed acknowledgement arrives, so every home registration here takes *two*
-  Binding Updates; the later correspondent registration completes with one.
-  The two acknowledgements then arrive out of order — the second update
-  reaches a home agent that already holds a binding, so it is answered at once
-  and overtakes the held first one — and the mobile node accepts the
-  acknowledgement carrying sequence number 2, discarding the late sequence
-  number 1. That is why the binding cache shown later records sequence
-  number 2.
-
-  .. todo::
-
-     This bullet documents an INET defect as though it were scenario
-     behaviour, and the defect is already fixed on
-     ``topic/gy/mipv6-first-registration-timer`` — commits ``2e9fc0200a``
-     (issue #1132: RFC 6275 Section 11.8's first-registration branch was dead
-     code) and ``f513057d65`` (issue #1133: the timeout constant was 1 s
-     instead of the RFC 6275 Section 13 value of 1.5 s), pull request #1134.
-     Neither is an ancestor of this branch; fixing either alone changes
-     nothing.
-
-     With both, the retransmission timer fires at ~21.54 s, well after the
-     acknowledgement arrives at ~21.07 s: the registration completes with a
-     single Binding Update and the binding cache records sequence number 1.
-
-     So this bullet should go when #1134 lands — and with it the
-     two-Binding-Update story everywhere else the page tells it. As of
-     2026-08-27 that is eight places: the sequence-number gloss in
-     Terminology; the "signaling, message by message" prose and its
-     sequence-chart panel recipes; the Home Test Init retransmission
-     narrative; the "Step by step" panel and its recipe; and the binding
-     cache figure's explanation, which reads sequence number 2 off the
-     screenshot. The prose is cheap; the sequence-chart panels, the handover
-     video and the binding cache screenshot would all need re-capturing.
+- The mobile node waits 1.5 s for the acknowledgement of a first home
+  registration before it retransmits the Binding Update. This is the
+  standard's first-registration timeout (InitialBindackTimeoutFirstReg), chosen
+  to leave the home agent time for its duplicate address detection. The held
+  acknowledgement arrives about one second after the Binding Update, so every
+  home registration here takes one Binding Update, and the binding cache
+  records sequence number 1.
+- After a move, the mobile node runs duplicate address detection on its
+  link-local address only, and assigns the care-of address without probing
+  it. The standard requires both checks; a node that runs them at the same
+  time waits about as long.
 - Routers in this network have ICMPv6 Redirect generation disabled
   (``sendRedirects = false``). A router sends a Redirect when it forwards a
   packet back out of the very interface that packet arrived on, to tell the
