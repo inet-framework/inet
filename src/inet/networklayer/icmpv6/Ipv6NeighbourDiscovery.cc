@@ -97,6 +97,10 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         sendGratuitousNa = par("sendGratuitousNa");
 
+        redirectRate = par("redirectRate");
+        redirectBurst = par("redirectBurst");
+        redirectTokens = redirectBurst;
+
         pendingQueue.setName("pendingQueue");
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
@@ -2396,6 +2400,18 @@ void Ipv6NeighbourDiscovery::sendRedirect(Packet *redirectedPacket, const Ipv6Ad
                 << " is neither the destination " << destAddr << " nor a link-local address\n";
         return;
     }
+
+    // RFC 4861 Section 8.2: "A router MUST limit the rate at which Redirect messages
+    // are sent". RFC 4443 Section 2.4 (f), which it refers to for the details,
+    // recommends a token bucket of average rate N and burst size B.
+    simtime_t now = simTime();
+    redirectTokens = std::min((double)redirectBurst, redirectTokens + (now - redirectTokensUpdated).dbl() * redirectRate);
+    redirectTokensUpdated = now;
+    if (redirectTokens < 1) {
+        EV_INFO << "Not sending ICMPv6 Redirect to " << pktSrcAddr << " for " << destAddr << ": rate limit reached\n";
+        return;
+    }
+    redirectTokens -= 1;
 
     EV_INFO << "Sending ICMPv6 Redirect to " << pktSrcAddr << ": use " << targetAddr
             << " as next hop for " << destAddr << "\n";

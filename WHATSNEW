@@ -322,6 +322,19 @@ Notable backward incompatible changes are the following:
    Simulations with configured routes through a global gateway on a shared
    link send fewer Redirects, so their fingerprints may change.
 
+19. IPv6 Redirects are rate limited
+
+   A router sent one Internet Control Message Protocol for IPv6 (ICMPv6)
+   Redirect for every datagram that qualified, with no limit, although RFC
+   4861 section 8.2 requires one. Ipv6NeighbourDiscovery now
+   meters them with the token bucket that RFC 4443 section 2.4 (f) recommends.
+   The two new parameters redirectRate (default 10Hz) and redirectBurst (default
+   10) are the rate N and the burst size B of that bucket, and the defaults are
+   the example values of that section.
+
+   Simulations where a source keeps sending through a router that redirects it
+   send fewer Redirects, so their fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
