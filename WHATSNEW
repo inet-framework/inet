@@ -303,6 +303,20 @@ Notable backward incompatible changes are the following:
     field. Code outside INET that sends an ICMPv6 message without passing it
     through Ipv6 must compute the checksum itself; see the migration guide.
 
+18. ICMPv6 checksums include the IPv6 pseudo-header
+
+    With checksumMode = "computed", the Internet Control Message Protocol for
+    IPv6 (ICMPv6) checksum was computed over the ICMPv6 message alone, without
+    the IPv6 pseudo-header that RFC 4443 requires. Every ICMPv6 message INET
+    sent -- Neighbour Discovery, Multicast Listener Discovery (MLD), ping and
+    error reports -- carried a wrong checksum, and Wireshark marked it as bad
+    in packet captures. The checksum now covers the pseudo-header.
+    Simulations with the default "declared" checksum mode are unaffected.
+    Fingerprints that hash packet bytes over IPv6 networks change. Code outside
+    INET that sends an ICMPv6 message without passing it through Ipv6 can use
+    the new Icmpv6::insertChecksum() overload that takes the source and
+    destination addresses.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

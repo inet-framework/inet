@@ -24,6 +24,7 @@
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 
 namespace inet {
 
@@ -48,10 +49,11 @@ void Icmpv6::initialize(int stage)
         registerService(Protocol::icmpv6, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("ipv6In"));
 
-        // The checksum is filled in after routing, because the address the datagram is
-        // finally sent from is not always known when the message is built: a sender may
-        // leave the source unspecified and let Ipv6 choose it (Ipv6NeighbourDiscovery does
-        // this for a Router Solicitation, and Mldv1/Mldv2 set only the destination).
+        // RFC 4443 Section 2.3 computes the checksum over an IPv6 pseudo-header, so it
+        // needs the address the datagram is finally sent from, which is not always known
+        // when the message is built: a sender may leave the source unspecified and let Ipv6
+        // choose it (Ipv6NeighbourDiscovery does this for a Router Solicitation, and Mldv1
+        // and Mldv2 set only the destination).
         // Register on Ipv6 whatever this module's own checksumMode is:
         // Ipv6NeighbourDiscovery, Mldv1, Mldv2 and PingApp each have their own
         // checksumMode parameter and all produce ICMPv6 messages.
@@ -324,11 +326,13 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     bool deliverLocally = ipv6Header->getSrcAddress().isUnspecified();
 
     auto icmpHeader = errorMsg->removeAtFront<Icmpv6Header>();
-    insertChecksum(icmpHeader, errorMsg);
     // A message that goes out through Ipv6 gets its checksum in datagramPostRoutingHook();
-    // the one looped back below never reaches Ipv6, so compute it here.
-    if (deliverLocally && checksumMode == CHECKSUM_COMPUTED)
-        icmpHeader->setChksum(computeChecksum(icmpHeader, errorMsg->peekData(Chunk::PF_ALLOW_EMPTY)));
+    // the one looped back below never reaches Ipv6, so compute it here from the addresses
+    // it is about to be tagged with.
+    if (deliverLocally)
+        insertChecksum(checksumMode, Ipv6Address::LOOPBACK_ADDRESS, Ipv6Address::LOOPBACK_ADDRESS, icmpHeader, errorMsg);
+    else
+        insertChecksum(icmpHeader, errorMsg);
     errorMsg->insertAtFront(icmpHeader);
 
     // debugging information
@@ -339,7 +343,9 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     if (deliverLocally) {
         // pretend it came from the IP layer
         errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->addTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
+        auto addressInd = errorMsg->addTag<L3AddressInd>(); // FIXME maybe use configured loopback address
+        addressInd->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);
+        addressInd->setDestAddress(Ipv6Address::LOOPBACK_ADDRESS);
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -479,8 +485,9 @@ void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& 
             icmpHeader->setChksum(0xBAAD);
             break;
         case CHECKSUM_COMPUTED:
-            // if the checksum mode is computed, then only zero the field here; the value is
-            // computed in datagramPostRoutingHook(), after routing
+            // if the checksum mode is computed, then only zero the field here: the RFC 4443
+            // checksum covers an IPv6 pseudo-header, so the value is computed in
+            // datagramPostRoutingHook(), once Ipv6 has settled the two addresses
             icmpHeader->setChksum(0x0000);
             break;
         default:
@@ -488,9 +495,27 @@ void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& 
     }
 }
 
-uint16_t Icmpv6::computeChecksum(const Ptr<const Icmpv6Header>& icmpHeader, const Ptr<const Chunk>& icmpData)
+void Icmpv6::insertChecksum(ChecksumMode checksumMode, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
 {
+    insertChecksum(checksumMode, icmpHeader, packet);
+    if (checksumMode == CHECKSUM_COMPUTED)
+        icmpHeader->setChksum(computeChecksum(srcAddress, destAddress, icmpHeader, packet->peekData(Chunk::PF_ALLOW_EMPTY)));
+}
+
+uint16_t Icmpv6::computeChecksum(const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const Icmpv6Header>& icmpHeader, const Ptr<const Chunk>& icmpData)
+{
+    // RFC 4443, Section 2.3: the checksum covers a pseudo-header of IPv6 header fields, as
+    // specified in RFC 8200 Section 8.1, followed by the entire ICMPv6 message. The Next
+    // Header value used in the pseudo-header is 58.
+    auto pseudoHeader = makeShared<TransportPseudoHeader>();
+    pseudoHeader->setSrcAddress(srcAddress);
+    pseudoHeader->setDestAddress(destAddress);
+    pseudoHeader->setNetworkProtocolId(Protocol::ipv6.getId());
+    pseudoHeader->setProtocolId(IP_PROT_IPv6_ICMP);
+    pseudoHeader->setPacketLength(icmpHeader->getChunkLength() + icmpData->getChunkLength());
+    pseudoHeader->setChunkLength(B(40)); // the IPv6 pseudo-header is 40 bytes
     MemoryOutputStream stream;
+    Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, icmpHeader);
     Chunk::serialize(stream, icmpData);
     return internetChecksum(stream.getData());
@@ -507,9 +532,12 @@ INetfilter::IHook::Result Icmpv6::datagramPostRoutingHook(Packet *packet)
     // that runs earlier may have replaced it -- Mipv6 inserts a Home Address Option and
     // rewrites the next header field -- and the tag then still holds the header as it was.
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
+    L3Address srcAddress = ipv6Header->getSourceAddress();
+    L3Address destAddress = ipv6Header->getDestinationAddress();
 
     // walk the next header chain to the ICMPv6 message, keeping the extension headers so
-    // that they can be put back as they were
+    // that they can be put back as they were; RFC 8200 Section 8.1 keeps them out of the
+    // checksum, so only their length is of interest here
     b offset = ipv6Header->getChunkLength();
     IpProtocolId nextHeader = ipv6Header->getProtocolId();
     std::vector<Ptr<const Ipv6ExtensionHeader>> extensionHeaders;
@@ -528,7 +556,19 @@ INetfilter::IHook::Result Icmpv6::datagramPostRoutingHook(Packet *packet)
     // message off, replace the message header, and put the very same header chunks back
     packet->eraseAtFront(offset);
     auto icmpHeader = packet->removeAtFront<Icmpv6Header>();
-    icmpHeader->setChksum(computeChecksum(icmpHeader, packet->peekData(Chunk::PF_ALLOW_EMPTY)));
+    if (extensionHeaders.empty())
+        icmpHeader->setChksum(computeChecksum(srcAddress, destAddress, icmpHeader, packet->peekData(Chunk::PF_ALLOW_EMPTY)));
+    else {
+        // An extension header sits in front of the message: with Mobile IPv6, a Home
+        // Address option or a type 2 routing header. The pseudo-header then holds an
+        // address this IPv6 header does not: the home address instead of the care-of
+        // address source (RFC 6275 Section 11.3.1), or the final destination (RFC 8200
+        // Section 8.1). INET does not model that substitution on the sending side, so mark
+        // the field as a declared placeholder rather than write a value the receiver would
+        // reject.
+        icmpHeader->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+        icmpHeader->setChksum(0xC00D);
+    }
     packet->insertAtFront(icmpHeader);
     for (auto it = extensionHeaders.rbegin(); it != extensionHeaders.rend(); ++it)
         packet->insertAtFront(*it);
@@ -547,9 +587,18 @@ bool Icmpv6::verifyChecksum(const Packet *packet)
             // if the checksum mode is declared to be incorrect, then the check fails
             return false;
         case CHECKSUM_COMPUTED: {
-            // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
-            auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            // the RFC 4443 checksum covers the two addresses, which only a datagram
+            // delivered by Ipv6 carries; a packet dissected on its own has no L3AddressInd
+            // tag and its checksum cannot be recomputed (cf. Udp::isCorrectPacket())
+            const auto& addressInd = packet->findTag<L3AddressInd>();
+            if (addressInd == nullptr)
+                return icmpHeader->isCorrect();
+            // otherwise compute the checksum over the pseudo-header and the whole message;
+            // the check passes if the result is 0, the received checksum being part of it.
+            // The length is explicit: peeking with b(-1) would return the next chunk of a
+            // quoted datagram rather than all of it.
+            auto icmpData = packet->peekDataAt(icmpHeader->getChunkLength(), packet->getDataLength() - icmpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
+            uint16_t checksum = computeChecksum(addressInd->getSrcAddress(), addressInd->getDestAddress(), icmpHeader, icmpData);
             // TODO delete these isCorrect calls, rely on checksum only
             return checksum == 0 && icmpHeader->isCorrect();
         }
