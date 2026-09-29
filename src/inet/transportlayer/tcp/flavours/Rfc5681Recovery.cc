@@ -89,6 +89,11 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    new data unless the incoming duplicate acknowledgment contains
     //    new SACK information.
     //"
+    // This recovery runs only without SACK, and there every duplicate ACK already
+    // takes one segment out of getBytesInFlight() (TcpSackRexmitQueue::addInferredSack(),
+    // Linux tcp_add_reno_sack()). The window therefore stays at ssthresh and is not
+    // inflated: cwnd minus that pipe gives the same sending room as the RFC's inflated
+    // cwnd minus FlightSize.
     if (state->dupacks < state->dupthresh) {
         // TODO FlightSize would remain less than or equal to cwnd plus 2*SMSS
         if (state->limited_transmit_enabled) {
@@ -128,8 +133,11 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //    the congestion window by the number of segments (three) that have
         //    left the network and which the receiver has buffered.
         //"
+        // The retransmission takes the place of the lost head in the pipe (Linux
+        // marks it lost), so the head is not counted twice.
+        conn->getRexmitQueueForUpdate()->markHeadLost();
         conn->retransmitOneSegment(false);
-        state->snd_cwnd = state->ssthresh; // no +3*SMSS inflation: getBytesInFlight already accounts for the 3 segments in sackedOut
+        state->snd_cwnd = state->ssthresh; // no +3*SMSS inflation: the three duplicate ACKs took three segments out of the pipe
         conn->emit(cwndSignal, state->snd_cwnd);
 
         // entering fast retransmit means starting the loss recovery phase; the ACK
@@ -142,13 +150,8 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    congestion window in order to reflect the additional segment that
     //    has left the network.
     //"
-    // "additional" is counted by arrival, not by state->dupacks: the counter is frozen
-    // at dupthresh for the whole recovery phase, so every further duplicate ACK inside
-    // it is an additional one
-    else if (state->dupacks > state->dupthresh || state->lossRecovery) {
-        state->snd_cwnd += state->snd_effmss;
-        conn->emit(cwndSignal, state->snd_cwnd);
-    }
+    // Not done on cwnd: the inferred SACK of this duplicate ACK already took the
+    // segment out of the pipe, and an increment here would count it a second time.
     //"
     // 5.  When previously unsent data is available and the new value of
     //     cwnd and the receiver's advertised window allow, a TCP SHOULD

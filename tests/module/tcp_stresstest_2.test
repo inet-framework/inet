@@ -28,8 +28,8 @@ Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.cli_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_tcp: finishing with 1 connections open.
-TcpTestNet2.srv_app: received 655360 bytes in 463 packets
-[232.600] tcpdump finished, A:745 B:539 segments
+TcpTestNet2.srv_app: received 655360 bytes in 458 packets
+[220.143] tcpdump finished, A:737 B:536 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------
