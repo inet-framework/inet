@@ -1,7 +1,7 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2c, 3 and 4 done; step 2b is open;
-step 5, 5b and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
+Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2b, 2c, 3 and 4 done; step 5, 5b
+and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
 since 2026-09-29 (owner's decision); older copies are on `topic/audit` and on `master`.
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
@@ -730,7 +730,11 @@ tests fail, and all of them because #1155 meets master's newer tests:
 2. the retransmission timeout **follows RFC 6298 by default**; a test that needs Linux's formula
    overrides it;
 3. this plan lives on the branch;
-4. **no serializer adaptation yet**: the PPP change may still be modified.
+4. **no serializer adaptation yet**: the PPP change may still be modified;
+5. the initial window **follows RFC 5681 by default**; IW10 is an option, which the packetdrill
+   configuration selects (asked during 2b);
+6. a soft ICMP error **never aborts a connection by default** (RFC 9293 MUST-56); the Linux abort
+   during setup is an option, which the packetdrill configuration selects (asked during 2b).
 
 **2a. The timeout by RFC 6298 — done 2026-09-29.** The default computes RTO = max(SRTT + 4·RTTVAR,
 the minimum), the Linux variance floor becomes a parameter, and the packetdrill configuration in
@@ -738,14 +742,39 @@ the minimum), the Linux variance floor becomes a parameter, and the packetdrill 
 also adds the peer's delayed-ACK allowance (RFC 8985 section 7.2). 11 module tests were recorded
 again. `Rfc6298FirstMeasurement` and `Rfc6298InitialTimeout` pass.
 
-**2b. The standards tests for the modern defaults — open.** The TCP tests and the 2 self tests hold
-under the new defaults; a test overrides a parameter only where its check needs it, and says why.
-The TCP evidence documents follow. After 2a and 2c, 15 TCP standards tests fail with the modern
-defaults, and 1 with the legacy parameters. `Rfc5681FastRetransmit` needs a decision of form: it
-describes Reno without SACK, so it overrides the algorithm, SACK, the loss detection and PRR; its
-step 3 reads the published `cwnd`, which is ssthresh in the model (see 2c). The proposal is to
-check the send decision instead: after the third duplicate ACK, the number of new segments
-matches ssthresh + (3 + k)·SMSS − FlightSize for the k further duplicate ACKs.
+**2b. The standards tests for the modern defaults — done 2026-09-29.** The TCP tests and the 2 self
+tests hold under the new defaults; a test overrides a parameter only where its check needs it, and
+says why in its ini. The analysis of the 15 failures found four more defects of the model, and
+each one has its own commit:
+
+| Commit | Change | Evidence |
+| --- | --- | --- |
+| `c23267fa9b` | fix: the tail loss probe stayed armed after the ACK of all data; in TIME_WAIT it sent the FIN again (caused by `a325074313`) | `Rfc9293OutOfWindowSegment`; packetdrill `shutdown-rdwr-send-queue-ack-close` becomes a MATCH |
+| `7b559a6998` | fix: RFC 6298 section 5.7, the RTO is 3 s after a SYN timeout (the 1 s default of `03a922dc57` came without it) | `Rfc6298TimeoutAfterLostSyn` |
+| `3101ddb055` | change: the initial window defaults to the RFC 5681 bound (decision 5) | `Rfc5681InitialWindow`; `tcp_sack_2`, `tcp_sack_3` recorded again |
+| `f3ab035caa` | fix: a soft ICMP error does not abort a connection during setup; `softIcmpErrorsAbortSetup` selects Linux (decision 6; caused by `152783c1e0`) | the self test `ReactiveInject` |
+| `d6c974a3b6` | tests: the 15 TCP tests and `CaptureWithUnit`; the helpers `tcpHeaderOf()`, `tcpMssOptionOf()`, `tcpOptionsLength()` | 25 PASS, 2 FAIL (expected); each new guard fails on a changed copy |
+| `5d73133454` | doc: the procedures, `results.md`, `coverage.md`, `conformance.md`, `notes.md`; four links to `TcpBaseAlg.cc` repaired | the link check passes |
+| `fa0a620ced` | comment: the RTO is Linux's only with `rtoVarianceFloor` | — |
+
+inet-gpl `61d2315` selects IW10 and `softIcmpErrorsAbortSetup` in the packetdrill base
+configuration, as `84fdfb1` did for the RTO.
+
+The test errors, by class: five tests had a blocking `never` step in which SACK and RACK finished
+the repair, so the next step missed its event (now `meanwhile` guards); two tests assumed
+536-octet segments or a 20-octet ACK header (now read from the run); the shrunk-window scenario
+picked host B's fourth ACK, which became its FIN, so `Rfc9293ShrunkWindowNoNewData` **passed
+without looking at anything**; `Rfc6298KarnsRule` sent one segment; three RFC 5681 tests now
+select Reno, because CUBIC departs from RFC 5681 on purpose (RFC 9438); two timer tests turn off
+the tail loss probe, which re-arms the RTO. `Rfc5681FastRetransmit` judges the window by what
+host A sends, as proposed: a guard forbids new data in recovery that takes FlightSize past
+ssthresh + (3 + k)·SMSS.
+
+Results at `fa0a620ced`: module `tcp_` 79 of 79 pass; protocol `tcp/` 27 tests, 25 PASS and 2
+FAIL (expected); protocol `self/` 21 PASS; packetdrill 297 MATCH, 12 KERNEL_DRIFT, 6 DIVERGENCE,
+3 UNSUPPORTED_FEATURE. The complete module suite passes (383), all 11 protocol suites pass, and
+the serializer suite keeps its 2 known failures (decision 4). `check-series-builds.sh` builds all
+14 commits after `13eff5386e`.
 
 **2c. The three differences — done 2026-09-29.** `Rfc5681FastRetransmit`, `Rfc9293FlowControl` and
 the MIPv6 leak were analyzed. They hid six defects of the series. Each one has its own `fix:`
@@ -776,8 +805,13 @@ the modern defaults 10 of 27 pass, 2 fail as expected, 15 fail.
 
 - `Rfc6675Recovery` step (3.3) restricts Limited Transmit to new data (HighData+1) only in RACK
   mode. In the classic mode `nextSeg()` rule 3 can give the unSACKed hole, and the loop then
-  retransmits it before loss detection enters recovery. No test covers the case; step 2b adds one,
-  then the rule applies in all modes.
+  retransmits it before loss detection enters recovery. No test covers the case, and RFC 6675 is
+  not yet in the in-scope set of the standards tests; a later pass writes the check first, then
+  the rule applies in all modes.
+- Without an SRTT the loss probe timeout is the RTO, not 1 s (RFC 8985 section 7.2, Linux
+  `TCP_TIMEOUT_INIT`). The two agree except after RFC 6298 section 5.7, where the RTO is 3 s.
+- The active side seeds the RTT estimator from the handshake whatever `seedRttFromHandshake`
+  says; the passive side obeys the parameter (`TcpConnectionRcvSegment.cc`).
 - `calculateSsthreshForRto()` and the TLP reaction of `processTlpAck()` still take the pipe for
   FlightSize. RFC 5681 equation (4) applies to the timeout too. No test shows a difference yet.
 - `TcpSimsignals.h` declares `rtoSignal`, `rttSignal` and `rttvarSignal` two times each.
@@ -786,9 +820,10 @@ the modern defaults 10 of 27 pass, 2 fail as expected, 15 fail.
 - Two tests share the base name `Fragmentation.test` (`element/`, `ipv4/`), which matters for
   runners that extract a test into `work/<base name>`.
 
-**Still open from this step:** the force-push of the branch, after the owner's confirmation; then
-the rebase of `topic/tcp-packetdrill-tests` onto the result; and the serializer adaptation,
-deferred by decision 4.
+**Still open from this step:** the force-push of the branch, after the owner's confirmation; and
+the serializer adaptation, deferred by decision 4. `topic/tcp-packetdrill-tests` is rebased onto
+this branch locally (2026-09-29, 306 wrappers, the same results as before the rebase); it follows
+the branch again before the push.
 
 ### Step 3 — The release note (F-2) — done 2026-09-14
 
