@@ -48,6 +48,7 @@ CLAUDE.md
 /tutorials/*/data/
 /tests/*/work/
 /tests/*/*/work/
+/tests/protocol/**/work/
 /tests/*/results*/
 /tests/fingerprint/SelfDoc.xml
 /coverage
