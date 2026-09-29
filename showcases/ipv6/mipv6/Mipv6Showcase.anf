@@ -850,7 +850,7 @@ if props["yaxis_max"]:
         ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
                 color="C3", transform=top, clip_on=False, zorder=5)
         ax.text(t[off].min() - 1.0, 0.90,
-                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at the home agent)"
+                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at router homeAgent)"
                 % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
                 ha="right", va="top", fontsize=9, color="C3", transform=top)
 
