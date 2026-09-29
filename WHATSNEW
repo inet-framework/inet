@@ -293,6 +293,24 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IPv6 repeats the Hop-by-Hop Options and Routing headers in every fragment
+
+   Internet Protocol version 6 (IPv6) fragmentation split every extension
+   header together with the payload. A Hop-by-Hop Options header or a Routing
+   header went into the first fragment only, behind the Fragment header, and
+   every fragment named it as the header that follows the Fragment header. Each
+   fragment now starts with the per-fragment headers of Request for Comments
+   (RFC) 8200 section 4.5: the IPv6 header and the extension headers up to and
+   including the Routing header, else the Hop-by-Hop Options header, then the
+   Fragment header.
+
+   Greedy Perimeter Stateless Routing (GPSR) over IPv6 no longer stops with
+   "Gpsr option not found in datagram!" when a node forwards a fragment, and the
+   simulation no longer ends with an error when a destination reassembles the
+   fragments of a datagram that carries a Hop-by-Hop Options header. The
+   fragments of such a datagram are longer by the repeated headers, so the
+   datagram can need more fragments than before.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
