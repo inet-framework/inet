@@ -1,0 +1,86 @@
+%description:
+Tests that a tunnel exit point survives a netfilter PREROUTING hook that drops
+the decapsulated datagram.
+
+Topology: A --- HA --- H. Host A tunnels its traffic for H to the home agent
+HA (IPv6-in-IPv6, RFC 2473). HA has no binding for A, so Mipv6 drops every
+decapsulated datagram in its PREROUTING hook, because the tunnel source is not
+a known tunnel exit point (RFC 6275 Section 10.4.5). The first one is the
+Neighbour Solicitation of the tunnel interface's own Duplicate Address
+Detection, at t=0.654s; a Router Solicitation and two UDP datagrams follow
+after t=3s.
+Ipv6::datagramPreRoutingHook() deletes a dropped datagram itself, so the tunnel
+exit point must not delete it again.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import inet.node.mipv6.HomeAgent6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelExitDropTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        A: StandardHost6;
+        HA: HomeAgent6;
+        H: StandardHost6;
+    connections:
+        A.ethg++ <--> ethline <--> HA.ethg++;
+        HA.ethg++ <--> ethline <--> H.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelExitDropTestNetwork
+ned-path = ../../../../src
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.config = xml("<config> \
+    <interface among='A HA' prefix='2001:db8:1::/64'/> \
+    <interface among='HA H' prefix='2001:db8:2::/64'/> \
+    <route hosts='A' destination='2001:db8:2:0:8aa:ff:fe00:4' prefixLength='128' interface='tun0'/> \
+  </config>")
+
+**.A.numTunInterfaces = 1
+**.A.tun[0].typename = "Ipv6TunnelInterface"
+**.A.tun[0].source = "2001:db8:1:0:8aa:ff:fe00:1"
+**.A.tun[0].destination = "2001:db8:1:0:8aa:ff:fe00:2"
+
+**.A.numApps = 1
+**.A.app[0].typename = "UdpBasicApp"
+**.A.app[0].destAddresses = "2001:db8:2:0:8aa:ff:fe00:4"
+**.A.app[0].destPort = 5000
+**.A.app[0].messageLength = 100B
+**.A.app[0].sendInterval = 0.5s
+**.A.app[0].startTime = 3s
+**.A.app[0].stopTime = 3.9s
+
+**.H.numApps = 1
+**.H.app[0].typename = "UdpSink"
+**.H.app[0].localPort = 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Dropping packet: tunnel source is not a known tunnel exit point.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelExitDropTestNetwork.H.app[0]: received 0 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
