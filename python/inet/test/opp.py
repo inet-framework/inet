@@ -96,16 +96,19 @@ class OppTestTask(TestTask):
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        with open(os.path.join(test_directory, "makefrag"), "w") as f:
-            f.write(_test_program_makefrag)
-        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}"]
-        subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
-        if subprocess_result.returncode != 0:
-            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["make", f"MODE={self.mode}", "-j", str(multiprocessing.cpu_count())]
-        subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
-        if subprocess_result.returncode != 0:
-            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
+        # a test that names its own program with %testprog never runs the test binary, so
+        # building one costs a makefile and a link per test for nothing
+        if not re.search(r"^%testprog:", read_file(test_file_name), re.MULTILINE):
+            with open(os.path.join(test_directory, "makefrag"), "w") as f:
+                f.write(_test_program_makefrag)
+            args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}"]
+            subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
+            if subprocess_result.returncode != 0:
+                return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
+            args = ["make", f"MODE={self.mode}", "-j", str(multiprocessing.cpu_count())]
+            subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
+            if subprocess_result.returncode != 0:
+                return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         test_program = f"{test_binary_name}/{test_binary_name}{binary_suffix}"
         ned_directory = os.path.join(self.working_directory, "ned")
         ned_relative_path = os.path.relpath(ned_directory, test_directory) if os.path.exists(ned_directory) else ""
@@ -125,6 +128,11 @@ class OppTestTask(TestTask):
             stdout = ide_opp_test.print_stream.getvalue()
             stdout = re.sub(r'\x1b\[[0-9;]*[mGKH]', '', stdout)
         stderr = subprocess_result.stderr
+        # opp_test counts a test whose program prints "#SKIPPED" as skipped, and still prints
+        # "Aggregate result: PASS" for a run in which nothing failed; a skip must not read as a pass
+        skipped = re.search(r"^\*\*\* \S+: SKIPPED \((.*)\)\s*$", stdout, re.MULTILINE)
+        if skipped:
+            return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason=skipped.group(1), stdout=stdout, stderr=stderr)
         match = re.search(r"Aggregate result: (\w+)", stdout)
         if match:
             return self.task_result_class(self, result=match.group(1), expected_result=self.expected_result, stdout=stdout, stderr=stderr)

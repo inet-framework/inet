@@ -43,8 +43,14 @@ wrapper give PASS, FAIL (expected), FAIL (unexpected) and PASS. `.gitignore` gai
 `Aggregate result: PASS`, and `opp_repl` reads only that line — a missing `inet-gpl` would read as
 306 passes.
 
-**Step 4 — the runner builds nothing for a wrapper** (`opp_repl`); verified here with
-`inet_run_protocol_tests`.
+**Step 4 — the runner builds nothing for a wrapper, and a skip is a skip. — done in INET's
+runner 2026-09-29.** INET has its own copy of the test runner, `python/inet/test/opp.py`, which
+`inet_run_protocol_tests` and the GitHub job use; `opp_repl` has a second one, for `opp_ci`. In
+INET's copy, a test that declares `%testprog` gets no makefile and no link, and a test that
+`opp_test` marks `SKIPPED` becomes `SKIP` instead of the `PASS` of its aggregate line. **Done:** all
+306 wrappers with `inet-gpl` give 296 PASS, 3 FAIL (expected) and the 7 baseline divergences as
+FAIL (unexpected), in 14 seconds on 12 cores; without `inet-gpl`, 306 SKIP; the two older TCP
+protocol tests, which still build a binary, pass. The `opp_repl` copy follows.
 
 **Step 6 — CI.** The *Test: protocol* job builds `inet-gpl` and fails if every wrapper skips.
 
