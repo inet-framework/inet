@@ -47,8 +47,9 @@ import inet.transportlayer.contract.ITcp;
 //      Limited Transmit algorithm (RFC 3042).
 //
 //   -# The `initialWindow` parameter selects the initial congestion window:
-//      one segment (RFC 2001), min(4*MSS, max(2*MSS, 4380 bytes)) (RFC 3390), or
-//      IW10 (RFC 6928), which is the default. The older `increasedIWEnabled`
+//      one segment (RFC 2001), min(4*MSS, max(2*MSS, 4380 bytes)) (RFC 3390),
+//      which is the default and the upper bound of RFC 5681 section 3.1, or IW10
+//      (RFC 6928, experimental), which Linux uses. The older `increasedIWEnabled`
 //      boolean does the same as "rfc3390" and is deprecated.
 //
 //   -# The `advertisedWindow` parameter defines the amount of data TCP can
@@ -215,20 +216,21 @@ import inet.transportlayer.contract.ITcp;
 //       is a representation choice, but it does surface: where the reference
 //       counts packets (for example when deciding how large a burst may be), the
 //       byte-valued window has to be divided by the effective MSS first.
-//     - The default initial window is RFC 6928's IW10, not RFC 5681's 2-4
-//       segments (see `initialWindow`).
 //    Predecessors cited in the code: RFC 2001, "TCP Slow Start, Congestion
 //    Avoidance, Fast Retransmit, and Fast Recovery Algorithms" (also the name of
 //    `initialWindow = "rfc2001"`, one segment), and RFC 2581, "TCP Congestion
 //    Control"; both are obsoleted by RFC 5681.
 //
-//  - RFC 6928 - Increasing TCP's Initial Window
-//    IW10, the default (`initialWindow = "rfc6928"`). A route-supplied initial
-//    window may override it (`initialCwnd`), as `initcwnd` does on Linux.
+//  - RFC 6928 - Increasing TCP's Initial Window (experimental)
+//    IW10, selectable as `initialWindow = "rfc6928"`; Linux uses it. It is above
+//    the upper bound of RFC 5681 section 3.1, so it is not the default. A
+//    route-supplied initial window may override the initial window
+//    (`initialCwnd`), as `initcwnd` does on Linux.
 //
 //  - RFC 3390 - Increasing TCP's Initial Window
-//    Selectable as `initialWindow = "rfc3390"`. The older `increasedIWEnabled`
-//    boolean is deprecated in favor of it.
+//    The default (`initialWindow = "rfc3390"`): the upper bound of RFC 5681
+//    section 3.1. The older `increasedIWEnabled` boolean is deprecated in favor
+//    of it.
 //
 //  - RFC 9438 - CUBIC for Fast and Long-Distance Networks (obsoletes RFC 8312,
 //    "CUBIC for Fast Long-Distance Networks")
@@ -490,7 +492,7 @@ simple Tcp extends SimpleModule like ITcp
         bool fastopenServerEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) server role: accept and accelerate a validated-cookie SYN-with-data. ~ sysctl tcp_fastopen bit 1 (TFO_SERVER_ENABLE)
         bool frtoEnabled = default(true); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced variant): after a retransmission timeout, an ACK/SACK covering data that was never retransmitted proves the original flight arrived and the timeout was spurious -- the pre-RTO cwnd/ssthresh are restored. ~ sysctl tcp_frto=2 (the Linux default)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
-        string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
+        string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc3390"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
         bool lossUndoEnabled = default(true); // Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary.
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
