@@ -50,7 +50,8 @@ INET's copy, a test that declares `%testprog` gets no makefile and no link, and 
 `opp_test` marks `SKIPPED` becomes `SKIP` instead of the `PASS` of its aggregate line. **Done:** all
 306 wrappers with `inet-gpl` give 296 PASS, 3 FAIL (expected) and the 7 baseline divergences as
 FAIL (unexpected), in 14 seconds on 12 cores; without `inet-gpl`, 306 SKIP; the two older TCP
-protocol tests, which still build a binary, pass. The `opp_repl` copy follows.
+protocol tests, which still build a binary, pass. The `opp_repl` copy got the same change
+(`3100802` on `main`, not pushed), with the same results through `opp_run_protocol_tests`.
 
 **Step 6 — CI.** The *Test: protocol* job builds `inet-gpl` and fails if every wrapper skips.
 
