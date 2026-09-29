@@ -980,16 +980,7 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     EV_WARN << "DAD failed for address " << duplicateAddr << " on " << ie->getInterfaceName()
             << " -- Loss of DAD, address will not be assigned\n";
 
-    for (auto it = dadList.begin(); it != dadList.end(); ++it) {
-        DadEntry *dadEntry = *it;
-        if (dadEntry->interfaceId == ie->getInterfaceId() && dadEntry->address == duplicateAddr) {
-            cancelAndDelete(dadEntry->timeoutMsg);
-            dadList.erase(it);
-            delete dadEntry;
-            break;
-        }
-    }
-
+    cancelDad(duplicateAddr, ie);
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(duplicateAddr);
 
     auto git = dadGlobalList.find(ie->getInterfaceId());
@@ -999,6 +990,19 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
     emit(dadFailedSignal, 1);
+}
+
+void Ipv6NeighbourDiscovery::cancelDad(const Ipv6Address& addr, NetworkInterface *ie)
+{
+    for (auto it = dadList.begin(); it != dadList.end(); ++it) {
+        DadEntry *dadEntry = *it;
+        if (dadEntry->interfaceId == ie->getInterfaceId() && dadEntry->address == addr) {
+            cancelAndDelete(dadEntry->timeoutMsg);
+            dadList.erase(it);
+            delete dadEntry;
+            break;
+        }
+    }
 }
 
 void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
