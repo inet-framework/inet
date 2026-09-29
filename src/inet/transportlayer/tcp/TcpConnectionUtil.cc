@@ -1902,6 +1902,12 @@ uint32_t TcpConnection::getDataSndUna() const
     return state->snd_una;
 }
 
+uint32_t TcpConnection::getFlightSize() const
+{
+    uint32_t outstanding = state->snd_max - getDataSndUna();
+    return outstanding > state->limitedTransmitBytes ? outstanding - state->limitedTransmitBytes : 0;
+}
+
 void TcpConnection::releaseRcvBufOccupancy(uint64_t readBytes)
 {
     // Linux frees an skb -- and with it the WHOLE truesize it was charged -- only

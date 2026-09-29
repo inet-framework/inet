@@ -319,6 +319,7 @@ struct TcpStateVariables
 
     // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32_t dupacks = 0;    // current number of received consecutive duplicate ACKs
+    uint32_t limitedTransmitBytes = 0;    // new data that Limited Transmit sent on the current duplicate ACKs (RFC 5681 section 3.2 step 2 leaves it out of FlightSize)
     uint32_t snd_sacks = 0;    // number of sent sacks
     uint32_t rcv_sacks = 0;    // number of received sacks
     uint32_t rcv_oooseg = 0;    // number of received out-of-order segments

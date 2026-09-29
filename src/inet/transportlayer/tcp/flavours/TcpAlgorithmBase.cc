@@ -868,6 +868,7 @@ void TcpAlgorithmBase::countDuplicateAck(const TcpHeader *tcpHeader, uint32_t pa
         }
         // reset counter
         state->dupacks = 0;
+        state->limitedTransmitBytes = 0;
         conn->emit(dupAcksSignal, state->dupacks);
     }
 }
@@ -949,6 +950,7 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     }
 
     state->dupacks = 0;
+    state->limitedTransmitBytes = 0;
     conn->emit(dupAcksSignal, state->dupacks);
 
     //
@@ -965,8 +967,11 @@ void TcpAlgorithmBase::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 
     bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
-    if (state->dupacks < state->dupthresh && state->limited_transmit_enabled) // DUPTRESH = 3
+    if (state->dupacks < state->dupthresh && state->limited_transmit_enabled) { // DUPTRESH = 3
+        uint32_t oldSndMax = state->snd_max;
         conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
+        state->limitedTransmitBytes += state->snd_max - oldSndMax;
+    }
 
     //
     // Leave to subclasses (e.g. TcpTahoe, TcpReno) whatever they want to do
@@ -987,6 +992,7 @@ void TcpAlgorithmBase::receivedAckForUnsentData(uint32_t seq)
     EV_INFO << "ACK acks something not yet sent, sending ACK\n";
     conn->sendAck();
     state->dupacks = 0;
+    state->limitedTransmitBytes = 0;
     conn->emit(dupAcksSignal, state->dupacks);
 }
 
@@ -1108,7 +1114,7 @@ uint32_t TcpAlgorithmBase::calculateSsthreshForFastRecovery()
 {
     // Default (RFC 5681 / RFC 6675 4.2): ssthresh = max(FlightSize/2, 2*SMSS),
     // used by the Reno family; CUBIC overrides with cwnd*beta.
-    return std::max(getBytesInFlight() / 2, 2 * state->snd_mss);
+    return std::max(conn->getFlightSize() / 2, 2 * state->snd_mss);
 }
 
 uint32_t TcpAlgorithmBase::calculateSsthresh(uint32_t bytesInFlight)
