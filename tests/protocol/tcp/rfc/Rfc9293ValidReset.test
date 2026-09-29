@@ -49,10 +49,13 @@ Define_ProtocolTestProgram()
                   .describe("the valid reset at host B's TCP")
                   .within(1.0))
         // Observation 3: host B sends nothing more for this connection. It has none.
-        .never(on("host2.tcp").signal("packetSentToLower")
-                  .filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true && tcp.rstBit == false")
-                  .describe("any further acknowledgment from host B")
-                  .within(0.5))
+        // The guard runs beside the next step: host A sends its next segments in the same
+        // flight (the initial window holds several segments), so host B's reset for one of
+        // them comes inside the guard's window, and a blocking step would miss it.
+        .meanwhile(never(on("host2.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true && tcp.rstBit == false")
+                             .describe("any further acknowledgment from host B")
+                             .within(0.5)))
         // Observation 4: host A retransmits after its timeout, and the segment now reaches a
         // host with no such connection, which answers with a reset (RFC9293-RST-1). This is
         // the proof that host B aborted.
