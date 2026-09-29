@@ -176,7 +176,17 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
         return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.relpath(test_file_name, simulation_project.get_full_path(test_folder)), lib_directory=simulation_project.get_full_path(lib_folder) if lib_folder else None, lib_name=lib_name, task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
-    test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),
+    # the working directory filter selects a test when its test folder or the folder of its .test
+    # file matches, both relative to the project root: -w tests/protocol/tcp selects every test of
+    # tests/protocol/tcp, and -w tests/protocol/tcp/rfc only the tests in that subfolder
+    working_directory_filter = kwargs.get("working_directory_filter", None)
+    exclude_working_directory_filter = kwargs.get("exclude_working_directory_filter", None)
+    project_folder = simulation_project.get_full_path(".")
+    def matches_working_directory(test_file_name):
+        folders = [test_folder, os.path.relpath(os.path.dirname(test_file_name), project_folder)]
+        return (working_directory_filter is None or any(matches_filter(folder, working_directory_filter, None, full_match) for folder in folders)) and \
+               (exclude_working_directory_filter is None or not any(matches_filter(folder, exclude_working_directory_filter, None, full_match) for folder in folders))
+    test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match) and matches_working_directory(test_file_name),
                                            get_opp_test_file_names(simulation_project.get_full_path(test_folder))))
     test_tasks = list(map(create_test_task, test_file_names))
     return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, lib_folder=lib_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)

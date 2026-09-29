@@ -50,18 +50,19 @@ def get_protocol_test_tasks(simulation_project=None, **kwargs):
     arp, element, ethernet, ipv4, ipv6, self, tcp or wifi. The suite folder is the root a
     test is built and run from, so a test may sit in a subfolder of it and still reach the
     files the whole suite shares. A new subfolder needs no registration here. Select one
-    suite with the working directory filter, for example:
+    suite, or the tests of one subfolder, with the working directory filter, for example:
 
         inet_run_protocol_tests -w self
+        inet_run_protocol_tests -w tests/protocol/tcp/rfc
+
+    The filter matches a suite folder or the folder of a .test file, relative to the project
+    root.
 
     A suite links the protocol test framework library when its tests compile against it.
     """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     protocol_folder = "tests/protocol"
-    working_directory_filter = kwargs.get("working_directory_filter", None)
-    exclude_working_directory_filter = kwargs.get("exclude_working_directory_filter", None)
-    full_match = kwargs.get("full_match", False)
     test_tasks = []
     for folder in sorted(glob.glob(os.path.join(simulation_project.get_full_path(protocol_folder), "*"))):
         # a suite may group its tests in subfolders, so look for them at any depth
@@ -70,8 +71,6 @@ def get_protocol_test_tasks(simulation_project=None, **kwargs):
             continue
         suite_name = os.path.basename(folder)
         test_folder = protocol_folder + "/" + suite_name
-        if not matches_filter(test_folder, working_directory_filter, exclude_working_directory_filter, full_match):
-            continue
         uses_framework_library = any('#include "ProtocolTest.h"' in read_file(test_file_name)
                                      for test_file_name in test_file_names)
         multiple_test_tasks = get_opp_test_tasks(test_folder, simulation_project=simulation_project,
