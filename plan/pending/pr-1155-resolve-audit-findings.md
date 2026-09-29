@@ -1,7 +1,7 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a to 1j (all of step 1), 2, 3 and 4 done; the rebase left the work of
-steps 2a to 2c; step 5, 5b and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
+Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2c, 3 and 4 done; step 2b is open;
+step 5, 5b and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
 since 2026-09-29 (owner's decision); older copies are on `topic/audit` and on `master`.
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
@@ -732,16 +732,59 @@ tests fail, and all of them because #1155 meets master's newer tests:
 3. this plan lives on the branch;
 4. **no serializer adaptation yet**: the PPP change may still be modified.
 
-**2a. The timeout by RFC 6298.** The default computes RTO = max(SRTT + 4·RTTVAR, the minimum), the
-Linux variance floor becomes a parameter, and the packetdrill configuration in `inet-gpl` selects
-it, because the Linux scripts expect it.
+**2a. The timeout by RFC 6298 — done 2026-09-29.** The default computes RTO = max(SRTT + 4·RTTVAR,
+the minimum), the Linux variance floor becomes a parameter, and the packetdrill configuration in
+`inet-gpl` selects it, because the Linux scripts expect it. Commit `13eff5386e`; the TLP timeout
+also adds the peer's delayed-ACK allowance (RFC 8985 section 7.2). 11 module tests were recorded
+again. `Rfc6298FirstMeasurement` and `Rfc6298InitialTimeout` pass.
 
-**2b. The standards tests for the modern defaults.** The 13 TCP tests and the 2 self tests hold
+**2b. The standards tests for the modern defaults — open.** The TCP tests and the 2 self tests hold
 under the new defaults; a test overrides a parameter only where its check needs it, and says why.
-The TCP evidence documents follow.
+The TCP evidence documents follow. After 2a and 2c, 15 TCP standards tests fail with the modern
+defaults, and 1 with the legacy parameters. `Rfc5681FastRetransmit` needs a decision of form: it
+describes Reno without SACK, so it overrides the algorithm, SACK, the loss detection and PRR; its
+step 3 reads the published `cwnd`, which is ssthresh in the model (see 2c). The proposal is to
+check the send decision instead: after the third duplicate ACK, the number of new segments
+matches ssthresh + (3 + k)·SMSS − FlightSize for the k further duplicate ACKs.
 
-**2c. The three differences.** `Rfc5681FastRetransmit`, `Rfc9293FlowControl` and the MIPv6 leak are
-analyzed, and each one is repaired in the commit that caused it, or recorded.
+**2c. The three differences — done 2026-09-29.** `Rfc5681FastRetransmit`, `Rfc9293FlowControl` and
+the MIPv6 leak were analyzed. They hid six defects of the series. Each one has its own `fix:`
+commit at the end of the series, and its message names the commit that caused it and gives a
+`Reproduce:` paragraph:
+
+| Commit | Defect | Caused by | Evidence |
+| --- | --- | --- | --- |
+| `2eb30b00f2` | sender SWS avoidance without the Fs = 1/2 rule of RFC 9293 section 3.8.6.2.1: a peer whose window stays below one MSS got no data | `494df0f29b` | `Rfc9293FlowControl` passes |
+| `ed945833b2` | FlightSize for ssthresh taken from the pipe, not snd_max − snd_una without the Limited Transmit data (RFC 5681 equation (4)) | `35545f677e` | `tcp_prr_1` leaves recovery with ssthresh 4000 = 8000/2 |
+| `88fdd796d5` | `limitedTransmitEnabled = false` had no effect on the Reno family (step 1 and step 5 of `Rfc5681Recovery`, step (3.3) of `Rfc6675Recovery`) | `35545f677e` | `tcp_sack_6` is master's trajectory again |
+| `25adf3537b` | RFC 5681 recovery counted each further duplicate ACK two times (cwnd inflation and inferred SACK), and the lost head stayed in the pipe | `35545f677e` | `tcp_fastrexmit_1` sends in recovery the same segments as master |
+| `f118a57ffd` | a forked connection that the app had not accepted sent `TCP_I_CLOSED`; the dispatcher stopped the simulation | `a56686eb4d` | no more "Unknown socket" error |
+| `f8324a1008` | the PAWSACTIVEREJECTED check of the SYN-ACK used the last SYN's time, not the first (Linux `retrans_stamp`) | `494df0f29b` | `MIPv6_tcp_handover` passes |
+
+Why the representation differs from the RFC: without SACK, every duplicate ACK takes one segment
+out of `getBytesInFlight()` (inferred SACK, as Linux `tcp_add_reno_sack()`), and the published
+`cwnd` stays at ssthresh in fast recovery. After the repairs, cwnd minus that pipe gives the same
+sending room as the RFC's inflated cwnd minus FlightSize. The send decisions agree with RFC 5681;
+only the published `cwnd` value differs.
+
+Results at `f8324a1008`: module `tcp_` 79 of 79 pass; packetdrill 296 MATCH, 12 KERNEL_DRIFT,
+7 DIVERGENCE, 3 UNSUPPORTED_FEATURE (unchanged); TCP standards tests with the legacy parameters 24
+pass, 2 fail as expected, 1 fails (`Rfc5681FastRetransmit`, the published `cwnd`, see 2b); with
+the modern defaults 10 of 27 pass, 2 fail as expected, 15 fail.
+
+**Findings recorded, not repaired:**
+
+- `Rfc6675Recovery` step (3.3) restricts Limited Transmit to new data (HighData+1) only in RACK
+  mode. In the classic mode `nextSeg()` rule 3 can give the unSACKed hole, and the loop then
+  retransmits it before loss detection enters recovery. No test covers the case; step 2b adds one,
+  then the rule applies in all modes.
+- `calculateSsthreshForRto()` and the TLP reaction of `processTlpAck()` still take the pipe for
+  FlightSize. RFC 5681 equation (4) applies to the timeout too. No test shows a difference yet.
+- `TcpSimsignals.h` declares `rtoSignal`, `rttSignal` and `rttvarSignal` two times each.
+- The TCP table of `WHATSNEW` does not list all changed defaults (`initialRto` 3 s → 1 s,
+  `maxRexmitTimeout` 240 s → 120 s, TLP, RACK and others).
+- Two tests share the base name `Fragmentation.test` (`element/`, `ipv4/`), which matters for
+  runners that extract a test into `work/<base name>`.
 
 **Still open from this step:** the force-push of the branch, after the owner's confirmation; then
 the rebase of `topic/tcp-packetdrill-tests` onto the result; and the serializer adaptation,
