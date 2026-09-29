@@ -10,9 +10,9 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-24 21:55 +0200
-- INET: branch `topic/standards-tests-mpls-level2`, commit `daac3593fb`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `de3a0cb0f0`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, debug build from this commit, Ubuntu clang 23.0.0, Ubuntu 26.04.1 LTS
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/mpls$'`
 - Suite: 21 tests, 5 PASS, 10 FAIL (unexpected), 6 FAIL (expected), so the suite reports FAIL

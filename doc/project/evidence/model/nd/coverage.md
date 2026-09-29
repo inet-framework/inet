@@ -10,11 +10,11 @@ changes. This one changes on every pass.
 
 State of the ledger, from this run:
 
-- Date: 2026-09-24 14:02 +0200
-- INET: branch `topic/standards-tests-nd-level2`, commit `8f78f1a73c`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `2e0e43b607`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, commit `cf58891643`
-- Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
+- Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/nd$'`

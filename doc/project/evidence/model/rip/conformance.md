@@ -8,9 +8,9 @@ with the feature support of the ledger, feature by feature.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-24 12:26 +0200
-- INET: branch `topic/standards-tests-rip-level2`, commit `7969452e2d`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `efc3877515`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -18,7 +18,8 @@ Run record of the ledger state that part 2 comes from:
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/rip$'`
 
 Part 1 was first read by the level 1 pass, at src `16dc528e10`. The RIP code is the same in
-both trees; the two trees differ only in seven files of IEEE 802.11.
+both trees; the two trees differ only in seven files of IEEE 802.11 and one line of
+`src/inet/common/InitStages.cc`.
 
 ## Part 1 — the claims
 

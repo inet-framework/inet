@@ -13,7 +13,7 @@ Read record of part 1 — no build, no run:
 - INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
 - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
 
-The src tree of the level 2 run, `5c4f41c600`, is a later one; the claims of part 1 are the same
+The src tree of the level 2 run, `8b4f86968e`, is a later one; the claims of part 1 are the same
 in it (`IPsec.ned`, `SecurityPolicy.h`, `SecurityAssociation.h`).
 
 ## Part 1 — the claims
@@ -117,9 +117,9 @@ question, and the pass must check each one):
 
 Run record of the verdicts behind the support values:
 
-- Date: 2026-09-24 19:35 +0200
-- INET: branch `topic/standards-tests-ipsec-level2`, commit `829ba07bae`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `3ffda5ff0f`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)

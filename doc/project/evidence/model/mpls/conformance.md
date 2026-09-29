@@ -13,7 +13,7 @@ Read record of part 1 — no build, no run:
 - INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
 - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
 
-The src tree of the level 2 run, `5c4f41c600`, is a later one; the MPLS, RSVP-TE and PPP sources
+The src tree of the level 2 run, `8b4f86968e`, is a later one; the MPLS, RSVP-TE and PPP sources
 and the MPLS chapter of the User's Guide are the same in it.
 
 ## Part 1 — the claims
@@ -110,9 +110,9 @@ question, and the pass must check each one):
 
 Run record of the verdicts behind the support values:
 
-- Date: 2026-09-24 21:55 +0200
-- INET: branch `topic/standards-tests-mpls-level2`, commit `daac3593fb`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `de3a0cb0f0`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, debug build from this commit, Ubuntu clang 23.0.0, Ubuntu 26.04.1 LTS
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/mpls$'`
 

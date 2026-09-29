@@ -8,18 +8,19 @@ with the feature support of the ledger, feature by feature.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-24 14:02 +0200
-- INET: branch `topic/standards-tests-nd-level2`, commit `8f78f1a73c`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `2e0e43b607`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, commit `cf58891643`
-- Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
+- Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/nd$'`
 
 Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0
 branch. The ND code is the same in `5c4f41c600`: the two trees differ only in seven files of
-IEEE 802.11. The line numbers of part 1 therefore hold for both.
+IEEE 802.11, and the tree of the run, `8b4f86968e`, differs from it in one line of
+`src/inet/common/InitStages.cc`. The line numbers of part 1 therefore hold for all three.
 
 ## Part 1 — the claims
 

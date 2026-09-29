@@ -9,9 +9,9 @@ to implement, each checked behavior.
 
 ## Run record
 
-- Date: 2026-09-24 21:55 +0200
-- INET: branch `topic/standards-tests-mpls-level2`, commit `daac3593fb`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `de3a0cb0f0`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
@@ -19,6 +19,11 @@ to implement, each checked behavior.
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/mpls$'`
 
 21 tests: 5 PASS, 16 FAIL, 6 of them declared expected.
+
+The level 2 pass ran on 2026-09-24 at src `5c4f41c600`, the tree of `origin/master` at `7772a7e4ef`,
+and changed no source file. The branch landed on `master` by a rebase onto `49e1fa0945`, whose
+`src/` differs from that tree in one line of `src/inet/common/InitStages.cc`. So the suite ran again
+on `master`, and the verdicts and the failure reasons are those of the level 2 run.
 
 ## Verdicts
 

@@ -9,18 +9,20 @@ to implement, each checked behavior.
 
 ## Run record
 
-- Date: 2026-09-24 14:02 +0200
-- INET: branch `topic/standards-tests-nd-level2`, commit `8f78f1a73c`, tree clean
-- Trees: src `5c4f41c600`, tests/protocol `2e0e43b607`
+- Date: 2026-09-29 17:29 +0200
+- INET: branch `master`, commit `24675c3a37`, tree clean
+- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
 - OMNeT++: 6.4.0, commit `cf58891643`
-- Build: debug; the object files are a copy of a build of the same src tree `5c4f41c600`
+- Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/nd$'`
 - Suite: 37 tests, 22 PASS, 15 FAIL (unexpected), 0 FAIL (expected), so the suite reports FAIL
 
-The `src/` tree `5c4f41c600` is the tree of `origin/master` at `7772a7e4ef`: this pass changes
-no source file.
+The level 2 pass ran on 2026-09-24 at src `5c4f41c600`, the tree of `origin/master` at `7772a7e4ef`,
+and changed no source file. The branch landed on `master` by a rebase onto `49e1fa0945`, whose
+`src/` differs from that tree in one line of `src/inet/common/InitStages.cc`. So the suite ran again
+on `master`, and the verdicts and the failure reasons are those of the level 2 run.
 
 ## Verdicts
 
