@@ -1,9 +1,17 @@
 # Run the packetdrill TCP corpus as INET protocol tests — the INET half
 
 Status: **in progress.** Branch `topic/tcp-packetdrill-tests`, worktree
-`/home/levy/workspace/inet-tcp-packetdrill-tests`, based on `topic/tcp-new-audit-fixes` (#1155).
+`/home/levy/workspace/inet-tcp-packetdrill-tests`, based on `master` since 2026-09-29: the owner
+wants these tests in `master` before the TCP repairs of #1155, so the order is reversed and #1155
+follows this branch.
 
-**The design and every decision are in the `inet-gpl` plan**, branch `rh/packetdrill`,
+**What that means on `master`.** Without `inet-gpl` the 306 wrappers skip; the RFC tests keep
+their verdicts from `tcp/rfc/` (25 PASS, 2 FAIL (expected)); every other protocol suite gives the
+same counts as `master` (checked against `4b42ce2d29`). With `inet-gpl` the wrappers need INET
+with #1155: `inet-gpl` master builds only against it (F1 and F10 of the cleanup plan), and there
+the 306 wrappers give 303 PASS and 3 FAIL (expected).
+
+**The design and every decision are in the `inet-gpl` plan**, now on `inet-gpl` master,
 `plan/pending/packetdrill-tcp-protocol-tests.md`. This file tracks the steps that land in INET, so
 that the INET commits name a plan inside this repository.
 
