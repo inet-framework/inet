@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. A Random Early Detection queue with useEcn marks IPv6 packets
+
+   A RedDropper (Random Early Detection, RED) with useEcn = true set
+   Congestion Experienced (CE) on an Explicit Congestion Notification (ECN)
+   capable IPv4 packet above its threshold, but dropped an ECN-capable IPv6
+   packet in the same state. It now marks both. The cause was the
+   EcnMarker::getEcn() and EcnMarker::setEcn() helpers, which read and wrote
+   only the ECN field of an IPv4 header; they now also handle the ECN
+   field of the IPv6 Traffic Class, which RFC 3168 section 5 defines
+   identically. For the same reason, the EcnMarker module now applies an
+   EcnReq tag to IPv6 packets too.
+
+   This changes the results of simulations that send Explicit Congestion
+   Notification (ECN) capable IPv6 traffic through a RedDropper with
+   useEcn = true or through an EcnMarker. IPv4 traffic is unaffected.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

@@ -10,8 +10,8 @@ package inet.queueing.marker;
 import inet.queueing.base.PacketMarkerBase;
 
 //
-// Sets Explicit Congestion Notification (ECN) bits in the IPv4 header based on the
-// attached `EcnReq` tag on the packets.
+// Sets Explicit Congestion Notification (ECN) bits in the IPv4 header or in the
+// Traffic Class of the IPv6 header based on the attached `EcnReq` tag on the packets.
 //
 simple EcnMarker extends PacketMarkerBase
 {
