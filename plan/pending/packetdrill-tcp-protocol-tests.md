@@ -9,13 +9,22 @@ that the INET commits name a plan inside this repository.
 
 ## What INET receives
 
-- `tests/protocol/tcp/packetdrill/run` — runs one corpus script through `inet-gpl`, or skips when
-  `inet-gpl` is absent.
-- One wrapper per script, `tests/protocol/tcp/packetdrill/<corpus>/<script id, / as __>.test`: 306 files,
-  generated in `inet-gpl`, each naming its script and matching one verdict line. No wrapper holds
-  script text; the scripts are GPL-2.0 and stay in `inet-gpl`.
-- `tests/protocol/tcp/packetdrill/README.md` — the scripts that have no wrapper, and why.
+- `bin/inet_run_packetdrill <id>` — runs one packetdrill script through `inet-gpl`'s packetdrill
+  suite, or skips when `inet-gpl` is absent. The id is the script's path below `tests/protocol`,
+  and its first segment names the protocol.
+- One wrapper per script, at the script's own path: `tests/protocol/tcp/linux/<script>.test` (158)
+  and `tests/protocol/tcp/packetdrill/<folders>/<script>.test` (148), generated in `inet-gpl`, each
+  naming its script and matching one verdict line. No wrapper holds script text; the scripts are
+  GPL-2.0 and stay in `inet-gpl`, in the mirrored folders `tests/protocol/tcp/{linux,packetdrill}`.
+- A `README.md` in each of the two folders — what the wrappers exercise, and the scripts that have
+  no wrapper, and why.
+- The 27 RFC-based TCP tests in `tests/protocol/tcp/rfc/`.
 - CI, evidence and guide changes (steps 6 to 8).
+
+Steps 2 to 5 below record the first layout, in which the wrappers sat in
+`tests/protocol/tcp/packetdrill/{gtests,kernel}/` under flattened names and called
+`tests/protocol/tcp/packetdrill/run` with ids such as `gtests:fast_retransmit/fr-4pkt-sack`. The
+step "The layout of the inet-gpl cleanup" replaces that layout.
 
 ## The INET steps
 
@@ -58,6 +67,41 @@ protocol tests, which still build a binary, pass. The `opp_repl` copy got the sa
 or the document or the Linux interface outside it. `README.md` tallies the three kinds. The ids
 point into `doc/project/evidence/`, which this branch gets with the rebase onto master.
 
+**The layout of the inet-gpl cleanup. — done 2026-09-29.** `inet-gpl`'s `rh/packetdrill` is
+rewritten (`092f1e7`, plan `packetdrill-branch-cleanup.md` there, step S4): the scripts live in
+`tests/protocol/tcp/{linux,packetdrill}`, and a script's id is its path below `tests/protocol`.
+INET follows in eight commits:
+
+1. INET's runner runs a `%testprog` test in `work/<file name>` beside its `.test` file, and puts
+   the test's own folder on the include path. Every other test keeps `work/<file name>` of its
+   test folder, because the wifi tests include `../../ini/_b.ini` relative to it: from a folder
+   beside the test, all 45 of them that pass fail. `opp_repl` runs every test beside its file,
+   so it has that problem for the wifi tests (see below).
+2. The 27 RFC-based TCP tests and `TcpMutations.h` move into `tests/protocol/tcp/rfc/` (D7 of the
+   `inet-gpl` plan, decided 2026-09-29: TCP alone, because only TCP has other kinds of test).
+3. The guide says when a protocol moves its standards-derived tests into `<proto>/rfc/`. The TCP
+   evidence documents name the tests by file name only, so they do not change.
+4. The classification gate counts `bin/` as the `build` area; a commit that touched only `bin/`
+   failed with any area.
+5. `bin/inet_run_packetdrill` replaces `tests/protocol/tcp/packetdrill/run`.
+6. The wrappers move to the scripts' paths (a pure move), and
+7. come again from `tests/packetdrill/suite.py gen-wrappers`, with the new ids and the new
+   command;
+8. the old runner goes.
+
+**Checked** with `inet-gpl` `092f1e7` and this branch on INET `359db08cc3`, debug: INET's runner
+gives the 282 other protocol tests the same results before and after (240 PASS, 42 FAIL
+(expected)), the 27 RFC tests the same results from `rfc/`, and the 306 wrappers 297 PASS,
+3 FAIL (expected) and 6 FAIL (unexpected), the six known divergences. The whole suite is 588 tests:
+537 PASS, 45 FAIL (expected), 6 FAIL (unexpected). The two `basic-rw` wrappers run in separate work
+folders. `bin/inet_run_packetdrill` gives the right exit status for a pass, a divergence, a
+skipped script, an unknown id, a missing `inet-gpl` and a missing id.
+
+**Found:** `opp_repl` gives the wrappers the same results, but it cannot build the other protocol
+tests: 269 of them end in ERROR, because `opp_repl` does not add the protocol test library
+(`tests/protocol/lib`, `ProtocolTest.h`, `WifiTestSupport.h`) that INET's runner adds. The gap is
+older than this step and belongs to `opp_repl`.
+
 **Step 6 — CI. — designed 2026-09-29; lands after the rebase of #1155.** At this branch's base the
 protocol tests run in the matrix of `.github/workflows/other-tests.yml`; master split it into one
 workflow per category (`4fda03f612`), so a change here would be replaced at the rebase. The change
@@ -75,13 +119,13 @@ and, in the *Build and test* step, after `build-inet.sh` and before `inet_run_pr
 
 ```sh
 echo "::group::Building inet-gpl"
-python3 -m pip install pyyaml            # oracle.py reads corpus.yaml and mapping.yaml
+python3 -m pip install pyyaml            # suite.py reads tcp/scripts.yaml and tcp/sysctls.yaml
 cd $GITHUB_WORKSPACE/inet-gpl && . setenv -q && make makefiles && make MODE=$MODE -j $(nproc)
-make -C tests/oracle build
+make -C tests/packetdrill build
 echo "::endgroup::"
 echo "::group::Checking that the packetdrill wrappers can run"
-"$INET_ROOT/tests/protocol/tcp/packetdrill/run" gtests:fast_retransmit/fr-4pkt-sack | tail -1 \
-  | grep -qx 'PACKETDRILL gtests:fast_retransmit/fr-4pkt-sack: PASS'
+inet_run_packetdrill tcp/packetdrill/fast_retransmit/fr-4pkt-sack | tail -1 \
+  | grep -qx 'PACKETDRILL tcp/packetdrill/fast_retransmit/fr-4pkt-sack: PASS'
 echo "::endgroup::"
 ```
 
@@ -100,5 +144,5 @@ since 2026-09-29: INET `c23267fa9b` (the loss probe after the last ACK) turned
 `derive-tests-from-a-standard.md` did not exist at this branch's first base. Since the rebase of
 #1155 onto master (2026-09-29) they do, so the two steps can land on this branch.
 
-**So steps 6, 7 and 8 all wait for the rebase of #1155**, which the owner holds for the comparison
-with the original branch.
+**Steps 6, 7 and 8 are open.** The rebase of #1155 that they waited for is done: this branch is on
+INET `359db08cc3`, and the CI change above has the names of the new layout.
