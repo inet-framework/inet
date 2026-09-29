@@ -849,11 +849,9 @@ void Ipv6::localDeliverFinish(Packet *packet)
         // or forwarded -- and seen by the netfilter pre-routing hooks -- normally.
         // The L3AddressInd left by decapsulate() carries the tunnel (outer) source.
         packet->removeTagIfPresent<InterfaceReq>();
-        auto verdict = datagramPreRoutingHook(packet);
-        if (verdict == INetfilter::IHook::ACCEPT)
+        // on DROP datagramPreRoutingHook() has already deleted the datagram
+        if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
             preroutingFinish(packet, fromIE, nullptr, Ipv6Address::UNSPECIFIED_ADDRESS);
-        else if (verdict == INetfilter::IHook::DROP)
-            delete packet;
     }
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
