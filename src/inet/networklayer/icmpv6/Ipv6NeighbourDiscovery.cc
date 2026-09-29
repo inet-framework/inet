@@ -126,7 +126,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             ipv6Data->setDupAddrDetectTransmits(dupAddrDetectTransmits);
             ipv6Data->setOptimisticDad(optimisticDad);
             ipv6Data->setRetransTimer(retransTimer);
-            ipv6Data->setBaseReachableTime((uint)baseReachableTime.dbl());
+            ipv6Data->setBaseReachableTime(baseReachableTime);
 
             if (ipv6Data->getAdvSendAdvertisements()) {
                 ipv6Data->setMinRtrAdvInterval(minRAInterval.dbl());
@@ -1669,20 +1669,12 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
     }
 
     // If the received Reachable Time value is non-zero the host SHOULD set its
-    // BaseReachableTime variable to the received value.
+    // BaseReachableTime variable to the received value. If the new value differs
+    // from the previous value, setBaseReachableTime() recomputes the random
+    // ReachableTime.
     if (ra->getReachableTime() != 0) {
-        EV_INFO << "RA's reachable time is non-zero ";
-
-        if (ra->getReachableTime() != SIMTIME_DBL(ie->getProtocolData<Ipv6InterfaceData>()->getReachableTime())) {
-            EV_INFO << " and RA's and Host's reachable time differ, \nsetting host's base"
-                    << " reachable time to received value.\n";
-            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setBaseReachableTime(ra->getReachableTime());
-            // If the new value differs from the previous value, the host SHOULD
-            // recompute a new random ReachableTime value.
-            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setReachableTime(ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->generateReachableTime());
-        }
-
-        EV_INFO << endl;
+        EV_INFO << "RA's reachable time is non-zero, setting host's base reachable time to received value.\n";
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setBaseReachableTime(SimTime(ra->getReachableTime(), SIMTIME_S));
     }
 
     // The RetransTimer variable SHOULD be copied from the Retrans Timer field,
@@ -2425,7 +2417,7 @@ void Ipv6NeighbourDiscovery::processNaForIncompleteNceState(const Ipv6NeighbourA
         if (naSolicitedFlag == true) {
             nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
             EV_INFO << "Reachability confirmed through successful Addr Resolution.\n";
-            nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
+            nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getReachableTime();
         }
         else
             nce->reachabilityState = Ipv6NeighbourCache::STALE;
@@ -2508,7 +2500,7 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
             if (msg != nullptr) {
                 EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
-                nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
+                nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getReachableTime();
                 cancelAndDelete(msg);
                 nce->nudTimeoutEvent = nullptr;
             }
