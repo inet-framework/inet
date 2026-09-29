@@ -5,7 +5,7 @@
         <input pattern="results/*.vec"/>
     </inputs>
     <charts id="0" name="">
-        <chart id="1" type="MATPLOTLIB" name="Ping round-trip time" template="linechart_mpl" icon="icons/full/obj/linechart.png">
+        <chart id="1" type="MATPLOTLIB" name="All three configurations: ping round-trip time" template="linechart_mpl" icon="icons/full/obj/linechart.png">
             <script>
 <![CDATA[import math
 from omnetpp.scave import results, chart, utils
@@ -47,6 +47,24 @@ ax.text(33, 0.96, "away from home", ha="center", va="top", fontsize=9,
 
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
+
+# replies above the pinned y range: draw them as markers on the top edge and
+# label them with their real round-trip times, so they are not silently clipped
+# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
+if props["yaxis_max"]:
+    import numpy as np
+    ytop = ax.get_ylim()[1]
+    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
+    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
+    off = v > ytop
+    if off.any():
+        top = ax.get_xaxis_transform()
+        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
+                color="C3", transform=top, clip_on=False, zorder=5)
+        ax.text(t[off].min() - 1.0, 0.90,
+                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at the home agent)"
+                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
+                ha="right", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -818,6 +836,24 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
+# replies above the pinned y range: draw them as markers on the top edge and
+# label them with their real round-trip times, so they are not silently clipped
+# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
+if props["yaxis_max"]:
+    import numpy as np
+    ytop = ax.get_ylim()[1]
+    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
+    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
+    off = v > ytop
+    if off.any():
+        top = ax.get_xaxis_transform()
+        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
+                color="C3", transform=top, clip_on=False, zorder=5)
+        ax.text(t[off].min() - 1.0, 0.90,
+                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at the home agent)"
+                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
+                ha="right", va="top", fontsize=9, color="C3", transform=top)
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -1588,6 +1624,24 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
+# replies above the pinned y range: draw them as markers on the top edge and
+# label them with their real round-trip times, so they are not silently clipped
+# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
+if props["yaxis_max"]:
+    import numpy as np
+    ytop = ax.get_ylim()[1]
+    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
+    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
+    off = v > ytop
+    if off.any():
+        top = ax.get_xaxis_transform()
+        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
+                color="C3", transform=top, clip_on=False, zorder=5)
+        ax.text(t[off].min() - 1.0, 0.90,
+                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at the home agent)"
+                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
+                ha="right", va="top", fontsize=9, color="C3", transform=top)
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -2357,6 +2411,24 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
+
+# replies above the pinned y range: draw them as markers on the top edge and
+# label them with their real round-trip times, so they are not silently clipped
+# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
+if props["yaxis_max"]:
+    import numpy as np
+    ytop = ax.get_ylim()[1]
+    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
+    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
+    off = v > ytop
+    if off.any():
+        top = ax.get_xaxis_transform()
+        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
+                color="C3", transform=top, clip_on=False, zorder=5)
+        ax.text(t[off].min() - 1.0, 0.90,
+                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at the home agent)"
+                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
+                ha="right", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

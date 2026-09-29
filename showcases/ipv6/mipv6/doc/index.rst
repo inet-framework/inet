@@ -509,760 +509,543 @@ everything down again.
 Results
 -------
 
-The round-trip time of every ping tells the whole story. The three
-configurations are plotted separately on identical axes, so the phases can be
-compared panel by panel; the shaded band marks the interval the mobile node
-spends away from its home network.
+This section follows one run of each configuration in time order. Until the
+mobile node has its care-of address, at 19.9 s, the three configurations are
+the same simulation. After that point, we follow the run without Mobile IPv6
+first, because it shows the problem, and then the two runs with Mobile IPv6.
+
+The pings are named after their ICMPv6 sequence number: the correspondent node
+sends ``ping0`` at t = 1 s and one more every 0.5 s, so ``ping<N>`` leaves at
+1 + 0.5·N s. All times come from the default random seed. Where a value
+depends on the seed, we also give its range over ten runs with different
+seeds.
+
+Before the move
+~~~~~~~~~~~~~~~
+
+After the start, the mobile node associates with ``apHome``, forms its home
+address by stateless address autoconfiguration (SLAAC), and checks it with
+duplicate address detection (DAD). The first reply, to ``ping9`` at 5.5 s,
+comes this late only because the home agent cannot resolve the home address
+while the mobile node is still checking it.
+
+From then on, the pings take the home path: correspondent node, ``backbone``,
+``homeAgent``, ``apHome``, mobile node. The round-trip time (RTT) stays at
+about 14 ms (median 14.07 ms), as The Model predicts. No Mobile IPv6 message is
+sent while the node is at home. The one higher point, 15.98 ms for ``ping19``
+at 10.5 s, is not an 802.11 retransmission. It is a probe of Neighbor
+Unreachability Detection (NUD), the Neighbor Discovery check that a neighbor is
+still reachable, which the mobile node queues just ahead of its reply.
+
+Leaving home
+~~~~~~~~~~~~
+
+At 15 s the mobile node starts to move to the foreign network. The last reply
+at home arrives at 17.014 s (``ping32``). The node hears the last ``apHome``
+beacon at 17.407 s, but it stays associated: it declares the access point lost
+only after several missed beacons, at 17.757 s. Meanwhile the home agent still
+sends the pings to ``apHome``, which transmits each of ``ping33`` to ``ping37``
+seven times and then drops it.
+
+The node then scans both wireless channels. Channel 1 is empty, and channel 2
+has ``apForeign``. The scan ends at 18.407 s, and the node is associated with
+``apForeign`` at 18.408 s.
+
+The association makes the node send a Router Solicitation (RS) at once.
+``foreignRouter`` answers with a Router Advertisement (RA) after a random delay
+of 0.457 s: the standard requires a random delay of up to 0.5 s before a
+solicited Router Advertisement. The Router Advertisement reaches the node at
+18.867 s with the prefix ``2001:db8:0:3::/64``. This is not the home prefix, so
+the node has moved. It marks its link-local address and its home address
+tentative, and starts duplicate address detection (DAD) with one Neighbor
+Solicitation for its link-local address.
+
+The check takes 1 s plus a random 0.057 s. The Mobile IPv6 standard prefers to
+skip this random part for a care-of address when something else already
+spreads the nodes out in time, as the randomly delayed Router Advertisement
+does here; both choices are allowed. As the implementation notes say, INET
+probes only the link-local address. Duplicate address detection completes at
+19.924 s. In the same event, the node assigns its care-of address,
+``2001:db8:0:3:8aa:ff:fe00:d``, and its home address becomes usable again.
+
+Here is this part of the run as a sequence chart, taken from the
+``WithoutMipv6`` run. Each horizontal line is one node, each arrow is one hop
+of one packet, and the time axis is linear, so the waits appear at their true
+length:
+
+.. figure:: media/seqchart-p1-movement.png
+   :align: center
+   :width: 100%
+
+..
+   PLACEHOLDER: sequence chart P1 -- WithoutMipv6, 18.40-19.93 s, LINEAR timeline;
+   RS, the delayed RA, the one DAD NS, then silence until "DAD completed".
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p1-movement.txt)
+
+The Router Solicitation goes up to ``foreignRouter`` at once, and the Router
+Advertisement comes back almost half a second later. Then comes the single
+Neighbor Solicitation of duplicate address detection (DAD), and after it a
+second of silence, in which the node may not use its new addresses yet. At
+19.924 s all three runs have a working care-of address. This is where they
+part.
+
+Without Mobile IPv6
+~~~~~~~~~~~~~~~~~~~
+
+Without Mobile IPv6, nothing happens at 19.924 s. The node has a new, working
+address, but nobody knows it. The correspondent node keeps sending to the home
+address, and the pings keep going to the home link, where nobody answers.
+
+Here is the round-trip time of every ping in the ``WithoutMipv6`` run. The
+shaded band is the time the node spends away from home. The three
+configurations are plotted separately on identical axes, because at home their
+points coincide and would hide one another:
 
 .. figure:: media/pingrtt-without.png
    :align: center
 
 ..
-   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
-   type:     chart (matplotlib)
-   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (without Mobile IPv6)"
-   inputs:   results/WithoutMipv6-#0.vec (re-run the config first)
-   shows:    RTT of every ping in the WithoutMipv6 config; the total reachability
-             gap while away; "away from home" span shaded 15..51s
-   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
-             directly -- keep all three identical if any one is redone.
-             The gap is structural -- the home address is simply not routable
-             on the foreign link.
-   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (without Mobile IPv6)"
-             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: RTT chart, WithoutMipv6 (being re-captured: pinned axes, off-scale points marked).
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/pingrtt-without.txt)
 
-**Without Mobile IPv6 the node is unreachable the whole time it is away** —
-no replies at all for 37.5 s, resuming only when it re-enters home coverage on
-the way back. Its home address means nothing on the foreign link.
+No reply arrives for 35.0 s, from 17.014 s until the node is home again. The
+home agent holds the last few pings until the node answers it again, at
+52.007 s, so their replies arrive late: the markers on the top edge, at about
+52 s, stand for round-trip times of 523.5 to 2015.8 ms. Over ten seeds, the gap
+without replies is 34.5–37.0 s. This is the problem that Mobile IPv6 solves.
 
-.. figure:: media/pingrtt-bidirectional.png
-   :align: center
+The home registration
+~~~~~~~~~~~~~~~~~~~~~
 
-..
-   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
-   type:     chart (matplotlib)
-   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (bidirectional tunneling)"
-   inputs:   results/BidirectionalTunneling-#0.vec (re-run the config first)
-   shows:    RTT of every ping with route optimization off; the 40 ms tunneled
-             plateau while away; "away from home" span shaded 15..51s
-   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
-             directly -- keep all three identical if any one is redone.
-             The 40 ms plateau is link-delay arithmetic (38 ms + wifi) -- if it
-             moved, the NED delays or the wifi bitrate changed.
-   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (bidirectional tunneling)"
-             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
-   stamp:    captured 2026-08, INET 4.7
+We now go back to 19.9 s, the moment the care-of address is ready, and follow
+the runs with Mobile IPv6. The ``BidirectionalTunneling`` and
+``RouteOptimization`` runs are the same until 20.04 s.
 
-**Bidirectional tunneling restores reachability, at the cost of a detour.**
-After a ~4.5 s outage replies resume on the 40 ms plateau and stay there, every
-packet taking the long way through the home agent.
-
-Where those seconds go, from this run's event log — the last reply at home
-arrives at t = 17.014 s, the first tunneled one at t = 21.540 s:
-
-- **0.74 s** — still associated with the home access point, already out of
-  range. The requests sent at 17.5 s and 18.0 s are simply lost.
-- **0.65 s** — scanning both channels, then authenticating and associating
-  with ``apForeign``.
-- **0.22 s** — waiting for a Router Advertisement on the new link, which
-  reveals the unfamiliar prefix.
-- **1.42 s** — duplicate address detection on the new link, on the link-local
-  address the mobile node regenerates there. The *Binding Update* leaves in the
-  same event as its completion.
-- **1.03 s** — the home agent holding its *Binding Acknowledgement*, its
-  stand-in for the duplicate address detection it should run on the home
-  address (see the implementation notes), plus propagation.
-- **0.47 s** — the wait for the next ping. The one sent at 21.0 s missed the
-  binding by 71 ms; the one sent at 21.5 s got through.
-
-**More than half the outage — 2.45 s of 4.53 s — is duplicate address
-detection, at one end or the other.** It is a correctness check whose entire
-cost lands in handover latency, which is what motivates optimizations such as
-RFC 4429 Optimistic DAD. Both terms are timeouts rather than round trips, so
-neither shrinks on a faster link.
-
-That 1.42 s is this seed's value, not a constant: INET waits ``retransTimer``
-(1 s) plus a random 0–1 s standing for the solicited-node multicast group join
-of RFC 4862 Section 5.4.2, so the outage moves by up to a second from run to
-run.
-
-.. todo::
-
-   The 1.42 s term is DAD on the *link-local* address, not on the care-of
-   address, and that is an INET bug rather than a modelling choice — see gap 8
-   in MIPV6_IMPLEMENTATION_GAPS.md. At a handover the mobile node marks every
-   address on the interface tentative (the home address included), probes the
-   link-local one alone, and then assigns the care-of address permanently
-   without ever probing it
-   (``Ipv6NeighbourDiscovery.cc:2578-2594`` and ``:906-937``).
-
-   Two things to settle:
-
-   1. Whether the reader-facing implementation-notes list above should carry
-      this too. It is a real deviation, and the budget on this page leans on
-      the number it produces — but it is Neighbor Discovery, not Mobile IPv6,
-      so it may belong in an IPv6 page instead.
-   2. Fixing it in INET adds a second DAD interval to every handover, so this
-      budget, the ~4.5 s outage figure, the charts and the sequence-chart
-      panel anchors all need re-deriving once it lands.
-
-.. figure:: media/pingrtt-routeopt.png
-   :align: center
-
-..
-   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
-   type:     chart (matplotlib)
-   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (route optimization)"
-   inputs:   results/RouteOptimization-#0.vec (re-run the config first)
-   shows:    RTT of every ping with route optimization on; one 40 ms tunneled
-             reply, then the 20 ms direct path; span shaded 15..51s
-   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
-             directly -- keep all three identical if any one is redone.
-             The 20 ms plateau is link-delay arithmetic (18 ms + wifi); the lone
-             40 ms point at t=21.5s is the last pre-optimization reply.
-   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (route optimization)"
-             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
-   stamp:    captured 2026-08, INET 4.7
-
-**Route optimization removes the detour after a single tunneled packet.** The
-same outage, then **exactly one reply at 40 ms** — the single ping answered
-through the tunnel before route optimization completed — and the direct path
-at 20 ms from there on.
-
-Up to the handover the three runs are identical: while the node is at home
-Mobile IPv6 has nothing to do, so the three configurations are the same
-simulation, sample for sample, on the 14 ms baseline. Plotted on one pair of
-axes the three curves coincided exactly and hid one another, which is why they
-are shown separately here.
-
-On the way back (t≈50 s) a shorter outage covers re-association and
-de-registration, and all three configurations converge on the 14 ms baseline
-again — for the plain host, simply because its old address works again at
-home.
-
-Details worth noticing rather than worrying about: the very first reply
-arrives only at t≈5.5 s — and a couple of milliseconds high — because both
-hosts spend the first seconds on SLAAC and neighbor resolution after boot;
-the few isolated elevated dots (the 42.7 ms one at t≈26.5 s, and one per run
-near the end, t≈58–59.5 s) are single 802.11 retransmissions, each worth a
-couple of extra milliseconds; and after
-the return, the Mobile IPv6 runs resume 1.5 s earlier than the plain host
-(t=53.0 vs t=54.5) — de-registration ends with that unsolicited Neighbor
-Advertisement announcing the return, while the plain host is only
-re-discovered when the router next resolves its address.
-
-The handover, live
-~~~~~~~~~~~~~~~~~~
-
-The video below shows the outbound handover in the ``RouteOptimization``
-configuration (t = 13.2 s to 23.5 s). The colored polylines are drawn by
-INET's network-route visualizer: each traces the path a ping actually took.
-Watch the sequence: the home path (correspondent → backbone → home agent →
-mobile node) while at home; the dash to the foreign network; the registration;
-then a brief moment of tunneled traffic taking the detour through the home
-agent — and finally the direct path through the foreign router, with the home
-agent out of the loop. The status label steps from "at home" through a brief
-"away (via home agent)" to "away (route-optimized, 1 CN)", and the address
-label changes to the care-of address the moment SLAAC completes in the
-foreign network.
+The video below shows the handover in the ``RouteOptimization`` configuration,
+from the last reply at home to the direct path. The colored lines trace the
+path each ping takes, and the label above the mobile node shows its status:
 
 .. video:: media/handover.mp4
    :align: center
 
 ..
-   VIDEO RECIPE (redo via the "video-recording" skill)
-   config:   RouteOptimization
-   seed:     default (seed-set=1)
-   shows:    home path arrow -> dash -> handover -> one tunneled detour ->
-             direct path; status + address labels updating live
-   anchors:  registration BU at t~20.04; the HA's BAck is delayed ~1s (home-
-             link DAD stand-in), binding active ~21.09; first tunneled reply
-             ~21.54; RO complete (BU to CN) ~21.58; direct pings from 22.0.
-             If these move, timing/params changed -> re-derive window.
-   window:   express to 13.2s -> step 1 event -> record to 23.5s. No
-             realTime-fade channel visualizer -> no settle wait needed.
-   anim:     playback_speed=1, min_animation_speed=0.1 (the model publishes
-             no animation speed; without the floor it records one frame per
-             event). Qtenv built-in message animation OFF for the recording
-             (private .qtenvrc copy with animation_enabled=false) -- the
-             wireless signal animation draws misleading bars between the APs.
-   capture:  fps=2, crop_area=with_padding; 206 frames; crop was 854:732:911:96
-   encode:   ffmpeg -r 10 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
-   post:     none
-   stamp:    recorded 2026-08, INET 4.7
+   PLACEHOLDER: the file is the OLD capture; wave 2 re-captures it (RouteOptimization,
+   window 16.5-22.5 s, label pacing 1.5-2 s).
+   VIDEO RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/handover.txt)
 
-The signaling, message by message
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The pings first take the home path, then stop while the node moves. After the
+registration they take the detour through the home agent for a moment, and
+then the direct path through ``foreignRouter``. The status label changes from
+"at home" to "away (via home agent)", and then to "away (route-optimized, 1
+CN)".
 
-The sequence chart below shows the same handover on the eventlog level,
-filtered to the mobility signaling and the pings (all 802.11 management and
-neighbor discovery traffic is hidden). Time flows left to right on a
-nonlinear axis, with tick labels showing offsets from the window start
-(t = 20.02 s); the six lifelines are six of the network's seven nodes —
-``apHome`` plays no part in this window and is omitted. Each hop of a
-message is drawn and labelled as its own arrow, so one packet appears as a
-chain of same-named arrows across the lifelines it crosses.
+In the same event in which duplicate address detection (DAD) completes, at
+19.924 s, the mobile node sends a Binding Update (BU) to its home agent. The
+source address is the care-of address. The Binding Update carries sequence
+number 1, a lifetime of 3600 s, and the A (acknowledge) and H (home
+registration) flags. The node expects the Binding Acknowledgement (BA) within
+1.5 s; otherwise it would send the Binding Update again at 21.424 s.
 
-Each lifeline occupies a horizontal band on the chart. An arrow that *bends*
-at a lifeline stops at that node, which then starts a new arrow onward; an
-arrow that merely *crosses* a lifeline's band passes that node without
-touching it. That is how the chart shows whether the home agent is in the
-path or not.
+The home agent receives the Binding Update at 19.953 s. It creates a binding
+cache entry and the tunnel to the care-of address at once, but it holds the
+Binding Acknowledgement (BA) for exactly 1 s. This is the stand-in for
+duplicate address detection described in the implementation notes. The
+standard asks the home agent to check the home address on the home link before
+it acknowledges a first registration, and that check also takes about a
+second. A standard home agent would start tunneling only after the check;
+INET's home agent starts at once. The same pings are lost either way.
 
-The ping names carry the ICMPv6 sequence number, which starts at zero: the
-correspondent node sends ``ping0`` at t = 1 s and one more every 0.5 s, so
-``ping39`` leaves at t = 20.5 s, just after this window opens.
+Here is the home agent at 20.5 s, in the middle of the hold. Its interfaces now
+include ``ip6tun0``, the tunnel to the care-of address:
 
-.. figure:: media/seqchart.png
+.. figure:: media/homeagent-tunnel.png
+   :align: center
+
+..
+   PLACEHOLDER: canvas screenshot of the homeAgent interior at ~20.5 s, BidirectionalTunneling,
+   showing ip6tun0 next to the Ethernet interfaces.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/homeagent-tunnel.txt)
+
+At the same moment, its binding cache holds one entry:
+
+.. figure:: media/bindingcache.png
+   :align: center
+
+..
+   PLACEHOLDER: binding cache inspector at ~20.5 s (being re-captured: sequence number 1).
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/bindingcache.txt)
+
+The entry maps the home address to the care-of address, with sequence number 1.
+The lifetime of 3600 s is INET's default for a home registration
+(``maxHaBindingLifeTime``), not a value from the standard. The tunnel
+interface exists only while the binding does.
+
+At 20.0 s the correspondent node sends ``ping38``. The home agent intercepts it
+and sends it through the tunnel, and it reaches the mobile node at 20.038 s.
+The node answers, but it drops its own reply. The reply's source is the home
+address, and until the Binding Acknowledgement (BA) arrives, the node has no
+reverse tunnel to carry it. ``ping39`` reaches the node at 20.520 s, 0.447 s
+before the binding becomes active, and its reply is dropped the same way. The
+home agent is ready, but the mobile node is not. The standard has no rule that
+makes the node discard these packets; this is the INET behavior listed in the
+implementation notes.
+
+At 20.953 s, 1 s after the Binding Update arrived, the home agent sends the
+Binding Acknowledgement with sequence number 1. It reaches the mobile node at
+20.967 s. The node marks the binding active and creates its reverse tunnel,
+from the care-of address to the home agent. One Binding Update, one Binding
+Acknowledgement: the retransmission planned for 21.424 s is not needed,
+because the 1.5 s timeout leaves room for the home agent's 1 s wait. The
+standard chose the value for this reason.
+
+``ping40`` leaves the correspondent node at 21.0 s. It goes to the home agent,
+through the tunnel to the mobile node, and its reply comes back through the
+reverse tunnel. The home agent unwraps the reply at 21.034 s and forwards it to
+the correspondent node, where it arrives at 21.040 s. The round trip takes
+40.36 ms.
+
+The outage, from the last reply at home to this first reply abroad, is 4.03 s.
+It is the same in both Mobile IPv6 configurations. Over ten seeds it is
+4.0–7.5 s, with a median of 4.5 s; the random parts are the delay of duplicate
+address detection, the delay of the Router Advertisement and, in some runs,
+the rate limit on Router Advertisements. This run is at the low end: none of
+the ten runs had a shorter outage.
+
+Here is the registration as a sequence chart, from the
+``BidirectionalTunneling`` run. The bracket marks the 1 s hold, and the red
+stubs mark the two dropped replies. The time axis is not linear here: busy
+stretches get more room than idle ones, so the bracket's label gives the true
+length of the hold:
+
+.. figure:: media/seqchart-p2-registration.png
    :align: center
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart
-   config:   RouteOptimization, re-run with --record-eventlog=true
-             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
-   seed:     default (seed-set=1)
-   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
-             project dir first if the worktree is not a workspace project)
-   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
-             correspondentNode (this top-to-bottom order; apForeign is the
-             wireless transit -- removing it hides the arrows)
-   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
-             CoTI, HoT, CoT, ping*
-   anchor:   BU at t=20.0437 (event #11078); CoTI ~20.54; second BU ~21.04;
-             ping41+reply ~21.5; HoTI 21.56; BU-to-CN 21.578; direct pings
-             from 22.0. goto_event first -- the disjoint recording intervals
-             confuse a bare zoom_to_simulation_time_range.
-   capture:  NONLINEAR timeline, NETWORK_COMMUNICATION mode, zoom to
-             20.02..22.06, window 1920x1000; was 1593x599
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: sequence chart P2 -- BidirectionalTunneling, 19.92-21.05 s, NONLINEAR timeline;
+   time-label bracket "BA held 1.000 s" on homeAgent (#11152 -> #11762);
+   "reply dropped" stubs at #11322 (ping38) and #11603 (ping39).
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p2-registration.txt)
 
-Reading it left to right: the overview is dense, so the three panels below
-zoom into it in order, each covering one stretch of the same window.
+The Binding Update travels down from ``mobileNode`` through ``apForeign``,
+``foreignRouter`` and ``backbone`` to ``homeAgent``. The next arrows belong to
+``ping38`` and ``ping39``. They bend at the ``homeAgent`` line and then go out
+to the foreign network, but no reply arrow leaves ``mobileNode``. After the
+bracket, the Binding Acknowledgement travels to the mobile node, and the round
+trip of ``ping40`` follows, through the home agent in both directions.
 
-**Registration, and pings that get no reply.**
+Return routability and the direct path
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: media/seqchart-registration.png
+In the ``RouteOptimization`` configuration, the arrival of ``ping38`` at
+20.038 s also starts return routability. The standard names a tunneled packet
+from a correspondent node as one reason to start it. The node sends the Home
+Test Init (HoTI) and the Care-of Test Init (CoTI) at the same time. The Home
+Test Init has the home address as its source, so the node drops it, like the
+ping replies. The Care-of Test Init goes directly to the correspondent node,
+which answers with the Care-of Test (CoT). The Care-of Test is back at the
+mobile node at 20.057 s.
+
+Here is that moment as a sequence chart; the red stub marks the dropped Home
+Test Init:
+
+.. figure:: media/seqchart-p3-careoftest.png
    :align: center
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (zoomed panel of the overview chart above)
-   config:   RouteOptimization, re-run with --record-eventlog=true
-             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
-   seed:     default (seed-set=1)
-   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
-             project dir first if the worktree is not a workspace project)
-   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
-             correspondentNode (this top-to-bottom order; apForeign is the
-             wireless transit -- removing it hides the arrows)
-   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
-             CoTI, HoT, CoT, ping*
-   shows:    the first Binding Update reaching the home agent; ping39 and ping40
-             arriving through the home-agent detour with no reply returning;
-             the CoTI/CoT pair going directly to the correspondent
-   anchor:   first BU at t=20.0437 (event #11078); CoTI 20.5385; CoT 20.5580;
-             ping39 20.50, ping40 21.00. The HoTI generated at 20.5385 is
-             deliberately absent -- it is dropped before transmission.
-   capture:  goto_event #11077 first, then zoom 20.02..21.04. NONLINEAR timeline,
-             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
-             The timeline allots pixels by event density, so widening the time
-             range does NOT give clipped labels more room -- move the panel
-             boundary instead.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: sequence chart P3 -- RouteOptimization, 20.030-20.065 s;
+   ping38 arriving, CoTI/CoT direct; "HoTI dropped" stub at #11324.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p3-careoftest.txt)
 
-At the left edge the first *Binding Update* descends from the mobile node
-(top lifeline) through the foreign network to the home agent. No
-acknowledgement follows it here: the home agent holds the *Binding
-Acknowledgement* back for one second — the duplicate-address-detection
-stand-in from the implementation notes — so it appears only in the next panel.
+The Care-of Test Init and the Care-of Test run straight between the two nodes,
+without touching ``homeAgent``. The care-of half of the test is finished a
+second before the home half can leave the mobile node.
 
-Meanwhile ``ping39`` and ``ping40`` reach the mobile node through the
-home-agent detour — every one of their arrows visits the ``homeAgent``
-lifeline — but **no reply travels back**. Until the binding is active the
-mobile node discards its own home-address-sourced replies, the same
-implementation note as before.
+The node sends the Home Test Init (HoTI) again at 21.038 s, 1 s after the first
+copy. Now the binding is active, so the message goes through the reverse
+tunnel: it reaches the home agent at 21.052 s and the correspondent node at
+21.058 s. The correspondent node sends the Home Test (HoT) to the home address.
+The home agent intercepts it and tunnels it to the care-of address, and it
+reaches the mobile node at 21.077 s. The node now holds both tokens, so return
+routability is complete.
 
-The *Care-of Test Init (CoTI)* and *Care-of Test (CoT)* travel directly
-between mobile node and correspondent, right after the first tunneled ping
-arrives. Their partner the *Home Test Init (HoTI)* is **not drawn here even
-though the mobile node generates it at the same instant**: the Home Test Init
-needs the reverse tunnel, so this first copy is dropped along with the early
-replies, and only its retransmission — a full second later, in the next panel
-— gets through.
+In the same event, the node sends a Binding Update (BU) to the correspondent
+node, with sequence number 1 and a lifetime of 420 s. The correspondent node
+creates its binding cache entry at 21.088 s and answers with a Binding
+Acknowledgement (BA), which reaches the node at 21.097 s. The node's status
+becomes "away (route-optimized, 1 CN)"; it was "away (via home agent)" for
+1.17 s. Asking for this acknowledgement is the mobile node's choice (INET
+always asks), but a correspondent node that is asked must answer. The standard
+lets this Binding Update go only after both tests are complete and the home
+agent has acknowledged the home registration. Here the home agent's Binding
+Acknowledgement arrived at 20.967 s, well before.
 
-**The binding activates, and return routability completes.**
+Here is the second half of return routability and the registration at the
+correspondent node:
 
-.. figure:: media/seqchart-routability.png
+.. figure:: media/seqchart-p4-hometest.png
    :align: center
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (zoomed panel of the overview chart above)
-   config:   RouteOptimization, re-run with --record-eventlog=true
-             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
-   seed:     default (seed-set=1)
-   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
-             project dir first if the worktree is not a workspace project)
-   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
-             correspondentNode (this top-to-bottom order; apForeign is the
-             wireless transit -- removing it hides the arrows)
-   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
-             CoTI, HoT, CoT, ping*
-   shows:    the retransmitted Binding Update, both Binding Acknowledgements
-             arriving, ping41 as the first ping with a reply (still tunneled),
-             and the HoTI retransmission answered by HoT
-   anchor:   second BU 21.0437; BAcks at the mobile node 21.0710 (stale, discarded)
-             and 21.0870 (activates the binding); ping41 21.50 with its reply
-             reaching the correspondent 21.5404; HoTI retransmit 21.5385;
-             HoT back at the mobile node 21.5781, where this panel ends.
-   capture:  goto_event #11914 first, then zoom 21.03..21.5782. NONLINEAR timeline,
-             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
-             The timeline allots pixels by event density, so widening the time
-             range does NOT give clipped labels more room -- move the panel
-             boundary instead.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: sequence chart P4 -- RouteOptimization, 21.03-21.10 s; HoTI through the
+   tunnel, HoT via homeAgent, BU to the CN and its BA; label "sent again, 1 s after the
+   dropped copy" at #12082.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p4-hometest.txt)
 
-The mobile node's retransmission timer fires before the held acknowledgement
-arrives, so the registration takes a **second Binding Update** — visible at
-the left edge. Both *Binding Acknowledgement* chains then arrive together: the
-first is discarded for its stale sequence number, the second activates the
-binding. This is why the binding cache shown later records sequence number 2.
+The Home Test Init and the Home Test both bend at the ``homeAgent`` line: the
+home half of the test travels through the tunnel, as it must. The Binding
+Update to the correspondent node and its acknowledgement then run directly.
 
-With the binding active, ``ping41`` is the first ping to be answered — the
-reply follows the reverse tunnel back through the ``homeAgent`` lifeline. The
-retransmitted *Home Test Init* now gets through, and the *Home Test (HoT)*
-returns via the home agent, completing return routability just as the panel
-ends.
+From ``ping41`` at 21.5 s on, the pings take the direct path: correspondent
+node, ``backbone``, ``foreignRouter``, mobile node. The request carries a
+type 2 routing header with the home address, and the reply carries a Home
+Address destination option. The round trip takes 20.18 ms. Exactly one reply
+in this run came through the tunnel, the reply to ``ping40``; the same is true
+in each of the ten seeds. Here is the direct path as a sequence chart:
 
-**Route optimization takes effect.**
-
-.. figure:: media/seqchart-optimized.png
+.. figure:: media/seqchart-p5-direct.png
    :align: center
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (zoomed panel of the overview chart above)
-   config:   RouteOptimization, re-run with --record-eventlog=true
-             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
-   seed:     default (seed-set=1)
-   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
-             project dir first if the worktree is not a workspace project)
-   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
-             correspondentNode (this top-to-bottom order; apForeign is the
-             wireless transit -- removing it hides the arrows)
-   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
-             CoTI, HoT, CoT, ping*
-   shows:    the Binding Update sent straight to the correspondent node and
-             acknowledged, then ping42 and ping43 running directly between
-             correspondent and mobile node
-   anchor:   BU to the correspondent 21.5781, acknowledged 21.5881, ack back at
-             the mobile node 21.5978; ping42 at 22.00 and ping43 at 22.50 take
-             the direct path. If any ping still bends at homeAgent, route
-             optimization did not complete.
-   capture:  goto_event #12518 first, then zoom 21.5775..22.55. NONLINEAR timeline,
-             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
-             The timeline allots pixels by event density, so widening the time
-             range does NOT give clipped labels more room -- move the panel
-             boundary instead.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: sequence chart P5 -- RouteOptimization, 21.49-22.05 s; ping41 and ping42
+   direct, crossing the homeAgent band without touching it.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p5-direct.txt)
 
-The *Binding Update* now goes straight to the correspondent node and is
-acknowledged. (INET requests an acknowledgement on every Binding Update; the
-standard makes it optional for correspondents.)
+An arrow that bends at a line stops at that node; an arrow that only crosses a
+line passes its position on the chart. The ping arrows now run between
+``correspondentNode`` and ``mobileNode`` and cross the ``homeAgent`` line
+without bending: the home agent is out of the path.
 
-From ``ping42`` onward the arrows run **directly between correspondent and
-mobile node** — no arrow bends at the ``homeAgent`` lifeline any more. Later
-arrows merely *cross* its axis on the way past, which is the visual difference
-between a packet the home agent forwards and one that simply passes its
-position on the chart. That is route optimization in one glance.
+Away from home
+~~~~~~~~~~~~~~
 
-Step by step
-~~~~~~~~~~~~
+While the node is away, neither Mobile IPv6 configuration sends any Mobile
+IPv6 message. The binding lasts 3600 s at the home agent and 420 s at the
+correspondent node, both far longer than the 30 s stay. Here are the
+round-trip times of the two Mobile IPv6 runs, on the same axes as before:
 
-The three panels above are enough to follow the handover. If you want to watch
-each message travel hop by hop, the six panels below cut the same window
-finer — one exchange at a time, with the dead time between exchanges skipped.
-
-One thing to know before reading them: an arrow running *upward* across the
-wireless band, from ``apForeign`` back to ``mobileNode``, is **not** Mobile
-IPv6 signaling. The access point is a learning bridge, and until it knows
-where a frame's link-layer destination lives it floods the frame to every
-port — including the wireless one the frame just arrived on. The mobile
-node's MAC discards it. It is ordinary 802.11 bridging, visible here only
-because these panels finally give it room.
-
-**1 — The first Binding Update.**
-
-.. figure:: media/seqchart2-1-registration.png
+.. figure:: media/pingrtt-bidirectional.png
    :align: center
-   :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 1 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #11077 first, then zoom 20.02..20.10
-   shows:    the first Binding Update, hop by hop from mobileNode to homeAgent
-   anchor:   BU at 20.0437 (event #11078). No acknowledgement in this window --
-             the home agent holds it for one second.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: RTT chart, BidirectionalTunneling (being re-captured).
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/pingrtt-bidirectional.txt)
 
-The mobile node registers its new care-of address: one message, five hops —
-wireless to ``apForeign``, then over Ethernet through ``foreignRouter`` and
-``backbone`` to ``homeAgent``. Nothing comes back yet.
-
-**2 — A tunneled ping, and the care-of test.**
-
-.. figure:: media/seqchart2-2-tunneled.png
+.. figure:: media/pingrtt-routeopt.png
    :align: center
-   :width: 100%
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 2 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #11383 first, then zoom 20.45..20.60
-   shows:    ping39 arriving through the home-agent detour with no reply, and
-             the CoTI/CoT pair going directly to the correspondent
-   anchor:   ping39 leaves the correspondent at 20.50 and reaches the mobile node
-             at 20.5385; CoTI 20.5385, CoT back at 20.5580.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: RTT chart, RouteOptimization (being re-captured).
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/pingrtt-routeopt.txt)
 
-``ping39`` arrives the long way — correspondent to ``backbone`` to
-``homeAgent``, and only then out to the foreign network. Its reply is
-generated but never leaves. In the same window the *Care-of Test Init* and
-*Care-of Test* run straight to the correspondent and back, needing no tunnel.
+With bidirectional tunneling, the pings stay on a plateau of 40.34 ms (median;
+40.26–40.40 ms) for the whole stay. With route optimization, one reply at
+40 ms is followed by a plateau of 20.16 ms (median; 20.08–20.22 ms). Both
+plateaus match the path arithmetic in The Model. No answered ping in any
+configuration needed an 802.11 retransmission.
 
-**3 — The registration is retransmitted, and acknowledged.**
-
-.. figure:: media/seqchart2-3-retransmit.png
-   :align: center
-   :width: 100%
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 3 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #11829 first, then zoom 20.95..21.10
-   shows:    ping40 on the same detour, the retransmitted Binding Update, and
-             both Binding Acknowledgements arriving
-   anchor:   ping40 21.00; second BU 21.0437; acknowledgements at the mobile node
-             21.0710 (stale, discarded) and 21.0870 (activates the binding).
-   stamp:    captured 2026-08, INET 4.7
-
-``ping40`` takes the same detour. The retransmission timer then fires — the
-second *Binding Update* — and both *Binding Acknowledgements* come back: the
-first discarded for its stale sequence number, the second activating the
-binding.
-
-**4 — The first ping that gets an answer.**
-
-.. figure:: media/seqchart2-4-firstreply.png
-   :align: center
-   :width: 100%
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 4 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #12227 first, then zoom 21.45..21.545
-   shows:    ping41 and the first reply that actually travels, through the
-             reverse tunnel and out to the correspondent
-   anchor:   ping41 21.50, at the mobile node 21.52, reply decapsulated at the home
-             agent 21.5344 and delivered to the correspondent 21.5404.
-   stamp:    captured 2026-08, INET 4.7
-
-With the binding active, ``ping41``'s reply finally travels: through the
-reverse tunnel to the home agent, which decapsulates it and forwards it to the
-correspondent.
-
-**5 — The home test, and the correspondent registration.**
-
-.. figure:: media/seqchart2-5-hometest.png
-   :align: center
-   :width: 100%
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 5 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #12369 first, then zoom 21.53..21.60
-   shows:    the retransmitted HoTI getting through the tunnel, HoT returning,
-             and the Binding Update to the correspondent being acknowledged
-   anchor:   HoTI retransmit 21.5385; HoT at the mobile node 21.5781; BU to the
-             correspondent 21.5781, acknowledged 21.5881, ack back 21.5978.
-   stamp:    captured 2026-08, INET 4.7
-
-The retransmitted *Home Test Init* now gets through the tunnel and the *Home
-Test* returns via the home agent. Return routability is complete, so the
-mobile node sends a *Binding Update* straight to the correspondent, which
-acknowledges it.
-
-**6 — The direct path.**
-
-.. figure:: media/seqchart2-6-direct.png
-   :align: center
-   :width: 100%
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
-   type:     seqchart (step panel 6 of 6)
-   shared:   same eventlog, axes, event filter, timeline mode and window size
-             as the stage panels above -- see the first stage panel's recipe
-             for the full setup
-   capture:  goto_event #12770 first, then zoom 21.95..22.55
-   shows:    ping42 and ping43 running directly between correspondent and mobile
-             node, crossing the homeAgent band without touching it
-   anchor:   ping42 at 22.00 and ping43 at 22.50 take the direct path. If either
-             still bends at homeAgent, route optimization did not complete.
-   stamp:    captured 2026-08, INET 4.7
-
-``ping42`` and ``ping43`` run correspondent → ``backbone`` → ``foreignRouter``
-→ mobile node, and back the same way. Their arrows *cross* the ``homeAgent``
-band without ever touching it — the difference between a packet the home agent
-forwards and one that merely passes its position on the chart.
-
-Inside the packets
-~~~~~~~~~~~~~~~~~~
-
-The two forwarding modes are distinguishable inside a single packet. Below are
-the two IPv6 header chunks of a tunneled ping request, captured on the home
-agent's backbone link and expanded field by field in Qtenv's object
-inspector: **two stacked IPv6 headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
-care-of address (``2001:db8:0:3:...:d``) with ``protocol = ipv6``, carrying
-the untouched inner packet from the correspondent to the *home* address, 40
-bytes of overhead in all. Notice that the two destination addresses share
-their interface identifier (``8aa:ff:fe00:d``) under different prefixes —
-the identity/location split, visible inside one packet. (The numbers after
-the protocol names in the figure, like ``ipv6(40)``, are INET's internal
-protocol identifiers, not the IANA protocol numbers; fields such as
-``extensionType = 43`` are genuine wire values.)
+The two forwarding modes also differ inside each packet. Here is a tunneled
+ping request, captured on the home agent's backbone link and opened in Qtenv's
+object inspector:
 
 .. figure:: media/tunneled_packet.png
    :align: center
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     inspector
-   config:   BidirectionalTunneling
-   seed:     default (seed-set=1)
-   shows:    IPv6-in-IPv6: chunks list with two Ipv6Header rows (outer
-             HA->CoA protocol=ipv6(40); inner CN->HoA protocol=icmpv6)
-   target:   express to 24.4s, fast to 25.65s -> list_logged_packets at
-             homeAgent -> the 170B ping -> object inspector, expand depth 4
-   anchor:   tunneled pings are 170B on the HA-backbone wire (130B + 40B
-             outer header) throughout the away phase
-   capture:  open_inspector type=object -> expand_inspector_tree depth=5 ->
-             get_inspector_screenshot 1400x4400 -> PIL-crop (60,1778)-(800,2554),
-             which is the chunks[2] and chunks[3] Ipv6Header rows with their
-             fields; was 740x776.  depth=5 is deliberate -- depth=6 also
-             unfolds the raw bin/raw hex dumps and shifts every row offset.
-   stamp:    captured 2026-08, INET 4.7
+   PLACEHOLDER: object inspector, tunneled ping (BidirectionalTunneling), two IPv6 header chunks.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/tunneled_packet.txt)
 
-The same ping in the route-optimized mode, captured at the correspondent node
-and expanded the same way: **one** IPv6 header, addressed to the care-of
-address directly, followed by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) whose
-address field — collapsed here, but opened in the Wireshark dissection below —
-carries the home address: 24 bytes instead of 40, and no detour. (Replies in the other
-direction carry the home address in a *Home Address destination option*
-instead; not shown.)
+The packet has two IPv6 headers. The outer header runs from the home agent
+(``2001:db8:0:1:8aa:ff:fe00:1``) to the care-of address
+(``2001:db8:0:3:8aa:ff:fe00:d``). The inner header is the correspondent node's
+original packet, addressed to the home address. The outer header adds 40
+bytes: the ping is 170 bytes on this link, against 130 bytes at home. The two
+destination addresses have the same interface identifier (``8aa:ff:fe00:d``)
+under different prefixes, so identity and location appear in one packet. (The
+numbers in parentheses after protocol names, such as ``ipv6(40)``, are INET's
+internal protocol identifiers, not byte counts.)
 
-.. figure:: media/ropacket.png
-   :align: center
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     inspector
-   config:   RouteOptimization
-   seed:     default (seed-set=1)
-   shows:    direct-path ping: single Ipv6Header (CN->CoA) + Ipv6RoutingHeader
-             routingType=2 row
-   target:   express to 24.4s, fast to 25.65s -> list_logged_packets at
-             correspondentNode -> the 154B ping -> object inspector, depth 4
-   anchor:   route-optimized pings are 154B on the CN wire (130B + 24B
-             type-2 routing header) during the away phase
-   capture:  open_inspector type=object -> expand_inspector_tree depth=5 ->
-             get_inspector_screenshot 1400x4400 -> PIL-crop (60,1688)-(800,2358),
-             which is the chunks[2] Ipv6Header and chunks[3] Ipv6RoutingHeader
-             rows with their fields; was 740x670.  address[1] stays collapsed
-             at depth=5 (see the prose); depth=6 would open it but also unfolds
-             the hex dumps and shifts every row offset.
-   stamp:    captured 2026-08, INET 4.7
-
-The same two packets, off the wire
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-INET can also write a packet capture (PCAP) file, so the same two packets can
-be handed to Wireshark. That is worth doing as a cross-check: Wireshark knows
-nothing about INET and dissects the recorded bytes on their own terms, so
-whatever it reports is a property of the packet rather than of the simulator's
-own view of it.
-
-.. figure:: media/tunneled_packet_wireshark.png
-   :align: center
-   :width: 100%
-
-..
-   FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
-   type:     wireshark GUI screenshot of the packet-detail pane
-   config:   BidirectionalTunneling   # ../omnetpp.ini
-   seed:     default (seed-set=1)
-   pcap:     inet -u Cmdenv -c BidirectionalTunneling
-             --"*.homeAgent.numPcapRecorders=1"
-             --'*.homeAgent.pcapRecorder[0].pcapFile="results/tunneled.pcap"'
-             --'*.homeAgent.pcapRecorder[0].fileFormat="pcap"'
-             --'**.fcsMode="computed"' --'**.crcMode="computed"'
-             --'**.checksumMode="computed"'
-             The computed modes are required: with INET's default declared FCS
-             the recorder aborts with "Cannot serialize Ethernet FCS without a
-             properly computed FCS" and writes an empty file.
-   frame:    tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' -> first match = frame 159 at t=20.42s
-   gui:      This desktop is Wayland, and XWayland refuses synthetic input from
-             other X clients, so the GUI cannot be driven on the main display.
-             Run it in a nested X server instead:
-               Xephyr :77 -screen 1500x1150 -ac -noreset &
-               DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r <one-frame>.pcap
-             QT_QPA_PLATFORM=xcb matters: under Wayland, Qt6 opens a native
-             Wayland window that X11 tools can neither see nor capture.
-   layout:   in the profile's "recent" file set gui.byte_view_show and
-             gui.packet_diagram_show to false, so the detail tree gets the
-             full window width and the addresses stop truncating.
-   expand:   window 1500x900; click the first tree row to give the pane focus,
-             then per header: Home, Down x N, Right.  N = 3 then 2 -- the inner
-             IPv6 header first, because its children appear below it and so the
-             outer row does not move.
-   capture:  import -window <id>, crop (0,487)-(772,836); was 772x349
-   anchor:   two "Internet Protocol Version 6" root lines, the outer one with
-             Next Header: IPv6 (41). One root only = the tunnel was not up.
-   stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
-
-**Wireshark independently finds the two stacked IPv6 headers** — outer from
-the home agent to the care-of address with ``Next Header: IPv6 (41)``, inner
-from the correspondent to the home address with ``Next Header: ICMPv6 (58)``.
-These are the real IANA protocol numbers, where the object inspector above
-showed INET's internal identifiers for the same two fields.
+Here is a route-optimized ping request, recorded at the correspondent node
+into a packet capture (PCAP) file and opened in Wireshark:
 
 .. figure:: media/ropacket_wireshark.png
    :align: center
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
-   type:     wireshark GUI screenshot of the packet-detail pane
-   config:   RouteOptimization   # ../omnetpp.ini
-   seed:     default (seed-set=1)
-   pcap:     inet -u Cmdenv -c RouteOptimization
-             --"*.correspondentNode.numPcapRecorders=1"
-             --'*.correspondentNode.pcapRecorder[0].pcapFile="results/routeopt.pcap"'
-             --'*.correspondentNode.pcapRecorder[0].fileFormat="pcap"'
-             --'**.fcsMode="computed"' --'**.crcMode="computed"'
-             --'**.checksumMode="computed"'
-             The computed modes are required: with INET's default declared FCS
-             the recorder aborts with "Cannot serialize Ethernet FCS without a
-             properly computed FCS" and writes an empty file.
-   frame:    tshark -Y 'ipv6.routing.type==2 && icmpv6.type==128' -> first match = frame 95 at t=21.92s
-   gui:      This desktop is Wayland, and XWayland refuses synthetic input from
-             other X clients, so the GUI cannot be driven on the main display.
-             Run it in a nested X server instead:
-               Xephyr :77 -screen 1500x1150 -ac -noreset &
-               DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r <one-frame>.pcap
-             QT_QPA_PLATFORM=xcb matters: under Wayland, Qt6 opens a native
-             Wayland window that X11 tools can neither see nor capture.
-   layout:   in the profile's "recent" file set gui.byte_view_show and
-             gui.packet_diagram_show to false, so the detail tree gets the
-             full window width and the addresses stop truncating.
-   expand:   window 1500x900; click the first tree row to give the pane focus,
-             then Home, Down x2, Right (the IPv6 header), then Home, Down x12,
-             Right (the routing header -- it is the tenth child of IPv6, after
-             the generated [Stream index] row, so 2 + 10).
-   capture:  import -window <id>, crop (0,487)-(772,806); was 772x319
-   anchor:   one IPv6 root with Next Header: Routing Header for IPv6 (43), and
-             Address[1] holding the home address. If the routing header is
-             absent, route optimization did not complete.
-   stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
+   PLACEHOLDER: Wireshark detail pane, route-optimized ping (RouteOptimization), Address[1] = home address.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/ropacket_wireshark.txt)
 
-**And here the routing header gives up the field the object inspector kept
-collapsed**: ``Address[1]: 2001:db8:0:1:8aa:ff:fe00:d`` — the home address,
-carried alongside a destination of ``2001:db8:0:3:8aa:ff:fe00:d``, the care-of
-address. One packet, both halves of the identity/location split, and no home
-agent anywhere on its path.
-
-One detail to reconcile: Wireshark reports these frames as 162 and 146 bytes,
-eight fewer than the 170 B and 154 B the simulation reports for the same
-packets. INET counts the Ethernet preamble and start-of-frame delimiter, which
-a capture file does not store.
-
-Meanwhile the home agent's binding cache holds exactly one entry — the
-mapping this whole protocol exists to maintain. The 3600 s lifetime is the
-home-registration default (``maxHaBindingLifeTime``) — unlike the seven-
-minute correspondent bindings, home bindings are long-lived, refreshed well
-before expiry. And the sequence number 2 is the two-act registration again:
-the acknowledgement that activated this binding answered the retransmitted,
-second Binding Update:
-
-.. figure:: media/bindingcache.png
-   :align: center
-
-..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     inspector
-   config:   BidirectionalTunneling (RouteOptimization looks the same)
-   seed:     default (seed-set=1)
-   shows:    homeAgent.ipv6.bindingCache: HoA 2001:db8:0:1:...:d => CoA
-             2001:db8:0:3:...:d, lifetime 3600, home registration
-   target:   open_inspector (object) on Mipv6Showcase.homeAgent.ipv6.
-             bindingCache at t~25s, expand depth 4
-   anchor:   exactly 1 entry while the mobile node is away; 0 after ~53s
-   capture:  get_inspector_screenshot 1300x900 -> crop map rows
-             (was x14-830, y370-430)
-   stamp:    captured 2026-08, INET 4.7
+There is one IPv6 header, addressed to the care-of address, and a type 2
+routing header whose ``Address[1]`` field holds the home address. The routing
+header adds 24 bytes instead of the tunnel's 40, and the packet takes no
+detour. Wireshark shows 146 bytes where INET reports 154 bytes, because INET
+counts the Ethernet preamble and start-of-frame delimiter, which a capture file
+does not store.
 
 Coming home
 ~~~~~~~~~~~
 
-The second video shows the return (t = 47.5 s to 56 s), still in the
-``RouteOptimization`` configuration: direct-path pings, the walk home, and —
-right after re-association — the de-registration Binding Updates (lifetime
-zero) to the home agent and the correspondent node. The status label returns
-to "at home", the address label to the home address, and the pings to the
-14 ms home path. The binding cache empties, and the node is an ordinary
-IPv6 host again.
+At 48 s the node starts back. The last reply while away arrives at 50.020 s
+with route optimization (50.040 s with bidirectional tunneling). The following
+pings still go to the care-of address, and ``apForeign`` drops each of them
+after seven transmissions. The node loses the ``apForeign`` beacons at
+50.721 s, scans, and is associated with ``apHome`` at 51.372 s. It sends a
+Router Solicitation (RS) at once.
+
+Now the node waits. The home agent must answer with a Router Advertisement
+(RA), but it had multicast one on the home link at 50.614 s, and a router sends
+at most one multicast Router Advertisement every 3 s. So the answer leaves the
+home agent at 53.821 s, 2.45 s after the solicitation arrived, and reaches the
+node at 53.822 s. In the ``BidirectionalTunneling`` run the last multicast
+Router Advertisement was earlier, at 49.648 s, and the wait is 1.42 s. The 3 s
+gap is the standard's default, which Mobile IPv6 allows a home agent to lower;
+INET keeps it fixed.
+
+The Router Advertisement carries the home prefix, so the node knows that it is
+home. It removes its care-of address and its reverse tunnel, and it does not
+run duplicate address detection (DAD). The standard forbids a node to probe its
+own home address while its binding is still alive, to avoid a conflict with
+the home agent, which still uses that address. In the same event, the node
+sends the de-registration Binding Update (BU) to the home agent, with sequence
+number 2 and lifetime 0. With route optimization, it sends one to the
+correspondent node as well.
+
+The home agent deletes the binding and the tunnel at 53.823 s and sends the
+Binding Acknowledgement (BA), with sequence number 2 and lifetime 0, at once. A
+de-registration needs no check, so there is no hold. The acknowledgement
+reaches the node at 53.825 s. The standard asks the home agent to keep the
+deleted entry, marked invalid, for about 10 s; INET removes it at once. The
+node then announces its return with the unsolicited Neighbor Advertisement
+described in the About section. Here it changes nothing, because the home
+agent's neighbor entry for the node still holds the right MAC address. The
+correspondent node deletes its binding at 53.830 s, and its Binding
+Acknowledgement reaches the node at 53.837 s.
+
+The first reply at home is the reply to ``ping106``, at 54.014 s, with a round
+trip of 13.91 ms. With bidirectional tunneling, the first reply at home is the
+reply to ``ping104``, at 53.014 s.
+
+Here is the return in the ``RouteOptimization`` run as a sequence chart. The
+bracket marks the wait for the Router Advertisement:
+
+.. figure:: media/seqchart-p6-return.png
+   :align: center
+   :width: 100%
+
+..
+   PLACEHOLDER: sequence chart P6 -- RouteOptimization, 51.3-54.05 s, NONLINEAR timeline;
+   time-label bracket "RA delay 2.45 s" on homeAgent (RS #28738 -> RA #30136), saying it is
+   the 3 s rate limit; de-registration BUs and BAs, the unsolicited NA, ping106 round trip.
+   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p6-return.txt)
+
+The Router Solicitation reaches ``homeAgent`` right after the association, and
+then nothing happens for the length of the bracket. After the Router
+Advertisement, the two de-registration Binding Updates leave the mobile node in
+the same instant, and both acknowledgements come back within milliseconds.
+The last arrows are the round trip of ``ping106`` on the home path.
+
+The video below shows the same return: the direct path, the walk home, the
+de-registration, and the pings back on the home path. The status label returns
+to "at home", and the address label to the home address:
 
 .. video:: media/returnhome.mp4
    :align: center
 
 ..
-   VIDEO RECIPE (redo via the "video-recording" skill)
-   config:   RouteOptimization
-   seed:     default (seed-set=1)
-   shows:    direct path -> dash home -> re-association -> lifetime-0 BUs
-             (~52.8s) -> home path again; labels revert
-   anchors:  de-registration BUs (lifetime 0) to HA and CN at t~52.49, BAcks
-             ~52.50; first home-path reply ~53.01
-   window:   express to 47.5s -> step 1 event -> record to 56s
-   anim:     same as handover.mp4 (playback_speed=1, min_animation_speed=0.1,
-             built-in animation off via private .qtenvrc)
-   capture:  fps=2, crop_area=with_padding; 170 frames (numbering continued
-             at 206 -> ffmpeg -start_number 206); crop was 854:732:911:96
-   encode:   ffmpeg -r 10 -start_number 206 -vcodec libx264 -pix_fmt yuv420p
-   post:     none
-   stamp:    recorded 2026-08, INET 4.7
+   PLACEHOLDER: the file is the OLD capture; wave 2 re-captures it (RouteOptimization,
+   window to be set from the corrected return times, which now end at 54.014 s).
+   VIDEO RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/returnhome.txt)
+
+So the return is not shorter in this run, although it skips duplicate address
+detection and the home agent's hold. With route optimization it takes 3.99 s,
+against 4.03 s on the way out; with bidirectional tunneling it takes 2.97 s.
+The node saves both waits for duplicate address detection, and then spends the
+time waiting for the rate-limited Router Advertisement instead. That wait
+depends on when the home agent last multicast an advertisement, so it changes
+from run to run. Over ten seeds, the return takes 1.5–4.5 s with route
+optimization and 2.0–4.0 s with bidirectional tunneling, against 4.0–7.5 s on
+the way out, where this run is at the minimum.
+
+The plain host of the ``WithoutMipv6`` run gets its first reply earlier in this
+run, at 52.016 s, because its home agent had sent no multicast Router
+Advertisement in the previous 3 s. Which kind of host is answered first after
+the return depends on the run; Mobile IPv6 gives no advantage here. Back home,
+all three runs return to the 14 ms plateau.
+
+What the handover costs
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Where do the 4.03 s of the outbound outage go? The steps above give the terms,
+and each term is either a protocol timer or a value of this scenario:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 15 35
+
+   * - Term
+     - Time
+     - Kind
+   * - Out of range, still associated with ``apHome``
+     - 0.743 s
+     - scenario value (802.11 beacon loss)
+   * - Scan and association
+     - 0.651 s
+     - scenario value (scan settings, two channels)
+   * - Wait for the Router Advertisement
+     - 0.459 s
+     - protocol timer (random, up to 0.5 s)
+   * - Duplicate address detection on the new link
+     - 1.057 s
+     - protocol timer (1 s, plus a random part)
+   * - Binding Update, the home agent's hold, Binding Acknowledgement
+     - 1.043 s
+     - protocol timer (1 s hold) plus 43 ms of network path
+   * - Next ping and its round trip
+     - 0.074 s
+     - measurement granularity (0.5 s ping interval)
+   * - **Total**
+     - **4.026 s**
+     -
+
+The protocol timers (the wait for the Router Advertisement, duplicate address
+detection, and the home agent's hold) take 2.52 s. The two terms tied to
+duplicate address detection (DAD) alone take 2.10 s, more than half of the
+outage. The scenario values, the time 802.11 takes to notice the lost access
+point, to scan and to associate, take 1.39 s. The network paths take 43 ms,
+and the rest comes from the 0.5 s spacing of the pings.
+
+Neither Mobile IPv6 configuration changes these terms: bidirectional tunneling
+and route optimization have the same outage, because route optimization starts
+only after the first tunneled packet. Its gain is on the path afterward, 20 ms
+instead of 40 ms. That gain comes from where the home agent sits in this
+network, 5 ms off the backbone; with a home agent close to the correspondent
+node, the gain shrinks. The share of duplicate address detection is what
+optimizations such as Optimistic Duplicate Address Detection (RFC 4429)
+target: they let a node use a new address while the check still runs.
+
+The standard's default timers predict an outage of about 3.9 s without the
+random part of duplicate address detection, and about 4.4 s with it. The
+median over ten seeds, 4.5 s, lies close to the second value. A measured
+802.11 testbed (Cabellos-Aparicio et al., 2005) reports a mean Mobile IPv6
+handover of 2.1 s, 87 % of it in the IPv6 phase, so the same timers dominate
+there. That testbed shows no wait at the home agent, and it starts its clock
+at the scan, which accounts for most of the difference.
+
+The two modes also cost differently per packet. The tunnel adds 40 bytes to
+every packet, so it lowers the largest packet the node can send without
+fragmentation. Route optimization adds only 24 bytes, but in IPv6 extension
+headers, which some networks filter out.
+
+In practice, the pattern of the ``BidirectionalTunneling`` run, an anchor that
+keeps the node's address and a tunnel to wherever the node is, is what mobile
+operator networks, Wi-Fi calling and enterprise Wi-Fi controllers use, under
+other names and protocols. Route optimization did not spread. It needs support
+in every correspondent node, firewalls and filters drop its headers, and it
+reveals the node's location to every peer.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`Mipv6Showcase.ned <../Mipv6Showcase.ned>`,
