@@ -1,7 +1,7 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2b, 2c, 2d, 3 and 4 done; step 5,
-5b and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
+Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a to 2e, 3 and 4 done; step 5, 5b and
+6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
 since 2026-09-29 (owner's decision); older copies are on `topic/audit` and on `master`.
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
@@ -730,7 +730,8 @@ tests fail, and all of them because #1155 meets master's newer tests:
 2. the retransmission timeout **follows RFC 6298 by default**; a test that needs Linux's formula
    overrides it;
 3. this plan lives on the branch;
-4. **no serializer adaptation yet**: the PPP change may still be modified;
+4. **no serializer adaptation yet**: the PPP change may still be modified; the same holds for the
+   MPLS tests that master added later (decided during the rebase of 2e);
 5. the initial window **follows RFC 5681 by default**; IW10 is an option, which the packetdrill
    configuration selects (asked during 2b);
 6. a soft ICMP error **never aborts a connection by default** (RFC 9293 MUST-56); the Linux abort
@@ -842,7 +843,22 @@ divergence, which is the July 2026 result; module `tcp_` 79 of 79; protocol `tcp
 FAIL (expected); protocol `self/` 21 PASS.
 
 **Still open from this step:** the serializer adaptation, deferred by decision 4.
-`topic/tcp-packetdrill-tests` follows this branch again.
+
+**2e. The tests land first — done 2026-09-29.** At the owner's request the packetdrill wrappers
+and the move of the RFC tests to `tests/protocol/tcp/rfc/` landed on master first (`4eb3bb4fa9`,
+the branch `topic/tcp-packetdrill-tests` is gone), and this branch was rebased onto that master.
+The 95 commits applied without a conflict: git followed the move, so the test rewrite of 2b edits
+`tcp/rfc/`. Master's 62 new commits change nothing under `src/`, so every commit has the source
+tree that the build gate already passed. Three `Reproduce:` paragraphs named the old test path;
+a message pass corrected them and kept every tree.
+
+Results at the rebased head: protocol `tcp/` 333 tests, 328 PASS and 5 FAIL (expected), the RFC
+tests and the wrappers with `inet-gpl`; packetdrill 303 MATCH; the complete module suite 383
+PASS; every other protocol suite gives master's counts, except **MPLS: 21 ERROR**. Master's new
+MPLS helper `tests/protocol/mpls/MplsChecks.h` names `PppTrailer`, which the PPP commit of this
+series removes. Without that one term the suite gives master's verdicts exactly (5 PASS, 6 FAIL
+(expected), the same 10 FAIL (unexpected)), but the owner deferred it with the serializer
+adaptation (decision 4).
 
 ### Step 3 — The release note (F-2) — done 2026-09-14
 
