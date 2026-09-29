@@ -81,10 +81,17 @@ class OppTestTask(TestTask):
     def run_protected(self, **kwargs):
         binary_suffix = "_dbg" if self.mode == "debug" else ""
         test_file_name = os.path.join(self.working_directory, self.test_file_name)
-        # the test file may sit in a subfolder of the test folder, but opp_test always
-        # extracts it into work/<basename>
+        # a test that names its own program with %testprog never runs the test binary
+        has_testprog = re.search(r"^%testprog:", read_file(test_file_name), re.MULTILINE)
+        # the test file may sit in a subfolder of the test folder. opp_test extracts it into
+        # work/<basename> of the test folder, because the ini files of a test reach shared files
+        # by paths relative to that folder (the wifi tests include ../../ini/_b.ini). A %testprog
+        # test builds nothing and has no such paths, so it runs in work/<basename> beside its
+        # .test file, and two of them with one file name in different subfolders (the packetdrill
+        # wrappers) do not share a folder.
         test_binary_name = os.path.basename(re.sub(r"\.test$", "", self.test_file_name))
-        test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
+        work_directory = os.path.join(os.path.dirname(self.test_file_name), "work") if has_testprog else "work"
+        test_directory = os.path.join(self.working_directory, work_directory, test_binary_name)
         has_lib = os.path.exists(self.lib_directory)
         os.makedirs(test_directory, exist_ok=True)
         # paths are relative to test_directory, so they must be computed from the actual
@@ -92,16 +99,17 @@ class OppTestTask(TestTask):
         src_relative_path = os.path.relpath(self.simulation_project.get_full_path("src"), test_directory)
         lib_relative_path = os.path.relpath(self.lib_directory, test_directory)
         test_folder_relative_path = os.path.relpath(self.working_directory, test_directory)
-        args = ["opp_test", "gen", "-v", self.test_file_name]
+        # a header beside the .test file, such as tests/protocol/tcp/rfc/TcpMutations.h
+        test_file_folder_relative_path = os.path.relpath(os.path.dirname(test_file_name), test_directory)
+        args = ["opp_test", "gen", "-v", "-w", work_directory, self.test_file_name]
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        # a test that names its own program with %testprog never runs the test binary, so
-        # building one costs a makefile and a link per test for nothing
-        if not re.search(r"^%testprog:", read_file(test_file_name), re.MULTILINE):
+        # building a binary for a %testprog test costs a makefile and a link per test for nothing
+        if not has_testprog:
             with open(os.path.join(test_directory, "makefrag"), "w") as f:
                 f.write(_test_program_makefrag)
-            args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}"]
+            args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}", f"-I{test_file_folder_relative_path}"]
             subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
             if subprocess_result.returncode != 0:
                 return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
@@ -114,12 +122,12 @@ class OppTestTask(TestTask):
         ned_relative_path = os.path.relpath(ned_directory, test_directory) if os.path.exists(ned_directory) else ""
         simulation_args = ["--check-signals=false", "-lINET", "-n", ":".join(filter(None, [src_relative_path, ".", lib_relative_path if has_lib else "", ned_relative_path]))]
         if not self.debug:
-            args = ["opp_test", "run", "-v", "-p", test_program, self.test_file_name, "-a", *simulation_args]
+            args = ["opp_test", "run", "-v", "-w", work_directory, "-p", test_program, self.test_file_name, "-a", *simulation_args]
             subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
             stdout = subprocess_result.stdout
         else:
             ide_opp_test = IdeOppTest(remove_launch=self.remove_launch)
-            ide_opp_test.args = types.SimpleNamespace(verbose=True, workdir=os.path.join(self.working_directory, "work"), mode="run", testprogram=test_program, extraargs=" ".join(simulation_args), filenames=[test_file_name])
+            ide_opp_test.args = types.SimpleNamespace(verbose=True, workdir=os.path.join(self.working_directory, work_directory), mode="run", testprogram=test_program, extraargs=" ".join(simulation_args), filenames=[test_file_name])
             ide_opp_test.saveOriginalEnv()
             ide_opp_test.parse_testfile(test_file_name)
             ide_opp_test.run_tests()
@@ -144,13 +152,12 @@ class OppTestTask(TestTask):
 def get_opp_test_file_names(test_folder):
     """
     Returns the .test files in the given test folder, at any depth, except the ones in the work
-    folder that opp_test generates there. A test may extract .test files into that folder too.
-    The test folder must be an absolute path.
+    folders that opp_test generates, in the test folder and beside %testprog tests. A test may
+    extract .test files into its work folder too. The test folder must be an absolute path.
     """
-    work_folder = os.path.join(test_folder, "work")
     return [test_file_name
             for test_file_name in glob.glob(os.path.join(test_folder, "**", "*.test"), recursive=True)
-            if os.path.commonpath([test_file_name, work_folder]) != work_folder]
+            if "work" not in os.path.relpath(test_file_name, test_folder).split(os.sep)[:-1]]
 
 def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, lib_folder=None, lib_name="test", **kwargs):
     """
