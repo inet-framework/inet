@@ -10,12 +10,13 @@ an *identity* (a connection is pinned to the address pair). When a device moves
 to a network with a different prefix, it gets a new, routable address — but
 every open connection breaks, and nobody can reach it at the address they know.
 
-Mobile IPv6 (RFC 6275) solves this by splitting the two roles
-into two addresses, anchored by a *home agent*. This showcase demonstrates the
-whole mechanism in one scenario: a wireless node moves from its home network to
-a foreign one and back, while a peer keeps pinging it at its stable address.
-Without Mobile IPv6 the session dies; with it, the traffic keeps flowing —
-first through a tunnel, then, with route optimization, on the direct path.
+Mobile IPv6 (RFC 6275) solves this by splitting the two roles into two
+addresses, anchored by a *home agent*. This showcase demonstrates the whole
+mechanism in one scenario: a wireless node moves from its home network to a
+foreign one and back, while a peer keeps pinging it at its stable address.
+Without Mobile IPv6 the node cannot be reached while it is away; with it, the
+traffic keeps flowing — first through a tunnel, then, with route optimization,
+on the direct path.
 
 | Verified with INET version: ``TODO``
 | Source files location: `inet/showcases/ipv6/mipv6 <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/mipv6>`__
@@ -514,11 +515,11 @@ RouteOptimization configuration
 
 The configuration states ``useRouteOptimization`` explicitly so that the one
 parameter separating this scenario from the previous one is visible in both
-listings. The first tunneled ping that reaches the mobile node
-triggers the return-routability procedure with the correspondent node, the
-Binding Update installs a binding there, and from the next ping onward the
-traffic takes the direct path (~20 ms) — until the return home tears
-everything down again.
+listings. The first tunneled ping that reaches the mobile node triggers the
+return-routability procedure with the correspondent node, the Binding Update
+installs a binding there, and once that registration completes, the traffic
+takes the direct path (~20 ms) — until the return home tears everything down
+again.
 
 Results
 -------
@@ -554,10 +555,11 @@ Leaving home
 At 15 s the mobile node starts to move to the foreign network. The last reply
 at home arrives at 17.014 s (``ping32``). The node hears the last ``apHome``
 beacon at 17.407 s, but it stays associated: it declares the access point lost
-only when 3.5 beacon intervals have passed without a beacon, a value fixed in
-INET, at 17.757 s. Meanwhile the home agent still
-sends the pings to ``apHome``, which transmits each of ``ping33`` to ``ping37``
-seven times and then drops it.
+only when 3.5 beacon intervals (0.35 s with this network's 0.1 s beacon
+interval) have passed without a beacon, at 17.757 s; the 3.5 is fixed in INET.
+Meanwhile the home agent still sends the pings to ``apHome``, which transmits
+each of ``ping33`` to ``ping37`` seven times, the 802.11 retry limit, and then
+drops it.
 
 The node then scans both wireless channels. Channel 1 is empty, and channel 2
 has ``apForeign``. The scan ends at 18.407 s, and the node is associated with
@@ -574,8 +576,9 @@ only its link-local address, with one Neighbor Solicitation, and never its new
 care-of address. While the check runs, INET also marks the node's home address
 tentative, so the node cannot use that address either.
 
-The check takes 1 s plus a random 0.057 s and completes at 19.924 s. At the
-same instant, the node assigns its care-of address,
+INET sends the probe at once and then waits 1 s plus a random 0.057 s; the
+standard puts the random part before the probe instead. The check completes at
+19.924 s. At the same instant, the node assigns its care-of address,
 ``2001:db8:0:3:8aa:ff:fe00:d``, without probing it, and its home address
 becomes usable again. From here on, the home address is usable; the replies
 that the node drops a little later have a different cause.
@@ -632,14 +635,13 @@ at their true length:
 The Router Solicitation goes from ``mobileNode`` to ``foreignRouter`` at once,
 and the Router Advertisement comes back about 0.46 s later. At the same moment,
 the node sends the single Neighbor Solicitation of duplicate address detection
-(DAD). At the scale of the overview the two arrows coincide; the strip below
-it stretches this moment about 800 times and shows the order: the Router
+(DAD). At the scale of the overview the two arrows coincide; the strip below it
+stretches this moment about 800 times and shows the order: the Router
 Advertisement reaches ``mobileNode`` first, and then the Neighbor Solicitation
-leaves it. After that comes about a second of silence, in which the node may not use
-its new addresses yet. The end of the check is not a message, so no arrow
-marks it. At
-19.924 s all three runs have a working care-of address. This is where they
-part.
+leaves it. After that comes about a second of silence, in which the node may
+not use its new addresses yet. The end of the check is not a message, so no
+arrow marks it. At 19.924 s all three runs have a working care-of address. This
+is where they part.
 
 Without Mobile IPv6
 ~~~~~~~~~~~~~~~~~~~
@@ -651,7 +653,8 @@ address, and the pings keep going to the home link. There, the router
 sends each ping to ``apHome``, which transmits it seven times and drops it; 53
 pings are lost this way. Neighbor Unreachability Detection (NUD), the Neighbor
 Discovery check that a neighbor still answers, starts to doubt the entry at
-36.0 s, probes the node from 41.0 s, and deletes the entry at 44.0 s. Only then
+36.0 s, when INET's 30 s reachable time runs out. It waits 5 s, probes the node
+three times, 1 s apart, from 41.0 s, and deletes the entry at 44.0 s. Only then
 does the router try to resolve the home address to a link-layer address again.
 It holds the pings that arrive during each attempt. When an attempt fails, it
 drops them, and the correspondent node receives ICMPv6 Destination Unreachable
@@ -673,18 +676,19 @@ points coincide and would hide one another:
    shows:    RTT of every ping in the WithoutMipv6 config: the 14 ms home plateau, no reply from 17.014 s to 52.016 s, then four queued replies off scale (drawn as red markers on the top edge, labelled with their real RTTs) and the home plateau again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             first reply ping9 at 5.516 s (15.77 ms); last reply before the move ping32 at 17.014 s; first reply after the return ping98 at 52.016 s (2015.8 ms, off scale); off-scale label reads "4 replies off scale: 524–2016 ms round trip (queued at the home agent)"; ping102 at 52.025 s (24.6 ms) is on scale. If the marker/label is missing or the count differs, the return timing changed.
+             first reply ping9 at 5.516 s (15.77 ms); last reply before the move ping32 at 17.014 s; first reply after the return ping98 at 52.016 s (2015.8 ms, off scale); off-scale label reads "4 replies off scale: 524–2016 ms round trip (queued at router homeAgent)"; ping102 at 52.025 s (24.6 ms) is on scale. If the marker/label is missing or the count differs, the return timing changed.
              Replies above the y range are never clipped silently: the shared chart
              script draws them as red markers on the top edge with one label.
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(without Mobile IPv6)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
+   stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2; off-scale label re-rendered 2026-09-29 (G5 r3: "queued at router homeAgent")
 
 No reply arrives for 35.0 s, from 17.014 s until the node is home again. The
 node answers the router's third attempt at 52.007 s, and the router sends the
-pings it held for that attempt, so their replies arrive late: the markers on the top edge, at about
-52 s, stand for round-trip times of 523.5 to 2015.8 ms. Over ten seeds, the gap
-without replies is 34.5–37.0 s. This is the problem that Mobile IPv6 solves.
+pings it held for that attempt, so their replies arrive late: the markers on
+the top edge, at about 52 s, stand for round-trip times of 523.5 to 2015.8 ms.
+Over ten seeds, the gap without replies is 34.5–37.0 s. This is the problem
+that Mobile IPv6 solves.
 
 The home registration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -706,15 +710,15 @@ mobile node show its access point, its address and its status:
    config:   RouteOptimization
    seed:     default (seed-set=1)
    shows:    home path -> the move -> AP label HOME -> FOREIGN -> care-of address and
-             "away (via home agent)" -> ping40 round trip through the tunnel (reply leg
-             drawn along homeAgent-backbone) -> "away (route-optimized, 1 CN)" -> ping41
+             "away (via home agent)" -> the ping40 reply path through the reverse tunnel
+             (drawn along homeAgent-backbone) -> "away (route-optimized, 1 CN)" -> ping41
              and later pings on the direct path through foreignRouter
    anchors:  association with apForeign 18.408 s; DAD done + BU 19.924 s (status label
              "away (via home agent)", address label -> 2001:db8:0:3:8aa:ff:fe00:d);
              binding active 20.967 s; first reply ping40 at 21.040 s (tunneled route);
              CN's BA at the MN 21.097 s (status "away (route-optimized, 1 CN)");
              ping41 direct 21.520 s. ping38/ping39 (replies dropped at the MN) draw no
-             route -- the network-route visualizer shows only delivered round trips.
+             route -- each line is the path of one reply that reached the correspondent node.
              If ping40 is not the first route drawn after the move, the timeline moved.
    window:   express to 16.5 s -> step 1 event (normal) -> record to 22.5 s.
              Route visualizer fades in simulation time (0.6 s) -> no settle wait.
@@ -748,21 +752,23 @@ agent. Then the status
 becomes "away (route-optimized, 1 CN)", and from ``ping41`` on, the lines take
 the direct path through ``foreignRouter``.
 
-At the same instant as duplicate address detection (DAD) completes, at
-19.924 s, the mobile node sends a Binding Update (BU) to its home agent. The
-source address is the care-of address. The Binding Update carries sequence
-number 1, a lifetime of 3600 s, and the A (acknowledge), H (home registration)
-and L (link-local address compatibility) flags. The node expects the Binding Acknowledgement (BA) within
-1.5 s; otherwise it would send the Binding Update again at 21.424 s.
+At the same instant as duplicate address detection (DAD) completes, at 19.924
+s, the mobile node sends a Binding Update (BU) to its home agent. The source
+address is the care-of address. The Binding Update carries sequence number 1, a
+lifetime of 3600 s, and the A (acknowledge), H (home registration) and L
+(link-local address compatibility) flags. The L flag says that the node's
+link-local address has the same interface identifier as its home address. The
+node expects the Binding Acknowledgement (BA) within 1.5 s; otherwise it would
+send the Binding Update again at 21.424 s.
 
 The home agent receives the Binding Update at 19.953 s. It creates a binding
 cache entry and the tunnel to the care-of address at once, but it holds the
 Binding Acknowledgement (BA) for exactly 1 s. This is the stand-in for
-duplicate address detection described in the implementation notes. The
-standard requires the home agent to check the home address on the home link before
-it acknowledges a first registration, and that check also takes about a
-second. A standard home agent would start tunneling only after the check;
-INET's home agent starts at once.
+duplicate address detection described in the implementation notes. The standard
+requires the home agent to check the home address on the home link before it
+acknowledges a first registration, and that check also takes about a second. A
+standard home agent would start tunneling only after the check; INET's home
+agent starts at once.
 
 Here are the home agent's interfaces at 20.48 s, in the middle of the hold.
 Next to the loopback and the two Ethernet interfaces there is now a tunnel
@@ -848,14 +854,14 @@ the correspondent node, where it arrives at 21.040 s. The round trip takes
 40.36 ms.
 
 The outage, from the last reply at home to this first reply abroad, is 4.03 s.
-It is the same in both Mobile IPv6 configurations. Over ten seeds it is
-4.0–7.5 s, with a median of 4.5 s; the ping interval rounds these values to
-steps of 0.5 s. The random parts are the delay of duplicate address detection
-and the delay of the Router Advertisement. The two longest runs, 7.0 and
-7.5 s, are 3 s longer than the shortest ones: there the foreign router's answer
-was held back by a limit on multicast Router Advertisements, which the return
-home shows at work. This run is at the low end: none of the ten runs had a
-shorter outage.
+It is the same in both Mobile IPv6 configurations. Over ten seeds it is 4.0–7.5
+s, with a median of 4.5 s; the ping interval rounds these values to steps of
+0.5 s. The random parts are the delay of duplicate address detection and the
+delay of the Router Advertisement. The two longest runs, 7.0 and 7.5 s, are 3
+and 3.5 s longer than the shortest ones: there the foreign router's answer was
+held back by a limit on multicast Router Advertisements, which the return home
+shows at work. This run is at the low end: none of the ten runs had a shorter
+outage.
 
 Here is the registration as a sequence chart, from the
 ``BidirectionalTunneling`` run. The bracket marks the 1 s hold, and the red
@@ -917,14 +923,14 @@ trip of ``ping40`` follows, through the home agent in both directions.
 Return routability and the direct path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We go back once more, to 20.038 s. In the ``RouteOptimization``
-configuration, the arrival of ``ping38`` also starts return routability. The standard names a tunneled packet
-from a correspondent node as one reason to start it. The node sends the Home
-Test Init (HoTI) and the Care-of Test Init (CoTI) at the same time. The Home
-Test Init has the home address as its source, so the node drops it, like the
-ping replies. The Care-of Test Init goes directly to the correspondent node,
-which answers with the Care-of Test (CoT). The Care-of Test is back at the
-mobile node at 20.057 s.
+We go back once more, to 20.038 s. In the ``RouteOptimization`` configuration,
+the arrival of ``ping38`` also starts return routability. The standard names a
+tunneled packet from a correspondent node as one reason to start it. The node
+sends the Home Test Init (HoTI) and the Care-of Test Init (CoTI) at the same
+time. The Home Test Init has the home address as its source, so the node drops
+it, like the ping replies. The Care-of Test Init goes directly to the
+correspondent node, which answers with the Care-of Test (CoT). The Care-of Test
+is back at the mobile node at 20.057 s.
 
 Here is that moment as a sequence chart; the red stub marks the dropped Home
 Test Init:
@@ -973,25 +979,29 @@ The Care-of Test Init and the Care-of Test run straight between the two nodes,
 without touching ``homeAgent``. The care-of half of the test is finished,
 while the home half has not left the mobile node.
 
-The node sends the Home Test Init (HoTI) again at 21.038 s. The Binding
-Acknowledgement does not trigger this copy: the Home Test Init has its own
-retransmission timer of 1 s, which fires 1 s after the dropped first copy. Now
-the binding is active, so the message goes through the reverse tunnel: it reaches the home agent at 21.052 s and the correspondent node at
-21.058 s. The correspondent node sends the Home Test (HoT) to the home address.
-The home agent intercepts it and tunnels it to the care-of address, and it
-reaches the mobile node at 21.077 s. The node now holds both tokens, so return
-routability is complete.
+The node sends the Home Test Init (HoTI) again at 21.038 s. This copy is sent
+by the Home Test Init's own retransmission timer, 1 s after the dropped first
+copy. The Binding Acknowledgement at 20.967 s does restart return routability,
+but the node sends no new Home Test Init then, because it counts the dropped
+copy as sent. Now the binding is active, so the message goes through the
+reverse tunnel: it reaches the home agent at 21.052 s and the correspondent
+node at 21.058 s. The correspondent node sends the Home Test (HoT) to the home
+address. The home agent intercepts it and tunnels it to the care-of address,
+and it reaches the mobile node at 21.077 s. The node now holds both tokens, so
+return routability is complete.
 
 At the same instant, the node sends a Binding Update (BU) to the correspondent
 node, with sequence number 1 and a lifetime of 420 s. The correspondent node
 creates its binding cache entry at 21.088 s and answers with a Binding
-Acknowledgement (BA), which reaches the node at 21.097 s. Route optimization
-is now complete, and the node's status becomes "away (route-optimized, 1 CN)".
-Asking for this acknowledgement is the mobile node's choice (INET
-always asks), but a correspondent node that is asked must answer. The standard
-lets this Binding Update go only after both tests are complete and the home
-agent has acknowledged the home registration. Here the home agent's Binding
-Acknowledgement arrived at 20.967 s, well before.
+Acknowledgement (BA), which reaches the node at 21.097 s. Route optimization is
+now complete, and the node's status becomes "away (route-optimized, 1 CN)".
+Asking for this acknowledgement is the mobile node's choice (INET always asks),
+but a correspondent node that is asked must answer. The standard lets this
+Binding Update go only after both tests are complete and the home agent has
+acknowledged the home registration. Here the home agent's Binding
+Acknowledgement arrived at 20.967 s, well before. INET does not check this
+condition; the order holds anyway, because the Home Test Init needs the reverse
+tunnel, which the acknowledgement creates.
 
 Here is the second half of return routability and the registration at the
 correspondent node:
@@ -1143,10 +1153,13 @@ round-trip times of the two Mobile IPv6 runs, on the same axes as before:
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
 With bidirectional tunneling, the pings stay on a plateau of 40.34 ms (median;
-40.26–40.40 ms) for the whole stay. With route optimization, one reply at
-40 ms is followed by a plateau of 20.16 ms (median; 20.08–20.22 ms). Both
-plateaus match the path arithmetic in The Model. No answered ping in any
-configuration needed an 802.11 retransmission.
+40.26–40.40 ms) for the whole stay. With route optimization, one reply at 40 ms
+is followed by a plateau of 20.16 ms (median; 20.08–20.22 ms). Both plateaus
+match the path arithmetic in The Model. No answered ping in any configuration
+needed an 802.11 retransmission. The few points slightly above the plateaus,
+such as ``ping19`` at 10.5 s, are replies that waited behind a Neighbor
+Unreachability Detection probe; the 24.6 ms point at 52 s in the plain-host
+chart is the last of the pings the router held.
 
 The two forwarding modes also differ inside each packet. Here is a tunneled
 ping request, captured on the home agent's backbone link and opened in Qtenv's
@@ -1226,16 +1239,18 @@ into a packet capture (PCAP) file and opened in Wireshark:
    capture:  import -window root on :77, crop (0,487)-(772,806); 772x319
    anchor:   one IPv6 root with Next Header: Routing Header for IPv6 (43), destination
              2001:db8:0:3:8aa:ff:fe00:d (care-of) and Address[1]: 2001:db8:0:1:8aa:ff:fe00:d
-             (home). 146 bytes.
-             Keep the top "Frame 1: Packet, 146 bytes on wire" row in the crop:
-             the page text cites it. No routing header = route optimization did not complete.
+             (home); [Length: 24 bytes] -- the overhead the page quotes. The Frame row
+             reads 146 bytes on wire (kept in the crop; the page cites it).
+             No routing header = route optimization did not complete.
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d, Wireshark 4.6.4
              (pixel-identical to the committed 2026-08 image: git shows no change)
 
 There is one IPv6 header, addressed to the care-of address, and a type 2
 routing header whose ``Address[1]`` field holds the home address. The routing
-header adds 24 bytes instead of the tunnel's 40, and the packet takes no
-detour.
+header adds 24 bytes instead of the tunnel's 40: INET counts this packet as 154
+bytes on the wire, against 130 bytes at home. Wireshark shows 146 bytes,
+because a capture file leaves out the 8-byte preamble and start-of-frame
+delimiter that INET counts. The packet takes no detour.
 
 Coming home
 ~~~~~~~~~~~
@@ -1248,31 +1263,33 @@ after seven transmissions. The node loses the ``apForeign`` beacons at
 Router Solicitation (RS) at once.
 
 Now the node waits. The home agent answers with a Router Advertisement (RA)
-sent by multicast, and a router may send at most one multicast Router
-Advertisement every 3 s. The home agent had multicast one on the home link at
-50.614 s, so its answer waits until 3 s after that, plus a random 0.207 s. It
-leaves the home agent at 53.821 s, 2.45 s after the solicitation arrived, and
-reaches the node at 53.822 s. In the ``BidirectionalTunneling`` run the last
-multicast Router Advertisement was earlier, at 49.648 s, and the wait is
-1.42 s.
+sent by multicast, as INET's routers always do, and a router may send at most
+one multicast Router Advertisement every 3 s. The home agent had multicast one
+on the home link at 50.614 s, so its answer waits until 3 s after that, plus a
+random 0.207 s. It leaves the home agent at 53.821 s, 2.45 s after the
+solicitation arrived, and reaches the node at 53.822 s. In the
+``BidirectionalTunneling`` run the last multicast Router Advertisement was
+earlier, at 49.648 s, and the wait is 1.42 s.
 
 This wait comes from answering by multicast. The standard also allows a router
 to answer a solicitation by unicast, and a unicast answer is not held back by
-the limit; common router software enables it by default. The 3 s gap itself is
-the standard's default, which Mobile IPv6 allows a router serving mobile nodes
-to lower. INET keeps it as a fixed value; it is not the
-``minIntervalBetweenRAs`` parameter of the ini file, which sets the spacing of
-the periodic advertisements.
+the limit. Whether a router does so is a setting: some routers answer by
+unicast by default, others multicast unless configured, and RFC 7772
+recommends unicast. INET always multicasts. The 3 s gap itself is the
+standard's default, which Mobile IPv6 allows a router serving mobile nodes to
+lower. INET keeps it as a fixed value; it is not the ``minIntervalBetweenRAs``
+parameter of the ini file, which is the lower bound of the spacing of the
+periodic advertisements.
 
 The Router Advertisement carries the home prefix, so the node knows that it is
 home. It removes its care-of address and its reverse tunnel, and it does not
 run duplicate address detection (DAD). The standard forbids a node to probe its
-own home address while its binding is still alive, to avoid a conflict with
-the home agent, which still uses that address; because the node's Binding
-Update had the L flag set, the rule covers its link-local address too. At the
-same instant, the node sends the de-registration Binding Update (BU) to the home agent, with sequence
-number 2 and lifetime 0. With route optimization, it sends one to the
-correspondent node as well.
+own home address while its binding is still alive, to avoid a conflict with the
+home agent, which still uses that address; because the node's Binding Update
+had the L flag set, the rule covers its link-local address too. At the same
+instant, the node sends the de-registration Binding Update (BU) to the home
+agent, with sequence number 2 and lifetime 0. With route optimization, it sends
+one to the correspondent node as well.
 
 The home agent deletes the binding and the tunnel at 53.823 s and sends the
 Binding Acknowledgement (BA), with sequence number 2 and lifetime 0, at once. A
@@ -1358,7 +1375,7 @@ The last arrows are the round trip of ``ping106`` on the home path.
 
 The video below shows the same return: the direct path, the walk home, the
 de-registration, and the pings back on the home path. After the association
-with ``apHome``, the picture stays still for about 2.4 s of simulated time. The
+with ``apHome``, the picture stays still for 2.45 s of simulated time. The
 node is at home, but its status still reads "away (route-optimized, 1 CN)",
 because it is waiting for the held Router Advertisement. Then the status label
 returns to "at home", the address label to the home address, and the pings
@@ -1400,24 +1417,28 @@ take the home path:
 So in this run the return is barely shorter with route optimization, 3.99 s
 against 4.03 s on the way out, and clearly shorter with bidirectional
 tunneling, 2.97 s. The node skips both waits for duplicate address detection,
-but it spends time waiting for the held multicast Router Advertisement
-instead; a router that answered by unicast would not hold it back. That wait
-depends on when the home agent last multicast an advertisement, so it changes
-from run to run. Over ten seeds, the return takes 1.5–4.5 s with route
+but it spends time waiting for the held multicast Router Advertisement instead;
+a router that answered by unicast would not hold it back. That wait depends on
+when the home agent last multicast an advertisement, so it changes from run to
+run. The difference between the two Mobile IPv6 runs is chance, not route
+optimization: after 20.04 s the two runs make different random draws, so the
+home agent's last multicast Router Advertisement before the return falls at a
+different time in each. Over ten seeds, the return takes 1.5–4.5 s with route
 optimization and 2.0–4.0 s with bidirectional tunneling, against 4.0–7.5 s on
 the way out, where this run is at the minimum.
 
 The plain host of the ``WithoutMipv6`` run gets its first replies earlier in
-this run, at 52.016 s. At 52.007 s the next address-resolution attempt of its
-home router, ``homeAgent``, reaches the host, and the router sends the pings it
-held. The replies find their way back because the host has already received
-the router's Router Advertisement, at 51.469 s, which replaced the foreign
-router as its default router; the router had sent no multicast Router
+this run, at 52.016 s. At 52.006 s the next Neighbor Solicitation of the third
+address-resolution attempt of its home router, ``homeAgent``, reaches the host;
+the answer is back at 52.007 s, and the router sends the pings it held. The
+replies find their way back because the host has already received the router's
+Router Advertisement, at 51.469 s, which, in INET's handling, replaced the
+foreign router as its default router; the router had sent no multicast Router
 Advertisement in the previous 3 s, so this one was not held back. In runs where
 it is held back, the host answers the pings but sends the replies toward the
-foreign router, and they are lost until the advertisement arrives. Which kind of host is answered first after
-the return depends on the run; Mobile IPv6 gives no advantage here. Back home,
-all three runs return to the 14 ms plateau.
+foreign router, and they are lost until the advertisement arrives. Which kind
+of host is answered first after the return depends on the run; Mobile IPv6
+gives no advantage here. Back home, all three runs return to the 14 ms plateau.
 
 What the handover costs
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1432,9 +1453,12 @@ and each term is either a protocol timer or a value of this scenario:
    * - Term
      - Time
      - Kind
-   * - Out of range, still associated with ``apHome``
-     - 0.743 s
-     - scenario value (802.11 beacon loss)
+   * - From the last reply at home to the last beacon heard
+     - 0.393 s
+     - measurement granularity (0.5 s ping interval)
+   * - Beacon loss: 3.5 beacon intervals without a beacon
+     - 0.350 s
+     - scenario value (0.1 s beacon interval; the 3.5 is fixed in INET)
    * - Scan and association
      - 0.651 s
      - scenario value (scan settings, two channels)
@@ -1458,13 +1482,11 @@ and each term is either a protocol timer or a value of this scenario:
 The protocol timers (the wait for the Router Advertisement, duplicate address
 detection, and the home agent's hold) take 2.52 s. The two waits tied to
 duplicate address detection (DAD), the node's own check and the home agent's
-hold, alone take 2.06 s, more than half of the outage. The scenario values, the time 802.11 takes to notice the lost access
-point, to scan and to associate, take 1.39 s. The network paths take 43 ms,
-and the rest comes from the 0.5 s spacing of the pings.
-
-A measured 802.11 testbed (Cabellos-Aparicio et al., 2005) found a mean
-Mobile IPv6 handover of 2.1 s, 87 % of it in the IPv6 phase; it had no wait at
-the home agent and started timing at the scan.
+hold, alone take 2.06 s, more than half of the outage. The scenario values, the
+time 802.11 takes to notice the lost access point, to scan and to associate,
+take 1.00 s. The network paths take 43 ms. The rest comes from the 0.5 s ping
+interval: the 0.39 s the node was still in range after the last reply at home,
+and 0.07 s for the next ping and its round trip.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`Mipv6Showcase.ned <../Mipv6Showcase.ned>`,
@@ -1512,57 +1534,70 @@ the GitHub issue tracker for commenting on this showcase.
 
 .. TODO: create the tracker issue for this showcase and replace the link above
 
-The handover outage in this showcase is set mostly by protocol timers. The
-standard's default timers, added to this scenario's 802.11 times and ping
-spacing, predict about 3.9 s without the random delay before duplicate address
-detection and about 4.4 s with it. For a care-of address, the Mobile IPv6
-standard prefers the variant without the random delay; INET applies the delay.
-Neither value reaches the 7.0–7.5 s of the longest runs, which come from the
-limit on multicast Router Advertisements.
+The handover outage in this showcase is set mostly by protocol timers. For a
+care-of address, the Mobile IPv6 standard prefers duplicate address detection
+without a random delay; INET adds a random 0–1 s to the wait after its probe.
 
-A measured 802.11 testbed (Cabellos-Aparicio et al., 2005) shows the same
-picture. Its IPv6 phase, 1.84 s on average, is close to this run's Router
-Advertisement wait and duplicate address detection together, 1.52 s. The
-testbed spent that phase on duplicate address detection and on Neighbor
-Unreachability Detection, which finds out that the old router no longer
-answers; this run detects the move from the link layer instead. The rest of
-the gap between the testbed's 2.1 s and this run's 4.03 s comes from three
-things the testbed did not have: the home agent's 1 s first-registration
-check, the 0.74 s the node stays associated with an access point it can no
-longer hear, and the 0.5 s spacing of the pings.
+A measured 802.11 testbed (Cabellos-Aparicio et al., 2005) found a mean Mobile
+IPv6 handover of 2.1 s, 87 % of it in the IPv6 phase. That phase, 1.84 s on
+average, is close to this run's Router Advertisement wait and duplicate address
+detection together, 1.52 s. The testbed spent it on duplicate address detection
+and on Neighbor Unreachability Detection, which finds out that the old router
+no longer answers; this run detects the move from the link layer instead.
 
-The 802.11 terms of this scenario are long. With fast roaming (IEEE 802.11k and
-802.11r), a node changes access points in about 50 ms or less, which leaves
-the protocol timers as an even larger share of the outage.
+This run's 4.03 s is about 1.9 s longer. The home agent's first-registration
+exchange takes 1.04 s here and 4 ms in the testbed. This run counts 0.74 s
+between the last reply at home and the loss of the access point, which the
+testbed's clock, started at the scan, leaves out. Scan and association take
+0.65 s here against 0.26 s there, and the next ping and its round trip add 0.07
+s. The shorter IPv6 phase, 0.32 s less than the testbed's, takes part of this
+back.
+
+The 802.11 terms of this scenario depend on its scan settings. Fast roaming
+(IEEE 802.11k and 802.11r) changes access points in tens of milliseconds, but
+only between access points of one Wi-Fi network, where the network normally
+also keeps the node's address and Mobile IPv6 is not needed. A move to a
+different network, as here, needs a full scan and association, and in a secured
+network also a full authentication, which this scenario leaves out. So the
+802.11 terms of a real move can be shorter or longer than here.
 
 Optimizations such as Optimistic Duplicate Address Detection (RFC 4429) let a
 node use a new address while the check still runs. This removes the mobile
-node's own wait, about 1.06 s here, but not the home agent's 1 s check before
-a first registration, which the standard requires separately.
+node's own wait, about 1.06 s here, but not the home agent's 1 s check before a
+first registration, which the standard requires separately.
 
 Route optimization does not shorten the outage. The standard lets the Binding
 Update to the correspondent node go only after the home agent has acknowledged
-the home registration, so the direct path can start only after the tunnel
-works. The gain of route optimization is on the path afterward, 20 ms instead
-of 40 ms. That gain comes from where the home agent sits in this network, 5 ms
-off the backbone; with a home agent close to the correspondent node, the gain
-shrinks.
+the home registration. INET does not check this rule, but it keeps the same
+order, because the Home Test Init can leave only through the reverse tunnel,
+which the acknowledgement creates. The gain of route optimization is on the
+path afterward, 20 ms instead of 40 ms. That gain comes from where the home
+agent sits in this network, 5 ms off the backbone; with a home agent close to
+the correspondent node, the gain shrinks.
 
-The two modes also cost differently per packet. The tunnel adds 40 bytes to
-every packet, so on a path that carries 1500-byte packets, the node can send
-packets of at most 1460 bytes without fragmentation. Route optimization adds
-only 24 bytes, but in IPv6 extension headers, which some networks filter out.
+The two modes also cost differently per packet. The tunnel adds at least 40
+bytes to every packet, more when the tunnel is protected with IPsec, which this
+model leaves out. On a path that carries 1500-byte packets, the node can then
+send packets of at most 1460 bytes without fragmentation. Route optimization
+adds only 24 bytes, but in IPv6 extension headers, which some networks filter
+out.
 
 In practice, the pattern of the ``BidirectionalTunneling`` run, an anchor that
 keeps the node's address and a tunnel to wherever the node is, is what mobile
-operator networks, Wi-Fi calling and enterprise Wi-Fi controllers use, under
-other names and protocols. In those systems the network, not the node, sends
-the registration, and the node keeps its address on the new link. So the
-address-change terms of this showcase, the Router Advertisement wait and
-duplicate address detection, do not occur there; what carries over is the
-anchor, the tunnel, its detour and its per-packet overhead. Route optimization
-did not spread. It needs support in every correspondent node, firewalls and
-filters on some paths drop its headers, and it reveals the node's location to
-each correspondent node it route-optimizes with. End hosts that need their
-sessions to survive a change of network more often solve this in the
-transport layer, with Multipath TCP or QUIC connection migration.
+operator networks, enterprise Wi-Fi controllers and Wi-Fi calling use, under
+other names and protocols. In mobile operator core networks and enterprise
+Wi-Fi controllers, the network, not the node, sends the registration, and the
+node keeps its address on the new link, so the Router Advertisement wait and
+duplicate address detection of this showcase do not occur there. Wi-Fi calling
+is closer to this showcase: the phone first gets a new local address on the
+Wi-Fi network, then builds an IPsec tunnel from it to the operator's gateway,
+which keeps the phone's inner address. What carries over to all three is the
+anchor, the tunnel, its detour and its per-packet overhead.
+
+Route optimization did not spread. It needs support in every correspondent
+node, firewalls and filters on some paths drop its headers, and it reveals the
+node's location to each correspondent node it route-optimizes with. End hosts
+that need their own sessions to survive a change of network more often solve
+this in the transport layer, with Multipath TCP or QUIC connection migration;
+being reachable at a fixed address for sessions that others start still needs
+an anchor.
