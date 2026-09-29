@@ -31,6 +31,7 @@ class INET_API TcpAlgorithm : public cObject
     simtime_t initialRto;
     simtime_t minRexmitTimeout;
     bool rtoVarianceFloor = false;
+    bool retainSackAfterRto = false;
     simtime_t maxRexmitTimeout;
     int maxRexmitCount;
     simtime_t minPersistTimeout;
@@ -83,6 +84,7 @@ class INET_API TcpAlgorithm : public cObject
         initialRto = conn->getTcpMain()->par("initialRto");
         minRexmitTimeout = conn->getTcpMain()->par("minRexmitTimeout");
         rtoVarianceFloor = conn->getTcpMain()->par("rtoVarianceFloor");
+        retainSackAfterRto = conn->getTcpMain()->par("retainSackAfterRto");
         maxRexmitTimeout = conn->getTcpMain()->par("maxRexmitTimeout");
         maxRexmitCount = conn->getTcpMain()->par("maxRexmitCount");
         minPersistTimeout = conn->getTcpMain()->par("minPersistTimeout");

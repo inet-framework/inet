@@ -402,7 +402,12 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
     // if sacked_enabled reset sack related flags
     if (state->sack_enabled) {
-        conn->getRexmitQueueForUpdate()->resetSackedBit();
+        // RFC 2018 section 8: after a timeout the sender SHOULD turn off the SACKed
+        // bits, because the receiver may have reneged; RFC 5682 step 1 repeats it.
+        // Linux keeps them (tcp_timeout_mark_lost() clears them only on detected
+        // reneging), which RFC 6675 section 5.1 allows; retainSackAfterRto selects that.
+        if (!retainSackAfterRto)
+            conn->getRexmitQueueForUpdate()->resetSackedBit();
         conn->getRexmitQueueForUpdate()->resetRexmittedBit();
 
         // RFC 6675, page 10: "If an RTO occurs during loss recovery as specified in this document,

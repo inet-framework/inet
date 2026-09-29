@@ -195,7 +195,10 @@ import inet.transportlayer.contract.ITcp;
 //    comments and parameter descriptions still refer to.
 //
 //  - RFC 2018 - TCP Selective Acknowledgment Options
-//    SACK-Permitted and SACK, used only when both endpoints offer them.
+//    SACK-Permitted and SACK, used only when both endpoints offer them. After a
+//    retransmission timeout the SACKed marks are cleared (section 8);
+//    `retainSackAfterRto` keeps them, as Linux does and RFC 6675 section 5.1
+//    allows. (Linux parity, opt-in.)
 //
 //  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for
 //    TCP (D-SACK)
@@ -485,6 +488,7 @@ simple Tcp extends SimpleModule like ITcp
         bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
         int delayedAckFrameCount = default(2); // number of frames after delayed acks are sent
         bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool retainSackAfterRto = default(false); // false: a retransmission timeout clears the SACKed marks of the scoreboard (RFC 2018 section 8, RFC 5682 step 1); true: the marks survive the timeout, as in Linux (RFC 6675 section 5.1 allows it)
         bool fastopenAcceptWithoutCookie @mutable = default(false); // Server role: accept SYN-with-data even when the SYN carries no Fast Open cookie option at all (RFC 7413 section 4.1.3's cookie-less mode). ~ sysctl tcp_fastopen bit 9 (0x200, TFO_SERVER_COOKIE_NOT_REQD). Only meaningful with fastopenServerEnabled.
         bool fastopenClientEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) client role: attempt SYN-with-data when a cookie is cached. ~ sysctl tcp_fastopen bit 0 (TFO_CLIENT_ENABLE)
         bool fastopenClientNoCookieRequired @mutable = default(false); // Linux net.ipv4.tcp_fastopen bit 0x4 (TFO_CLIENT_NO_COOKIE): the client sends SYN+data immediately with NO cookie (and no cookie-request) at all -- for networks where the server is known to accept cookie-less TFO
