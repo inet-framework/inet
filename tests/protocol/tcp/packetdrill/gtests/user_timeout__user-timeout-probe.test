@@ -11,6 +11,10 @@ Upstream: https://github.com/google/packetdrill.git at 2c4001c4d6fc,
 gtests/net/tcp/user_timeout/user-timeout-probe.pkt.
 Linux 7.1.3 passes the script (leg L golden, script sha256 fbbf50f3e1d2facf).
 
+Features: none in INET's TCP feature map
+Not in INET's TCP catalogs: RFC 5482
+Linux socket interface, no standard: TCP_USER_TIMEOUT
+
 Expected result: FAIL. The class is an unimplemented feature: INET cannot run the
 script, because of mid-script tc qdisc manipulation (local-congestion drops not modeled).
 

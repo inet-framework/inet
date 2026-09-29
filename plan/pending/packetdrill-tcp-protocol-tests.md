@@ -53,6 +53,11 @@ FAIL (unexpected), in 14 seconds on 12 cores; without `inet-gpl`, 306 SKIP; the 
 protocol tests, which still build a binary, pass. The `opp_repl` copy got the same change
 (`3100802` on `main`, not pushed), with the same results through `opp_run_protocol_tests`.
 
+**Step 5 — what each wrapper exercises. — done 2026-09-29.** Each wrapper's description has a
+`Features:` line from `tests/oracle/features.yaml` in `inet-gpl`: ids of INET's TCP feature map,
+or the document or the Linux interface outside it. `README.md` tallies the three kinds. The ids
+point into `doc/project/evidence/`, which this branch gets with the rebase onto master.
+
 **Step 6 — CI.** The *Test: protocol* job builds `inet-gpl` and fails if every wrapper skips.
 
 **Steps 7 and 8 — the evidence and the guide.** `doc/project/evidence/` and the guide
