@@ -1,0 +1,10 @@
+A router interface holds its configured global IPv6 address once
+
+With Ipv6NetworkConfigurator, a router interface listed its global
+Internet Protocol version 6 (IPv6) address twice: the configurator
+assigned it, and Ipv6NeighbourDiscovery assigned it again after Duplicate
+Address Detection of the link-local address. The second assignment is now
+skipped, so getNumAddresses() counts the address once, interface dumps
+list it once, and the ipv6AddressAssigned and interfaceIpv6ConfigChanged
+signals that the second assignment raised are gone. Ipv6FlatNetworkConfigurator, which assigns no
+global address, is unaffected.
