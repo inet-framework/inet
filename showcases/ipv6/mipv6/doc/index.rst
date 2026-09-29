@@ -575,15 +575,40 @@ is linear, so the waits appear at their true length:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P1 -- WithoutMipv6, 18.40-19.93 s, LINEAR timeline;
-   filter: RS, RA, NS; RS, the delayed RA, the one DAD NS, then silence until
-   "DAD completed". No annotations.
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p1-movement.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   WithoutMipv6, seed-set 1, re-run with --record-eventlog=true
+             --eventlog-recording-intervals=18.3s..20.0s,51.3s..52.1s
+             (results/WithoutMipv6-intervals.elog)
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apForeign, foreignRouter (this order)
+   filter:   message_names RouterSolicitation, RouterAdvertisement, NeighbourSolicitation
+   view:     NETWORK_COMMUNICATION, SIMULATION_TIME (linear); resize_window 1250x900;
+             zoom 18.30..19.96 (left margin so the RS at 18.408 is not under the axis strip)
+   anchor:   RS 18.408162 (event #10129) up to foreignRouter; RA 18.866896 (#10462, router
+             delay 0.457 s) and the one DAD NS (#10464) at the same time; then nothing until
+             DAD done 19.923596 (#11079, not a message, so not drawn). A second NS or an RA
+             much later than 0.5 s after the RS = the timeline moved.
+   capture:  screenshot 1036x508 -> crop (0,62)-(1036,508): drops the top ruler and the
+             "Position/Range" hover box; 1036x446
+   post:     none
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
-The Router Solicitation goes up to ``foreignRouter`` at once, and the Router
-Advertisement comes back almost half a second later. Then comes the single
-Neighbor Solicitation of duplicate address detection (DAD), and after it a
-second of silence, in which the node may not use its new addresses yet. At
+The Router Solicitation goes from ``mobileNode`` to ``foreignRouter`` at once,
+and the Router Advertisement comes back about 0.46 s later. At the same moment,
+the node sends the single Neighbor Solicitation of duplicate address detection
+(DAD). After it comes about a second of silence, in which the node may not use
+its new addresses yet. The end of the check is not a message, so no arrow
+marks it. At
 19.924 s all three runs have a working care-of address. This is where they
 part.
 
@@ -636,21 +661,57 @@ the runs with Mobile IPv6. The ``BidirectionalTunneling`` and
 
 The video below shows the handover in the ``RouteOptimization`` configuration,
 from the last reply at home to the direct path. The colored lines trace the
-path each ping takes, and the label above the mobile node shows its status:
+path of each ping round trip that completes, and the labels at the mobile node
+show its access point, its address and its status:
 
 .. video:: media/handover.mp4
    :align: center
 
 ..
-   PLACEHOLDER: the file is the OLD capture; wave 2 re-captures it (RouteOptimization,
-   window 16.5-22.5 s, label pacing 1.5-2 s).
-   VIDEO RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/handover.txt)
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   RouteOptimization
+   seed:     default (seed-set=1)
+   shows:    home path -> the move -> AP label HOME -> FOREIGN -> care-of address and
+             "away (via home agent)" -> ping40 round trip through the tunnel (reply leg
+             drawn along homeAgent-backbone) -> "away (route-optimized, 1 CN)" -> ping41
+             and later pings on the direct path through foreignRouter
+   anchors:  association with apForeign 18.408 s; DAD done + BU 19.924 s (status label
+             "away (via home agent)", address label -> 2001:db8:0:3:8aa:ff:fe00:d);
+             binding active 20.967 s; first reply ping40 at 21.040 s (tunneled route);
+             CN's BA at the MN 21.097 s (status "away (route-optimized, 1 CN)");
+             ping41 direct 21.520 s. ping38/ping39 (replies dropped at the MN) draw no
+             route -- the network-route visualizer shows only delivered round trips.
+             If ping40 is not the first route drawn after the move, the timeline moved.
+   window:   express to 16.5 s -> step 1 event (normal) -> record to 22.5 s.
+             Route visualizer fades in simulation time (0.6 s) -> no settle wait.
+   launch:   private prefs copy so the user's Qtenv prefs stay untouched:
+             XDG_CONFIG_HOME=<dir> with <dir>/omnetpp/.qtenvrc copied from
+             ~/.config/omnetpp/.qtenvrc and animation_enabled=false (built-in message
+             animation off); opp_run_release ... -u Qtenv -c RouteOptimization
+             '--*.visualizer.osgVisualizer.typename=""' --mcp-server-address localhost:8777
+   anim:     set_animation_parameters profile=normal playback_speed=1
+             min_animation_speed=0.1 (no model animation speed with the built-in
+             animation off; the floor gives 0.05 s sim time per frame at fps=2)
+   capture:  record_video fps=2, crop_area=with_padding; 120 frames (0000-0119);
+             crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_handover
+   encode:   ffmpeg -r 6 -f image2 -i handover_%04d.png
+             -filter:v "crop=854:696:884:123,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+             -vcodec libx264 -pix_fmt yuv420p handover.mp4
+             (the crop drops the top 36 px = Qtenv's floating canvas toolbar);
+             20.0 s; a ping route stays ~12 frames = 2.0 s on screen
+   post:     none
+   stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
 
-The pings first take the home path, then stop while the node moves. After the
-registration they take the detour through the home agent for a moment, and
-then the direct path through ``foreignRouter``. The status label changes from
-"at home" to "away (via home agent)", and then to "away (route-optimized, 1
-CN)".
+The pings first take the home path, and no line is drawn while the node moves.
+The access point label changes from HOME to FOREIGN. At 19.924 s the address
+label shows the care-of address, and the status becomes "away (via home
+agent)". The video does not draw the Binding Update or any other signaling;
+the status label is where the signaling shows. ``ping38`` and ``ping39`` draw
+no line either, because their replies are dropped; the sequence chart later in
+this subsection shows them. The first line after the move belongs to
+``ping40``, which takes the detour through the home agent. Then the status
+becomes "away (route-optimized, 1 CN)", and from ``ping41`` on, the lines take
+the direct path through ``foreignRouter``.
 
 In the same event in which duplicate address detection (DAD) completes, at
 19.924 s, the mobile node sends a Binding Update (BU) to its home agent. The
@@ -769,10 +830,39 @@ length of the hold:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P2 -- BidirectionalTunneling, 19.92-21.05 s, NONLINEAR timeline;
-   time-label bracket "BA held 1.000 s" on homeAgent (#11152 -> #11762);
-   "reply dropped" stubs at #11322 (ping38) and #11603 (ping39).
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p2-registration.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   BidirectionalTunneling, seed-set 1, --record-eventlog=true
+             --eventlog-recording-intervals=19.9s..21.1s,51.3s..53.1s
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
+   filter:   message_names "Binding Update", "Binding Acknowledgement", ping*
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102x578);
+             goto_event 11080, zoom 19.92..21.3
+   anchor:   BU leaves the MN 19.923596 (#11081), reaches homeAgent 19.953260 (#11152);
+             ping38 and ping39 reach the MN via homeAgent at 20.037830 (#11320) and
+             20.519974 (#11601) with no reply; BA leaves homeAgent 20.953260 (#11762), at
+             the MN 20.966823 (#11798); ping40 round trip via homeAgent both ways, reply at
+             the CN 21.040356 (#11982)
+   capture:  screenshot 1102x578 -> crop (0,62)-(1062,578) (drops the hover box and ping41
+             at the right edge); 1062x516
+   post:     PIL overlay (research/analyst-data/overlay.py): bracket on the homeAgent
+             lifeline from the BU arrival #11152 to the BA departure #11762, bar 33 px below
+             the homeAgent axis, label "BA held 1.000 s"; red stubs "reply dropped" downward
+             from the mobileNode axis at the ping38 arrival (#11320; drop event #11322, same
+             sim time) and the ping39 arrival (#11601; drop event #11603). x positions read
+             from the arrowheads in the image (blue pixels just below/above the axis line):
+             were x=128, 597, 344, 536 in the uncropped screenshot.
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Binding Update travels down from ``mobileNode`` through ``apForeign``,
 ``foreignRouter`` and ``backbone`` to ``homeAgent``. The next arrows belong to
@@ -801,10 +891,32 @@ Test Init:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P3 -- RouteOptimization, 20.030-20.065 s;
-   filter: CoTI, CoT, HoTI, ping*; ping38 arriving, CoTI/CoT direct;
-   "HoTI dropped" stub at #11324 (the ping38 reply drop #11326 is NOT marked; P2 shows it).
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p3-careoftest.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   RouteOptimization, seed-set 1, --record-eventlog=true
+             --eventlog-recording-intervals=19.9s..22.1s,51.3s..54.6s
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
+   filter:   message_names CoTI, CoT, HoTI, ping*
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1250x1000; goto_event 11320,
+             zoom 20.034..20.060
+   anchor:   ping38 reaches the MN 20.037830 (#11320); CoTI MN -> CN 20.037830..20.047718
+             (#11391), CoT back at the MN 20.057332 (#11433); both cross the homeAgent band
+             without touching it; no HoTI arrow (dropped at the MN, #11324)
+   capture:  screenshot 1036x578 -> crop (0,62)-(1036,578); 1036x516
+   post:     PIL red stub "HoTI dropped" downward from the mobileNode axis at the ping38
+             arrival (#11320; drop #11324 is at the same simulation time); x from the
+             arrowhead (was 193). The ping38 reply drop (#11326) is deliberately not marked.
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Care-of Test Init and the Care-of Test run straight between the two nodes,
 without touching ``homeAgent``. The care-of half of the test is finished,
@@ -839,14 +951,40 @@ correspondent node:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P4 -- RouteOptimization, 21.03-21.10 s; HoTI through the
-   tunnel, HoT via homeAgent, BU to the CN and its BA; label "sent again, 1 s after the
-   dropped copy" at #12082.
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p4-hometest.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   RouteOptimization (same eventlog as P3)
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
+   filter:   message_names HoTI, HoT, "Binding Update", "Binding Acknowledgement", ping*
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102);
+             goto_event 12082, zoom 21.0365..21.0985
+   anchor:   HoTI leaves the MN 21.037830 (#12082) through the reverse tunnel, homeAgent
+             21.051580, CN 21.057593 (#12161); HoT via homeAgent (21.063607) to the MN
+             21.077391 (#12229); BU to the CN (#12232) and its BA at the MN 21.097182 (#12337)
+             go direct. The end of the previous ping40 reply shows at the left edge.
+   capture:  screenshot 1102x578 -> crop (0,62)-(1102,578); 1102x516. The MN-side
+             "Binding Acknowledgement" label is cut at the right edge (the BA is the last
+             filtered event); its other hops carry the full label.
+   post:     PIL red label "HoTI sent again, 1 s after the dropped copy" with a leader line
+             to the HoTI start at the mobileNode axis (#12082, x read from the arrow: was 46)
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Home Test Init and the Home Test both bend at the ``homeAgent`` line: the
 home half of the test travels through the tunnel, as it must. The Binding
-Update to the correspondent node and its acknowledgement then run directly.
+Update to the correspondent node and the Binding Acknowledgement that answers
+it then run directly, without bending at ``homeAgent``. The
+acknowledgement's label is readable on its hops through ``backbone`` and
+``foreignRouter``; its last hop, at the right edge, is cut off.
 
 Because the Home Test Init waited for its timer, return routability completes
 only at 21.097 s, after ``ping40`` has left the correspondent node at 21.0 s.
@@ -863,9 +1001,29 @@ in each of the ten seeds. Here is the direct path as a sequence chart:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P5 -- RouteOptimization, 21.49-22.05 s; ping41 and ping42
-   direct, crossing the homeAgent band without touching it.
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p5-direct.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   RouteOptimization (same eventlog as P3)
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
+   filter:   message_names ping*
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000; goto_event 12472,
+             zoom 21.4995..22.03
+   anchor:   ping41 leaves the CN 21.5 (#12472), reply back 21.520178; ping42 22.0, reply
+             22.020078; all arrows CN <-> backbone <-> foreignRouter <-> MN cross the
+             homeAgent band without a bend. A bend at homeAgent = route optimization failed.
+   capture:  screenshot 1102x578 -> crop (0,62)-(1070,578); 1070x516
+   post:     none
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The ping arrows now run between
 ``correspondentNode`` and ``mobileNode`` and cross the ``homeAgent`` line
@@ -1068,30 +1226,97 @@ the Router Advertisement:
    :width: 100%
 
 ..
-   PLACEHOLDER: sequence chart P6 -- RouteOptimization, 51.3-54.05 s, NONLINEAR timeline;
-   filter: RS, RA, Binding Update, Binding Acknowledgement, NA, ping106 (request and reply)
-   only -- ping101-ping105 are hidden;
-   time-label bracket "RA delay 2.45 s" on homeAgent (RS #28738 -> RA #30136), saying it is
-   the 3 s rate limit; de-registration BUs and BAs, the unsolicited NA, ping106 round trip.
-   FIGURE RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/seqchart-p6-return.txt)
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   RouteOptimization, seed-set 1, --record-eventlog=true
+             --eventlog-recording-intervals=19.9s..22.1s,51.3s..54.6s (the 54.6 s end is
+             needed: see filter)
+   ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
+             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
+             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
+             absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
+             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
+             the zoom only sets the left edge; the scale is fixed by the event count, so the
+             panel width is set with resize_window, and the right edge ends at the last
+             filtered event.
+   axes:     mobileNode, apHome, homeAgent, backbone, correspondentNode (apForeign and
+             foreignRouter left out: their bands only showed overheard wireless copies)
+   filter:   message_names RouterSolicitation, RouterAdvertisement, "Binding Update",
+             "Binding Acknowledgement", NeighbourAdvertisement, ping106, ping106-reply,
+             ping107 -- ping107 only gives the NONLINEAR timeline an event after the last
+             wanted arrow, and is cropped away
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1400x1100 (widget 1160x649);
+             goto_event 28703, zoom 51.372..54.51
+   anchor:   RS 51.372109 (#28703) reaches homeAgent 51.372849 (#28738); the solicited RA
+             leaves homeAgent 53.821173 (#30136) -- 3 s after the HA's multicast RA of
+             50.614221 plus 0.207 s; both de-registration BUs leave the MN together
+             53.821936 (#30167/#30168); HA BA at the MN 53.824734, unsolicited NA
+             53.824734, CN BA at the MN 53.836521; ping106 on the home path, reply at the CN
+             54.013915 (#30564). Periodic RAs on the WAN links (between homeAgent and backbone at
+             51.905-51.938 s, backbone -> CN at about 53.71 s) also match the RouterAdvertisement filter and
+             appear inside the bracket; they are not sent to the mobile node (the IDE's
+             message_expression filter could not exclude them).
+   capture:  screenshot 1160x649 -> crop (0,62)-(1016,649): drops the hover box and the
+             ping107 arrows; 1016x587
+   post:     PIL bracket (research/analyst-data/overlay.py helpers) on the homeAgent lifeline
+             from the RS arrival #28738 to the RA departure #30136; x read from the arrow
+             ends (were 40 and 348 in the uncropped screenshot). Bar 32 px above the
+             homeAgent axis (cropped y 284), label "RA delay 2.45 s (3 s rate limit)" above
+             the bar. The left tick stops above the "homeAgent" axis name (name box was
+             x 28-116, y 299-312 cropped) and ends in a small down-pointing arrowhead; the
+             right tick runs down to the axis. Nothing of the overlay covers the name.
+   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Router Solicitation reaches ``homeAgent`` right after the association, and
-then no signaling happens for the length of the bracket. After the Router
+then no signaling reaches the mobile node for the length of the bracket. The
+Router Advertisements drawn inside the bracket, between ``homeAgent``,
+``backbone`` and ``correspondentNode``, are periodic advertisements on the
+wired links; none of them reaches the mobile node. After the Router
 Advertisement, the two de-registration Binding Updates leave the mobile node in
 the same instant, and both acknowledgements come back within milliseconds.
 The last arrows are the round trip of ``ping106`` on the home path.
 
 The video below shows the same return: the direct path, the walk home, the
-de-registration, and the pings back on the home path. The status label returns
-to "at home", and the address label to the home address:
+de-registration, and the pings back on the home path. After the association
+with ``apHome``, the picture stays still for about 2.4 s of simulated time. The
+node is at home, but its status still reads "away (route-optimized, 1 CN)",
+because it is waiting for the held Router Advertisement. Then the status label
+returns to "at home", the address label to the home address, and the pings
+take the home path:
 
 .. video:: media/returnhome.mp4
    :align: center
 
 ..
-   PLACEHOLDER: the file is the OLD capture; wave 2 re-captures it (RouteOptimization,
-   window to be set from the corrected return times, which now end at 54.014 s).
-   VIDEO RECIPE: to be supplied by the analyst (panel/g4-behavior/recipes/returnhome.txt)
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   RouteOptimization
+   seed:     default (seed-set=1)
+   shows:    last direct pings (red route through foreignRouter) -> the walk home -> AP
+             label FOREIGN -> HOME ("Associated with AP" bubble) while the status stays
+             "away (route-optimized, 1 CN)" for 2.4 s (the Router Advertisement held by the
+             3 s rate limit) -> status "at home", address label back to the home address
+             -> ping106 and ping107 on the home path through homeAgent
+   anchors:  last reply away ping98 at 50.020 s; beacon loss 50.721 s; association with
+             apHome 51.372 s; HA's solicited RA 53.821 s (last multicast RA on the home
+             link 50.614 s + 3 s + 0.207 s random); de-registration BUs to HA and CN at
+             53.822 s, BAs at the MN 53.825 / 53.837 s; first home reply ping106 at
+             54.014 s; ping107 54.514 s. If the status turns "at home" long before 53.8 s,
+             the rate-limited RA no longer happens (timeline moved).
+   window:   continue in the same Qtenv session after handover.mp4 (or relaunch): express
+             to 49.5 s -> step 1 event -> record to 54.1 s, then record again to 54.6 s so
+             the ping106 route (arrives 54.014 s) stays on screen ~2 s. Same output dir:
+             numbering continues (0120-0221).
+   anim:     same as handover.mp4 (playback_speed=1, min_animation_speed=0.1, built-in
+             animation off via the private .qtenvrc copy)
+   capture:  record_video fps=2, crop_area=with_padding; 102 frames (0120-0221);
+             crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_returnhome
+   encode:   ffmpeg -r 6 -start_number 120 -f image2 -i returnhome_%04d.png
+             -filter:v "crop=854:696:884:123,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+             -vcodec libx264 -pix_fmt yuv420p returnhome.mp4   ; 17.0 s
+   post:     none
+   stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
 
 So the return is not shorter in this run, although it skips duplicate address
 detection and the home agent's hold. With route optimization it takes 3.99 s,
