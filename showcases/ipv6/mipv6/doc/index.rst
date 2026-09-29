@@ -584,8 +584,9 @@ Here is this part of the run as a sequence chart, taken from the
 ``WithoutMipv6`` run. Each horizontal line is one node, and each arrow is one
 hop of one packet. An arrow that bends at a line stops at that node, which then
 sends the packet on; an arrow that only crosses a line passes that node's
-position on the chart without touching the node. The time axis of this chart
-is linear, so the waits appear at their true length:
+position on the chart without touching the node. The chart has an overview
+and, below it, a zoomed strip. Both have linear time axes, so the waits appear
+at their true length:
 
 .. figure:: media/seqchart-p1-movement.png
    :align: center
@@ -609,21 +610,32 @@ is linear, so the waits appear at their true length:
              filtered event.
    axes:     mobileNode, apForeign, foreignRouter (this order)
    filter:   message_names RouterSolicitation, RouterAdvertisement, NeighbourSolicitation
-   view:     NETWORK_COMMUNICATION, SIMULATION_TIME (linear); resize_window 1250x900;
-             zoom 18.30..19.96 (left margin so the RS at 18.408 is not under the axis strip)
+   view:     NETWORK_COMMUNICATION, SIMULATION_TIME (linear); resize_window 1250x900.
+             Overview: zoom 18.30..19.96 (viewport left 18.2992048, 624.096 px/s).
+             Zoom (V2): goto_event 10462, zoom 18.86595..18.86799 (viewport left 18.8659493,
+             507843 px/s) -- the Router Advertisement (up) and the DAD Neighbor Solicitation
+             (down) separate; the AP's re-sent copy of the multicast NS at ~18.8680 s stays
+             just outside the window.
    anchor:   RS 18.408162 (event #10129) up to foreignRouter; RA 18.866896 (#10462, router
              delay 0.457 s) and the one DAD NS (#10464) at the same time; then nothing until
              DAD done 19.923596 (#11079, not a message, so not drawn). A second NS or an RA
              much later than 0.5 s after the RS = the timeline moved.
-   capture:  screenshot 1036x508 -> crop (0,62)-(1036,508): drops the top ruler and the
-             "Position/Range" hover box; 1036x446
-   post:     none
+   capture:  two screenshots, 1036x508 each (raw: seqchart-raw/p1c.png, p1zoom3.png)
+   post:     research/analyst-data/p1.py: overview crop (0,110)-(1036,486) + absolute tick strip
+             (ticks at 18.408 RS, 18.867 RA/NS, 19.924 DAD done, and 18.6/19.2/19.6, x=(t-18.2992048)
+             *624.096); a grey "zoomed below" note at the RA/NS; then the zoom crop (0,120)-(1036,486)
+             + tick strip 18.8660..18.8675 s (x=(t-18.8659493)*507843) with the note "zoomed about
+             800x: the Router Advertisement goes up to mobileNode, then the Neighbor Solicitation goes
+             down". The IDE rulers are cut off. Result 1036x868.
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Router Solicitation goes from ``mobileNode`` to ``foreignRouter`` at once,
 and the Router Advertisement comes back about 0.46 s later. At the same moment,
 the node sends the single Neighbor Solicitation of duplicate address detection
-(DAD). After it comes about a second of silence, in which the node may not use
+(DAD). At the scale of the overview the two arrows coincide; the strip below
+it stretches this moment about 800 times and shows the order: the Router
+Advertisement reaches ``mobileNode`` first, and then the Neighbor Solicitation
+leaves it. After that comes about a second of silence, in which the node may not use
 its new addresses yet. The end of the check is not a message, so no arrow
 marks it. At
 19.924 s all three runs have a working care-of address. This is where they
@@ -716,11 +728,10 @@ mobile node show its access point, its address and its status:
              animation off; the floor gives 0.05 s sim time per frame at fps=2)
    capture:  record_video fps=2, crop_area=with_padding; 120 frames (0000-0119);
              crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_handover
-   encode:   ffmpeg -r 6 -f image2 -i handover_%04d.png
-             -filter:v "crop=854:696:884:123,pad=ceil(iw/2)*2:ceil(ih/2)*2"
-             -vcodec libx264 -pix_fmt yuv420p handover.mp4
-             (the crop drops the top 36 px = Qtenv's floating canvas toolbar);
-             20.0 s; a ping route stays ~12 frames = 2.0 s on screen
+   encode:   ffmpeg -r 6 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:896:123"
+             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (V3: the crop keeps only the canvas
+             interior -- x 896-1725, y 123-806 -- so neither the green Qtenv window background nor the
+             canvas border shows; 830x684, fits the 834 px column without scaling)
    post:     none
    stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
 
@@ -880,15 +891,20 @@ length of the hold:
              20.519974 (#11601) with no reply; BA leaves homeAgent 20.953260 (#11762), at
              the MN 20.966823 (#11798); ping40 round trip via homeAgent both ways, reply at
              the CN 21.040356 (#11982)
-   capture:  screenshot 1102x578 -> crop (0,62)-(1062,578) (drops the hover box and ping41
-             at the right edge); 1062x516
-   post:     PIL overlay (research/analyst-data/overlay.py): bracket on the homeAgent
-             lifeline from the BU arrival #11152 to the BA departure #11762, bar 33 px below
-             the homeAgent axis, label "BA held 1.000 s"; red stubs "reply dropped" downward
-             from the mobileNode axis at the ping38 arrival (#11320; drop event #11322, same
-             sim time) and the ping39 arrival (#11601; drop event #11603). x positions read
-             from the arrowheads in the image (blue pixels just below/above the axis line):
-             were x=128, 597, 344, 536 in the uncropped screenshot.
+   capture:  screenshot 1102x578 (raw: seqchart-raw/p2h.png) -> crop (0,62)-(1062,556): drops the
+             hover box, the IDE ruler and ping41; + absolute tick strip -> 1062x571
+   post:     bracket on the homeAgent lifeline from the BU arrival #11152 (x 128) to the BA departure
+             #11762 (x 597), bar at cropped y 425, label "BA held 1.000 s"; red stubs "reply dropped"
+             from the mobileNode axis at the ping38 arrival (#11320, x 344; drop #11322 same time) and
+             the ping39 arrival (#11601, x 536; drop #11603). Ticks: 19.953 (#11152), 20.038 (#11320),
+             20.520 (#11601), 20.953 (#11762), 20.967 (#11798, x 676.5), 21.000 (ping40 leaves the CN,
+             x 732), 21.040 (#11982, x 1031.5).
+             Composition script research/analyst-data/pn.py (helpers compose.py; raw
+             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
+             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
+             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
+             the arrow ends in the screenshot), labelled with the event's simulation time, and the
+             note "time [s] at the marked events; the axis between them is not linear" (V1).
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Binding Update travels down from ``mobileNode`` through ``apForeign``,
@@ -939,10 +955,18 @@ Test Init:
    anchor:   ping38 reaches the MN 20.037830 (#11320); CoTI MN -> CN 20.037830..20.047718
              (#11391), CoT back at the MN 20.057332 (#11433); both cross the homeAgent band
              without touching it; no HoTI arrow (dropped at the MN, #11324)
-   capture:  screenshot 1036x578 -> crop (0,62)-(1036,578); 1036x516
-   post:     PIL red stub "HoTI dropped" downward from the mobileNode axis at the ping38
-             arrival (#11320; drop #11324 is at the same simulation time); x from the
-             arrowhead (was 193). The ping38 reply drop (#11326) is deliberately not marked.
+   capture:  screenshot 1036x578 (raw: seqchart-raw/p3b.png) -> crop (0,62)-(1036,556) + tick
+             strip -> 1036x550
+   post:     red stub "HoTI dropped" from the mobileNode axis at the ping38 arrival (#11320, x 193;
+             drop #11324 same time); the ping38 reply drop (#11326) is deliberately not marked. Ticks:
+             20.0378 (#11320), 20.0477 (CoTI at the CN #11391, x 639.5), 20.0573 (CoT at the MN #11433,
+             x 965.5).
+             Composition script research/analyst-data/pn.py (helpers compose.py; raw
+             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
+             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
+             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
+             the arrow ends in the screenshot), labelled with the event's simulation time, and the
+             note "time [s] at the marked events; the axis between them is not linear" (V1).
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Care-of Test Init and the Care-of Test run straight between the two nodes,
@@ -998,11 +1022,21 @@ correspondent node:
              21.051580, CN 21.057593 (#12161); HoT via homeAgent (21.063607) to the MN
              21.077391 (#12229); BU to the CN (#12232) and its BA at the MN 21.097182 (#12337)
              go direct. The end of the previous ping40 reply shows at the left edge.
-   capture:  screenshot 1102x578 -> crop (0,62)-(1102,578); 1102x516. The MN-side
-             "Binding Acknowledgement" label is cut at the right edge (the BA is the last
-             filtered event); its other hops carry the full label.
-   post:     PIL red label "HoTI sent again, 1 s after the dropped copy" with a leader line
-             to the HoTI start at the mobileNode axis (#12082, x read from the arrow: was 46)
+   capture:  screenshot 1102x578 (raw: seqchart-raw/p4b.png) -> crop (0,62)-(1102,556) + tick
+             strip -> 1102x550. The MN-side "Binding Acknowledgement" label is cut at the right edge
+             (the BA is the last filtered event); its other hops carry the full label.
+   post:     red label "HoTI sent again, 1 s after the dropped copy" in the apForeign band (x 130,
+             cropped y 64) with a horizontal leader and arrowhead ending on the HoTI arrow just below
+             the mobileNode axis (#12082, arrow start x 46); no overlay pixel crosses the "mobileNode"
+             name (V4). Ticks: 21.038 (#12082), 21.040 (ping40 reply at the CN, x 164.5), 21.058
+             (HoTI at the CN #12161, x 345.5), 21.077 (HoT at the MN #12229, x 619.5), 21.088 (BU at the
+             CN #12296, x 833.5), 21.097 (BA at the MN #12337, x 1000.5).
+             Composition script research/analyst-data/pn.py (helpers compose.py; raw
+             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
+             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
+             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
+             the arrow ends in the screenshot), labelled with the event's simulation time, and the
+             note "time [s] at the marked events; the axis between them is not linear" (V1).
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Home Test Init and the Home Test both bend at the ``homeAgent`` line: the
@@ -1047,8 +1081,17 @@ in each of the ten seeds. Here is the direct path as a sequence chart:
    anchor:   ping41 leaves the CN 21.5 (#12472), reply back 21.520178; ping42 22.0, reply
              22.020078; all arrows CN <-> backbone <-> foreignRouter <-> MN cross the
              homeAgent band without a bend. A bend at homeAgent = route optimization failed.
-   capture:  screenshot 1102x578 -> crop (0,62)-(1070,578); 1070x516
-   post:     none
+   capture:  screenshot 1102x578 (raw: seqchart-raw/p5b.png) -> crop (0,62)-(1102,556) + tick
+             strip -> 1102x550
+   post:     no marks; ticks: 21.510 (ping41 at the MN, x 190.5), 21.520 (ping41 reply at the CN,
+             x 458), 22.000 (ping42 leaves the CN, x 572), 22.010 (ping42 at the MN, x 742.5), 22.020
+             (ping42 reply at the CN, x 1008.5).
+             Composition script research/analyst-data/pn.py (helpers compose.py; raw
+             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
+             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
+             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
+             the arrow ends in the screenshot), labelled with the event's simulation time, and the
+             note "time [s] at the marked events; the axis between them is not linear" (V1).
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The ping arrows now run between
@@ -1288,15 +1331,20 @@ the Router Advertisement:
              51.905-51.938 s, backbone -> CN at about 53.71 s) also match the RouterAdvertisement filter and
              appear inside the bracket; they are not sent to the mobile node (the IDE's
              message_expression filter could not exclude them).
-   capture:  screenshot 1160x649 -> crop (0,62)-(1016,649): drops the hover box and the
-             ping107 arrows; 1016x587
-   post:     PIL bracket (research/analyst-data/overlay.py helpers) on the homeAgent lifeline
-             from the RS arrival #28738 to the RA departure #30136; x read from the arrow
-             ends (were 40 and 348 in the uncropped screenshot). Bar 32 px above the
-             homeAgent axis (cropped y 284), label "RA delay 2.45 s (3 s rate limit)" above
-             the bar. The left tick stops above the "homeAgent" axis name (name box was
-             x 28-116, y 299-312 cropped) and ends in a small down-pointing arrowhead; the
-             right tick runs down to the axis. Nothing of the overlay covers the name.
+   capture:  screenshot 1160x649 (raw: seqchart-raw/p6g.png) -> crop (0,62)-(1016,627): drops the
+             hover box, the IDE ruler and the ping107 arrows; + tick strip -> 1016x621
+   post:     bracket on the homeAgent lifeline from the RS arrival #28738 (x 40) to the RA departure
+             #30136 (x 348), bar at cropped y 282 with label "RA delay 2.45 s (3 s rate limit)" above
+             it; the left tick stops above the "homeAgent" axis name (name box x 28-116, y 299-312)
+             in a down-pointing arrowhead; the right tick runs down to the axis. Ticks: 51.373
+             (#28738), 53.821 (#30136), 53.823 (BU at the HA #30193, x 441.5), 53.830 (CN BU #30339,
+             x 631.5), 54.000 (ping106 leaves the CN, x 759), 54.014 (#30564, x 919.5).
+             Composition script research/analyst-data/pn.py (helpers compose.py; raw
+             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
+             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
+             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
+             the arrow ends in the screenshot), labelled with the event's simulation time, and the
+             note "time [s] at the marked events; the axis between them is not linear" (V1).
    stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
 
 The Router Solicitation reaches ``homeAgent`` right after the association, and
@@ -1342,9 +1390,10 @@ take the home path:
              animation off via the private .qtenvrc copy)
    capture:  record_video fps=2, crop_area=with_padding; 102 frames (0120-0221);
              crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_returnhome
-   encode:   ffmpeg -r 6 -start_number 120 -f image2 -i returnhome_%04d.png
-             -filter:v "crop=854:696:884:123,pad=ceil(iw/2)*2:ceil(ih/2)*2"
-             -vcodec libx264 -pix_fmt yuv420p returnhome.mp4   ; 17.0 s
+   encode:   ffmpeg -r 6 -start_number 120 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:896:123"
+             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (V3: the crop keeps only the canvas
+             interior -- x 896-1725, y 123-806 -- so neither the green Qtenv window background nor the
+             canvas border shows; 830x684, fits the 834 px column without scaling)
    post:     none
    stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
 
