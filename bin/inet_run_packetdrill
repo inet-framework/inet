@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Runs one packetdrill script of the inet-gpl project in INET, for a wrapper test such as
+# tests/protocol/tcp/packetdrill/fast_retransmit/fr-4pkt-sack.test:
+#
+#   %testprog: inet_run_packetdrill tcp/packetdrill/fast_retransmit/fr-4pkt-sack
+#
+# The id is the script's path below tests/protocol, without .pkt. The wrapper has the same path
+# in INET, and the script the same path in inet-gpl. The first segment of the id names the
+# protocol, so one command serves the scripts of every protocol.
+#
+# The scripts, the packetdrill parser and the comparison of packets live in the inet-gpl
+# project, which is GPL licensed; INET holds only the wrappers that name the scripts. inet-gpl
+# is found through INETGPL_ROOT, which its setenv sets. Without it the test is skipped, never
+# passed.
+#
+# The command is the INET run of one script in inet-gpl's packetdrill suite
+# (tests/packetdrill/suite.py inet-one). It prints the simulation output and ends with one line
+# that the wrapper matches:
+#
+#   PACKETDRILL <id>: PASS
+#   PACKETDRILL <id>: FAIL (<verdict>: <detail>)
+#
+# INET's setenv puts this folder on the PATH, so a wrapper names the command without a path.
+# A test runner appends its own simulation arguments to the command; they are ignored.
+
+if [ -z "$1" ]; then
+    echo "usage: inet_run_packetdrill <protocol>/<set>/<script>, the path below tests/protocol" >&2
+    exit 2
+fi
+if [ -z "$INETGPL_ROOT" ] || [ ! -f "$INETGPL_ROOT/tests/packetdrill/suite.py" ]; then
+    echo "#SKIPPED: inet-gpl not found -- source the setenv of an inet-gpl checkout to set INETGPL_ROOT"
+    exit 0
+fi
+PACKETDRILL_PROTOCOL="${1%%/*}"
+export PACKETDRILL_PROTOCOL
+exec "${PYTHON:-python3}" "$INETGPL_ROOT/tests/packetdrill/suite.py" inet-one "$1"
