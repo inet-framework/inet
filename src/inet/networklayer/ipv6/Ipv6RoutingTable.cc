@@ -330,10 +330,12 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
         d->setAdvOtherConfigFlag(toBool(s));
     if ((s = cfg->getAttribute("AdvLinkMTU")) != nullptr)
         d->setAdvLinkMtu(utils::atoul(s));
+    // AdvReachableTime and AdvRetransTimer are given in seconds; the variables hold
+    // the Router Advertisement field values, in milliseconds
     if ((s = cfg->getAttribute("AdvReachableTime")) != nullptr)
-        d->setAdvReachableTime(utils::atoul(s));
+        d->setAdvReachableTime(utils::atoul(s) * 1000);
     if ((s = cfg->getAttribute("AdvRetransTimer")) != nullptr)
-        d->setAdvRetransTimer(utils::atoul(s));
+        d->setAdvRetransTimer(utils::atoul(s) * 1000);
     if ((s = cfg->getAttribute("AdvCurHopLimit")) != nullptr)
         d->setAdvCurHopLimit(utils::atoul(s));
     if ((s = cfg->getAttribute("AdvDefaultLifetime")) != nullptr)

@@ -322,6 +322,21 @@ Notable backward incompatible changes are the following:
    REACHABLE for 1800 to 5400 s instead of 30 s. The results of IPv6
    simulations in which a neighbour is used again after a pause change.
 
+20. IPv6 Router Advertisement timers in milliseconds
+
+   Routers put AdvReachableTime and AdvRetransTimer into the Reachable Time and
+   Retrans Timer fields of a Router Advertisement as a number of seconds, and
+   hosts read the fields as seconds. RFC 4861 Section 4.2 defines both fields in
+   milliseconds. Both ends now use milliseconds, so the bytes of every Router
+   Advertisement change: the default 1 hour is sent as 3600000, the default 1 s
+   as 1000. The advReachableTime parameter and the AdvReachableTime,
+   AdvRetransTimer, HostBaseReachableTime and HostRetransTimer attributes keep
+   their unit, seconds, and an INET host derives the same whole-second values
+   from the new bytes as before. The advReachableTime parameter now keeps
+   fractions of a second: 0.5s was advertised as 0, and is advertised as 500. A
+   host now reads a Router Advertisement from another implementation, for
+   example in emulation, in the unit it was sent in.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

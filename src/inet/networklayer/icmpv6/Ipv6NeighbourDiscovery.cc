@@ -124,7 +124,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             if (ipv6Data->getAdvSendAdvertisements()) {
                 ipv6Data->setMinRtrAdvInterval(minRAInterval.dbl());
                 ipv6Data->setMaxRtrAdvInterval(maxRAInterval.dbl());
-                ipv6Data->setAdvReachableTime((int)advReachableTime.dbl());
+                ipv6Data->setAdvReachableTime(advReachableTime.inUnit(SIMTIME_MS));
             }
         }
     }
@@ -1507,14 +1507,14 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
     // ReachableTime.
     if (ra->getReachableTime() != 0) {
         EV_INFO << "RA's reachable time is non-zero, setting host's base reachable time to received value.\n";
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setBaseReachableTime(SimTime(ra->getReachableTime(), SIMTIME_S));
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setBaseReachableTime(SimTime(ra->getReachableTime(), SIMTIME_MS));
     }
 
     // The RetransTimer variable SHOULD be copied from the Retrans Timer field,
     // if the received value is non-zero.
     if (ra->getRetransTimer() != 0) {
         EV_INFO << "RA's retrans timer is non-zero, copying retrans timer variable.\n";
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setRetransTimer(SimTime(ra->getRetransTimer(), SIMTIME_S));
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setRetransTimer(SimTime(ra->getRetransTimer(), SIMTIME_MS));
     }
 
     /*If the MTU option is present, hosts SHOULD copy the option's value into
