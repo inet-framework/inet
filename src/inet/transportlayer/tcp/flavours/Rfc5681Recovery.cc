@@ -91,9 +91,12 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //"
     if (state->dupacks < state->dupthresh) {
         // TODO FlightSize would remain less than or equal to cwnd plus 2*SMSS
-        uint32_t oldSndMax = state->snd_max;
-        conn->sendData(state->snd_cwnd);
-        state->limitedTransmitBytes += state->snd_max - oldSndMax;
+        if (state->limited_transmit_enabled) {
+            uint32_t oldSndMax = state->snd_max;
+            conn->sendData(state->snd_cwnd);
+            state->limitedTransmitBytes += state->snd_max - oldSndMax;
+        }
+        return;
     }
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
@@ -103,8 +106,8 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //"
     // dupacks is frozen for the duration of the recovery phase, so every further
     // duplicate ACK arrives with dupacks == dupthresh; only the first one may enter
-    // fast retransmit, the rest fall through to step 5's send below
-    else if (state->dupacks == state->dupthresh && !state->lossRecovery) {
+    // fast retransmit, the rest go to step 4
+    if (state->dupacks == state->dupthresh && !state->lossRecovery) {
         //"
         // When a TCP sender detects segment loss using the retransmission timer
         // and the given segment has not yet been resent by way of the

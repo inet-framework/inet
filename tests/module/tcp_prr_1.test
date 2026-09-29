@@ -68,7 +68,7 @@ PRR: leaving fast recovery, cwnd=ssthresh=4000
 
 %# the transfer completed despite the loss
 %contains: stdout
-received 15000 bytes in 13 packets
+received 15000 bytes in 15 packets
 
 %# classic Reno cwnd inflation must NOT occur under PRR
 %# Falsification: with prrEnabled=false this scenario instead prints

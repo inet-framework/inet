@@ -321,7 +321,8 @@ void Rfc6675Recovery::receivedDuplicateAck()
                 //       update HighData to reflect this transmission, then return
                 //       to (3.2).
                 //"
-                while ((int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
+                while (state->limited_transmit_enabled
+                       && (int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
                     uint32_t seqNum;
                     if (!nextSeg(seqNum))
                         break;
