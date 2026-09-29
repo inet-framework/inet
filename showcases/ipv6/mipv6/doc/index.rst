@@ -10,15 +10,27 @@ an *identity* (a connection is pinned to the address pair). When a device moves
 to a network with a different prefix, it gets a new, routable address — but
 every open connection breaks, and nobody can reach it at the address they know.
 
-Mobile IPv6 (RFC 3775, later RFC 6275) solves this by splitting the two roles
+Mobile IPv6 (RFC 6275) solves this by splitting the two roles
 into two addresses, anchored by a *home agent*. This showcase demonstrates the
 whole mechanism in one scenario: a wireless node moves from its home network to
 a foreign one and back, while a peer keeps pinging it at its stable address.
 Without Mobile IPv6 the session dies; with it, the traffic keeps flowing —
 first through a tunnel, then, with route optimization, on the direct path.
 
-| Verified with INET version: ``4.7``
+| Verified with INET version: ``TODO``
 | Source files location: `inet/showcases/ipv6/mipv6 <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/mipv6>`__
+
+.. todo::
+
+   The showcase needs five INET source commits that are not in any release
+   yet: ac1db6c244 (a ``WirelessHost6`` mobile node without Mobile IPv6),
+   8b08688968 and 7e6083f7f1 (the first-registration Binding Update timer,
+   pull request #1134), 979eb60440 (pull request #1152) and aeee20a40d
+   (Mobile IPv6 signaling addressed to the next hop). Without them the
+   ``WithoutMipv6`` configuration still runs Mobile IPv6 and the registration
+   takes two Binding Updates. Fill in the version above, and change the
+   ``inet-4.7`` release in the Try It Yourself ``opp_env`` commands, once a
+   release contains them.
 
 About Mobile IPv6
 -----------------
@@ -255,7 +267,9 @@ modules exist at all.
 Neither lifetime expires inside this showcase's 80 second run, but a study of
 re-registration reaches the 420 second one first. ``Mipv6`` also emits two
 signals a study can record: ``mipv6RoCompleted`` when route optimization
-finishes, and ``packetDropped``.
+finishes, and ``packetDropped``. The drops that the Results section walks
+through (the mobile node's replies and its first Home Test Init) happen in the
+IPv6 module, not in ``Mipv6``, and emit no drop signal.
 
 Configuration notes:
 
@@ -281,7 +295,7 @@ Configuration notes:
 Implementation notes and simplifications, so the simulation is read for what
 it is:
 
-- The IPsec protection that RFC 3775 mandates between mobile node and home
+- The IPsec protection that RFC 6275 mandates between mobile node and home
   agent is not modeled (standard practice in simulation).
 - The return-routability *message exchange* — sequence, paths, sizes, timing,
   and the mobile node's periodic token refresh — is faithful, but the
@@ -293,7 +307,7 @@ it is:
   distinction is invisible — no other host lives on the home link — but a
   host on the home link could not reach an away mobile node.
 
-  .. admonition:: TODO
+  .. todo::
 
      Merge this bullet with the next one: the one-second delay described there
      is a consequence of this same missing capability, not a separate
@@ -315,7 +329,7 @@ it is:
 
      The next bullet's one-second delay is the workaround for the missing
      first step, hardcoded as ``sendTime = existingBinding ? 0 : 1`` at
-     ``Mipv6.cc:867`` and applied at ``:656``, which carries its own
+     ``Mipv6.cc:898`` and applied at ``:664``, which carries its own
      ``// TODO solve the HA DAD problem in a different way``. Fixing this gap
      replaces that literal with a real probe, so the delay would then vary per
      seed the way the mobile node's own duplicate address detection does, and
@@ -326,7 +340,7 @@ it is:
   deviation: a compliant home agent waits about as long for real duplicate
   address detection.
 
-  .. admonition:: TODO
+  .. todo::
 
      This bullet exists only because the previous one's capability is missing.
      Implementing proxy Neighbor Discovery gives the home agent a real
