@@ -75,8 +75,7 @@ INET follows in eight commits:
 1. INET's runner runs a `%testprog` test in `work/<file name>` beside its `.test` file, and puts
    the test's own folder on the include path. Every other test keeps `work/<file name>` of its
    test folder, because the wifi tests include `../../ini/_b.ini` relative to it: from a folder
-   beside the test, all 45 of them that pass fail. `opp_repl` runs every test beside its file,
-   so it has that problem for the wifi tests (see below).
+   beside the test, all 45 of them that pass fail. `opp_repl` does the same since `bb4d294`.
 2. The 27 RFC-based TCP tests and `TcpMutations.h` move into `tests/protocol/tcp/rfc/` (D7 of the
    `inet-gpl` plan, decided 2026-09-29: TCP alone, because only TCP has other kinds of test).
 3. The guide says when a protocol moves its standards-derived tests into `<proto>/rfc/`. The TCP
@@ -97,10 +96,16 @@ gives the 282 other protocol tests the same results before and after (240 PASS, 
 folders. `bin/inet_run_packetdrill` gives the right exit status for a pass, a divergence, a
 skipped script, an unknown id, a missing `inet-gpl` and a missing id.
 
-**Found:** `opp_repl` gives the wrappers the same results, but it cannot build the other protocol
-tests: 269 of them end in ERROR, because `opp_repl` does not add the protocol test library
-(`tests/protocol/lib`, `ProtocolTest.h`, `WifiTestSupport.h`) that INET's runner adds. The gap is
-older than this step and belongs to `opp_repl`.
+**Found, and repaired on 2026-09-29:**
+
+- `opp_repl` gave the wrappers the same results, but could not build the other protocol tests:
+  269 of them ended in ERROR, because it ran each test from the folder of its `.test` file and
+  did not link `tests/protocol/lib`. `opp_repl` `bb4d294` runs INET's protocol tests as suites,
+  from the suite folder, with the shared library (parameters in its `inet.opp`); it now gives
+  each of the 588 tests the result of INET's runner.
+- `-w` selected only whole suites: `-w tests/protocol/tcp/rfc` gave an empty result. INET's
+  runner and `opp_repl` now select a test when its test folder, its working directory or the
+  folder of its `.test` file matches, so a subfolder of a suite can be run on its own.
 
 **Step 6 — CI. — designed 2026-09-29; lands after the rebase of #1155.** At this branch's base the
 protocol tests run in the matrix of `.github/workflows/other-tests.yml`; master split it into one
