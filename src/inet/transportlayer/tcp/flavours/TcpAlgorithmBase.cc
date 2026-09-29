@@ -824,6 +824,21 @@ void TcpAlgorithmBase::receiveSeqChanged()
 
 void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
+    processWindowUpdate();
+
+    countDuplicateAck(tcpHeader, payloadLength);
+
+    //
+    // Leave congestion window management and possible sending data to
+    // subclasses (e.g. TcpTahoe, TcpReno).
+    //
+    // That is, subclasses will redefine this method, call us, then perform
+    // window adjustments and send data (if there's room in the window).
+    //
+}
+
+void TcpAlgorithmBase::processWindowUpdate()
+{
     // A pure window-update ACK that reopened a closed window ends the persist
     // state and transmits queued data immediately (Linux FLAG_WIN_UPDATE ->
     // tcp_data_snd_check; without this the data waited for the next
@@ -842,16 +857,6 @@ void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader
         }
         sendData(false);
     }
-
-    countDuplicateAck(tcpHeader, payloadLength);
-
-    //
-    // Leave congestion window management and possible sending data to
-    // subclasses (e.g. TcpTahoe, TcpReno).
-    //
-    // That is, subclasses will redefine this method, call us, then perform
-    // window adjustments and send data (if there's room in the window).
-    //
 }
 
 bool TcpAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)

@@ -176,6 +176,7 @@ bool TcpClassicAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_
 
 void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
+    processWindowUpdate();
     countDuplicateAck(tcpHeader, payloadLength);
 }
 

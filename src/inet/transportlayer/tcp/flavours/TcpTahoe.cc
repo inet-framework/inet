@@ -56,6 +56,8 @@ void TcpTahoe::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
 void TcpTahoe::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
+    processWindowUpdate();
+
     bool isDupack = state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max;
     if (isDupack) {
         state->dupacks++;
