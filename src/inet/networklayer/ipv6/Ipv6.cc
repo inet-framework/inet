@@ -433,10 +433,23 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
     // route packet
     if (destIE != nullptr) {
-        if (!ipv6Header->getDestAddress().isMulticast())
-            fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true);
-        else
-            fragmentPostRouting(packet, destIE, ipv6Header->getDestAddress().mapToMulticastMacAddress(), true);
+        Ipv6Address destAddress = ipv6Header->getDestAddress();
+        if (destAddress.isMulticast())
+            fragmentPostRouting(packet, destIE, destAddress.mapToMulticastMacAddress(), true);
+        else {
+            // RFC 4861 Section 5.2: the link-layer address of the next hop comes from the
+            // Neighbour Cache. A pinned output interface skips next-hop determination, so the
+            // cache can only be consulted when the sender states the next hop itself (as
+            // Neighbour Discovery and GPSR do, for an on-link neighbour they already know).
+            // Otherwise the destination need not be the next hop -- it may not even be on this
+            // link -- and the link layer cannot be addressed.
+            MacAddress macAddress;
+            if (!requestedNextHopAddress.isUnspecified())
+                macAddress = nd->resolveNeighbour(requestedNextHopAddress, destIE->getInterfaceId());
+            if (macAddress.isUnspecified())
+                macAddress = MacAddress::BROADCAST_ADDRESS;
+            fragmentPostRouting(packet, destIE, macAddress, true);
+        }
     }
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
