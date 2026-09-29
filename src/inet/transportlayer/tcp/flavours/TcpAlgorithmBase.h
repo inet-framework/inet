@@ -154,6 +154,13 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
+    /**
+     * An ACK that acknowledges no new data, with nothing in flight and an open send
+     * window, is a window update that ends the persist state: cancel the persist timer
+     * and send. Every override of receivedAckForAlreadyAckedData() calls it.
+     */
+    virtual void processWindowUpdate();
+
     /** RFC 5681 duplicate-ACK test; flavours owning a recovery object defer to it. */
     virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
 
