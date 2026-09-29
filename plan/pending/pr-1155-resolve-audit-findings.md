@@ -1,7 +1,7 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2b, 2c, 3 and 4 done; step 5, 5b
-and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
+Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a, 2b, 2c, 2d, 3 and 4 done; step 5,
+5b and 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
 since 2026-09-29 (owner's decision); older copies are on `topic/audit` and on `master`.
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
 Audit: `audit/pull-request/pr-1155.md`, third pass, 2026-09-11.
@@ -816,14 +816,33 @@ the modern defaults 10 of 27 pass, 2 fail as expected, 15 fail.
   FlightSize. RFC 5681 equation (4) applies to the timeout too. No test shows a difference yet.
 - `TcpSimsignals.h` declares `rtoSignal`, `rttSignal` and `rttvarSignal` two times each.
 - The TCP table of `WHATSNEW` does not list all changed defaults (`initialRto` 3 s → 1 s,
-  `maxRexmitTimeout` 240 s → 120 s, TLP, RACK and others).
+  `maxRexmitTimeout` 240 s → 120 s, TLP, RACK and others), nor the Linux options of 2a, 2b and
+  2d (`rtoVarianceFloor`, `initialWindow = "rfc6928"`, `softIcmpErrorsAbortSetup`,
+  `retainSackAfterRto`).
 - Two tests share the base name `Fragmentation.test` (`element/`, `ipv4/`), which matters for
   runners that extract a test into `work/<base name>`.
 
-**Still open from this step:** the force-push of the branch, after the owner's confirmation; and
-the serializer adaptation, deferred by decision 4. `topic/tcp-packetdrill-tests` is rebased onto
-this branch locally (2026-09-29, 306 wrappers, the same results as before the rebase); it follows
-the branch again before the push.
+**2d. The packetdrill divergences — done 2026-09-29.** After the cleanup of the packetdrill suite
+(inet-gpl master `93276f5`), the owner asked for the reasons of the unexpected TCP failures: the
+six packetdrill divergences, four scripts of which two are in both script sets. They were three
+defects of the series. An experiment confirmed each one: with one repair at a time, each repair
+fixed exactly its own scripts. The owner decided the form of the third:
+
+| Commit | Defect | Caused by | Scripts |
+| --- | --- | --- | --- |
+| `3ed9158dd1` | fix: the classic flavours and Tahoe override `receivedAckForAlreadyAckedData()` without its window-update part, so a pure window update that reopens a zero window sent nothing | `9b8860d624` (labeled a refactor) | `slow-start-after-win-update`, `tcp-info-rwnd-limited`, both sets |
+| `e6992aa467` | fix: an RTO and the start of fast recovery did not end the loss probe episode (RFC 8985 section 7.1), so the ACK of the RTO retransmission cut the window a second time | `a325074313` | `cubic-rto-ss-ca-cwnd-bump` |
+| `f5190638cc` | fix: F-RTO took a SACK block from before the RTO for proof of a spurious timeout, because the RTO clears the scoreboard; a region now records `everSacked` | `a2167f2416` | `fr-4pkt-fack-last-byte` |
+| `cfba7be2d4` | add: `retainSackAfterRto`, the Linux scoreboard across an RTO (owner's decision: both forms, the RFC form by default) | — | inet-gpl `d79c008` sets it |
+
+inet-gpl `42a5684` updates the scoreboard of `tests/packetdrill/tcp/README.md`.
+
+Results at `cfba7be2d4`: packetdrill 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE and no
+divergence, which is the July 2026 result; module `tcp_` 79 of 79; protocol `tcp/` 25 PASS and 2
+FAIL (expected); protocol `self/` 21 PASS.
+
+**Still open from this step:** the serializer adaptation, deferred by decision 4.
+`topic/tcp-packetdrill-tests` follows this branch again.
 
 ### Step 3 — The release note (F-2) — done 2026-09-14
 
