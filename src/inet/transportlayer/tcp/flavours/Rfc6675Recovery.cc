@@ -185,6 +185,11 @@ void Rfc6675Recovery::step4()
     // (4) Invoke fast retransmit and enter loss recovery as follows:
     //"
     state->lossRecovery = true;
+    // RFC 8985 section 7.1: "Reset TLP.is_retrans and TLP.end_seq when initiating a
+    // connection, fast recovery, or RTO recovery." An earlier probe is not the repair of
+    // this loss (Linux tcp_init_cwnd_reduction() and tcp_enter_loss()).
+    state->tlpHighSeq = 0;
+    state->tlpRetrans = false;
 
     //"
     // (4.1) RecoveryPoint = HighData
