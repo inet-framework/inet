@@ -166,8 +166,10 @@ import inet.transportlayer.contract.ITcp;
 //    mitigations, and the global challenge-ACK rate limit, are not implemented.
 //
 //  - RFC 5461 - TCP's Reaction to Soft Errors
-//    A soft ICMP error never aborts an established connection; hard errors abort
-//    a connection that is still being set up.
+//    A soft ICMP error never aborts a connection (RFC 9293 MUST-56); hard errors
+//    abort a connection that is still being set up. `softIcmpErrorsAbortSetup`
+//    selects the widespread behavior that RFC 5461 section 4 describes and Linux
+//    has: an IPv4 net or host unreachable then aborts a connection in setup too.
 //
 //  - RFC 5927 - ICMP Attacks against TCP
 //    The sequence number quoted inside an ICMP error is validated against the
@@ -523,6 +525,7 @@ simple Tcp extends SimpleModule like ITcp
         double maxRexmitTimeout @unit(s) = default(120s); // maximum retransmission timeout
         double minPersistTimeout @unit(s) = default(5s); // minimum persist timeout
         double minRexmitTimeout @unit(s) = default(1s); // minimum retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)
+        bool softIcmpErrorsAbortSetup = default(false); // false: a soft ICMP error (IPv4 Destination Unreachable codes 0, 1 and 5) never aborts a connection, also not during setup (RFC 9293 MUST-56); true: an IPv4 net or host unreachable aborts a connection in SYN_SENT or SYN_RCVD, as Linux tcp_v4_err() does (RFC 5461 section 4)
         bool rtoVarianceFloor = default(false); // false: RTO = SRTT + 4*RTTVAR, rounded up to minRexmitTimeout (RFC 6298 sections 2.3 and 2.4); true: RTO = SRTT + max(4*RTTVAR, minRexmitTimeout), Linux tcp_set_rto
         bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
         // parameters of: tcp: retransmission, persist and handshake timing
