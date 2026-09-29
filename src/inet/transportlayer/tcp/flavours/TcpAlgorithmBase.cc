@@ -317,7 +317,8 @@ void TcpAlgorithmBase::processPtoTimer(TcpEventCode& event)
     // recovery can be entered by the RACK reordering timer WITHOUT restarting the RTO
     // (a pure-SACK recovery advances no cumulative ACK), leaving a stale PTO armed; it
     // must not fire a redundant last-segment probe once RACK/PRR own recovery.
-    if (!state->tlpEnabled || state->tlpHighSeq != 0 || state->lossRecovery)
+    if (!state->tlpEnabled || state->tlpHighSeq != 0 || state->lossRecovery
+            || state->snd_una == state->snd_max)
         return;
     if (conn->sendTlpProbe()) {
         state->tlpHighSeq = state->snd_max; // probe outstanding until this is acked
@@ -901,6 +902,10 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         }
         else
             EV_INFO << "There were no outstanding segments, nothing new in this ACK.\n";
+        // Nothing is outstanding, so there is nothing to probe: the loss probe shares
+        // the one timer of RFC 8985 section 8 with the RTO, and goes with it.
+        if (tlpTimer->isScheduled())
+            cancelEvent(tlpTimer);
     }
     else {
         EV_INFO << "ACK acks some but not all outstanding segments ("
