@@ -189,7 +189,6 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     nodeConstants.maxUnicastSolicit = IPv6_MAX_UNICAST_SOLICIT;
     nodeConstants.maxAnycastDelayTime = IPv6_MAX_ANYCAST_DELAY_TIME;
     nodeConstants.maxNeighbourAdvertisement = IPv6_MAX_NEIGHBOUR_ADVERTISEMENT;
-    nodeConstants.reachableTime = IPv6_REACHABLE_TIME;
     nodeConstants.delayFirstProbeTime = IPv6_DELAY_FIRST_PROBE_TIME;
     nodeConstants.minRandomFactor = IPv6_MIN_RANDOM_FACTOR;
     nodeConstants.maxRandomFactor = IPv6_MAX_RANDOM_FACTOR;
@@ -521,7 +520,7 @@ void Ipv6InterfaceData::removeAdvPrefix(int i)
 }
 
 simtime_t Ipv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
-        double MAX_RANDOM_FACTOR, uint baseReachableTime)
+        double MAX_RANDOM_FACTOR, simtime_t baseReachableTime)
 {
     return RNGCONTEXT uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
@@ -529,6 +528,14 @@ simtime_t Ipv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
 simtime_t Ipv6InterfaceData::generateReachableTime()
 {
     return RNGCONTEXT uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
+}
+
+void Ipv6InterfaceData::setBaseReachableTime(simtime_t d)
+{
+    if (d == hostVars.baseReachableTime)
+        return;
+    hostVars.baseReachableTime = d;
+    hostVars.reachableTime = generateReachableTime();
 }
 
 bool Ipv6InterfaceData::isMemberOfMulticastGroup(const Ipv6Address& multicastAddress) const

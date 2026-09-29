@@ -1,0 +1,94 @@
+%description:
+Tests that the Reachable Time field of a received Router Advertisement (RA) and
+the Ipv6NeighbourDiscovery baseReachableTime parameter set how long a Neighbour
+Cache entry stays REACHABLE (RFC 4861 Sections 6.3.2, 6.3.4 and 7.3.3).
+
+Both hosts send a datagram to srv at 6 s and at 15 s. The entry of the router
+in each host's Neighbour Cache becomes REACHABLE at about 11 s, when
+Neighbour Unreachability Detection (NUD) for the first datagram is answered.
+ReachableTime is a random value between 0.5 and 1.5 times BaseReachableTime,
+so with a BaseReachableTime of 1 s the entry is STALE again by 12.5 s, and the
+datagram at 15 s must start NUD again.
+
+The router advertises a Reachable Time of 1 s on the link of host. On the link
+of otherHost it advertises 0 (unspecified), so otherHost keeps its own
+baseReachableTime = 1s.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network NdReachableTimeNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+        otherHost: StandardHost6;
+        srv: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+        otherHost.ethg++ <--> ethline <--> router.ethg++;
+        srv.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = NdReachableTimeNetwork
+sim-time-limit = 25s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t] %C: "
+
+**.router.ipv6.neighbourDiscovery.advReachableTime = 1s
+**.router.routes = xml("<routingTable><local node='router'><interface name='eth1' AdvSendAdvertisements='on' AdvReachableTime='0'/></local></routingTable>")
+**.otherHost.ipv6.neighbourDiscovery.baseReachableTime = 1s
+
+**.host.numApps = 1
+**.host.app[0].typename = "UdpBasicApp"
+**.host.app[0].destAddresses = "srv"
+**.host.app[0].destPort = 1000
+**.host.app[0].messageLength = 64B
+**.host.app[0].startTime = 6s
+**.host.app[0].stopTime = 16s
+**.host.app[0].sendInterval = 9s
+
+**.otherHost.numApps = 1
+**.otherHost.app[0].typename = "UdpBasicApp"
+**.otherHost.app[0].destAddresses = "srv"
+**.otherHost.app[0].destPort = 1000
+**.otherHost.app[0].messageLength = 64B
+**.otherHost.app[0].startTime = 6s
+**.otherHost.app[0].stopTime = 16s
+**.otherHost.app[0].sendInterval = 9s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[15] (Ipv6NeighbourDiscovery)NdReachableTimeNetwork.host.ipv6.neighbourDiscovery: Initiating Neighbour Unreachability Detection
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[15] (Ipv6NeighbourDiscovery)NdReachableTimeNetwork.otherHost.ipv6.neighbourDiscovery: Initiating Neighbour Unreachability Detection
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
