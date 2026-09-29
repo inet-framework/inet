@@ -547,7 +547,7 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // 500ms ticks is available from old tcpmodule.cc:calcRetransTimer().
     //
 
-    // RTT estimator per RFC 6298 (Jacobson/Karn), with Linux's variance-floor RTO.
+    // RTT estimator per RFC 6298 (Jacobson/Karn); rtoVarianceFloor selects Linux's RTO.
     // update smoothed RTT estimate (srtt) and variance (rttvar)
     const double g = 0.125; // 1 / 8; (1 - alpha) where alpha == 7 / 8;
     simtime_t newRTT = tAcked - tSent;
