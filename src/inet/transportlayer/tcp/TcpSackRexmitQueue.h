@@ -26,6 +26,7 @@ class INET_API TcpSackRexmitQueue
         uint32_t endSeqNum;
         bool lost; // indicates whether region has been lost
         bool sacked; // indicates whether region has already been sacked by data receiver
+        bool everSacked = false; // SACKed at some time since it was sent; the RTO's reset of 'sacked' (RFC 2018 section 8) keeps it, as Linux keeps TCPCB_SACKED_ACKED
         bool rexmitted; // indicates whether region has already been retransmitted by data sender
         simtime_t firstSentTime = 0; // time this region was first transmitted (RACK/Vegas: original send time)
         simtime_t lastSentTime = 0; // time this region was most recently (re)transmitted (RACK: xmit time)
