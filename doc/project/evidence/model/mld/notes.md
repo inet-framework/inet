@@ -13,8 +13,11 @@ The tooling quirks that apply to every protocol are in
 on 2026-09-24, and most of what it learned about the scenarios, the model shape and the tooling is
 in [`igmp/notes.md`](../igmp/notes.md): the ini order, the link stimulus, the channel disabled at
 initialization, one Report per query sequence, the requests module, the margins and the windows.
-All of it holds for MLD as well. What follows is what MLD added. The gaps themselves are in
-[`results.md`](results.md#the-model-gaps).
+All of it holds for MLD as well. What follows is what MLD added, at level 2 and in the repairs of
+the seventeen gaps on 2026-09-25 to 2026-09-28, on `topic/standards-tests-igmp-mld-level2-fixes`.
+The gaps themselves are in [`results.md`](results.md#the-model-gaps). A section with a **Fixed
+on** paragraph describes the model before the repair, and its line numbers are those of the level
+2 commit.
 
 ## Model quirks
 
@@ -25,7 +28,21 @@ gaps have a twin in `Mldv2`, at the same place of the same function. The one tha
 precedence of the Reports, has no MLD rule. A repair of an IGMP gap is half of a repair: do the
 twin in `Mldv2.cc` in the same change, and run both suites.
 
+The repairs kept the two modules parallel: each IGMP repair has an `Mldv2` commit after it, with
+the same names (`setQuerierFields`, `cancelHostTimers`, `sendSourceSpecificQueries`). Two
+differences stay. The TO_EX loop of `Mldv2` in EXCLUDE mode was right where the `Igmpv3` loop was
+wrong. And RFC 9777 has no rule that lowers the version of a router on an older Query, so the
+MLDv1 mode of a router comes from its parameter `routerVersion` only, where the IGMPv2 mode of
+`Igmpv3` also comes from an IGMPv2 Query.
+
 ### The MLDv1 module stops the run on an MLDv2 Query
+
+**Fixed on** 2026-09-25 (gap 16): `Mldv1::processQuery` reads the Query as an `MldMessage`, the
+base of both Query classes, and an MLDv2 Query is an MLDv1 Query to it. An earlier commit made
+`Mldv1` ignore an MLDv2 Report, which stopped it with "Cannot convert chunk from type
+inet::Mldv2Report to type inet::MldMessage" once the hosts reported their solicited-node groups
+(gap 5) before the first MLDv1 Query. The throw on another unknown type stays. What follows
+describes the model before the repair.
 
 `Mldv1::processQuery` reads every Query as an MLDv1 Query of 24 octets
 ([Mldv1.cc:351](../../../../../src/inet/networklayer/icmpv6/Mldv1.cc#L351)), and the chunk of an
@@ -50,6 +67,14 @@ code. Do not plan a check around the comment.
 
 ### An MLD message leaves from the global address
 
+**Fixed on** 2026-09-25 (gap 2): `Mldv1` and `Mldv2` give the link-local address as the source,
+when Duplicate Address Detection has tested it. Before that, a node has no such address, so the
+querier of an interface starts when it has one, up to about 2.3 s after the start, and a Report or
+a Done waits in the module. RFC 3810 §5.2.13 would send it from the unspecified address, but the
+IPv6 layer of the model replaces an unspecified source with its preferred address. The modules
+learn the moment from `interfaceIpv6ConfigChanged`, which `Ipv6InterfaceData` now emits when an
+address becomes tentative or valid. What follows describes the model before the repair.
+
 `Mldv2::sendToIPv6` gives the IPv6 layer no source address
 ([Mldv2.cc:1420-1430](../../../../../src/inet/networklayer/icmpv6/Mldv2.cc#L1420)), and IPv6 then
 takes the global address of the interface, also for a message to ff02::16 (gap 2). The MLDv1
@@ -59,12 +84,28 @@ addresses do; a mockup where they do not would show a second effect of the gap.
 
 ### There is no Router Alert option for IPv6 in the model
 
+**Fixed on** 2026-09-25 (gap 3): `Ipv6RouterAlertOption` is option type 5, and
+`createIpv6RouterAlertHeader()` gives the Hop-by-Hop Options header of 8 octets that both MLD
+modules ask for. The repair found two defects on its way. `Ipv6::encapsulate` set the Payload
+Length before it inserted the requested extension headers, so the receiver cut off the end of
+the message; a commit of its own corrected it. And a multicast router delivered every ICMPv6
+multicast datagram locally: with the new header, the next header of an MLD message is 0, so the
+router now delivers a multicast datagram locally when it carries the option. What follows
+describes the model before the repair.
+
 The option types of
 [Ipv6ExtensionHeaders.msg](../../../../../src/inet/networklayer/ipv6/Ipv6ExtensionHeaders.msg)
 hold no type 5 of RFC 2711, and no MLD message carries a Hop-by-Hop Options header (gap 3). No
 comment names it. A repair needs the option first, then the header on each MLD message.
 
 ### The ICMPv6 checksum has no pseudo-header, in every ICMPv6 message
+
+**Fixed on** 2026-09-25 (gap 4): the `Ipv6` module computes the checksum in its post-routing hook
+with the new `Icmpv6::insertComputedChecksum()`, because only there is the final source address
+known. The pseudo-header holds the final destination of a Routing header and the home address of
+a Home Address option; an error about a local datagram gets its checksum in `sendErrorMessage`.
+The 23 fingerprints of the IPv6 examples moved in ~tND, and a debug run of each with the same
+modes showed no drop for a checksum. What follows describes the model before the repair.
 
 `Icmpv6::insertChecksum` sums the serialized message alone, and `Icmpv6::verifyChecksum` checks
 the same sum ([Icmpv6.cc:452-475](../../../../../src/inet/networklayer/icmpv6/Icmpv6.cc#L452)).
@@ -75,6 +116,12 @@ every message of the runs, and the sum with the pseudo-header in none (gap 4). A
 every ICMPv6 message, Neighbor Discovery too, and changes no verdict between two model nodes.
 
 ### A node never reports its solicited-node addresses
+
+**Fixed on** 2026-09-25 (gap 5), with the change of the ND repair branch applied again:
+`Ipv6InterfaceData::assignAddress` joins the solicited-node group of a unicast address, and
+`removeAddress` leaves it. Because a Report waits for the link-local address (gap 2), the Reports
+for these groups leave at about 2 s, after Duplicate Address Detection and not before it as RFC
+4862 §5.4.2 asks. What follows describes the model before the repair.
 
 A node accepts a packet to a solicited-node address by a match with its own addresses
 ([Ipv6InterfaceData.cc:375](../../../../../src/inet/networklayer/ipv6/Ipv6InterfaceData.cc#L375))
@@ -91,10 +138,17 @@ that names an older node.
 ### The routers report their own groups
 
 A router runs the listener part of MLDv2 too, as RFC9777-RQ-4 asks, and reports ff02::2 and
-ff02::16 at the start, from its global address. A filter that looks for "the first Report" must
+ff02::16 at the start, and since the repair of gap 5 its solicited-node groups, from its
+link-local address since the repair of gap 2. A filter that looks for "the first Report" must
 name the address or the sender, or it takes the Report of the router.
 
 ### The two MLDv2 default intervals of RFC 3810, and a third one
+
+**Fixed on** 2026-09-25 (gaps 6 and 7): both defaults of `Mldv2.ned` follow RFC 9777, and the
+Older Version Querier Present Timer runs for the interval of §9.12. The Older Version Host Present
+Timer of a router ran with `groupMembershipInterval`; it has its own parameter now,
+`olderVersionHostPresentInterval`, which keeps 260 s. No test measures it (RFC9777-TIMER-19 is
+owed). What follows describes the model before the repair.
 
 `Mldv2.ned` has the RFC 3810 value of the Multicast Address Listening Interval, 260 s (line 76),
 and the RFC 2710 value of the Unsolicited Report Interval, 10 s (line 82), as `Igmpv3.ned` has. The
@@ -128,8 +182,19 @@ of the enum `MldGroupRecordType`; the checks use those names.
 - The route of R comes from `MulticastLeafRoute6` of
   [MldChecks.h](../../../../../tests/protocol/mld/MldChecks.h), on `.ipv6.routingTable`, with the
   unspecified group, which matches every group.
+- Since the repair of gap 2, a router sends its first Query when it has a tested link-local
+  address, up to about 2.3 s after the start. The checks wait 3 s for it. The MLDv1 router of the
+  compatibility checks has no boot delay and `DupAddrDetectTransmits = 0`, which RFC 4862 §5.1
+  allows, so its Queries come at the times that the checks compute from 0.
+- Since the repair of gap 5, every node reports its solicited-node groups at about 2 s, and in
+  MLDv1 mode it answers the Queries for them too. A step that takes "a Report of A" must name the
+  group, or it takes one of these. Four tests needed that correction, each in a `tests:` commit
+  of its own.
 
 ### The older host cannot be the MLDv1 module
+
+**Fixed on** 2026-09-25 (gap 16): the MLDv1 module is the older host of `Rfc9777RouterV1Listener`
+and `Rfc9777BlockInV1Mode`, and both pass. What follows describes the model before the repair.
 
 Because `Mldv1` stops on the first MLDv2 Query of R, the two checks with an older host stop at the
 start. The tests keep the faithful mockup and fail on gap 16; there is no other MLDv1 host in the
@@ -137,6 +202,10 @@ model. An MLDv2 host in MLDv1 mode would need an MLDv1 General Query on the link
 router that sends one also stops on the Queries of R.
 
 ### A configuration option that the model does not have
+
+**Fixed on** 2026-09-28 (gap 17): the parameter `routerVersion` of `Mldv2`, 2 by default, puts a
+router into MLDv1 mode, and `Rfc9777QuerierConfiguredV1` sets it to 1 and passes. What follows
+describes the model before the repair.
 
 The check of the querier with an MLDv1 router configures R1 into MLDv1 mode, as RFC 9777 §8.3.1
 asks of an administrator. `Mldv2` has no such parameter, so the test runs R1 with its defaults and
@@ -170,21 +239,20 @@ decided gap 4. Never commit it.
 
 ## Follow-ups, in the order I would do them
 
-1. **Make `Mldv1` read an MLDv2 Query as an MLDv1 Query** (gap 16): the first 24 octets are the
-   MLDv1 Query. Then run `Rfc9777RouterV1Listener`, `Rfc9777BlockInV1Mode` and
-   `Rfc9777QuerierConfiguredV1` again; the router half of the MLDv1 interoperation has no verdict
-   until then.
-2. **The IPv6 gaps of every MLD message**: a link-local source in `sendToIPv6` (gap 2), the Router
-   Alert option and its header (gap 3), the pseudo-header of the ICMPv6 checksum (gap 4, a change
-   for every ICMPv6 message), and the solicited-node groups in the interface data (gap 5, with ND
-   gap 9).
-3. **The twins of the IGMP gaps**, in the same change as each IGMP repair: see the follow-ups of
-   [`igmp/notes.md`](../igmp/notes.md#follow-ups-in-the-order-i-would-do-them). The MLD numbers are
-   gaps 1, 6 to 15.
-4. **The MLDv1 querier mode of an MLDv2 router, with its configuration option** (gap 17), the one
-   missing feature; its test declares the failure expected, and the declaration goes with the
-   implementation.
-5. **Correct the documentation of `Mldv2.ned`**: remove the stale "parity gaps", and name RFC 9777
+The seventeen gaps are repaired, on `topic/standards-tests-igmp-mld-level2-fixes`; the follow-ups
+that repaired them are gone from this list.
+
+1. **Merge the solicited-node change once.** The ND repair branch and this branch carry the same
+   change of `Ipv6InterfaceData`, in two commits; the second merge must take one of them.
+2. **Send the Reports before Duplicate Address Detection**, from the unspecified address, as RFC
+   3810 §5.2.13 and RFC 4862 §5.4.2 ask. The IPv6 layer of the model replaces an unspecified
+   source now; a repair needs a way to keep it.
+3. **Make `Mldv1` ignore every message type that it does not know**, as `Mldv2` does
+   ([Mldv1.cc:378](../../../../../src/inet/networklayer/icmpv6/Mldv1.cc#L378)).
+4. **Correct the documentation of `Mldv2.ned`**: remove the stale "parity gaps", and name RFC 9777
    in place of RFC 3810.
-6. **Level 3 and the 58 owed checks**: see
-   [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes).
+5. **Level 2 and the 58 owed checks**: see
+   [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes). Three of them
+   measure what the repairs changed without a test: the Older Version Host Present Interval
+   (RFC9777-TIMER-19, COMPR-17) and the BLOCK record in EXCLUDE mode (RFC9777-RREP-25).
+6. **Level 3**: the receiver rules of MLD-F-MESSAGE-VALIDATION need crafted messages.

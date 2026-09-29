@@ -163,19 +163,24 @@ RFC9776-GEN-10, QRY-6, QRY-23, QRY-30, REP-3, REP-5, REP-15, REP-16, REP-30, REP
 VER-4, HOST-5 and RFC2236-HOST-7, HOST-8, HOST-11, HOST-14, ROUTER-20, ROUTER-23; an IGMPv2
 Group-Specific Query that reaches a host in IGMPv3 mode (RFC9776-COMPH-11); a Report of IGMPv3 in
 an order that normal members do not produce, a TO_IN record at a router in INCLUDE mode
-(RFC9776-RREP-23).
+(RFC9776-RREP-23); a Leave Group message at a router in IGMPv1 mode, which no host in IGMPv1 mode
+sends (RFC9776-COMPR-4).
 
 **A version 1 system**, level 5 by the standards map: a host or a router of RFC 1112 and every
-rule that only an IGMPv1 message reaches — RFC9776-GEN-7, VER-1, COMPH-5, COMPH-8, COMPH-14,
-COMPH-18 to COMPH-20, COMPR-3 to COMPR-5, COMPR-16, COMPR-19, COMPR-24, COMPR-31 to COMPR-33, and
-RFC2236-HOST-16, HOST-33 to HOST-40, ROUTER-17, ROUTER-21, ROUTER-26, ROUTER-31, ROUTER-36,
-ROUTER-40, ROUTER-42, ROUTER-45 to ROUTER-47.
+rule that only an IGMPv1 message reaches — RFC9776-GEN-7, VER-1, COMPH-5, COMPH-8, COMPH-20,
+COMPR-16, COMPR-19, COMPR-24, COMPR-31 to COMPR-33, and RFC2236-HOST-16, HOST-33 to HOST-40,
+ROUTER-17, ROUTER-21, ROUTER-26, ROUTER-31, ROUTER-36, ROUTER-40, ROUTER-42, ROUTER-45 to
+ROUTER-47. An IGMPv3 router configured in IGMPv1 mode (RFC9776-COMPR-2) sends the
+IGMPv1 Query on the ordinary link, so the check
+[Querier configured in IGMPv1 mode](checks/compatibility.md#querier-configured-in-igmpv1-mode)
+reads RFC9776-COMPR-3, COMPH-14, COMPH-18 and COMPH-19 without a version 1 system.
 
 **SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9776-REP-21, REP-25, RREP-1 to
 RREP-4, COMPH-23 to COMPH-25, COMPH-27, COMPR-11, COMPR-12.
 
 **State inside a node**, the toolset of level 4: a variable that no message shows
-(RFC9776-HOST-2, RQ-3, RQ-4) and a warning or a log entry (RFC9776-COMPR-7, COMPR-9, COMPR-10).
+(RFC9776-HOST-2, RQ-3, RQ-4) and a warning or a log entry (RFC9776-COMPR-5, COMPR-7, COMPR-9,
+COMPR-10).
 
 **A permission that no observation can fail**: a router may forward excluded sources onto a
 transit network (RFC9776-FWD-2); a host may let an older Report suppress its own record

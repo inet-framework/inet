@@ -9,9 +9,9 @@ with the feature support of the ledger, feature by feature.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `ddea7a391b`, tree clean
+- Trees: src `e76d92f3af`, tests/protocol `36c0e0673d`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -20,8 +20,8 @@ Run record of the ledger state that part 2 comes from:
 
 Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0
 branch. The MLD code is the same in `5c4f41c600`: the two trees differ only in seven files of
-IEEE 802.11, and the tree of the run, `8b4f86968e`, differs from it in one line of
-`src/inet/common/InitStages.cc`. The line numbers of part 1 therefore hold for all three.
+IEEE 802.11. The line numbers of part 1 therefore hold for both.
+The repairs of this branch change the MLD code, so part 1 describes the code before them.
 
 ## Part 1 — the claims
 
@@ -123,61 +123,61 @@ A feature is `claimed` when the claims of part 1 cover its governing source docu
 model claims RFC 3810 for MLDv2, and RFC 9777 is the same protocol raised to Internet Standard,
 with the changes of the [override table](../../protocol/mld/standards.md#override-table); the
 claim of RFC 3810 therefore covers every feature that RFC 3810 already had, and the changed
-interval is a gap of its own, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents). The model claims RFC 2710 as a whole, so the two version 1
+interval was a gap of its own, which the repairs closed, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents). The model claims RFC 2710 as a whole, so the two version 1
 features are claimed. One feature is not claimed: MLD-F-SSM-AWARE comes from the SSM text of RFC
 4604, and the model names RFC 4604 nowhere. The support comes from
 [`coverage.md`](coverage.md#feature-support).
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
-| [MLD-F-MESSAGE-FORMAT](../../protocol/mld/features.md#mld-f-message-format) | mandatory | yes | partial | `partial` — RFC9777-GEN-2: a global source, [gap 2](results.md#gap-2-defect--an-mld-message-leaves-from-a-global-address); GEN-4: no Router Alert, [gap 3](results.md#gap-3-defect--an-mld-message-carries-no-router-alert-option); QRY-4, REP-4: no pseudo-header in the checksum, [gap 4](results.md#gap-4-defect--the-icmpv6-checksum-has-no-pseudo-header) |
-| [MLD-F-QUERY-FORMAT](../../protocol/mld/features.md#mld-f-query-format) | mandatory | yes | partial | `partial` — RFC9777-QRY-13, QRY-15: no QRV and no QQIC, [gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic); QRY-26, RQRY-10: a global source, [gap 2](results.md#gap-2-defect--an-mld-message-leaves-from-a-global-address) |
-| [MLD-F-REPORT-FORMAT](../../protocol/mld/features.md#mld-f-report-format) | mandatory | yes | partial | `partial` — RFC9777-REP-34: a global source, [gap 2](results.md#gap-2-defect--an-mld-message-leaves-from-a-global-address); REP-22: an empty MODE_IS_INCLUDE record, [gap 11](results.md#gap-11-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
-| [MLD-F-MESSAGE-VALIDATION](../../protocol/mld/features.md#mld-f-message-validation) | mandatory | yes | not supported | `defect` — RFC2710-NODE-2: the MLDv1 node stops the simulation on an MLDv2 Query, [gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query); the other statements are level 3 |
-| [MLD-F-STATE-CHANGE-REPORT](../../protocol/mld/features.md#mld-f-state-change-report) | mandatory | yes | partial | `partial` — RFC9777-LSN-3: no Report for the solicited-node addresses, [gap 5](results.md#gap-5-defect--a-node-does-not-report-its-solicited-node-addresses) |
-| [MLD-F-REPORT-RETRANSMISSION](../../protocol/mld/features.md#mld-f-report-retransmission) | mandatory | yes | partial | `partial` — RFC9777-LSN-13: the default interval is 10 s, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents); LSN-16, LSN-24: no merge of the pending records, [gap 8](results.md#gap-8-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
-| [MLD-F-QUERY-RESPONSE](../../protocol/mld/features.md#mld-f-query-response) | mandatory | yes | partial | `partial` — RFC9777-LTIM-1, LTIM-10: records that the standard leaves out, [gap 11](results.md#gap-11-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out); LQRY-5 is owed |
+| [MLD-F-MESSAGE-FORMAT](../../protocol/mld/features.md#mld-f-message-format) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-QUERY-FORMAT](../../protocol/mld/features.md#mld-f-query-format) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-REPORT-FORMAT](../../protocol/mld/features.md#mld-f-report-format) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-MESSAGE-VALIDATION](../../protocol/mld/features.md#mld-f-message-validation) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-GEN-8, QRY-6, QRY-20, QRY-21, QRY-27, QRY-30, REP-6, REP-16, REP-17, REP-18, REP-33, REP-35, REP-42, VER-2, LQRY-1, RREP-1, RQRY-1, RFC2710-NODE-6, ROUTER-2, ROUTER-13, ROUTER-14, ROUTER-16 are later |
+| [MLD-F-STATE-CHANGE-REPORT](../../protocol/mld/features.md#mld-f-state-change-report) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-REPORT-RETRANSMISSION](../../protocol/mld/features.md#mld-f-report-retransmission) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-LSN-20, LSN-21 are owed |
+| [MLD-F-QUERY-RESPONSE](../../protocol/mld/features.md#mld-f-query-response) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-LQRY-5, LTIM-9 are owed |
 | [MLD-F-GENERAL-QUERY](../../protocol/mld/features.md#mld-f-general-query) | mandatory | yes | supported | `confirmed` |
 | [MLD-F-QUERIER-ELECTION](../../protocol/mld/features.md#mld-f-querier-election) | mandatory | yes | supported | `confirmed` |
-| [MLD-F-LISTENING-STATE](../../protocol/mld/features.md#mld-f-listening-state) | mandatory | yes | partial | `partial` — RFC9777-RREP-19, TIMER-7: the interval of RFC 3810, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents); RST-25: the Source Timers are not lowered, [gap 14](results.md#gap-14-defect--a-multicast-address-and-source-specific-query-does-not-lower-the-source-timers) |
-| [MLD-F-FORWARDING](../../protocol/mld/features.md#mld-f-forwarding) | mandatory | yes | partial | `partial` — RFC9777-FWD-5, RST-7: every source of an address is forwarded, [gap 15](results.md#gap-15-defect--the-forwarding-asks-for-a-listener-of-the-address-not-of-the-source); FWD-4: [gap 14](results.md#gap-14-defect--a-multicast-address-and-source-specific-query-does-not-lower-the-source-timers); FWD-6, FWD-7 are owed |
-| [MLD-F-STATE-CHANGE-PROCESSING](../../protocol/mld/features.md#mld-f-state-change-processing) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-RREP-24 to RREP-26 are owed, RREP-23 is level 3 |
-| [MLD-F-SPECIFIC-QUERIES](../../protocol/mld/features.md#mld-f-specific-queries) | mandatory | yes | partial | `partial` — RFC9777-RQRY-14: the S flag, [gap 12](results.md#gap-12-defect--the-s-flag-of-a-multicast-address-specific-query-comes-from-the-timer-before-it-is-lowered); RQRY-16: a Report cancels the retransmissions, [gap 13](results.md#gap-13-defect--a-report-cancels-the-retransmissions-of-the-queries); RQRY-15: [gap 14](results.md#gap-14-defect--a-multicast-address-and-source-specific-query-does-not-lower-the-source-timers) |
-| [MLD-F-QUERY-TIMER-UPDATES](../../protocol/mld/features.md#mld-f-query-timer-updates) | mandatory | yes | partial | `partial` — RFC9777-RQRY-2, RQRY-3, RREP-6: the Source Timers are not lowered, [gap 14](results.md#gap-14-defect--a-multicast-address-and-source-specific-query-does-not-lower-the-source-timers) |
-| [MLD-F-LISTENER-COMPATIBILITY](../../protocol/mld/features.md#mld-f-listener-compatibility) | mandatory | yes | partial | `partial` — RFC9777-TIMER-17: the MLDv1 mode ends after 255 s, [gap 7](results.md#gap-7-defect--the-mldv1-mode-of-a-host-ends-after-the-other-querier-present-interval); COMPL-11: the pending retransmissions stay, [gap 10](results.md#gap-10-defect--the-mldv1-mode-keeps-the-pending-mldv2-retransmissions) |
-| [MLD-F-VERSION-1-LISTENER](../../protocol/mld/features.md#mld-f-version-1-listener) | mandatory | yes | partial | `partial` — RFC2710-NODE-13, NODE-14, NODE-20 to NODE-22: no report timer and no repetition, [gap 9](results.md#gap-9-defect--the-mldv1-mode-of-a-host-answers-at-once-and-sends-one-report) |
-| [MLD-F-ROUTER-COMPATIBILITY](../../protocol/mld/features.md#mld-f-router-compatibility) | mandatory | yes | not supported | `defect` by the table; RFC9777-COMPR-1, COMPR-5: no MLDv1 mode, [gap 17](results.md#gap-17-missing-feature--no-mldv1-mode-in-an-mldv2-router), declared; the other core statements are not reached, [gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query) |
-| [MLD-F-VERSION-1-ROUTER](../../protocol/mld/features.md#mld-f-version-1-router) | mandatory | yes | partial | `partial` — no core check fails; RFC2710-ROUTER-27, ROUTER-30, ROUTER-32, ROUTER-34 to ROUTER-39 are owed |
+| [MLD-F-LISTENING-STATE](../../protocol/mld/features.md#mld-f-listening-state) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-RREP-18, RSW-2 are owed |
+| [MLD-F-FORWARDING](../../protocol/mld/features.md#mld-f-forwarding) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-FWD-6, FWD-7 are owed |
+| [MLD-F-STATE-CHANGE-PROCESSING](../../protocol/mld/features.md#mld-f-state-change-processing) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-RREP-24, RREP-25, RREP-26 are owed; RFC9777-RREP-23 is later |
+| [MLD-F-SPECIFIC-QUERIES](../../protocol/mld/features.md#mld-f-specific-queries) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-QUERY-TIMER-UPDATES](../../protocol/mld/features.md#mld-f-query-timer-updates) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-RQRY-5, QRY-12 are owed |
+| [MLD-F-LISTENER-COMPATIBILITY](../../protocol/mld/features.md#mld-f-listener-compatibility) | mandatory | yes | supported | `confirmed` |
+| [MLD-F-VERSION-1-LISTENER](../../protocol/mld/features.md#mld-f-version-1-listener) | mandatory | yes | partial | `partial` — no core check fails; RFC2710-NODE-18, NODE-23 are owed |
+| [MLD-F-ROUTER-COMPATIBILITY](../../protocol/mld/features.md#mld-f-router-compatibility) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-COMPR-17, TIMER-19 are owed |
+| [MLD-F-VERSION-1-ROUTER](../../protocol/mld/features.md#mld-f-version-1-router) | mandatory | yes | partial | `partial` — no core check fails; RFC2710-ROUTER-27, ROUTER-30, ROUTER-32, ROUTER-34, ROUTER-35, ROUTER-36, ROUTER-37, ROUTER-38, ROUTER-39 are owed |
 | [MLD-F-SSM-AWARE](../../protocol/mld/features.md#mld-f-ssm-aware) | optional | no | untested | `out of claim` — level 5 |
-| [MLD-F-TIMER-CONFIGURATION](../../protocol/mld/features.md#mld-f-timer-configuration) | mandatory | yes | partial | `partial` — RFC9777-TIMER-3: a QRV of zero, [gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic); TIMER-1, RFC2710-TIMER-1 are owed |
+| [MLD-F-TIMER-CONFIGURATION](../../protocol/mld/features.md#mld-f-timer-configuration) | mandatory | yes | partial | `partial` — no core check fails; RFC9777-TIMER-1, RFC2710-TIMER-1 are owed; RFC2710-TIMER-4 is later |
 
-Two features are `confirmed`, fifteen `partial`, two `defect` and one `out of claim`.
+Eight features are `confirmed`, eleven `partial` and one `out of claim`. In the level 2 run, two
+were `confirmed`, fifteen `partial` and two `defect`.
 
 ### How to read the matrix
 
-- **The two `defect` verdicts are of different kinds.** MLD-F-MESSAGE-VALIDATION is a defect on
-  the normal path: its one core statement that level 2 reaches, RFC2710-NODE-2, fails because
-  the MLDv1 node cannot read an MLDv2 Query. MLD-F-ROUTER-COMPATIBILITY is `defect` by the table
-  only: its querier half is a missing feature, declared expected ([gap 17](results.md#gap-17-missing-feature--no-mldv1-mode-in-an-mldv2-router)), and its other half, the
-  router state for MLDv1 listeners, has code that no run reached, because [gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query) stops every run
-  with an MLDv1 host at the start. Read it as one missing feature and one statement set without
-  a verdict.
-- **The fifteen `partial` verdicts** fall into two groups. Thirteen hold a failing core check;
-  the IPv6-specific gaps 2 to 5 reach every MLD message, and MLD-F-MESSAGE-FORMAT is partial
-  through them alone. The other two, the state-change processing of the router and the
-  MLDv1 router, fail no core check and are partial only because some core statement is owed or
-  later.
+- **The two `defect` verdicts of the level 2 run are gone.** MLD-F-MESSAGE-VALIDATION failed
+  its one core statement on the normal path, RFC2710-NODE-2, because the MLDv1 node could not
+  read an MLDv2 Query ([gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query)).
+  MLD-F-ROUTER-COMPATIBILITY had its querier half missing ([gap 17](results.md#gap-17-missing-feature--no-mldv1-mode-in-an-mldv2-router))
+  and its other half unreached, because gap 16 stopped every run with an MLDv1 host. After the
+  repairs both are `partial`: every core statement that runs passes, and the others are owed or
+  need crafted messages.
+- **The eleven `partial` verdicts** fail no core check; each has a core statement that is owed
+  or needs a later level. In the level 2 run, thirteen partial features held a failing core
+  check, and the IPv6-specific gaps 2 to 5 reached every MLD message.
 - **The twins of IGMP**: every IGMP gap except gap 2, the precedence, for which MLD has no rule,
-  has a twin here, with the same code shape in `Mldv2`; the MLD module is a port of `Igmpv3`,
-  and the port carried the defects with it.
+  had a twin here, with the same code shape in `Mldv2`; the MLD module is a port of `Igmpv3`,
+  the port carried the defects with it, and the repairs are twins too.
 
 ## Headlines for the next pass
 
-1. **Gap 16 blocks the MLDv1 interoperation of the router.** A repair of `Mldv1::processQuery`
-   gives the older-host checks their verdicts, and makes MLD-F-ROUTER-COMPATIBILITY readable.
-2. **The IPv6-specific gaps 2 to 5 reach every MLD message**: a global source, no Router Alert,
-   a checksum without pseudo-header, and no Report for the solicited-node addresses. Between
-   nodes of the model they cancel out; a real node, or a level 3 check of the receiver rules,
-   drops every message.
+1. **The receiver rules are the next MLD checks.** Since the repairs of gaps 2 and 3, every MLD
+   message has the source, the Hop Limit and the Router Alert option that a receiver checks; the
+   checks of those rules need crafted messages, level 3, and MLD-F-MESSAGE-VALIDATION stays
+   partial until then.
+2. **The IPv6-specific gaps 2 to 5 are repaired**: a link-local source, the Router Alert option,
+   the checksum over the pseudo-header, and the Reports for the solicited-node addresses. The
+   repair of the checksum reaches every ICMPv6 message of the model.
 3. **The obsolete claim of level 1 stands**: `Mldv2.ned:12` names RFC 3810, and the stale
    "parity gaps" comment of the same file still says that three working mechanisms are missing.

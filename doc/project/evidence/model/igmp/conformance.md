@@ -11,9 +11,9 @@ the notes below say where the two diverge.
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `ddea7a391b`, tree clean
+- Trees: src `e76d92f3af`, tests/protocol `36c0e0673d`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
@@ -22,8 +22,8 @@ Run record of the ledger state that part 2 comes from:
 
 Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0
 branch. The IGMP code is the same in `5c4f41c600`: the two trees differ only in seven files of
-IEEE 802.11, and the tree of the run, `8b4f86968e`, differs from it in one line of
-`src/inet/common/InitStages.cc`. The line numbers of part 1 therefore hold for all three.
+IEEE 802.11. The line numbers of part 1 therefore hold for both.
+The repairs of this branch change the IGMP code, so part 1 describes the code before them.
 
 ## Part 1 — the claims
 
@@ -110,7 +110,7 @@ A feature is `claimed` when the claims of part 1 cover its governing source docu
 model claims RFC 3376 for IGMPv3, and RFC 9776 is the same protocol raised to Internet Standard,
 with the changes of the [override table](../../protocol/igmp/standards.md#override-table); the
 claim of RFC 3376 therefore covers every feature that RFC 3376 already had, and the two changed
-intervals are gaps of their own, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents)
+intervals were gaps of their own, which the repairs closed, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents)
 and [gap 4](results.md#gap-4-defect--the-igmpv2-mode-of-a-host-ends-after-the-other-querier-present-interval).
 The model claims RFC 2236 as a whole, so the two version 2 features are claimed. One feature is
 not claimed: IGMP-F-SSM-AWARE comes from the SSM text of RFC 4604, which RFC 9776 took over, and
@@ -119,40 +119,39 @@ the model names RFC 4604 nowhere. The support comes from [`coverage.md`](coverag
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
 | [IGMP-F-MESSAGE-FORMAT](../../protocol/igmp/features.md#igmp-f-message-format) | mandatory | yes | supported | `confirmed` |
-| [IGMP-F-QUERY-FORMAT](../../protocol/igmp/features.md#igmp-f-query-format) | mandatory | yes | partial | `partial` — RFC9776-QRY-12, QRY-15, QRY-16: the Queries carry no QRV and no QQIC, [gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic); QRY-4, QRY-13, QRY-17 are owed |
+| [IGMP-F-QUERY-FORMAT](../../protocol/igmp/features.md#igmp-f-query-format) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-QRY-4, QRY-13, QRY-17 are owed |
 | [IGMP-F-REPORT-FORMAT](../../protocol/igmp/features.md#igmp-f-report-format) | mandatory | yes | supported | `confirmed` |
 | [IGMP-F-MESSAGE-VALIDATION](../../protocol/igmp/features.md#igmp-f-message-validation) | mandatory | yes | untested | `unverified` — level 3 |
 | [IGMP-F-STATE-CHANGE-REPORT](../../protocol/igmp/features.md#igmp-f-state-change-report) | mandatory | yes | supported | `confirmed` |
-| [IGMP-F-REPORT-RETRANSMISSION](../../protocol/igmp/features.md#igmp-f-report-retransmission) | mandatory | yes | partial | `partial` — RFC9776-HOST-18: the default interval is 10 s, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents); HOST-16, HOST-25: no merge of the pending records, [gap 5](results.md#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
-| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | yes | partial | `partial` — RFC9776-HQRY-10, HQRY-17: a record for a group without reception state, and an empty record, [gap 8](results.md#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out); HQRY-16 is owed |
+| [IGMP-F-REPORT-RETRANSMISSION](../../protocol/igmp/features.md#igmp-f-report-retransmission) | mandatory | yes | supported | `confirmed` |
+| [IGMP-F-QUERY-RESPONSE](../../protocol/igmp/features.md#igmp-f-query-response) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-HQRY-16 is owed |
 | [IGMP-F-GENERAL-QUERY](../../protocol/igmp/features.md#igmp-f-general-query) | mandatory | yes | supported | `confirmed` |
 | [IGMP-F-QUERIER-ELECTION](../../protocol/igmp/features.md#igmp-f-querier-election) | mandatory | yes | supported | `confirmed` |
-| [IGMP-F-GROUP-MEMBERSHIP](../../protocol/igmp/features.md#igmp-f-group-membership) | mandatory | yes | partial | `partial` — RFC9776-RREP-11, TIMER-8: the Group Membership Interval of RFC 3376, [gap 3](results.md#gap-3-defect--two-default-intervals-have-the-values-of-older-documents); RST-14 is not reached, [gap 11](results.md#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers); RREP-8, RREP-10 are owed |
-| [IGMP-F-FORWARDING](../../protocol/igmp/features.md#igmp-f-forwarding) | mandatory | yes | partial | `partial` — RFC9776-FWD-5: every source of a group is forwarded, [gap 12](results.md#gap-12-defect--the-forwarding-asks-for-a-listener-of-the-group-not-of-the-source); FWD-4 is not reached, [gap 11](results.md#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers); FWD-6, FWD-7 are owed |
-| [IGMP-F-STATE-CHANGE-PROCESSING](../../protocol/igmp/features.md#igmp-f-state-change-processing) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-RREP-24 to RREP-26 are owed, RREP-23 is level 3 |
-| [IGMP-F-SPECIFIC-QUERIES](../../protocol/igmp/features.md#igmp-f-specific-queries) | mandatory | yes | partial | `partial` — RFC9776-RQRY-11: the S flag, [gap 9](results.md#gap-9-defect--the-s-flag-of-a-group-specific-query-comes-from-the-timer-before-it-is-lowered); RQRY-13: a Report cancels the retransmissions, [gap 10](results.md#gap-10-defect--a-report-cancels-the-retransmissions-of-the-queries) |
-| [IGMP-F-QUERY-TIMER-UPDATES](../../protocol/igmp/features.md#igmp-f-query-timer-updates) | mandatory | yes | partial | `partial` — RFC9776-RQRY-2: the Source Timers are not lowered, [gap 11](results.md#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers); RQRY-4, QRY-10 are owed |
-| [IGMP-F-HOST-COMPATIBILITY](../../protocol/igmp/features.md#igmp-f-host-compatibility) | mandatory | yes | partial | `partial` — RFC9776-TIMER-22: the IGMPv2 mode ends after 255 s, [gap 4](results.md#gap-4-defect--the-igmpv2-mode-of-a-host-ends-after-the-other-querier-present-interval); COMPH-22: the pending retransmissions stay, [gap 7](results.md#gap-7-defect--the-igmpv2-mode-keeps-the-pending-igmpv3-retransmissions); the IGMPv1 statements are level 5 |
-| [IGMP-F-VERSION-2-HOST](../../protocol/igmp/features.md#igmp-f-version-2-host) | mandatory | yes | partial | `partial` — RFC2236-HOST-21, HOST-22, HOST-28, HOST-29, HOST-31: no report delay timer and no repetition, [gap 6](results.md#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report); HOST-30 is owed |
-| [IGMP-F-ROUTER-COMPATIBILITY](../../protocol/igmp/features.md#igmp-f-router-compatibility) | mandatory | yes | partial | `partial` — RFC9776-RQRY-8, COMPR-1: no IGMPv2 querier mode, [gap 13](results.md#gap-13-missing-feature--no-igmpv2-querier-mode-in-an-igmpv3-router), declared expected; COMPR-20, COMPR-30, TIMER-25 are owed; the IGMPv1 statements are level 5 |
-| [IGMP-F-VERSION-2-ROUTER](../../protocol/igmp/features.md#igmp-f-version-2-router) | mandatory | yes | partial | `partial` — no core check fails; RFC2236-ROUTER-37, ROUTER-41 are owed; the IGMPv1 statements are level 5 |
+| [IGMP-F-GROUP-MEMBERSHIP](../../protocol/igmp/features.md#igmp-f-group-membership) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-RREP-8, RREP-10 are owed |
+| [IGMP-F-FORWARDING](../../protocol/igmp/features.md#igmp-f-forwarding) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-FWD-6, FWD-7 are owed |
+| [IGMP-F-STATE-CHANGE-PROCESSING](../../protocol/igmp/features.md#igmp-f-state-change-processing) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-RREP-24, RREP-25, RREP-26 are owed; RFC9776-RREP-23 is later |
+| [IGMP-F-SPECIFIC-QUERIES](../../protocol/igmp/features.md#igmp-f-specific-queries) | mandatory | yes | supported | `confirmed` |
+| [IGMP-F-QUERY-TIMER-UPDATES](../../protocol/igmp/features.md#igmp-f-query-timer-updates) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-RQRY-4, QRY-10 are owed |
+| [IGMP-F-HOST-COMPATIBILITY](../../protocol/igmp/features.md#igmp-f-host-compatibility) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-VER-1, COMPH-5, COMPH-8, COMPH-11, COMPH-20 are later |
+| [IGMP-F-VERSION-2-HOST](../../protocol/igmp/features.md#igmp-f-version-2-host) | mandatory | yes | partial | `partial` — no core check fails; RFC2236-HOST-30 is owed |
+| [IGMP-F-ROUTER-COMPATIBILITY](../../protocol/igmp/features.md#igmp-f-router-compatibility) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-COMPR-20, COMPR-30, TIMER-25 are owed; RFC9776-GEN-7, COMPR-16, COMPR-19, COMPR-31, COMPR-32, COMPR-33 are later |
+| [IGMP-F-VERSION-2-ROUTER](../../protocol/igmp/features.md#igmp-f-version-2-router) | mandatory | yes | partial | `partial` — no core check fails; RFC2236-ROUTER-37, ROUTER-41 are owed; RFC2236-ROUTER-36, ROUTER-40, ROUTER-42, ROUTER-45, ROUTER-46, ROUTER-47 are later |
 | [IGMP-F-SSM-AWARE](../../protocol/igmp/features.md#igmp-f-ssm-aware) | optional | no | untested | `out of claim` — level 5 |
-| [IGMP-F-TIMER-CONFIGURATION](../../protocol/igmp/features.md#igmp-f-timer-configuration) | mandatory | yes | partial | `partial` — RFC9776-TIMER-3: a QRV of zero, [gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic); TIMER-1 is owed |
+| [IGMP-F-TIMER-CONFIGURATION](../../protocol/igmp/features.md#igmp-f-timer-configuration) | mandatory | yes | partial | `partial` — no core check fails; RFC9776-TIMER-1 is owed |
 
-Five features are `confirmed`, thirteen `partial`, one `unverified` and one `out of claim`.
+Seven features are `confirmed`, eleven `partial`, one `unverified` and one `out of claim`. In the
+level 2 run, five were `confirmed` and thirteen `partial`.
 
 ### How to read the matrix
 
-- **No feature is a `defect`.** Every mandatory feature with a failing core check also has a
-  core check that passes, so the table of the guide gives `partial`. The thirteen gaps of
-  [`results.md`](results.md#the-model-gaps) are statement-level defects inside partial
-  features; eleven partial features hold one of them.
-- **Gap 13 is the one missing feature**, and it sits inside IGMP-F-ROUTER-COMPATIBILITY: the
-  router half of the IGMPv2 mode. The feature is partial because the router keeps a group with
-  an IGMPv2 member correctly; only the querier does not change its version.
-- **The two `partial` verdicts without a failing core check**, the state-change processing of
-  the router and the IGMPv2 router, are partial only because some core statement needs an owed
-  check or a later level.
+- **No feature is a `defect`, and since the repairs no core check fails.** Every `partial`
+  verdict comes from a core statement whose check is owed or needs a later level. In the level 2
+  run the thirteen gaps of [`results.md`](results.md#the-model-gaps) were statement-level defects
+  inside eleven partial features.
+- **Gap 13 was the one missing feature**, inside IGMP-F-ROUTER-COMPATIBILITY: the router half of
+  the IGMPv2 mode. The repairs added it, with the IGMPv1 mode, as the parameter `routerVersion`
+  of `Igmpv3`; the feature stays partial because the Older Host Present Interval and some
+  IGMPv1 statements have no check.
 - **The one `unverified`**, IGMP-F-MESSAGE-VALIDATION, is level 3 work, not a verdict on the
   model; the level 1 look and the run both show that an unknown type stops the simulation
   ([results.md](results.md#other-findings)), so its check will fail when it exists.
@@ -161,8 +160,9 @@ Five features are `confirmed`, thirteen `partial`, one `unverified` and one `out
 
 1. **IGMP-F-MESSAGE-VALIDATION is `unverified` and mandatory**, and its first check will fail:
    the IGMPv2 router stops the simulation on a Version 3 Report already on the normal path.
-2. **The twelve defects** of [`results.md`](results.md#the-model-gaps) are repairs, not tests:
-   none is declared, so the suite stays red until they are repaired. After a repair of gap 10,
-   RFC9776-RQRY-14 gets its first evidence for a retransmission.
+2. **The thirteen gaps** of [`results.md`](results.md#the-model-gaps) are repaired, and the suite
+   passes. The next level 2 work is the debt of
+   [`coverage.md`](coverage.md#the-coverage-debt-the-checks-this-pass-owes), 49 owed statements.
 3. **The obsolete claim of level 1 stands**: `Igmpv3.ned:13` and the inline comments name RFC
-   3376, and two of the gaps are values of the documents that RFC 9776 replaced.
+   3376. Two of the gaps were values of the documents that RFC 9776 replaced; the repairs changed
+   the values, and not the claim.

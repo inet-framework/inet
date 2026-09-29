@@ -7,22 +7,27 @@ document of the pass that may name the simulation model and reference code, and 
 the verdicts of the run, the class of every failure, and where the model implements, or fails
 to implement, each checked behavior.
 
+The level 2 pass ran on 2026-09-24 at `29aed12310` (src `5c4f41c600`): 42 tests, 24 PASS, 17
+FAIL, 1 FAIL declared expected, and thirteen gaps. The repairs of 2026-09-25, on
+`topic/standards-tests-igmp-mld-level2-fixes`, repaired all thirteen, and added a check and a test
+for the IGMPv1 mode of a router; the run below is theirs. Each gap keeps its description of the
+code of the level 2 run, and says how it was repaired.
+
 ## Run record
 
-- Date: 2026-09-29 17:29 +0200
-- INET: branch `master`, commit `24675c3a37`, tree clean
-- Trees: src `8b4f86968e`, tests/protocol `1f1d62beca`
+- Date: 2026-09-29 18:33 +0200
+- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `ddea7a391b`, tree clean
+- Trees: src `e76d92f3af`, tests/protocol `36c0e0673d`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/igmp$'`
-- Suite: 42 tests, 24 PASS, 17 FAIL (unexpected), 1 FAIL (expected), so the suite reports FAIL
+- Suite: 43 tests, 43 PASS, so the suite reports PASS
 
-The level 2 pass ran on 2026-09-24 at src `5c4f41c600`, the tree of `origin/master` at `7772a7e4ef`,
-and changed no source file. The branch landed on `master` by a rebase onto `49e1fa0945`, whose
-`src/` differs from that tree in one line of `src/inet/common/InitStages.cc`. So the suite ran again
-on `master`, and the verdicts and the failure reasons are those of the level 2 run.
+The `src/` tree of the level 2 run, `5c4f41c600`, is the tree of `origin/master` at
+`7772a7e4ef`: the pass changed no source file. The repairs change `Igmpv3`, `Ipv4` and
+`Ipv4InterfaceData` for IGMP; the MLD half of the branch changes the IPv6 and ICMPv6 modules.
 
 ## Verdicts
 
@@ -36,62 +41,72 @@ IGMPv2 mode of a host, and the return to IGMPv3.
 | Test | Check | Verdict | Class |
 | --- | --- | --- | --- |
 | `Rfc9776ReportEncapsulation` | [Membership Report encapsulation](../../protocol/igmp/checks/message-format.md#membership-report-encapsulation) | PASS | — |
-| `Rfc9776QueryEncapsulation` | [Membership Query encapsulation](../../protocol/igmp/checks/message-format.md#membership-query-encapsulation) | FAIL at observation 5 | defect, [gap 1](#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic) |
+| `Rfc9776QueryEncapsulation` | [Membership Query encapsulation](../../protocol/igmp/checks/message-format.md#membership-query-encapsulation) | PASS | repaired, [gap 1](#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic) |
 | `Rfc9776RouterAlert` | [Router Alert and precedence on every message](../../protocol/igmp/checks/message-format.md#router-alert-and-precedence-on-every-message) | PASS | — |
-| `Rfc9776Precedence` | [Router Alert and precedence on every message](../../protocol/igmp/checks/message-format.md#router-alert-and-precedence-on-every-message) | FAIL at observation 3 | defect, [gap 2](#gap-2-defect--a-report-leaves-with-precedence-0) |
-| `Rfc9776QueryRobustness` | [Timer relations in the Query](../../protocol/igmp/checks/message-format.md#timer-relations-in-the-query) | FAIL at observation 2 | defect, [gap 1](#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic) |
+| `Rfc9776Precedence` | [Router Alert and precedence on every message](../../protocol/igmp/checks/message-format.md#router-alert-and-precedence-on-every-message) | PASS | repaired, [gap 2](#gap-2-defect--a-report-leaves-with-precedence-0) |
+| `Rfc9776QueryRobustness` | [Timer relations in the Query](../../protocol/igmp/checks/message-format.md#timer-relations-in-the-query) | PASS | repaired, [gap 1](#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic) |
 | `Rfc9776QueryTimerRelations` | [Timer relations in the Query](../../protocol/igmp/checks/message-format.md#timer-relations-in-the-query) | PASS | — |
 | `Rfc9776JoinReport` | [Join reported at once](../../protocol/igmp/checks/host-reports.md#join-reported-at-once) | PASS | — |
-| `Rfc9776JoinRepeated` | [Join repeated](../../protocol/igmp/checks/host-reports.md#join-repeated) | FAIL at observation 2 | defect, [gap 3](#gap-3-defect--two-default-intervals-have-the-values-of-older-documents) |
+| `Rfc9776JoinRepeated` | [Join repeated](../../protocol/igmp/checks/host-reports.md#join-repeated) | PASS | repaired, [gap 3](#gap-3-defect--two-default-intervals-have-the-values-of-older-documents) |
 | `Rfc9776JoinRepeatedCount` | [Join repeated](../../protocol/igmp/checks/host-reports.md#join-repeated) | PASS | — |
 | `Rfc9776LeaveReport` | [Leave reported](../../protocol/igmp/checks/host-reports.md#leave-reported) | PASS | — |
 | `Rfc9776SourceListChange` | [Source list change](../../protocol/igmp/checks/host-reports.md#source-list-change) | PASS | — |
 | `Rfc9776ExcludeChange` | [Change inside EXCLUDE mode](../../protocol/igmp/checks/host-reports.md#change-inside-exclude-mode) | PASS | — |
-| `Rfc9776ChangeDuringRepetitions` | [A change during the repetitions](../../protocol/igmp/checks/host-reports.md#a-change-during-the-repetitions) | FAIL at observation 2 | defect, [gap 5](#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
+| `Rfc9776ChangeDuringRepetitions` | [A change during the repetitions](../../protocol/igmp/checks/host-reports.md#a-change-during-the-repetitions) | PASS | repaired, [gap 5](#gap-5-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
 | `Rfc9776ChangeDuringRepetitionsTail` | [A change during the repetitions](../../protocol/igmp/checks/host-reports.md#a-change-during-the-repetitions) | PASS | — |
 | `Rfc9776GeneralQueryResponse` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | PASS | — |
-| `Rfc9776GeneralQueryNoState` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | FAIL at observation 5 | defect, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
+| `Rfc9776GeneralQueryNoState` | [Response to a General Query](../../protocol/igmp/checks/query-response.md#response-to-a-general-query) | PASS | repaired, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
 | `Rfc9776GroupSpecificResponse` | [Response to a Group-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-specific-query) | PASS | — |
-| `Rfc9776GroupSourceResponse` | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | FAIL at observation 5 | defect, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
+| `Rfc9776GroupSourceResponse` | [Response to a Group-and-Source-Specific Query](../../protocol/igmp/checks/query-response.md#response-to-a-group-and-source-specific-query) | PASS | repaired, [gap 8](#gap-8-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
 | `Rfc9776StartupQueries` | [General Queries at startup and after it](../../protocol/igmp/checks/router-queries.md#general-queries-at-startup-and-after-it) | PASS | — |
 | `Rfc9776QuerierElection` | [Querier election](../../protocol/igmp/checks/router-queries.md#querier-election) | PASS | — |
 | `Rfc9776ForwardingAfterJoin` | [Forwarding after a join](../../protocol/igmp/checks/router-state.md#forwarding-after-a-join) | PASS | — |
 | `Rfc9776SourceSpecificForwarding` | [Source-specific forwarding](../../protocol/igmp/checks/router-state.md#source-specific-forwarding) | PASS | — |
-| `Rfc9776SourceSpecificBlocking` | [Source-specific forwarding](../../protocol/igmp/checks/router-state.md#source-specific-forwarding) | FAIL at observation 3 | defect, [gap 12](#gap-12-defect--the-forwarding-asks-for-a-listener-of-the-group-not-of-the-source) |
-| `Rfc9776MembershipTimeout` | [Membership timeout without a leave](../../protocol/igmp/checks/router-state.md#membership-timeout-without-a-leave) | FAIL at observation 2 | defect, [gap 3](#gap-3-defect--two-default-intervals-have-the-values-of-older-documents) |
+| `Rfc9776SourceSpecificBlocking` | [Source-specific forwarding](../../protocol/igmp/checks/router-state.md#source-specific-forwarding) | PASS | repaired, [gap 12](#gap-12-defect--the-forwarding-asks-for-a-listener-of-the-group-not-of-the-source) |
+| `Rfc9776MembershipTimeout` | [Membership timeout without a leave](../../protocol/igmp/checks/router-state.md#membership-timeout-without-a-leave) | PASS | repaired, [gap 3](#gap-3-defect--two-default-intervals-have-the-values-of-older-documents) |
 | `Rfc9776LastMemberQuery` | [Leave and the last member query](../../protocol/igmp/checks/router-state.md#leave-and-the-last-member-query) | PASS | — |
-| `Rfc9776LastMemberQuerySFlag` | [Leave and the last member query](../../protocol/igmp/checks/router-state.md#leave-and-the-last-member-query) | FAIL at observation 6 | defect, [gap 9](#gap-9-defect--the-s-flag-of-a-group-specific-query-comes-from-the-timer-before-it-is-lowered) |
+| `Rfc9776LastMemberQuerySFlag` | [Leave and the last member query](../../protocol/igmp/checks/router-state.md#leave-and-the-last-member-query) | PASS | repaired, [gap 9](#gap-9-defect--the-s-flag-of-a-group-specific-query-comes-from-the-timer-before-it-is-lowered) |
 | `Rfc9776LeaveWithAnotherMember` | [Leave with another member](../../protocol/igmp/checks/router-state.md#leave-with-another-member) | PASS | — |
-| `Rfc9776SourceBlockedOtherMember` | [Source blocked while another member wants it](../../protocol/igmp/checks/router-state.md#source-blocked-while-another-member-wants-it) | FAIL at observation 3 | defect, [gap 10](#gap-10-defect--a-report-cancels-the-retransmissions-of-the-queries) |
+| `Rfc9776SourceBlockedOtherMember` | [Source blocked while another member wants it](../../protocol/igmp/checks/router-state.md#source-blocked-while-another-member-wants-it) | PASS | repaired, [gap 10](#gap-10-defect--a-report-cancels-the-retransmissions-of-the-queries) |
 | `Rfc9776SourceQuerySFlag` | [Source blocked while another member wants it](../../protocol/igmp/checks/router-state.md#source-blocked-while-another-member-wants-it) | PASS | — |
-| `Rfc9776SourceBlockedOnlyMember` | [Source blocked by its only member](../../protocol/igmp/checks/router-state.md#source-blocked-by-its-only-member) | FAIL at observation 2 | defect, [gap 11](#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers) |
+| `Rfc9776SourceBlockedOnlyMember` | [Source blocked by its only member](../../protocol/igmp/checks/router-state.md#source-blocked-by-its-only-member) | PASS | repaired, [gap 11](#gap-11-defect--a-group-and-source-specific-query-does-not-lower-the-source-timers) |
 | `Rfc9776RouterAfterJoin` | [A router that comes up after a join](../../protocol/igmp/checks/router-state.md#a-router-that-comes-up-after-a-join) | PASS | — |
-| `Rfc9776HostV2Mode` | [Host in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#host-in-igmpv2-mode) | FAIL at observation 4 | defect, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
-| `Rfc9776HostV2ModeRepeat` | [Host in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#host-in-igmpv2-mode) | FAIL at observation 3 | defect, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
-| `Rfc2236ReportSuppression` | [Report suppression in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#report-suppression-in-igmpv2-mode) | FAIL at observation 2 | defect, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
+| `Rfc9776HostV2Mode` | [Host in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#host-in-igmpv2-mode) | PASS | repaired, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
+| `Rfc9776HostV2ModeRepeat` | [Host in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#host-in-igmpv2-mode) | PASS | repaired, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
+| `Rfc2236ReportSuppression` | [Report suppression in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#report-suppression-in-igmpv2-mode) | PASS | repaired, [gap 6](#gap-6-defect--the-igmpv2-mode-of-a-host-answers-at-once-and-sends-one-report) |
 | `Rfc9776LeaveV2Mode` | [Leave in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#leave-in-igmpv2-mode) | PASS | — |
 | `Rfc2236LeaveAtV2Router` | [Leave at an IGMPv2 router](../../protocol/igmp/checks/compatibility.md#leave-at-an-igmpv2-router) | PASS | — |
 | `Rfc9776HostBackToV3` | [Host back to IGMPv3](../../protocol/igmp/checks/compatibility.md#host-back-to-igmpv3) | PASS | — |
-| `Rfc9776OlderQuerierInterval` | [Host back to IGMPv3](../../protocol/igmp/checks/compatibility.md#host-back-to-igmpv3) | FAIL at observation 2 | defect, [gap 4](#gap-4-defect--the-igmpv2-mode-of-a-host-ends-after-the-other-querier-present-interval) |
+| `Rfc9776OlderQuerierInterval` | [Host back to IGMPv3](../../protocol/igmp/checks/compatibility.md#host-back-to-igmpv3) | PASS | repaired, [gap 4](#gap-4-defect--the-igmpv2-mode-of-a-host-ends-after-the-other-querier-present-interval) |
 | `Rfc9776RouterV2Member` | [Router with an IGMPv2 member](../../protocol/igmp/checks/compatibility.md#router-with-an-igmpv2-member) | PASS | — |
-| `Rfc9776QuerierV2Router` | [Querier with an IGMPv2 router](../../protocol/igmp/checks/compatibility.md#querier-with-an-igmpv2-router) | FAIL at observation 2, declared expected | missing feature, [gap 13](#gap-13-missing-feature--no-igmpv2-querier-mode-in-an-igmpv3-router) |
-| `Rfc9776ModeChangeCancels` | [A mode change cancels the pending reports](../../protocol/igmp/checks/compatibility.md#a-mode-change-cancels-the-pending-reports) | FAIL at observation 2 | defect, [gap 7](#gap-7-defect--the-igmpv2-mode-keeps-the-pending-igmpv3-retransmissions) |
+| `Rfc9776QuerierV2Router` | [Querier with an IGMPv2 router](../../protocol/igmp/checks/compatibility.md#querier-with-an-igmpv2-router) | PASS | repaired, [gap 13](#gap-13-missing-feature--no-igmpv2-querier-mode-in-an-igmpv3-router) |
+| `Rfc9776QuerierConfiguredV1` | [Querier configured in IGMPv1 mode](../../protocol/igmp/checks/compatibility.md#querier-configured-in-igmpv1-mode) | PASS | — |
+| `Rfc9776ModeChangeCancels` | [A mode change cancels the pending reports](../../protocol/igmp/checks/compatibility.md#a-mode-change-cancels-the-pending-reports) | PASS | repaired, [gap 7](#gap-7-defect--the-igmpv2-mode-keeps-the-pending-igmpv3-retransmissions) |
 | `Rfc9776BlockInV2Mode` | [A BLOCK record for a group in IGMPv2 mode](../../protocol/igmp/checks/compatibility.md#a-block-record-for-a-group-in-igmpv2-mode) | PASS | — |
+
+All 43 tests pass. In the level 2 run, 24 of the 42 tests passed, and the thirteen gaps below
+held every failure.
 
 ## The class of every failure
 
-Sixteen failures are of the class **defect** of
+**After the repairs of 2026-09-25** no failure is left, and no test of this suite needed a repair
+of its premises. Three module tests expected the old behavior of the model: `IGMPv3_interop_host`
+(gap 6), `IGMPv3_router2` and `IGMPv3_router3` (gaps 10 and 11); the commits of those gaps say
+what changed. The rest of this section classes the failures of the level 2 run.
+
+Sixteen failures were of the class **defect** of
 [the guide](../../../guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected):
-the model has code for the behavior, and the code gets it wrong. None of them is declared
-expected, because no limitation blocks a repair; each gap names the code that a repair would
-change. One failure, `Rfc9776QuerierV2Router`, is an **unimplemented feature**: no code of the
-IGMPv3 module sends an IGMPv2 Query, so the test declares `%# expected-result: FAIL`.
+the model had code for the behavior, and the code got it wrong. None of them was declared
+expected, because no limitation blocked a repair; each gap names the code that a repair would
+change. One failure, `Rfc9776QuerierV2Router`, was an **unimplemented feature**: no code of the
+IGMPv3 module sent an IGMPv2 Query, so the test declared `%# expected-result: FAIL` until the
+feature came.
 
 The first design of the pass had declared source-specific forwarding expected too. The code
 exists in two halves that do not meet (gap 12), and the question of the guide, "does code exist
 for this specific behavior?", makes it a defect; commit `bb20f0dd5e` removed the declaration.
 
-No failure of this run is a test error or a misread of the specification. The earlier runs of
+No failure of that run was a test error or a misread of the specification. The earlier runs of
 the pass found test errors — the order of the ini lines, two windows, a lifecycle stimulus that
 the model cannot give — and one misread, the S flag of the second Group-and-Source-Specific
 Query; the pass corrected each one before this run, and the plan records them.
@@ -120,6 +135,9 @@ mechanism that do not meet (gap 12).
 - **Scope**: every Query of every IGMPv3 router. A QRV of 0 means a Robustness Variable above 7
   (RFC9776-QRY-13), and a QQIC of 0 a Query Interval of 0; a non-querier that adopts the values
   of the querier (RFC9776-TIMER-1, owed) would read both.
+- **Repaired** on 2026-09-25 (`d271b5415e`): every Query of an IGMPv3 router carries the Robustness
+  Variable in the QRV, 0 above 7, and the code of the Query Interval in the QQIC; `codeTime` now
+  asserts the range of its codes.
 
 ### Gap 2 (defect) — a Report leaves with precedence 0
 
@@ -131,6 +149,8 @@ mechanism that do not meet (gap 12).
   `Igmpv3::sendQueryToIP` sets it (line 1492), so the Queries of R hold.
 - **Scope**: every Report and every Leave of an IGMPv3 host, also the IGMPv2 messages that the
   host sends in IGMPv2 mode, which go through the same function.
+- **Repaired** on 2026-09-25 (`1ef5de3b22`): the line that sets the Type of Service 0xc0 is in
+  effect, for every Report and Leave.
 
 ### Gap 3 (defect) — two default intervals have the values of older documents
 
@@ -149,6 +169,10 @@ mechanism that do not meet (gap 12).
 - **Scope**: every host that keeps the default sends its repetitions up to 10 s after the first
   Report, where the standard asks for 1 s; every router that keeps the default ends a group 10 s
   early.
+- **Repaired** on 2026-09-25 (`31f8b1bc8c`): the defaults are 1 s and [Robustness Variable] × [Query
+  Interval] + 2 × [Query Response Interval]. The Older-Host-Present Timer of a router ran with
+  `groupMembershipInterval`; it has its own parameter, `olderHostPresentInterval`, and keeps 260 s
+  (RFC 9776 §8.13).
 
 ### Gap 4 (defect) — the IGMPv2 mode of a host ends after the Other Querier Present Interval
 
@@ -164,6 +188,8 @@ mechanism that do not meet (gap 12).
 - **Scope**: with Queries every 125 s, a pause between two Queries is 125, 250 or 375 s, and
   both 255 s and 350 s lie between the last two, so the gap shows only when the IGMPv2 querier
   stops: then the host goes back to IGMPv3 95 s early.
+- **Repaired** on 2026-09-25 (`241e729606`): the timer runs for [Robustness Variable] × [Query
+  Interval] + 10 × the Max Response Time of the Query; an IGMPv1 Query counts as 10 s (RFC 2236 §4).
 
 ### Gap 5 (defect) — a second change replaces the pending records instead of a merge
 
@@ -178,6 +204,8 @@ mechanism that do not meet (gap 12).
 - **Scope**: a host that changes its filter twice within the repetitions of a Report sends the
   sources of the first change fewer times than the Robustness Variable; the loss of one Report
   can then lose a source.
+- **Repaired** on 2026-09-25 (`cd3ef2ef2d`): a group keeps a count for the Filter-Mode-Change record
+  and one for each source, and each State-Change Report comes from them by Table 4 of §5.1.
 
 ### Gap 6 (defect) — the IGMPv2 mode of a host answers at once and sends one Report
 
@@ -195,6 +223,8 @@ mechanism that do not meet (gap 12).
   report delay timer, so it has no Delaying Member state and no suppression.
 - **Scope**: every IGMPv3 host on a link with an IGMPv2 querier. All members of a group answer
   each Query at the same instant, and a lost unsolicited Report is not repeated.
+- **Repaired** on 2026-09-25 (`12710e9624`): the IGMPv1 and IGMPv2 modes follow the host state
+  machine of RFC 2236 §6, with a report delay timer and the flag of the last reporter.
 
 ### Gap 7 (defect) — the IGMPv2 mode keeps the pending IGMPv3 retransmissions
 
@@ -209,6 +239,8 @@ mechanism that do not meet (gap 12).
 - **Scope**: a host that changes its state just before it hears an IGMPv2 Query sends a
   Version 3 Report to an IGMPv2 router — which the IGMPv2 router of the model does not survive,
   see [Other findings](#other-findings).
+- **Repaired** on 2026-09-25 (`1cdcca6e66`): every change of the Host Compatibility Mode cancels the
+  response and retransmission timers of the interface.
 
 ### Gap 8 (defect) — an answer to a Query holds a record that the standard leaves out
 
@@ -230,6 +262,8 @@ mechanism that do not meet (gap 12).
 - **How the pass found the second half**: the MLD twin of the check had a scenario where the
   answer could never be empty; the corrected check queries a source that A does not want, in
   both protocols (commit `a9fd397749`).
+- **Repaired** on 2026-09-25 (`44ca8f19cf`): the answers leave out the groups with no reception
+  state and every record with no sources.
 
 ### Gap 9 (defect) — the S flag of a Group-Specific Query comes from the timer before it is lowered
 
@@ -244,6 +278,8 @@ mechanism that do not meet (gap 12).
 - **Scope**: every Group-Specific Query after a leave. A second router that honors the S flag
   (RFC9776-QRY-10, owed) would keep its timer, and would forward the group after the querier
   stops.
+- **Repaired** on 2026-09-25 (`8c78e15833`): the flag comes from the Group Timer at each
+  transmission, after it is lowered.
 
 ### Gap 10 (defect) — a Report cancels the retransmissions of the Queries
 
@@ -263,6 +299,11 @@ mechanism that do not meet (gap 12).
 - **Scope**: every Group-Specific and Group-and-Source-Specific Query that a member answers. The
   sequence stops at the first answer, so the loss of one answer can end the group or the source
   early.
+- **Repaired** on 2026-09-25 (`189b00882c`): together with gap 11. A group keeps the retransmission
+  state of the Group-Specific Query and of each source, a Report changes only the timers, and each
+  transmission of a Group-and-Source-Specific Query is two Queries, with and without the S flag. The
+  lowered timers reached three old defects of the router state, which two commits before it repair:
+  see [Other findings](#other-findings).
 
 ### Gap 11 (defect) — a Group-and-Source-Specific Query does not lower the Source Timers
 
@@ -277,6 +318,9 @@ mechanism that do not meet (gap 12).
   group in time: `Rfc9776LastMemberQuery` passes.
 - **Scope**: a source that the last member of an INCLUDE-mode group blocks stays forwarded until
   its Source Timer ends, up to 260 s after the last Report that named it.
+- **Repaired** on 2026-09-25 (`189b00882c`): together with gap 10. A queried source whose timer is
+  larger than the Last Member Query Time gets it lowered to that time and [Last Member Query Count]
+  transmissions.
 
 ### Gap 12 (defect) — the forwarding asks for a listener of the group, not of the source
 
@@ -293,6 +337,8 @@ mechanism that do not meet (gap 12).
   but the forwarding never asks it.
 - **Scope**: every IGMPv3 router forwards all sources of a group that has a member. The source
   lists of INCLUDE and EXCLUDE mode have no effect on the data, only on the Queries.
+- **Repaired** on 2026-09-25 (`b9154906bf`): both places of IPv4 ask `hasMulticastListener(group,
+  source)`, which returned the opposite answer and is corrected.
 
 ### Gap 13 (missing feature) — no IGMPv2 querier mode in an IGMPv3 router
 
@@ -307,6 +353,11 @@ mechanism that do not meet (gap 12).
   1151). The router half of RFC 9776 §7.3.1 is not in the model.
 - **Scope**: a link with an IGMPv2 router and an IGMPv3 router has two versions of Queries. The
   test declares the failure expected; a repair is new code, not a correction.
+- **Added** on 2026-09-25 (`a636b65ffe`): the parameter `routerVersion` of `Igmpv3` (3, 2 or 1) sets
+  the IGMPv2 or IGMPv1 mode of RFC 9776 §7.3.1, and an older General Query lowers it on its
+  interface (§6.6.2). A new check, [Querier configured in IGMPv1
+  mode](../../protocol/igmp/checks/compatibility.md#querier-configured-in-igmpv1-mode)
+  (`8619a5e7ef`), and its test `Rfc9776QuerierConfiguredV1` cover the IGMPv1 mode.
 
 ## What the model does well
 
@@ -341,10 +392,11 @@ mechanism that do not meet (gap 12).
   ([`Igmpv2.cc:488`](../../../../../src/inet/networklayer/ipv4/Igmpv2.cc)); RFC 2236 §2 says
   "Unrecognized message types should be silently ignored". This is fact 1 of the level 1 look,
   and the run reaches it without a crafted message: an ordinary Version 3 Report of an IGMPv3
-  host is enough. A link with an IGMPv2 router and an IGMPv3 host in IGMPv3 mode stops the run —
-  after gap 4 ends the IGMPv2 mode of the host early, or with gap 7. RFC 2236 §2 is outside the
-  in-scope set of this pass, so no check targets it; the check of the mode change keeps R off L1
-  while A sends its Version 3 Report.
+  host is enough. A link with an IGMPv2 router and an IGMPv3 host in IGMPv3 mode stops the run;
+  in the level 2 run, gap 4 and gap 7 made the host reach IGMPv3 mode on such a link, and after
+  their repairs a host in IGMPv3 mode before the first IGMPv2 Query still does. RFC 2236 §2 is
+  outside the in-scope set of this pass, so no check targets it, and the repairs leave it; the
+  check of the mode change keeps R off L1 while A sends its Version 3 Report.
 - **The IGMP modules have no lifecycle.** A router that is down at the start stops the
   simulation at initialization: `Igmpv3::initialize` reads the IPv4 data of each interface
   ([`Igmpv3.cc:117`](../../../../../src/inet/networklayer/ipv4/Igmpv3.cc)), which a node that is
@@ -368,6 +420,19 @@ mechanism that do not meet (gap 12).
   mockup did not forward ("source is not directly connected",
   [`PimDm.cc:1430`](../../../../../src/inet/routing/pim/modes/PimDm.cc)). The tests add one route
   with a test module, `MulticastLeafRoute` of `IgmpChecks.h`. Both are outside the in-scope set.
+- **The router state had three more defects, which the repairs of gaps 10 and 11 reached.** The
+  loops that delete source records while they iterate over the source map, at the end of the
+  group timer and for an IS_EX record, incremented the iterator of the erased entry; the loop
+  of a TO_EX record in EXCLUDE mode tested the next entry instead of the current one, and so
+  deleted a source that RFC 9776 §6.4.2 keeps in the exclude list. The loop of a BLOCK record in
+  EXCLUDE mode iterated over the source map instead of the sources of the record, so it never
+  added the new sources of (A-X-Y). The module tests `IGMPv3_router2`, `IGMPv3_router3` and
+  `IGMPv3_router4` reached the first two paths when the lowered timers ended in EXCLUDE mode.
+  Repaired on 2026-09-25 (`fc01e589ea`,
+  `ba0ee0dfde`), in `Mldv2` too.
+- **The check of a listener of a source was inverted.**
+  `Ipv4InterfaceData::hasMulticastListener(group, source)` returned `true` for a source that the
+  state does not want; no caller used it until the repair of gap 12, which corrects it.
 
 ## The four facts of the level 1 look
 
@@ -386,7 +451,7 @@ The level 1 pass named four facts for this pass to check
    Reports; the older Reports reach the router state, and `Rfc9776RouterV2Member` passes.
 4. **The two intervals of RFC 9776 §8.** The Group Membership Interval is the RFC 3376 value,
    260 s, and the Older Version Querier Present Interval is 255 s, the value of no document:
-   gaps 3 and 4.
+   gaps 3 and 4, both repaired.
 
 ## What the next pass owes
 
@@ -395,10 +460,10 @@ In the order I would do it:
 1. **Level 3**, the crafted messages: the validation of every received message, the unknown
    types of both modules, and the IGMPv2 Group-Specific Query at a host in IGMPv3 mode. IGMP
    message validation is the one mandatory feature with no check at level 2.
-2. **After a repair of gap 10**, run `Rfc9776SourceBlockedOtherMember` and
-   `Rfc9776SourceQuerySFlag` again: RFC9776-RQRY-14 has no evidence for a retransmission until
-   then, and `processRexmtTimer` (gap 10) will then decide it.
-3. **After a repair of gap 13**, COMPR-8 gets its verdict from `Rfc9776QuerierV2Router`.
+2. **The Older Host Present Interval** has its own parameter since the repair of gap 3, and no
+   test measures it: RFC9776-TIMER-25, COMPR-20 and COMPR-21 are owed.
+3. **The Leave that a router in IGMPv1 mode ignores** (RFC9776-COMPR-4) needs a Leave on a link
+   where every host is in IGMPv1 mode, so a crafted message, level 3.
 4. **The level 2 statements this pass left**: the closing list of
    [`checks.md`](../../protocol/igmp/checks.md#statements-this-pass-wrote-no-check-for) names what
    each needs, from a code value above the plain range to two IGMPv2 routers on one link.

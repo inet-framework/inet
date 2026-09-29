@@ -10,10 +10,12 @@ list of what to do next.
 
 The tooling quirks that apply to every protocol are in
 [`ipv4/notes.md`](../ipv4/notes.md#tooling-quirks); this pass added its own there too. What
-follows is what IGMP added, in one pass: level 2 on 2026-09-24, together with MLD, whose
-[`notes.md`](../mld/notes.md) holds the IPv6 side. The gaps themselves are in
-[`results.md`](results.md#the-model-gaps); this document says what is behind them and around
-them.
+follows is what IGMP added, in two passes: level 2 on 2026-09-24, together with MLD, whose
+[`notes.md`](../mld/notes.md) holds the IPv6 side, and the repairs of the thirteen gaps on
+2026-09-25 to 2026-09-28, on `topic/standards-tests-igmp-mld-level2-fixes`. The gaps themselves
+are in [`results.md`](results.md#the-model-gaps); this document says what is behind them and
+around them. A section with a **Fixed on** paragraph describes the model before the repair, and
+its line numbers are those of the level 2 commit.
 
 ## Model quirks
 
@@ -26,6 +28,10 @@ IGMPv3 host stops the run as soon as the host's IGMPv2 mode ends (gap 4 ends it 
 pending Version 3 retransmission leaves after an IGMPv2 Query (gap 7). RFC 2236 §2 says
 "Unrecognized message types should be silently ignored", but §2 is outside the in-scope set of
 this pass, so no check targets it.
+
+The repairs of gaps 4 and 7 did not touch `Igmpv2`, so the throw stays: an IGMPv3 host goes back
+to IGMPv3 350 s after the last IGMPv2 Query, and its next Report stops an IGMPv2 router that is
+still on the link.
 
 The check of the mode change had to work around it: R is off L1 while A sends its Version 3
 Report, and joins L1 just before its own IGMPv2 Query. When the test fails, it decides at A's
@@ -56,6 +62,12 @@ it forwards, and that is the question IGMP answers.
 
 ### The IGMP router knows the sources; the forwarding does not ask
 
+**Fixed on** 2026-09-25 (gap 12): `Ipv4` asks `hasMulticastListener(group, source)` in both
+places. The overload had a second defect that no caller showed: it returned the negation of
+`sourceList.contains(source)`, so it answered "no" for a wanted source. A listener for all
+sources, as `Igmpv2` and the configurators add it, has the source list EXCLUDE {}, and its
+forwarding did not change. What follows describes the model before the repair.
+
 `Igmpv3::processReport` stores the forwarded sources of each group with `setMulticastListeners`
 ([Igmpv3.cc:1093](../../../../../src/inet/networklayer/ipv4/Igmpv3.cc#L1093)), and the interface
 data answers `hasMulticastListener(group, source)`. IPv4 calls the overload with the group only
@@ -66,6 +78,13 @@ gap 12. Look for both halves before a declaration.
 
 ### The IGMPv2 mode of a host has no timers
 
+**Fixed on** 2026-09-25 (gap 6): a host group has the report delay timer and the flag of RFC 2236
+§6 for the IGMPv1 and IGMPv2 modes; a join repeats its Report within `unsolicitedReportInterval`,
+and a leave sends the Leave only when the flag is set. The module test `IGMPv3_interop_host` had
+an IGMPv1 Query 4 s after an IGMPv2 Query with a Max Response Time of 10 s; with the delay, the
+answer came in IGMPv1 mode, so its IGMPv2 Query now has 1 s. What follows describes the model
+before the repair.
+
 `Igmpv3::processOlderVersionQuery` answers an IGMPv2 Query in the same event, for every joined
 group ([Igmpv3.cc:1128-1133](../../../../../src/inet/networklayer/ipv4/Igmpv3.cc#L1128)), and
 `multicastSourceListChanged` sends one IGMPv2 Report for a join and returns (lines 198-216). So
@@ -75,6 +94,11 @@ after the Query, the transmission time, which is why "not at the instant" has a 
 
 ### The host keeps a group that it left
 
+**Fixed on** 2026-09-25 for the answers (gap 8): the answer to a General Query leaves out the
+groups in INCLUDE mode with no sources, and an answer to a specific Query leaves only with
+reception state or with sources. The entry of a left group stays in the table. What follows
+describes the model before the repair.
+
 A leave sets the group entry of the host to INCLUDE({}) and keeps it. Every General Query then
 gets a MODE_IS_INCLUDE record without sources for that group, for as long as the host runs
 (`processHostGeneralQueryTimer`,
@@ -83,6 +107,14 @@ gets a MODE_IS_INCLUDE record without sources for that group, for as long as the
 are gap 8. A run longer than one Query Interval shows the first one in every test with a leave.
 
 ### The retransmission of a source-specific Query picks the wrong sources
+
+**Fixed on** 2026-09-25 (gaps 10 and 11, one commit): a router group keeps a retransmission count
+for the group and one for each source, a Report no longer cancels them, a Group-and-Source-Specific
+Query lowers the timers of its sources, and each transmission is two Queries, with and without the
+S flag. The two gaps are one mechanism: with the lowering alone, the old retransmission queried no
+source. The module tests `IGMPv3_router2` and `IGMPv3_router3` expected the old sequence, and now
+expect the one of RFC 9776 §6.4.2, §6.5 and §6.6.3. What follows describes the model before the
+repair.
 
 `Igmpv3::processRexmtTimer` retransmits only the sources whose timer is above the Last Member
 Query Time, and never sets the S flag of a Group-and-Source-Specific Query
@@ -96,7 +128,8 @@ first and gap 11 keeps every timer high. Repair it with gaps 10 and 11.
 `Igmpv2::sendToIP` has "TODO add Router Alert option" above it
 ([Igmpv2.cc:728-729](../../../../../src/inet/networklayer/ipv4/Igmpv2.cc#L728)); the Reports and
 Leaves of `Igmpv2` carry the option (lines 703-705 and 721-723). No check reads the messages of
-the IGMPv2 router for it.
+the IGMPv2 router for it. The IGMPv2 mode of `Igmpv3`, which the repair of gap 13 added, sends its
+Queries through `Igmpv3::sendQueryToIP`, with the option and the precedence.
 
 ### Two comments of the code are stale
 
@@ -109,9 +142,38 @@ dispatcher sends the older Reports to `processOlderVersionReport` (lines 672-677
 ### The Robustness Variable of a host counts its State-Change Reports
 
 The parameter `robustnessVariable` of a host sets how many times it sends each State-Change
-Report. A host does not adopt the QRV of the querier — which is 0 anyway, gap 1. The tests use
+Report. A host does not adopt the QRV of the querier, which the Queries carry since the repair of
+gap 1. The tests use
 the parameter to make a host send each Report once; see
 [one Report, one query sequence](#one-report-starts-one-query-sequence).
+
+### The routers deleted source records in unsafe loops
+
+**Fixed on** 2026-09-25, before gaps 10 and 11. Two loops of `Igmpv3` and `Mldv2`, at the end of
+a Group Timer in EXCLUDE mode and at an IS_EX record, erased a source record and then incremented
+the iterator of the erased entry. The TO_EX loop of `Igmpv3` in EXCLUDE mode tested the entry
+after the current one, and so deleted a source that RFC 9776 §6.4.2 keeps in Y. No run reached the
+first two loops until the repair of gap 11 left expired source records in EXCLUDE mode; then three
+module tests stopped with a segmentation fault. A repair can open a path that no run reached:
+run the module tests after each gap, and read a crash as a finding of its own.
+
+### A BLOCK record in EXCLUDE mode added no source
+
+**Fixed on** 2026-09-25: the loop of `Igmpv3` and `Mldv2` that adds the new sources A-X-Y of
+RFC9776-RREP-25 iterated over the source map of the group and asked if the map held its own
+entries, so it never added a source. The forwarding did not change, but the Query that follows
+named sources without a record, and the repair of gap 11 lowers only the timers of recorded
+sources. No test measures this row; it is owed.
+
+### The IGMPv2 and IGMPv1 modes of a router
+
+The repair of gap 13 added the parameter `routerVersion` of `Igmpv3`, 3 by default. Each router
+interface keeps its own version, and an older General Query lowers it (RFC9776-RQRY-8); a Query of
+another version than the configured one gets a warning, once for each interface. In IGMPv2 mode the
+Queries are 8 octets with the Max Response Time in tenths of a second; in IGMPv1 mode the General
+Queries have a Max Resp Code of 0, and the router sends no Group-Specific Query and ignores a
+Leave. The new check "Querier configured in IGMPv1 mode" and its test
+`Rfc9776QuerierConfiguredV1` read the IGMPv1 mode on the ordinary link.
 
 ## Scenario quirks
 
@@ -208,6 +270,14 @@ missed deadline says only which step it was. Collect the reasons with
 `grep -A8 ": FAIL" work/*/test.out | grep reason`, and run one test with the `-f` filter of
 `inet_run_protocol_tests`.
 
+### A verdict that stays can hide a new reason
+
+A repair can change the premise of a test that fails for another gap: the test still fails, but
+at an earlier step, and a comparison of verdicts shows nothing. The MLD repair of gap 2 did this
+to the tests with an MLDv1 router (see [`mld/notes.md`](../mld/notes.md#the-ipv6-mockups)). After each repair,
+compare the `reason:` lines of every failing test with those of the run before, and correct the
+test in a `tests:` commit of its own before the next repair.
+
 ### A guard holds the run until its window closes
 
 A step started with `meanwhile(...)` starts at the match of the step before it and runs until its
@@ -224,25 +294,17 @@ pass. Never commit it.
 
 ## Follow-ups, in the order I would do them
 
+The thirteen gaps are repaired, on `topic/standards-tests-igmp-mld-level2-fixes`; the follow-ups
+that repaired them are gone from this list.
+
 1. **Make `Igmpv2` ignore a message type that it does not know.** One line at
-   [Igmpv2.cc:488](../../../../../src/inet/networklayer/ipv4/Igmpv2.cc#L488). No check of this
-   pass fails on it, but every mixed-version link can stop on it.
-2. **The few-line gaps**: set the QRV and the QQIC (gap 1), uncomment the DSCP line of the
-   Reports (gap 2), correct the two NED defaults (gap 3), give the Older Version Querier Present
-   Timer its own interval (gap 4), lower the Group Timer before the S flag is computed (gap 9),
-   and send no empty record and drop the entry of a left group (gap 8). Six gaps, eight tests.
-3. **The router's query sequence**: keep the retransmission state per source when a Report
-   arrives (gap 10), lower the Source Timers of a Group-and-Source-Specific Query (gap 11), and
-   split its retransmission into the two messages of §6.6.3.2 at the same time.
-4. **Ask the forwarding for the source** (gap 12): the one-argument call at `Ipv4.cc:534` and 803
-   becomes the two-argument one. Source-specific multicast starts to work.
-5. **The host's state machines**: merge a later change into the pending records (gap 5), give
-   the IGMPv2 mode its Delaying Member state (gap 6), and cancel the timers on a mode change
-   (gap 7).
-6. **The IGMPv2 querier mode of an IGMPv3 router** (gap 13), the one missing feature; its test
-   declares the failure expected, and the declaration goes with the implementation.
-7. **A lifecycle for `Igmpv2` and `Igmpv3`**, as `Mldv2` has.
-8. **Level 3 and the 49 owed checks**: see
-   [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes).
-9. **Name RFC 9776 in `Igmpv3.ned`**: the claim of RFC 3376 is obsolete; see
-   [`conformance.md`](conformance.md#headlines-for-the-next-pass).
+   [Igmpv2.cc:488](../../../../../src/inet/networklayer/ipv4/Igmpv2.cc#L488). No check fails on
+   it, but every mixed-version link can stop on it.
+2. **A lifecycle for `Igmpv2` and `Igmpv3`**, as `Mldv2` has.
+3. **Level 2 and the 49 owed checks**: see
+   [the coverage debt](coverage.md#the-coverage-debt-the-checks-this-pass-owes). Two of them
+   measure what the repairs changed without a test: the Older Host Present Interval
+   (RFC9776-TIMER-25) and the BLOCK record in EXCLUDE mode (RFC9776-RREP-25).
+4. **Level 3**: the message validation of IGMP-F-MESSAGE-VALIDATION needs crafted messages.
+5. **Name RFC 9776 in `Igmpv3.ned`**, and remove the stale comments of `Igmpv3.cc`: the claim of
+   RFC 3376 is obsolete; see [`conformance.md`](conformance.md#headlines-for-the-next-pass).
