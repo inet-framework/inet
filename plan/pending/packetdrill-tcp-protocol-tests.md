@@ -138,12 +138,13 @@ echo "::endgroup::"
 `inet-gpl` is missing or broken fails at once instead of turning 306 wrappers into 306 skips.
 Checked locally: it passes with `inet-gpl` and fails without it.
 
-**The job will be red** while the baseline divergences stand: under D-2 each one is a plain
-`FAIL`, not an expected one. Repairing or explaining them is what turns the job green. Six remain
-since 2026-09-29: INET `c23267fa9b` (the loss probe after the last ACK) turned
-`gtests:shutdown/shutdown-rdwr-send-queue-ack-close` into a pass. After the second rebase onto
-`topic/tcp-new-audit-fixes` the 306 wrappers give 297 PASS, 3 FAIL (expected) and 6 FAIL
-(unexpected).
+**The job is green since 2026-09-29.** Under D-2 each baseline divergence was a plain `FAIL`, not
+an expected one, and each was a defect of INET. The #1155 branch repairs all seven: `c23267fa9b`
+(the loss probe after the last ACK), `3ed9158dd1` (a window update in the classic flavours, four
+wrappers), `e6992aa467` (the loss probe episode at an RTO) and `f5190638cc` (F-RTO and SACK blocks
+from before the RTO). After the third rebase onto `topic/tcp-new-audit-fixes` (`3bdc199bb6`) the
+306 wrappers give 303 PASS and 3 FAIL (expected), the three scripts that need a `tc qdisc`; all
+588 protocol tests pass or fail as expected.
 
 **Steps 7 and 8 — the evidence and the guide.** `doc/project/evidence/` and the guide
 `derive-tests-from-a-standard.md` did not exist at this branch's first base. Since the rebase of
