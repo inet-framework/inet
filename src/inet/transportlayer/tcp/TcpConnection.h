@@ -707,10 +707,11 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processIcmpv6Error(Indication *indication);
 
     /**
-     * Returns true if the given ICMPv4 type+code is a "hard" error
-     * (protocol unreachable, port unreachable, admin prohibited).
+     * Returns true if the given ICMPv4 type+code is a "hard" error during connection
+     * setup (protocol unreachable, port unreachable, admin prohibited). With
+     * softErrorsAbortSetup, net and host unreachable are hard too, as in Linux.
      */
-    static bool isHardIcmpv4Error(int type, int code);
+    static bool isHardIcmpv4Error(int type, int code, bool softErrorsAbortSetup);
 
     /**
      * Returns true if the given ICMPv6 type+code is a "hard" error

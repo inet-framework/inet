@@ -505,7 +505,7 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     // TFO-accelerated connection dies, see TcpConnectionBase's RCV_RST rule).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
-    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode())
+    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode(), tcpMain->par("softIcmpErrorsAbortSetup").boolValue())
         && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
     {
         EV_DETAIL << "Hard ICMPv4 error during connection setup -- connection refused\n";
@@ -668,19 +668,22 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     return true;
 }
 
-bool TcpConnection::isHardIcmpv4Error(int type, int code)
+bool TcpConnection::isHardIcmpv4Error(int type, int code, bool softErrorsAbortSetup)
 {
-    // Only consulted during connection setup (SYN_SENT/SYN_RCVD), where Linux
-    // tcp_v4_err() aborts on ANY Destination Unreachable code (for the SYN
-    // states the icmp_err_convert fatal flag is bypassed) -- so net/host
-    // unreachable are hard here too, EXCEPT frag-needed (code 4), which
-    // triggers the immediate reduced-MSS SYN retransmit instead.
-    return type == ICMP_DESTINATION_UNREACHABLE
-           && (code == ICMP_DU_NETWORK_UNREACHABLE
-               || code == ICMP_DU_HOST_UNREACHABLE
-               || code == ICMP_DU_PROTOCOL_UNREACHABLE
-               || code == ICMP_DU_PORT_UNREACHABLE
-               || code == ICMP_DU_COMMUNICATION_PROHIBITED);
+    // Only consulted during connection setup (SYN_SENT/SYN_RCVD). RFC 9293 section
+    // 3.9.2.2: net and host unreachable (codes 0 and 1) are soft errors, and a soft
+    // error MUST NOT abort the connection (MUST-56). Linux tcp_v4_err() aborts on
+    // them in the SYN states (the icmp_err_convert fatal flag is bypassed there),
+    // which RFC 5461 section 4 describes as widespread; softErrorsAbortSetup selects
+    // that. Frag-needed (code 4) is never hard here: it triggers the immediate
+    // reduced-MSS SYN retransmit instead.
+    if (type != ICMP_DESTINATION_UNREACHABLE)
+        return false;
+    if (code == ICMP_DU_NETWORK_UNREACHABLE || code == ICMP_DU_HOST_UNREACHABLE)
+        return softErrorsAbortSetup;
+    return code == ICMP_DU_PROTOCOL_UNREACHABLE
+           || code == ICMP_DU_PORT_UNREACHABLE
+           || code == ICMP_DU_COMMUNICATION_PROHIBITED;
 }
 
 bool TcpConnection::isHardIcmpv6Error(int type, int code)
