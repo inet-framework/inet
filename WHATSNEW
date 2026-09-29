@@ -293,6 +293,17 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IPv6 Duplicate Address Detection ends when its address is removed
+
+   A host that receives a Router Advertisement with two new autonomous prefixes
+   removes the address of the first one when the second one restarts Duplicate
+   Address Detection on its link-local address. The Duplicate Address Detection
+   of the removed address kept running and then completed for an address the
+   interface no longer held: a debug build stopped with an assertion failure in
+   Ipv6InterfaceData::permanentlyAssign(), and a release build wrote one byte
+   outside the address list. It now stops when the address is removed. The
+   results of simulations that took this path change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
