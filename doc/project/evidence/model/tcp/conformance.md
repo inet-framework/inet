@@ -258,6 +258,25 @@ is a choice of default, one is a `should not` beside a `must` that holds, and on
 missing case in a module of another layer. None of them is a failure of the connection logic
 itself, which is what these eleven checks were built to attack.
 
+### 9. Where Linux departs from an RFC, the default follows the RFC (PR #1155)
+
+The branch of PR #1155 models Linux in detail, and the packetdrill corpus of inet-gpl checks
+that against real kernels. In four places Linux departs from an RFC that this pass checks.
+The owner decided on 2026-09-29 that the default follows the RFC and that Linux is an option;
+the packetdrill configuration selects the options.
+
+| Behavior | Default (RFC) | Linux, selectable |
+| --- | --- | --- |
+| Retransmission timeout | RFC 6298 §2.3 and §2.4: SRTT + 4·RTTVAR, rounded up to 1 s | `rtoVarianceFloor`: SRTT + max(4·RTTVAR, minimum), with a 200 ms minimum |
+| Initial window | RFC 5681 §3.1: min(4·SMSS, max(2·SMSS, 4380 octets)) | `initialWindow = "rfc6928"`: IW10 (RFC 6928, experimental) |
+| ICMP net or host unreachable during setup | RFC 9293 MUST-56: a soft error, never an abort | `softIcmpErrorsAbortSetup`: the connection aborts (RFC 5461 §4) |
+| RTO after a lost SYN | RFC 6298 §5.7: 3 s | no option: Linux does the same (`TCP_TIMEOUT_FALLBACK`) |
+
+One departure is not an option but a newer standard: CUBIC, the default algorithm, follows
+RFC 9438, which departs from RFC 5681 on purpose in slow start and in the threshold. The
+checks of RFC 5681 therefore select Reno, and say why in their ini. See
+[`results.md`](results.md#the-modern-defaults-of-pr-1155-2026-09-29).
+
 ## What this document does not establish
 
 - It says nothing about the documents outside the in-scope set. The model claims 15 RFCs;

@@ -64,6 +64,10 @@ acknowledgment that covers new data. The initial threshold is set arbitrarily hi
 - The plain mockup, with no loss and a receiver window large enough never to limit the
   sender.
 - Enough data to fill several windows, so the growth is visible over several round trips.
+- The sender runs the congestion control of RFC 5681 (Reno). CUBIC (RFC 9438) departs from
+  RFC 5681 on purpose: its slow start follows HyStart++ (RFC 9406), which lets one
+  acknowledgment raise the window by more than one segment, and it sets the threshold with
+  its own factor.
 
 ### Procedure
 
@@ -99,6 +103,10 @@ half the data in flight, with a floor of two segments, and sets the window to on
   it in that window, so no duplicate acknowledgment reaches the sender and only the timer
   can detect the loss.
 - The window has grown well beyond one segment before the loss, so the drop is visible.
+- The sender runs the congestion control of RFC 5681 (Reno). CUBIC (RFC 9438) departs from
+  RFC 5681 on purpose: its slow start follows HyStart++ (RFC 9406), which lets one
+  acknowledgment raise the window by more than one segment, and it sets the threshold with
+  its own factor.
 
 ### Procedure
 
@@ -139,6 +147,10 @@ acknowledged.
   with a duplicate acknowledgment.
 - The window holds at least four segments at the moment of the loss, so three duplicates
   can arrive.
+- The sender runs RFC 5681 as written: Reno, without SACK (which brings the recovery of
+  RFC 6675), with loss detection by three duplicate acknowledgments (not RACK-TLP,
+  RFC 8985), and without Proportional Rate Reduction (RFC 6937), which replaces the window
+  of steps 3 to 5.
 
 ### Procedure
 
@@ -154,7 +166,9 @@ acknowledged.
 2. Host A retransmits the missing segment after the third duplicate, and well before the
    retransmission timer would expire.
 3. After the third duplicate the threshold falls, and the window equals the threshold plus
-   three segments.
+   three segments, plus one segment for each further duplicate. The window is observed by
+   what it limits: no segment of new data that host A sends before the acknowledgment of
+   new data takes FlightSize past that window.
 4. After the acknowledgment of new data the window equals the threshold.
 
 ### Notes
@@ -164,6 +178,10 @@ acknowledged.
   adds over a plain retransmission.
 - Observation 2 needs a second bound: the retransmission must arrive before the timer would
   have fired, or a slow timer and fast retransmit look the same.
+- Observation 3 reads the window through FlightSize, because an implementation may keep the
+  window in another form. Linux, for example, does not inflate the window; it takes each
+  duplicate out of the data it counts in flight instead. Both forms allow the same segments,
+  and only the segments are on the link.
 
 ## Window after a lost SYN
 

@@ -65,12 +65,43 @@ small window**, which does not need the window to close. A closing window needs 
 
 ### The initial congestion window is one segment
 
-[TcpBaseAlg.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L149).
+[TcpAlgorithmBase.cc:203](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L203).
 This is what lets a 300-octet receiver window be the binding limit in the flow-control
 check: it is smaller than a segment and smaller than the congestion window, so neither of
 the other two limits can be mistaken for it.
 
+On the branch of PR #1155 the default is the bound of RFC 5681 §3.1 instead, 4380 octets for
+a 1460-octet MSS
+([TcpAlgorithmBase.cc:109](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L109)).
+The 300-octet receiver window is still the smallest of the three limits.
+
 ## Scenario and tooling quirks
+
+### A loss is repaired within a millisecond
+
+With SACK and RACK, the defaults of PR #1155, a sender repairs a lost segment about half a
+millisecond after the loss, and it sends its next segments in the same flight. A blocking
+`never` step holds the cursor for its whole window, so the event that the next step waits
+for happens inside that window and the next step misses it. Five checks failed this way on
+2026-09-29. The guard belongs beside the steps (`meanwhile`). A guard that forbids an
+acknowledgment "before the retransmission" needs a flag that a later step sets, because a
+fixed window then also catches the correct acknowledgment after the repair.
+
+### A scenario constant can stop making its condition
+
+The shrunk-window checks rewrote host B's fourth acknowledgment. Under the old defaults that
+acknowledgment came while data was in flight. Under the new ones host A sends the whole
+stream in its first flight, and the fourth acknowledgment was host B's FIN. The
+no-new-data check then passed without looking at anything. A change of defaults needs a
+look at every constant that picks a segment by its position.
+
+### The published window is Linux's, not RFC 5681's
+
+Without SACK the model takes each duplicate acknowledgment out of the data it counts in
+flight, as Linux does, and does not inflate the window. The published `cwnd` stays at the
+threshold in fast recovery, while RFC 5681 says threshold plus three segments. Both allow the
+same segments. A check of the window reads what the window limits: the new data that the
+sender puts in flight.
 
 ### An echo application defeats a delayed-acknowledgment scenario
 

@@ -16,8 +16,9 @@ usable window to become negative.
 
 ### Scenario constants
 
-- The common transfer, with a relay on the path.
-- The relay rewrites the window field of the fourth acknowledgment from host B to 100 octets
+- The common transfer, with a relay on the path, but with a stream of 30000 octets: more
+  than an initial window, so that host A still has data it has not sent.
+- The relay rewrites the window field of host B's first acknowledgment of data to 100 octets
   and computes the checksum again. By then host A has several segments in flight, so the
   right edge the relay writes falls behind the sequence number host A has reached: the
   usable window is negative.
@@ -56,8 +57,8 @@ the right edge.
 
 ### Scenario constants
 
-- The same as [Shrunk window](#shrunk-window): the relay shrinks the fourth acknowledgment
-  to a window of 100 octets.
+- The same as [Shrunk window](#shrunk-window): the relay shrinks host B's first
+  acknowledgment of data to a window of 100 octets.
 
 ### Procedure
 
