@@ -32,8 +32,8 @@ class Ipv6RoutingTable;
 
 #define IPv6_DEFAULT_MAX_RTR_ADV_INT            600 // seconds-decrease to enable more periodic RAs
 #define IPv6_DEFAULT_MIN_TO_MAX_RTR_ADV_RATIO   0.33 // RFC 4861: default MinRtrAdvInterval = 0.33 * MaxRtrAdvInterval
-#define IPv6_DEFAULT_ADV_REACHABLE_TIME         3600 // seconds
-#define IPv6_DEFAULT_ADV_RETRANS_TIMER          1   // seconds
+#define IPv6_DEFAULT_ADV_REACHABLE_TIME         3600000 // milliseconds
+#define IPv6_DEFAULT_ADV_RETRANS_TIMER          1000 // milliseconds
 #define IPv6__INET_DEFAULT_ROUTER_HOPLIMIT      64
 
 /**************RFC 2461: Section 10 Protocol Constants*************************/
