@@ -153,6 +153,16 @@ void TcpAlgorithmBase::established(bool active)
     // handshake ACK).
     state->time_last_data_sent = simTime();
 
+    // RFC 6298 section 5.7: "If the timer expires awaiting the ACK of a SYN segment and
+    // the TCP implementation is using an RTO less than 3 seconds, the RTO MUST be
+    // re-initialized to 3 seconds when data transmission begins". A retransmitted SYN
+    // or SYN-ACK gives no RTT sample (Karn), so the RTO is still the initial one here.
+    // Linux tcp_init_metrics() does the same with TCP_TIMEOUT_FALLBACK.
+    if (state->syn_rexmit_count > 0 && !state->rttMeasured && state->rexmit_timeout < 3) {
+        state->rexmit_timeout = 3;
+        EV_INFO << "RFC 6298 5.7: the SYN timer expired, RTO re-initialized to 3s\n";
+    }
+
     // initialize cwnd (we may learn SMSS during connection setup)
 
     // RFC 3390, page 2: "The upper bound for the initial window is given more precisely in
