@@ -293,6 +293,18 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+18. IPv6 Neighbour Discovery retransmission interval
+
+   The retransTimer parameter of Ipv6NeighbourDiscovery, the Retrans Timer field
+   of a received Router Advertisement and the HostRetransTimer attribute of the
+   routing table configuration set the interval between Duplicate Address
+   Detection probes only. Address resolution and Neighbour Unreachability
+   Detection kept retransmitting their Neighbour Solicitations every second. All
+   three now use the configured or advertised value, as RFC 4861 Sections 6.3.4,
+   7.2.2 and 7.3.3 require. The parameter also keeps fractions of a second now: a
+   value such as 0.2s was truncated to 0. The results of simulations that set any
+   of the three change; with the default of 1s nothing changes.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
