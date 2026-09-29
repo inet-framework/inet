@@ -231,7 +231,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
         uint maxUnicastSolicit;
         simtime_t maxAnycastDelayTime;
         uint maxNeighbourAdvertisement;
-        simtime_t reachableTime;
         simtime_t delayFirstProbeTime;
         double minRandomFactor;
         double maxRandomFactor;
@@ -314,7 +313,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  A base value used for computing the random ReachableTime value.
          *  Default: REACHABLE_TIME milliseconds. > protocol constants
          */
-        uint baseReachableTime;
+        simtime_t baseReachableTime;
         /**
          *  The time a neighbor is considered reachable after receiving a
          *  reachability confirmation.
@@ -610,7 +609,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     uint _getMaxUnicastSolicit() const { return nodeConstants.maxUnicastSolicit; }
     simtime_t _getMaxAnycastDelayTime() const { return nodeConstants.maxAnycastDelayTime; }
     uint _getMaxNeighbourAdvertisement() const { return nodeConstants.maxNeighbourAdvertisement; }
-    simtime_t _getReachableTime() const { return nodeConstants.reachableTime; }
     simtime_t _getDelayFirstProbeTime() const { return nodeConstants.delayFirstProbeTime; }
     double _getMinRandomFactor() const { return nodeConstants.minRandomFactor; }
     double _getMaxRandomFactor() const { return nodeConstants.maxRandomFactor; }
@@ -619,7 +617,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     virtual void _setMaxUnicastSolicit(uint d) { nodeConstants.maxUnicastSolicit = d; }
     virtual void _setMaxAnycastDelayTime(simtime_t d) { nodeConstants.maxAnycastDelayTime = d; }
     virtual void _setMaxNeighbourAdvertisement(uint d) { nodeConstants.maxNeighbourAdvertisement = d; }
-    virtual void _setReachableTime(simtime_t d) { nodeConstants.reachableTime = d; }
     virtual void _setDelayFirstProbeTime(simtime_t d) { nodeConstants.delayFirstProbeTime = d; }
     virtual void _setMinRandomFactor(double d) { nodeConstants.minRandomFactor = d; }
     virtual void _setMaxRandomFactor(double d) { nodeConstants.maxRandomFactor = d; }
@@ -634,13 +631,17 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     /************Getters for Host Variables************************************/
     uint getLinkMtu() const { return hostVars.linkMTU; }
     short getCurHopLimit() const { return hostVars.curHopLimit; }
-    uint getBaseReachableTime() const { return hostVars.baseReachableTime; }
+    simtime_t getBaseReachableTime() const { return hostVars.baseReachableTime; }
     simtime_t getReachableTime() const { return hostVars.reachableTime; }
     simtime_t getRetransTimer() const { return hostVars.retransTimer; }
     /************Setters for Host Variables************************************/
     virtual void setLinkMtu(uint d) { hostVars.linkMTU = d; }
     virtual void setCurHopLimit(short d) { hostVars.curHopLimit = d; }
-    virtual void setBaseReachableTime(uint d) { hostVars.baseReachableTime = d; }
+    /**
+     * Sets BaseReachableTime, and recomputes the random ReachableTime from it
+     * when the value changes (RFC 4861 Section 6.3.2).
+     */
+    virtual void setBaseReachableTime(simtime_t d);
     virtual void setReachableTime(simtime_t d) { hostVars.reachableTime = d; }
     virtual void setRetransTimer(simtime_t d) { hostVars.retransTimer = d; }
     /************End of Host Variables getters and setters*********************/
@@ -709,7 +710,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *  MAX_RANDOM_FACTOR and baseReachableTime. Refer to RFC 2461: Section 6.3.2
      */
     virtual simtime_t generateReachableTime(double MIN_RANDOM_FACTOR, double MAX_RANDOM_FACTOR,
-            uint baseReachableTime);
+            simtime_t baseReachableTime);
 
     /**
      * Arg-less version.

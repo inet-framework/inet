@@ -343,7 +343,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
     if ((s = cfg->getAttribute("HostCurHopLimit")) != nullptr)
         d->setCurHopLimit(utils::atoul(s));
     if ((s = cfg->getAttribute("HostBaseReachableTime")) != nullptr)
-        d->setBaseReachableTime(utils::atoul(s));
+        d->setBaseReachableTime(SimTime(utils::atoul(s), SIMTIME_S));
     if ((s = cfg->getAttribute("HostRetransTimer")) != nullptr)
         d->setRetransTimer(SimTime(utils::atoul(s), SIMTIME_S));
     if ((s = cfg->getAttribute("HostDupAddrDetectTransmits")) != nullptr)
