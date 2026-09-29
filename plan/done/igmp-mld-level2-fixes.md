@@ -1,6 +1,6 @@
 # IGMP and MLD level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-igmp-mld-level2-fixes`, on
+**Status:** done on 2026-09-29. Started 2026-09-25 on `topic/standards-tests-igmp-mld-level2-fixes`, on
 top of `topic/standards-tests-igmp-mld-level2` at `8dba80c00a`. Worktree:
 `/home/levy/workspace/inet-standards-tests-igmp-mld-level2-fixes`.
 
@@ -61,9 +61,9 @@ The twin gaps come next to each other, IGMP first.
 19. [x] **IGMP gap 13** — the IGMPv2 querier mode of an IGMPv3 router (missing feature), with the
     IGMPv1 mode and a new check and test for it.
 20. [x] **MLD gap 17** — the MLDv1 mode of an MLDv2 router (missing feature).
-21. [ ] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
+21. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and
     `notes.md` of both protocols follow it; the statistics branch.
-22. [ ] Gates, then move this plan to `plan/done/`.
+22. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -158,4 +158,19 @@ The twin gaps come next to each other, IGMP first.
 - **Open finding.** `Icmpv6` emits `packetDropped` when a checksum is wrong, but `Icmpv6.ned`
   does not declare the signal, so a debug run stops there. The drop path is not more reachable
   than before; not repaired on this branch.
-
+- **The documents.** A fresh run at the plan commit of step 20: IGMP 43 tests, 43 PASS; MLD 47
+  tests, 47 PASS. The IGMP ledger has 111 covered, 49 owed and 71 later statements; the matrix has
+  7 features confirmed, 11 partial, 1 unverified and 1 out of claim. The MLD ledger keeps 58 owed
+  statements; the matrix has 8 confirmed, 11 partial and 1 out of claim, and no defect. With the
+  IGMPv1 mode of a router, the closing list of the IGMP checks moves RFC9776-COMPR-4 (a Leave at
+  a router in IGMPv1 mode) to level 3 and COMPR-5 (a warning) to level 4.
+- **Statistics.** One run of the whole set for each of the 32 source commits, in order. Five
+  commits move results: MLD gaps 2, 3 and 5 (the five IPv6 multicast examples, and inet/ipsec
+  Multicast6 with gap 3), IGMP gap 3 (inet/igmp IGMPv3) and MLD gap 6 (ipv6/mld MldV2Ssm and pim
+  ssm_ipv6). The statistics branch of the same name has one commit for each, named by the INET
+  subject; the other 27 commits say "No statistical result moves". A wait loop that uses
+  `pgrep -f` finds its own command line and never ends: wait for a PID or for a file instead.
+- **Message repairs.** A `git filter-branch --msg-filter` keyed by `$GIT_COMMIT` added the
+  statistics paragraph and the `statistical` trailer, and rewrapped two paragraphs. The documents
+  cited the commits through `{{H:<subject>}}` tokens, which were replaced by the new hashes after
+  the filter; the doc commit was amended with them.
