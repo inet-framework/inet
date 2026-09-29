@@ -1441,12 +1441,14 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             // RFC 7323 / Linux tcp_rcv_synsent_state_process (PAWSACTIVEREJECTED):
             // a SYN-ACK whose TSecr does not echo anything this connection could
-            // have sent (it must lie between the SYN's send time and now on our
-            // timestamp clock) is repelled with <SEQ=SEG.ACK><CTL=RST> and the
+            // have sent (it must lie between the FIRST SYN's send time and now on
+            // our timestamp clock) is repelled with <SEQ=SEG.ACK><CTL=RST> and the
             // segment is dropped -- the connection stays in SYN_SENT awaiting a
-            // valid SYN-ACK (synack-data TEST5's deliberate bad-ecr probe).
-            if (state->rcv_initial_ts && state->lastRcvdTSecr != 0 && state->handshakeSentTime >= SIMTIME_ZERO) {
-                uint32_t tsLow = convertSimtimeToTS(state->handshakeSentTime);
+            // valid SYN-ACK (synack-data TEST5's deliberate bad-ecr probe). The
+            // lower bound is Linux tp->retrans_stamp, which a SYN retransmission
+            // does not change: a SYN-ACK to an earlier copy of the SYN is valid.
+            if (state->rcv_initial_ts && state->lastRcvdTSecr != 0 && state->firstSynSentTime >= SIMTIME_ZERO) {
+                uint32_t tsLow = convertSimtimeToTS(state->firstSynSentTime);
                 uint32_t tsHigh = convertSimtimeToTS(simTime());
                 if (seqLess(state->lastRcvdTSecr, tsLow) || seqGreater(state->lastRcvdTSecr, tsHigh)) {
                     EV_WARN << "SYN-ACK TSecr " << state->lastRcvdTSecr << " outside [" << tsLow << ", "

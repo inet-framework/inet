@@ -1258,6 +1258,8 @@ void TcpConnection::sendSyn()
     Packet *fp = attachSynData ? sendQueue->createSegmentWithBytes(state->iss + 1, synDataLen) : new Packet("SYN");
 
     state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
+    if (state->syn_rexmit_count == 0)
+        state->firstSynSentTime = simTime(); // for the PAWS check of the SYN-ACK
 
     // send it
     sendToIP(fp, tcpHeader);
