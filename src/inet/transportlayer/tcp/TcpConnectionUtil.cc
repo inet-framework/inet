@@ -2138,7 +2138,16 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         return false;
     }
 
-    if (allowedToSend < state->snd_effmss && buffered > allowedToSend) {
+    // Sender-side SWS avoidance, RFC 9293 section 3.8.6.2.1: a segment smaller than the
+    // MSS that does not carry all queued data goes out only if it fills at least half
+    // (Fs = 1/2) of the largest window the peer ever offered. Without that condition a
+    // peer whose window never reaches one MSS never receives anything. Linux gets a
+    // similar result from tcp_bound_to_half_wnd(), which limits the segment size to
+    // half of that window.
+    auto swsHold = [&] (uint32_t usable, uint32_t queued) {
+        return usable < state->snd_effmss && queued > usable && usable < state->max_window / 2;
+    };
+    if (swsHold(allowedToSend, buffered)) {
         EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
         return false;
     }
@@ -2244,7 +2253,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
                                    && seqLE(state->snd_sml, state->snd_nxt);
         bool nagleHold = state->nagle_enabled && unacknowledgedData && unackedSmallSegment
                          && !containsFin && buffered < state->snd_effmss && !state->corkFlush;
-        if (allowedToSend < state->snd_effmss && buffered > allowedToSend)
+        if (swsHold(allowedToSend, buffered))
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
         else if (corkHold || nagleHold) {
             if (corkHold)
