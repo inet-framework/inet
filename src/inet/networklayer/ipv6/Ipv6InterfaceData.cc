@@ -190,7 +190,6 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     nodeConstants.maxAnycastDelayTime = IPv6_MAX_ANYCAST_DELAY_TIME;
     nodeConstants.maxNeighbourAdvertisement = IPv6_MAX_NEIGHBOUR_ADVERTISEMENT;
     nodeConstants.reachableTime = IPv6_REACHABLE_TIME;
-    nodeConstants.retransTimer = IPv6_RETRANS_TIMER;
     nodeConstants.delayFirstProbeTime = IPv6_DELAY_FIRST_PROBE_TIME;
     nodeConstants.minRandomFactor = IPv6_MIN_RANDOM_FACTOR;
     nodeConstants.maxRandomFactor = IPv6_MAX_RANDOM_FACTOR;
