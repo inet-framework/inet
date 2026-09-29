@@ -610,6 +610,15 @@ class INET_API TcpConnection : public SimpleModule
     virtual uint32_t getDataSndUna() const;
 
     /**
+     * FlightSize for the ssthresh of fast retransmit (RFC 5681 equation (4)): the data
+     * that was sent but is not cumulatively acknowledged. Step 2 of RFC 5681 section
+     * 3.2 leaves out the data that Limited Transmit sent on the duplicate ACKs. This is
+     * not the pipe of getBytesInFlight(): the pipe also leaves out the SACKed and the
+     * duplicate-ACKed segments.
+     */
+    virtual uint32_t getFlightSize() const;
+
+    /**
      * MTU <-> MSS conversions for the RFC 4821 search (Linux tcp_mtu_to_mss /
      * tcp_mss_to_mtu). The header allowance is the FIXED part -- network header
      * plus TCP header plus the options carried on every established segment --

@@ -89,9 +89,12 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    new data unless the incoming duplicate acknowledgment contains
     //    new SACK information.
     //"
-    if (state->dupacks < state->dupthresh)
+    if (state->dupacks < state->dupthresh) {
         // TODO FlightSize would remain less than or equal to cwnd plus 2*SMSS
+        uint32_t oldSndMax = state->snd_max;
         conn->sendData(state->snd_cwnd);
+        state->limitedTransmitBytes += state->snd_max - oldSndMax;
+    }
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
     //    to no more than the value given in equation (4).  When [RFC3042]
@@ -113,8 +116,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // where, as discussed above, FlightSize is the amount of outstanding
         // data in the network.
         //"
-        uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_effmss; // the +1 MSS accounts for the retransmitOneSegment call below
-        state->ssthresh = conn->getTcpAlgorithmForUpdate()->calculateSsthresh(flightSize);
+        state->ssthresh = conn->getTcpAlgorithmForUpdate()->calculateSsthresh(conn->getFlightSize());
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"

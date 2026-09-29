@@ -64,7 +64,7 @@ PRR: pipe=
 
 %# on leaving recovery cwnd is set to ssthresh (RFC 6937 tcp_end_cwnd_reduction)
 %contains: stdout
-PRR: leaving fast recovery, cwnd=ssthresh=3500
+PRR: leaving fast recovery, cwnd=ssthresh=4000
 
 %# the transfer completed despite the loss
 %contains: stdout

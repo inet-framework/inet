@@ -336,8 +336,10 @@ void Rfc6675Recovery::receivedDuplicateAck()
                         break;
                     if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
                         state->snd_nxt = seqNum;
+                        uint32_t oldSndMax = state->snd_max;
                         uint32_t sentBytes = conn->sendSegment(state->snd_mss);
                         state->pipe += sentBytes;
+                        state->limitedTransmitBytes += state->snd_max - oldSndMax;
                     }
                     else
                         break;

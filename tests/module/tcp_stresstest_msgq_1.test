@@ -36,7 +36,7 @@ TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.cli_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_app: received 252372 bytes in 89 packets
-[50.049] tcpdump finished, A:345 B:408 segments
+[51.364] tcpdump finished, A:359 B:421 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------
