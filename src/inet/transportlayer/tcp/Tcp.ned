@@ -150,8 +150,10 @@ import inet.transportlayer.contract.ITcp;
 //  - RFC 6298 - Computing TCP's Retransmission Timer
 //    Jacobson's and Karn's algorithms, exponential backoff, `initialRto` = 1 s.
 //    Deviations:
-//     - `minRexmitTimeout` defaults to 200 ms, Linux's floor, where section 2.4
-//       recommends 1 s (while explicitly allowing a lower value). (Linux parity.)
+//     - `rtoVarianceFloor` computes the timeout as Linux does, with the
+//       minimum bounding the variance term instead of the whole value, and
+//       with `minRexmitTimeout` = 200 ms it is Linux's timer. (Linux parity,
+//       opt-in; the default follows sections 2.3 and 2.4.)
 //     - With `seedRttFromHandshake` the estimator starts from the SYN/SYN-ACK
 //       round trip rather than from the first data ACK. RFC 6298 does not
 //       describe this; Linux does it. (Linux parity, on by default.)
@@ -518,7 +520,8 @@ simple Tcp extends SimpleModule like ITcp
         int maxRexmitCount = default(12); // maximum retransmission count
         double maxRexmitTimeout @unit(s) = default(120s); // maximum retransmission timeout
         double minPersistTimeout @unit(s) = default(5s); // minimum persist timeout
-        double minRexmitTimeout @unit(s) = default(0.2s); // minimum retransmission timeout
+        double minRexmitTimeout @unit(s) = default(1s); // minimum retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)
+        bool rtoVarianceFloor = default(false); // false: RTO = SRTT + 4*RTTVAR, rounded up to minRexmitTimeout (RFC 6298 sections 2.3 and 2.4); true: RTO = SRTT + max(4*RTTVAR, minRexmitTimeout), Linux tcp_set_rto
         bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
         // parameters of: tcp: retransmission, persist and handshake timing
         int synLinearTimeouts = default(4); // Linux net.ipv4.tcp_syn_linear_timeouts: number of initial CLIENT SYN retransmits fired at the (non-backed-off) initial RTO before exponential backoff begins; 0 = double from the first retransmit
