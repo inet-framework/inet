@@ -220,7 +220,7 @@ exists to find.
 | 3 | Extract checkable statements, per document | `evidence/standard/<doc>/catalog.md` |
 | 4 | Map the features across the combined standards | `evidence/protocol/<proto>/features.md` |
 | 5 | Write the English check procedure with a mockup | `evidence/protocol/<proto>/checks.md`, and `checks/<feature>.md` |
-| 6 | Write the protocol test | `tests/protocol/<proto>/<Doc><Name>.test`, and the helper header of the suite |
+| 6 | Write the protocol test | `tests/protocol/<proto>/<Doc><Name>.test`, or `<proto>/rfc/` beside other kinds of test, and the helper header of the suite |
 | 7 | Run the test, analyze the model, update feature support | `evidence/model/<proto>/results.md` |
 | 8 | Extract the model claims, cross-check at feature level | `evidence/model/<proto>/conformance.md` |
 | 9 | Decide the category of each check | `evidence/model/<proto>/categories.md` |
@@ -511,6 +511,14 @@ Translate the English document into a self-contained `opp_test` file in
   `ethernetmac.dest`, which lands on the frame check sequence); an ini key with a wrong
   path applies nothing. On a deadline miss, run the tester without `testName` first
   and read the real frames in the trace.
+
+**One folder per kind of test.** A protocol whose only protocol tests are the ones of this
+guide keeps them in `tests/protocol/<proto>/`. When a second kind of test arrives for the
+protocol, the tests of this guide move into `tests/protocol/<proto>/rfc/`, and each other kind
+gets a folder of its own. TCP is the first: `tests/protocol/tcp/rfc/` holds its tests of this
+guide, and `tests/protocol/tcp/linux/` and `tests/protocol/tcp/packetdrill/` hold the wrappers
+that run the packetdrill scripts of `inet-gpl`. File names and program names stay the same in
+`rfc/`, and a header that the tests include moves with them.
 
 ## Step 7 — run and analyze (`model/<proto>/results.md`)
 
@@ -925,6 +933,9 @@ tests/protocol/<proto>/                  the tests
   Rfc791FragmentReassembly.test
   Rfc791DontFragment.test
   Ipv4Mutations.h                        step 6: the helper header of the suite
+
+tests/protocol/tcp/rfc/                  the tests of a protocol that has other kinds of test
+  Rfc9293DataTransfer.test               step 6
 
 plan/pending/, plan/done/                the plan of the pass, with its decision log
 audit/<proto>-level<N>/                  the working scripts, not in git
