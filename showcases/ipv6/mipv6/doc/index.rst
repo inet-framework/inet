@@ -8,7 +8,8 @@ An IPv6 address plays two roles at once: routers treat it as a *location* (the
 prefix says which link the node is on), and transport connections treat it as
 an *identity* (a connection is pinned to the address pair). When a device moves
 to a network with a different prefix, it gets a new, routable address — but
-every open connection breaks, and nobody can reach it at the address they know.
+nobody can reach it at the address they know, so its open connections stall
+until it comes back.
 
 Mobile IPv6 (RFC 6275) solves this by splitting the two roles into two
 addresses, anchored by a *home agent*. This showcase demonstrates the whole
@@ -577,11 +578,12 @@ care-of address. While the check runs, INET also marks the node's home address
 tentative, so the node cannot use that address either.
 
 INET sends the probe at once and then waits 1 s plus a random 0.057 s; the
-standard puts the random part before the probe instead. The check completes at
-19.924 s. At the same instant, the node assigns its care-of address,
-``2001:db8:0:3:8aa:ff:fe00:d``, without probing it, and its home address
-becomes usable again. From here on, the home address is usable; the replies
-that the node drops a little later have a different cause.
+general rule for duplicate address detection (RFC 4862) puts a random delay
+before the probe instead. The check completes at 19.924 s. At the same instant,
+the node assigns its care-of address, ``2001:db8:0:3:8aa:ff:fe00:d``, without
+probing it, and its home address becomes usable again. From here on, the home
+address is usable; the replies that the node drops a little later have a
+different cause.
 
 Here is this part of the run as a sequence chart, taken from the
 ``WithoutMipv6`` run. Each horizontal line is one node, and each arrow is one
@@ -640,8 +642,10 @@ stretches this moment about 800 times and shows the order: the Router
 Advertisement reaches ``mobileNode`` first, and then the Neighbor Solicitation
 leaves it. After that comes about a second of silence, in which the node may
 not use its new addresses yet. The end of the check is not a message, so no
-arrow marks it. At 19.924 s all three runs have a working care-of address. This
-is where they part.
+arrow marks it. The second Router Solicitation and Neighbor Solicitation labels
+in the ``apForeign`` band are not second messages: they are the access point
+relaying the multicast copy back into its cell. At 19.924 s all three runs have
+a working care-of address. This is where they part.
 
 Without Mobile IPv6
 ~~~~~~~~~~~~~~~~~~~
@@ -652,13 +656,15 @@ address, and the pings keep going to the home link. There, the router
 ``homeAgent`` still has a valid neighbor entry for the home address, so it
 sends each ping to ``apHome``, which transmits it seven times and drops it; 53
 pings are lost this way. Neighbor Unreachability Detection (NUD), the Neighbor
-Discovery check that a neighbor still answers, starts to doubt the entry at
-36.0 s, when INET's 30 s reachable time runs out. It waits 5 s, probes the node
-three times, 1 s apart, from 41.0 s, and deletes the entry at 44.0 s. Only then
-does the router try to resolve the home address to a link-layer address again.
-It holds the pings that arrive during each attempt. When an attempt fails, it
-drops them, and the correspondent node receives ICMPv6 Destination Unreachable
-messages, at 47.0 s and again at 50.0 s.
+Discovery check that a neighbor still answers, counts INET's 30 s reachable
+time from the last time the node confirmed the entry, at 5.5 s, so the time
+runs out at 35.5 s. The next ping, at 36.0 s, makes the router start to doubt
+the entry. It waits 5 s, probes the node three times, 1 s apart, from 41.0 s,
+and deletes the entry at 44.0 s. Only then does the router try to resolve the
+home address to a link-layer address again. It holds the pings that arrive
+during each attempt. When an attempt fails, it drops them, and the
+correspondent node receives ICMPv6 Destination Unreachable messages, at 47.0 s
+and again at 50.0 s.
 
 Here is the round-trip time of every ping in the ``WithoutMipv6`` run. The
 shaded band is the time the node spends away from home. The three
@@ -1273,9 +1279,7 @@ earlier, at 49.648 s, and the wait is 1.42 s.
 
 This wait comes from answering by multicast. The standard also allows a router
 to answer a solicitation by unicast, and a unicast answer is not held back by
-the limit. Whether a router does so is a setting: some routers answer by
-unicast by default, others multicast unless configured, and RFC 7772
-recommends unicast. INET always multicasts. The 3 s gap itself is the
+the limit. INET always multicasts. The 3 s gap itself is the
 standard's default, which Mobile IPv6 allows a router serving mobile nodes to
 lower. INET keeps it as a fixed value; it is not the ``minIntervalBetweenRAs``
 parameter of the ini file, which is the lower bound of the spacing of the
@@ -1390,7 +1394,7 @@ take the home path:
    seed:     default (seed-set=1)
    shows:    last direct pings (red route through foreignRouter) -> the walk home -> AP
              label FOREIGN -> HOME ("Associated with AP" bubble) while the status stays
-             "away (route-optimized, 1 CN)" for 2.4 s (the Router Advertisement held by the
+             "away (route-optimized, 1 CN)" for 2.45 s (the Router Advertisement held by the
              3 s rate limit) -> status "at home", address label back to the home address
              -> ping106 and ping107 on the home path through homeAgent
    anchors:  last reply away ping98 at 50.020 s; beacon loss 50.721 s; association with
@@ -1473,7 +1477,7 @@ and each term is either a protocol timer or a value of this scenario:
      - protocol timer (1 s hold, first registration only) plus 43 ms of network
        path
    * - Next ping and its round trip
-     - 0.074 s
+     - 0.073 s
      - measurement granularity (0.5 s ping interval)
    * - **Total**
      - **4.026 s**
@@ -1535,7 +1539,7 @@ the GitHub issue tracker for commenting on this showcase.
 .. TODO: create the tracker issue for this showcase and replace the link above
 
 The handover outage in this showcase is set mostly by protocol timers. For a
-care-of address, the Mobile IPv6 standard prefers duplicate address detection
+care-of address, Mobile IPv6 (RFC 6275) prefers duplicate address detection
 without a random delay; INET adds a random 0–1 s to the wait after its probe.
 
 A measured 802.11 testbed (Cabellos-Aparicio et al., 2005) found a mean Mobile
@@ -1545,13 +1549,11 @@ detection together, 1.52 s. The testbed spent it on duplicate address detection
 and on Neighbor Unreachability Detection, which finds out that the old router
 no longer answers; this run detects the move from the link layer instead.
 
-This run's 4.03 s is about 1.9 s longer. The home agent's first-registration
-exchange takes 1.04 s here and 4 ms in the testbed. This run counts 0.74 s
-between the last reply at home and the loss of the access point, which the
-testbed's clock, started at the scan, leaves out. Scan and association take
-0.65 s here against 0.26 s there, and the next ping and its round trip add 0.07
-s. The shorter IPv6 phase, 0.32 s less than the testbed's, takes part of this
-back.
+This run's 4.03 s is longer mainly for three reasons: the home agent's
+first-registration exchange, 1.04 s here and 4 ms in the testbed; the 0.74 s
+this run counts before the access point is lost (the ping-spacing and
+beacon-loss rows of the table), which the testbed's clock, started at the scan,
+leaves out; and a longer scan and association, 0.65 s against 0.26 s.
 
 The 802.11 terms of this scenario depend on its scan settings. Fast roaming
 (IEEE 802.11k and 802.11r) changes access points in tens of milliseconds, but
@@ -1560,6 +1562,12 @@ also keeps the node's address and Mobile IPv6 is not needed. A move to a
 different network, as here, needs a full scan and association, and in a secured
 network also a full authentication, which this scenario leaves out. So the
 802.11 terms of a real move can be shorter or longer than here.
+
+Whether a router answers a Router Solicitation by unicast, which the 3 s limit
+does not hold back, is a setting: some routers do so by default, others
+multicast unless configured. RFC 7772 asks routers to support unicast answers,
+and asks networks with many battery-powered devices to turn them on, to save
+energy.
 
 Optimizations such as Optimistic Duplicate Address Detection (RFC 4429) let a
 node use a new address while the check still runs. This removes the mobile
