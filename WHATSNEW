@@ -347,6 +347,14 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. An IPv6 tunnel exit point survives a dropped decapsulated datagram
+
+   An IPv6 node that decapsulated an IPv6-in-IPv6 datagram crashed when a
+   netfilter PREROUTING hook dropped the inner datagram, because the datagram
+   was deleted twice. A Mobile IPv6 home agent drops a datagram tunneled to
+   it from a source it has no binding for, so such a home agent crashed on
+   the first one. The datagram is now dropped and the simulation continues.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
