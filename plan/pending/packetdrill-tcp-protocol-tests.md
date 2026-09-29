@@ -58,8 +58,43 @@ protocol tests, which still build a binary, pass. The `opp_repl` copy got the sa
 or the document or the Linux interface outside it. `README.md` tallies the three kinds. The ids
 point into `doc/project/evidence/`, which this branch gets with the rebase onto master.
 
-**Step 6 — CI.** The *Test: protocol* job builds `inet-gpl` and fails if every wrapper skips.
+**Step 6 — CI. — designed 2026-09-29; lands after the rebase of #1155.** At this branch's base the
+protocol tests run in the matrix of `.github/workflows/other-tests.yml`; master split it into one
+workflow per category (`4fda03f612`), so a change here would be replaced at the rebase. The change
+to master's `protocol-tests.yml`:
+
+```yaml
+      - uses: actions/checkout@v6
+        with:
+          repository: inet-framework/inet-gpl
+          path: inet-gpl
+          ref: rh/packetdrill            # master, once rh/packetdrill merges
+```
+
+and, in the *Build and test* step, after `build-inet.sh` and before `inet_run_protocol_tests`:
+
+```sh
+echo "::group::Building inet-gpl"
+python3 -m pip install pyyaml            # oracle.py reads corpus.yaml and mapping.yaml
+cd $GITHUB_WORKSPACE/inet-gpl && . setenv -q && make makefiles && make MODE=$MODE -j $(nproc)
+make -C tests/oracle build
+echo "::endgroup::"
+echo "::group::Checking that the packetdrill wrappers can run"
+"$INET_ROOT/tests/protocol/tcp/packetdrill/run" gtests:fast_retransmit/fr-4pkt-sack | tail -1 \
+  | grep -qx 'PACKETDRILL gtests:fast_retransmit/fr-4pkt-sack: PASS'
+echo "::endgroup::"
+```
+
+**The guard** runs one script that passes and requires its verdict line, so a job in which
+`inet-gpl` is missing or broken fails at once instead of turning 306 wrappers into 306 skips.
+Checked locally: it passes with `inet-gpl` and fails without it.
+
+**The job will be red** while the seven baseline divergences stand: under D-2 each one is a plain
+`FAIL`, not an expected one. Repairing or explaining them is what turns the job green.
 
 **Steps 7 and 8 — the evidence and the guide.** `doc/project/evidence/` and the guide
 `derive-tests-from-a-standard.md` do not exist at this branch's base, which predates them. These
 two steps land after the rebase of #1155 onto master, or on a branch of their own from master.
+
+**So steps 6, 7 and 8 all wait for the rebase of #1155**, which the owner holds for the comparison
+with the original branch.
