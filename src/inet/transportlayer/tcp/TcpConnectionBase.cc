@@ -768,7 +768,10 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             break;
 
         case TCP_S_CLOSED:
-            if (oldState != TCP_S_TIME_WAIT && event != TCP_E_ABORT)
+            // A forked connection that the app has not accepted is unknown to the
+            // app: it gets no indication with its own socket id. RFC 9293 section
+            // 3.10.7.3: "The user need not be informed."
+            if (oldState != TCP_S_TIME_WAIT && event != TCP_E_ABORT && !isToBeAccepted())
                 sendIndicationToApp(TCP_I_CLOSED);
             // all timers need to be cancelled
             if (the2MSLTimer)
