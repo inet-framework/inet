@@ -1006,8 +1006,32 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
     {
         // source address can be unspecified during DAD
-        const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+        Ipv6Address srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
+
+        // A link-local source must not leave its link (RFC 4291 Section 2.5.6), but an
+        // outgoing interface with only a link-local address, such as an
+        // Ipv6TunnelInterface, has no other address. For a global destination, take the
+        // source from another interface, as Linux also does: RFC 6724 Section 4 only
+        // recommends the outgoing interface's addresses as the candidates, and its Rule
+        // 2 prefers a source whose scope is at least the destination's. A tentative
+        // address is not assigned yet (RFC 4862 Section 5.4), unless Optimistic
+        // Duplicate Address Detection (RFC 4429) allows its use.
+        const Ipv6Address& destAddr = ipv6Header->getDestAddress();
+        if (srcAddr.isLinkLocal() && destAddr.getScope() == Ipv6Address::GLOBAL) {
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                const NetworkInterface *candidateIE = ift->getInterface(i);
+                auto candidateData = candidateIE->findProtocolData<Ipv6InterfaceData>();
+                if (candidateIE == ie || !candidateIE->isUp() || candidateData == nullptr)
+                    continue;
+                const Ipv6Address& candidate = candidateData->getPreferredAddress();
+                bool tentative = candidateData->isTentativeAddress(candidate) && !candidateData->isOptimisticDad();
+                if (candidate.getScope() == Ipv6Address::GLOBAL && !tentative) {
+                    srcAddr = candidate;
+                    break;
+                }
+            }
+        }
 
         // TODO factor out
         ipv6Header = nullptr;
