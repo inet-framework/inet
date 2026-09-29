@@ -71,10 +71,12 @@ Define_ProtocolTestProgram()
                   .within(1.0))
         // Observation 3: host A ends nothing. No reset leaves it (RFC9293-ICMP-2: the message
         // is discarded, and a discard changes nothing).
-        .never(on("host1.tcp").signal("packetSentToLower")
-                  .filterPacket("tcp.rstBit == true")
-                  .describe("a reset from host A")
-                  .within(0.5))
+        // The guard runs beside the next step: the modern loss recovery (SACK, RACK) can
+        // complete the stream inside its window, and a blocking step would miss that.
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.rstBit == true")
+                             .describe("a reset from host A")
+                             .within(0.5)))
         // Observation 4: the connection carries on and the whole stream is acknowledged.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
                   .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")

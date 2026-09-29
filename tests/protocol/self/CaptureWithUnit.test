@@ -82,6 +82,14 @@ seed-set = 0
 
 **.ipv4.arp.typename = "GlobalArp"
 
+# The steps need a SYN that is exactly four octets longer than the final ACK: a SYN with the
+# MSS option alone, and an ACK without options. The default SYN also carries the timestamp,
+# window scale and SACK-permitted options, and the timestamp then goes on every segment, so
+# the three are off. This test is about the capture of a unit, not about TCP.
+**.tcp.timestampSupport = false
+**.tcp.windowScalingSupport = false
+**.tcp.sackSupport = false
+
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"

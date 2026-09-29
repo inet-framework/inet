@@ -11,7 +11,7 @@ scenario turns it off.
 
 **How the rule is observed.** The written procedure reads the smoothed value before and
 after and requires it to be unchanged. The model gives a sharper observable: a sample is
-taken in `TcpBaseAlg::rttMeasurementComplete`, and that function is the only place that
+taken in `TcpAlgorithmBase::rttMeasurementComplete`, and that function is the only place that
 publishes `srtt`, `rttvar` and `rto`. So a forbidden sample is not a changed value, it is a
 **publication that must not happen**. The check forbids it outright, which is stronger than
 comparing two values: a sample that happened to give the same number would still be a
@@ -21,19 +21,17 @@ The guard runs beside the ordered steps. Without that it could not be written at
 blocking guard would hold the cursor for its whole window, so the acknowledgment that proves
 the exchange completed could not be observed inside it.
 
-**The model conforms.** The run takes exactly one round-trip sample, from the first
-segment, and cancels the measurement when the timer expires:
+**The model conforms.** The handshake gives the first sample, as in Linux. The first data
+segment gives the next one; host B delays its acknowledgment, so that sample is about
+200 ms. The timer then expires for the second segment, and the measurement is cancelled:
 
-    Measured RTT=0.10804ms, updated SRTT=0.013505ms, new RTO=2625.067525ms
-    Performing retransmission #1; increasing RTO from 2.625067525s to 5.25013505s,
-        and cancelling RTT measurement
+    Measured RTT=200.25588ms, updated SRTT=25.054ms, new RTO=1000ms
+    Performing retransmission #1; increasing RTO from 1s  to 2s, and cancelling RTT measurement
+
+No sample of host A follows the acknowledgment of the retransmission.
 
 The guard was verified to detect a sample: opened before the permitted one instead of after
-it, it fires with "forbidden event occurred at t=0.20010804".
-
-That first line also shows the defect `Rfc6298FirstMeasurement.test` records, on a different
-link: the measured trip is 0.108 ms and the smoothed value becomes 0.0135 ms, one eighth of
-it, where RFC 6298 section 2.2 requires the two to be equal.
+it, it fires on that permitted sample.
 
 **Why the check is not vacuous.** A forbidden publication is only meaningful if a permitted
 one is possible in the same window, so the last step observes the acknowledgment of the
@@ -65,17 +63,24 @@ Define_ProtocolTestProgram()
                        .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                        .minBytes(100).nth(2)
                        .drop().describe("the second data segment, dropped once"))
-        // The first segment is acknowledged cleanly, so the estimator takes its one
-        // permitted sample here. This proves the signal is alive, so the guard below
-        // forbids something the model really does publish.
-        .once(on("host1.tcp").signal("srtt").first()
-                  .describe("the one permitted round-trip sample, from the first segment")
-                  .within(5.0))
-        // Host A gives up on the second segment and sends it again.
+        // Both data segments leave in the first flight. Record where the second one, the
+        // one the relay discards, starts.
         .once(on("host1.tcp").signal("packetSentToLower")
                   .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                   .filterEvent(dataSegment).nth(2)
                   .capture("retransmittedSeq", "tcp.sequenceNo")
+                  .describe("the second data segment, which the relay discards")
+                  .within(2.0))
+        // The first segment is acknowledged cleanly, so the estimator takes a permitted
+        // sample here. This proves the signal is alive, so the guard below forbids
+        // something the model really does publish.
+        .once(on("host1.tcp").signal("srtt").first()
+                  .describe("a permitted round-trip sample, from the first data segment")
+                  .within(5.0))
+        // Host A sends the second segment again.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {retransmittedSeq} && tcp.synBit == false")
+                  .filterEvent(dataSegment).first()
                   .describe("the retransmission of the second data segment")
                   .within(20.0))
         // From here on, no sample may be taken. The acknowledgment of the retransmission
@@ -134,9 +139,9 @@ seed-set = 0
 *.host1.app[0].connectPort = 1000
 *.host1.app[0].tOpen = 0.1s
 *.host1.app[0].tSend = 0.2s
-# Two segments and no more, so no later segment can take a permitted sample inside the
-# guard's window.
-*.host1.app[0].sendBytes = 1000B
+# Two segments of the default MSS and no more, so no later segment can take a permitted
+# sample inside the guard's window.
+*.host1.app[0].sendBytes = 2000B
 *.host1.app[0].tClose = -1s
 *.host2.numApps = 1
 *.host2.app[0].typename = "TcpSinkApp"

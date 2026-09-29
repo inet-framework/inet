@@ -9,9 +9,11 @@ doc/project/evidence/protocol/tcp/checks/window.md#no-new-data-past-a-shrunk-edg
 onto its expected observations. Mapping of the mockup with a relay: host A = host1, relay T =
 tap, host B = host2.
 
-The relay rewrites the window field of the fourth acknowledgment from host B to 100 octets
-and computes the checksum again. By that time host A has several segments in flight, so the
-right edge the relay writes falls behind the sequence number host A has already reached: the
+The relay rewrites the window field of host B's first acknowledgment of data to 100 octets
+and computes the checksum again. The stream is 30000 octets, more than host A's initial
+window, so host A has several segments in flight when that acknowledgment arrives and data
+it has not sent yet. The right edge the relay writes falls behind the
+sequence number host A has already reached: the
 usable window is negative, which is the state MUST-34 names. Host B itself never shrinks its
 window; the relay is what a peer that does would look like from host A's side.
 
@@ -56,12 +58,13 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_shrunk_window_no_new_data")
-        // The relay shrinks the window of the fourth acknowledgment from host B.
-        .intercept(tap("tap").filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true").nth(4)
+        // The relay shrinks the window of host B's first acknowledgment of data, the one
+        // after its SYN+ACK.
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 1000 && tcp.ackBit == true").nth(2)
                      .mutate([](Packet *frame) {
                          rewriteTcpHeader(frame, [](TcpHeader& h) { h.setWindow(100); });
                      })
-                     .describe("host B's fourth acknowledgment (shrink its window to 100 octets)"))
+                     .describe("host B's first acknowledgment of data (shrink its window to 100 octets)"))
         // Observation 1: host A sends its SYN. Record ISS_A.
         .once(on("host1.tcp").signal("packetSentToLower")
                   .filterPacket("tcp.synBit == true && tcp.ackBit == false")
@@ -141,7 +144,7 @@ seed-set = 0
 *.host1.app[0].connectPort = 1000
 *.host1.app[0].tOpen = 0.1s
 *.host1.app[0].tSend = 0.2s
-*.host1.app[0].sendBytes = 5000B
+*.host1.app[0].sendBytes = 30000B
 *.host1.app[0].tClose = 0.4s
 *.host2.numApps = 1
 *.host2.app[0].typename = "TcpEchoApp"

@@ -181,6 +181,11 @@ sim-time-limit = 40s
 seed-set = 0
 
 **.ipv4.arp.typename = "GlobalArp"
+
+# RFC 5681's response to a timeout is the rule of Reno TCP. The default algorithm, CUBIC,
+# sets the threshold after a timeout with its own factor (RFC 9438 section 4.8), which is
+# not the bound of RFC 5681 equation (4). The check reads RFC 5681, so it runs Reno.
+**.tcp.tcpAlgorithmClass = "TcpReno"
 **.tcp.advertisedWindow = 65535
 
 *.host1.numApps = 1

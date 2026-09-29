@@ -13,8 +13,8 @@ This is the first test of the TCP suite that reads a control variable instead of
 The congestion window never travels on the link: it is a limit the sender keeps. The tester
 observes it through the `cwnd` scalar signal, which the ini names in `stateSignals`.
 
-The segment size here is 536 bytes, the default of the model and the value RFC 1122 gives
-for a host that learns nothing else. 536 falls in the lowest band of the table, so the bound
+The segment size here is 536 bytes, set in the ini: the value RFC 1122 gives for a host
+that learns nothing else. 536 falls in the lowest band of the table, so the bound
 is 4 * 536 = 2144 bytes.
 
 One property of the model decides what "the initial window" means here. The window is

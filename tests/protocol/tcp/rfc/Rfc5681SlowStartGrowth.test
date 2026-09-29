@@ -118,6 +118,12 @@ seed-set = 0
 
 **.ipv4.arp.typename = "GlobalArp"
 
+# RFC 5681's slow start is the rule of Reno TCP. The default algorithm, CUBIC, follows
+# RFC 9438 section 4.10 and HyStart++ (RFC 9406), which lets one acknowledgment raise the
+# window by more than one segment; RFC 9438 section 1 says that this departs from RFC 5681 on
+# purpose. The check reads RFC 5681, so it runs Reno.
+**.tcp.tcpAlgorithmClass = "TcpReno"
+
 # A receiver window large enough never to limit the sender, so the congestion window is the
 # only thing that decides how much is in flight.
 **.tcp.advertisedWindow = 65535

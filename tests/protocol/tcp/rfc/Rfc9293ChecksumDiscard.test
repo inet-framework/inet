@@ -24,12 +24,32 @@ Expected result: PASS.
 using namespace inet;
 using namespace inet::protocoltest;
 
+// True from the moment host B's TCP receives the retransmission of the discarded segment. An
+// acknowledgment of that segment's data is correct from then on, so the guard ignores it.
+static bool retransmissionArrived = false;
+
+static bool beforeTheRetransmission(const MatchContext&)
+{
+    return !retransmissionArrived;
+}
+
+// At host B's TCP the segment starts with its TCP header, so the data is what follows it.
+static bool markTheRetransmission(const MatchContext& context)
+{
+    const Packet *segment = context.event.packet;
+    double dataLength = segment->getByteLength() - evalPacketField(segment, "tcp.headerLength").doubleValueInUnit("B");
+    if (dataLength <= 0)
+        return false;
+    retransmissionArrived = true;
+    return true;
+}
+
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc9293_checksum_discard")
         // The relay corrupts the checksum of the first data segment. A segment that carries
-        // data is told from a bare acknowledgment by the length of its IP datagram: 40 octets
-        // hold the two headers alone, and a full segment holds 536 octets more.
+        // data is told from a bare acknowledgment by the length of its IP datagram: the two
+        // headers and their options alone stay below 100 octets.
         .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
                      .mutate([](Packet *frame) { corruptTcpChecksum(frame); })
                      .describe("the first data segment (replace its checksum with the one's complement)"))
@@ -44,19 +64,27 @@ Define_ProtocolTestProgram()
                   .filterPacket("tcp.destPort == 1000")
                   .describe("host B's TCP discards the segment whose checksum is wrong")
                   .within(1.0))
-        // Observation 3: host B does not acknowledge the data of that segment. The
-        // acknowledgment ISS_A + 537 can only follow a retransmission, which comes later.
-        .never(on("host2.tcp").signal("packetSentToLower")
-                  .filterPacket("tcp.ackBit == true && tcp.ackNo == {issA} + 537")
-                  .describe("an acknowledgment of the discarded segment's data")
-                  .within(0.2))
+        // Observation 3: host B does not acknowledge the data of that segment before host A
+        // sends it again. Every acknowledgment until then names ISS_A + 1 as the next octet
+        // it expects. The guard runs beside the next steps, because with the default loss
+        // recovery (SACK, RACK) the retransmission follows the loss within a millisecond.
+        .meanwhile(never(on("host2.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.ackBit == true && tcp.ackNo > {issA} + 1")
+                             .filterEvent(beforeTheRetransmission)
+                             .describe("an acknowledgment of the discarded segment's data before its retransmission")
+                             .within(8.0)))
+        // The retransmission of the discarded segment reaches host B's TCP. From here on an
+        // acknowledgment of its data is correct.
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.sequenceNo == {issA} + 1")
+                  .filterEvent(markTheRetransmission)
+                  .describe("the retransmission of the discarded segment at host B's TCP")
+                  .within(8.0))
         // Observation 4: the connection recovers. Host A receives an acknowledgment of the
-        // whole stream, so the discard was silent and the stream stayed reliable. The window
-        // is generous on purpose: host A has one segment in flight when the loss happens, so
-        // no duplicate acknowledgment can arrive and the recovery waits for the
-        // retransmission timeout, which starts at three seconds. The acknowledgment is
-        // matched with `>=` because host A's program closes while data is still unsent, so
-        // the FIN travels with the tail of the stream and host B acknowledges both at once.
+        // whole stream, so the discard was silent and the stream stayed reliable. The
+        // acknowledgment is matched with `>=` because host A's program may close while data
+        // is still unsent; the FIN then travels with the tail of the stream and host B
+        // acknowledges both at once.
         .once(on("host1.tcp").signal("packetReceivedFromLower")
                   .filterPacket("tcp.ackBit == true && tcp.ackNo >= {issA} + 5001")
                   .describe("the cumulative acknowledgment of the whole 5000-octet stream")
