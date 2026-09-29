@@ -62,7 +62,7 @@ class BindingUpdate extends MobilityHeader
     uint8_t homeNetworkPrefixLength = 0;
     uint8_t handoffIndicator = 0;              // Handoff Indicator option, RFC 5213 Section 8.4
     uint8_t accessTechnologyType = 0;          // Access Technology Type option, RFC 5213 Section 8.5
-    uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8 (0 = ordered by sequence number)
+    uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8
 }
 
 //Defining the status fields for the Binding Acknowledgement Message

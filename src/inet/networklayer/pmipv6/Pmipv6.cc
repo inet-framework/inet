@@ -33,6 +33,17 @@ namespace inet {
 
 Define_Module(Pmipv6);
 
+// RFC 5213 Section 8.8: the Timestamp option is 64 bits, of which the first 48 hold
+// the integer number of seconds and the last 16 a fraction of a second in units of
+// 1/65536. It is not the NTP 32.32 layout. The clock read here is simulation time.
+static uint64_t timestampOf(simtime_t t)
+{
+    double seconds = t.dbl();
+    uint64_t wholeSeconds = (uint64_t)seconds;
+    uint64_t fraction = (uint64_t)((seconds - (double)wholeSeconds) * 65536.0);
+    return (wholeSeconds << 16) | (fraction & 0xFFFF);
+}
+
 Pmipv6::~Pmipv6()
 {
 }
@@ -205,6 +216,23 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         else
             EV_INFO << "LMA ignoring stale deregistration for MN '" << mnId << "'" << endl;
     }
+    else if (it != bindingCache.end()
+            && pbu->getTimestampValue() <= it->second.timestamp)
+    {
+        // RFC 5213 Section 5.5: a Proxy Binding Update whose timestamp is not greater
+        // than that of the last one accepted for this mobile node is refused, so that
+        // one delayed in the network cannot re-point the prefix to a MAG the node has
+        // left. An older timestamp is answered with TIMESTAMP_LOWER_THAN_PREV_ACCEPTED
+        // (rule 8), an equal one fails the validity check of rule 6 and is answered
+        // with TIMESTAMP_MISMATCH (rule 9). The check against the LMA's own clock and
+        // TimestampValidityWindow is not implemented: every node reads the same
+        // simulation clock.
+        bool older = pbu->getTimestampValue() < it->second.timestamp;
+        status = older ? TIMESTAMP_LOWER_THAN_PREV_ACCEPTED : TIMESTAMP_MISMATCH;
+        EV_WARN << "LMA rejecting Proxy Binding Update for MN '" << mnId << "' from MAG " << magAddress
+                << ": its timestamp is " << (older ? "older than" : "equal to")
+                << " the last one accepted" << endl;
+    }
     else {
         // Registration / re-registration / handover.
         int tunnelId = getOrCreateTunnel(lmaAddress, magAddress, lmaTunnelByMag);
@@ -231,6 +259,7 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
         entry.homeNetworkPrefixLength = hnpLen;
         entry.servingMagAddress = magAddress;
         entry.sequenceNumber = seq;
+        entry.timestamp = pbu->getTimestampValue();
         entry.expiry = simTime() + lifetime;
         entry.tunnelInterfaceId = tunnelId;
     }
@@ -242,10 +271,13 @@ void Pmipv6::processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu)
     pba->setProxyRegistrationFlag(true);
     pba->setStatus(status);
     pba->setSequenceNumber(seq);
-    pba->setLifetime(lifetime);
+    pba->setLifetime(status == BINDING_UPDATE_ACCEPTED ? lifetime : 0);
     pba->setMobileNodeIdentifier(mnId.c_str());
     pba->setHomeNetworkPrefix(hnp);
     pba->setHomeNetworkPrefixLength(hnpLen);
+    // RFC 5213 Section 5.5, rules 7 to 9: an acceptance echoes the timestamp it was
+    // sent, a rejection carries the current time of day on the LMA
+    pba->setTimestampValue(status == BINDING_UPDATE_ACCEPTED ? pbu->getTimestampValue() : timestampOf(simTime()));
     pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(mnId.size()));
     reply->insertAtFront(pba);
     sendMobilityMessage(reply, magAddress, lmaAddress);
@@ -373,7 +405,7 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
     pbu->setHomeNetworkPrefixLength(binding.homeNetworkPrefixLength);
     pbu->setHandoffIndicator(1);       // attachment over a new interface
     pbu->setAccessTechnologyType(4);   // IEEE 802.11 (RFC 5213 access technology type)
-    pbu->setTimestampValue(0);         // ordered by sequence number in this model
+    pbu->setTimestampValue(timestampOf(simTime()));
     pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(binding.mnIdentifier.size()));
     packet->insertAtFront(pbu);
     sendMobilityMessage(packet, localMobilityAnchorAddress, magAddress);
