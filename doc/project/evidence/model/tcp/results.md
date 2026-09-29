@@ -98,13 +98,67 @@ verdicts.
 Nine of the ten pass. Both control loops are written, and the one difference the checks find
 is a defect rather than an absence.
 
+## The modern defaults of PR #1155 (2026-09-29)
+
+Not a new pass: a re-run of the same checks on the branch `topic/tcp-new-audit-fixes`, whose
+TCP has new defaults (SACK, window scaling and timestamps on, CUBIC, RACK-TLP, PRR, an RFC
+6298 timer). The owner decided that the tests run these defaults and override a parameter
+only where a check needs it, with the reason in the ini.
+
+- Date: 2026-09-29
+- INET: branch `topic/tcp-new-audit-fixes`, commit `d6c974a3b6`, tree clean
+- OMNeT++: 6.4.0; build: debug; compiler: Ubuntu clang version 23.0.0
+- Command, after the `setenv` scripts of OMNeT++ and INET:
+  `inet_run_protocol_tests -p inet --filter '(tcp|self)/'`
+- Result: TCP 27 tests, **25 PASS, 2 FAIL (expected), 0 FAIL (unexpected)**; the 21
+  protocol self tests pass. The two declared failures are gap 1 (PSH) and gap 2 (the checksum
+  default), as on master.
+
+Before the rewrite, 15 of the 27 tests failed with the new defaults, and two self tests. The
+analysis found four defects of the model and several test errors.
+
+**Model findings, each repaired by a commit of the series:**
+
+| Finding | Seen in | Commit |
+| --- | --- | --- |
+| The tail loss probe stayed armed after the acknowledgment of all data; in TIME_WAIT it sent the FIN again, and the peer answered with a reset | Rfc9293OutOfWindowSegment (a forbidden reset at t=0.6) | `c23267fa9b` |
+| RFC 6298 §5.7 was missing: after a SYN timeout the RTO stayed at the 1 s default instead of 3 s | Rfc6298TimeoutAfterLostSyn | `7b559a6998` |
+| The default initial window was IW10 (RFC 6928), above the bound of RFC 5681 §3.1 | Rfc5681InitialWindow | `3101ddb055`, the owner's decision |
+| An ICMP net unreachable aborted a connection in SYN_SENT, against RFC 9293 MUST-56 | the self test ReactiveInject | `f3ab035caa`, the owner's decision |
+
+The last two are Linux behavior. The model keeps them as options, and the packetdrill
+configuration of inet-gpl selects them.
+
+**Test errors and their repair** (commit `d6c974a3b6`):
+
+| Class | Tests | Repair |
+| --- | --- | --- |
+| A blocking `never` step hid the next event: SACK and RACK repair a loss within a millisecond, and host A sends its next segments in the same flight | SoftIcmpError, SourceQuench, ValidReset, OutOfWindowSegment, ChecksumDiscard | the guard runs beside the next steps (`meanwhile`); ChecksumDiscard forbids an acknowledgment of the discarded data only until the retransmission |
+| A constant of the old defaults: 536-octet segments, a 20-octet ACK header | DataTransfer, ConnectionEstablishment | the effective send MSS is read from the run (RFC 9293 §3.7.1); the header length must be 20 octets plus the options |
+| The scenario no longer made the condition: host B's fourth acknowledgment was its FIN, after the whole stream | ShrunkWindow, and **ShrunkWindowNoNewData, which passed without looking at anything** | a 30000-octet stream, and the shrink on host B's first acknowledgment of data |
+| One segment where the check needs two | KarnsRule | 2000 octets, and the guard starts at the retransmission |
+| The check reads an algorithm that the default replaces on purpose (RFC 9438 departs from RFC 5681) | SlowStartGrowth, TimeoutResponse, FastRetransmit | the ini selects Reno; FastRetransmit also turns off SACK, RACK and PRR |
+| The tail loss probe re-arms the retransmission timer (RFC 8985 §7.3) | BackoffDoubling, TimeoutAfterLostSyn | the probe is off |
+| A framework test needed a SYN four octets longer than the ACK | the self test CaptureWithUnit | three options are off |
+
+FastRetransmit also changed its observable. The model keeps the window of Linux: without
+SACK, each duplicate acknowledgment takes one segment out of the data counted in flight, and
+the published `cwnd` stays at the threshold. So the check no longer reads the published
+value; a guard forbids new data in recovery that takes FlightSize past the threshold plus
+3 + k segments. The series repaired three defects of that recovery on the way (`ed945833b2`,
+`88fdd796d5`, `25adf3537b`), found by a comparison with master's module test
+`tcp_fastrexmit_1`.
+
+Each new guard and assertion was checked to fail on a copy with one changed detail, and
+each copy failed at the intended place.
+
 ## Gap 5 (pass 4): the first round-trip measurement is smoothed — defect
 
 RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed value
 becomes R and the variance becomes R/2. The model has no such case.
 `TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every
 measurement, the first one included
-([TcpBaseAlg.cc:327-341](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L327-L341)).
+([TcpAlgorithmBase.cc:551-566](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L551-L566), the code after the repair).
 The run states it in one line:
 
     Measured RTT=400.05104ms, updated SRTT=50.00638ms, new RTO=2875.0319ms
@@ -344,7 +398,7 @@ the ICMP module closes both.
   conformant configuration.
 - `*.host2.tcp.advertisedWindow = 300` and `*.host2.tcp.delayedAcksEnabled = true` in the
   flow-control test. The delay is the fixed constant
-  [TcpBaseAlg.cc:32](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L32),
+  [TcpAlgorithmBase.cc:30](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L30),
   0.2 s, which is what the check document assumes and within MUST-40.
 - `sendBytes = 5000B` (data transfer, push) and `3000B` (flow control); `connectPort = 7000`
   with `*.host2.numApps = 0` (reset).
@@ -425,7 +479,7 @@ evidence is how that goes unnoticed.
   `min(snd_wnd, cwnd) - (snd_nxt - snd_una)`,
   [TcpConnectionUtil.cc:1075-1078](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1075-L1078).
   The initial congestion window is one segment,
-  [TcpBaseAlg.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpBaseAlg.cc#L149),
+  [TcpAlgorithmBase.cc:203](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L203),
   so a 300-octet receiver window is the binding limit. Observed: a 300-octet first segment,
   silence for 0.15 s, the delayed acknowledgment at 0.2 s, and the resume at the edge.
 - **Advertised window (WND-1):** `updateRcvWnd`,

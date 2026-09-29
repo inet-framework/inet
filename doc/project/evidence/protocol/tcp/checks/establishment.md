@@ -47,7 +47,9 @@ sequence number.
 2. Host A receives a segment with SYN set and ACK set, whose acknowledgment field equals
    `ISS_A + 1`. Record its sequence number as `ISS_B`.
 3. Host A sends a segment with ACK set and SYN clear, whose acknowledgment field equals
-   `ISS_B + 1`, with a header length of 20 octets: no option, five words.
+   `ISS_B + 1`, with a header length of 20 octets plus the options it carries, padded to
+   whole 32-bit words: five words without options. When both SYNs carried the timestamp
+   option, RFC 7323 §3.2 puts it on this segment too.
 
 ### Notes
 

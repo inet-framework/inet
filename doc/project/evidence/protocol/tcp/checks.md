@@ -108,9 +108,10 @@ Scenario constants, shared unless a check says otherwise:
 | Open time | 0.1 s | after the link and the address resolution settle |
 | Send time | 0.2 s | clearly after the handshake, so a data segment cannot be confused with a handshake segment |
 | Close time | 0.4 s | clearly after the data exchange |
-| Maximum segment size | 536 octets | the default send MSS over IPv4 (RFC 9293 §3.7.1, MUST-15); no check sends a larger MSS option |
+| Maximum segment size | the value of the peer's MSS option | a check that needs the effective send MSS computes it as RFC 9293 §3.7.1 does: the MSS option less the TCP options of the segment; a check that needs a fixed size says so |
 | Checksums | computed by every node | the TCP checksum is never optional (MUST-2); a model that offers a mode that assumes checksums correct runs with that mode off |
-| Observation limit | 2 s at level 2, 10 s where a loss must be recovered | a check that takes a segment away waits for the retransmission timeout, which starts at three seconds |
+| Observation limit | 2 s at level 2, 10 s where a loss must be recovered | a check that takes a segment away may wait for the retransmission timeout, which starts at one second (RFC 6298 §2.1) and at three seconds after a lost SYN (§5.7) |
+| Algorithms | the implementation's defaults | a check that reads the rule of one algorithm, for example the Reno congestion control of RFC 5681, selects that algorithm and says why |
 | The receiving program | echoes nothing at level 3 | the reverse direction then carries acknowledgments only, so an observation about a segment from host B cannot be confused with an echo |
 
 No check assumes a value for any sequence number. Each side picks its own initial sequence

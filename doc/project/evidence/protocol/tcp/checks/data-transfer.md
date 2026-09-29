@@ -16,10 +16,12 @@ The procedures come from the specification only. They name no simulation model a
 
 ### Value arithmetic
 
-Write `ISS_A` for host A's initial sequence number. The data block is 5000 octets and the
-effective send MSS is 536, so the stream occupies sequence numbers `ISS_A + 1` to
-`ISS_A + 5000`, in nine segments of 536 octets and one of 176. The acknowledgment of the
-whole stream is `ISS_A + 5001`.
+Write `ISS_A` for host A's initial sequence number. The data block is 5000 octets, so the
+stream occupies sequence numbers `ISS_A + 1` to `ISS_A + 5000`, and the acknowledgment of
+the whole stream is `ISS_A + 5001`. Write `SendMSS` for the value of the MSS option in host
+B's SYN+ACK. RFC 9293 §3.7.1 gives the effective send MSS of a segment as `SendMSS` less the
+TCP options that the segment carries (on a path whose MMS is not smaller). Write `L` for the
+data length of host A's first data segment.
 
 ### Procedure
 
@@ -31,17 +33,19 @@ whole stream is `ISS_A + 5001`.
 
 1. Host A sends its SYN. Record its sequence number as `ISS_A`. *(Confirms the connection
    stimulus.)*
-2. After the send time, host A sends a segment with sequence number `ISS_A + 1` that
-   carries exactly 536 octets of data and has ACK set (RFC9293-SEG-1: a full segment is
-   the effective send MSS and not more; RFC9293-ACK-2).
-3. Host A sends a segment with sequence number `ISS_A + 537` that carries data: the stream
-   continues where the first segment ended, with no gap.
-4. Host A receives a segment with ACK set whose acknowledgment field equals `ISS_A + 5001`
+2. Host A receives host B's SYN+ACK. Record the value of its MSS option as `SendMSS`.
+3. After the send time, host A sends a segment with sequence number `ISS_A + 1` that has
+   ACK set and carries exactly one effective send MSS of data (RFC9293-SEG-1: a full
+   segment is the effective send MSS and not more; RFC9293-ACK-2). Record its data length
+   as `L`.
+4. Host A sends a segment with sequence number `ISS_A + 1 + L` that carries data: the
+   stream continues where the first segment ended, with no gap.
+5. Host A receives a segment with ACK set whose acknowledgment field equals `ISS_A + 5001`
    (RFC9293-ACK-1, RFC9293-DATA-1: the receiver accepted the whole stream in order).
 
 ### Notes
 
-- Observation 4 is decisive: a cumulative acknowledgment of the last octet cannot occur
+- Observation 5 is decisive: a cumulative acknowledgment of the last octet cannot occur
   unless every earlier octet was received in order.
 - The PSH bit on the last segment of the stream is a separate check, "Push on the last
   segment", so that its outcome cannot block the decisive observation here.

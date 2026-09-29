@@ -30,14 +30,18 @@ trust.
 ### Expected observations
 
 1. Host B discards the segment.
-2. Host B does not acknowledge the data of that segment. The acknowledgment that would cover
-   it can only follow a retransmission.
+2. Host B does not acknowledge the data of that segment before host A sends it again. Until
+   the retransmission reaches host B, every acknowledgment from host B names the first
+   octet of that segment as the next one it expects.
 3. The connection recovers: the whole stream is acknowledged in the end.
 
 ### Notes
 
 - Observation 3 is what tells a discard from a break. A receiver that answered the corrupt
   segment with a reset would also "not deliver" it, and would be wrong.
+- Observation 2 holds until the retransmission, not for a fixed time. A sender with SACK
+  and time-based loss detection (RFC 8985) can send the segment again within a millisecond,
+  and the acknowledgment that follows is then correct.
 
 ## Checksum by default
 
