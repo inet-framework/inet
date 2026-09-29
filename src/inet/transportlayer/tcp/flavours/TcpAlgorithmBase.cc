@@ -283,7 +283,7 @@ void TcpAlgorithmBase::schedulePto()
     if (state->srtt > 0) {
         pto = state->srtt * 2;
         if (state->snd_max - state->snd_una <= state->snd_mss)
-            pto += minRexmitTimeout; // single packet in flight: allow for the peer's delayed ACK
+            pto += TCP_DELACK_MAX_S; // single packet in flight: allow for the peer's delayed ACK (RFC 8985 section 7.2, WCDelAckT)
         else
             pto += SimTime(2, SIMTIME_MS); // floor so a near-zero srtt cannot fire the
                                            // probe between back-to-back ACKs of one flight
@@ -562,13 +562,21 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
         state->rttvar += g * (fabs(err) - state->rttvar);
     }
 
-    // Linux-style variance floor (tcp_set_rto): RTO = SRTT + max(4*RTTVAR, RTO_MIN),
-    // i.e. RTO >= SRTT + minRexmitTimeout, rather than clamping the final RTO from
-    // below.
-    simtime_t varTerm = 4 * state->rttvar;
-    if (varTerm < minRexmitTimeout)
-        varTerm = minRexmitTimeout;
-    simtime_t rto = state->srtt + varTerm;
+    // RFC 6298 sections 2.3 and 2.4: RTO = SRTT + 4*RTTVAR, rounded up to the
+    // minimum (1 s by default). With rtoVarianceFloor, Linux's tcp_set_rto instead:
+    // the minimum bounds the variance term, RTO = SRTT + max(4*RTTVAR, RTO_MIN).
+    simtime_t rto;
+    if (rtoVarianceFloor) {
+        simtime_t varTerm = 4 * state->rttvar;
+        if (varTerm < minRexmitTimeout)
+            varTerm = minRexmitTimeout;
+        rto = state->srtt + varTerm;
+    }
+    else {
+        rto = state->srtt + 4 * state->rttvar;
+        if (rto < minRexmitTimeout)
+            rto = minRexmitTimeout;
+    }
 
     if (rto > maxRexmitTimeout)
         rto = maxRexmitTimeout;

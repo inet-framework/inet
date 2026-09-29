@@ -62,8 +62,8 @@ include ../../lib/tcp-legacy.ini
 
 %# The persist timer engages when the zero window is seen (~t=1.013). Persist
 %# probes (1-byte segments, incrementing seq) follow Linux's probe0 cadence
-%# (tcp_probe_timer): the first probe one RTO (~1.004 s) after the window
-%# closed, then doubling per probe (2.008, 4.016, 8.03, 16.06, 32.1 s), capped
+%# (tcp_probe_timer): the first probe one RTO (1 s, RFC 6298's minimum) after the
+%# window closed, then doubling per probe (2, 4, 8, 16, 32 s), capped
 %# at maxPersistTimeout -- NOT the old fixed Stevens 5/5/6/12/24/48/60 table
 %# (the resolved FIXME): with a real RTT the first probe must go out at ~RTO,
 %# which the packetdrill slow-start-after-win-update oracle script pins at
@@ -76,14 +76,14 @@ Received zero-sized window therefore PERSIST timer is started.
 %# consuming sequence space), so the tcpdump line shows a bare ACK and there
 %# are NO probe-byte RTO retransmissions any more.
 %contains-regex: stdout
-\[2\.017 [^\n]*A ack 501
+\[2\.013 [^\n]*A ack 501
 %contains-regex: stdout
-\[4\.025 [^\n]*A ack 501
+\[4\.013 [^\n]*A ack 501
 %contains-regex: stdout
-\[8\.041 [^\n]*A ack 501
+\[8\.013 [^\n]*A ack 501
 %contains-regex: stdout
-\[16\.073 [^\n]*A ack 501
+\[16\.013 [^\n]*A ack 501
 %contains-regex: stdout
-\[32\.137 [^\n]*A ack 501
+\[32\.013 [^\n]*A ack 501
 %contains-regex: stdout
-\[64\.265 [^\n]*A ack 501
+\[64\.013 [^\n]*A ack 501
