@@ -992,18 +992,23 @@ void Ipv6RoutingTable::deletePrefixes(int interfaceID)
     }
 }
 
-bool Ipv6RoutingTable::isOnLinkAddress(const Ipv6Address& address)
+NetworkInterface *Ipv6RoutingTable::findOnLinkInterface(const Ipv6Address& address)
 {
     for (int j = 0; j < ift->getNumInterfaces(); j++) {
         NetworkInterface *ie = ift->getInterface(j);
 
         for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); i++)
             if (address.matches(ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i).prefix, ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i).prefixLength))
-                return true;
+                return ie;
 
     }
 
-    return false;
+    return nullptr;
+}
+
+bool Ipv6RoutingTable::isOnLinkAddress(const Ipv6Address& address)
+{
+    return findOnLinkInterface(address) != nullptr;
 }
 
 void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
