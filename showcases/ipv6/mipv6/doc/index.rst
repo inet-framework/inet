@@ -1402,20 +1402,27 @@ the GitHub issue tracker for commenting on this showcase.
 
 The handover outage in this showcase is set mostly by protocol timers. For a
 care-of address, Mobile IPv6 (RFC 6275) prefers duplicate address detection
-without a random delay; INET adds a random 0–1 s to the wait after its probe.
+without a random delay; INET waits a random delay before this probe too, as for
+any other address (0.15 s in this run).
 
 A measured 802.11 testbed (Cabellos-Aparicio et al., 2005) found a mean Mobile
 IPv6 handover of 2.1 s, 87 % of it in the IPv6 phase. That phase, 1.84 s on
-average, is close to this run's Router Advertisement wait and duplicate address
-detection together, 1.52 s. The testbed spent it on duplicate address detection
-and on Neighbor Unreachability Detection, which finds out that the old router
-no longer answers; this run detects the move from the link layer instead.
+average, is shorter than this run's Router Advertisement wait and duplicate
+address detection together, 3.49 s. The testbed spent it on duplicate address
+detection and on Neighbor Unreachability Detection, which finds out that the
+old router no longer answers; this run detects the move from the link layer
+instead.
 
-This run's 4.03 s is longer mainly for three reasons: the home agent's
-first-registration exchange, 1.04 s here and 4 ms in the testbed; the 0.74 s
-this run counts before the access point is lost (the first two terms of
-the budget in the Results), which the testbed's clock, started at the scan,
-leaves out; and a longer scan and association, 0.65 s against 0.26 s.
+This run's 5.96 s is 3.85 s longer. The largest part of the difference is the
+IPv6 phase, 1.66 s longer here, because this run checks both its link-local and its care-of
+address, each after a random delay. The home agent's first-registration
+exchange takes 1.05 s here, with a real duplicate address detection, and 4 ms
+in the testbed. This run counts 0.74 s before the access point is lost (the
+first two terms of the budget in the Results), which the testbed's clock,
+started at the scan, leaves out, and its scan and association take 0.65 s
+against 0.26 s. The remaining 0.01 s is this run's 20 ms for the held first
+reply against the testbed's 9 ms for the registration at the correspondent
+node.
 
 The 802.11 terms of this scenario depend on its scan settings. Fast roaming
 (IEEE 802.11k and 802.11r) changes access points in tens of milliseconds, but
@@ -1433,8 +1440,9 @@ energy.
 
 Optimizations such as Optimistic Duplicate Address Detection (RFC 4429) let a
 node use a new address while the check still runs. This removes the mobile
-node's own wait, about 1.06 s here, but not the home agent's 1 s check before a
-first registration, which the standard requires separately.
+node's own waits, 1.90 s for the link-local and 1.15 s for the care-of address
+here, but not the home agent's 1 s check before a first registration, which the
+standard requires separately.
 
 Route optimization does not shorten the outage. The standard lets the Binding
 Update to the correspondent node go only after the home agent has acknowledged
