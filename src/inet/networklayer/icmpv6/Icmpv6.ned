@@ -26,6 +26,7 @@ simple Icmpv6 extends SimpleModule
     parameters:
         @class(Icmpv6);
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string networkProtocolModule = default("^.ipv6"); // The path to the Ipv6 module; its post-routing hook fills in the computed checksum of outgoing ICMPv6 messages
         string checksumMode @enum("declared", "computed") = default("declared");
         string mldModule = default("");  // Path to the MLD module, or "" if MLD is not enabled; MLD messages are dropped when empty
         @display("i=block/control");
