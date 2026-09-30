@@ -597,8 +597,10 @@ arrives at t = 17.014 s, the first tunneled one at t = 21.040 s:
   at the same instant as the check completes.
 - **1.04 s** — the home agent holding its *Binding Acknowledgement* for 1 s,
   its stand-in for the duplicate address detection it should run on the home
-  address (see the implementation notes), plus 43 ms of propagation. It creates
-  the tunnel at once, before the hold ends.
+  address (see the implementation notes), plus 43 ms of network path: about 27
+  ms of link delay and transmission, and 16 ms for ``foreignRouter`` to resolve
+  the backbone router's address before it forwards the Binding Update. It
+  creates the tunnel at once, before the hold ends.
 - **0.07 s** — the next ping and its round trip. The pings sent at 20.0 s and
   20.5 s reached the mobile node through the tunnel, but it dropped their
   replies: its binding became active only at 20.967 s. The one sent at 21.0 s
@@ -660,7 +662,7 @@ de-registration: 3.99 s with route optimization and 2.97 s with bidirectional
 tunneling, barely shorter than the 4.03 s outbound outage in the first case and
 clearly shorter in the second (the return video explains why). All three
 configurations converge on the 14 ms baseline again — for the plain host, once
-its home router's address resolution reaches it at 52.007 s and the router's
+its home router's address resolution reaches it at 52.006 s and the router's
 Router Advertisement has made that router its default router again.
 
 Details worth noticing rather than worrying about: the very first reply arrives
@@ -669,10 +671,12 @@ cannot resolve the home address while the mobile node is still checking it with
 duplicate address detection after boot; the few isolated elevated dots
 (``ping19`` at t=10.5 s in all three runs, and a few more after the return) are
 not 802.11 retransmissions — no answered ping needed one — but replies that
-waited behind a Neighbor Unreachability Detection probe; and after the return,
-the plain host is answered first in this run (t=52.016 s, against 53.014 s with
-bidirectional tunneling and 54.014 s with route optimization) — which host
-comes back first depends on the run's random timing, not on Mobile IPv6.
+waited behind a Neighbor Unreachability Detection probe, except the plain
+host's 24.6 ms point at 52 s, which is the last of the pings the router held
+during its address resolution; and after the return, the plain host is answered
+first in this run (t=52.016 s, against 53.014 s with bidirectional tunneling
+and 54.014 s with route optimization) — which host comes back first depends on
+the run's random timing, not on Mobile IPv6.
 
 The handover, live
 ~~~~~~~~~~~~~~~~~~
@@ -1089,28 +1093,43 @@ and no detour. (Replies in the other direction carry the home address in a
    type:     inspector
    config:   RouteOptimization
    seed:     default (seed-set=1)
-   shows:    direct-path ping: single Ipv6Header (CN->CoA) + Ipv6RoutingHeader
-             routingType=2 row
-   target:   express to 24.4s, fast to 25.65s -> list_logged_packets at
-             correspondentNode -> the 154B ping -> object inspector, depth 4
-   anchor:   route-optimized pings are 154B on the CN wire (130B + 24B
-             type-2 routing header) during the away phase
-   capture:  open_inspector type=object -> expand_inspector_tree depth=5 ->
-             get_inspector_screenshot 1400x4400 -> PIL-crop (60,1688)-(800,2358),
-             which is the chunks[2] Ipv6Header and chunks[3] Ipv6RoutingHeader
-             rows with their fields; was 740x670.  address[1] stays collapsed
-             at depth=5 (see the prose); depth=6 would open it but also unfolds
-             the hex dumps and shifts every row offset.
-   stamp:    captured 2026-08, INET 4.7
+   shows:    direct-path ping on the correspondent node's wire: chunks[2] = a single Ipv6Header
+             (correspondent 2001:db8:0:5:8aa:ff:fe00:8 -> care-of 2001:db8:0:3:8aa:ff:fe00:d,
+             chunkLength 40 B, payloadLength 88 B, hopLimit 30, protocolId 43) and chunks[3] =
+             Ipv6RoutingHeader (chunkLength 24 B, nextHeaderProtocol 58, routingType 2,
+             segmentsLeft 1, address[1] collapsed)
+   launch:   Qtenv with the sim's own MCP server: opp_run_release -l <wt>/src/INET -u Qtenv
+             -c RouteOptimization -n <wt>/src:<wt>/showcases
+             '--*.visualizer.osgVisualizer.typename=""' --mcp-server-address localhost:8777
+             --qtenv-default-run=0 omnetpp.ini   (8765 is taken by the showcase previewer)
+   target:   run_simulation mode=express time_limit="25.4", then mode=fast time_limit="25.52"
+             (stops at 25.519886, event #14894) -> list_logged_packets
+             module_path=Mipv6Showcase.correspondentNode name_pattern=ping49* -> the 154 B
+             EthernetSignal "ping49" sent by correspondentNode.eth[0] at 25.5 (event #14785),
+             path logged:<id> (was logged:12370). Not ping49-reply: that is also 154 B, but it
+             carries a Home Address destination option instead of the routing header.
+   anchor:   route-optimized pings are 154 B on the CN wire (130 B + 24 B type 2 routing header)
+             from ping41 on. The chunk ids shown (Ipv6Header id = 11080, Ipv6RoutingHeader
+             id = 11079) are run-specific; if they change, the model or the run changed. A single
+             Ipv6Header without a routing header = route optimization did not complete.
+   capture:  open_inspector object_path=logged:<id> type=object -> expand_inspector_tree depth=5
+             -> get_inspector_screenshot width=1400 height=4400 -> PIL-crop (60,1688)-(800,2358):
+             740x670, the same crop as the 2026-08 image. address[1] stays collapsed at depth=5;
+             depth=6 opens it but also unfolds the hex dumps and shifts every row.
+   compare:  against the 2026-08 image the only differing pixels are the two "id =" rows
+             (was 11202 / 11201); every address, length and field is identical.
+   stamp:    captured 2026-09-29, INET HEAD 035ff8b8a1 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
 
-The same two packets, off the wire
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The same two kinds of packet, off the wire
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-INET can also write a packet capture (PCAP) file, so the same two packets can
-be handed to Wireshark. That is worth doing as a cross-check: Wireshark knows
-nothing about INET and dissects the recorded bytes on their own terms, so
-whatever it reports is a property of the packet rather than of the simulator's
-own view of it.
+INET can also write a packet capture (PCAP) file, so the same two kinds of
+packet can be handed to Wireshark. The captured pings are different ones
+(``ping39`` tunneled, ``ping41`` route-optimized, where the inspector showed
+``ping49``), but their header fields are the same. That is worth doing as a
+cross-check: Wireshark knows nothing about INET and dissects the recorded bytes
+on their own terms, so whatever it reports is a property of the packet rather
+than of the simulator's own view of it.
 
 .. figure:: media/tunneled_packet_wireshark.png
    :align: center
@@ -1153,11 +1172,12 @@ own view of it.
    stamp:    captured 2026-08; verified against INET HEAD 035ff8b8a1 (model = aeee20a40d),
              OMNeT++ 6.4.0aipre2, Wireshark 4.6.4
 
-Wireshark independently finds the two stacked IPv6 headers — outer from
-the home agent to the care-of address with ``Next Header: IPv6 (41)``, inner
-from the correspondent to the home address with ``Next Header: ICMPv6 (58)``.
-These are the real IANA protocol numbers, where the object inspector above
-showed INET's internal identifiers for the same two fields.
+Wireshark independently finds the two stacked IPv6 headers — outer from the
+home agent to the care-of address with ``Next Header: IPv6 (41)``, inner from
+the correspondent to the home address with ``Next Header: ICMPv6 (58)``. These
+are the IANA protocol numbers, the same ones the object inspector above shows
+in its ``protocolId`` fields; only the numbers in parentheses after its protocol
+names are INET's own identifiers.
 
 .. figure:: media/ropacket_wireshark.png
    :align: center
@@ -1201,16 +1221,17 @@ address. One packet, both halves of the identity/location split, and no home
 agent anywhere on its path.
 
 One detail to reconcile: Wireshark reports these frames as 162 and 146 bytes,
-eight fewer than the 170 B and 154 B the simulation reports for the same
-packets. INET counts the Ethernet preamble and start-of-frame delimiter, which
-a capture file does not store.
+eight fewer than the 170 B and 154 B the simulation reports for the same kinds
+of packet. INET counts the Ethernet preamble and start-of-frame delimiter,
+which a capture file does not store.
 
 Meanwhile the home agent's binding cache holds exactly one entry — the mapping
 this whole protocol exists to maintain. The 3600 s lifetime is the
-home-registration default (``maxHaBindingLifeTime``) — unlike the seven- minute
-correspondent bindings, home bindings are long-lived, refreshed well before
-expiry. And the sequence number is 1: one Binding Update, answered by one
-acknowledgement:
+home-registration default (``maxHaBindingLifeTime``) — unlike the seven-minute
+correspondent bindings, home bindings are long-lived. INET refreshes one 2 s
+before it expires, a fixed value, where the standard suggests refreshing well
+before; in this 80 s run no refresh happens. And the sequence number is 1: one
+Binding Update, answered by one acknowledgement:
 
 .. figure:: media/bindingcache.png
    :align: center
