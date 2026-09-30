@@ -725,6 +725,11 @@ void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& b
             // of course this is also true for CNs
             destroyTunnelFromTrigger(HoA);
 
+            // ...which on the home link means giving the home address back to the
+            // mobile node, that being where it has just returned to
+            if (rt6->isHomeAgent())
+                stopInterceptingForHomeAddress(HoA);
+
             // A correspondent node inserts the Type 2 Routing Header for this home
             // address based on its route-optimization state (see datagramLocalOutHook),
             // not on the binding cache, so that state must be dropped here too -- otherwise
@@ -884,6 +889,13 @@ void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& b
                 destroyTunnelForEntryAndTrigger(HA, HoA);
 
                 createTunnel(NORMAL, HA, CoA, HoA);
+
+                // The tunnel only carries what already reached this home agent. Traffic
+                // from a host on the home link is resolved by Neighbour Discovery there
+                // and never routed, so intercepting it takes a second step -- and only
+                // for a home registration, which is what the standard keys the check on.
+                if (homeRegistration)
+                    startInterceptingForHomeAddress(HoA, existingBinding);
             }
             else {
                 // we first destroy the already existing RH2 path if
@@ -2803,6 +2815,40 @@ void Mipv6::handleBULExpiry(cMessage *msg)
     }
 }
 
+void Mipv6::startInterceptingForHomeAddress(const Ipv6Address& HoA, bool existingBinding)
+{
+    /*10.4.1
+       While a node is serving as a home agent for some mobile node, the home agent
+       uses IPv6 Neighbor Discovery [18] to intercept unicast packets on the home link
+       addressed to the mobile node.  In order to intercept packets in this way, the
+       home agent MUST act as a proxy for this mobile node and reply to any received
+       Neighbor Solicitations for it.*/
+    NetworkInterface *homeLink = rt6->findOnLinkInterface(HoA);
+
+    if (homeLink == nullptr) {
+        // Every home agent advertises the home prefix, so this means the home address
+        // does not belong to a prefix this node serves.
+        EV_WARN << "Home address " << HoA << " is on-link on no interface; not intercepting for it\n";
+        return;
+    }
+
+    ipv6nd->addProxyAddress(homeLink, HoA);
+
+    /*10.4.1
+       [...] subsequently it MUST multicast onto the home link a Neighbor Advertisement
+       message [18] on behalf of the mobile node.*/
+    // Only for a binding that did not exist before. A binding that is merely being
+    // refreshed, or moved to a new care-of address, changes nothing on the home link:
+    // its neighbours already resolve the home address to this home agent.
+    if (!existingBinding)
+        ipv6nd->sendUnsolicitedNa(homeLink, HoA);
+}
+
+void Mipv6::stopInterceptingForHomeAddress(const Ipv6Address& HoA)
+{
+    ipv6nd->removeProxyAddress(HoA);
+}
+
 void Mipv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, NetworkInterface *ie, simtime_t scheduledTime)
 {
     cMessage *bcExpiryMsg = new cMessage("BCEntryExpiry", MK_BC_EXPIRY);
@@ -2843,6 +2889,10 @@ void Mipv6::handleBCExpiry(cMessage *msg)
     // and remove the tunnel
     destroyTunnelFromTrigger(bcExpIfEntry->HoA);
     removeRouteOptimizationForTrigger(bcExpIfEntry->HoA);
+
+    // an expired binding is no longer a reason to answer for the home address
+    if (rt6->isHomeAgent())
+        stopInterceptingForHomeAddress(bcExpIfEntry->HoA);
 
     // and remove entry from list
     cancelTimerIfEntry(bcExpIfEntry->dest, bcExpIfEntry->ifEntry->getInterfaceId(), KEY_BC_EXP);

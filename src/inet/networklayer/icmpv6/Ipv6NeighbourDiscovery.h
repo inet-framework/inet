@@ -9,6 +9,7 @@
 #define __INET_IPV6NEIGHBOURDISCOVERY_H
 
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -100,6 +101,12 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
 #endif
 
     Ipv6NeighbourCache neighbourCache;
+
+    // Addresses this node answers Neighbor Solicitations for although it does not hold
+    // them, keyed by (interface id, address); the value says whether the proxied target
+    // is itself a router. See addProxyAddress().
+    std::map<std::pair<int, Ipv6Address>, bool> proxyAddresses;
+
     typedef std::vector<cMessage *> RaTimerList;
 
     // stores information about a pending Duplicate Address Detection for
@@ -377,7 +384,43 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      */
     virtual void sendUnsolicitedRa(NetworkInterface *ie);
 
+    /**
+     * Starts providing Neighbour Discovery proxy service for the given address on the
+     * given interface. The node joins the address's solicited-node multicast group, so
+     * that solicitations for an address it does not hold reach it at all, and answers
+     * them with its own link-layer address (RFC 4861, Section 7.2.4). It also defends
+     * the address against another node's Duplicate Address Detection.
+     *
+     * A Mobile IPv6 home agent uses this to intercept packets addressed to an absent
+     * mobile node on the home link (RFC 6275, Section 10.4.1). Taking an address over
+     * from a node whose neighbours still cache its old link-layer address additionally
+     * requires a multicast Neighbor Advertisement, which the caller sends with
+     * sendUnsolicitedNa(): a solicited proxy advertisement carries a cleared Override
+     * flag and so cannot replace a cached entry on its own.
+     */
+    virtual void addProxyAddress(NetworkInterface *ie, const Ipv6Address& address, bool targetIsRouter = false);
+
+    /**
+     * Stops providing Neighbour Discovery proxy service for the given address on every
+     * interface it is proxied on, and leaves its solicited-node multicast groups. Takes
+     * the address alone because the interface the address was on-link on may since have
+     * changed, and the record is what says where the group was actually joined.
+     * Does nothing if the address is not being proxied.
+     */
+    virtual void removeProxyAddress(const Ipv6Address& address);
+
   protected:
+    /**
+     * Returns true if this node provides Neighbour Discovery proxy service for the
+     * given address on the given interface.
+     */
+    virtual bool isProxyAddress(NetworkInterface *ie, const Ipv6Address& address) const;
+
+    /**
+     * Returns true if the proxied target is itself a router, which decides the Router
+     * flag of an advertisement sent for it. False for an address that is not proxied.
+     */
+    virtual bool isProxyTargetRouter(NetworkInterface *ie, const Ipv6Address& address) const;
 
     virtual void processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
     virtual bool validateNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
