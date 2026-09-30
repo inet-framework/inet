@@ -548,7 +548,7 @@ spends away from its home network.
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2; off-scale label re-rendered 2026-09-29 (G5 r3: "queued at router homeAgent")
 
-**Without Mobile IPv6 the node is unreachable the whole time it is away** — no
+Without Mobile IPv6 the node is unreachable the whole time it is away — no
 replies at all for 35.0 s (34.5–37.0 s over ten seeds), resuming only when it
 re-enters home coverage on the way back. Its home address means nothing on the
 foreign link. The four markers on the top edge at about 52 s are pings that the
@@ -573,7 +573,7 @@ replies arrive 0.5 to 2.0 s late.
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
-**Bidirectional tunneling restores reachability, at the cost of a detour.**
+Bidirectional tunneling restores reachability, at the cost of a detour.
 After a 4.0 s outage replies resume on the 40 ms plateau and stay there, every
 packet taking the long way through the home agent.
 
@@ -604,8 +604,8 @@ arrives at t = 17.014 s, the first tunneled one at t = 21.040 s:
   replies: its binding became active only at 20.967 s. The one sent at 21.0 s
   got through.
 
-**More than half the outage — 2.06 s of 4.03 s — is duplicate address
-detection, at one end or the other.** It is a correctness check whose entire
+More than half the outage — 2.06 s of 4.03 s — is duplicate address
+detection, at one end or the other. It is a correctness check whose entire
 cost lands in handover latency, which is what motivates optimizations such as
 RFC 4429 Optimistic DAD. Both terms are timeouts rather than round trips, so
 neither shrinks on a faster link.
@@ -644,8 +644,8 @@ one.
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
-**Route optimization removes the detour after a single tunneled packet.** The
-same outage, then **exactly one reply at 40 ms** — the single ping answered
+Route optimization removes the detour after a single tunneled packet. The
+same outage, then exactly one reply at 40 ms — the single ping answered
 through the tunnel before route optimization completed — and the direct path
 at 20 ms from there on.
 
@@ -1119,38 +1119,41 @@ own view of it.
 ..
    FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
    type:     wireshark GUI screenshot of the packet-detail pane
-   config:   BidirectionalTunneling   # ../omnetpp.ini
+   config:   BidirectionalTunneling
    seed:     default (seed-set=1)
-   pcap:     inet -u Cmdenv -c BidirectionalTunneling
-             --"*.homeAgent.numPcapRecorders=1"
-             --'*.homeAgent.pcapRecorder[0].pcapFile="results/tunneled.pcap"'
-             --'*.homeAgent.pcapRecorder[0].fileFormat="pcap"'
-             --'**.fcsMode="computed"' --'**.crcMode="computed"'
-             --'**.checksumMode="computed"'
-             The computed modes are required: with INET's default declared FCS
-             the recorder aborts with "Cannot serialize Ethernet FCS without a
-             properly computed FCS" and writes an empty file.
-   frame:    tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' -> first match = frame 163 (ping38) at t=19.917s
-   gui:      This desktop is Wayland, and XWayland refuses synthetic input from
-             other X clients, so the GUI cannot be driven on the main display.
-             Run it in a nested X server instead:
-               Xephyr :77 -screen 1500x1150 -ac -noreset &
-               DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r <one-frame>.pcap
-             QT_QPA_PLATFORM=xcb matters: under Wayland, Qt6 opens a native
-             Wayland window that X11 tools can neither see nor capture.
-   layout:   in the profile's "recent" file set gui.byte_view_show and
-             gui.packet_diagram_show to false, so the detail tree gets the
-             full window width and the addresses stop truncating.
-   expand:   window 1500x900; click the first tree row to give the pane focus,
-             then per header: Home, Down x N, Right.  N = 3 then 2 -- the inner
-             IPv6 header first, because its children appear below it and so the
-             outer row does not move.
-   capture:  import -window <id>, crop (0,487)-(772,836); was 772x349
-   anchor:   two "Internet Protocol Version 6" root lines, the outer one with
-             Next Header: IPv6 (41). One root only = the tunnel was not up.
-   stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
+   shows:    Frame 1: 162 bytes on wire; Ethernet II 0a:aa:00:00:00:02 -> 0a:aa:00:00:00:05
+             (homeAgent -> backbone); outer IPv6 2001:db8:0:1:8aa:ff:fe00:1 -> care-of
+             2001:db8:0:3:8aa:ff:fe00:d, Payload Length 104, Next Header IPv6 (41), Hop Limit 30;
+             inner IPv6 2001:db8:0:5:8aa:ff:fe00:8 -> home 2001:db8:0:1:8aa:ff:fe00:d, Payload
+             Length 64, Next Header ICMPv6 (58), Hop Limit 28; ICMPv6 collapsed
+   pcap:     opp_run_release -l <wt>/src/INET -u Cmdenv -c BidirectionalTunneling
+             -n <wt>/src:<wt>/showcases '--*.visualizer.osgVisualizer.typename=""'
+             '--*.homeAgent.numPcapRecorders=1'
+             '--*.homeAgent.pcapRecorder[0].pcapFile="<dir>/tunneled.pcap"'
+             '--*.homeAgent.pcapRecorder[0].fileFormat="pcap"'
+             '--**.fcsMode="computed"' '--**.crcMode="computed"' '--**.checksumMode="computed"'
+             omnetpp.ini   (the computed modes are required: with the default declared FCS the
+             recorder aborts and writes an empty file)
+   frame:    ping39 = frame 165, relative 20.417481 s (sim 20.506): the frame of the 2026-08
+             image. tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' now matches ping38 first
+             (frame 163, 19.917481 s); ping38 differs from ping39 only in the FCS, which the
+             shot does not show. Cut it out: editcap -r tunneled.pcap one.pcap 165
+   gui:      Xephyr :77 -screen 1500x1150 -ac -noreset &
+             DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r one.pcap
+             (the desktop is Wayland; XWayland refuses synthetic input, so drive a nested X
+             server; set gui.byte_view_show and gui.packet_diagram_show to false in the profile's
+             "recent" file so the detail tree gets the full width)
+   expand:   window 1500x900; click the first tree row, then per header Home, Down x N, Right,
+             N = 3 then 2 (the inner IPv6 header first, so the outer row does not move)
+   capture:  import -window <id>, crop (0,487)-(772,836): 772x349
+   compare:  2026-09-29, not recaptured: tshark -V of the 2026-08 capture's frame (old pcap
+             frame 159, ping39, relative 20.417481) and of the current run's frame 165 is
+             identical line for line from "Ethernet II" to "Internet Control Message Protocol",
+             FCS included, so the image still shows the current run.
+   stamp:    captured 2026-08; verified against INET HEAD 035ff8b8a1 (model = aeee20a40d),
+             OMNeT++ 6.4.0aipre2, Wireshark 4.6.4
 
-**Wireshark independently finds the two stacked IPv6 headers** — outer from
+Wireshark independently finds the two stacked IPv6 headers — outer from
 the home agent to the care-of address with ``Next Header: IPv6 (41)``, inner
 from the correspondent to the home address with ``Next Header: ICMPv6 (58)``.
 These are the real IANA protocol numbers, where the object inspector above
@@ -1191,8 +1194,8 @@ showed INET's internal identifiers for the same two fields.
    stamp:    captured 2026-09-29, INET HEAD aeee20a40d, Wireshark 4.6.4
              (pixel-identical to the committed 2026-08 image: git shows no change)
 
-**And here the routing header gives up the field the object inspector kept
-collapsed**: ``Address[1]: 2001:db8:0:1:8aa:ff:fe00:d`` — the home address,
+And here the routing header gives up the field the object inspector kept
+collapsed: ``Address[1]: 2001:db8:0:1:8aa:ff:fe00:d`` — the home address,
 carried alongside a destination of ``2001:db8:0:3:8aa:ff:fe00:d``, the care-of
 address. One packet, both halves of the identity/location split, and no home
 agent anywhere on its path.
