@@ -347,6 +347,15 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. IPv6 Neighbor Discovery proxy service
+
+   Ipv6NeighbourDiscovery can answer Neighbor Solicitations for an address the
+   node does not hold, as a proxy in the sense of RFC 4861 Section 7.2.4. The
+   C++ methods addProxyAddress() and removeProxyAddress() start and stop the
+   service for an address on an interface. While it runs, the node is a member
+   of the address's solicited-node multicast group and answers solicitations
+   with its own link-layer address and a cleared Override flag.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

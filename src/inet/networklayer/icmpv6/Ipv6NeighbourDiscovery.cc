@@ -1819,8 +1819,11 @@ void Ipv6NeighbourDiscovery::processNsPacket(Packet *packet, const Ipv6Neighbour
     // RFC 2461:Section 7.2.3
     // If target address is not a valid "unicast" or anycast address assigned to the
     // receiving interface, we should silently discard the packet.
+    // A node also answers for an address it provides proxy service for (RFC 4861,
+    // Section 7.2.4), which by definition is not assigned to the interface.
     if (validateNsPacket(packet, ns) == false
-        || ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(nsTargetAddr) == false)
+        || (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(nsTargetAddr) == false
+            && !isProxyAddress(ie, nsTargetAddr)))
     {
         bubble("NS validation failed\n");
         delete packet;
@@ -1994,7 +1997,11 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
 
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
        otherwise it MUST set the flag to zero.*/
-    na->setRouterFlag(rt6->isRouter());
+    // The flag describes the target, not the sender, so for a proxied address it follows
+    // what the caller said the proxied node is -- a Mobile IPv6 home agent proxies for a
+    // mobile host and so clears it (RFC 6275, Section 10.4.1), even though it is a router.
+    bool proxy = isProxyAddress(ie, ns->getTargetAddress());
+    na->setRouterFlag(proxy ? isProxyTargetRouter(ie, ns->getTargetAddress()) : rt6->isRouter());
 
     /*If the (NS)Target Address is either an anycast address or a unicast
        address for which the node is providing proxy service, or the Target
@@ -2005,7 +2012,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
         sourceLinkLayerAddress = sla->getLinkLayerAddress();
 
-    if (sourceLinkLayerAddress.isUnspecified())
+    if (proxy || sourceLinkLayerAddress.isUnspecified())
         // the Override flag SHOULD be set to zero.
         na->setOverrideFlag(false);
     else
@@ -2058,6 +2065,66 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
+void Ipv6NeighbourDiscovery::addProxyAddress(NetworkInterface *ie, const Ipv6Address& address, bool targetIsRouter)
+{
+    Enter_Method("addProxyAddress");
+
+    // Both preconditions come from what proxying needs to do below: hold IPv6 state on
+    // the interface, and join a multicast group on it.
+    if (ie->findProtocolData<Ipv6InterfaceData>() == nullptr)
+        throw cRuntimeError("addProxyAddress(): interface %s has no IPv6 data", ie->getInterfaceName());
+    if (!ie->isMulticast())
+        throw cRuntimeError("addProxyAddress(): interface %s is not multicast capable, so solicitations "
+                            "for %s cannot reach this node", ie->getInterfaceName(), address.str().c_str());
+
+    if (!proxyAddresses.insert({ { ie->getInterfaceId(), address }, targetIsRouter }).second)
+        return; // already proxying for it on this interface
+
+    EV_INFO << "Providing Neighbour Discovery proxy service for " << address
+            << " on " << ie->getInterfaceName() << "\n";
+
+    // Solicitations for the address are sent to its solicited-node multicast address.
+    // A node that does not hold the address is not a member of that group, so Ipv6
+    // would discard the solicitation before Neighbour Discovery ever saw it.
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(address.formSolicitedNodeMulticastAddress());
+}
+
+void Ipv6NeighbourDiscovery::removeProxyAddress(const Ipv6Address& address)
+{
+    Enter_Method("removeProxyAddress");
+
+    for (auto it = proxyAddresses.begin(); it != proxyAddresses.end(); ) {
+        if (it->first.second != address) {
+            ++it;
+            continue;
+        }
+
+        NetworkInterface *ie = ift->getInterfaceById(it->first.first);
+        EV_INFO << "No longer providing Neighbour Discovery proxy service for " << address
+                << " on " << (ie ? ie->getInterfaceName() : "a deleted interface") << "\n";
+
+        // Leave the group this entry joined. Gated on the entry having existed, because
+        // leaving a group that was never joined trips an assertion in Ipv6InterfaceData.
+        if (ie != nullptr) {
+            if (auto ipv6Data = ie->findProtocolDataForUpdate<Ipv6InterfaceData>())
+                ipv6Data->leaveMulticastGroup(address.formSolicitedNodeMulticastAddress());
+        }
+
+        it = proxyAddresses.erase(it);
+    }
+}
+
+bool Ipv6NeighbourDiscovery::isProxyAddress(NetworkInterface *ie, const Ipv6Address& address) const
+{
+    return proxyAddresses.find({ ie->getInterfaceId(), address }) != proxyAddresses.end();
+}
+
+bool Ipv6NeighbourDiscovery::isProxyTargetRouter(NetworkInterface *ie, const Ipv6Address& address) const
+{
+    auto it = proxyAddresses.find({ ie->getInterfaceId(), address });
+    return it != proxyAddresses.end() && it->second;
+}
+
 void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie, const Ipv6Address& forAddress)
 {
     // RFC 2461
@@ -2073,6 +2140,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie, const Ipv6A
     // least RetransTimer seconds.
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
     Ipv6Address myIPv6Addr = forAddress.isUnspecified() ? ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress() : forAddress;
+    bool proxy = isProxyAddress(ie, myIPv6Addr);
 
     // The Target Address field in the unsolicited advertisement is set to
     // an IP address of the interface, and the Target Link-Layer Address
@@ -2089,7 +2157,8 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie, const Ipv6A
 
     // If the node is a router, it MUST set the Router flag to one;
     // otherwise it MUST set it to zero.
-    na->setRouterFlag(rt6->isRouter());
+    // As in sendSolicitedNa(), the flag describes the target, not the sender.
+    na->setRouterFlag(proxy ? isProxyTargetRouter(ie, myIPv6Addr) : rt6->isRouter());
 
     // The Override flag MAY be set to either zero or one.  In either case,
     // neighboring nodes will immediately change the state of their Neighbor
@@ -2125,10 +2194,21 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie, const Ipv6A
     // Neighbor Unreachability Detection algorithm ensures that all nodes
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
+    // The target address doubles as the source address, which holds as long as the node
+    // advertises an address of its own. It does not hold when it advertises one it only
+    // proxies for: RFC 6275, Section 10.4.1 requires that "The Source Address in the IPv6
+    // header MUST be set to the home agent's IP address on the interface used to send the
+    // advertisement", and a node cannot legitimately source a packet from an address it
+    // does not hold in any case.
+    Ipv6Address dgSrcAddr = proxy ? ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress() : myIPv6Addr;
+
+    EV_INFO << "Sending unsolicited Neighbour Advertisement for " << myIPv6Addr
+            << " on " << ie->getInterfaceName() << (proxy ? " as a proxy" : "") << "\n";
+
     auto packet = new Packet("NeighbourAdvertisement");
     Icmpv6::insertChecksum(checksumMode, na, packet);
     packet->insertAtFront(na);
-    sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
+    sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, dgSrcAddr, ie->getInterfaceId());
 }
 
 void Ipv6NeighbourDiscovery::sendUnsolicitedRa(NetworkInterface *ie)
@@ -2706,6 +2786,11 @@ void Ipv6NeighbourDiscovery::stop()
 
     // clear neighbour cache
     neighbourCache.clear();
+
+    // stop proxying: nothing here survives the node, and a record that did would make it
+    // answer for -- and defend -- an address on a live link with no binding behind it
+    while (!proxyAddresses.empty())
+        removeProxyAddress(proxyAddresses.begin()->first.second);
 }
 } // namespace inet
 
