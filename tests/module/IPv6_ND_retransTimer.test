@@ -1,0 +1,91 @@
+%description:
+Tests that the Ipv6NeighbourDiscovery retransTimer parameter and the Retrans
+Timer field of a received Router Advertisement set the interval between
+retransmitted address-resolution Neighbor Solicitations (RFC 4861 Sections
+6.3.2, 6.3.4 and 7.2.2).
+
+The router has retransTimer = 3s. It must resolve aaaa:0:66::dead, which no
+node owns, so it sends MAX_MULTICAST_SOLICIT (3) Neighbor Solicitations 3 s
+apart and declares failure 3 s after the last one.
+
+The host keeps the default retransTimer, but the router advertises a Retrans
+Timer of 2 on the host's link. The host must adopt it: it resolves
+aaaa:0:65::dead, which no node owns, and must send its solicitations 2 s apart.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network NdRetransTimerNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+        otherHost: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+        otherHost.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = NdRetransTimerNetwork
+sim-time-limit = 40s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "[%t] %C: "
+
+**.router.ipv6.neighbourDiscovery.retransTimer = 3s
+**.router.routes = xml("<routingTable><local node='router'><interface name='eth0' AdvSendAdvertisements='on' AdvRetransTimer='2'/></local></routingTable>")
+
+**.host.numApps = 2
+**.host.app[*].typename = "UdpBasicApp"
+**.host.app[*].destPort = 1000
+**.host.app[*].messageLength = 64B
+**.host.app[*].sendInterval = 100s
+**.host.app[0].destAddresses = "aaaa:0:66:0::dead"
+**.host.app[0].startTime = 10s
+**.host.app[0].stopTime = 11s
+**.host.app[1].destAddresses = "aaaa:0:65:0::dead"
+**.host.app[1].startTime = 20s
+**.host.app[1].stopTime = 21s
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[13.0001105] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.router.ipv6.neighbourDiscovery: Sending another Address Resolution NS message
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[16.0001105] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.router.ipv6.neighbourDiscovery: Sending another Address Resolution NS message
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[19.0001105] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.router.ipv6.neighbourDiscovery: Address Resolution has failed.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[22] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.host.ipv6.neighbourDiscovery: Sending another Address Resolution NS message
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[24] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.host.ipv6.neighbourDiscovery: Sending another Address Resolution NS message
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[26] (Ipv6NeighbourDiscovery)NdRetransTimerNetwork.host.ipv6.neighbourDiscovery: Address Resolution has failed.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

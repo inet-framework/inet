@@ -4,6 +4,40 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IPv6 Neighbour Discovery Retransmission Interval
+------------------------------------------------
+
+:cpp:`Ipv6InterfaceData` holds the RFC 4861 RetransTimer once now. The node
+constant accessors ``_getRetransTimer()`` and ``_setRetransTimer()`` are
+removed; call ``getRetransTimer()`` and ``setRetransTimer()`` instead. Their
+type changes from ``uint`` seconds to ``simtime_t``, so code that passes a
+number of seconds keeps compiling, and code that stored the result in an
+integer must use :cpp:`simtime_t`.
+
+IPv6 Neighbour Discovery Reachable Time
+---------------------------------------
+
+:cpp:`Ipv6InterfaceData` holds the RFC 4861 ReachableTime once now. The node
+constant accessors ``_getReachableTime()`` and ``_setReachableTime()`` are
+removed; call ``getReachableTime()`` and ``setReachableTime()`` instead.
+``getBaseReachableTime()`` and ``setBaseReachableTime()`` change from ``uint``
+seconds to ``simtime_t``, and ``setBaseReachableTime()`` now draws a new
+random ReachableTime when the value changes, as RFC 4861 Section 6.3.2
+requires. The overload of ``generateReachableTime()`` with three arguments
+takes the base as ``simtime_t``.
+
+IPv6 Router Advertisement Timers
+--------------------------------
+
+The router variables of :cpp:`Ipv6InterfaceData` that
+``getAdvReachableTime()``, ``setAdvReachableTime()``, ``getAdvRetransTimer()``
+and ``setAdvRetransTimer()`` access hold milliseconds now, the value of the
+Router Advertisement field as RFC 4861 Sections 4.2 and 6.2.1 define it.
+Their defaults, the macros ``IPv6_DEFAULT_ADV_REACHABLE_TIME`` and
+``IPv6_DEFAULT_ADV_RETRANS_TIMER``, change from 3600 and 1 to 3600000 and
+1000. Code that set the variables or used the macros in seconds must
+multiply by 1000.
+
 IEEE 802.11 EDCA Management Recovery
 -----------------------------------
 

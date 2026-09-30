@@ -293,6 +293,50 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+18. IPv6 Neighbour Discovery retransmission interval
+
+   The retransTimer parameter of Ipv6NeighbourDiscovery, the Retrans Timer field
+   of a received Router Advertisement and the HostRetransTimer attribute of the
+   routing table configuration set the interval between Duplicate Address
+   Detection probes only. Address resolution and Neighbour Unreachability
+   Detection kept retransmitting their Neighbour Solicitations every second. All
+   three now use the configured or advertised value, as RFC 4861 Sections 6.3.4,
+   7.2.2 and 7.3.3 require. The parameter also keeps fractions of a second now: a
+   value such as 0.2s was truncated to 0. The results of simulations that set any
+   of the three change; with the default of 1s nothing changes.
+
+19. IPv6 Neighbour Unreachability Detection uses the host's ReachableTime
+
+   A Neighbour Cache entry stayed REACHABLE for exactly 30 s after a
+   reachability confirmation. The baseReachableTime parameter of
+   Ipv6NeighbourDiscovery, the HostBaseReachableTime attribute of the routing
+   table configuration and the Reachable Time field of a received Router
+   Advertisement were stored, but Neighbour Unreachability Detection did not
+   read them. It now uses ReachableTime, a random value between 0.5 and 1.5
+   times BaseReachableTime, as RFC 4861 Sections 6.3.2 and 7.3.3 require. The
+   parameter also keeps fractions of a second now: a value such as 0.5s was
+   truncated to 0.
+
+   An INET router advertises its advReachableTime parameter, 3600s by default,
+   so a host that receives its Router Advertisements now keeps an entry
+   REACHABLE for 1800 to 5400 s instead of 30 s. The results of IPv6
+   simulations in which a neighbour is used again after a pause change.
+
+20. IPv6 Router Advertisement timers in milliseconds
+
+   Routers put AdvReachableTime and AdvRetransTimer into the Reachable Time and
+   Retrans Timer fields of a Router Advertisement as a number of seconds, and
+   hosts read the fields as seconds. RFC 4861 Section 4.2 defines both fields in
+   milliseconds. Both ends now use milliseconds, so the bytes of every Router
+   Advertisement change: the default 1 hour is sent as 3600000, the default 1 s
+   as 1000. The advReachableTime parameter and the AdvReachableTime,
+   AdvRetransTimer, HostBaseReachableTime and HostRetransTimer attributes keep
+   their unit, seconds, and an INET host derives the same whole-second values
+   from the new bytes as before. The advReachableTime parameter now keeps
+   fractions of a second: 0.5s was advertised as 0, and is advertised as 500. A
+   host now reads a Router Advertisement from another implementation, for
+   example in emulation, in the unit it was sent in.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
