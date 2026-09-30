@@ -76,6 +76,14 @@ Define_Module(Mipv6);
  */
 Mipv6::~Mipv6()
 {
+    // A probe still running in Neighbour Discovery holds a pointer to this module and would
+    // call back into freed memory. Both references are already null when the referenced module
+    // was deleted first, which is the ordinary end-of-simulation teardown; the case that needs
+    // this is a Mipv6 deleted at runtime while Neighbour Discovery lives on.
+    if (ipv6nd.getNullable() != nullptr && ift.getNullable() != nullptr)
+        cancelAllPendingHomeRegistrations();
+    pendingHomeRegistrations.clear();
+
     auto it = transmitIfList.begin();
 
     while (it != transmitIfList.end()) {
@@ -626,7 +634,7 @@ Mipv6::BuTransmitIfEntry *Mipv6::fetchBUTransmitIfEntry(NetworkInterface *ie, co
 }
 
 void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
-        const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime) // overloaded for use at CN - CB
+        const Ipv6Address& srcAddr, int interfaceId) // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
@@ -642,12 +650,7 @@ void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& dest
               << " SrcAddr=" << srcAddr
               << " InterfaceId=" << interfaceId << endl;
 
-    // TODO solve the HA DAD problem in a different way
-    // (delay currently specified via the sendTime parameter)
-    if (sendTime > 0)
-        sendDelayed(msg, sendTime, "toIPv6");
-    else
-        send(msg, "toIPv6");
+    send(msg, "toIPv6");
 }
 
 void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
@@ -718,6 +721,12 @@ void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& b
                If the home agent does not reject the Binding Update as described
                  above, then it MUST delete any existing entry in its Binding Cache
                  for this mobile node.*/
+            // A de-registration that overtakes the probe of a still-unacknowledged
+            // registration cancels it. The mobile node asked for the binding to be gone and is
+            // acknowledged for the de-registration below, so acknowledging the registration it
+            // just withdrew would only tell it about a binding that no longer exists.
+            cancelPendingHomeRegistration(HoA);
+
             bc->deleteEntry(HoA);
 
             /*In addition, the home agent MUST stop intercepting packets on the
@@ -853,23 +862,52 @@ void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& b
                    address, the home agent MUST perform Duplicate Address Detection [13]
                    on the mobile node's home link before returning the Binding
                    Acknowledgement.*/
-                simtime_t sendTime;
-                if (rt6->isHomeAgent())
-                    // HA has to do DAD in case this is a new binding for this HoA
-                    sendTime = existingBinding ? 0 : 1;
-                else
-                    sendTime = 0;
-
-                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
-//                        bu->getBindingAuthorizationData(), 15, sendTime); // swapped src and dest
-                        bu->getBindingAuthorizationData(), lifeTime, sendTime); // swapped src and dest, corrected lifetime value
-
                 /*If this Duplicate Address Detection fails for the given
                    home address or an associated link local address, then the home agent
                    MUST reject the complete Binding Update and MUST return a Binding
                    Acknowledgement to the mobile node, in which the Status field is set
                    to 134 (Duplicate Address Detection failed).*/
-                // TODO
+                // A binding still waiting for Duplicate Address Detection is not yet a binding
+                // this home agent "already has": a Binding Update arriving while the probe runs
+                // -- a retransmission, typically -- must not be acknowledged ahead of it.
+                bool probeRunning = isHomeRegistrationPending(HoA);
+                NetworkInterface *homeLink = nullptr;
+
+                if (rt6->isHomeAgent() && homeRegistration && (!existingBinding || probeRunning)) {
+                    // the NOT_HOME_SUBNET test above already established that some interface of
+                    // this home agent advertises a prefix covering this home address
+                    homeLink = findHomeLinkInterface(HoA);
+                    ASSERT(homeLink != nullptr);
+                }
+
+                if (homeLink != nullptr) {
+                    // Hold the acknowledgement back until the probe ends; addressProbeCompleted()
+                    // sends it, with status 134 if another node defends the home address.
+                    PendingHomeRegistration& pending = pendingHomeRegistrations[HoA];
+                    pending.homeAgentAddress = destAddress;
+                    pending.careOfAddress = CoA;
+                    pending.interfaceId = ifTag->getInterfaceId();
+                    pending.baSeqNumber = baSeqNumber;
+                    pending.bindingAuthorizationData = bu->getBindingAuthorizationData();
+                    pending.homeLinkInterfaceId = homeLink->getInterfaceId();
+
+                    if (probeRunning)
+                        EV_INFO << "Duplicate Address Detection for " << HoA << " is still running; "
+                                << "this Binding Update will be acknowledged when it ends" << endl;
+                    else {
+                        EV_INFO << "New home registration for " << HoA
+                                << ": running Duplicate Address Detection on "
+                                << homeLink->getInterfaceName()
+                                << " before acknowledging the Binding Update" << endl;
+                        ipv6nd->startAddressProbe(HoA, homeLink, this);
+                    }
+                }
+                else {
+                    // a correspondent node runs no Duplicate Address Detection, and neither
+                    // does a home agent that already holds a binding for this home address
+                    createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
+                            bu->getBindingAuthorizationData(), lifeTime);
+                }
             }
             else { // condition: ! bu->getAckFlag()
                 EV_INFO << "BU Validated as OK: ACK FLAG NOT SET" << endl;
@@ -1028,7 +1066,7 @@ bool Mipv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const Bindin
 
 void Mipv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& dest,
         int interfaceId, const BaStatus& baStatus, const uint baSeq,
-        const int bindingAuthorizationData, const uint lifeTime, const simtime_t sendTime)
+        const int bindingAuthorizationData, const uint lifeTime)
 {
     EV_TRACE << "Entered createAndSendBAMessage() method" << endl;
 
@@ -1080,7 +1118,100 @@ void Mipv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& de
        Solicitation).*/
     // TODO
 
-    sendMobilityMessageToIPv6Module(packet, dest, src, ie->getInterfaceId(), sendTime);
+    sendMobilityMessageToIPv6Module(packet, dest, src, ie->getInterfaceId());
+}
+
+NetworkInterface *Mipv6::findHomeLinkInterface(const Ipv6Address& homeAddress)
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+        const Ipv6InterfaceData *ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
+
+        for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++)
+            if (homeAddress.matches(ipv6Data->getAdvPrefix(j).prefix, ipv6Data->getAdvPrefix(j).prefixLength))
+                return ie;
+    }
+
+    return nullptr;
+}
+
+void Mipv6::addressProbeCompleted(const Ipv6Address& addr, NetworkInterface *ie, bool unique)
+{
+    Enter_Method("addressProbeCompleted"); // can be called by the NeighbourDiscovery module
+
+    auto it = pendingHomeRegistrations.find(addr);
+    if (it == pendingHomeRegistrations.end())
+        return; // the binding was de-registered while the probe was running
+
+    PendingHomeRegistration pending = it->second;
+    pendingHomeRegistrations.erase(it);
+
+    if (unique) {
+        /*10.3.1
+           When the home agent sends a successful Binding Acknowledgement to the mobile
+           node, the home agent assures to the mobile node that its address(es) will be
+           kept unique by the home agent for as long as the lifetime was granted for the
+           binding.*/
+        EV_INFO << "Duplicate Address Detection for " << addr << " found no other claimant; "
+                << "acknowledging the home registration" << endl;
+        createAndSendBAMessage(pending.homeAgentAddress, pending.careOfAddress, pending.interfaceId,
+                BINDING_UPDATE_ACCEPTED, pending.baSeqNumber, pending.bindingAuthorizationData,
+                bc->getLifetime(addr));
+    }
+    else {
+        /*10.3.1
+           If this Duplicate Address Detection fails for the given home address or an
+           associated link local address, then the home agent MUST reject the complete
+           Binding Update and MUST return a Binding Acknowledgement to the mobile node, in
+           which the Status field is set to 134 (Duplicate Address Detection failed).*/
+        EV_WARN << "Duplicate Address Detection for " << addr << " failed: another node on the "
+                << "home link holds the address. Rejecting the home registration" << endl;
+
+        // reject the complete Binding Update: undo everything accepting it set up
+        bc->deleteEntry(addr);
+        destroyTunnelFromTrigger(addr);
+        cancelTimerIfEntry(addr, pending.interfaceId, KEY_BC_EXP);
+
+        createAndSendBAMessage(pending.homeAgentAddress, pending.careOfAddress, pending.interfaceId,
+                DAD_FAILED, pending.baSeqNumber, pending.bindingAuthorizationData, 0);
+    }
+}
+
+bool Mipv6::isHomeRegistrationPending(const Ipv6Address& homeAddress)
+{
+    auto it = pendingHomeRegistrations.find(homeAddress);
+    if (it == pendingHomeRegistrations.end())
+        return false;
+
+    NetworkInterface *ie = ift->getInterfaceById(it->second.homeLinkInterfaceId);
+    if (ie != nullptr && ipv6nd->isAddressProbeRunning(homeAddress, ie))
+        return true;
+
+    // The probe is gone without having reported, which happens when Neighbour Discovery is
+    // stopped on its own. Without this the record would keep every later Binding Update for
+    // this home address waiting for a probe that will never end.
+    EV_WARN << "The Duplicate Address Detection probe for " << homeAddress
+            << " disappeared; discarding the held-back home registration" << endl;
+    pendingHomeRegistrations.erase(it);
+    return false;
+}
+
+void Mipv6::cancelPendingHomeRegistration(const Ipv6Address& homeAddress)
+{
+    auto it = pendingHomeRegistrations.find(homeAddress);
+    if (it == pendingHomeRegistrations.end())
+        return;
+
+    if (NetworkInterface *ie = ift->getInterfaceById(it->second.homeLinkInterfaceId))
+        ipv6nd->cancelAddressProbe(homeAddress, ie);
+
+    pendingHomeRegistrations.erase(it);
+}
+
+void Mipv6::cancelAllPendingHomeRegistrations()
+{
+    while (!pendingHomeRegistrations.empty())
+        cancelPendingHomeRegistration(pendingHomeRegistrations.begin()->first);
 }
 
 void Mipv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledgement>& ba)
@@ -2837,6 +2968,10 @@ void Mipv6::handleBCExpiry(cMessage *msg)
     BcExpiryIfEntry *bcExpIfEntry = (BcExpiryIfEntry *)msg->getContextPointer(); // detaching the corresponding bulExpIfEntry pointer
     ASSERT(bcExpIfEntry != nullptr);
 
+    // a registration still waiting for its probe expires with the binding it belongs to,
+    // otherwise the probe would acknowledge a binding that no longer exists
+    cancelPendingHomeRegistration(bcExpIfEntry->HoA);
+
     // remove binding from BC
     bc->deleteEntry(bcExpIfEntry->HoA);
 
@@ -2907,6 +3042,8 @@ void Mipv6::handleTokenExpiry(cMessage *msg)
 
 void Mipv6::handleStopOperation(LifecycleOperation *operation)
 {
+    cancelAllPendingHomeRegistrations();
+
     // cancel and delete all timer entries
     for (auto& entry : transmitIfList) {
         cancelAndDelete(entry.second->timer);
@@ -2923,6 +3060,8 @@ void Mipv6::handleStopOperation(LifecycleOperation *operation)
 
 void Mipv6::handleCrashOperation(LifecycleOperation *operation)
 {
+    cancelAllPendingHomeRegistrations();
+
     // cancel and delete all timer entries
     for (auto& entry : transmitIfList) {
         cancelAndDelete(entry.second->timer);

@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/icmpv6/IAddressProbeHandler.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/networklayer/mipv6/BindingUpdateList.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h" // for HAOpt & RH2
@@ -59,7 +60,8 @@ enum TimerIfEntryType {
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler, public IIpv6TlvOptionHandler, public NetfilterBase::HookBase
+class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandler,
+    public IIpv6TlvOptionHandler, public NetfilterBase::HookBase, public IAddressProbeHandler
 {
   public:
     virtual ~Mipv6();
@@ -70,6 +72,23 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     ModuleRefByPar<BindingUpdateList> bul;
     ModuleRefByPar<BindingCache> bc;
     ModuleRefByPar<Ipv6NeighbourDiscovery> ipv6nd;
+
+    //
+    // Home registrations whose Binding Acknowledgement is waiting for Duplicate Address
+    // Detection to finish on the home link (RFC 6275 Section 10.3.1), keyed by the mobile
+    // node's home address. Everything the acknowledgement needs is kept here, because the
+    // Binding Update that carried it is long deleted by the time the probe ends.
+    //
+    struct PendingHomeRegistration {
+        Ipv6Address homeAgentAddress; // source address of the acknowledgement
+        Ipv6Address careOfAddress; // destination address of the acknowledgement
+        int interfaceId = -1; // interface the Binding Update arrived on
+        uint baSeqNumber = 0; // sequence number copied from the Binding Update
+        int bindingAuthorizationData = 0; // authenticator copied from the Binding Update
+        int homeLinkInterfaceId = -1; // interface the probe runs on
+    };
+
+    std::map<Ipv6Address, PendingHomeRegistration> pendingHomeRegistrations;
 
     //
     // IP tunnel management (RFC 2473), moved here from the former Ipv6Tunneling
@@ -305,9 +324,8 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
      * Append tags to the Mobility Messages (BU, BA etc) and send it out to the Ipv6 Module
      */
     void sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
-            const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
-            simtime_t sendTime = 0); // overloaded for use at CN - CB
-//    void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
+            const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS,
+            int interfaceId = -1); // overloaded for use at CN - CB
 
     /**
      * Process a BU - only applicable to HAs and CNs.
@@ -329,7 +347,41 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
      */
     void createAndSendBAMessage(const Ipv6Address& src,
             const Ipv6Address& dest, int interfaceId, const BaStatus& baStatus, const uint baSeq,
-            const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);
+            const int bindingAuthorizationData, const uint lifeTime);
+
+    /**
+     * Returns this home agent's interface onto the home link of the given home address --
+     * the interface advertising a prefix that covers it -- or nullptr if there is none.
+     *
+     * Duplicates the loop in Ipv6RoutingTable::isOnLinkAddress(). Kept here so that this
+     * change does not collide with the companion proxy Neighbor Discovery work, which
+     * extracts that loop as Ipv6RoutingTable::findOnLinkInterface(); whichever lands second
+     * folds one into the other.
+     */
+    NetworkInterface *findHomeLinkInterface(const Ipv6Address& homeAddress);
+
+    /**
+     * Returns true while a home registration for the given home address is held back waiting
+     * for Duplicate Address Detection. Discards the held-back record if its probe has gone
+     * without a callback, so that a dropped probe cannot block the address forever.
+     */
+    bool isHomeRegistrationPending(const Ipv6Address& homeAddress);
+
+    /**
+     * Sends the Binding Acknowledgement that was held back for Duplicate Address Detection,
+     * with status 134 and the binding withdrawn when another node defended the home address.
+     */
+    virtual void addressProbeCompleted(const Ipv6Address& addr, NetworkInterface *ie, bool unique) override;
+
+    /**
+     * Abandons a held-back home registration and its running probe, if any.
+     */
+    void cancelPendingHomeRegistration(const Ipv6Address& homeAddress);
+
+    /**
+     * Abandons every held-back home registration and its running probe.
+     */
+    void cancelAllPendingHomeRegistrations();
 
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
