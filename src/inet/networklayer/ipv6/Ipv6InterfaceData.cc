@@ -375,7 +375,9 @@ bool Ipv6InterfaceData::hasAddress(const Ipv6Address& addr) const
 bool Ipv6InterfaceData::matchesSolicitedNodeMulticastAddress(const Ipv6Address& solNodeAddr) const
 {
     for (const auto& elem : addresses)
-        if (elem.address.formSolicitedNodeMulticastAddress() == solNodeAddr)
+        // the loopback address has no solicited-node group: it is not assigned to a link
+        // (RFC 4291 section 2.5.3), yet ::1 maps to ff02::1:ff00:1
+        if (!elem.address.isLoopback() && elem.address.formSolicitedNodeMulticastAddress() == solNodeAddr)
             return true;
 
     return false;
