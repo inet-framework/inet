@@ -504,15 +504,21 @@ spends away from its home network.
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (without Mobile IPv6)"
    inputs:   results/WithoutMipv6-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping in the WithoutMipv6 config: the 14 ms home plateau, no reply from 17.014 s to 52.016 s, then four queued replies off scale (drawn as red markers on the top edge, labelled with their real RTTs) and the home plateau again; "away from home" span shaded 15..51 s
+   shows:    RTT of every ping without Mobile IPv6: 3 off-scale boot markers at 4.536 s, the 14 ms home plateau, no reply from 17.014 s to 54.514 s (37.5 s), the home plateau again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             first reply ping9 at 5.516 s (15.77 ms); last reply before the move ping32 at 17.014 s; first reply after the return ping98 at 52.016 s (2015.8 ms, off scale); off-scale label reads "4 replies off scale: 524–2016 ms round trip (queued at router homeAgent)"; ping102 at 52.025 s (24.6 ms) is on scale. If the marker/label is missing or the count differs, the return timing changed.
+             boot: ping4/5/6 arrive together at 4.536 s (1535.5 / 1035.5 / 535.5 ms, off scale), ping7
+             35.5 ms on scale; home median 14.05 ms; last reply before the move ping32 at 17.014 s;
+             first reply after the return ping107 at 54.514 s (14.07 ms); no marker at ~52 s any more;
+             elevated ping117 15.73 ms at 59.5 s (waited behind the mobile node's NUD probe).
+             If a marker appears at ~52 s or the gap is not 37.5 s, the return timing changed.
              Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge with one label.
+             script draws them as red markers on the top edge, with one label per cluster
+             (boot: "queued at router homeAgent until it resolved the home address";
+             handover: "held by the mobile node until the Binding Acknowledgement").
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(without Mobile IPv6)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2; off-scale label re-rendered 2026-09-29 (G5 r3: "queued at router homeAgent")
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
 Without Mobile IPv6 the node is unreachable the whole time it is away — no
 replies at all for 37.5 s (34.5–37.5 s over ten seeds), resuming only when it
@@ -530,15 +536,20 @@ mobile node is still checking its home address, and their replies arrive 0.5 to
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (bidirectional tunneling)"
    inputs:   results/BidirectionalTunneling-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping with route optimization off: 14 ms at home, gap 17.014–21.040 s, the 40 ms tunneled plateau while away, gap 50.040–53.014 s, 14 ms at home again; "away from home" span shaded 15..51 s
+   shows:    RTT of every ping with route optimization off: boot markers, 14 ms at home, gap 17.014-22.970 s, two off-scale held replies at 22.97 s, the 40 ms tunneled plateau from ping44, gap 50.040-52.014 s, 14 ms at home again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             first reply after the move ping40 at 21.040 s (40.36 ms); away median 40.34 ms (40.26–40.40), no point above 40.4 ms; last reply away ping98 at 50.040 s; first reply at home ping104 at 53.014 s. The 40 ms plateau is link-delay arithmetic (38 ms wired + wifi).
+             boot markers as in the plain-host chart; first replies after the move ping42 at 22.970 s
+             (969.9 ms) and ping43 at 22.971 s (471.3 ms), both off scale; away median 40.30 ms
+             (40.26-40.40, from ping44 at 23.040 s); last reply away ping98 at 50.040 s; first reply at
+             home ping102 at 52.014 s (return 1.974 s); elevated ping112 15.03 ms at 57.0 s.
              Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge with one label.
+             script draws them as red markers on the top edge, with one label per cluster
+             (boot: "queued at router homeAgent until it resolved the home address";
+             handover: "held by the mobile node until the Binding Acknowledgement").
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(bidirectional tunneling)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
 Bidirectional tunneling restores reachability, at the cost of a detour. After a
 6.0 s outage replies resume on the 40 ms plateau and stay there, every packet
@@ -607,15 +618,20 @@ ten is 26 ms shorter than this one.
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (route optimization)"
    inputs:   results/RouteOptimization-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping with route optimization on: 14 ms at home, gap 17.014–21.040 s, exactly one 40 ms tunneled point (ping40), the 20 ms direct plateau from ping41, gap 50.020–54.014 s, 14 ms at home again; span shaded 15..51 s
+   shows:    RTT of every ping with route optimization on: boot markers, 14 ms at home, gap 17.014-22.971 s, two off-scale held replies, no 40 ms point, the 20 ms direct plateau from ping44, gap 50.020-54.014 s, 14 ms at home again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             the lone 40 ms point is ping40 at 21.040 s (40.36 ms); ping41 at 21.520 s is the first 20 ms point; direct median 20.16 ms (20.08–20.22); last reply away ping98 at 50.020 s; first reply at home ping106 at 54.014 s. More than one 40 ms point = route optimization completed later.
+             boot markers as in the plain-host chart; ping42 at 22.971 s (971.0 ms) and ping43 at
+             22.972 s (472.3 ms) off scale; NO 40 ms point; ping44 at 23.021 s (20.97 ms) is the first
+             direct reply; direct median 20.16 ms (20.08-20.97); last reply away ping98 at 50.020 s;
+             first reply at home ping106 at 54.014 s (return 3.994 s).
              Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge with one label.
+             script draws them as red markers on the top edge, with one label per cluster
+             (boot: "queued at router homeAgent until it resolved the home address";
+             handover: "held by the mobile node until the Binding Acknowledgement").
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(route optimization)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
 
 Route optimization removes the detour right away. The same outage, then the two
 held replies, off scale at 22.97 s, and the direct path at 20 ms from
@@ -661,9 +677,9 @@ which is not drawn but shows in the status label; then two replies, to
 ``ping42`` and ``ping43``, taking the detour through the home agent together —
 and finally the direct path through the foreign router, with the home agent out
 of the loop. The status label steps from "at home" through a brief "away (via
-home agent)" to "away (route-optimized, 1 CN)", and the address label changes
-to the care-of address the moment its duplicate address detection completes in
-the foreign network.
+home agent)" to "away (route-optimized, 1 CN)", while the address label keeps
+showing the home address — the node's identity — for the whole stay; the
+care-of address is used underneath.
 
 .. video:: media/handover.mp4
    :align: center
@@ -672,35 +688,36 @@ the foreign network.
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   RouteOptimization
    seed:     default (seed-set=1)
-   shows:    home path -> the move -> AP label HOME -> FOREIGN -> care-of address and
-             "away (via home agent)" -> the ping40 reply path through the reverse tunnel
-             (drawn along homeAgent-backbone) -> "away (route-optimized, 1 CN)" -> ping41
-             and later pings on the direct path through foreignRouter
-   anchors:  association with apForeign 18.408 s; DAD done + BU 19.924 s (status label
-             "away (via home agent)", address label -> 2001:db8:0:3:8aa:ff:fe00:d);
-             binding active 20.967 s; first reply ping40 at 21.040 s (tunneled route);
-             CN's BA at the MN 21.097 s (status "away (route-optimized, 1 CN)");
-             ping41 direct 21.520 s. ping38/ping39 (replies dropped at the MN) draw no
-             route -- each line is the path of one reply that reached the correspondent node.
-             If ping40 is not the first route drawn after the move, the timeline moved.
-   window:   express to 16.5 s -> step 1 event (normal) -> record to 22.5 s.
+   shows:    home path -> the move -> AP label HOME -> FOREIGN, status "at home" while both
+             duplicate address detections run -> "away (via home agent)" -> two reply paths through
+             the reverse tunnel (the held ping42/ping43 replies, drawn along homeAgent-backbone) ->
+             "away (route-optimized, 1 CN)" -> ping44 and later pings on the direct path through
+             foreignRouter
+   anchors:  association with apForeign 18.408 s; care-of DAD done + BU 21.900 s (status "away (via
+             home agent)"); BA at the MN 22.950 s releases the held replies: ping42 and ping43 reply
+             paths drawn at 22.97 s; CN's BA at the MN 23.009 s (status "away (route-optimized, 1 CN)");
+             ping44 direct 23.021 s, ping45 23.520 s. The green address label stays at the home address
+             2001:db8:0:1:8aa:ff:fe00:d throughout (it shows the interface's preferred address, which is
+             the home address in this model version; the Mipv6 watch careOfAddress holds
+             2001:db8:0:3:8aa:ff:fe00:d). No reply path is drawn between 17.014 s and 22.97 s.
+   window:   express to 16.5 s -> step 1 event (normal) -> record to 23.6 s.
              Route visualizer fades in simulation time (0.6 s) -> no settle wait.
-   launch:   private prefs copy so the user's Qtenv prefs stay untouched:
-             XDG_CONFIG_HOME=<dir> with <dir>/omnetpp/.qtenvrc copied from
-             ~/.config/omnetpp/.qtenvrc and animation_enabled=false (built-in message
-             animation off); opp_run_release ... -u Qtenv -c RouteOptimization
-             '--*.visualizer.osgVisualizer.typename=""' --mcp-server-address localhost:8777
-   anim:     set_animation_parameters profile=normal playback_speed=1
-             min_animation_speed=0.1 (no model animation speed with the built-in
-             animation off; the floor gives 0.05 s sim time per frame at fps=2)
-   capture:  record_video fps=2, crop_area=with_padding; 120 frames (0000-0119);
-             crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_handover
-   encode:   ffmpeg -r 6 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:896:123"
-             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (V3: the crop keeps only the canvas
-             interior -- x 896-1725, y 123-806 -- so neither the green Qtenv window background nor the
-             canvas border shows; 830x684, fits the 834 px column without scaling)
+   launch:   private prefs copy so the user's Qtenv prefs stay untouched: XDG_CONFIG_HOME=
+             /var/tmp/mipv6-video/xdg (omnetpp/.qtenvrc copied from ~/.config/omnetpp/.qtenvrc with
+             animation_enabled=false); opp_run_release -l <wt>/src/INET -u Qtenv -c RouteOptimization
+             -n <wt>/src:<wt>/showcases '--*.visualizer.osgVisualizer.typename=""'
+             --mcp-server-address localhost:8777 --qtenv-default-run=0 omnetpp.ini
+   anim:     set_animation_parameters profile=normal playback_speed=1 min_animation_speed=0.1
+             (0.05 s simulation time per frame at fps=2; encoded at 6 fps = 0.3 s per video second)
+   capture:  record_video fps=2, crop_area=with_padding, time_limit 23.6; 142 frames (0000-0141);
+             frames kept in /var/tmp/update6/video/frames_handover
+   encode:   ffmpeg -r 6 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:876:123"
+             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (the crop keeps only the canvas interior,
+             x 876-1705, y 123-806; the Qtenv window now places the canvas 20 px further left than on
+             2026-09-29, so re-measure the black canvas border before encoding: crop_rect was 854x732 at
+             864,87); 830x684, fits the 834 px column without scaling
    post:     none
-   stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
+   stamp:    recorded 2026-09-30, INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2
 
 The signaling, message by message
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -730,39 +747,33 @@ their true length:
 ..
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
    type:     seqchart
-   config:   WithoutMipv6, seed-set 1, re-run with --record-eventlog=true
-             --eventlog-recording-intervals=18.3s..20.0s,51.3s..52.1s
-             (results/WithoutMipv6-intervals.elog)
+   config:   WithoutMipv6, seed-set 1, --record-eventlog=true
+             --eventlog-recording-intervals=18.3s..22.0s,51.3s..54.6s
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
-   axes:     mobileNode, apForeign, foreignRouter (this order)
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
+   axes:     mobileNode, apForeign, foreignRouter (MANUAL order)
    filter:   message_names RouterSolicitation, RouterAdvertisement, NeighbourSolicitation
-   view:     NETWORK_COMMUNICATION, SIMULATION_TIME (linear); resize_window 1250x900.
-             Overview: zoom 18.30..19.96 (viewport left 18.2992048, 624.096 px/s).
-             Zoom (V2): goto_event 10462, zoom 18.86595..18.86799 (viewport left 18.8659493,
-             507843 px/s) -- the Router Advertisement (up) and the DAD Neighbor Solicitation
-             (down) separate; the AP's re-sent copy of the multicast NS at ~18.8680 s stays
-             just outside the window.
-   anchor:   RS 18.408162 (event #10129) up to foreignRouter; RA 18.866896 (#10462, router
-             delay 0.457 s) and the one DAD NS (#10464) at the same time; then nothing until
-             DAD done 19.923596 (#11079, not a message, so not drawn). A second NS or an RA
-             much later than 0.5 s after the RS = the timeline moved.
-   capture:  two screenshots, 1036x508 each (raw: seqchart-raw/p1c.png, p1zoom3.png)
-   post:     research/analyst-data/p1.py: overview crop (0,110)-(1036,486) + absolute tick strip
-             (ticks at 18.408 RS, 18.867 RA/NS, 19.924 DAD done, and 18.6/19.2/19.6, x=(t-18.2992048)
-             *624.096); a grey "zoomed below" note at the RA/NS; then the zoom crop (0,120)-(1036,486)
-             + tick strip 18.8660..18.8675 s (x=(t-18.8659493)*507843) with the note "zoomed about
-             800x: the Router Advertisement goes up to mobileNode, then the Neighbor Solicitation goes
-             down". The IDE rulers are cut off. Result 1036x868.
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+   view:     NETWORK_COMMUNICATION, SIMULATION_TIME (linear); resize_window 1250x900 (widget 1036x508);
+             goto_event 10756, zoom 18.30..22.00 (viewport left 18.3011594516, 280 px/s)
+   anchor:   RS 18.408302 (x 30); solicited RA at the MN 18.857696 (#11091, x 156); periodic RA
+             19.352899 (x 294); link-local DAD probe 19.754759 (#11626, x 407; random 0.897 s before it);
+             link-local check done 20.754759 (#12221, no message); care-of DAD probe 20.900354 (x 728;
+             random 0.146 s); RS again 20.994583 (#12346, x 754); care-of check done 21.900354 (#12938,
+             no message, x 1006). Second RS/NS labels in the apForeign band = the AP's copy into its cell.
+             If the RA and the NS coincide again, the delay-before-probe fix is gone.
+   capture:  screenshot 1036x508 (raw: seqchart-raw-8c94/p1.png) -> crop (0,150)-(1036,470)
+   post:     below the chart a magenta wait strip (x=(t-18.3011594516)*280): "random delay 0.90 s"
+             18.858-19.755, "link-local check 1 s" 19.755-20.755, "0.15 s" 20.755-20.900, "care-of
+             check 1 s" 20.900-21.900, caption "duplicate address detection on the mobile node"; then a
+             linear tick strip (18.408, 18.858, 19.353, 19.755, 20.900, 20.995, 21.900), note "time [s],
+             linear". No zoom strip any more (the RA and the NS no longer coincide). Result 1036x455.
+             Script research/analyst-data/pn8c94.py p1.
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 The Router Solicitation goes from ``mobileNode`` to ``foreignRouter`` at once,
 and the Router Advertisement comes back about 0.45 s later. The node then waits
@@ -770,19 +781,20 @@ a random 0.90 s before it sends the Neighbor Solicitation that checks its
 link-local address, and 1 s more for an answer. Right after that check, a
 second Neighbor Solicitation checks the new care-of address, again after a
 random delay (0.15 s), and again 1 s passes in silence. The Router Solicitation
-in between, at 20.995 s, is the node restarting router discovery. The end of a
-check is not a message, so no arrow marks it. The second Router Solicitation
-and Neighbor Solicitation labels in the ``apForeign`` band are not second
-messages: they are the access point relaying the multicast copy back into its
-cell.
+in between, at 20.995 s, is the node restarting router discovery, and the
+Router Advertisement at 19.353 s is a periodic one. The strip below the chart
+marks the four waits. The end of a check is not a message, so no arrow marks
+it. The second Router Solicitation and Neighbor Solicitation labels in the
+``apForeign`` band are not second messages: they are the access point relaying
+the multicast copy back into its cell.
 
 **Registration, and replies held back.** This chart is taken from the
 ``BidirectionalTunneling`` run; with the messages shown here, the
 ``RouteOptimization`` run looks the same. The bracket marks the home agent's
-duplicate address detection on the home address, and the stubs mark the two
-replies the mobile node holds. The time axis is not linear here: busy stretches
-get more room than idle ones, so the bracket's label gives the true length of
-the check:
+duplicate address detection on the home address, and the red bars mark how long
+the mobile node holds each of the two replies. The time axis is not linear
+here: busy stretches get more room than idle ones, so the bracket's label gives
+the true length of the check:
 
 .. figure:: media/seqchart-p2-registration.png
    :align: center
@@ -792,41 +804,40 @@ the check:
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
    type:     seqchart
    config:   BidirectionalTunneling, seed-set 1, --record-eventlog=true
-             --eventlog-recording-intervals=19.9s..21.1s,51.3s..53.1s
+             --eventlog-recording-intervals=21.8s..23.1s,51.3s..52.1s
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
    axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
-   filter:   message_names "Binding Update", "Binding Acknowledgement", ping*
-   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102x578);
-             goto_event 11080, zoom 19.92..21.3
-   anchor:   BU leaves the MN 19.923596 (#11081), reaches homeAgent 19.953260 (#11152);
-             ping38 and ping39 reach the MN via homeAgent at 20.037830 (#11320) and
-             20.519974 (#11601) with no reply; BA leaves homeAgent 20.953260 (#11762), at
-             the MN 20.966823 (#11798); ping40 round trip via homeAgent both ways, reply at
-             the CN 21.040356 (#11982)
-   capture:  screenshot 1102x578 (raw: seqchart-raw/p2h.png) -> crop (0,62)-(1062,556): drops the
-             hover box, the IDE ruler and ping41; + absolute tick strip -> 1062x571
-   post:     bracket on the homeAgent lifeline from the BU arrival #11152 (x 128) to the BA departure
-             #11762 (x 597), bar at cropped y 425, label "BA held 1.000 s"; red stubs "reply dropped"
-             from the mobileNode axis at the ping38 arrival (#11320, x 344; drop #11322 same time) and
-             the ping39 arrival (#11601, x 536; drop #11603). Ticks: 19.953 (#11152), 20.038 (#11320),
-             20.520 (#11601), 20.953 (#11762), 20.967 (#11798, x 676.5), 21.000 (ping40 leaves the CN,
-             x 732), 21.040 (#11982, x 1031.5).
-             Composition script research/analyst-data/pn.py (helpers compose.py; raw
-             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
-             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
-             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
-             the arrow ends in the screenshot), labelled with the event's simulation time, and the
-             note "time [s] at the marked events; the axis between them is not linear" (V1).
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+   filter:   message_names "Binding Update", "Binding Acknowledgement", ping42, ping42-reply, ping43,
+             ping43-reply
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1400x1000 (widget 1160x578);
+             goto_event 12939, zoom 21.895..22.9715
+   anchor:   BU leaves the MN 21.900354 (#12940, x 24), at homeAgent 21.930018 (#13024, x 151); the home
+             agent's DAD probe of the home address 21.936075 (not drawn; home link); ping42 leaves the CN
+             22.000 (#13066, x 205), reaches the MN via homeAgent 22.037730 (#13215, x 407.5), reply held
+             (#13217); ping43 leaves the CN 22.500 (#13369, x 481), at the MN 22.519974 (#13434, x 632.5),
+             reply held; BA leaves homeAgent 22.936075 (#13596, x 706), at the MN 22.949638 (#13632,
+             x 801.5); held replies leave at 22.949638 (#13636/#13637, x 860 / 920) through the reverse
+             tunnel; at the CN 22.969940 (#13772, x 1107) and 22.971260 (#13798, x 1146)
+   capture:  screenshot 1160x578 (raw: seqchart-raw-8c94/p2.png) -> crop (0,62)-(1160,556) + tick strip
+             -> 1160x571. The last labels at the right edge are cut (the last filtered event ends the view).
+   post:     magenta bracket on the homeAgent lifeline 151-706, bar at cropped y 425, two-line label "home
+             agent checks the / home address: 1.006 s"; red hold bars above the mobileNode axis:
+             407.5-860 at y 20 "ping42 reply held 0.912 s" (label left) and 632.5-920 at y 44 "ping43
+             reply held 0.430 s" (label right). Ticks 21.900, 21.930, 22.000, 22.038, 22.500, 22.520,
+             22.936, 22.950, 22.970, 22.971.
+             Composition script research/analyst-data/pn8c94.py (helpers compose.py; raw screenshots
+             in research/analyst-data/seqchart-raw-8c94/): run from analyst-data/ with an out8c94/
+             directory. Overlay font DejaVu Sans 17 px. The IDE's rulers are cut off; the IDE's dotted
+             cursor column is removed (decursor()); an absolute-time strip gives a tick at each anchor
+             event's x (read from the arrow ends in the screenshot), labelled with the event's time, and
+             the note "time [s] at the marked events; the axis between them is not linear".
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 At the left edge the *Binding Update* descends from the mobile node (top
 lifeline) through ``apForeign``, ``foreignRouter`` and ``backbone`` to
@@ -847,10 +858,10 @@ both held replies through the reverse tunnel, back through the ``homeAgent``
 lifeline; the reply to ``ping42`` is the first one to arrive, at 22.970 s.
 
 **The care-of test.** In the ``RouteOptimization`` run, the arrival of
-``ping42`` at 22.036 s also starts return routability. The node sends the Home
+``ping42`` at 22.038 s also starts return routability. The node sends the Home
 Test Init (HoTI) and the Care-of Test Init (CoTI) at the same time. The Home
 Test Init has the home address as its source, so the node holds it, like the
-ping replies; the stub marks it:
+ping replies; the red marker shows where:
 
 .. figure:: media/seqchart-p3-careoftest.png
    :align: center
@@ -860,37 +871,33 @@ ping replies; the stub marks it:
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
    type:     seqchart
    config:   RouteOptimization, seed-set 1, --record-eventlog=true
-             --eventlog-recording-intervals=19.9s..22.1s,51.3s..54.6s
+             --eventlog-recording-intervals=21.8s..23.6s,51.3s..54.6s
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
    axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
-   filter:   message_names CoTI, CoT, HoTI, ping*
-   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1250x1000; goto_event 11320,
-             zoom 20.034..20.060
-   anchor:   ping38 reaches the MN 20.037830 (#11320); CoTI MN -> CN 20.037830..20.047718
-             (#11391), CoT back at the MN 20.057332 (#11433); both cross the homeAgent band
-             without touching it; no HoTI arrow (dropped at the MN, #11324)
-   capture:  screenshot 1036x578 (raw: seqchart-raw/p3b.png) -> crop (0,62)-(1036,556) + tick
-             strip -> 1036x550
-   post:     red stub "HoTI dropped" from the mobileNode axis at the ping38 arrival (#11320, x 193;
-             drop #11324 same time); the ping38 reply drop (#11326) is deliberately not marked. Ticks:
-             20.0378 (#11320), 20.0477 (CoTI at the CN #11391, x 639.5), 20.0573 (CoT at the MN #11433,
-             x 965.5).
-             Composition script research/analyst-data/pn.py (helpers compose.py; raw
-             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
-             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
-             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
-             the arrow ends in the screenshot), labelled with the event's simulation time, and the
-             note "time [s] at the marked events; the axis between them is not linear" (V1).
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+   filter:   message_names CoTI, CoT, ping42
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1250x1000 (widget 1036x578);
+             goto_event 13066, zoom 21.999..22.058
+   anchor:   ping42 leaves the CN 22.000 (#13066, x 24), bends at homeAgent, reaches the MN 22.037730
+             (#13215, x 467.5); HoTI (#13219) held, CoTI (#13220) leaves at the same instant (x 564);
+             CoTI at the CN 22.047698 (#13286, x 761); CoT at the MN 22.057312 (#13328, x 988.5).
+             CoTI and CoT do not touch homeAgent.
+   capture:  screenshot 1036x578 (raw: seqchart-raw-8c94/p3.png) -> crop (0,62)-(1036,556) + tick strip
+             -> 1036x550
+   post:     red "held" marker (stem + pause sign) on the mobileNode axis at x 564, label left "HoTI held
+             until the Binding Acknowledgement at 22.950 s". Ticks 22.000, 22.0377, 22.0477, 22.0573.
+             Composition script research/analyst-data/pn8c94.py (helpers compose.py; raw screenshots
+             in research/analyst-data/seqchart-raw-8c94/): run from analyst-data/ with an out8c94/
+             directory. Overlay font DejaVu Sans 17 px. The IDE's rulers are cut off; the IDE's dotted
+             cursor column is removed (decursor()); an absolute-time strip gives a tick at each anchor
+             event's x (read from the arrow ends in the screenshot), labelled with the event's time, and
+             the note "time [s] at the marked events; the axis between them is not linear".
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 The *Care-of Test Init* and the *Care-of Test (CoT)* run straight between the
 two nodes, without touching ``homeAgent``. The care-of half of the test is
@@ -910,39 +917,33 @@ the reverse tunnel:
    type:     seqchart
    config:   RouteOptimization (same eventlog as P3)
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
    axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
-   filter:   message_names HoTI, HoT, "Binding Update", "Binding Acknowledgement", ping*
-   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102);
-             goto_event 12082, zoom 21.0365..21.0985
-   anchor:   HoTI leaves the MN 21.037830 (#12082) through the reverse tunnel, homeAgent
-             21.051580, CN 21.057593 (#12161); HoT via homeAgent (21.063607) to the MN
-             21.077391 (#12229); BU to the CN (#12232) and its BA at the MN 21.097182 (#12337)
-             go direct. The end of the previous ping40 reply shows at the left edge.
-   capture:  screenshot 1102x578 (raw: seqchart-raw/p4b.png) -> crop (0,62)-(1102,556) + tick
-             strip -> 1102x550. The MN-side "Binding Acknowledgement" label is cut at the right edge
-             (the BA is the last filtered event); its other hops carry the full label.
-   post:     red label "HoTI sent again, 1 s after the dropped copy" in the apForeign band (x 130,
-             cropped y 64) with a horizontal leader and arrowhead ending on the HoTI arrow just below
-             the mobileNode axis (#12082, arrow start x 46); no overlay pixel crosses the "mobileNode"
-             name (V4). Ticks: 21.038 (#12082), 21.040 (ping40 reply at the CN, x 164.5), 21.058
-             (HoTI at the CN #12161, x 345.5), 21.077 (HoT at the MN #12229, x 619.5), 21.088 (BU at the
-             CN #12296, x 833.5), 21.097 (BA at the MN #12337, x 1000.5).
-             Composition script research/analyst-data/pn.py (helpers compose.py; raw
-             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
-             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
-             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
-             the arrow ends in the screenshot), labelled with the event's simulation time, and the
-             note "time [s] at the marked events; the axis between them is not linear" (V1).
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+   filter:   message_names HoTI, HoT, "Binding Update", "Binding Acknowledgement"
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102x578);
+             goto_event 13705, zoom 22.935..23.0095
+   anchor:   the home agent's BA leaves homeAgent 22.936075 (#13705, x 22), at the MN 22.949638 (#13741,
+             x 157.5); the held HoTI leaves at the same instant (#13746, x 222), bends at homeAgent
+             22.963755 (#13910, x 374), at the CN 22.969768 (#13938, x 452); HoT via homeAgent at the MN
+             22.989566 (#14031, x 711.5); BU to the CN leaves at once (#14034, x 777), at the CN
+             22.999727 (#14097, x 914); the CN's BA at the MN 23.009358 (#14177, x 1068.5). No HoTI
+             retransmission. The MN-side "Binding Acknowledgement" label is cut at the right edge.
+   capture:  screenshot 1102x578 (raw: seqchart-raw-8c94/p4.png) -> crop (0,62)-(1102,556) + tick strip
+             -> 1102x550
+   post:     red "held" marker at x 222, label right "the held HoTI leaves with the Binding
+             Acknowledgement". Ticks 22.936, 22.950, 22.964, 22.970, 22.990, 23.000, 23.009.
+             Composition script research/analyst-data/pn8c94.py (helpers compose.py; raw screenshots
+             in research/analyst-data/seqchart-raw-8c94/): run from analyst-data/ with an out8c94/
+             directory. Overlay font DejaVu Sans 17 px. The IDE's rulers are cut off; the IDE's dotted
+             cursor column is removed (decursor()); an absolute-time strip gives a tick at each anchor
+             event's x (read from the arrow ends in the screenshot), labelled with the event's time, and
+             the note "time [s] at the marked events; the axis between them is not linear".
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 The *Home Test Init* and the *Home Test (HoT)* both bend at the ``homeAgent``
 line: the home half of the test travels through the tunnel, as it must. The
@@ -966,34 +967,32 @@ sent at 23.0 s, already takes the direct path.
    type:     seqchart
    config:   RouteOptimization (same eventlog as P3)
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
    axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent, correspondentNode
-   filter:   message_names ping*
-   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000; goto_event 12472,
-             zoom 21.4995..22.03
-   anchor:   ping41 leaves the CN 21.5 (#12472), reply back 21.520178; ping42 22.0, reply
-             22.020078; all arrows CN <-> backbone <-> foreignRouter <-> MN cross the
-             homeAgent band without a bend. A bend at homeAgent = route optimization failed.
-   capture:  screenshot 1102x578 (raw: seqchart-raw/p5b.png) -> crop (0,62)-(1102,556) + tick
-             strip -> 1102x550
-   post:     no marks; ticks: 21.510 (ping41 at the MN, x 190.5), 21.520 (ping41 reply at the CN,
-             x 458), 22.000 (ping42 leaves the CN, x 572), 22.010 (ping42 at the MN, x 742.5), 22.020
-             (ping42 reply at the CN, x 1008.5).
-             Composition script research/analyst-data/pn.py (helpers compose.py; raw
-             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
-             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
-             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
-             the arrow ends in the screenshot), labelled with the event's simulation time, and the
-             note "time [s] at the marked events; the axis between them is not linear" (V1).
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+   filter:   message_names ping43-reply, ping44, ping44-reply, ping45, ping45-reply (ping43-reply keeps the
+             homeAgent axis on the chart: an axis without filtered events is hidden)
+   view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1330x1000 (widget 1102x578);
+             goto_event 13924, zoom 22.966..23.5205
+   anchor:   left edge: the last tunneled reply (ping43-reply) bends at homeAgent and reaches the CN
+             22.972268 (x 94.5); ping44 leaves the CN 23.000 (x 189), at the MN 23.010654 (#14203,
+             x 347.5), reply at the CN 23.020967 (#14272, x 586.5); ping45 leaves 23.500 (x 686), at the
+             MN 23.509885 (#14458, x 838.5), reply at the CN 23.520218 (#14525, x 1077.5). ping44 and
+             ping45 cross the homeAgent band without bending.
+   capture:  screenshot 1102x578 (raw: seqchart-raw-8c94/p5.png) -> crop (0,62)-(1102,556) + tick strip
+             -> 1102x550
+   post:     no marks; ticks 22.972, 23.000, 23.011, 23.021, 23.500, 23.510, 23.520.
+             Composition script research/analyst-data/pn8c94.py (helpers compose.py; raw screenshots
+             in research/analyst-data/seqchart-raw-8c94/): run from analyst-data/ with an out8c94/
+             directory. Overlay font DejaVu Sans 17 px. The IDE's rulers are cut off; the IDE's dotted
+             cursor column is removed (decursor()); an absolute-time strip gives a tick at each anchor
+             event's x (read from the arrow ends in the screenshot), labelled with the event's time, and
+             the note "time [s] at the marked events; the axis between them is not linear".
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 From ``ping44`` onward the arrows run **directly between correspondent and
 mobile node** — no arrow bends at the ``homeAgent`` lifeline any more. The
@@ -1036,10 +1035,10 @@ such as ``extensionType = 43`` are genuine wire values.)
              --qtenv-default-run=0 omnetpp.ini   (port 8765 is taken by the showcase
              previewer; the OSG override is needed only while VisualizationOsg is off)
    target:   run_simulation mode=express time_limit=25.4, then mode=fast time_limit=25.52
-             (stops at 25.519985, event #14747) -> list_logged_packets
+             (stops at 25.519985, event #15353; was #14747) -> list_logged_packets
              module_path=Mipv6Showcase.homeAgent name_pattern=ping49* -> the 170 B
-             EthernetSignal "ping49" sent by homeAgent.eth[1] at 25.5060208 (event #14688),
-             path logged:<id> (was logged:12223)
+             EthernetSignal "ping49" sent by homeAgent.eth[1] at 25.5060208 (event #15294; was #14688),
+             path logged:<id> (was logged:12223; 2026-09-30: logged:40780)
    anchor:   tunneled pings are 170 B on the HA-backbone wire (130 B + 40 B outer header)
              throughout the away phase; chunks[1] EthernetMacHeader src 0A-AA-00-00-00-02 ->
              dst 0A-AA-00-00-00-05. A single Ipv6Header = the tunnel was not up.
@@ -1048,7 +1047,7 @@ such as ``extensionType = 43`` are genuine wire values.)
              the chunks[2] and chunks[3] Ipv6Header rows with all their fields; 740x791.
              depth=5 unfolds raw bin/raw hex above the chunks; the crop starts below them.
              The row headers are cut at the right edge on purpose (the fields below repeat them).
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d, OMNeT++ 6.4.0aipre2
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2 (chunk ids now 11261 / 11260; only the two "id =" rows differ from the 2026-09-29 image)
 
 The same ping in the route-optimized mode, captured at the correspondent node
 and expanded the same way: **one** IPv6 header, addressed to the care-of
@@ -1076,14 +1075,14 @@ and no detour. (Replies in the other direction carry the home address in a
              '--*.visualizer.osgVisualizer.typename=""' --mcp-server-address localhost:8777
              --qtenv-default-run=0 omnetpp.ini   (8765 is taken by the showcase previewer)
    target:   run_simulation mode=express time_limit="25.4", then mode=fast time_limit="25.52"
-             (stops at 25.519886, event #14894) -> list_logged_packets
+             (stops at 25.519886, event #15580) -> list_logged_packets
              module_path=Mipv6Showcase.correspondentNode name_pattern=ping49* -> the 154 B
-             EthernetSignal "ping49" sent by correspondentNode.eth[0] at 25.5 (event #14785),
-             path logged:<id> (was logged:12370). Not ping49-reply: that is also 154 B, but it
+             EthernetSignal "ping49" sent by correspondentNode.eth[0] at 25.5 (event #15471),
+             path logged:<id> (2026-09-30: logged:53815). Not ping49-reply: that is also 154 B, but it
              carries a Home Address destination option instead of the routing header.
    anchor:   route-optimized pings are 154 B on the CN wire (130 B + 24 B type 2 routing header)
-             from ping41 on. The chunk ids shown (Ipv6Header id = 11080, Ipv6RoutingHeader
-             id = 11079) are run-specific; if they change, the model or the run changed. A single
+             from ping44 on. The chunk ids shown (Ipv6Header id = 11403, Ipv6RoutingHeader
+             id = 11402) are run-specific; if they change, the model or the run changed. A single
              Ipv6Header without a routing header = route optimization did not complete.
    capture:  open_inspector object_path=logged:<id> type=object -> expand_inspector_tree depth=5
              -> get_inspector_screenshot width=1400 height=4400 -> PIL-crop (60,1688)-(800,2358):
@@ -1091,7 +1090,7 @@ and no detour. (Replies in the other direction carry the home address in a
              depth=6 opens it but also unfolds the hex dumps and shifts every row.
    compare:  against the 2026-08 image the only differing pixels are the two "id =" rows
              (was 11202 / 11201); every address, length and field is identical.
-   stamp:    captured 2026-09-29, INET HEAD 035ff8b8a1 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2 (was ids 11080 / 11079)
 
 The same two kinds of packet, off the wire
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1106,7 +1105,6 @@ than of the simulator's own view of it.
 
 .. figure:: media/tunneled_packet_wireshark.png
    :align: center
-   :width: 100%
 
 ..
    FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
@@ -1126,10 +1124,10 @@ than of the simulator's own view of it.
              '--**.fcsMode="computed"' '--**.crcMode="computed"' '--**.checksumMode="computed"'
              omnetpp.ini   (the computed modes are required: with the default declared FCS the
              recorder aborts and writes an empty file)
-   frame:    ping39 = frame 165, relative 20.417481 s (sim 20.506): the frame of the 2026-08
-             image. tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' now matches ping38 first
-             (frame 163, 19.917481 s); ping38 differs from ping39 only in the FCS, which the
-             shot does not show. Cut it out: editcap -r tunneled.pcap one.pcap 165
+   frame:    ping42 = frame 189, relative 21.514055 s (sim 22.006): the first tunneled echo
+             request since 8c94b616cd (tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' -> first match;
+             ping38-ping41 are never tunneled any more: the home agent has no binding before 21.930 s).
+             Cut it out: editcap -r tunneled.pcap one.pcap 189
    gui:      Xephyr :77 -screen 1500x1150 -ac -noreset &
              DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r one.pcap
              (the desktop is Wayland; XWayland refuses synthetic input, so drive a nested X
@@ -1138,12 +1136,13 @@ than of the simulator's own view of it.
    expand:   window 1500x900; click the first tree row, then per header Home, Down x N, Right,
              N = 3 then 2 (the inner IPv6 header first, so the outer row does not move)
    capture:  import -window <id>, crop (0,487)-(772,836): 772x349
-   compare:  2026-09-29, not recaptured: tshark -V of the 2026-08 capture's frame (old pcap
-             frame 159, ping39, relative 20.417481) and of the current run's frame 165 is
-             identical line for line from "Ethernet II" to "Internet Control Message Protocol",
-             FCS included, so the image still shows the current run.
-   stamp:    captured 2026-08; verified against INET HEAD 035ff8b8a1 (model = aeee20a40d),
-             OMNeT++ 6.4.0aipre2, Wireshark 4.6.4
+   compare:  2026-09-30, not recaptured: tshark -V of frame 189 (ping42, current run, pcap in
+             /var/tmp/update6/pcap/) and of the frame behind the image (old pcap frame 159, ping39) are
+             identical line for line from "Ethernet II" to "Internet Control Message Protocol" except
+             the Frame Check Sequence, which the shot does not show; the image still shows the current
+             run.
+   stamp:    captured 2026-08; verified against INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2,
+             Wireshark 4.6.4
 
 Wireshark independently finds the two stacked IPv6 headers — outer from the
 home agent to the care-of address with ``Next Header: IPv6 (41)``, inner from
@@ -1168,8 +1167,9 @@ names are INET's own identifiers.
              --'**.checksumMode="computed"'
              The computed modes are required (declared FCS -> empty file).
    frame:    tshark -Y 'ipv6.routing.type==2 && icmpv6.type==128' -> first match =
-             frame 97 = ping41 (sent at sim 21.500012, capture-relative 21.415459);
-             editcap -r routeopt.pcap frame.pcap 97  (one-frame file, shows as "Frame 1")
+             frame 100 = ping44 (sent at sim 23.000, capture-relative 22.149633; since 8c94b616cd
+             ping41 is lost and ping44 is the first route-optimized request);
+             editcap -r routeopt.pcap frame.pcap 100  (one-frame file, shows as "Frame 1")
    gui:      Xephyr :77 -screen 1500x1150 -ac -noreset &
              env -u WAYLAND_DISPLAY QT_QPA_PLATFORM=xcb DISPLAY=:77 HOME=<tmp>
              XDG_CONFIG_HOME=<tmp>/.config wireshark -r frame.pcap
@@ -1184,8 +1184,10 @@ names are INET's own identifiers.
              (home); [Length: 24 bytes] -- the overhead the page quotes. The Frame row
              reads 146 bytes on wire (kept in the crop; the page cites it).
              No routing header = route optimization did not complete.
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d, Wireshark 4.6.4
-             (pixel-identical to the committed 2026-08 image: git shows no change)
+   compare:  2026-09-30, not recaptured: tshark -V of frame 100 (ping44, current run) and of frame
+             97 (ping41) of the aeee20a40d run differ only in the Frame Check Sequence, which the shot
+             does not show.
+   stamp:    captured 2026-09-29 (aeee20a40d); verified against INET HEAD 8c94b616cd, Wireshark 4.6.4
 
 And here the routing header gives up the field the object inspector kept
 collapsed: ``Address[1]: 2001:db8:0:1:8aa:ff:fe00:d`` — the home address,
@@ -1216,18 +1218,17 @@ Binding Update, answered by one acknowledgement:
    seed:     default (seed-set=1)
    shows:    homeAgent.ipv6.bindingCache with one entry: HoA 2001:db8:0:1:8aa:ff:fe00:d =>
              CoA 2001:db8:0:3:8aa:ff:fe00:d, lifetime 3600, home registration, BU sequence 1
-   launch:   as tunneled_packet.png (Qtenv, --mcp-server-address localhost:8777)
-   target:   run_simulation mode=express time_limit=20.5 (stops at 20.480866, event #11533,
-             next event = the CN's sendPing for ping39) -> open_inspector
-             Mipv6Showcase.homeAgent.ipv6.bindingCache type=object -> expand_inspector_tree
-             depth=4. Same moment as homeagent-tunnel.png.
-   anchor:   exactly 1 entry, BU_Sequence#: 1, from 19.953260 (BU received, event #11153)
-             until 52.796721 (BT de-registration). Sequence 2 = a second Binding Update
-             happened (the pre-fix behavior).
-   capture:  get_inspector_screenshot width=1300 height=900 -> PIL-crop (14,370)-(830,430):
-             the bindingCache map rows; 816x60. The entry text ("Registeration", trailing
-             "\n") is INET's own string.
-   stamp:    captured 2026-09-29, INET HEAD aeee20a40d, OMNeT++ 6.4.0aipre2
+   launch:   Qtenv with the sim's own MCP server (--mcp-server-address localhost:8777; setup_config
+             config_name=BidirectionalTunneling run_number=0 switches an open session)
+   target:   run_simulation mode=express time_limit=22.5 (stops at 22.480866, event #13366): inside the
+             home agent's duplicate address detection (entry created at the BU 21.930018, BA only at
+             22.936075) -> open_inspector Mipv6Showcase.homeAgent.ipv6.bindingCache type=object ->
+             expand_inspector_tree depth=4. The entry is the same before and after the BA.
+   anchor:   exactly 1 entry, BU_Sequence#: 1, from 21.930018 (BU received, #13025) until 51.701109
+             (BT de-registration, #31410). Sequence 2 = the BU was retransmitted (seeds 2, 3, 7-10).
+   capture:  get_inspector_screenshot width=1300 height=900 -> PIL-crop (14,370)-(830,430): 816x60.
+             Pixel-identical to the 2026-09-29 image, which is therefore kept unchanged.
+   stamp:    verified 2026-09-30, INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2
 
 Coming home
 ~~~~~~~~~~~
@@ -1236,9 +1237,10 @@ The second video shows the return (t = 49.5 s to 54.6 s), still in the
 ``RouteOptimization`` configuration: direct-path pings, the walk home, and —
 2.59 s after re-association, when the home agent's Router Advertisement finally
 arrives — the de-registration Binding Updates (lifetime zero) to the home agent
-and the correspondent node. The status label returns to "at home", the address
-label to the home address, and the pings to the 14 ms home path. The binding
-cache empties, and the node is an ordinary IPv6 host again.
+and the correspondent node. The status label returns to "at home" and the pings
+to the 14 ms home path; the address label has shown the home address, the
+node's identity, all along. The binding cache empties, and the node is an
+ordinary IPv6 host again.
 
 .. video:: media/returnhome.mp4
    :align: center
@@ -1247,31 +1249,33 @@ cache empties, and the node is an ordinary IPv6 host again.
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   RouteOptimization
    seed:     default (seed-set=1)
-   shows:    last direct pings (red route through foreignRouter) -> the walk home -> AP
-             label FOREIGN -> HOME ("Associated with AP" bubble) while the status stays
-             "away (route-optimized, 1 CN)" for 2.45 s (the Router Advertisement held by the
-             3 s rate limit) -> status "at home", address label back to the home address
-             -> ping106 and ping107 on the home path through homeAgent
-   anchors:  last reply away ping98 at 50.020 s; beacon loss 50.721 s; association with
-             apHome 51.372 s; HA's solicited RA 53.821 s (last multicast RA on the home
-             link 50.614 s + 3 s + 0.207 s random); de-registration BUs to HA and CN at
-             53.822 s, BAs at the MN 53.825 / 53.837 s; first home reply ping106 at
-             54.014 s; ping107 54.514 s. If the status turns "at home" long before 53.8 s,
-             the rate-limited RA no longer happens (timeline moved).
-   window:   continue in the same Qtenv session after handover.mp4 (or relaunch): express
-             to 49.5 s -> step 1 event -> record to 54.1 s, then record again to 54.6 s so
-             the ping106 route (arrives 54.014 s) stays on screen ~2 s. Same output dir:
-             numbering continues (0120-0221).
-   anim:     same as handover.mp4 (playback_speed=1, min_animation_speed=0.1, built-in
-             animation off via the private .qtenvrc copy)
-   capture:  record_video fps=2, crop_area=with_padding; 102 frames (0120-0221);
-             crop_rect was 854x732 at 884,87; frames kept in /var/tmp/mipv6-video/frames_returnhome
-   encode:   ffmpeg -r 6 -start_number 120 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:896:123"
-             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (V3: the crop keeps only the canvas
-             interior -- x 896-1725, y 123-806 -- so neither the green Qtenv window background nor the
-             canvas border shows; 830x684, fits the 834 px column without scaling)
+   shows:    last direct pings (red route through foreignRouter) -> the walk home -> AP label
+             FOREIGN -> HOME while the status stays "away (route-optimized, 1 CN)" for 2.59 s (the
+             Router Advertisement held by the 3 s rate limit) -> status "at home" -> ping106 on the
+             home path through homeAgent
+   anchors:  last reply away ping98 at 50.020 s; beacon loss 50.721 s; association with apHome
+             51.372 s; the HA's solicited RA leaves 53.959 s (last home-link multicast RA 50.785 s + 3 s +
+             0.174 s); de-registration BUs to HA and CN 53.960 s, BAs at the MN 53.963 / 53.975 s; first
+             home reply ping106 at 54.014 s. The address label shows the home address throughout. If the
+             status turns "at home" long before 53.9 s, the rate-limited RA no longer happens.
+   window:   same Qtenv session after handover.mp4: express to 49.5 s -> step 1 event -> record to
+             54.6 s in one go (the ping106 route, 54.014 s, stays on screen about 2 s of video).
+   launch:   private prefs copy so the user's Qtenv prefs stay untouched: XDG_CONFIG_HOME=
+             /var/tmp/mipv6-video/xdg (omnetpp/.qtenvrc copied from ~/.config/omnetpp/.qtenvrc with
+             animation_enabled=false); opp_run_release -l <wt>/src/INET -u Qtenv -c RouteOptimization
+             -n <wt>/src:<wt>/showcases '--*.visualizer.osgVisualizer.typename=""'
+             --mcp-server-address localhost:8777 --qtenv-default-run=0 omnetpp.ini
+   anim:     set_animation_parameters profile=normal playback_speed=1 min_animation_speed=0.1
+             (0.05 s simulation time per frame at fps=2; encoded at 6 fps = 0.3 s per video second)
+   capture:  record_video fps=2, crop_area=with_padding, time_limit 54.6; 102 frames (0142-0243);
+             frames kept in /var/tmp/update6/video/frames_returnhome
+   encode:   ffmpeg -r 6 -start_number 142 -f image2 -i <prefix>_%04d.png -filter:v "crop=830:684:876:123"
+             -vcodec libx264 -pix_fmt yuv420p <name>.mp4  (the crop keeps only the canvas interior,
+             x 876-1705, y 123-806; the Qtenv window now places the canvas 20 px further left than on
+             2026-09-29, so re-measure the black canvas border before encoding: crop_rect was 854x732 at
+             864,87); 830x684, fits the 834 px column without scaling
    post:     none
-   stamp:    recorded 2026-09-29, INET HEAD 0d66eff240 (model = aeee20a40d), OMNeT++ 6.4.0aipre2
+   stamp:    recorded 2026-09-30, INET HEAD 8c94b616cd, OMNeT++ 6.4.0aipre2
 
 Why the wait: the home agent answers the node's Router Solicitation with a
 multicast Router Advertisement, as INET's routers always do, and a router may
@@ -1299,51 +1303,39 @@ the Router Advertisement:
 ..
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
    type:     seqchart
-   config:   RouteOptimization, seed-set 1, --record-eventlog=true
-             --eventlog-recording-intervals=19.9s..22.1s,51.3s..54.6s (the 54.6 s end is
-             needed: see filter)
+   config:   RouteOptimization (same eventlog as P3; second interval 51.3..54.6 s)
    ide:      OMNeT++ IDE (omnetpp-aipre-GUI, MCP server on 127.0.0.1:5077), started with
-             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples (plain opp_ide
-             stops at the Choose Workspace dialog). The .elog must be inside a workspace project:
-             it was copied to /home/user/inet/tmp-mipv6-seq/ (project "inet") and opened by
-             absolute path.
-   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range -- a bare zoom on a
-             multi-interval eventlog squashes the whole log into the viewport. In NONLINEAR mode
-             the zoom only sets the left edge; the scale is fixed by the event count, so the
-             panel width is set with resize_window, and the right edge ends at the last
-             filtered event.
-   axes:     mobileNode, apHome, homeAgent, backbone, correspondentNode (apForeign and
-             foreignRouter left out: their bands only showed overheard wireless copies)
-   filter:   message_names RouterSolicitation, RouterAdvertisement, "Binding Update",
-             "Binding Acknowledgement", NeighbourAdvertisement, ping106, ping106-reply,
-             ping107 -- ping107 only gives the NONLINEAR timeline an event after the last
-             wanted arrow, and is cropped away
+             ~/omnetpp-aipre-GUI/ide/opp_ide -data ~/omnetpp-aipre-GUI/samples. The .elog must be
+             inside a workspace project: copied to /home/user/inet/tmp-mipv6-seq/<Config>-8c94.elog
+             (project "inet") and opened by absolute path.
+   nav:      goto_event <first event> BEFORE zoom_to_simulation_time_range. In NONLINEAR mode the zoom
+             only sets the left edge; the scale follows the event count, the panel width is set with
+             resize_window, and the right edge ends at the last filtered event.
+   axes:     mobileNode, apHome, homeAgent, backbone, correspondentNode
+   filter:   message_names RouterSolicitation, RouterAdvertisement, "Binding Update", "Binding
+             Acknowledgement", NeighbourAdvertisement, ping106, ping106-reply, ping107 (ping107 only
+             extends the view past ping106; it is cropped off)
    view:     NETWORK_COMMUNICATION, NONLINEAR; resize_window 1400x1100 (widget 1160x649);
-             goto_event 28703, zoom 51.372..54.51
-   anchor:   RS 51.372109 (#28703) reaches homeAgent 51.372849 (#28738); the solicited RA
-             leaves homeAgent 53.821173 (#30136) -- 3 s after the HA's multicast RA of
-             50.614221 plus 0.207 s; both de-registration BUs leave the MN together
-             53.821936 (#30167/#30168); HA BA at the MN 53.824734, unsolicited NA
-             53.824734, CN BA at the MN 53.836521; ping106 on the home path, reply at the CN
-             54.013915 (#30564). Periodic RAs on the WAN links (between homeAgent and backbone at
-             51.905-51.938 s, backbone -> CN at about 53.71 s) also match the RouterAdvertisement filter and
-             appear inside the bracket; they are not sent to the mobile node (the IDE's
-             message_expression filter could not exclude them).
-   capture:  screenshot 1160x649 (raw: seqchart-raw/p6g.png) -> crop (0,62)-(1016,627): drops the
-             hover box, the IDE ruler and the ping107 arrows; + tick strip -> 1016x621
-   post:     bracket on the homeAgent lifeline from the RS arrival #28738 (x 40) to the RA departure
-             #30136 (x 348), bar at cropped y 282 with label "RA delay 2.45 s (3 s rate limit)" above
-             it; the left tick stops above the "homeAgent" axis name (name box x 28-116, y 299-312)
-             in a down-pointing arrowhead; the right tick runs down to the axis. Ticks: 51.373
-             (#28738), 53.821 (#30136), 53.823 (BU at the HA #30193, x 441.5), 53.830 (CN BU #30339,
-             x 631.5), 54.000 (ping106 leaves the CN, x 759), 54.014 (#30564, x 919.5).
-             Composition script research/analyst-data/pn.py (helpers compose.py; raw
-             screenshots in research/analyst-data/seqchart-raw/): run from analyst-data/ with an
-             out/ directory. Overlay font DejaVu Sans 17 px (V5). The IDE's relative ruler is cut
-             off and replaced by an absolute-time strip: a tick at each anchor event's x (read from
-             the arrow ends in the screenshot), labelled with the event's simulation time, and the
-             note "time [s] at the marked events; the axis between them is not linear" (V1).
-   stamp:    captured 2026-09-29, INET HEAD 473613b760 (model = aeee20a40d), OMNeT++ IDE 6.4.0aipre
+             goto_event 29570, zoom 51.3715..54.51
+   anchor:   RS at homeAgent 51.372649 (#29605, x 44); periodic RAs on the wired links inside the wait;
+             the held solicited RA leaves homeAgent 53.959495 (#31047, x 403) = last home-link multicast
+             RA 50.785212 + 3 s + 0.174 s; RA at the MN 53.960258 (#31069, x 426.5); two de-registration
+             BUs in that event (#31073/#31074); BU at homeAgent 53.961000 (#31099, x 504); HA BA at the MN
+             53.962976 (#31173, x 593.5); BU at the CN 53.968113 (#31245, x 712); the CN's BA reaches the
+             MN via homeAgent 53.974743 (#31304, x 796.5); ping106 leaves the CN 54.000 (#31325, x 849),
+             reply at the CN 54.013935 (#31439, x 1026).
+   capture:  screenshot 1160x649 (raw: seqchart-raw-8c94/p6.png) -> crop (0,62)-(1050,627): drops the
+             IDE rulers and the ping107 arrows; + tick strip -> 1050x642
+   post:     magenta bracket on the homeAgent lifeline 44-403, bar at cropped y 282, label above "RA delay
+             2.59 s (3 s rate limit)"; the left tick stops above the "homeAgent" name in a down-pointing
+             arrowhead (left_stop 294). Ticks 51.373, 53.959, 53.961, 53.968, 53.975, 54.000, 54.014.
+             Composition script research/analyst-data/pn8c94.py (helpers compose.py; raw screenshots
+             in research/analyst-data/seqchart-raw-8c94/): run from analyst-data/ with an out8c94/
+             directory. Overlay font DejaVu Sans 17 px. The IDE's rulers are cut off; the IDE's dotted
+             cursor column is removed (decursor()); an absolute-time strip gives a tick at each anchor
+             event's x (read from the arrow ends in the screenshot), labelled with the event's time, and
+             the note "time [s] at the marked events; the axis between them is not linear".
+   stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ IDE 6.4.0aipre
 
 The Router Solicitation reaches ``homeAgent`` right after the association, and
 then no signaling reaches the mobile node for the length of the bracket. The
@@ -1414,15 +1406,15 @@ old router no longer answers; this run detects the move from the link layer
 instead.
 
 This run's 5.96 s is 3.85 s longer. The largest part of the difference is the
-IPv6 phase, 1.66 s longer here, because this run checks both its link-local and its care-of
-address, each after a random delay. The home agent's first-registration
-exchange takes 1.05 s here, with a real duplicate address detection, and 4 ms
-in the testbed. This run counts 0.74 s before the access point is lost (the
-first two terms of the budget in the Results), which the testbed's clock,
-started at the scan, leaves out, and its scan and association take 0.65 s
-against 0.26 s. The remaining 0.01 s is this run's 20 ms for the held first
-reply against the testbed's 9 ms for the registration at the correspondent
-node.
+IPv6 phase, 1.66 s longer here, because this run checks both its link-local and
+its care-of address, each after a random delay. The home agent's
+first-registration exchange takes 1.05 s here, with a real duplicate address
+detection, and 4 ms in the testbed. This run counts 0.74 s before the access
+point is lost (the first two terms of the budget in the Results), which the
+testbed's clock, started at the scan, leaves out, and its scan and association
+take 0.65 s against 0.26 s. The remaining 0.01 s is this run's 20 ms for the
+held first reply against the testbed's 9 ms for the registration at the
+correspondent node.
 
 The 802.11 terms of this scenario depend on its scan settings. Fast roaming
 (IEEE 802.11k and 802.11r) changes access points in tens of milliseconds, but
