@@ -267,15 +267,16 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(NetworkInterface *ie)
     /*o  Any additional Unicast and Anycast Addresses that have been configured
        for the node's interfaces (manually or automatically).*/
 
-    // FIXME: commented out the following lines, because these addresses
-    // are implicitly checked for in isLocalAddress() (we don't want redundancy,
-    // and manually adding solicited-node mcast address for each and every address
-    // is very error-prone)
-    //
     // o  The All-Nodes Multicast Addresses defined in section 2.7.1.
+    //
+    // Joined below, together with the all-routers group.
 
     /*o  The Solicited-Node Multicast Address for each of its unicast and anycast
        addresses.*/
+
+    // Not joined here: Ipv6InterfaceData::assignAddress() joins the solicited-node group
+    // of an address as it is assigned, and leaves it as it is removed, so the membership
+    // tracks the address list on its own (RFC 4861 Section 7.2.1).
 
     // o  Multicast Addresses of all other groups to which the node belongs.
 
