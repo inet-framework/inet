@@ -124,6 +124,52 @@ A, and nothing reaches UDP.
 - Two values because a node may know one number by name without implementing it and have
   never heard of the other; RFC 8200 asks for the same action in both cases.
 
+## Unrecognized routing type
+
+Checks: **RFC8200-EXT-4** (must), for Routing Type 0, which **RFC8504-NR-7** (must) says
+is treated as an unrecognized routing type.
+
+### Requirement
+
+RFC 8200 §4.4: a node that meets a Routing header with an unrecognized Routing Type and
+Segments Left non-zero must discard the packet and send Parameter Problem code 0 to the
+source, pointing to the Routing Type. RFC 8504 §5.2: Routing Header type 0 must be treated
+as an unrecognized routing type.
+
+### Scenario constants
+
+- Mockup with a relay. Application data: 100 octets, to port 5000.
+- The relay inserts a Routing header between the IPv6 header and the UDP header: Routing
+  Type 0, Segments Left 1, one address. The Routing Type is octet 2 of the Routing header,
+  and the Routing header follows the 40-octet IPv6 header, so the pointer names offset 42.
+  The relay also removes host B's report on its way back to host A, as in
+  [unrecognized next header](#unrecognized-next-header); this check judges host B.
+
+### Procedure
+
+1. Build the mockup with the relay.
+2. Tell the relay to insert the Routing header, and to remove the report that returns.
+3. Let host A send the datagram.
+4. Observe host B's interface, host B's own origination of messages, the messages that
+   leave host B, and host B's UDP.
+
+### Expected observations
+
+1. At host B's interface, the packet arrives with a Routing header of type 0 and Segments
+   Left 1. This confirms the stimulus.
+2. Host B originates a Parameter Problem message, type 4 code 0, pointer 42: recorded at
+   host B at the moment of the decision (RFC8200-EXT-4).
+3. That message leaves host B, type 4 code 0, pointer 42, addressed to host A.
+4. From then on, nothing of the packet reaches UDP at host B.
+
+The check passes if observations 1 to 3 occur in this order and observation 4 records
+nothing within the time limit.
+
+### Notes
+
+- Type 0 is chosen over an unassigned value because RFC 8504 fixes it as unrecognized for
+  every node; a node may implement any other assigned type, such as type 4 (RFC 8754).
+
 ## Unknown ICMPv6 error type
 
 Checks: **RFC4443-MPR-4** (must not), for an error message of unknown type; notes

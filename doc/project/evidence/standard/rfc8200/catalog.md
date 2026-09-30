@@ -43,6 +43,7 @@ here.
 | [RFC8200-EXT-1](#rfc8200-ext-1) | Nodes en route do not process, insert, or delete extension headers. |
 | [RFC8200-EXT-2](#rfc8200-ext-2) | The destination processes extension headers strictly in order. |
 | [RFC8200-EXT-3](#rfc8200-ext-3) | An unrecognized next header should discard the packet with Parameter Problem code 1. |
+| [RFC8200-EXT-4](#rfc8200-ext-4) | An unrecognized Routing Type with Segments Left non-zero discards the packet with Parameter Problem code 0. |
 | [RFC8200-FRAG-1](#rfc8200-frag-1) | Only source nodes fragment; routers do not. |
 | [RFC8200-FRAG-2](#rfc8200-frag-2) | The identification differs from any recent fragmented packet of the same source and destination. |
 | [RFC8200-FRAG-3](#rfc8200-frag-3) | Fragments fit the path MTU; each but the last is a multiple of 8 octets. |
@@ -233,6 +234,28 @@ send Parameter Problem code 1 with the pointer at the offending field.**
   action a must and extends it to an unrecognized upper-layer protocol.
 - Check idea: deliver a packet whose next header is an unassigned protocol number. Nothing
   is delivered, and the source receives type 4 code 1.
+
+### RFC8200-EXT-4
+
+**A node that meets a Routing header with an unrecognized Routing Type ignores it when
+Segments Left is zero; otherwise it discards the packet and sends Parameter Problem code 0,
+with the pointer at the Routing Type field.**
+
+> "If, while processing a received packet, a node encounters a Routing header with an
+> unrecognized Routing Type value, the required behavior of the node depends on the value
+> of the Segments Left field, as follows: If Segments Left is zero, the node must ignore
+> the Routing header and proceed to process the next header in the packet, whose type is
+> identified by the Next Header field in the Routing header. If Segments Left is non-zero,
+> the node must discard the packet and send an ICMP Parameter Problem, Code 0, message to
+> the packet's Source Address, pointing to the unrecognized Routing Type." — §4.4,
+> `rfc8200.txt:791-802`
+
+- Strength: must. Class: end-to-end (absence) plus error-signal.
+- Note: RFC 4443 §2.4 (e.3) suppresses the report when the packet is destined to a multicast
+  address; the discard still holds.
+- Check idea: insert a Routing header of an unrecognized type with Segments Left 1 into a
+  packet. Nothing is delivered, and the source receives type 4 code 0 with the pointer at
+  the Routing Type octet.
 
 ## Fragmentation
 
@@ -566,7 +589,8 @@ a zero result, and a receiver discards a UDP packet with a zero checksum.**
 ## Out of scope in this catalog
 
 The extension headers other than the fragment header, their order and their options (§4.1
-to §4.4, §4.6 to §4.8), the flow label (§6, RFC 6437), the traffic class (§7, RFC 2474 and
+to §4.4, §4.6 to §4.8) — except the unrecognized Routing Type rule of §4.4, which is
+RFC8200-EXT-4 — the flow label (§6, RFC 6437), the traffic class (§7, RFC 2474 and
 RFC 3168), the maximum packet lifetime note (§8.2, which states that no lifetime is
 enforced), the maximum upper-layer payload size (§8.3, a rule for the transport protocol),
 the response to routing headers (§8.4), the jumbo payload (RFC 2675), and the security

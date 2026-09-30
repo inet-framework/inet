@@ -63,6 +63,7 @@ repeated in the table below, because every test ran again on this tree.
 | Rfc8200ZeroUdpChecksum.test | RFC8200-CKSUM-1 (the discard) | PASS |
 | Rfc8200UnrecognizedNextHeader.test | RFC8504-NR-6 (governs RFC8200-EXT-3) | PASS |
 | Rfc8200UnassignedNextHeader.test | RFC8504-NR-6, for an unassigned value | PASS |
+| Rfc8200UnrecognizedRoutingType.test | RFC8200-EXT-4, for Routing Type 0 (RFC8504-NR-7) | **PASS** since the repair of the unrecognized Routing Type; added with it. Before, host B stopped the run with "No handler registered for routing header type 0" |
 | Rfc4443UnknownErrorType.test | RFC4443-MPR-4 (the silence); notes MPR-1 | PASS |
 | Rfc4443UnknownInformationalType.test | RFC4443-MPR-2 | **PASS** since 2026-09-14; the defect is repaired |
 
@@ -76,6 +77,9 @@ MTU, and the payload length of a fragment. Nothing in this suite is outstanding.
 on 2026-09-23, commit `28536bd0a5`, confirms the same 27 PASS; see
 [`coverage.md`](coverage.md) for the current run record, the per-statement verdicts, and the
 feature support they now carry.
+
+Rfc8200UnrecognizedRoutingType.test was added later, with the repair of the unrecognized
+Routing Type, and makes the suite 28 tests.
 
 ## Which failures are declared, and which are not
 

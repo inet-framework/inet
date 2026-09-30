@@ -293,6 +293,29 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. An ICMPv6 Parameter Problem message can carry its Pointer
+
+   Icmpv6::sendErrorMessage takes the Pointer field of an Internet Control
+   Message Protocol for IPv6 (ICMPv6) Parameter Problem message as a new last
+   argument, defaulted to 0, and Icmpv6::createParamProblemMsg takes it as a
+   second argument. The field was always 0 before. A subclass of Icmpv6 that
+   overrides either method must add the argument to keep overriding it; see the
+   migration guide.
+
+18. An unrecognized IPv6 Routing header type is reported, not thrown
+
+   Ipv6::processExtensionHeaders threw a cRuntimeError when a received Routing
+   header had a non-zero Segments Left and a Routing Type that no module had
+   registered. Only Mobile IPv6 registers one, type 2, so a single packet with any
+   other type, such as a Segment Routing over IPv6 (SRv6) header of type 4 or a
+   deprecated type 0 header, stopped the simulation at its destination.
+
+   RFC 8200 section 4.4 requires the node to discard the packet and send an
+   ICMPv6 Parameter Problem message, code 0, whose Pointer field names the
+   Routing Type. Ipv6 does that now.
+
+   Simulations that never received such a packet produce the same results.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
