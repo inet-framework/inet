@@ -1,0 +1,68 @@
+%description:
+Tests that a host runs at most one Router Discovery process per interface.
+
+A wireless IPv6 host associates with an access point on a link that has no
+router. Router Discovery starts twice on the same interface: once when the
+interface associates at the link layer (detectL2Movement), and once when
+Duplicate Address Detection of the link-local address completes. The second
+start must restart the process, not add a second one. With no router on the
+link, a single process ends after MAX_RTR_SOLICITATIONS solicitations with
+one "no routers on-link" conclusion (RFC 4861 Section 6.3.7). Two concurrent
+processes on one interface produce two conclusions, and the timer of one of
+them is deleted while the other still references it.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network RouterDiscoveryRestartNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=50,50");
+        }
+        ap: AccessPoint {
+            @display("p=200,100");
+        }
+        host: WirelessHost {
+            @display("p=250,150");
+        }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src
+network = RouterDiscoveryRestartNetwork
+sim-time-limit = 20s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%t %N: "
+**.neighbourDiscovery.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.host.hasIpv4 = false
+*.host.hasIpv6 = true
+*.host.ipv6.neighbourDiscovery.detectL2Movement = true
+**.wlan[*].mgmt.ssid = "AP"
+**.mobility.initFromDisplayString = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+neighbourDiscovery: Interface wlan0 (re)associated at the link layer; restarting Router Discovery.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+neighbourDiscovery: Initiating Router Discovery
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -c "No RA messages were received" test.out > test_rd_conclusions.out || true
+%contains-regex: test_rd_conclusions.out
+^1$
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

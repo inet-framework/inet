@@ -293,6 +293,17 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IPv6 Router Discovery keeps one process per interface
+
+   A host starts Router Discovery on an interface each time Duplicate Address
+   Detection of the link-local address completes, and when the interface
+   associates at the link layer. It kept these processes side by side. A
+   timeout of the second one was processed against the first, which could
+   delete a timer that was still in use: the run stopped with a "Cannot cancel
+   another module's self-message" error, heap corruption or a segmentation
+   fault. A second start now restarts the running process. The results of
+   simulations that started Router Discovery twice on one interface change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
