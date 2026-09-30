@@ -938,11 +938,15 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
 
     // Assign global scope addresses to routers. The Ipv6FlatNetworkConfigurator assigns
     // a 64 bit prefix to the routers but for Mipv6 operation, we need full 128bit global
-    // scope address for routers.
+    // scope address for routers. Ipv6NetworkConfigurator assigns the same address itself,
+    // so assign only an address the interface does not hold yet: assigning it a second time
+    // left the interface with two entries for the one address.
     if (rt6->isRouter() && !(ie->isLoopback())) {
-        for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); i++) {
-            Ipv6Address globalAddress = ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->autoConfRouterGlobalScopeAddress(i);
-            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(globalAddress, false, 0, 0);
+        auto ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+        for (int i = 0; i < ipv6Data->getNumAdvPrefixes(); i++) {
+            Ipv6Address globalAddress = ipv6Data->autoConfRouterGlobalScopeAddress(i);
+            if (!ipv6Data->hasAddress(globalAddress))
+                ipv6Data->assignAddress(globalAddress, false, 0, 0);
         }
     }
 
