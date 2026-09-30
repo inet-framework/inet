@@ -264,7 +264,10 @@ Every tunable parameter lives in the ``mipv6`` module:
   a correspondent node.
 
 One level up, ``hasMipv6`` on ``Ipv6NetworkLayer`` decides whether these
-modules exist at all.
+modules exist at all. The same network layer also has a ``hasPmipv6``
+parameter for Proxy Mobile IPv6 (RFC 5213), a different approach in which the
+network moves the node and the mobile node runs no mobility software of its
+own. This showcase does not use it.
 
 Neither lifetime expires inside this showcase's 80 second run, but a study of
 re-registration reaches the 420 second one first. ``Mipv6`` also emits two
