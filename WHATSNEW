@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. ECN across IPv6-in-IPv6 tunnels
+
+    An Ipv6TunnelInterface sent every tunnel packet with an ECN (Explicit
+    Congestion Notification) field of Not-ECT (not ECN-Capable Transport), and
+    the tunnel exit point discarded the ECN field of the outer header. A router
+    inside a tunnel had nothing to mark, and a Congestion Experienced mark on the
+    outer header did not reach the destination. The tunnel entry point now copies
+    the ECN field of the inner header to the outer header, and the exit point
+    combines the two as RFC 6040 Section 4.2 requires: Congestion Experienced on
+    the outer header reaches an ECN-capable inner header, and under such an outer
+    header a datagram that is not ECN-capable is dropped. The DSCP
+    (Differentiated Services Code Point) of the outer header stays zero, the
+    default of RFC 2473 Section 6.4. The results of simulations that send
+    ECN-capable traffic through a tunnel change; the tunnels that Mipv6 and
+    Pmipv6 create are Ipv6TunnelInterface modules too.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
