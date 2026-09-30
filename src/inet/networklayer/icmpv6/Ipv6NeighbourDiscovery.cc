@@ -1998,19 +1998,13 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
 
     /*If the (NS)Target Address is either an anycast address or a unicast
        address for which the node is providing proxy service, or the Target
-       Link-Layer Address option is not included,*/
+       Link-Layer Address option is not included, the Override flag SHOULD be
+       set to zero. Otherwise, the Override flag SHOULD be set to one.*/
     // TODO: anycast target address handling is not implemented
-
-    MacAddress sourceLinkLayerAddress;
-    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
-        sourceLinkLayerAddress = sla->getLinkLayerAddress();
-
-    if (sourceLinkLayerAddress.isUnspecified())
-        // the Override flag SHOULD be set to zero.
-        na->setOverrideFlag(false);
-    else
-        // Otherwise, the Override flag SHOULD be set to one.
-        na->setOverrideFlag(true);
+    // The advertisement above always carries a Target Link-Layer Address option, and
+    // Neighbour Discovery proxy service is not modelled, so none of the three cases
+    // that clear the flag can occur here.
+    na->setOverrideFlag(true);
 
     /*Proper setting of the Override flag ensures that nodes give preference to
        non-proxy advertisements, even when received after proxy advertisements, and
