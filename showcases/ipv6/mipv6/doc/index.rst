@@ -379,9 +379,10 @@ router:
    stamp:    captured 2026-08, INET 4.7
 
 The status text above the mobile node is live: it shows the associated
-SSID and the mobility state (at home / away / route-optimized), and the green
-label on the right is its current IP address. Both update as the
-simulation runs. Note that the foreign network's router is a plain
+SSID and the mobility state (at home / away / route-optimized), and it updates
+as the simulation runs. The green label on the right is the node's preferred
+address, which stays the home address throughout, even while the node is away.
+Note that the foreign network's router is a plain
 ``Router6`` — the visited network needs no Mobile IPv6 support at all, just
 as promised above.
 
