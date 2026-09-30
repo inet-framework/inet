@@ -2489,6 +2489,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
 
     // changed structure of code below, 12.9.07 - CB
     bool isPrefixAssignedToInterface = false;
+    int assignedAddrIndex = -1;
     bool returnedHome = false; // 4.9.07 - CB
 
     for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
@@ -2516,9 +2517,47 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
                 returnedHome = true;
             else {
                 isPrefixAssignedToInterface = true;
+                assignedAddrIndex = i;
                 EV_INFO << "The received Prefix is already assigned to the interface" << endl; // Zarrar Yousaf 19.07.07
                 break;
             }
+        }
+    }
+
+    /*e) If the advertised prefix is equal to the prefix of an address
+         configured by stateless autoconfiguration in the list, the preferred
+         lifetime of the address is reset to the Preferred Lifetime in the
+         received advertisement.  The specific action to perform for the valid
+         lifetime of the address depends on the Valid Lifetime in the received
+         advertisement and the remaining time to the valid lifetime expiration
+         of the previously autoconfigured address.*/
+    if (isPrefixAssignedToInterface) {
+        auto *ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+        simtime_t expiryTime = ipv6Data->getAddressExpiryTime(assignedAddrIndex);
+        // An address with an infinite valid lifetime was not autoconfigured from a
+        // Prefix Information option, so step (e) does not speak about it.
+        if (expiryTime != SIMTIME_ZERO) {
+            // RFC 4862 Section 5.5.3 (e) writes the remaining valid lifetime of the
+            // address as RemainingLifetime, and caps how far an unauthenticated
+            // advertisement may shorten it. Without that cap a single forged
+            // advertisement carrying short valid lifetimes could expire every
+            // address of a node; a legitimate advertisement, which the router
+            // repeats, always passes the first case and takes effect immediately.
+            const simtime_t twoHours = 7200;
+            simtime_t remainingLifetime = expiryTime - simTime();
+            simtime_t newValidLifetime;
+
+            if (validLifetime > twoHours || validLifetime > remainingLifetime)
+                newValidLifetime = validLifetime; // (e)(1)
+            else if (remainingLifetime <= twoHours)
+                newValidLifetime = remainingLifetime; // (e)(2), the advertisement is not authenticated
+            else
+                newValidLifetime = twoHours; // (e)(3)
+
+            EV_INFO << "Prefix already assigned to the interface, refreshing lifetimes: valid "
+                    << newValidLifetime << ", preferred " << preferredLifetime << endl;
+            ipv6Data->updateMatchingAddressExpiryTimes(prefix, prefixLength,
+                    simTime() + newValidLifetime, simTime() + preferredLifetime);
         }
     }
     /*d) If the prefix advertised does not match the prefix of an address already
