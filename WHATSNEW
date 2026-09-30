@@ -293,6 +293,17 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. A Mobile IPv6 home agent intercepts packets on the home link
+
+    While a home registration exists, a Mobile IPv6 home agent now answers
+    Neighbor Solicitations for the mobile node's home address with its own
+    link-layer address, and multicasts a Neighbor Advertisement for the home
+    address when it accepts a new binding, as RFC 6275 Section 10.4.1
+    requires. Before, a host on the home link could not reach a mobile node
+    that was away. The results of Mobile IPv6 simulations change, including
+    the fingerprints of the Mobile IPv6 examples, because of the additional
+    advertisement.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
