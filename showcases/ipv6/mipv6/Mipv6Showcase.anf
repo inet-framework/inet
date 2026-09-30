@@ -61,10 +61,17 @@ if props["yaxis_max"]:
         top = ax.get_xaxis_transform()
         ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
                 color="C3", transform=top, clip_on=False, zorder=5)
-        ax.text(t[off].min() - 1.0, 0.90,
-                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at router homeAgent)"
-                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
-                ha="right", va="top", fontsize=9, color="C3", transform=top)
+        # one label per cluster of off-scale replies, each naming where they waited
+        to, vo = t[off], v[off]
+        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
+                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
+                               (51, 1e9, "queued at router homeAgent", 0.90)):
+            sel = (to >= lo) & (to < hi)
+            if sel.any():
+                ax.text(to[sel].max() + 1.0, y,
+                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
+                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
+                        ha="left", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -849,10 +856,17 @@ if props["yaxis_max"]:
         top = ax.get_xaxis_transform()
         ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
                 color="C3", transform=top, clip_on=False, zorder=5)
-        ax.text(t[off].min() - 1.0, 0.90,
-                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at router homeAgent)"
-                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
-                ha="right", va="top", fontsize=9, color="C3", transform=top)
+        # one label per cluster of off-scale replies, each naming where they waited
+        to, vo = t[off], v[off]
+        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
+                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
+                               (51, 1e9, "queued at router homeAgent", 0.90)):
+            sel = (to >= lo) & (to < hi)
+            if sel.any():
+                ax.text(to[sel].max() + 1.0, y,
+                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
+                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
+                        ha="left", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1637,10 +1651,17 @@ if props["yaxis_max"]:
         top = ax.get_xaxis_transform()
         ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
                 color="C3", transform=top, clip_on=False, zorder=5)
-        ax.text(t[off].min() - 1.0, 0.90,
-                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at router homeAgent)"
-                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
-                ha="right", va="top", fontsize=9, color="C3", transform=top)
+        # one label per cluster of off-scale replies, each naming where they waited
+        to, vo = t[off], v[off]
+        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
+                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
+                               (51, 1e9, "queued at router homeAgent", 0.90)):
+            sel = (to >= lo) & (to < hi)
+            if sel.any():
+                ax.text(to[sel].max() + 1.0, y,
+                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
+                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
+                        ha="left", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2425,10 +2446,17 @@ if props["yaxis_max"]:
         top = ax.get_xaxis_transform()
         ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
                 color="C3", transform=top, clip_on=False, zorder=5)
-        ax.text(t[off].min() - 1.0, 0.90,
-                "%d replies off scale: %.0f\u2013%.0f %s round trip\n(queued at router homeAgent)"
-                % (off.sum(), v[off].min(), v[off].max(), props["yaxis_unit"]),
-                ha="right", va="top", fontsize=9, color="C3", transform=top)
+        # one label per cluster of off-scale replies, each naming where they waited
+        to, vo = t[off], v[off]
+        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
+                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
+                               (51, 1e9, "queued at router homeAgent", 0.90)):
+            sel = (to >= lo) & (to < hi)
+            if sel.any():
+                ax.text(to[sel].max() + 1.0, y,
+                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
+                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
+                        ha="left", va="top", fontsize=9, color="C3", transform=top)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
