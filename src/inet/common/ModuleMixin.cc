@@ -36,7 +36,7 @@ class cCollectObjectsVisitor : public cVisitor
 
 namespace internal {
 
-void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *thisModuleAsResolver)
+INET_API void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *thisModuleAsResolver)
 {
     if (thisModule->hasPar("displayStringTextFormat")) {
         try {
@@ -53,7 +53,7 @@ void refreshDisplayString(cModule *thisModule, const StringFormat::IResolver *th
     }
 }
 
-std::string doResolveExpression(cModule *thisModule, const char *expression)
+INET_API std::string doResolveExpression(cModule *thisModule, const char *expression)
 {
     const char *lastDot = strrchr(expression, '.');
 
