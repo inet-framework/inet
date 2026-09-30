@@ -293,6 +293,22 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. Mobile IPv6 signaling goes to the next hop, not to the whole link
+
+   Mobile Internet Protocol version 6 (Mobile IPv6, MIPv6) sent the Binding
+   Update (BU), the Care-of Test Init (CoTI), the Binding Acknowledgement (BA)
+   and the Binding Refresh Request on a fixed output interface without naming a
+   next hop, so the Ipv6 module addressed each of them to the link-layer
+   broadcast address. On 802.11 the access point relayed every such frame back
+   into its cell, and the relayed frame was sent without an acknowledgement.
+   Mipv6 now names the next hop, and the frame goes to that neighbour's
+   link-layer address when the Neighbour Cache holds it.
+
+   In MIPv6 simulations, the access point no longer relays the signaling into
+   the cell, and each signaling frame the access point forwards to a station
+   gets an 802.11 acknowledgement, so their trajectories and fingerprints may
+   change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

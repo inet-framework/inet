@@ -23,6 +23,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6.h"
@@ -631,8 +632,15 @@ void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& dest
     EV_INFO << "Appending ControlInfo to mobility message\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
-    if (interfaceId != -1)
+    if (interfaceId != -1) {
         msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+        // A pinned output interface makes the Ipv6 module skip next-hop determination, and
+        // without a stated next hop it sends a unicast datagram to the link-layer broadcast
+        // address. RFC 4861 Section 5.2: the link-layer address is that of the next hop.
+        Ipv6Address nextHop = getNextHopOnInterface(destAddr, interfaceId);
+        if (!nextHop.isUnspecified())
+            msg->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHop);
+    }
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
@@ -648,6 +656,29 @@ void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& dest
         sendDelayed(msg, sendTime, "toIPv6");
     else
         send(msg, "toIPv6");
+}
+
+Ipv6Address Mipv6::getNextHopOnInterface(const Ipv6Address& destAddr, int interfaceId) const
+{
+    if (destAddr.isMulticast())
+        return Ipv6Address::UNSPECIFIED_ADDRESS;
+    // RFC 4861 Section 5.1: the link-local prefix is always on-link
+    if (destAddr.isLinkLocal())
+        return destAddr;
+    // longest prefix match among the routes through the given interface; the routing
+    // table keeps its routes sorted by prefix length, so the first match is the longest
+    for (int i = 0; i < rt6->getNumRoutes(); i++) {
+        const Ipv6Route *route = rt6->getRoute(i);
+        if (route->getInterface() == nullptr || route->getInterface()->getInterfaceId() != interfaceId)
+            continue;
+        if (!destAddr.matches(route->getDestPrefix(), route->getPrefixLength()))
+            continue;
+        if (route->getExpiryTime() != 0 && simTime() > route->getExpiryTime()) // 0 means infinity
+            continue;
+        // an on-link destination is its own next hop
+        return route->getNextHop().isUnspecified() ? destAddr : route->getNextHop();
+    }
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
 void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
