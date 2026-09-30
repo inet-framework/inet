@@ -9,8 +9,10 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
 
@@ -45,7 +47,11 @@ void Ipv6Tunnel::handleUpperPacket(Packet *packet)
     // an outer header (source -> destination, next header = IPv6, because the
     // payload protocol is ipv6) and routes the result as a locally-originated
     // datagram toward the exit -- no tunneling-specific code in the IPv6 core.
+    // RFC 6040 Section 4.1, normal mode: the outer header carries a copy of the
+    // inner ECN field. The DSCP stays at the RFC 2473 Section 6.4 default of zero.
+    int ecn = packet->peekAtFront<Ipv6Header>()->getEcn();
     packet->clearTags();
+    packet->addTag<EcnReq>()->setExplicitCongestionNotification(ecn);
     auto addresses = packet->addTag<L3AddressReq>();
     addresses->setSrcAddress(source); // the tunnel entry point (RFC 2473)
     addresses->setDestAddress(destination);
