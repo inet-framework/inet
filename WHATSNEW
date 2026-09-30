@@ -293,6 +293,18 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IPv6 takes a global source when the outgoing interface is link-local only
+
+    A datagram an IPv6 node originated into an Ipv6TunnelInterface, with no
+    source address bound, carried the tunnel interface's link-local address
+    fe80:: as its source, even to a global destination. A receiver beyond the
+    tunnel exit could not answer it. For a global unicast destination, IPv6 now
+    takes the source address from another interface when the outgoing interface
+    has only a link-local one, as Linux also does. This changes the packets, and
+    so the fingerprints, of simulations that send traffic with no bound source
+    to a global destination through an interface that has only a link-local
+    address, such as a tunnel interface.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
