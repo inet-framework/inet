@@ -97,6 +97,10 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         sendGratuitousNa = par("sendGratuitousNa");
 
+        redirectRate = par("redirectRate");
+        redirectBurst = par("redirectBurst");
+        redirectTokens = redirectBurst;
+
         pendingQueue.setName("pendingQueue");
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
@@ -2385,6 +2389,29 @@ void Ipv6NeighbourDiscovery::sendRedirect(Packet *redirectedPacket, const Ipv6Ad
     auto ipv6Header = redirectedPacket->peekAtFront<Ipv6Header>();
     Ipv6Address pktSrcAddr = ipv6Header->getSrcAddress();
     Ipv6Address srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
+
+    // RFC 4861 Section 8.2: "If the target is a router, that router's link-local
+    // address MUST be used." A target that is neither the destination itself nor a
+    // link-local address is a router known only by another address, typically the
+    // gateway of a configured route; its link-local address is not known here, so
+    // no Redirect is sent (sending one is a SHOULD in the same section).
+    if (targetAddr != destAddr && !targetAddr.isLinkLocal()) {
+        EV_INFO << "Not sending ICMPv6 Redirect to " << pktSrcAddr << ": the target " << targetAddr
+                << " is neither the destination " << destAddr << " nor a link-local address\n";
+        return;
+    }
+
+    // RFC 4861 Section 8.2: "A router MUST limit the rate at which Redirect messages
+    // are sent". RFC 4443 Section 2.4 (f), which it refers to for the details,
+    // recommends a token bucket of average rate N and burst size B.
+    simtime_t now = simTime();
+    redirectTokens = std::min((double)redirectBurst, redirectTokens + (now - redirectTokensUpdated).dbl() * redirectRate);
+    redirectTokensUpdated = now;
+    if (redirectTokens < 1) {
+        EV_INFO << "Not sending ICMPv6 Redirect to " << pktSrcAddr << " for " << destAddr << ": rate limit reached\n";
+        return;
+    }
+    redirectTokens -= 1;
 
     EV_INFO << "Sending ICMPv6 Redirect to " << pktSrcAddr << ": use " << targetAddr
             << " as next hop for " << destAddr << "\n";

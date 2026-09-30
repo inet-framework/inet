@@ -293,6 +293,48 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. An IPv6 router sends a Redirect only to a neighbour
+
+   Ipv6::routePacket sent an Internet Control Message Protocol for IPv6
+   (ICMPv6) Redirect for every datagram it forwarded back out of the
+   interface it had arrived on, whatever its source. RFC 4861
+   section 8.2 also requires that the source of the datagram is a neighbour, so
+   that the better first hop is on the sender's link. A router now sends the
+   Redirect only when the source is a link-local address or matches an on-link
+   prefix of the arrival interface. A home agent that forwards a decapsulated,
+   reverse-tunneled datagram from a mobile node away from home is one of the
+   routers that no longer sends one.
+
+   Simulations where a router forwards datagrams from a distant source back out
+   of their arrival interface send fewer Redirects, so their fingerprints may
+   change.
+
+18. An IPv6 Redirect names a router by its link-local address
+
+   Ipv6NeighbourDiscovery::sendRedirect copied the next hop of the route into
+   the Target Address field as it was, so a route whose gateway was configured
+   as a global address produced a Redirect with a global Target Address. RFC
+   4861 sections 4.5 and 8.2 require the router's link-local address there, and
+   the receiving side of INET discarded every such Redirect. A router now sends
+   no Redirect in that case, and the Target Address is either the destination
+   itself or a link-local address.
+
+   Simulations with configured routes through a global gateway on a shared
+   link send fewer Redirects, so their fingerprints may change.
+
+19. IPv6 Redirects are rate limited
+
+   A router sent one Internet Control Message Protocol for IPv6 (ICMPv6)
+   Redirect for every datagram that qualified, with no limit, although RFC
+   4861 section 8.2 requires one. Ipv6NeighbourDiscovery now
+   meters them with the token bucket that RFC 4443 section 2.4 (f) recommends.
+   The two new parameters redirectRate (default 10Hz) and redirectBurst (default
+   10) are the rate N and the burst size B of that bucket, and the defaults are
+   the example values of that section.
+
+   Simulations where a source keeps sending through a router that redirects it
+   send fewer Redirects, so their fingerprints may change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

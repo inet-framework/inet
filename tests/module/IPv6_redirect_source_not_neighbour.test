@@ -1,0 +1,92 @@
+%description:
+Tests that a router sends no ICMPv6 Redirect to a source that is not a
+neighbour (RFC 4861 Section 8.2: "the Source Address field of the packet
+identifies a neighbor").
+
+Topology: hostA -- r0 -- [switch: r0, r1, r2] -- r2 -- hostB.
+hostA pings hostB. r0 forwards the echo requests to r1, whose route sends
+them back out the same interface to r2. The source of each forwarded echo
+request, hostA, is two hops away from r1, so r1 must not send it a Redirect.
+r2 still forwards the echo requests, and hostB answers them.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+network RedirectSourceNotNeighbour
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost;
+        r0: Router;
+        sw: EthernetSwitch;
+        r1: Router;
+        r2: Router;
+        hostB: StandardHost;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> r0.ethg++;
+        r0.ethg++ <--> Eth100M <--> sw.ethg++;
+        r1.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%file: redirect.xml
+<config>
+  <interface hosts="hostA" names="eth0" address="2001:db8:1::1"/>
+  <interface hosts="r0"    names="eth0" address="2001:db8:1::2"/>
+  <interface hosts="r0"    names="eth1" address="2001:db8:2::1"/>
+  <interface hosts="r1"    names="eth0" address="2001:db8:2::2"/>
+  <interface hosts="r2"    names="eth0" address="2001:db8:2::3"/>
+  <interface hosts="r2"    names="eth1" address="2001:db8:4::1"/>
+  <interface hosts="hostB" names="eth0" address="2001:db8:4::2"/>
+
+  <route hosts="hostA" destination="2001:db8:4::" prefixLength="64" gateway="2001:db8:1::2" interface="eth0"/>
+  <route hosts="r0"    destination="2001:db8:4::" prefixLength="64" gateway="2001:db8:2::2" interface="eth1"/>
+  <route hosts="r1"    destination="2001:db8:4::" prefixLength="64" gateway="fe80::8aa:ff:fe00:8" interface="eth0"/>
+  <route hosts="r2"    destination="2001:db8:1::" prefixLength="64" gateway="2001:db8:2::1" interface="eth0"/>
+  <route hosts="hostB" destination="2001:db8:1::" prefixLength="64" gateway="2001:db8:4::1" interface="eth0"/>
+</config>
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src;.
+network = RedirectSourceNotNeighbour
+sim-time-limit = 3s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.hasIpv4 = false
+**.hasIpv6 = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.configurator.addStaticRoutes = true
+*.configurator.addRemoteRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.config = xmldoc("redirect.xml")
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:4::2"
+*.hostA.app[0].startTime = 2s
+*.hostA.app[0].stopTime = 2.5s
+*.hostA.app[0].sendInterval = 50ms
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RedirectSourceNotNeighbour.hostB.ipv6.ipv6: ICMPv6 packet: passing it to ICMPv6 module
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Sending ICMPv6 Redirect to 2001:db8:1::1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
