@@ -105,6 +105,11 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      * this gate alone is not enough), and processNsPacket() then discards any solicitation
      * whose target this node does not hold. A home agent that proxies the address passes both,
      * so this case belongs with the proxy Neighbor Discovery work.
+     *
+     * The first solicitation is sent immediately, without the random RFC 4862 Section 5.4.2
+     * delay. That delay applies to the first message after interface (re)initialization and
+     * to addresses configured from a multicast Router Advertisement, neither of which a probe
+     * is; do not call this for an interface that has just come up.
      */
     virtual void startAddressProbe(const Ipv6Address& addr, NetworkInterface *ie, IAddressProbeHandler *handler);
 

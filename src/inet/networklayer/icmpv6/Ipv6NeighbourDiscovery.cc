@@ -1084,16 +1084,20 @@ void Ipv6NeighbourDiscovery::startAddressProbe(const Ipv6Address& addr, NetworkI
     addressProbeList.push_back(entry);
 
     /*RFC 4862 Section 5.4.2
-       Before sending a Neighbor Solicitation, an interface MUST join the all-nodes multicast
-       address and the solicited-node multicast address of the tentative address.*/
-    /*If the Neighbor Solicitation is going to be the first message sent from an interface
+       If the Neighbor Solicitation is going to be the first message sent from an interface
        after interface (re)initialization, the node SHOULD delay joining the solicited-node
-       multicast address by a random delay between 0 and MAX_RTR_SOLICITATION_DELAY.*/
-    // The join has to precede the solicitation, so delaying the join delays the solicitation
-    // with it. processAddressProbeTimeout() sends this first solicitation and every later
-    // one, each separated by RetransTimer. initiateDad() adds this term to the timeout
-    // instead, which is issue #1179.
-    scheduleAfter(uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), entry->timeoutMsg);
+       multicast address by a random delay between 0 and MAX_RTR_SOLICITATION_DELAY [...]
+       Even if the Neighbor Solicitation is not going to be the first message sent, the node
+       SHOULD delay joining the solicited-node multicast address by a random delay between 0
+       and MAX_RTR_SOLICITATION_DELAY if the address being checked is configured by a router
+       advertisement message sent to a multicast address.*/
+    // Neither case covers a probe: it runs on an interface that is already up, for an address
+    // another node asked about in a unicast message, not one configured from a multicast
+    // Router Advertisement. So the first solicitation leaves now, and the probe takes
+    // DupAddrDetectTransmits x RetransTimer -- the duration RFC 6275 Section 13 sizes a mobile
+    // node's InitialBindackTimeoutFirstReg on. processAddressProbeTimeout() sends it and
+    // schedules the next one RetransTimer later.
+    processAddressProbeTimeout(entry->timeoutMsg);
 }
 
 bool Ipv6NeighbourDiscovery::isAddressProbeRunning(const Ipv6Address& addr, NetworkInterface *ie)

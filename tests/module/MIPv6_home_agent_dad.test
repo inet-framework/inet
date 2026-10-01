@@ -133,6 +133,14 @@ running Duplicate Address Detection on
 %contains: stdout
 Mipv6Network.Home_Agent.ipv6.neighbourDiscovery: Probing
 %#--------------------------------------------------------------------------------------------------------------
+%# The first solicitation leaves in the same event, with no RFC 4862 Section 5.4.2 random delay:
+%# that delay is for the first message after interface (re)initialization, and a random wait of
+%# up to 1 s on top of RetransTimer would outlast the 1.5 s default of the mobile node's
+%# InitialBindackTimeoutFirstReg (RFC 6275 Section 13).
+%postrun-command: grep -A1 'neighbourDiscovery: Probing' test.out | tail -n 1 > probe_first_ns.out
+%contains: probe_first_ns.out
+Mipv6Network.Home_Agent.ipv6.neighbourDiscovery: Sending probe solicitation 1 for
+%#--------------------------------------------------------------------------------------------------------------
 %# nobody answers, so the registration is acknowledged
 %contains: stdout
 found no other claimant; acknowledging the home registration
