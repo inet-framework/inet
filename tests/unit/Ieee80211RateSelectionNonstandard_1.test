@@ -92,6 +92,19 @@ ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate6);
 ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::ACK, peer) == rate1);
 ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::CTS, peer) == rate6);
 
+// Explicit experimental overrides also bypass known peer capability restrictions.
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+Ieee80211RateSetState peerRates;
+peerRates.supported.known = true;
+peerRates.supported.legacyRates = {Mbps(6)};
+mib->installBssAndPeerRateSets(mib->getBssRateSet(), peer, peerRates);
+selection->configure(true, rate24, rate24);
+ASSERT(selection->computeResponseAckFrameMode(&packet, data) == rate24);
+ASSERT(selection->computeResponseCtsFrameMode(&packet, rts) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::ACK, peer) == rate24);
+ASSERT(selection->computeResponseMode(rate54, Ieee80211ResponseFrameKind::CTS, peer) == rate24);
+mib->removePeerRateSet(peer);
+
 // An unspecified override retains automatic selection, even with the option enabled.
 selection->configure(true, nullptr, nullptr);
 rejects([&] { selection->computeResponseAckFrameMode(&packet, data); });
