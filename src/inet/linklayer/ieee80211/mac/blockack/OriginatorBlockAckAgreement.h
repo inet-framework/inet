@@ -26,7 +26,6 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     bool isAMsduSupported = false;
     bool isDelayedBlockAckPolicySupported = false;
     bool isAddbaResponseReceived = false;
-    bool isAddbaRequestSent = false;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
 
@@ -47,7 +46,6 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }
     virtual void setStartingSequenceNumber(SequenceNumberCyclic sequenceNumber) { startingSequenceNumber = sequenceNumber; }
     virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
-    virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
     virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
     virtual MacAddress getReceiverAddr() const { return receiverAddr; }
@@ -57,7 +55,6 @@ class INET_API OriginatorBlockAckAgreement : public cObject
 
     virtual void setBufferSize(int bufferSize) { this->bufferSize = bufferSize; }
     virtual void setIsAddbaResponseReceived(bool isAddbaResponseReceived) { this->isAddbaResponseReceived = isAddbaResponseReceived; }
-    virtual void setIsAddbaRequestSent(bool isAddbaRequestSent) { this->isAddbaRequestSent = isAddbaRequestSent; }
     virtual void setIsAMsduSupported(bool isAMsduSupported) { this->isAMsduSupported = isAMsduSupported; }
     virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
     virtual void setBlockAckTimeoutValue(const simtime_t blockAckTimeoutValue) { this->blockAckTimeoutValue = blockAckTimeoutValue; }

@@ -32,6 +32,9 @@ class INET_API IOriginatorBlockAckAgreementHandler
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
+    // Return the earliest active absolute deadline, or SIMTIME_MAX if none exists.
+    virtual simtime_t computeEarliestExpirationTime() = 0;
+
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) = 0;
 };
 

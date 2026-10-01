@@ -28,11 +28,10 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
-    virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
     virtual ~OriginatorBlockAckAgreementHandler();
+    virtual simtime_t computeEarliestExpirationTime() override;
     virtual void processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
     virtual void processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
     virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) override;
