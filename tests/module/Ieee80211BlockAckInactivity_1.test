@@ -3,9 +3,11 @@ Verify Block Ack inactivity through real ADDBA exchanges and HCF restart.
 Cover both agreement owners, overdue deadlines, node stop/crash, zero timeout,
 and simultaneous originator and recipient agreements with different deadlines.
 Cover ADDBA response retries and queued responses after agreement expiry.
+Verify that local recipient expiry clears the old receive window before replacement.
+Verify that each DELBA direction changes only its matching agreement and receive buffer.
 IEEE Std 802.11-2024, 11.5.4 requires timeout DELBA for inactive agreements.
 
-%extraargs: -r 0..18
+%extraargs: -r 0..24
 
 %file: TestIeee80211BlockAckInactivity.cc
 
@@ -43,6 +45,8 @@ class TestBlockAckHcf : public Hcf
     int transmittedDelbas = 0;
     bool stopOnTimeoutDelba = false;
     bool dropAddbaAck = false;
+    bool dropDelbaAck = false;
+    int droppedDelbaAcks = 0;
     bool stopOnAddbaResponse = false;
     bool repeatStopOnAddbaResponse = false;
     int droppedAddbaAcks = 0;
@@ -86,6 +90,67 @@ class TestBlockAckHcf : public Hcf
         return recipientBlockAckAgreementHandler->getAgreement(0, peer)->getStartingSequenceNumber();
     }
 
+    void receiveData(const MacAddress& peer, SequenceNumberCyclic sequence)
+    {
+        Enter_Method("receiveData");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTransmitterAddress(peer);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTid(0);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setSequenceNumber(sequence);
+        auto packet = new Packet("isolated data", header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100, 0)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(Mbps(24)));
+        processLowerFrame(packet, header);
+    }
+
+    void receiveAddbaRequest(const MacAddress& peer, SequenceNumberCyclic start, uint8_t dialogToken = 1, bool dispatchManagementOnly = false)
+    {
+        Enter_Method("receiveAddbaRequest");
+        auto header = makeShared<Ieee80211AddbaRequest>();
+        header->setTransmitterAddress(peer);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTid(0);
+        header->setBlockAckPolicy(true);
+        header->setBufferSize(64);
+        header->setBlockAckTimeoutValue(SimTime(20, SIMTIME_MS));
+        header->setStartingSequenceNumber(start);
+        header->setDialogToken(dialogToken);
+        header->setSequenceNumber(start);
+        if (dispatchManagementOnly) {
+            recipientProcessReceivedManagementFrame(header);
+            return;
+        }
+        auto packet = new Packet("isolated ADDBA request", header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(Mbps(24)));
+        processLowerFrame(packet, header);
+    }
+
+    void receiveDelba(const MacAddress& peer, bool initiator)
+    {
+        Enter_Method("receiveDelba");
+        auto header = makeShared<Ieee80211Delba>();
+        header->setTransmitterAddress(peer);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTid(0);
+        header->setInitiator(initiator);
+        header->setSequenceNumber(SequenceNumberCyclic(4090));
+        receiveDelba(header);
+    }
+
+    void receiveDelba(const Ptr<const Ieee80211Delba>& header)
+    {
+        Enter_Method("receiveDelba");
+        auto packet = new Packet("isolated DELBA", header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(Mbps(24)));
+        processLowerFrame(packet, header);
+    }
+
     void queueFrame(const MacAddress& receiver, Tid tid = 0)
     {
         Enter_Method("queueFrame");
@@ -122,6 +187,11 @@ class TestBlockAckHcf : public Hcf
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader,
             Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
     {
+        if (dropDelbaAck && dynamicPtrCast<const Ieee80211Delba>(receivedHeader)) {
+            ++droppedDelbaAcks;
+            delete responsePacket;
+            return;
+        }
         if (dropAddbaAck && dynamicPtrCast<const Ieee80211AddbaResponse>(receivedHeader)) {
             ++droppedAddbaAcks;
             delete responsePacket;
@@ -182,6 +252,61 @@ class Ieee80211BlockAckInactivityTest : public cSimpleModule, public LifecycleCo
         const MacAddress senderAddress("02:00:00:00:00:01");
         const MacAddress recipientAddress("02:00:00:00:00:02");
         int scenario = par("scenario");
+        if (scenario == 29) {
+            sender->queueFrame(recipientAddress);
+            recipient->queueFrame(senderAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) > simTime());
+            ASSERT(recipient->getAgreementDeadline(senderAddress, true) > simTime());
+            sender->stop();
+            check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"))->setRadioMode(physicallayer::IRadio::RADIO_MODE_OFF);
+            auto mac = check_and_cast<TestBlockAckMac *>(getModuleByPath("^.node[1].wlan[0].mac"));
+            int deliveredBefore = mac->delivered;
+            auto start = recipient->getRecipientStartingSequenceNumber(senderAddress);
+            recipient->receiveData(senderAddress, start + 1);
+            ASSERT(mac->delivered == deliveredBefore);
+            recipient->receiveDelba(senderAddress, false);
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) > simTime());
+            ASSERT(recipient->getAgreementDeadline(senderAddress, true) < 0);
+            wait(SimTime(1, SIMTIME_MS));
+            recipient->receiveBar(senderAddress, start + 1);
+            ASSERT(mac->delivered == deliveredBefore + 1);
+            wait(SimTime(1, SIMTIME_MS));
+            recipient->receiveData(senderAddress, start + 3);
+            ASSERT(mac->delivered == deliveredBefore + 1);
+            recipient->receiveDelba(senderAddress, true);
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) < 0);
+            wait(SimTime(1, SIMTIME_MS));
+            recipient->receiveAddbaRequest(senderAddress, SequenceNumberCyclic(100), 2, true);
+            wait(SimTime(2, SIMTIME_MS));
+            recipient->receiveData(senderAddress, SequenceNumberCyclic(100));
+            ASSERT(mac->delivered == deliveredBefore + 2);
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
+        if (scenario == 27) {
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            auto mac = check_and_cast<TestBlockAckMac *>(getModuleByPath("^.node[1].wlan[0].mac"));
+            int deliveredBefore = mac->delivered;
+            auto oldStart = recipient->getRecipientStartingSequenceNumber(senderAddress);
+            recipient->receiveData(senderAddress, oldStart + 1);
+            ASSERT(mac->delivered == deliveredBefore);
+            auto radio = check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"));
+            sender->stop();
+            radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_OFF);
+            auto deadline = recipient->getAgreementDeadline(senderAddress, false);
+            wait(deadline - simTime() + SimTime(1, SIMTIME_NS));
+            ASSERT(recipient->timeoutDelbas == 1);
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) < 0);
+            wait(SimTime(45, SIMTIME_MS));
+            recipient->receiveAddbaRequest(senderAddress, SequenceNumberCyclic(100));
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) > simTime());
+            recipient->receiveData(senderAddress, SequenceNumberCyclic(100));
+            ASSERT(mac->delivered == deliveredBefore + 1);
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario >= 21 && scenario <= 23) {
             sender->queueFrame(recipientAddress);
             wait(SimTime(5, SIMTIME_MS));
@@ -210,6 +335,40 @@ class Ieee80211BlockAckInactivityTest : public cSimpleModule, public LifecycleCo
                 ASSERT(recipient->timeoutDelbas == 1);
                 ASSERT(recipient->getAgreementDeadline(senderAddress, false) < 0);
             }
+            std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
+        if (scenario == 16 || scenario >= 24) {
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->getAgreementDeadline(recipientAddress, true) > simTime());
+            auto radio = check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"));
+            sender->stop();
+            radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_OFF);
+            if (scenario == 25)
+                recipient->stop();
+            sender->queueFrame(recipientAddress);
+            if (scenario == 26) {
+                sender->queueFrame(recipientAddress);
+                sender->queueFrame(recipientAddress);
+            }
+            wait(SimTime(45, SIMTIME_MS));
+            radio->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+            recipient->dropDelbaAck = scenario == 24;
+            sender->dropDelbaAck = scenario == 25;
+            if (scenario == 25)
+                recipient->start();
+            sender->start();
+            wait(SimTime(15, SIMTIME_MS));
+            ASSERT(sender->expiredAddbaRequests == 0);
+            ASSERT(sender->getAgreementDeadline(recipientAddress, true) > simTime());
+            ASSERT(recipient->getAgreementDeadline(senderAddress, false) > simTime());
+            ASSERT(sender->isIdle() && recipient->isIdle());
+            if (scenario == 24 || scenario == 25)
+                ASSERT(sender->droppedDelbaAcks + recipient->droppedDelbaAcks > 1);
+            sender->queueFrame(recipientAddress);
+            wait(SimTime(1, SIMTIME_MS));
+            ASSERT(check_and_cast<TestBlockAckMac *>(getModuleByPath("^.node[1].wlan[0].mac"))->delivered == (scenario == 26 ? 5 : 3));
             std::cout << "Block Ack inactivity scenario " << scenario << " passed.\n";
             endSimulation();
         }
@@ -416,7 +575,7 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..15,21..23}
+*.test.scenario = ${scenario=0..16,21..27,29}
 *.node[*].hasStatus = true
 *.node[*].wlan[0].mac.typename = "TestBlockAckMac"
 *.node[*].wlan[0].mac.qosStation = true

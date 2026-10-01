@@ -94,6 +94,15 @@ agreements. A deadline that expires during downtime triggers expiry at restart.
 Expiry removes the local agreement before HCF queues its timeout DELBA.
 The modeled stop and crash operations share this retention policy.
 
+Block Ack handlers retain pending DELBA transactions across stop and restart.
+Replacement ADDBA setup waits until the old DELBA receives an acknowledgment
+or reaches a terminal drop. Individual transmission attempts do not remove
+an agreement. Custom originator and recipient handlers must implement
+``processDelbaFrameFinished()``. HCF calls it for final acknowledgment,
+queue drop, or retry exhaustion. The existing management transaction tag
+identifies the local teardown across packet copies. Late terminal callbacks
+must not complete another teardown transaction.
+
 Custom Block Ack agreement handlers must implement
 ``computeEarliestExpirationTime()``. It returns an absolute deadline, or
 ``SIMTIME_MAX`` when no finite deadline exists. The callback
@@ -130,6 +139,11 @@ without the local operational-rate restriction used for data transmission.
 Custom recipient agreement handlers must implement ``blockAckRequestReceived()``
 for Basic Block Ack Requests. This callback updates the matching inactivity deadline
 before it requests the shared timer update. Block Ack data reception follows the same order.
+Local recipient DELBA now removes the corresponding Block Ack receive buffer.
+Custom ``IRecipientQosMacDataService`` implementations must implement
+``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
+The next ADDBA agreement starts with a new receive window.
+
 
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
 candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then
