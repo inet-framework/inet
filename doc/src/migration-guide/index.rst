@@ -148,6 +148,8 @@ Custom ``IRecipientQosMacDataService`` implementations must implement
 ``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
 The next ADDBA agreement starts with a new receive window.
 
+AP disassociation and acknowledged refusal now commit station status before rate removal signals.
+The MIB already removes peer rate and HT state when it releases an association ID.
 
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
 candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then
