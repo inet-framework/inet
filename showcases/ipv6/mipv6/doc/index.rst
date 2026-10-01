@@ -254,10 +254,10 @@ Every tunable parameter lives in the ``mipv6`` module:
   type as described above.
 - ``useRouteOptimization`` (default ``true``) — route-optimize with
   correspondent nodes, or always tunnel through the home agent.
-- ``maxHaBindingLifeTime`` (default 3600 s) — the ceiling on a home
-  registration.
-- ``maxRrBindingLifeTime`` (default 420 s) — the ceiling on a binding held at
-  a correspondent node.
+- ``maxHaBindingLifeTime`` (default 3600 s) — the lifetime the mobile node
+  requests for a home registration; the home agent accepts it unchanged.
+- ``maxRrBindingLifeTime`` (default 420 s) — the lifetime the mobile node
+  requests for a binding at a correspondent node, which accepts it unchanged.
 
 One level up, ``hasMipv6`` on ``Ipv6NetworkLayer`` decides whether these
 modules exist at all. The same network layer also has a ``hasPmipv6``
@@ -265,21 +265,21 @@ parameter for Proxy Mobile IPv6 (RFC 5213), a different approach in which the
 network moves the node and the mobile node runs no mobility software of its
 own. This showcase does not use it.
 
-Neither lifetime expires inside this showcase's 80 second run, but a study of
-re-registration reaches the 420 second one first. ``Mipv6`` also emits two
-signals a study can record: ``mipv6RoCompleted`` when route optimization
-finishes, and ``packetDropped``. The losses that the Results section walks
-through do not happen in ``Mipv6`` and emit no ``Mipv6`` drop signal: the
-access points drop pings after their retry limit, and in the run without Mobile
-IPv6 the router ``homeAgent`` drops the pings it cannot deliver, and its
-interface on the home link discards the misaddressed replies.
+Neither lifetime expires inside this showcase's 80 second run. ``Mipv6`` also
+emits two signals: ``mipv6RoCompleted`` when route optimization finishes, and
+``packetDropped``. ``Mipv6.ned`` declares no statistic for them, so a study
+must declare a ``@statistic`` before it can record them. The losses that the
+Results section walks through do not happen in ``Mipv6`` and emit no ``Mipv6``
+drop signal: the access points drop pings after their retry limit, and in the
+run without Mobile IPv6 the router ``homeAgent`` drops the pings it cannot
+deliver, and its interface on the home link discards the misaddressed replies.
 
 Configuration notes:
 
 - ``hasMipv6`` (on the node's ``ipv6`` submodule) creates or omits the whole
   Mobile IPv6 footprint. The ``WithoutMipv6`` configuration sets it to
-  ``false`` on the mobile node, which leaves an ordinary wireless IPv6 host
-  and is how this showcase measures what mobility support is worth.
+  ``false`` on the mobile node, which leaves an ordinary wireless IPv6 host and
+  is how this showcase measures what mobility support is worth.
 - ``useRouteOptimization`` on the mobile node is what separates two of the
   three configurations: the same scenario runs both ways with this one flag.
 - Movement detection does not depend on frequent Router Advertisements: on
@@ -288,11 +288,11 @@ Configuration notes:
   ``true``), so the mobile node never waits for a periodic advertisement.
 - The mobile node autoconfigures its addresses, so the address configurator
   must leave hosts alone: the network sets ``assignAddressesToHosts = false``
-  on the ``Ipv6NetworkConfigurator``, which then assigns addresses and routes
-  to routers only. The home agent is recognized from its Router
-  Advertisements (via the home-agent flag the standard defines for them),
-  which is how the mobile node learns its home agent's address — at home,
-  before ever leaving. The standard's remote-discovery mechanisms are not
+  on the ``Ipv6NetworkConfigurator``, which then assigns addresses to routers
+  only (it still adds static routes to hosts). The home agent is recognized
+  from its Router Advertisements (via the home-agent flag the standard defines
+  for them), which is how the mobile node learns its home agent's address — at
+  home, before ever leaving. The standard's remote-discovery mechanisms are not
   modeled, so a mobile node must start the simulation in its home network.
 
 Implementation notes and simplifications, so the simulation is read for what
@@ -516,10 +516,10 @@ spends away from its home network.
 Without Mobile IPv6 the node is unreachable the whole time it is away — no
 replies at all for 37.5 s (34.5–37.5 s over ten seeds), resuming only when it
 re-enters home coverage on the way back. Its home address means nothing on the
-foreign link. The three markers on the top edge at about 4.5 s appear in all
-three charts: at boot the router ``homeAgent`` holds the first pings while the
-mobile node is still checking its home address, and their replies arrive 0.5 to
-1.5 s late.
+foreign link. The red marker on the top edge at about 4.5 s, labelled "3
+replies off scale", appears in all three charts: at boot the router
+``homeAgent`` holds the first pings while the mobile node is still checking its
+home address, and their replies arrive 0.5 to 1.5 s late.
 
 .. figure:: media/pingrtt-bidirectional.png
    :align: center
@@ -1274,17 +1274,18 @@ IPv6 host again.
    stamp:    recorded 2026-10-01, INET HEAD ba7c6038bf, OMNeT++ 6.4.0aipre2
 
 Why the return is short: the home agent answers the node's Router Solicitation
-with a multicast Router Advertisement, as INET's routers always do, and a router
-may multicast at most one Router Advertisement every 3 s. In this run its last
-one, at 47.847 s, was more than 3 s earlier, so the answer leaves after its
-random delay only, 0.08 s, at 51.453 s. The node then skips duplicate address
-detection — it must not probe its own home address while its binding is alive
-— and the home agent acknowledges the de-registration at once. So the return is
-far shorter than the way out: 1.49 s with route optimization and 1.47 s with
-bidirectional tunneling, against 5.95 s, the shortest returns of the ten seeds.
-In other seeds the last multicast advertisement was less than 3 s old, and the
-limit held the answer back by up to 3 s; that is what spreads the returns over
-1.5–5.0 s across ten seeds (1.5–4.5 s with bidirectional tunneling).
+with a multicast Router Advertisement, as INET's routers always do, and a
+router may multicast at most one Router Advertisement every 3 s. In this run
+its last one, at 47.847 s, was more than 3 s earlier, so the answer leaves
+after its random delay only, 0.08 s, at 51.453 s. The node then skips duplicate
+address detection — it must not probe its own home address while its binding is
+alive — and the home agent acknowledges the de-registration at once. So the
+return is far shorter than the way out: 1.49 s with route optimization and 1.47
+s with bidirectional tunneling, against 5.95 s, the shortest returns of the ten
+seeds. In most other seeds the last multicast advertisement was less than 3 s
+old, and the limit held the answer back by up to 3 s; that is what spreads the
+returns over 1.5–5.0 s across ten seeds (1.5–4.5 s with bidirectional
+tunneling).
 
 Here is the return in the ``RouteOptimization`` run as a sequence chart. It
 shows only the signaling and the first ping answered at home; the pings that
@@ -1333,10 +1334,11 @@ holds back here:
 
 The Router Solicitation reaches ``homeAgent`` right after the association, and
 the Router Advertisement follows 0.08 s later. After it, the two
-de-registration Binding Updates leave the mobile node in the same instant, and
-both acknowledgements come back within milliseconds, the correspondent node's
-through the home agent. The last arrows are the round trip of ``ping101`` on
-the home path.
+de-registration Binding Updates leave the node's IPv6 layer in the same
+instant; on the chart they leave the ``mobileNode`` line one after the other,
+because the radio sends the frames in turn. Then both acknowledgements come
+back within milliseconds, the correspondent node's through the home agent. The
+last arrows are the round trip of ``ping101`` on the home path.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`Mipv6Showcase.ned <../Mipv6Showcase.ned>`,
