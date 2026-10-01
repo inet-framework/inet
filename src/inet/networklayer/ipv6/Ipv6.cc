@@ -848,6 +848,38 @@ void Ipv6::localDeliverFinish(Packet *packet)
         // datagram is re-processed as if received from the network, so it is routed
         // or forwarded -- and seen by the netfilter pre-routing hooks -- normally.
         // The L3AddressInd left by decapsulate() carries the tunnel (outer) source.
+        //
+        // The inner datagram did not arrive on the physical interface the outer one
+        // came in on: it arrived through the tunnel, which RFC 2473 Section 3 models
+        // as a link of its own. Route it as arriving from the tunnel interface, so
+        // that the RFC 4861 Section 8.2 Redirect condition in routePacket() compares
+        // against the interface the datagram really came from. For an incoming
+        // datagram the tunnel's entry point is the outer destination and its exit
+        // point the outer source, so the endpoints are looked up the other way round.
+        // A node that decapsulates without having a tunnel interface for these
+        // endpoints (e.g. the far end of a unidirectional tunnel) keeps the physical
+        // interface, as before.
+        //
+        // Only the routing decision is re-attributed; the InterfaceInd tag keeps
+        // naming the physical interface, because upper layers read it to find the
+        // link the datagram came in on -- Mipv6, for instance, looks up that
+        // interface's Mipv6InterfaceData, which a tunnel interface does not have.
+        // For the same reason a pre-routing hook that QUEUEs the datagram loses the
+        // re-attribution: reinjectQueuedDatagram() recovers fromIE from that tag.
+        //
+        // Unicast only. A multicast inner datagram keeps the physical interface,
+        // because routeMulticastPacket() reads the arrival interface's
+        // Ipv6InterfaceData for its group membership test and matches it against the
+        // multicast route's incoming interface, and a tunnel interface has neither.
+        // Redirects are never sent for multicast (RFC 4861 Section 8.2), so nothing
+        // this commit repairs is lost by leaving that path alone.
+        const auto& inner = packet->peekAtFront<Ipv6Header>();
+        if (!inner->getDestAddress().isMulticast()) {
+            if (auto *tunnelIE = rt->findTunnelNetworkInterface(localAddress, remoteAddress)) {
+                fromIE = tunnelIE;
+                EV_INFO << "Routing the decapsulated datagram as arriving on " << fromIE->getInterfaceName() << "\n";
+            }
+        }
         packet->removeTagIfPresent<InterfaceReq>();
         auto verdict = datagramPreRoutingHook(packet);
         if (verdict == INetfilter::IHook::ACCEPT)

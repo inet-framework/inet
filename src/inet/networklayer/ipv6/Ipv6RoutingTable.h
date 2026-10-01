@@ -302,6 +302,21 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     virtual void deleteTunnelNetworkInterface(NetworkInterface *networkInterface);
 
     /**
+     * Returns the ~Ipv6TunnelInterface configured with the given tunnel entry
+     * and exit points, or nullptr if this node has no such tunnel. Used to
+     * identify the tunnel a received IPv6-in-IPv6 datagram arrived through:
+     * for an incoming datagram, source is its outer destination address and
+     * destination its outer source address.
+     *
+     * Endpoints do not identify a tunnel uniquely -- several tunnels may share
+     * an entry and exit pair and differ only in what is routed onto them (MIPv6
+     * split tunnels, for instance). They all represent the same pair of tunnel
+     * endpoints, so for the purpose of naming the link a datagram arrived on any
+     * of them will do, and the first match is returned.
+     */
+    virtual NetworkInterface *findTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination) const;
+
+    /**
      *  Adds a default route for a host. This method requires the RA's source
      *  address and the router expiry time plus the simTime().
      */
