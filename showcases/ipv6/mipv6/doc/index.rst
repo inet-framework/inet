@@ -496,30 +496,28 @@ spends away from its home network.
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (without Mobile IPv6)"
    inputs:   results/WithoutMipv6-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping without Mobile IPv6: 3 off-scale boot markers at 4.536 s, the 14 ms home plateau, no reply from 17.014 s to 54.514 s (37.5 s), the home plateau again; "away from home" span shaded 15..51 s
+   shows:    RTT of every ping without Mobile IPv6: the 14 ms home plateau, no reply from 17.014 s to 54.514 s (37.5 s), the home plateau again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             boot: ping4/5/6 arrive together at 4.536 s (1535.5 / 1035.5 / 535.5 ms, off scale), ping7
-             35.5 ms on scale; home median 14.05 ms; last reply before the move ping32 at 17.014 s;
-             first reply after the return ping107 at 54.514 s (14.07 ms); no marker at ~52 s any more;
+             boot: ping7 35.5 ms at 4.536 s is the only boot reply on scale; home median 14.05 ms; last reply before the move ping32 at 17.014 s;
+             first reply after the return ping107 at 54.514 s (14.07 ms); no reply above the axis at ~52 s;
              elevated ping117 15.73 ms at 59.5 s (waited behind the mobile node's NUD probe).
-             If a marker appears at ~52 s or the gap is not 37.5 s, the return timing changed.
-             Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge, with one label per cluster
-             (boot: "queued at router homeAgent until it resolved the home address";
-             handover: "held by the mobile node until the Binding Acknowledgement").
+             If the gap is not 37.5 s, the return timing changed.
+             Replies above 45 ms are NOT drawn (no marker, no label; the y axis stays pinned).
+             In this run that is ping4/ping5/ping6 at 4.536 s (1535.5 / 1035.5 / 535.5 ms, held at boot by homeAgent).
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(without Mobile IPv6)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-09-30, INET HEAD 8c94b616cd (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
              verified 2026-10-01 at ba7c6038bf: the WithoutMipv6 run is identical (same event count 42620, same pings), so this image is kept.
+             re-exported 2026-10-01 without off-scale markers and labels (user ruling).
 
 Without Mobile IPv6 the node is unreachable the whole time it is away — no
 replies at all for 37.5 s (34.5–37.5 s over ten seeds), resuming only when it
 re-enters home coverage on the way back. Its home address means nothing on the
-foreign link. The red marker on the top edge at about 4.5 s, labelled "3
-replies off scale", appears in all three charts: at boot the router
-``homeAgent`` holds the first pings while the mobile node is still checking its
-home address, and their replies arrive 0.5 to 1.5 s late.
+foreign link. The first three replies after boot, at about 4.5 s, are not drawn
+in any of the three charts: they arrive 0.5 to 1.5 s late, too late to fit the
+0–45 ms axis, because the router ``homeAgent`` holds the first pings while the
+mobile node is still checking its home address.
 
 .. figure:: media/pingrtt-bidirectional.png
    :align: center
@@ -529,26 +527,26 @@ home address, and their replies arrive 0.5 to 1.5 s late.
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (bidirectional tunneling)"
    inputs:   results/BidirectionalTunneling-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping with route optimization off: boot markers, 14 ms at home, gap 17.014-22.964 s, two off-scale held replies at 22.96 s, the 40 ms tunneled plateau from ping44, gap 50.040-51.514 s, 14 ms at home again; "away from home" span shaded 15..51 s
+   shows:    RTT of every ping with route optimization off: 14 ms at home, no point drawn from 17.014 s until ping44 at 23.040 s (the held ping42/ping43 replies at 22.96 s are above the axis), the 40 ms tunneled plateau from ping44, gap 50.040-51.514 s, 14 ms at home again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             boot markers as in the plain-host chart; first replies after the move ping42 at 22.964 s
-             (963.9 ms) and ping43 at 22.965 s (465.2 ms), both off scale; away median 40.32 ms
+             first replies after the move ping42 at 22.964 s
+             (963.9 ms) and ping43 at 22.965 s (465.2 ms), both above the axis (not drawn); away median 40.32 ms
              (40.26-40.40, from ping44); last reply away ping98 at 50.040 s; first reply at home ping101
              at 51.514 s (return 1.474 s); elevated ping111 16.04 ms at 56.5 s (MN NUD probe).
-             Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge, with one label per cluster
-             (boot: "queued at router homeAgent until it resolved the home address";
-             handover: "held by the mobile node until the Binding Acknowledgement").
+             Replies above 45 ms are NOT drawn (no marker, no label; the y axis stays pinned).
+             In this run that is ping4/ping5/ping6 at 4.536 s (1535.5 / 1035.5 / 535.5 ms) and ping42/ping43 at 22.964 / 22.965 s (963.9 / 465.2 ms, held by the mobile node until the Binding Acknowledgement).
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(bidirectional tunneling)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-10-01, INET HEAD ba7c6038bf (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
+             re-exported 2026-10-01 without off-scale markers and labels (user ruling).
 
 Bidirectional tunneling restores reachability, at the cost of a detour. After a
 6.0 s outage replies resume on the 40 ms plateau and stay there, every packet
-taking the long way through the home agent. The first two replies come back off
-scale, with round trips of 963.9 ms and 465.2 ms: the mobile node held them
-until its binding was active.
+taking the long way through the home agent. The first two replies, to
+``ping42`` and ``ping43``, are not drawn: with round trips of 963.9 ms and
+465.2 ms they do not fit the 0–45 ms axis. The mobile node held them until its
+binding was active, as the registration sequence chart below shows.
 
 Where those seconds go, from this run's event log — the last reply at home
 arrives at t = 17.014 s, the first tunneled one at t = 22.964 s:
@@ -603,25 +601,24 @@ than this one.
    type:     chart (matplotlib)
    anf:      Mipv6Showcase.anf   chart "Ping round-trip time (route optimization)"
    inputs:   results/RouteOptimization-#0.vec (re-run the config first, seed-set 1)
-   shows:    RTT of every ping with route optimization on: boot markers, 14 ms at home, gap 17.014-22.965 s, two off-scale held replies, no 40 ms point, the 20 ms direct plateau from ping44, gap 50.020-51.514 s, 14 ms at home again; "away from home" span shaded 15..51 s
+   shows:    RTT of every ping with route optimization on: 14 ms at home, no point drawn from 17.014 s until ping44 at 23.020 s (the held ping42/ping43 replies at 22.97 s are above the axis), no 40 ms point, the 20 ms direct plateau from ping44, gap 50.020-51.514 s, 14 ms at home again; "away from home" span shaded 15..51 s
    anchor:   axes are pinned (x 0..80 s, y 0..45 ms) so the three panels compare
              directly -- keep all three identical if any one is redone.
-             boot markers as in the plain-host chart; ping42 at 22.965 s (965.1 ms) and ping43 at
-             22.966 s (466.3 ms) off scale; NO 40 ms point; ping44 at 23.020 s (20.22 ms) is the first
+             ping42 at 22.965 s (965.1 ms) and ping43 at
+             22.966 s (466.3 ms) above the axis (not drawn); NO 40 ms point; ping44 at 23.020 s (20.22 ms) is the first
              direct reply; direct median 20.16 ms (20.08-20.22); last reply away ping98 at 50.020 s;
              first reply at home ping101 at 51.514 s (return 1.494 s, Router Advertisement not held).
-             Replies above the y range are never clipped silently: the shared chart
-             script draws them as red markers on the top edge, with one label per cluster
-             (boot: "queued at router homeAgent until it resolved the home address";
-             handover: "held by the mobile node until the Binding Acknowledgement").
+             Replies above 45 ms are NOT drawn (no marker, no label; the y axis stays pinned).
+             In this run that is ping4/ping5/ping6 at 4.536 s (1535.5 / 1035.5 / 535.5 ms) and ping42/ping43 at 22.965 / 22.966 s (965.1 / 466.3 ms, held by the mobile node until the Binding Acknowledgement).
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "(route optimization)" -f png --dpi 150
              -d doc/media   (8x6 in -> 1200x900; filename from image_export_filename)
    stamp:    captured 2026-10-01, INET HEAD ba7c6038bf (topic/gy/mipv6-showcase), OMNeT++ 6.4.0aipre2
+             re-exported 2026-10-01 without off-scale markers and labels (user ruling).
 
 Route optimization removes the detour right away. The same outage, then the two
-held replies, off scale at 22.97 s, and the direct path at 20 ms from
-``ping44`` on. No reply shows the 40 ms tunnel path: the correspondent node has
-its binding at 22.994 s, just before ``ping44`` leaves.
+held replies at 22.97 s, too late to be drawn on this axis, and the direct path
+at 20 ms from ``ping44`` on. No reply shows the 40 ms tunnel path: the
+correspondent node has its binding at 22.994 s, just before ``ping44`` leaves.
 
 Up to the handover the three runs are identical: while the node is at home
 Mobile IPv6 has nothing to do, so the three configurations are the same
@@ -639,11 +636,13 @@ limit on multicast Router Advertisements, arrives only at 54.311 s, and until
 then the host addresses its replies to the foreign router, so the router's
 interface on the home link discards them.
 
-Details worth noticing rather than worrying about: the very first reply arrives
-only at t≈4.5 s — and 1.5 s late, with the next two also off scale — because
-the home agent cannot resolve the home address while the mobile node is still
-checking it with duplicate address detection after boot, and holds the pings
-meanwhile; the few isolated elevated dots (``ping111`` at t=56.5 s with
+Details worth noticing rather than worrying about: the first replies arrive
+only at t≈4.5 s — the first three (``ping4`` to ``ping6``, 1.5, 1.0 and 0.5 s
+late) are too late to be drawn, and the isolated dot at about 35 ms at the same
+moment is the fourth, ``ping7``, the last of the pings the router held —
+because the home agent cannot resolve the home address while the mobile node is
+still checking it with duplicate address detection after boot, and holds the
+pings meanwhile; the few isolated elevated dots (``ping111`` at t=56.5 s with
 bidirectional tunneling and ``ping117`` at t=59.5 s without Mobile IPv6) are
 not 802.11 retransmissions but replies that waited behind a Neighbor
 Unreachability Detection probe; and after the return, the two Mobile IPv6 runs
