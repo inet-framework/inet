@@ -54,6 +54,71 @@ static BlockAckReordering::ReorderBuffer request(ReorderingProbe& reordering, Re
 
 %activity:
 const MacAddress peer("02:00:00:00:00:01");
+for (int initial : {0, 17, 4094, 4095}) {
+    SequenceNumberCyclic start(initial);
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+        checkFrames(receiveData(reordering, agreement, start), {start.get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 2);
+        checkFrames(request(reordering, agreement, start), {(start + 1).get(), (start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start + 3);
+        checkFrames(request(reordering, agreement, start), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(request(reordering, agreement, start), {});
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start);
+        checkFrames(request(reordering, agreement, start + 2), {(start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1, 0, true), {});
+        checkFrames(receiveData(reordering, agreement, start), {start.get()});
+        checkFrames(request(reordering, agreement, start), {});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 2);
+        checkFrames(receiveData(reordering, agreement, start + 1, 1), {(start + 1).get()});
+        checkFrames(request(reordering, agreement, start), {(start + 2).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+    }
+    {
+        ReorderingProbe reordering;
+        RecipientBlockAckAgreement agreement(peer, 0, start, 64, SIMTIME_ZERO);
+        checkFrames(receiveData(reordering, agreement, start + 2), {});
+        checkFrames(receiveData(reordering, agreement, start + 1), {});
+        checkFrames(receiveData(reordering, agreement, start + 3), {});
+        checkFrames(request(reordering, agreement, start + 3), {(start + 1).get(), (start + 2).get(), (start + 3).get()});
+        ASSERT(reordering.buffer(&agreement)->getLength() == 0);
+        ASSERT(reordering.buffer(&agreement)->getNextExpectedSequenceNumber() == start + 4);
+    }
+}
+{
+    ReorderingProbe reordering;
+    RecipientBlockAckAgreement first(peer, 0, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    RecipientBlockAckAgreement otherTid(peer, 3, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    RecipientBlockAckAgreement otherPeer(MacAddress("02:00:00:00:00:02"), 0, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+    for (auto agreement : {&first, &otherTid, &otherPeer})
+        checkFrames(receiveData(reordering, *agreement, SequenceNumberCyclic(1)), {});
+    checkFrames(receiveData(reordering, first, SequenceNumberCyclic(0)), {0});
+    checkFrames(request(reordering, first, SequenceNumberCyclic(0)), {1});
+    ASSERT(reordering.buffer(&otherTid)->getLength() == 1);
+    ASSERT(reordering.buffer(&otherPeer)->getLength() == 1);
+    auto delba = makeShared<Ieee80211Delba>();
+    delba->setTransmitterAddress(peer);
+    delba->setTid(3);
+    reordering.processReceivedDelba(delba);
+    reordering.processReceivedDelba(delba);
+    ASSERT(reordering.buffer(&otherPeer)->getLength() == 1);
+}
 {
     ReorderingProbe reordering;
     RecipientBlockAckAgreement oldAgreement(peer, 0, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);

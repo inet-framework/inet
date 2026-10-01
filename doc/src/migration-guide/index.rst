@@ -143,6 +143,15 @@ before it requests the shared timer update. Block Ack data reception follows the
 The record uses this cyclic boundary to distinguish missing frames from old frames.
 Its missing-frame bitmap can cause retransmission where the old model silently removed data.
 
+Basic Block Ack receive buffers now resume a repeated BAR at the next expected sequence
+when its original start precedes data already delivered after retransmission.
+The scan still stops at an incomplete or missing frame.
+This progress rule is a model interpretation of the legacy receive-buffer procedure.
+Buffer release and delivery also preserve cyclic sequence order across 4095 to 0.
+``BlockAckReordering::ReorderBuffer`` is now a vector of sequence/fragment pairs in
+delivery order. Custom consumers must iterate that order instead of using map lookup.
+These corrections can change delivery counts and simulation fingerprints after packet loss.
+
 Local recipient DELBA now removes the corresponding Block Ack receive buffer.
 Custom ``IRecipientQosMacDataService`` implementations must implement
 ``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
