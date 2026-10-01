@@ -382,6 +382,16 @@ Notable backward compatible changes are the following:
    Direct HT or rate removal still emits its own notification if state changes.
    Empty teardown emits no signal. Existing configuration parameters stay unchanged.
 
+7. A Mobile IPv6 mobile node ignores a second Home Test or Care-of Test
+
+   A mobile node accepted a Home Test or Care-of Test for a correspondent
+   node whose keygen token it already held, and sent the correspondent node
+   another Binding Update. This happened when the Home Test arrived after the
+   1 s retransmission interval, so the mobile node had retransmitted the Home
+   Test Init and both transmissions were answered.
+   The mobile node now ignores such a message, as RFC 6275 Section 11.6.2
+   requires.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

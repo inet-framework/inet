@@ -1629,12 +1629,11 @@ bool Mipv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 
     /* The Binding Update List indicates that no home keygen token has
        been received yet. */
-    // TODO reactivate this code as soon as token expiry is available in the BUL
-    /*if (bulEntry->tokenH != UNDEFINED_TOKEN)
-       {
-        EV << "Invalid HoT: Home keygen token already exists." << endl;
-        return false; // 0 is expected to indicate "undefined"
-       }*/
+    // sending a Home Test Init and the expiry of the token reset it to UNDEFINED_TOKEN
+    if (bulEntry->tokenH != UNDEFINED_TOKEN) {
+        EV_WARN << "Invalid HoT: Home keygen token already exists." << endl;
+        return false;
+    }
 
     /* The Destination Address of the packet has the home address of the
        mobile node, and the packet has been received in a tunnel from the
@@ -1722,12 +1721,11 @@ bool Mipv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 
     /* The Binding Update List indicates that no care-of keygen token has
        been received yet.. */
-    // TODO reactive this code as soon as token expiry is available in the BUL
-    /*if (bulEntry->tokenC != UNDEFINED_TOKEN)
-       {
-        EV << "Invalid CoT: Already received a care-of keygen token." << endl;
-        return false; // 0 is expected to indicate "undefined"
-       }*/
+    // sending a Care-of Test Init and the expiry of the token reset it to UNDEFINED_TOKEN
+    if (bulEntry->tokenC != UNDEFINED_TOKEN) {
+        EV_WARN << "Invalid CoT: Already received a care-of keygen token." << endl;
+        return false;
+    }
 
     /* The Destination Address of the packet is the current care-of
        address of the mobile node. */
