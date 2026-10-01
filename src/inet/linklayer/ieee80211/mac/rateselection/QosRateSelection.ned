@@ -49,4 +49,3 @@ simple QosRateSelection extends SimpleModule
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-

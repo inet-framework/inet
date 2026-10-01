@@ -39,4 +39,3 @@ std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agr
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

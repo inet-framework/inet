@@ -39,4 +39,3 @@ class INET_API IOriginatorBlockAckAgreementHandler
 } // namespace inet
 
 #endif
-
