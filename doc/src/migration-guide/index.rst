@@ -96,6 +96,8 @@ HCF ``QosRateSelection`` has no such option. For example, a conflicting
 uses it. Remove conflicting overrides from QoS configurations.
 Response selection uses the BSS basic rates or the applicable mandatory rates,
 without the local operational-rate restriction used for data transmission.
+AP disassociation and acknowledged refusal now commit station status before rate removal signals.
+The MIB already removes peer rate and HT state when it releases an association ID.
 
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
 candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then

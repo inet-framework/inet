@@ -5,6 +5,7 @@ INET-4.7.x (in development)
 ---------------------------
 
 Notable backward incompatible changes are the following:
+AP teardown publishes authenticated status before peer-rate removal signals.
 
 1. IEEE 802.11 rate control per receiver
 
