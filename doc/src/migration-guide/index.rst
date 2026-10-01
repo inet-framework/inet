@@ -36,6 +36,9 @@ Explicit configured rates retain precedence. Selectors no longer own holder
 transmission history. Custom PHY modes must implement the non-HT reference
 rate, modulation-class, and legacy-preamble queries.
 
+The fastest-mode retry does not override a configured QoS rate during an overrun.
+IEEE 802.11 recommends a high rate for this case; it does not require a fixed-rate override.
+
 Custom classes that implement these interfaces must supply the new methods:
 
 -  ``IRateSelection`` and ``IQosRateSelection`` require
@@ -138,6 +141,11 @@ HCF ``QosRateSelection`` has no such option. For example, a conflicting
 uses it. Remove conflicting overrides from QoS configurations.
 Response selection uses the BSS basic rates or the applicable mandatory rates,
 without the local operational-rate restriction used for data transmission.
+
+Explicit DCF experimental ACK/CTS overrides also bypass known peer-rate restrictions.
+Configure compatible experimental response modes at both peers.
+Unspecified overrides retain primary response selection and its receive-mode requirements.
+
 Custom recipient agreement handlers must implement ``blockAckRequestReceived()``
 for Basic Block Ack Requests. This callback updates the matching inactivity deadline
 before it requests the shared timer update. Block Ack data reception follows the same order.
