@@ -312,6 +312,9 @@ Recipient activity now refreshes the accepted inactivity timeout.
    HCF restart preserves Block Ack inactivity deadlines. Expiry uses the
    earliest absolute deadline across both agreement owners. Agreements that
    expire during downtime trigger timeout DELBA after restart.
+   Queued or retried ADDBA requests and responses can complete after expiry
+   without a crash or a change to a replacement agreement. The unused
+   transmission-state flags and recipient update hook are removed.
    See the migration guide for custom handler changes.
 
    Custom frame sequences, sequence handlers, rate selectors, acknowledgment
