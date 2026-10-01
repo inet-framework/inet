@@ -5,6 +5,7 @@ INET-4.7.x (in development)
 ---------------------------
 
 Notable backward incompatible changes are the following:
+Canceled HCF grants now emit a matching sequence finish signal.
 AP teardown publishes authenticated status before peer-rate removal signals.
 Access points now complete association safely when a rate-state listener stops or restarts management.
 The old completion cannot publish stale association notifications.
