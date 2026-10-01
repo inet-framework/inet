@@ -6,6 +6,8 @@ INET-4.7.x (in development)
 
 Notable backward incompatible changes are the following:
 AP teardown publishes authenticated status before peer-rate removal signals.
+Access points now complete association safely when a rate-state listener stops or restarts management.
+The old completion cannot publish stale association notifications.
 
 1. IEEE 802.11 rate control per receiver
 

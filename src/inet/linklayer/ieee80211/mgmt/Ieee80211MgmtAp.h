@@ -37,6 +37,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         bool pendingAssociationSuccessful = false;
         uint64_t pendingAssociationTransactionId = 0;
+        uint64_t completedAssociationTransactionId = 0; // zero cancels further publication from a completed response
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
