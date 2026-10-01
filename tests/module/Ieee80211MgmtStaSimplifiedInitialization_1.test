@@ -6,6 +6,8 @@ peer state and startup restores both. Verify crash performs the same cleanup,
 and remains safe when the recorded AP can no longer be resolved.
 Check advertised peer rates and rejection of a forbidden AP data rate in DCF and HCF.
 
+%extraargs: -r 0..3
+
 %file: TestInitializationObserver.cc
 
 #include <set>
@@ -44,12 +46,19 @@ class TestInitializationObserver : public cSimpleModule
             throw cRuntimeError("Rate state '%s' has an unexpected policy", name);
     }
 
+    std::set<bps> expectedStaBasic(ieee80211::Ieee80211Mib *staMib)
+    {
+        auto mgmt = staMib->getParentModule()->getSubmodule("mgmt");
+        return mgmt->par("basicRates").stdstringValue() == "auto" ?
+                std::set<bps>{bps(Mbps(6)), bps(Mbps(12))} : std::set<bps>{bps(Mbps(6))};
+    }
+
     void checkConfiguredRates(ieee80211::Ieee80211Mib *apMib, ieee80211::Ieee80211Mib *staMib)
     {
         const auto apOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12)), bps(Mbps(24))};
         const auto apBasic = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
         const auto staOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
-        const auto staBasic = std::set<bps>{bps(Mbps(6))};
+        const auto staBasic = expectedStaBasic(staMib);
         checkRatePolicy("AP local", apMib->getLocalRateSet(), apOperational, apBasic);
         checkRatePolicy("AP BSS", apMib->getBssRateSet(), apOperational, apBasic);
         checkRatePolicy("STA local", staMib->getLocalRateSet(), staOperational, staBasic);
@@ -87,7 +96,7 @@ class TestInitializationObserver : public cSimpleModule
         const auto apOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12)), bps(Mbps(24))};
         const auto apBasic = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
         const auto staOperational = std::set<bps>{bps(Mbps(6)), bps(Mbps(12))};
-        const auto staBasic = std::set<bps>{bps(Mbps(6))};
+        const auto staBasic = expectedStaBasic(staMib);
         checkRatePolicy("AP local", apMib->getLocalRateSet(), apOperational, apBasic);
         checkRatePolicy("STA local", staMib->getLocalRateSet(), staOperational, staBasic);
     }
@@ -275,7 +284,7 @@ record-scalar-results = false
 *.ap.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
 *.ap.wlan[0].radio.channelNumber = 6
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
-*.sta.wlan[0].mgmt.basicRates = "6Mbps"
+*.sta.wlan[0].mgmt.basicRates = ${staBasic="6Mbps","auto"}
 *.sta.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.hasStatus = true
