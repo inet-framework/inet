@@ -318,6 +318,7 @@ Notable backward incompatible changes are the following:
    drawn from random number generator 0 of the Mipv6 module. This changes the
    results of simulations that use route optimization.
 
+   The HO_COOKIE and CO_COOKIE constants are removed, and
    BindingUpdateList::addOrUpdateBUL() takes the cookie as uint64_t, as
    described in the migration guide.
 
