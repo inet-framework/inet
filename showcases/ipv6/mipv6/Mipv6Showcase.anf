@@ -48,30 +48,7 @@ ax.text(33, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
-# replies above the pinned y range: draw them as markers on the top edge and
-# label them with their real round-trip times, so they are not silently clipped
-# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
-if props["yaxis_max"]:
-    import numpy as np
-    ytop = ax.get_ylim()[1]
-    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
-    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
-    off = v > ytop
-    if off.any():
-        top = ax.get_xaxis_transform()
-        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
-                color="C3", transform=top, clip_on=False, zorder=5)
-        # one label per cluster of off-scale replies, each naming where they waited
-        to, vo = t[off], v[off]
-        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
-                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
-                               (51, 1e9, "queued at router homeAgent", 0.90)):
-            sel = (to >= lo) & (to < hi)
-            if sel.any():
-                ax.text(to[sel].max() + 1.0, y,
-                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
-                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
-                        ha="left", va="top", fontsize=9, color="C3", transform=top)
+# replies above the pinned y range are not drawn (the y axis stays pinned)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -843,30 +820,7 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
-# replies above the pinned y range: draw them as markers on the top edge and
-# label them with their real round-trip times, so they are not silently clipped
-# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
-if props["yaxis_max"]:
-    import numpy as np
-    ytop = ax.get_ylim()[1]
-    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
-    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
-    off = v > ytop
-    if off.any():
-        top = ax.get_xaxis_transform()
-        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
-                color="C3", transform=top, clip_on=False, zorder=5)
-        # one label per cluster of off-scale replies, each naming where they waited
-        to, vo = t[off], v[off]
-        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
-                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
-                               (51, 1e9, "queued at router homeAgent", 0.90)):
-            sel = (to >= lo) & (to < hi)
-            if sel.any():
-                ax.text(to[sel].max() + 1.0, y,
-                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
-                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
-                        ha="left", va="top", fontsize=9, color="C3", transform=top)
+# replies above the pinned y range are not drawn (the y axis stays pinned)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1638,30 +1592,7 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
-# replies above the pinned y range: draw them as markers on the top edge and
-# label them with their real round-trip times, so they are not silently clipped
-# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
-if props["yaxis_max"]:
-    import numpy as np
-    ytop = ax.get_ylim()[1]
-    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
-    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
-    off = v > ytop
-    if off.any():
-        top = ax.get_xaxis_transform()
-        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
-                color="C3", transform=top, clip_on=False, zorder=5)
-        # one label per cluster of off-scale replies, each naming where they waited
-        to, vo = t[off], v[off]
-        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
-                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
-                               (51, 1e9, "queued at router homeAgent", 0.90)):
-            sel = (to >= lo) & (to < hi)
-            if sel.any():
-                ax.text(to[sel].max() + 1.0, y,
-                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
-                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
-                        ha="left", va="top", fontsize=9, color="C3", transform=top)
+# replies above the pinned y range are not drawn (the y axis stays pinned)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2433,30 +2364,7 @@ ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
 utils.postconfigure_plot(props)
 ax.set_xlabel("Time [s]")
 
-# replies above the pinned y range: draw them as markers on the top edge and
-# label them with their real round-trip times, so they are not silently clipped
-# (df holds the values in the axis unit here: plot_vectors converted them to yaxis_unit)
-if props["yaxis_max"]:
-    import numpy as np
-    ytop = ax.get_ylim()[1]
-    t = np.concatenate([np.asarray(x, dtype=float) for x in df["vectime"]])
-    v = np.concatenate([np.asarray(x, dtype=float) for x in df["vecvalue"]])
-    off = v > ytop
-    if off.any():
-        top = ax.get_xaxis_transform()
-        ax.plot(t[off], [1.0] * int(off.sum()), linestyle="none", marker="^", markersize=7,
-                color="C3", transform=top, clip_on=False, zorder=5)
-        # one label per cluster of off-scale replies, each naming where they waited
-        to, vo = t[off], v[off]
-        for lo, hi, why, y in ((0, 15, "queued at router homeAgent\nuntil it resolved the home address", 0.58),
-                               (15, 51, "held by the mobile node\nuntil the Binding Acknowledgement", 0.74),
-                               (51, 1e9, "queued at router homeAgent", 0.90)):
-            sel = (to >= lo) & (to < hi)
-            if sel.any():
-                ax.text(to[sel].max() + 1.0, y,
-                        "%d replies off scale: %.0f\u2013%.0f %s round trip\n(%s)"
-                        % (sel.sum(), vo[sel].min(), vo[sel].max(), props["yaxis_unit"], why),
-                        ha="left", va="top", fontsize=9, color="C3", transform=top)
+# replies above the pinned y range are not drawn (the y axis stays pinned)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
