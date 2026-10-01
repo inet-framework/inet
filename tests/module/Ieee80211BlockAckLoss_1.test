@@ -2,7 +2,7 @@
 Verify pending Block Ack recovery through real radios and MAC handlers.
 Force internal collisions after final BAR deferral and stop/restart.
 
-%extraargs: -r 0..9
+%extraargs: -r 0..13
 
 %file: TestBlockAckLoss.cc
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -47,6 +47,26 @@ class LossTestHcf : public Hcf
     int dropData = 0;
     int dropBlockAck = 0;
     int dropped = 0;
+    int reviseOnResponse = -1;
+    bool dropRevisedResponse = false;
+    int rateChangesDuringWait = 0;
+
+    void reviseRatesDuringWait()
+    {
+        Enter_Method("reviseRatesDuringWait");
+        ASSERT(frameSequenceHandler->isSequenceRunning());
+        ASSERT(frameSequenceHandler->getContext()->getActiveStep()->getType() == IFrameSequenceStep::Type::RECEIVE);
+        auto state = mib->getLocalRateSet();
+        state.operational = state.supported;
+        state.operational.legacyRates.erase(Mbps(54));
+        auto context = frameSequenceHandler->getContext();
+        ASSERT(context->isRateStateValid());
+        mib->setLocalRateSet(state);
+        ASSERT(frameSequenceHandler->getContext() == context);
+        ASSERT(!context->isRateStateValid());
+        ASSERT(context->getActiveStep()->getType() == IFrameSequenceStep::Type::RECEIVE);
+        ++rateChangesDuringWait;
+    }
 
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override
     {
@@ -63,6 +83,15 @@ class LossTestHcf : public Hcf
     virtual void transmitControlResponseFrame(Packet *response, const Ptr<const Ieee80211MacHeader>& header,
             Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
     {
+        if (header->getType() == reviseOnResponse) {
+            reviseOnResponse = -1;
+            auto sender = check_and_cast<LossTestHcf *>(getModuleByPath("^.^.^.^.node[0].wlan[0].mac.hcf"));
+            sender->reviseRatesDuringWait();
+            if (dropRevisedResponse) {
+                delete response;
+                return;
+            }
+        }
         if (header->getType() == ST_BLOCKACK && dropBlockAck > 0) {
             --dropBlockAck;
             ++dropped;
@@ -170,6 +199,20 @@ class BlockAckLossTest : public cSimpleModule
             std::cout << "Block Ack recovery scenario " << scenario << " passed.\n";
             endSimulation();
         }
+        if (scenario >= 6) {
+            auto recipient = check_and_cast<LossTestHcf *>(getModuleByPath("^.node[1].wlan[0].mac.hcf"));
+            bool normalAck = scenario == 7 || scenario == 9;
+            recipient->reviseOnResponse = normalAck ? ST_ACK : ST_BLOCKACK;
+            recipient->dropRevisedResponse = scenario >= 9;
+            sender->queueFrame(peer, normalAck ? 6 : 0);
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(sender->empty());
+            ASSERT(receiver->delivered == 2);
+            ASSERT((scenario == 9 || scenario == 10) ? sender->repeatedData > 0 : sender->repeatedData == 0);
+            ASSERT(sender->rateChangesDuringWait == 1);
+            std::cout << "Block Ack recovery scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario < 2) {
             sender->queueVoiceOnDeferral = scenario == 0;
             sender->queueFrame(peer);
@@ -243,7 +286,7 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..5,12..15}
+*.test.scenario = ${scenario=0..5,7..10,12..15}
 *.node[*].wlan[0].mac.typename = "LossTestMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "LossTestHcf"
