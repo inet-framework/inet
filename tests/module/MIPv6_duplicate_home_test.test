@@ -7,8 +7,10 @@ between the home agent and R_2 has a 0.3 s delay instead of 0.1 us. A Home
 Test Init and its Home Test cross that link four times, so the Home Test
 arrives about 1.2 s after the Home Test Init, later than the 1 s
 retransmission interval. The mobile node therefore retransmits the Home Test
-Init, and two Home Tests arrive for one exchange (RFC 6275 Section 11.6.2
-requires the second to be ignored).
+Init, and two Home Tests arrive for one exchange. The retransmission carries a
+new cookie (RFC 6275 Section 11.8), so the answer to the first transmission
+does not match the cookie in the Binding Update List and is ignored (RFC 6275
+Section 11.6.2).
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -227,6 +229,9 @@ num-rngs = 3
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Mipv6SlowHomePathNetwork.MN[0].ipv6.mipv6: Message recognised as HOME TEST (HoT)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6SlowHomePathNetwork.MN[0].ipv6.mipv6: Invalid HoT: Cookie value different from the stored one.
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: echo "binding updates at CN: $(grep -c "CN\[0\].ipv6.mipv6: Message recognised as BINDING UPDATE (BU)" test.out)." > cn_binding_updates.out
 %contains: cn_binding_updates.out

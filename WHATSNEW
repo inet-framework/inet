@@ -309,6 +309,18 @@ Notable backward incompatible changes are the following:
    Ieee80211ModeBase supplies default unknown values for custom subclasses.
    The migration guide explains the return values and required overrides.
 
+18. A Mobile IPv6 mobile node uses a new cookie in every test init message
+
+   Every Home Test Init carried the Home Init Cookie 11 and every Care-of Test
+   Init the Care-of Init Cookie 21, retransmissions included, so a mobile node
+   could not tell the answers to two transmissions apart. Each transmission
+   now carries a new random 64-bit cookie (RFC 6275 Sections 5.2.3 and 11.8),
+   drawn from random number generator 0 of the Mipv6 module. This changes the
+   results of simulations that use route optimization.
+
+   BindingUpdateList::addOrUpdateBUL() takes the cookie as uint64_t, as
+   described in the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

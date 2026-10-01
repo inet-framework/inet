@@ -387,6 +387,11 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     void sendTestInit(cMessage *msg);
 
     /**
+     * Returns a new random Home Init or Care-of Init cookie, never UNDEFINED_COOKIE.
+     */
+    uint64_t generateInitCookie();
+
+    /**
      * Cancels the current existing timer and reschedules it with initial values.
      */
     /*void resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType);*/

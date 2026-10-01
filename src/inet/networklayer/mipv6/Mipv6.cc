@@ -1438,12 +1438,15 @@ void Mipv6::sendTestInit(cMessage *msg)
 
         auto outPacket = new Packet("HoTI");
 
+        // RFC 6275 Section 11.8: a retransmitted Home Test Init uses a new cookie
+        auto sentHomeTestInit = staticPtrCast<HomeTestInit>(homeTestInit->dupShared());
+        sentHomeTestInit->setHomeInitCookie(generateInitCookie());
         // update cache
-        bul->addOrUpdateBUL(tiIfEntry->dest, HoA, simTime(), homeTestInit->getHomeInitCookie(), true);
+        bul->addOrUpdateBUL(tiIfEntry->dest, HoA, simTime(), sentHomeTestInit->getHomeInitCookie(), true);
         // mark the current home token as invalid
         bul->resetHomeToken(tiIfEntry->dest, HoA);
         // and send message
-        outPacket->insertAtFront(homeTestInit);
+        outPacket->insertAtFront(sentHomeTestInit);
         sendMobilityMessageToIPv6Module(outPacket, tiIfEntry->dest, HoA);
     }
     else {
@@ -1455,12 +1458,15 @@ void Mipv6::sendTestInit(cMessage *msg)
 
         auto outPacket = new Packet("CoTI");
 
+        // RFC 6275 Section 11.8: a retransmitted Care-of Test Init uses a new cookie
+        auto sentCareOfTestInit = staticPtrCast<CareOfTestInit>(careOfTestInit->dupShared());
+        sentCareOfTestInit->setCareOfInitCookie(generateInitCookie());
         // update cache
-        bul->addOrUpdateBUL(tiIfEntry->dest, CoA, simTime(), careOfTestInit->getCareOfInitCookie(), false);
+        bul->addOrUpdateBUL(tiIfEntry->dest, CoA, simTime(), sentCareOfTestInit->getCareOfInitCookie(), false);
         // mark the current care-of token as invalid
         bul->resetCareOfToken(tiIfEntry->dest, CoA);
         // and send message
-        outPacket->insertAtFront(careOfTestInit);
+        outPacket->insertAtFront(sentCareOfTestInit);
         sendMobilityMessageToIPv6Module(outPacket, tiIfEntry->dest, CoA, ie->getInterfaceId());
     }
 
@@ -1511,11 +1517,22 @@ void Mipv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t r
     EV_INFO << "Updated BuTransmitIfEntry and corresponding timer.\n";
 }
 
+uint64_t Mipv6::generateInitCookie()
+{
+    // RFC 6275 Section 5.2.3: a newly generated random number in every Test Init message
+    uint64_t cookie;
+    do {
+        uint64_t high = getRNG(0)->intRand();
+        uint64_t low = getRNG(0)->intRand();
+        cookie = (high << 32) | low;
+    } while (cookie == UNDEFINED_COOKIE);
+    return cookie;
+}
+
 void Mipv6::createAndSendHoTIMessage(const Ipv6Address& cnDest, NetworkInterface *ie)
 {
     const auto& HoTI = makeShared<HomeTestInit>();
     HoTI->setMobilityHeaderType(HOME_TEST_INIT);
-    HoTI->setHomeInitCookie(HO_COOKIE);
     // setting message size
     HoTI->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_HOTI));
 
@@ -1526,7 +1543,6 @@ void Mipv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, NetworkInterface
 {
     const auto& CoTI = makeShared<CareOfTestInit>();
     CoTI->setMobilityHeaderType(CARE_OF_TEST_INIT);
-    CoTI->setCareOfInitCookie(CO_COOKIE);
     // setting message size
     CoTI->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_COTI));
 
@@ -1647,7 +1663,7 @@ bool Mipv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 
     /* The Home Init Cookie field in the message matches the value stored
        in the Binding Update List. */
-    if (bulEntry->cookieHoTI != (int)homeTest.getHomeInitCookie()) {
+    if (bulEntry->cookieHoTI != homeTest.getHomeInitCookie()) {
         EV_WARN << "Invalid HoT: Cookie value different from the stored one." << endl;
         return false;
     }
@@ -1737,7 +1753,7 @@ bool Mipv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 
     /* The Care-of Init Cookie field in the message matches the value
        stored in the Binding Update List. */
-    if (bulEntry->cookieCoTI != (int)CoT.getCareOfInitCookie()) {
+    if (bulEntry->cookieCoTI != CoT.getCareOfInitCookie()) {
         EV_WARN << "Invalid CoT: Cookie value different from the stored one." << endl;
         return false;
     }
