@@ -613,6 +613,23 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     void dropHeldDatagram(Packet *datagram, PacketDropReason reason);
 
     /**
+     * Returns true if the datagram carries a Home Test Init message.
+     */
+    bool isHomeTestInit(Packet *datagram) const;
+
+    /**
+     * Returns true if a Home Test Init to the given correspondent node is among the
+     * datagrams held by holdUntilReverseTunnelExists(), i.e. it has not been sent yet.
+     */
+    bool isHomeTestInitHeld(const Ipv6Address& cnAddress) const;
+
+    /**
+     * Restart the pending Home Test Init retransmission timer for the given
+     * correspondent node from the initial retransmission interval, counted from now.
+     */
+    void restartHomeTestInitTimer(const Ipv6Address& cnAddress);
+
+    /**
      * A route-optimization extension-header insertion that the local-out hook
      * applies to outgoing traffic, replacing a T2RH/HA_OPT pseudo-tunnel.
      */

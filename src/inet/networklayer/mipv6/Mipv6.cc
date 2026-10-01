@@ -1606,6 +1606,20 @@ void Mipv6::sendTestInit(cMessage *msg)
        MAY record the same information in multiple Binding Update List
        entries.*/
 
+    // RFC 6275 Section 11.8 retransmits a Test Init only when no response arrived within
+    // the retransmission interval. A Home Test Init still held by
+    // holdUntilReverseTunnelExists() has not been sent, so no response can be missing
+    // yet: sending another one now would release both at the Binding Acknowledgement and
+    // run return routability twice. Check again one interval later;
+    // releaseHeldDatagrams() restarts the timer when the held one is sent.
+    if (dynamicPtrCast<HomeTestInit>(tiIfEntry->testInitMsg) && isHomeTestInitHeld(tiIfEntry->dest)) {
+        EV_INFO << "The previous HoTI to " << tiIfEntry->dest << " is still held until the reverse "
+                << "tunnel exists; not retransmitting it\n";
+        tiIfEntry->nextScheduledTime = simTime() + tiIfEntry->ackTimeout;
+        scheduleAt(tiIfEntry->nextScheduledTime, msg);
+        return;
+    }
+
     // retrieve the cookie from the Test Init message
     if (auto homeTestInit = dynamicPtrCast<HomeTestInit>(tiIfEntry->testInitMsg)) {
         // moved the following two lines to here
@@ -2345,7 +2359,45 @@ void Mipv6::releaseHeldDatagrams(const Ipv6Address& homeAgentAddress)
         // as the hook would have done had the tunnel existed when the datagram was
         // first offered.
         requestTunnelOutputInterface(datagram);
+        // A held Home Test Init is transmitted only now, so its retransmission back-off
+        // starts now (RFC 6275 Section 11.8), not when it was first offered.
+        if (isHomeTestInit(datagram))
+            restartHomeTestInitTimer(datagram->peekAtFront<Ipv6Header>()->getDestAddress());
         networkProtocol->reinjectQueuedDatagram(datagram);
+    }
+}
+
+bool Mipv6::isHomeTestInit(Packet *datagram) const
+{
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB)
+        return false;
+    const auto& mobilityHeader = datagram->peekDataAt<MobilityHeader>(ipv6Header->getChunkLength());
+    return mobilityHeader->getMobilityHeaderType() == HOME_TEST_INIT;
+}
+
+bool Mipv6::isHomeTestInitHeld(const Ipv6Address& cnAddress) const
+{
+    for (const auto& elem : heldDatagrams)
+        if (isHomeTestInit(elem.second) && elem.second->peekAtFront<Ipv6Header>()->getDestAddress() == cnAddress)
+            return true;
+    return false;
+}
+
+void Mipv6::restartHomeTestInitTimer(const Ipv6Address& cnAddress)
+{
+    for (auto& elem : transmitIfList) {
+        if (elem.first.type != KEY_HI || elem.first.dest != cnAddress)
+            continue;
+        TimerIfEntry *entry = elem.second;
+        if (entry->timer != nullptr && entry->timer->isScheduled()) {
+            // the transmission happening now is the first one, so start the back-off
+            // from the initial interval, as sendTestInit() does after a first send
+            auto mipv6Data = entry->ifEntry->getProtocolData<Mipv6InterfaceData>();
+            entry->nextScheduledTime = simTime() + mipv6Data->_getInitialBindAckTimeout();
+            entry->ackTimeout = std::min(2 * mipv6Data->_getInitialBindAckTimeout(), mipv6Data->_getMaxBindAckTimeout());
+            rescheduleAt(entry->nextScheduledTime, entry->timer);
+        }
     }
 }
 
