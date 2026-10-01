@@ -10,6 +10,8 @@ IEEE 802.11 TXOP and rate selection
 Management modules accept ``basicRates`` and ``operationalRates`` as lists of
 legacy rates with units, for example ``"6Mbps 12Mbps"``.
 ``"auto"`` retains the automatic policy for legacy rates.
+Automatic basic rates include only mandatory rates in the selected
+operational set.
 An empty string means a known empty legacy rate set.
 These parameters replace only ``legacyRates``; they retain the separate HT
 MCS sets in ``htMcs``. An empty list therefore does not disable HT modes.

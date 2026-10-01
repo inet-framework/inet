@@ -87,8 +87,6 @@ void Ieee80211MgmtBase::initializeLocalRateState()
         auto rate = mode->getDataMode()->getNetBitrate();
         localRateSet.supported.legacyRates.insert(rate);
         localRateSet.operational.legacyRates.insert(rate);
-        if (modeSet->getIsMandatory(mode))
-            localRateSet.basic.legacyRates.insert(rate);
     }
     if (mib->isHtOperationSupported()) {
         for (int mcs = 0; mcs < 77; mcs++) {
@@ -106,6 +104,12 @@ void Ieee80211MgmtBase::initializeLocalRateState()
         localRateSet.operational.legacyRates = explicitOperational.legacyRates;
     if (explicitBasic.known)
         localRateSet.basic.legacyRates = explicitBasic.legacyRates;
+    else
+        for (const auto *mode : modeSet->getLegacyOperationalModes()) {
+            auto rate = mode->getDataMode()->getNetBitrate();
+            if (modeSet->getIsMandatory(mode) && localRateSet.operational.legacyRates.count(rate) != 0)
+                localRateSet.basic.legacyRates.insert(rate);
+        }
     mib->setLocalRateSet(localRateSet);
     if (mib->mode == Ieee80211Mib::INDEPENDENT || mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         mib->setBssRateSet(localRateSet);
