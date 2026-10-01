@@ -339,17 +339,6 @@ it is:
   link-local address and then on its new care-of address, one after the other;
   the standard requires both checks and allows them to run at the same time.
   Before each probe the node waits a random delay, as RFC 4862 describes.
-- Routers in this network have ICMPv6 Redirect generation disabled
-  (``sendRedirects = false``). A router sends a Redirect when it forwards a
-  packet back out of the very interface that packet arrived on, to tell the
-  sender about a better first hop. Traffic intercepted *toward* the mobile node
-  never meets that condition — it is steered into the tunnel before the
-  forwarding check. The way back does: after decapsulating a reverse-tunneled
-  reply, the home agent forwards the inner packet out of the very interface the
-  tunneled packet arrived on, and would send a useless Redirect to the mobile
-  node's home address on every reply. A real stack attributes decapsulated
-  packets to the tunnel interface instead; the flag stands in for that
-  difference.
 
 The Model
 ---------
