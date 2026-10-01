@@ -105,6 +105,12 @@ void QosRecoveryProcedure::blockAckFrameReceived()
     resetStationSrc();
 }
 
+void QosRecoveryProcedure::blockAckRequestInternalCollision()
+{
+    // 10.23.2.2: update category backoff state without a failed data MPDU.
+    incrementStationSrc();
+}
+
 //
 // This SRC and the SSRC shall be reset when a MAC frame of length less than or equal
 // to dot11RTSThreshold succeeds for that MPDU of type Data or MMPDU.
@@ -249,4 +255,3 @@ bool QosRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

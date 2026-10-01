@@ -20,7 +20,6 @@ simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBloc
         bool delayedAckPolicySupported = default(false);
         bool aMsduSupported = default(true);
         int maximumAllowedBufferSize = default(64);
-        double blockAckTimeoutValue @unit(s) = default(0s); // 0 means that it depends on the originator
+        double blockAckTimeoutValue @unit(s) = default(0s); // 0 disables inactivity expiry; a nonzero value accepts the originator's requested timeout
         @display("i=block/control");
 }
-

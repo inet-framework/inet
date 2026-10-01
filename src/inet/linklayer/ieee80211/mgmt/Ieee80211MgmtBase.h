@@ -35,9 +35,12 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     ModuleRefByPar<Ieee80211Mib> mib;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     NetworkInterface *myIface = nullptr;
-    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+    std::string basicRatesPolicy;
+    std::string operationalRatesPolicy;
+    Ieee80211RateSetState localRateSet;
 
     // statistics
     long numMgmtFramesReceived;
@@ -47,6 +50,14 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+    Ieee80211RateSet parseRatePolicy(const std::string& policy, const char *parameterName) const;
+    void initializeLocalRateState();
+    void updateSupportedRateElements();
+    Ieee80211RateSetState makeRateSetState(const Ieee80211SupportedRatesElement& supportedRates,
+            bool extendedSupportedRatesPresent, const Ieee80211ExtendedSupportedRatesElement& extendedSupportedRates,
+            const Ieee80211HtCapabilities *htCapabilities = nullptr,
+            const Ieee80211HtOperation *htOperation = nullptr) const;
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -105,7 +116,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** lifecycle support */
     //@{
-    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION; } // TODO INITSTAGE
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_NETWORK_CONFIGURATION; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER; }
 
@@ -124,4 +135,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-

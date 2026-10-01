@@ -30,10 +30,10 @@ class INET_API QosRtsPolicy : public ModeSetListener, public IRtsPolicy
     virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const override;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
     virtual int getRtsThreshold() const override { return rtsThreshold; }
+    virtual simtime_t getCtsTimeout(const physicallayer::IIeee80211Mode *responseMode) const override;
 };
 
 } /* namespace ieee80211 */
 } /* namespace inet */
 
 #endif
-

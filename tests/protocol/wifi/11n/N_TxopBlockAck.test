@@ -1,0 +1,76 @@
+%description:
+IEEE Std 802.11-2024, 9.2.5.2, 10.6.6.5.2, and 10.23.2.9:
+A zero-limit TXOP sends its required Basic BAR before unrelated queued data.
+The BAR reserves only BA airtime. The BA uses the BAR's legacy mode.
+
+%file: N_TxopBlockAck.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+using namespace physicallayer;
+struct BaEvidence { simtime_t start; simtime_t dataEnd; simtime_t dataDuration; simtime_t barDuration; const IIeee80211Mode *barMode = nullptr; };
+static TxopProcedure *baTxop(const MatchContext& c)
+{
+    return check_and_cast<TxopProcedure *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")
+            ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 1)->getSubmodule("txopProcedure"));
+}
+Define_ProtocolTest(wifi_qos_txop_blockack)
+{
+    auto evidence = std::make_shared<BaEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
+    return ProtocolTest("wifi_qos_txop_blockack")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<Ieee80211DataHeader>()->getAckPolicy() == AckPolicy::BLOCK_ACK; })
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->start = baTxop(c)->getStart();
+                auto mode = c.event.packet->getTag<Ieee80211ModeReq>()->getMode();
+                evidence->dataEnd = c.event.time + mode->getDuration(c.event.packet->getDataLength());
+                evidence->dataDuration = c.event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField();
+                return evidence->start == c.event.time && evidence->dataDuration > SIMTIME_ZERO;
+            }).within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211MacHeader>();
+                evidence->barMode = c.event.packet->getTag<Ieee80211ModeReq>()->getMode();
+                evidence->barDuration = header->getDurationField();
+                return header->getType() == ST_BLOCKACK_REQ && baTxop(c)->getStart() == evidence->start &&
+                        c.event.time == evidence->dataEnd + sifs &&
+                        evidence->dataDuration == sifs + evidence->barMode->getDuration(c.event.packet->getDataLength()) + evidence->barDuration &&
+                        evidence->barDuration == sifs + evidence->barMode->getDuration(LENGTH_BASIC_BLOCKACK);
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 25")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto mode = c.event.packet->getTag<Ieee80211ModeInd>()->getMode();
+                return mode == evidence->barMode;
+            }).within(0.003));
+}
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_qos_txop_blockack"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta*.wlan[*].classifier.udpPortUpMap = "5000 BE"
+*.sta*.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+**.hcf.isBlockAckSupported = true
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+**.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_txop_blockack: PASS

@@ -20,12 +20,14 @@ class INET_API RecipientBlockAckAgreement : public cObject
 
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
+    uint8_t dialogToken = 0;
+    bool blockAckPolicy = true;
+    bool aMsduSupported = false;
     simtime_t blockAckTimeoutValue = 0;
-    bool isAddbaResponseSent = false;
     simtime_t expirationTime = -1;
 
   public:
-    RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
+    RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue, uint8_t dialogToken = 1);
     virtual ~RecipientBlockAckAgreement() { delete blockAckRecord; }
 
     virtual void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
@@ -33,9 +35,17 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
+    uint8_t getDialogToken() const { return dialogToken; }
+    bool getBlockAckPolicy() const { return blockAckPolicy; }
+    bool getAMsduSupported() const { return aMsduSupported; }
+    void setNegotiatedParameters(int acceptedBufferSize, bool acceptedBlockAckPolicy, bool acceptedAMsduSupported)
+    {
+        bufferSize = acceptedBufferSize;
+        blockAckPolicy = acceptedBlockAckPolicy;
+        aMsduSupported = acceptedAMsduSupported;
+    }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
-    virtual void addbaResposneSent() { isAddbaResponseSent = true; }
     virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
     virtual simtime_t getExpirationTime() { return expirationTime; }
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);
@@ -45,4 +55,3 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

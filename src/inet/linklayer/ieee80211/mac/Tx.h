@@ -29,11 +29,13 @@ class INET_API Tx : public SimpleModule, public ITx
     Packet *frame = nullptr;
     cMessage *endIfsTimer = nullptr;
     bool transmitting = false;
+    uint64_t cancellationRevision = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    void startTransmission();
 
   public:
     Tx() {}
@@ -42,10 +44,10 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
     virtual void radioTransmissionFinished() override;
+    virtual bool cancelTransmission() override;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

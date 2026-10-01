@@ -1,0 +1,310 @@
+%description:
+ADDBA transmission completion preserves current agreements and deadlines.
+Cover live, expired, repeated, and replacement agreement completions.
+IEEE Std 802.11-2024, 11.5.4 requires timeout DELBA for inactive agreements.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::createAgreement;
+    using OriginatorBlockAckAgreementHandler::terminateAgreement;
+};
+
+class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
+{
+  public:
+    simtime_t timeout = SimTime(1);
+    int maximumBufferSize = 64;
+    bool aMsduEnabled = false;
+    bool delayedEnabled = false;
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& request) override { return true; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override { return true; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return timeout; }
+    virtual bool aMsduSupported() const override { return aMsduEnabled; }
+    virtual bool delayedBlockAckPolicySupported() const override { return delayedEnabled; }
+    virtual int getMaximumAllowedBufferSize() const override { return maximumBufferSize; }
+};
+
+class TestAgreementCallback : public IRecipientBlockAckAgreementHandler::ICallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    RecipientBlockAckAgreementHandler& handler;
+    Ptr<const Ieee80211AddbaResponse> response;
+    std::unique_ptr<Packet> lastDelba;
+    simtime_t deadline = SIMTIME_MAX;
+    int expirations = 0;
+    int replacements = 0;
+
+    explicit TestAgreementCallback(RecipientBlockAckAgreementHandler& handler) : handler(handler) {}
+
+    virtual void scheduleInactivityTimer() override { deadline = handler.computeEarliestExpirationTime(); }
+
+    virtual void recipientAgreementReplaced(RecipientBlockAckAgreement *previous, RecipientBlockAckAgreement *current) override
+    {
+        ASSERT(previous != current);
+        ASSERT(handler.getAgreement(current->getBlockAckRecord()->getTid(), current->getBlockAckRecord()->getOriginatorAddress()) == current);
+        ++replacements;
+        scheduleInactivityTimer();
+    }
+
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        if (auto addba = dynamicPtrCast<const Ieee80211AddbaResponse>(header))
+            response = addba;
+        else {
+            auto delba = CHK(dynamicPtrCast<const Ieee80211Delba>(header));
+            ASSERT(delba->getReasonCode() == 39);
+            lastDelba.reset(packet->dup());
+            ++expirations;
+        }
+        delete packet;
+    }
+
+    virtual void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
+    {
+        delete packet;
+        throw cRuntimeError("Unexpected control response");
+    }
+};
+
+%activity:
+RecipientBlockAckAgreementHandler handler;
+TestRecipientPolicy policy;
+TestAgreementCallback callback(handler);
+const MacAddress peer("02:00:00:00:00:01");
+auto install = [&](Tid tid, int sequenceNumber, simtime_t timeout) {
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setTransmitterAddress(peer);
+    request->setTid(tid);
+    request->setStartingSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+    request->setBufferSize(32);
+    request->setBlockAckTimeoutValue(timeout);
+    handler.processReceivedAddbaRequest(request, &policy, &callback);
+    return callback.response;
+};
+
+auto oldResponse = install(0, 1, SimTime(1, SIMTIME_MS));
+auto oldDeadline = handler.getAgreement(0, peer)->getExpirationTime();
+handler.processTransmittedAddbaResp(oldResponse, &callback);
+ASSERT(callback.deadline == oldDeadline);
+wait(SimTime(2, SIMTIME_MS));
+handler.blockAckAgreementExpired(&callback, &callback);
+ASSERT(callback.expirations == 1);
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+ASSERT(callback.deadline == SIMTIME_MAX);
+
+// A response can complete repeatedly after the agreement expires.
+for (int i = 0; i < 2; ++i) {
+    handler.processTransmittedAddbaResp(oldResponse, &callback);
+    ASSERT(handler.getAgreement(0, peer) == nullptr);
+    ASSERT(callback.deadline == SIMTIME_MAX);
+}
+
+auto replacementResponse = install(0, 42, SimTime(10, SIMTIME_MS));
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+auto oldDelba = callback.lastDelba->peekAtFront<Ieee80211Delba>();
+handler.processTransmittedDelba(oldDelba);
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+Packet unrelatedDelba("other transaction", oldDelba);
+handler.processDelbaFrameFinished(&unrelatedDelba, &policy, &callback);
+ASSERT(handler.getAgreement(0, peer) == nullptr);
+handler.processDelbaFrameFinished(callback.lastDelba.get(), &policy, &callback);
+replacementResponse = callback.response;
+auto replacement = handler.getAgreement(0, peer);
+ASSERT(replacement != nullptr);
+handler.processDelbaFrameFinished(callback.lastDelba.get(), &policy, &callback);
+handler.processTransmittedDelba(oldDelba);
+ASSERT(handler.getAgreement(0, peer) == replacement);
+auto replacementDeadline = replacement->getExpirationTime();
+auto otherResponse = install(3, 77, SimTime(5, SIMTIME_MS));
+auto other = handler.getAgreement(3, peer);
+auto otherDeadline = other->getExpirationTime();
+wait(SimTime(1, SIMTIME_MS));
+handler.processTransmittedAddbaResp(oldResponse, &callback);
+ASSERT(handler.getAgreement(0, peer) == replacement);
+ASSERT(replacement->getStartingSequenceNumber() == SequenceNumberCyclic(42));
+ASSERT(replacement->getBufferSize() == 32);
+ASSERT(replacement->getExpirationTime() == replacementDeadline);
+ASSERT(handler.getAgreement(3, peer) == other);
+ASSERT(other->getExpirationTime() == otherDeadline);
+ASSERT(callback.deadline == otherDeadline);
+handler.processTransmittedAddbaResp(replacementResponse, &callback);
+handler.processTransmittedAddbaResp(otherResponse, &callback);
+ASSERT(callback.deadline == otherDeadline);
+ASSERT(callback.expirations == 1);
+
+TestOriginatorHandler originator;
+auto request = makeShared<Ieee80211AddbaRequest>();
+request->setReceiverAddress(peer);
+request->setTid(0);
+request->setStartingSequenceNumber(SequenceNumberCyclic(1));
+request->setBufferSize(32);
+originator.createAgreement(request);
+originator.processTransmittedAddbaReq(request);
+ASSERT(originator.getAgreement(peer, 0) != nullptr);
+
+auto delba = makeShared<Ieee80211Delba>();
+delba->setReceiverAddress(peer);
+delba->setTid(0);
+originator.terminateAgreement(peer, 0);
+for (int i = 0; i < 2; ++i) {
+    originator.processTransmittedAddbaReq(request);
+    ASSERT(originator.getAgreement(peer, 0) == nullptr);
+}
+
+auto replacementRequest = makeShared<Ieee80211AddbaRequest>();
+replacementRequest->setReceiverAddress(peer);
+replacementRequest->setTid(0);
+replacementRequest->setStartingSequenceNumber(SequenceNumberCyclic(42));
+replacementRequest->setBufferSize(16);
+originator.createAgreement(replacementRequest);
+auto originatorReplacement = originator.getAgreement(peer, 0);
+auto originatorDeadline = originatorReplacement->getExpirationTime();
+originator.processTransmittedAddbaReq(request);
+originator.processTransmittedDelba(delba);
+ASSERT(originator.getAgreement(peer, 0) == originatorReplacement);
+ASSERT(originatorReplacement->getStartingSequenceNumber() == SequenceNumberCyclic(42));
+ASSERT(originatorReplacement->getBufferSize() == 16);
+ASSERT(!originatorReplacement->getIsAddbaResponseReceived());
+ASSERT(originatorReplacement->getExpirationTime() == originatorDeadline);
+for (int i = 0; i < 4; ++i) {
+    RecipientBlockAckAgreementHandler negotiated;
+    TestAgreementCallback result(negotiated);
+    TestRecipientPolicy selection;
+    selection.timeout = i & 1 ? SimTime(1) : SIMTIME_ZERO;
+    auto proposal = makeShared<Ieee80211AddbaRequest>();
+    proposal->setTransmitterAddress(peer);
+    proposal->setTid(0);
+    proposal->setStartingSequenceNumber(SequenceNumberCyclic(1));
+    proposal->setBufferSize(16);
+    proposal->setBlockAckTimeoutValue(i & 2 ? SimTime(20, SIMTIME_MS) : SIMTIME_ZERO);
+    negotiated.processReceivedAddbaRequest(proposal, &selection, &result);
+    auto accepted = negotiated.getAgreement(0, peer);
+    auto interval = result.response->getBlockAckTimeoutValue();
+    ASSERT(accepted->getBlockAckTimeoutValue() == interval);
+    ASSERT(interval == (i == 3 ? SimTime(20, SIMTIME_MS) : SIMTIME_ZERO));
+    auto deadline = accepted->getExpirationTime();
+    wait(SimTime(1, SIMTIME_MS));
+    selection.timeout = SIMTIME_ZERO;
+    negotiated.processReceivedAddbaRequest(proposal, &selection, &result);
+    negotiated.processTransmittedAddbaResp(result.response, &result);
+    ASSERT(accepted->getExpirationTime() == deadline);
+    ASSERT(result.response->getBlockAckTimeoutValue() == interval);
+}
+RecipientBlockAckAgreementHandler duplicateHandler;
+TestAgreementCallback duplicateCallback(duplicateHandler);
+TestRecipientPolicy duplicatePolicy;
+duplicatePolicy.delayedEnabled = true;
+duplicatePolicy.aMsduEnabled = true;
+auto firstRequest = makeShared<Ieee80211AddbaRequest>();
+firstRequest->setTransmitterAddress(peer);
+firstRequest->setTid(0);
+firstRequest->setStartingSequenceNumber(SequenceNumberCyclic(10));
+firstRequest->setDialogToken(1);
+firstRequest->setBufferSize(8);
+firstRequest->setBlockAckPolicy(false);
+firstRequest->setBlockAckTimeoutValue(SimTime(10, SIMTIME_MS));
+duplicateHandler.processReceivedAddbaRequest(firstRequest, &duplicatePolicy, &duplicateCallback);
+auto retained = duplicateHandler.getAgreement(0, peer);
+auto retainedDeadline = retained->getExpirationTime();
+ASSERT(retained->getBufferSize() == 8);
+ASSERT(!duplicateCallback.response->getBlockAckPolicy());
+ASSERT(duplicateCallback.response->getAMsduSupported());
+duplicatePolicy.delayedEnabled = false;
+duplicatePolicy.aMsduEnabled = false;
+auto duplicateRequest = makeShared<Ieee80211AddbaRequest>();
+duplicateRequest->setTransmitterAddress(peer);
+duplicateRequest->setTid(0);
+duplicateRequest->setStartingSequenceNumber(SequenceNumberCyclic(20));
+duplicateRequest->setDialogToken(1);
+duplicateRequest->setBufferSize(64);
+duplicateRequest->setBlockAckPolicy(true);
+duplicateRequest->setBlockAckTimeoutValue(SimTime(20, SIMTIME_MS));
+duplicateHandler.processReceivedAddbaRequest(duplicateRequest, &duplicatePolicy, &duplicateCallback);
+ASSERT(duplicateHandler.getAgreement(0, peer) == retained);
+ASSERT(retained->getStartingSequenceNumber() == SequenceNumberCyclic(10));
+ASSERT(retained->getBufferSize() == 8);
+ASSERT(retained->getExpirationTime() == retainedDeadline);
+ASSERT(duplicateCallback.response->getBufferSize() == 8);
+ASSERT(!duplicateCallback.response->getBlockAckPolicy());
+ASSERT(duplicateCallback.response->getAMsduSupported());
+ASSERT(duplicateCallback.response->getBlockAckTimeoutValue() == SimTime(10, SIMTIME_MS));
+ASSERT(duplicateCallback.replacements == 0);
+
+auto newDialog = makeShared<Ieee80211AddbaRequest>();
+newDialog->setTransmitterAddress(peer);
+newDialog->setTid(0);
+newDialog->setStartingSequenceNumber(SequenceNumberCyclic(100));
+newDialog->setDialogToken(2);
+newDialog->setBufferSize(16);
+newDialog->setBlockAckTimeoutValue(SimTime(30, SIMTIME_MS));
+duplicateHandler.processReceivedAddbaRequest(newDialog, &duplicatePolicy, &duplicateCallback);
+auto newRecipientAgreement = duplicateHandler.getAgreement(0, peer);
+ASSERT(duplicateCallback.replacements == 1);
+ASSERT(newRecipientAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(100));
+ASSERT(newRecipientAgreement->getDialogToken() == 2);
+ASSERT(newRecipientAgreement->getBufferSize() == 16);
+ASSERT(duplicateCallback.response->getDialogToken() == 2);
+ASSERT(duplicateCallback.response->getBufferSize() == 16);
+ASSERT(duplicateCallback.deadline == newRecipientAgreement->getExpirationTime());
+
+RecipientBlockAckAgreementHandler cappedHandler;
+TestAgreementCallback cappedCallback(cappedHandler);
+TestRecipientPolicy cappedPolicy;
+cappedPolicy.maximumBufferSize = 16;
+auto cappedRequest = makeShared<Ieee80211AddbaRequest>();
+cappedRequest->setTransmitterAddress(peer);
+cappedRequest->setTid(0);
+cappedRequest->setStartingSequenceNumber(SequenceNumberCyclic(30));
+cappedRequest->setBufferSize(64);
+cappedHandler.processReceivedAddbaRequest(cappedRequest, &cappedPolicy, &cappedCallback);
+ASSERT(cappedCallback.response->getBufferSize() == 16);
+ASSERT(cappedHandler.getAgreement(0, peer)->getBufferSize() == 16);
+EV << "ADDBA transmission completion preserves current agreements.\n";
+
+RecipientBlockAckAgreementHandler active;
+TestAgreementCallback activityCallback(active);
+TestRecipientPolicy activePolicy;
+auto activeRequest = makeShared<Ieee80211AddbaRequest>();
+activeRequest->setTransmitterAddress(peer);
+activeRequest->setTid(0);
+activeRequest->setStartingSequenceNumber(SequenceNumberCyclic(1));
+activeRequest->setBlockAckTimeoutValue(SimTime(10, SIMTIME_MS));
+activeRequest->setBufferSize(16);
+active.processReceivedAddbaRequest(activeRequest, &activePolicy, &activityCallback);
+auto activeAgreement = active.getAgreement(0, peer);
+auto initialDeadline = activeAgreement->getExpirationTime();
+wait(SimTime(1, SIMTIME_MS));
+auto activityHeader = makeShared<Ieee80211DataHeader>();
+activityHeader->setType(ST_DATA_WITH_QOS);
+activityHeader->setTransmitterAddress(peer);
+activityHeader->setTid(0);
+activityHeader->setAckPolicy(NORMAL_ACK);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setAckPolicy(BLOCK_ACK);
+activityHeader->setTid(3);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setTid(0);
+activityHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == initialDeadline);
+activityHeader->setTransmitterAddress(peer);
+active.qosFrameReceived(activityHeader, &activityCallback);
+ASSERT(activeAgreement->getExpirationTime() == simTime() + SimTime(10, SIMTIME_MS));
+ASSERT(activityCallback.deadline == activeAgreement->getExpirationTime());
+
+%contains: stdout
+ADDBA transmission completion preserves current agreements.

@@ -60,13 +60,19 @@ void FrameSequenceHandler::transmissionComplete()
 
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
 {
+    ASSERT(!inCallback);
     EV_INFO << "Starting frame sequence.\n";
     this->callback = callback;
     if (!isSequenceRunning()) {
         this->frameSequence = frameSequence;
         this->context = context;
+        inCallback = true;
         frameSequence->startSequence(context, 0);
-        startFrameSequenceStep();
+        inCallback = false;
+        if (cancellationRequested)
+            finishFrameSequence();
+        else
+            startFrameSequenceStep();
     }
     else
         throw cRuntimeError("Channel access granted while a frame sequence is running");
@@ -75,7 +81,14 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
 void FrameSequenceHandler::startFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
+    ASSERT(!inCallback);
+    inCallback = true;
     auto nextStep = frameSequence->prepareStep(context);
+    inCallback = false;
+    if (cancellationRequested) {
+        finishFrameSequence();
+        return;
+    }
     EV_INFO << "Starting next frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (nextStep == nullptr)
         finishFrameSequence();
@@ -85,7 +98,13 @@ void FrameSequenceHandler::startFrameSequenceStep()
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
+                inCallback = true;
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
+                inCallback = false;
+                if (cancellationRequested) {
+                    cancellationRequested = false;
+                    finishFrameSequence();
+                }
                 // TODO lifetime
 //                if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
 //                    transmitLifetimeHandler->frameTransmitted(dataFrame);
@@ -94,7 +113,11 @@ void FrameSequenceHandler::startFrameSequenceStep()
             case IFrameSequenceStep::Type::RECEIVE: {
                 // start reception timer, break loop if timer expires before reception is over
                 auto receiveStep = static_cast<IReceiveStep *>(nextStep);
+                inCallback = true;
                 callback->scheduleStartRxTimer(receiveStep->getTimeout());
+                inCallback = false;
+                if (cancellationRequested)
+                    finishFrameSequence();
                 break;
             }
             default:
@@ -106,8 +129,15 @@ void FrameSequenceHandler::startFrameSequenceStep()
 void FrameSequenceHandler::finishFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
+    ASSERT(!inCallback);
     auto lastStep = context->getLastStep();
+    inCallback = true;
     auto stepResult = frameSequence->completeStep(context);
+    inCallback = false;
+    if (cancellationRequested) {
+        finishFrameSequence();
+        return;
+    }
     EV_INFO << "Finishing last frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (!stepResult) {
         lastStep->setCompletion(IFrameSequenceStep::Completion::REJECTED);
@@ -118,24 +148,34 @@ void FrameSequenceHandler::finishFrameSequenceStep()
         switch (lastStep->getType()) {
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<ITransmitStep *>(lastStep);
+                inCallback = true;
                 callback->originatorProcessTransmittedFrame(transmitStep->getFrameToTransmit());
+                inCallback = false;
                 break;
             }
             case IFrameSequenceStep::Type::RECEIVE: {
                 auto receiveStep = static_cast<IReceiveStep *>(lastStep);
                 auto transmitStep = check_and_cast<ITransmitStep *>(context->getStepBeforeLast());
+                inCallback = true;
                 callback->originatorProcessReceivedFrame(receiveStep->getReceivedFrame(), transmitStep->getFrameToTransmit());
+                inCallback = false;
                 break;
             }
             default:
                 throw cRuntimeError("Unknown frame sequence step type");
         }
+        if (cancellationRequested)
+            finishFrameSequence();
     }
 }
 
 void FrameSequenceHandler::finishFrameSequence()
 {
     EV_INFO << "Frame sequence finished.\n";
+    finishing = true;
+    cancellationRequested = false;
+    if (context->getOutcome() == FrameSequenceOutcome::RUNNING)
+        context->setOutcome(FrameSequenceOutcome::COMPLETED);
     auto inProgressFrames = context->getInProgressFrames();
     callback->frameSequenceFinished();
     delete context;
@@ -143,30 +183,28 @@ void FrameSequenceHandler::finishFrameSequence()
     context = nullptr;
     frameSequence = nullptr;
     callback = nullptr;
+    finishing = false;
     inProgressFrames->clearDroppedFrames();
 }
 
 void FrameSequenceHandler::abortFrameSequence()
 {
+    ASSERT(!inCallback);
     EV_INFO << "Frame sequence aborted.\n";
-    auto inProgressFrames = context->getInProgressFrames();
+    context->setOutcome(FrameSequenceOutcome::RESPONSE_FAILED);
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep *>(dynamic_cast<IReceiveStep *>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
     auto header = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
+    inCallback = true;
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))
         callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));
     else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
-    callback->frameSequenceFinished();
-    delete context;
-    delete frameSequence;
-    context = nullptr;
-    frameSequence = nullptr;
-    callback = nullptr;
-    inProgressFrames->clearDroppedFrames();
+    inCallback = false;
+    finishFrameSequence();
 }
 
 FrameSequenceHandler::~FrameSequenceHandler()
@@ -175,6 +213,27 @@ FrameSequenceHandler::~FrameSequenceHandler()
     delete context;
 }
 
+void FrameSequenceHandler::recordTransmission()
+{
+    context->recordTransmission();
+}
+
+void FrameSequenceHandler::invalidateRateState()
+{
+    if (context != nullptr)
+        context->invalidateRateState();
+}
+
+void FrameSequenceHandler::cancelFrameSequence(FrameSequenceOutcome outcome)
+{
+    if (!isSequenceRunning() || finishing)
+        return;
+    context->setOutcome(outcome);
+    if (inCallback)
+        cancellationRequested = true;
+    else
+        finishFrameSequence();
+}
+
 } // namespace ieee80211
 } // namespace inet
-

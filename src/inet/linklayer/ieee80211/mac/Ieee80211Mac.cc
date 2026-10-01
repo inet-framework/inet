@@ -337,7 +337,8 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
             EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this is in a very wrong place!!! should be done explicitly from coordination function!
+            if (isUp() && (!hcf || !hcf->isStopped()))
+                configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
         }
         rx->transmissionStateChanged(transmissionState);
     }
@@ -423,16 +424,22 @@ void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
         return; // do nothing when called from initialize()
 
     initializeRadioMode();
+    if (hcf)
+        hcf->start();
 }
 
 // FIXME
 void Ieee80211Mac::handleStopOperation(LifecycleOperation *operation)
 {
+    if (hcf)
+        hcf->stop();
 }
 
 // FIXME
 void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
+    if (hcf)
+        hcf->stop();
 }
 
 } // namespace ieee80211

@@ -18,6 +18,8 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211Mib);
 
+simsignal_t Ieee80211Mib::rateStateChangedSignal = cComponent::registerSignal("rateStateChanged");
+
 void Ieee80211Mib::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -58,6 +60,9 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel)
 
 void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band)
 {
+    Enter_Method("setPrimaryChannel");
+    const auto previousOperation = htOperation;
+    bool wasPrimaryChannelAvailable = primaryChannelAvailable;
     if (primaryChannel < 0 || primaryChannel > 255)
         throw cRuntimeError("IEEE 802.11 primary channel must be in the range 0..255, not %d", primaryChannel);
 
@@ -94,9 +99,11 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::II
     htOperation.primaryChannel = primaryChannel;
     primaryChannelAvailable = true;
 
+    bool peerStateChanged = false;
     if (localHtCapabilitiesValid) {
         for (auto& entry : peerHtStates) {
             if (entry.second.valid) {
+                peerStateChanged |= !(entry.second.negotiatedCapabilities.operation == htOperation);
                 entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,
                         entry.second.advertisedCapabilities, htOperation);
                 if (++entry.second.generation == 0)
@@ -104,6 +111,8 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::II
             }
         }
     }
+    if (!wasPrimaryChannelAvailable || !(previousOperation == htOperation) || peerStateChanged)
+        emit(rateStateChangedSignal, true);
 }
 
 const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
@@ -115,6 +124,10 @@ const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
 void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
         const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit)
 {
+    Enter_Method("updateLocalHtCapabilities");
+    bool wasLocalHtCapabilitiesValid = localHtCapabilitiesValid;
+    const auto previousCapabilities = localHtCapabilities;
+    const auto previousOperation = htOperation;
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
     // operation input when rebuilding the mode-derived capability subset.
@@ -126,7 +139,11 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     primaryChannelAvailable = wasPrimaryChannelAvailable;
     localHtCapabilitiesValid = modeSet != nullptr && modeSet->isHtOperationSupported();
     if (!localHtCapabilitiesValid) {
-        clearPeerHtCapabilities();
+        bool hadPeers = !peerHtStates.empty();
+        peerHtStates.clear();
+        if (wasLocalHtCapabilitiesValid || hadPeers || !(previousCapabilities == localHtCapabilities) ||
+                !(previousOperation == htOperation))
+            emit(rateStateChangedSignal, true);
         return;
     }
     if (operationalHtSpatialStreamLimit <= 0)
@@ -182,14 +199,20 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (protectionMode < 0 || protectionMode > 3)
         throw cRuntimeError("htProtectionMode must be between 0 and 3");
     htOperation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protectionMode);
+    bool peerStateChanged = false;
     for (auto& entry : peerHtStates) {
         if (entry.second.valid) {
+            peerStateChanged |= !(entry.second.negotiatedCapabilities.localAdvertisement == localHtCapabilities) ||
+                    !(entry.second.negotiatedCapabilities.operation == htOperation);
             entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,
                     entry.second.advertisedCapabilities, htOperation);
             if (++entry.second.generation == 0)
                 entry.second.generation = 1;
         }
     }
+    if (!wasLocalHtCapabilitiesValid || !(previousCapabilities == localHtCapabilities) ||
+            !(previousOperation == htOperation) || peerStateChanged)
+        emit(rateStateChangedSignal, true);
 }
 
 const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerHtState(const MacAddress& address) const
@@ -198,12 +221,84 @@ const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerHtState(const MacAddress&
     return it == peerHtStates.end() || !it->second.valid ? nullptr : &it->second;
 }
 
+const Ieee80211RateSetState *Ieee80211Mib::findPeerRateSet(const MacAddress& address) const
+{
+    auto it = peerRateSets.find(address);
+    return it == peerRateSets.end() ? nullptr : &it->second;
+}
+
+void Ieee80211Mib::setLocalRateSet(const Ieee80211RateSetState& rateSet)
+{
+    Enter_Method("setLocalRateSet");
+    validateIeee80211RateSetState(rateSet, "local rate state");
+    if (localRateSet == rateSet)
+        return;
+    localRateSet = rateSet;
+    emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::setBssRateSet(const Ieee80211RateSetState& rateSet)
+{
+    Enter_Method("setBssRateSet");
+    validateIeee80211RateSetState(rateSet, "BSS rate state");
+    if (bssRateSet == rateSet)
+        return;
+    bssRateSet = rateSet;
+    emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::installBssAndPeerRateSets(const Ieee80211RateSetState& newBssRateSet,
+        const MacAddress& peerAddress, const Ieee80211RateSetState& newPeerRateSet)
+{
+    Enter_Method("installBssAndPeerRateSets");
+    validateIeee80211RateSetState(newBssRateSet, "BSS rate state");
+    validateIeee80211RateSetState(newPeerRateSet, "peer rate state");
+    bool bssChanged = bssRateSet != newBssRateSet;
+    auto peerIt = peerRateSets.find(peerAddress);
+    bool peerChanged = peerIt == peerRateSets.end() || peerIt->second != newPeerRateSet;
+    if (!bssChanged && !peerChanged)
+        return;
+    bssRateSet = newBssRateSet;
+    peerRateSets[peerAddress] = newPeerRateSet;
+    emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::clearBssRateSet()
+{
+    Enter_Method("clearBssRateSet");
+    if (!bssRateSet.supported.known && !bssRateSet.basic.known && !bssRateSet.operational.known)
+        return;
+    bssRateSet = Ieee80211RateSetState();
+    emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::removePeerRateSet(const MacAddress& address)
+{
+    Enter_Method("removePeerRateSet");
+    if (peerRateSets.erase(address) == 0)
+        return;
+    emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::clearPeerRateSets()
+{
+    Enter_Method("clearPeerRateSets");
+    if (peerRateSets.empty())
+        return;
+    peerRateSets.clear();
+    emit(rateStateChangedSignal, true);
+}
+
 void Ieee80211Mib::setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
         const Ieee80211HtOperation& operation)
 {
+    Enter_Method("setPeerHtCapabilities");
     if (!localHtCapabilitiesValid)
         throw cRuntimeError("Cannot install peer HT capabilities when local HT operation is disabled");
     auto& state = peerHtStates[address];
+    bool changed = !state.valid || !(state.advertisedCapabilities == capabilities) ||
+            !(state.negotiatedCapabilities.localAdvertisement == localHtCapabilities) ||
+            !(state.negotiatedCapabilities.operation == operation);
     state.valid = true;
     state.advertisedCapabilities = capabilities;
     state.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities, capabilities, operation);
@@ -212,16 +307,24 @@ void Ieee80211Mib::setPeerHtCapabilities(const MacAddress& address, const Ieee80
     EV_INFO << "Installed peer HT state, peer = " << address
             << ", txValid = " << state.negotiatedCapabilities.localTxPeerRx.valid
             << ", rxValid = " << state.negotiatedCapabilities.localRxPeerTx.valid << endl;
+    if (changed)
+        emit(rateStateChangedSignal, true);
 }
 
 void Ieee80211Mib::removePeerHtCapabilities(const MacAddress& address)
 {
-    peerHtStates.erase(address);
+    Enter_Method("removePeerHtCapabilities");
+    if (peerHtStates.erase(address) != 0)
+        emit(rateStateChangedSignal, true);
 }
 
 void Ieee80211Mib::clearPeerHtCapabilities()
 {
-    peerHtStates.clear();
+    Enter_Method("clearPeerHtCapabilities");
+    if (!peerHtStates.empty()) {
+        peerHtStates.clear();
+        emit(rateStateChangedSignal, true);
+    }
 }
 
 std::string Ieee80211Mib::getSsidStr() const
@@ -311,6 +414,7 @@ void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
     associationIdReservations.erase(address);
     bssAccessPointData.associationIds.erase(address);
     removePeerHtCapabilities(address);
+    removePeerRateSet(address);
 }
 
 void Ieee80211Mib::clearAssociationIds()
@@ -319,6 +423,7 @@ void Ieee80211Mib::clearAssociationIds()
     associationIdReservations.clear();
     bssAccessPointData.associationIds.clear();
     clearPeerHtCapabilities();
+    clearPeerRateSets();
 }
 
 } // namespace ieee80211
