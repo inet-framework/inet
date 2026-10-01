@@ -202,10 +202,10 @@ void Hcf::processDelbaFrameFinished(const Packet *packet, bool acknowledged)
             originatorBlockAckAgreementHandler->processDelbaFrameFinished(packet, this);
     }
     else if (recipientBlockAckAgreementHandler) {
-        auto previous = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
+        bool hadAgreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress()) != nullptr;
         recipientBlockAckAgreementHandler->processDelbaFrameFinished(packet, recipientBlockAckAgreementPolicy, this);
         auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
-        if (agreement != nullptr && agreement != previous)
+        if (!hadAgreement && agreement != nullptr)
             emit(blockAckAgreementAddedSignal, agreement);
     }
     scheduleInactivityTimer();
@@ -224,6 +224,18 @@ void Hcf::scheduleInactivityTimer()
         expirationTime = std::min(expirationTime, recipientBlockAckAgreementHandler->computeEarliestExpirationTime());
     if (expirationTime != SIMTIME_MAX)
         scheduleAt(std::max(simTime(), expirationTime), inactivityTimer);
+}
+
+void Hcf::recipientAgreementReplaced(RecipientBlockAckAgreement *previous, RecipientBlockAckAgreement *current)
+{
+    auto record = previous->getBlockAckRecord();
+    auto tid = record->getTid();
+    auto originatorAddress = record->getOriginatorAddress();
+    recipientDataService->blockAckAgreementTerminated(tid, originatorAddress);
+    emit(blockAckAgreementDeletedSignal, previous);
+    if (recipientBlockAckAgreementHandler->getAgreement(tid, originatorAddress) == current)
+        emit(blockAckAgreementAddedSignal, current);
+    scheduleInactivityTimer();
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -455,15 +467,19 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
 {
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
         if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
+            auto previous = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+            bool replacing = previous != nullptr && previous->getDialogToken() != addbaRequest->getDialogToken();
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
             auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
-            if (agreement != nullptr)
+            if (!replacing && agreement != nullptr)
                 emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+            auto previous = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
+            bool wasEstablished = previous != nullptr && previous->getIsAddbaResponseReceived();
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-            if (agreement != nullptr)
+            if (!wasEstablished && agreement != nullptr && agreement->getIsAddbaResponseReceived())
                 emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
