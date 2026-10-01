@@ -2,7 +2,7 @@
 Verify pending Block Ack recovery through real radios and MAC handlers.
 Force internal collisions after final BAR deferral and stop/restart.
 
-%extraargs: -r 0..2
+%extraargs: -r 0..5
 
 %file: TestBlockAckLoss.cc
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -38,6 +38,35 @@ class LossTestHcf : public Hcf
     int sentData = 0;
     int sentBars = 0;
     int retriedData = 0;
+    int repeatedData = 0;
+    std::map<std::tuple<MacAddress, Tid, int, int>, int> transmissionCounts;
+    int dropData = 0;
+    int dropBlockAck = 0;
+    int dropped = 0;
+
+    virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override
+    {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (data && data->getAckPolicy() == BLOCK_ACK && dropData > 0) {
+            --dropData;
+            ++dropped;
+            delete packet;
+            return;
+        }
+        Hcf::processLowerFrame(packet, header);
+    }
+
+    virtual void transmitControlResponseFrame(Packet *response, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
+    {
+        if (header->getType() == ST_BLOCKACK && dropBlockAck > 0) {
+            --dropBlockAck;
+            ++dropped;
+            delete response;
+            return;
+        }
+        Hcf::transmitControlResponseFrame(response, header, received, receivedHeader);
+    }
 
     bool hasAgreement(const MacAddress& peer, Tid tid = 0) const
     {
@@ -92,6 +121,8 @@ class LossTestHcf : public Hcf
     virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, AccessCategory ac) override
     {
         ++sentData;
+        repeatedData += transmissionCounts[{header->getReceiverAddress(), header->getTid(),
+                header->getSequenceNumber().get(), header->getFragmentNumber()}]++ != 0;
         retriedData += header->getRetry();
         Hcf::originatorProcessTransmittedDataFrame(packet, header, ac);
     }
@@ -123,7 +154,7 @@ class BlockAckLossTest : public cSimpleModule
             sender->queueFrame(peer);
             sender->queueFrame(peer);
         }
-        else {
+        else if (scenario == 2) {
             sender->stopBeforeBar = true;
             sender->queueFrame(peer);
             wait(SimTime(2, SIMTIME_MS));
@@ -132,11 +163,17 @@ class BlockAckLossTest : public cSimpleModule
             check_and_cast<physicallayer::IRadio *>(getModuleByPath("^.node[0].wlan[0].radio"))->setRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
             sender->start();
         }
+        else {
+            auto recipient = check_and_cast<LossTestHcf *>(getModuleByPath("^.node[1].wlan[0].mac.hcf"));
+            recipient->dropData = scenario == 3 ? 1 : 0;
+            recipient->dropBlockAck = scenario == 4 ? 1 : 0;
+            sender->queueFrame(peer);
+        }
         wait(SimTime(5, SIMTIME_MS));
         ASSERT(sender->empty());
         ASSERT(sender->sentBars > 0);
-        ASSERT(sender->retriedData == 0);
-        ASSERT(receiver->delivered == (scenario == 0 ? 4 : 3));
+        ASSERT((scenario == 3 || scenario == 4) ? sender->repeatedData > 0 : sender->repeatedData == 0);
+        ASSERT(receiver->delivered == (scenario == 0 ? 4 : scenario >= 3 ? 2 : 3));
         ASSERT(sender->deferredBars == (scenario == 0 ? 1 : 0));
         std::cout << "Block Ack recovery scenario " << scenario << " passed.\n";
         endSimulation();
@@ -185,7 +222,7 @@ cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
 seed-set = 0
-*.test.scenario = ${scenario=0..2}
+*.test.scenario = ${scenario=0..5}
 *.node[*].wlan[0].mac.typename = "LossTestMac"
 *.node[*].wlan[0].mac.qosStation = true
 *.node[*].wlan[0].mac.hcf.typename = "LossTestHcf"
@@ -196,7 +233,7 @@ seed-set = 0
 *.node[1].wlan[0].address = "02:00:00:00:00:02"
 **.wlan[*].opMode = "g(mixed)"
 **.wlan[*].bitrate = 24Mbps
-**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} < 2 ? 650us : 2ms
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} < 2 ? 650us : (${scenario} == 2 ? 2ms : 0s)
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].cwMin = 0
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].cwMax = 0
 *.node[0].wlan[0].mac.hcf.edca.edcaf[*].aifsn = 2

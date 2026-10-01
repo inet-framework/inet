@@ -139,6 +139,10 @@ without the local operational-rate restriction used for data transmission.
 Custom recipient agreement handlers must implement ``blockAckRequestReceived()``
 for Basic Block Ack Requests. This callback updates the matching inactivity deadline
 before it requests the shared timer update. Block Ack data reception follows the same order.
+``BlockAckRecord`` construction now requires the agreement's initial sequence number.
+The record uses this cyclic boundary to distinguish missing frames from old frames.
+Its missing-frame bitmap can cause retransmission where the old model silently removed data.
+
 Local recipient DELBA now removes the corresponding Block Ack receive buffer.
 Custom ``IRecipientQosMacDataService`` implementations must implement
 ``blockAckAgreementTerminated()`` and remove the buffer for the given peer and TID.
