@@ -151,6 +151,10 @@ The next ADDBA agreement starts with a new receive window.
 AP disassociation and acknowledged refusal now commit station status before rate removal signals.
 The MIB already removes peer rate and HT state when it releases an association ID.
 
+Custom ``rateStateChanged`` listeners now observe cleared association response state.
+If a listener stops or replaces the association, the old completion stops further publication.
+No configuration or method signature changes are required.
+
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data
 candidate exists or the TXOP limit is zero. A Block Ack Request (BAR) then
 takes priority over queued data if a group awaits a request.

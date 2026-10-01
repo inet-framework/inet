@@ -3,11 +3,16 @@ Verify that AP lifecycle teardown clears station association records,
 association IDs, reservations, and peer HT state on shutdown, and that
 after restarting the AP, a former station is no longer accepted as associated
 until it authenticates and associates again.
+Verify that synchronous rate listeners can stop management during association completion.
+An immediate restart must prevent stale state commits and association notifications.
 
 %file: TestIeee80211MgmtApLifecycle.cc
 
 #include <vector>
 
+#include "inet/common/Simsignals.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
@@ -97,6 +102,17 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         return it == staList.end() ? 0 : it->second.pendingAssociationTransactionId;
     }
 
+    bool hasPendingAssociationState(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        if (it == staList.end())
+            return false;
+        const auto& sta = it->second;
+        return sta.pendingAssociationTransactionId != 0 || sta.pendingAssociationSuccessful ||
+                sta.pendingHtStateAvailable || sta.pendingHtCapabilitiesValid || sta.pendingHtOperationValid ||
+                sta.pendingRateSet != Ieee80211RateSetState();
+    }
+
     void submitDisassociation(const MacAddress& address)
     {
         Enter_Method("submitDisassociation");
@@ -159,7 +175,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
 Define_Module(TestIeee80211MgmtAp);
 
-class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
+class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, public LifecycleController
 {
     TestIeee80211MgmtAp *observedMgmt = nullptr;
     Ieee80211Mib *observedMib = nullptr;
@@ -167,16 +183,55 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
     Ieee80211Mib::BssMemberStatus expectedStatus = Ieee80211Mib::AUTHENTICATED;
     int teardownNotifications = 0;
     int rateStateNotifications = 0;
+    int associationNotifications = 0;
+    int stopOnRateNotification = 0;
+    bool restartDuringNotification = false;
+
+    void changeManagementState(LifecycleOperation *operation)
+    {
+        LifecycleOperation::StringMap params;
+        operation->initialize(observedMgmt, params);
+        ASSERT(initiateOperation(operation));
+    }
 
   public:
     Ieee80211MgmtApLifecycleTest() : cSimpleModule(65536) {}
     virtual void receiveSignal(cComponent *, simsignal_t signalID, bool value, cObject *) override
     {
+        Enter_Method_Silent();
         ASSERT(signalID == Ieee80211Mib::rateStateChangedSignal && value);
         ++rateStateNotifications;
+        if (stopOnRateNotification == 0)
+            return;
+        ASSERT(!observedMgmt->hasPendingAssociationState(observedPeer));
+        if (--stopOnRateNotification != 0)
+            return;
+        ASSERT(observedMgmt->hasPeerHtState(observedPeer));
+        ASSERT(observedMgmt->getStationStatus(observedPeer) == Ieee80211Mib::ASSOCIATED);
+        changeManagementState(new ModuleStopOperation());
+        ASSERT(observedMgmt->isStaListEmpty());
+        ASSERT(!observedMgmt->hasStation(observedPeer));
+        ASSERT(!observedMgmt->hasCommittedAid(observedPeer));
+        ASSERT(!observedMgmt->hasPeerHtState(observedPeer));
+        ASSERT(observedMib->findPeerRateSet(observedPeer) == nullptr);
+        if (restartDuringNotification) {
+            changeManagementState(new ModuleStartOperation());
+            // A new association for the same address must have a different identity.
+            observedMgmt->submitAuthenticationRequest(observedPeer);
+            observedMgmt->submitAssociationRequest(observedPeer);
+            observedMgmt->finishAssociationResponse(observedPeer);
+        }
     }
-    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override
+    virtual void receiveSignal(cComponent *, simsignal_t signalID, cObject *, cObject *) override
     {
+        Enter_Method_Silent();
+        if (signalID == l2ApAssociatedSignal) {
+            ASSERT(observedMgmt->getStationStatus(observedPeer) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(!observedMgmt->hasPendingAssociationState(observedPeer));
+            ++associationNotifications;
+            return;
+        }
+        ASSERT(signalID == l2ApDisassociatedSignal);
         ASSERT(observedMgmt->getStationStatus(observedPeer) == expectedStatus);
         ASSERT(!observedMgmt->hasCommittedAid(observedPeer));
         ASSERT(!observedMgmt->hasPeerHtState(observedPeer));
@@ -299,6 +354,43 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener
             ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
         }
         ASSERT(teardownNotifications == 4);
+
+        // Stop during each publication boundary. Restart must invalidate the old completion
+        // even when a replacement association completes before the listener returns.
+        changeManagementState(new ModuleStopOperation());
+        changeManagementState(new ModuleStartOperation());
+        for (int notification : {1, 2}) {
+            for (bool restart : {false, true}) {
+                mgmt->submitAuthenticationRequest(staAddress);
+                mgmt->submitAssociationRequest(staAddress);
+                int associationsBefore = associationNotifications;
+                stopOnRateNotification = notification;
+                restartDuringNotification = restart;
+                mib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+                mgmt->subscribe(l2ApAssociatedSignal, this);
+                mgmt->finishAssociationResponse(staAddress);
+                mgmt->unsubscribe(l2ApAssociatedSignal, this);
+                mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
+                ASSERT(stopOnRateNotification == 0);
+                ASSERT(!mgmt->hasPendingAssociationState(staAddress));
+                ASSERT(associationNotifications == associationsBefore + (restart ? 1 : 0));
+                if (restart) {
+                    ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::ASSOCIATED);
+                    ASSERT(mgmt->hasCommittedAid(staAddress));
+                    ASSERT(mgmt->hasPeerHtState(staAddress));
+                    ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
+                    changeManagementState(new ModuleStopOperation());
+                }
+                else {
+                    ASSERT(mgmt->isStaListEmpty());
+                    ASSERT(mib->bssAccessPointData.stations.empty());
+                    ASSERT(mib->bssAccessPointData.associationIds.empty());
+                    ASSERT(!mgmt->hasPeerHtState(staAddress));
+                    ASSERT(mib->findPeerRateSet(staAddress) == nullptr);
+                }
+                changeManagementState(new ModuleStartOperation());
+            }
+        }
     }
 };
 
@@ -319,6 +411,7 @@ simple TestIeee80211MgmtAp extends Ieee80211MgmtAp
 {
     parameters:
         @class(::inet::ieee80211::TestIeee80211MgmtAp);
+        @lifecycleSupport;
 }
 
 simple Ieee80211MgmtApLifecycleTest extends SimpleModule
@@ -343,6 +436,7 @@ network Ieee80211MgmtApLifecycleTestNetwork
 
 [General]
 network = Ieee80211MgmtApLifecycleTestNetwork
+seed-set = 0
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 50us
 cmdenv-express-mode = false

@@ -131,27 +131,37 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
 
     if (status == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) {
         if (sta->second.pendingAssociationSuccessful) {
+            auto acceptedRates = sta->second.pendingRateSet;
+            bool htStateAvailable = sta->second.pendingHtStateAvailable;
+            bool htCapabilitiesValid = sta->second.pendingHtCapabilitiesValid;
+            auto htCapabilities = sta->second.pendingHtCapabilities;
             bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
             mib->commitAssociationId(address);
             mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
-            if (sta->second.pendingHtStateAvailable) {
+            // A synchronous listener can stop management or replace this association.
+            // Detach pending state before the first notification. Use value copies after it.
+            clearPendingAssociation(&sta->second);
+            sta->second.completedAssociationTransactionId = pendingTransactionId;
+            auto isCurrentAssociation = [this, address, pendingTransactionId]() {
+                auto currentSta = staList.find(address);
+                return currentSta != staList.end() && currentSta->second.completedAssociationTransactionId == pendingTransactionId;
+            };
+            if (htStateAvailable) {
                 // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
-                if (sta->second.pendingHtCapabilitiesValid && mib->isHtOperationSupported()) {
-                    const auto& currentOperation = mib->getHtOperation();
-                    if (supportsBasicHtMcsSet(sta->second.pendingHtCapabilities, currentOperation))
-                        mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, currentOperation);
+                if (htCapabilitiesValid && mib->isHtOperationSupported()) {
+                    auto currentOperation = mib->getHtOperation();
+                    if (supportsBasicHtMcsSet(htCapabilities, currentOperation))
+                        mib->setPeerHtCapabilities(address, htCapabilities, currentOperation);
                     else
                         mib->removePeerHtCapabilities(address);
                 }
                 else
                     mib->removePeerHtCapabilities(address);
             }
-            auto acceptedRates = sta->second.pendingRateSet;
-            clearPendingAssociation(&sta->second);
+            if (!isCurrentAssociation())
+                return;
             mib->installBssAndPeerRateSets(mib->getBssRateSet(), address, acceptedRates);
-            // Signal delivery is synchronous; observers must see committed
-            // station/peer state and no pending response transaction.
-            if (!wasAssociated)
+            if (!wasAssociated && isCurrentAssociation())
                 sendAssocNotification(address);
         }
         else if (mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
@@ -202,6 +212,7 @@ void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
     mib->cancelAssociationIdReservation(sta->address);
     sta->pendingAssociationSuccessful = false;
     sta->pendingAssociationTransactionId = 0;
+    sta->completedAssociationTransactionId = 0;
     sta->pendingHtStateAvailable = false;
     sta->pendingHtCapabilitiesValid = false;
     sta->pendingHtCapabilities = Ieee80211HtCapabilities();
@@ -590,7 +601,7 @@ void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
     staList.clear();
-    nextAssociationTransactionId = 0;
+    // Keep transaction identities distinct across synchronous stop and restart.
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();
 }
