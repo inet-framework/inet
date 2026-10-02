@@ -1,6 +1,6 @@
 # Resolve the audit findings of PR #1155
 
-Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a to 2e, 3 and 4 done; step 5, 5b and
+Status: **in progress** — steps 1a to 1j (all of step 1), 2, 2a to 2f, 3 and 4 done; step 5, 5b and
 6 follow. The plan lives on the branch `topic/tcp-new-audit-fixes`
 since 2026-09-29 (owner's decision); older copies are on `topic/audit` and on `master`.
 `/home/levy/workspace/inet-tcp-new-audit-fixes`, branch `topic/tcp-new-audit-fixes`.
@@ -731,7 +731,8 @@ tests fail, and all of them because #1155 meets master's newer tests:
    overrides it;
 3. this plan lives on the branch;
 4. **no serializer adaptation yet**: the PPP change may still be modified; the same holds for the
-   MPLS tests that master added later (decided during the rebase of 2e);
+   MPLS tests that master added later (decided during the rebase of 2e). **Superseded by 2f:** the
+   PPP change left the branch, so the adaptation is not needed;
 5. the initial window **follows RFC 5681 by default**; IW10 is an option, which the packetdrill
    configuration selects (asked during 2b);
 6. a soft ICMP error **never aborts a connection by default** (RFC 9293 MUST-56); the Linux abort
@@ -859,6 +860,40 @@ MPLS helper `tests/protocol/mpls/MplsChecks.h` names `PppTrailer`, which the PPP
 series removes. Without that one term the suite gives master's verdicts exactly (5 PASS, 6 FAIL
 (expected), the same 10 FAIL (unexpected)), but the owner deferred it with the serializer
 adaptation (decision 4).
+
+**2f. Nothing for other protocols — done 2026-10-02.** The owner decided that this branch carries
+nothing for other protocols that the TCP protocol tests do not strictly need, and that a defect in
+shared code is repaired at its root on a branch that reaches master first. Seven commits left the
+branch:
+
+| Commit (before the rewrite) | Why it left |
+| --- | --- |
+| `ppp: change: follow RFC 1661 rather than RFC 1331` | not correct: `Ppp` is the whole interface, so it needs the framing of RFC 1662; the old 7-octet frame was RFC 1661 with RFC 1662. It also removed the `receptionEnded` signal, which the pcap recorder and gPTP use, and added a parameter that nothing used |
+| `packet.recorder: fix: record PPP traces as LINKTYPE_PPP, not _WITH_DIR` | correct only for the RFC 1661 frame |
+| `ppp: fix: byte-align a packet truncated by a mid-transmission disconnect` | a workaround: the defect was in two serializers, repaired on `topic/packet-api-fixes` |
+| `packet: fix: keep the fill byte when splitting a BitCountChunk or ByteCountChunk` | moved to `topic/packet-api-fixes` unchanged |
+| `doc: change: lift the common/packet/ seal for three validated edits`, `doc: change: restore the common/packet/ seal` | no edit under the seal is left |
+| `sctp: name: follow the TCP algorithm interface rename` | SCTP does not use the TCP classes; its TCP half, the renamed TCP state structure in `doc/src/msgtags.xml`, moved into `tcp: name: rename TcpBaseAlg and TcpTahoeRenoFamily` |
+
+The branch now sits on `topic/packet-api-fixes` (plan `plan/done/packet-api-fixes.md`): its six
+commits lift the seal, repair the fill byte and the serialization of a slice that starts or ends
+inside a byte, restore the seal, and change no fingerprint of the packet data ingredient. The 89
+commits that stay applied without a conflict; the TCP code, tests and evidence are the same as
+before the rewrite.
+
+Results at the rewritten head: protocol `tcp/` 333 tests, 328 PASS and 5 FAIL (expected), the
+wrappers run with `inet-gpl`; packetdrill 303 MATCH; module 383 PASS, the two CUBIC tests over PPP
+links included; the MPLS suite gives master's counts again and `serializer_fields` passes again. The other protocol suites give
+master's counts.
+
+**Three TCP failures that predate the rewrite**, found because this check ran the unit and
+serializer suites for the first time on the branch:
+
+- `tests/unit/tcp_accecn_option_wire_1.test` and `tests/unit/tcp_ae_bit_wire_1.test` define a
+  `TestTcpHeaderSerializer` with the old hook names; master renamed them to `serializeFields()` and
+  `deserializeFields()` (`9614b9913f`) before the rebase of step 2.
+- `serializer_chunk_roundtrip`: its coverage gate reports `inet::tcp::TcpHeader::aeBit`, the
+  AccECN field that the branch adds and the test filler does not fill.
 
 ### Step 3 — The release note (F-2) — done 2026-09-14
 
