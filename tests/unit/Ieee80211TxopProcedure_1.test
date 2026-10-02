@@ -1,13 +1,18 @@
 %description:
-Tests that TxopProcedure reports the remaining time until the TXOP limit.
+Tests TXOP acquisition, timing, and exchange admission.
 
 %includes:
+#include <memory>
+
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 using namespace omnetpp;
 using namespace inet;
 using namespace inet::ieee80211;
+using namespace inet::physicallayer;
 
 namespace Ieee80211TxopProcedure_1 {
 
@@ -16,7 +21,7 @@ class TestTxopProcedure : public TxopProcedure
   public:
     void setModeSet(const char *name)
     {
-        modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(name));
+        modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet(name));
     }
 
     void resetTxopLimit()
@@ -34,6 +39,27 @@ class TestTxopProcedure : public TxopProcedure
     {
         if (stage == INITSTAGE_LOCAL)
             limit = par("txopLimit");
+    }
+};
+
+class PreparedPlan
+{
+  public:
+    std::unique_ptr<Packet> packet;
+    std::unique_ptr<TransmitStep> step;
+    TxopExchangePlan plan;
+
+    PreparedPlan(const IIeee80211Mode *mode, b length, bool dataOrManagement,
+            simtime_t interval = SIMTIME_ZERO) :
+        packet(std::make_unique<Packet>("frame", makeShared<ByteCountChunk>(length))),
+        step(std::make_unique<TransmitStep>(packet.get(), interval, mode, false))
+    {
+        plan.steps.push_back(step.get());
+        plan.payload = dataOrManagement ? packet.get() : nullptr;
+        plan.identity.receiver = MacAddress("02:00:00:00:00:01");
+        plan.identity.tid = 3;
+        plan.identity.sequenceNumber = 17;
+        plan.dataOrManagement = dataOrManagement;
     }
 };
 
@@ -65,10 +91,28 @@ network TestNetwork
 [General]
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
+simtime-resolution = ps
 
 %activity:
 
 auto txop = check_and_cast<TestTxopProcedure *>(cSimulation::getActiveSimulation()->getModuleByPath("txop"));
+const auto *mode = Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(6));
+const simtime_t tick = SimTime(1, SIMTIME_PS);
+
+ASSERT(!txop->isAcquired());
+ASSERT(!txop->hasStarted());
+txop->startTxop(AC_BE);
+ASSERT(txop->isAcquired());
+ASSERT(!txop->hasStarted());
+ASSERT(txop->getRemaining() == SimTime(10, SIMTIME_MS));
+txop->transmissionStarted();
+ASSERT(txop->hasStarted());
+ASSERT(txop->getStart() == SIMTIME_ZERO);
+ASSERT(txop->getDuration() == SIMTIME_ZERO);
+txop->endTxop();
+ASSERT(!txop->isAcquired());
+ASSERT(!txop->hasStarted());
+ASSERT(txop->getDuration() == SIMTIME_ZERO);
 
 auto getRemainingThrows = [txop]() {
     try {
@@ -79,7 +123,6 @@ auto getRemainingThrows = [txop]() {
         return true;
     }
 };
-
 ASSERT(getRemainingThrows());
 
 auto checkDefaultLimits = [txop](const char *modeSetName, simtime_t viLimit, simtime_t voLimit) {
@@ -116,21 +159,155 @@ checkDefaultLimits("ac", SimTime(3008, SIMTIME_US), SimTime(1504, SIMTIME_US));
 
 txop->setTxopLimit(SimTime(10, SIMTIME_MS));
 txop->startTxop(AC_VI);
+txop->transmissionStarted();
 ASSERT(txop->getRemaining() == SimTime(10, SIMTIME_MS));
-
 wait(0.003);
 ASSERT(txop->getRemaining() == SimTime(7, SIMTIME_MS));
-
 wait(0.007);
 ASSERT(txop->getRemaining() == SIMTIME_ZERO);
-
 wait(0.001);
 ASSERT(txop->getRemaining() == SIMTIME_ZERO);
-
 txop->endTxop();
 ASSERT(getRemainingThrows());
 
-EV << "TXOP remaining time is correct at all boundaries.\n";
+PreparedPlan exact(mode, B(100), true);
+auto inactive = txop->evaluate(exact.plan, simTime(), SIMTIME_ZERO, false);
+ASSERT(!inactive.accepted);
+ASSERT(inactive.reason == TxopAdmissionReason::INACTIVE);
+auto checkLimitBoundary = [&](simtime_t limit, bool expected) {
+    txop->endTxop();
+    txop->setTxopLimit(limit);
+    txop->startTxop(AC_BE);
+    txop->transmissionStarted();
+    auto exchangeStart = simTime();
+    auto decision = txop->evaluate(exact.plan, exchangeStart, SIMTIME_ZERO, false);
+    ASSERT(decision.accepted == expected);
+    txop->endTxop();
+};
+checkLimitBoundary(exact.plan.getDuration() - tick, false);
+checkLimitBoundary(exact.plan.getDuration(), true);
+checkLimitBoundary(exact.plan.getDuration() + tick, true);
+
+PreparedPlan txnav(mode, B(100), true, mode->getSifsTime());
+txop->setTxopLimit(txnav.plan.getDuration() + SimTime(1, SIMTIME_MS));
+txop->startTxop(AC_BE);
+txop->transmissionStarted();
+auto txnavStart = simTime();
+auto txnavFrameDuration = txnav.plan.getDuration() - txnav.plan.getLeadingInterval();
+auto expired = txop->evaluate(txnav.plan, txnavStart, txnavStart + txnavFrameDuration - tick, true);
+ASSERT(!expired.accepted);
+ASSERT(expired.reason == TxopAdmissionReason::RESERVATION_EXPIRED);
+auto equal = txop->evaluate(txnav.plan, txnavStart, txnavStart + txnavFrameDuration, true);
+ASSERT(!equal.accepted);
+ASSERT(equal.reason == TxopAdmissionReason::RESERVATION_EXPIRED);
+auto available = txop->evaluate(txnav.plan, txnavStart, txnavStart + txnavFrameDuration + tick, true);
+ASSERT(available.accepted);
+ASSERT(available.reason == TxopAdmissionReason::WITHIN_LIMIT);
+txop->endTxop();
+
+PreparedPlan zeroFirst(mode, B(100), true);
+PreparedPlan zeroSame(mode, B(100), true);
+PreparedPlan zeroDifferent(mode, B(100), true);
+PreparedPlan zeroControlSame(mode, B(14), false);
+PreparedPlan zeroControlDifferent(mode, B(14), false);
+zeroSame.plan.identity = zeroFirst.plan.identity;
+zeroDifferent.plan.identity = zeroFirst.plan.identity;
+zeroDifferent.plan.identity.sequenceNumber++;
+zeroControlSame.plan.identity = zeroFirst.plan.identity;
+zeroControlSame.plan.identity.sequenceNumber++;
+zeroControlDifferent.plan.identity = zeroControlSame.plan.identity;
+zeroControlDifferent.plan.identity.receiver = MacAddress("02:00:00:00:00:02");
+
+txop->setTxopLimit(SIMTIME_ZERO);
+txop->startTxop(AC_BE);
+txop->transmissionStarted();
+txop->recordTransmission(zeroFirst.plan, true);
+auto sameFrame = txop->evaluate(zeroSame.plan, simTime(), SIMTIME_ZERO, false);
+ASSERT(sameFrame.accepted);
+ASSERT(sameFrame.reason == TxopAdmissionReason::ZERO_LIMIT_FRAME);
+auto differentFrame = txop->evaluate(zeroDifferent.plan, simTime(), SIMTIME_ZERO, false);
+ASSERT(!differentFrame.accepted);
+ASSERT(differentFrame.reason == TxopAdmissionReason::DIFFERENT_ZERO_LIMIT_FRAME);
+auto sameFamilyControl = txop->evaluate(zeroControlSame.plan, simTime(), SIMTIME_ZERO, false);
+ASSERT(sameFamilyControl.accepted);
+ASSERT(sameFamilyControl.reason == TxopAdmissionReason::ZERO_LIMIT_FRAME);
+auto differentFamilyControl = txop->evaluate(zeroControlDifferent.plan, simTime(), SIMTIME_ZERO, false);
+ASSERT(!differentFamilyControl.accepted);
+ASSERT(differentFamilyControl.reason == TxopAdmissionReason::DIFFERENT_ZERO_LIMIT_FRAME);
+txop->endTxop();
+
+auto makeOverrun = [&](PreparedPlan& candidate) {
+    txop->setTxopLimit(SimTime(1, SIMTIME_US));
+    txop->startTxop(AC_BE);
+    txop->transmissionStarted();
+    auto exchangeStart = simTime() + SimTime(1, SIMTIME_MS);
+    auto decision = txop->evaluate(candidate.plan, exchangeStart, SIMTIME_ZERO, false);
+    txop->endTxop();
+    return decision;
+};
+
+PreparedPlan plain(mode, B(100), true);
+auto plainDecision = makeOverrun(plain);
+ASSERT(!plainDecision.accepted);
+ASSERT(plainDecision.reason == TxopAdmissionReason::LIMIT_EXCEEDED);
+
+auto checkDataException = [&](PreparedPlan& candidate, TxopAdmissionReason reason) {
+    auto positive = makeOverrun(candidate);
+    ASSERT(positive.accepted);
+    ASSERT(positive.reason == reason);
+
+    txop->setTxopLimit(SimTime(1, SIMTIME_US));
+    txop->startTxop(AC_BE);
+    txop->transmissionStarted();
+    txop->recordTransmission(plain.plan, true);
+    auto exchangeStart = simTime() + SimTime(1, SIMTIME_MS);
+    auto negative = txop->evaluate(candidate.plan, exchangeStart, SIMTIME_ZERO, false);
+    ASSERT(!negative.accepted);
+    ASSERT(negative.reason == TxopAdmissionReason::LIMIT_EXCEEDED);
+    txop->endTxop();
+};
+
+PreparedPlan unchangedRetry(mode, B(100), true);
+unchangedRetry.plan.unchangedRetry = true;
+checkDataException(unchangedRetry, TxopAdmissionReason::UNCHANGED_RETRY);
+
+PreparedPlan initialBlockAck(mode, B(100), true);
+initialBlockAck.plan.initialBlockAckMsdu = true;
+checkDataException(initialBlockAck, TxopAdmissionReason::BLOCK_ACK_MSDU);
+
+PreparedPlan retriedFragment(mode, B(100), true);
+retriedFragment.plan.initialFragmentAfterRetry = true;
+checkDataException(retriedFragment, TxopAdmissionReason::RETRIED_FRAGMENT_FAMILY);
+
+PreparedPlan sixteenFragments(mode, B(100), true);
+sixteenFragments.plan.sixteenFragments = true;
+checkDataException(sixteenFragments, TxopAdmissionReason::SIXTEEN_FRAGMENTS);
+
+PreparedPlan group(mode, B(100), true);
+group.plan.group = true;
+group.plan.identity.receiver = MacAddress("01:00:00:00:00:01");
+checkDataException(group, TxopAdmissionReason::GROUP);
+
+PreparedPlan control(mode, B(14), false);
+auto controlPositive = makeOverrun(control);
+ASSERT(controlPositive.accepted);
+ASSERT(controlPositive.reason == TxopAdmissionReason::CONTROL);
+
+txop->setTxopLimit(SimTime(1, SIMTIME_US));
+txop->startTxop(AC_BE);
+txop->transmissionStarted();
+txop->recordTransmission(plain.plan, true);
+auto controlExchangeStart = simTime() + SimTime(1, SIMTIME_MS);
+auto controlAfterOneActual = txop->evaluate(control.plan, controlExchangeStart, SIMTIME_ZERO, false);
+ASSERT(controlAfterOneActual.accepted);
+ASSERT(controlAfterOneActual.reason == TxopAdmissionReason::CONTROL);
+txop->recordTransmission(plain.plan, true);
+auto controlAfterTwoActual = txop->evaluate(control.plan, controlExchangeStart, SIMTIME_ZERO, false);
+ASSERT(!controlAfterTwoActual.accepted);
+ASSERT(controlAfterTwoActual.reason == TxopAdmissionReason::LIMIT_EXCEEDED);
+txop->endTxop();
+
+EV << "TXOP acquisition, boundaries, TXNAV, and admission exceptions are correct.\n";
 
 %contains: stdout
-TXOP remaining time is correct at all boundaries.
+TXOP acquisition, boundaries, TXNAV, and admission exceptions are correct.

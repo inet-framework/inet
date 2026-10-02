@@ -1,0 +1,130 @@
+%description:
+IEEE Std 802.11-2024, 10.4 and 10.23.2.9: retry facts survive a failed TXOP.
+A test MAC suppresses one ACK and reduces the eligible data rate.
+The unchanged retry and the next initial fragment use their specific exceptions.
+
+%file: N_TxopFragmentRetry.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+class RetryObservedHcf : public Hcf
+{
+  public:
+    TxopAdmissionReason getAdmissionReason() const
+    {
+        return frameSequenceHandler->getContext()->getExchangePlan()->admission.reason;
+    }
+};
+Define_Module(RetryObservedHcf);
+class FragmentAckLossMac : public Ieee80211Mac
+{
+  protected:
+    bool suppressed = false;
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!suppressed && simTime() >= SimTime(1) && header->getType() == ST_ACK && header->getReceiverAddress() == mib->address) {
+            suppressed = true;
+            auto state = mib->getLocalRateSet();
+            state.operational.legacyRates = {Mbps(6)};
+            state.operational.htMcs.clear();
+            state.basic.legacyRates = {Mbps(6)};
+            state.basic.htMcs.clear();
+            mib->setLocalRateSet(state);
+            emit(registerSignal("ackSuppressed"), 1L);
+            delete packet;
+            return;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(FragmentAckLossMac);
+struct RetryEvidence { int sequence = -1; b length; simtime_t start; simtime_t retryStart; };
+static TxopAdmissionReason currentReason(const MatchContext& c)
+{
+    auto hcf = check_and_cast<RetryObservedHcf *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")->getSubmodule("hcf"));
+    return hcf->getAdmissionReason();
+}
+static simtime_t currentStart(const MatchContext& c)
+{
+    return check_and_cast<TxopProcedure *>(c.event.node->getSubmodule("wlan", 0)->getSubmodule("mac")
+            ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 1)->getSubmodule("txopProcedure"))->getStart();
+}
+Define_ProtocolTest(wifi_txop_fragment_retry)
+{
+    auto evidence = std::make_shared<RetryEvidence>();
+    return ProtocolTest("wifi_txop_fragment_retry")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->sequence = header->getSequenceNumber().get();
+                evidence->length = c.event.packet->getDataLength();
+                evidence->start = currentStart(c);
+                return !header->getRetry() && header->getMoreFragments() && header->getFragmentNumber() == 0;
+            }).within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("ackSuppressed").filterValue(1).within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->retryStart = currentStart(c);
+                return header->getRetry() && header->getSequenceNumber().get() == evidence->sequence &&
+                        header->getFragmentNumber() == 0 && c.event.packet->getDataLength() == evidence->length &&
+                        currentReason(c) == TxopAdmissionReason::UNCHANGED_RETRY && evidence->retryStart > evidence->start;
+            }).within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return !header->getRetry() && header->getSequenceNumber().get() == evidence->sequence &&
+                        header->getFragmentNumber() == 1 && currentReason(c) == TxopAdmissionReason::RETRIED_FRAGMENT_FAMILY &&
+                        currentStart(c) > evidence->retryStart;
+            }).within(0.01));
+}
+}
+}
+
+%file: N_TxopFragmentRetry.ned
+@namespace(inet::protocoltest);
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+module RetryObservedHcf extends Hcf
+{
+    parameters:
+        @class(RetryObservedHcf);
+}
+module FragmentAckLossMac extends Ieee80211Mac
+{
+    parameters:
+        @class(FragmentAckLossMac);
+        @signal[ackSuppressed](type=long);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_txop_fragment_retry"
+*.sta1.wlan[*].mac.typename = "FragmentAckLossMac"
+*.sta1.wlan[*].mac.hcf.typename = "RetryObservedHcf"
+*.sta1.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 300us
+*.sta*.wlan[*].classifier.udpPortUpMap = "5000 BE"
+*.sta1.app[0].stopTime = 1.000001s
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = -1bps
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 300B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.hcf.originatorBlockAckAgreementPolicy.typename = ""
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_txop_fragment_retry: PASS

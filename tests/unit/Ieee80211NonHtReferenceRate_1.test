@@ -1,0 +1,88 @@
+%description:
+Check IEEE Std 802.11-2024, 10.6.11 and Table 10-10 through the mode interface.
+The reference rate depends on stream 1 modulation and the code rate.
+Channel width, guard interval, and spatial stream count do not change it.
+
+%includes:
+#include <cmath>
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211IrMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%global:
+class ReferenceRateProbe : public Ieee80211ModeBase
+{
+  public:
+    using Ieee80211ModeBase::computeNonHtReferenceRate;
+};
+
+%activity:
+// These values are the rows of Table 10-10, independent of the implementation.
+const unsigned int constellationSizes[] = {2, 2, 4, 4, 16, 16, 64, 64, 64, 64, 256, 256, 1024, 1024};
+const double codeRates[] = {0.5, 0.75, 0.5, 0.75, 0.5, 0.75, 0.5, 2.0/3, 0.75, 5.0/6, 0.75, 5.0/6, 0.75, 5.0/6};
+const double referenceRates[] = {6, 9, 12, 18, 24, 36, 48, 48, 54, 54, 54, 54, 54, 54};
+for (int i = 0; i < 14; i++)
+    ASSERT(ReferenceRateProbe::computeNonHtReferenceRate(constellationSizes[i], codeRates[i]) == Mbps(referenceRates[i]));
+ASSERT(std::isnan(ReferenceRateProbe::computeNonHtReferenceRate(2, 5.0/6).get()));
+ASSERT(std::isnan(ReferenceRateProbe::computeNonHtReferenceRate(4096, 0.75).get()));
+ASSERT(std::isnan(ReferenceRateProbe::computeNonHtReferenceRate(64, NaN).get()));
+
+const double htRates[] = {6, 12, 18, 24, 36, 48, 54, 54};
+int htCount = 0;
+for (const char *name : {"n(mixed-2.4Ghz)"}) {
+    auto modeSet = Ieee80211ModeSet::getModeSet(name);
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        const IIeee80211Mode *mode = modeSet->getMode(i);
+        if (mode->getHtMcsIndex() >= 0) {
+            ASSERT(mode->getModulationClass() == IIeee80211Mode::ModulationClass::HT);
+            ASSERT(mode->getNonHtReferenceRate() == Mbps(htRates[mode->getHtMcsIndex() % 8]));
+            htCount++;
+        }
+        else
+            ASSERT(mode->getNonHtReferenceRate() == mode->getDataMode()->getNetBitrate());
+    }
+}
+ASSERT(htCount == 128);
+
+const double vhtRates[] = {6, 12, 18, 24, 36, 48, 54, 54, 54, 54};
+auto vhtSet = Ieee80211ModeSet::getModeSet("ac");
+int vhtCount = 0;
+for (int i = 0; i < vhtSet->getNumModes(); i++) {
+    const IIeee80211Mode *mode = vhtSet->getMode(i);
+    auto vhtMode = dynamic_cast<const Ieee80211VhtMode *>(mode);
+    if (vhtMode) {
+        ASSERT(mode->getModulationClass() == IIeee80211Mode::ModulationClass::VHT);
+        ASSERT(mode->getNonHtReferenceRate() == Mbps(vhtRates[vhtMode->getDataMode()->getMcsIndex()]));
+        vhtCount++;
+    }
+}
+ASSERT(vhtCount > 0);
+for (const char *name : {"a", "b", "g(mixed)"}) {
+    auto modeSet = Ieee80211ModeSet::getModeSet(name);
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        const IIeee80211Mode *mode = modeSet->getMode(i);
+        ASSERT(mode->getNonHtReferenceRate() == mode->getDataMode()->getNetBitrate());
+    }
+}
+const IIeee80211Mode *unsupported = &Ieee80211IrCompliantModes::irMode1Mbps;
+ASSERT(std::isnan(unsupported->getNonHtReferenceRate().get()));
+ASSERT(unsupported->getModulationClass() == IIeee80211Mode::ModulationClass::UNKNOWN);
+auto dsss = Ieee80211ModeSet::getModeSet("b")->getMode(Mbps(1));
+auto hrDsss = Ieee80211ModeSet::getModeSet("b")->getMode(Mbps(11));
+ASSERT(dsss->getModulationClass() == IIeee80211Mode::ModulationClass::DSSS_HRDSSS);
+ASSERT(dsss->getModulationClass() == hrDsss->getModulationClass());
+ASSERT(dsss->getLegacyPreambleType() == IIeee80211Mode::PreambleType::LONG);
+ASSERT(hrDsss->getLegacyPreambleType() == IIeee80211Mode::PreambleType::LONG);
+ASSERT(Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckShortPreamble.getLegacyPreambleType() == IIeee80211Mode::PreambleType::SHORT);
+ASSERT(Ieee80211ModeSet::getModeSet("a")->getMode(0)->getModulationClass() == IIeee80211Mode::ModulationClass::OFDM);
+ASSERT(Ieee80211ModeSet::getModeSet("g(erp)")->getMode(0)->getModulationClass() == IIeee80211Mode::ModulationClass::ERP_OFDM);
+EV << "Non-HT reference rates verified.\n";
+
+%contains: stdout
+Non-HT reference rates verified.
