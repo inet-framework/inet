@@ -1,0 +1,415 @@
+%description:
+Verify STA association completion across synchronous rate and outcome callbacks.
+Stop, restart, and same-lifecycle replacement must cancel the old completion.
+Signal details must remain valid after a listener clears the AP list.
+Verify refusal, old-association cleanup, and detached list cleanup.
+
+%file: TestIeee80211MgmtStaAssociationCallbacks.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class CallbackSta : public Ieee80211MgmtSta
+{
+  public:
+    int confirmations = 0;
+    Ieee80211PrimResultCode lastResult = PRC_REFUSED;
+    MacAddress lastAddress;
+
+    void begin(const MacAddress& address, bool reassociation, bool ht, const char *ssid = "original")
+    {
+        Enter_Method("begin");
+        auto ap = lookupAP(address);
+        if (ap == nullptr) {
+            apList.push_back(ApInfo());
+            ap = &apList.back();
+        }
+        ap->address = address;
+        ap->channel = 1;
+        ap->ssid = ssid;
+        ap->beaconInterval = SimTime(1, SIMTIME_MS);
+        ap->isAuthenticated = true;
+        auto advertisement = makeShared<Ieee80211BeaconFrame>();
+        setSupportedRateElements(advertisement);
+        ap->supportedRates = advertisement->getSupportedRates();
+        ap->extendedSupportedRatesPresent = advertisement->getExtendedSupportedRatesPresent();
+        ap->extendedSupportedRates = advertisement->getExtendedSupportedRates();
+        ap->htCapabilitiesPresent = ht;
+        ap->htOperationPresent = ht;
+        if (ht) {
+            ap->htCapabilities = mib->localHtCapabilities;
+            ap->htOperation = mib->getHtOperation();
+            ap->htOperation.basicMcsSupported.fill(false);
+        }
+        if (reassociation)
+            startReassociation(ap, SimTime(20, SIMTIME_MS));
+        else
+            startAssociation(ap, SimTime(20, SIMTIME_MS));
+    }
+
+    void respond(const MacAddress& address, bool reassociation, int ht,
+            Ieee80211StatusCode status = SC_SUCCESSFUL)
+    {
+        Enter_Method("respond");
+        Ptr<Ieee80211AssociationResponseFrame> body;
+        if (reassociation)
+            body = makeShared<Ieee80211ReassociationResponseFrame>();
+        else
+            body = makeShared<Ieee80211AssociationResponseFrame>();
+        body->setStatusCode(status);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 3;
+        rates.rate[0] = 6;
+        rates.basicRate[0] = true;
+        rates.rate[1] = 12;
+        rates.rate[2] = 24;
+        body->setSupportedRates(rates);
+        const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
+        if (ht != 0) {
+            setHtCapabilities(body, mib->localHtCapabilities);
+            if (ht == 1) {
+                auto operation = mib->getHtOperation();
+                operation.basicMcsSupported.fill(false);
+                setHtOperation(body, band, operation);
+            }
+            // ht == 2 deliberately omits HT Operation and exercises the failure signal.
+        }
+        body->setChunkLength(B(100));
+        auto packet = new Packet("AssociationResponse");
+        packet->insertAtBack(body);
+        physicallayer::Ieee80211Channel channel(band, 1);
+        packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        processAssociationResponse(packet, header, reassociation);
+    }
+
+    void terminate()
+    {
+        Enter_Method("terminate");
+        if (mib->bssStationData.isAssociated) {
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setTransmitterAddress(assocAP.address);
+            handleDisassociationFrame(new Packet("Disassociation"), header);
+        }
+        else
+            cancelPendingAssociation();
+    }
+
+    void clearDiscovery() { Enter_Method("clearDiscovery"); clearAPList(); }
+    void expire()
+    {
+        Enter_Method("expire");
+        ASSERT(assocTimeoutMsg != nullptr);
+        cancelEvent(assocTimeoutMsg);
+        handleTimer(assocTimeoutMsg);
+    }
+    void deauthenticate(const MacAddress& address)
+    {
+        Enter_Method("deauthenticate");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDeauthenticationFrame(new Packet("Deauthentication"), header);
+    }
+    bool associated() const { return mib->bssStationData.isAssociated; }
+    bool hasTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    bool pending() const { return assocTimeoutMsg != nullptr; }
+    bool empty() const { return apList.empty(); }
+    MacAddress associatedAddress() const { return assocAP.address; }
+    const std::string& associatedSsid() const { return assocAP.ssid; }
+
+  protected:
+    virtual void sendManagementFrame(const char *, const Ptr<Ieee80211MgmtFrame>&, int, const MacAddress&) override {}
+    virtual void changeChannel(int) override {}
+    virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode result) override
+    {
+        ASSERT(ap->authTimeoutMsg == nullptr);
+        ++confirmations;
+        lastResult = result;
+        lastAddress = ap->address;
+    }
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode result) override
+    {
+        sendAssociationConfirm(ap, result);
+    }
+};
+
+Define_Module(CallbackSta);
+
+class StaAssociationCallbacksTest : public cSimpleModule, public cListener, public LifecycleController
+{
+    enum class Boundary { RATE, HT_FAILURE, ASSOCIATED, OLD_ASSOCIATION, REFUSAL, LIST_CLEAR };
+    CallbackSta *mgmt = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    MacAddress peer = MacAddress("02:00:00:00:00:01");
+    Boundary boundary = Boundary::RATE;
+    int action = 0;
+    bool armed = false;
+    int associations = 0;
+    int failures = 0;
+    int rateNotifications = 0;
+
+    bool replaces() const { return action == 1 || action == 2; }
+
+    class SnapshotObserver : public cListener
+    {
+      public:
+        int observations = 0;
+        virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *details) override
+        {
+            auto ap = check_and_cast<CallbackSta::ApInfo *>(details);
+            ASSERT(ap->address == MacAddress("02:00:00:00:00:01") || ap->address == MacAddress("02:00:00:00:00:02"));
+            ASSERT(ap->ssid == "original" || ap->ssid == "replacement");
+            ASSERT(ap->authTimeoutMsg == nullptr);
+            ASSERT(ap->beaconInterval == SimTime(1, SIMTIME_MS));
+            ++observations;
+        }
+    } observer;
+
+    void changeState(LifecycleOperation *operation)
+    {
+        LifecycleOperation::StringMap parameters;
+        operation->initialize(mgmt, parameters);
+        ASSERT(initiateOperation(operation));
+    }
+
+    void act()
+    {
+        ASSERT(armed);
+        armed = false;
+        if (action == 2)
+            mgmt->terminate();
+        else if (action == 4)
+            mgmt->deauthenticate(peer);
+        else if (action == 3)
+            changeState(new ModuleCrashOperation());
+        else
+            changeState(new ModuleStopOperation());
+        if (replaces()) {
+            if (action == 1)
+                changeState(new ModuleStartOperation());
+            mgmt->begin(peer, false, false, "replacement");
+            mgmt->respond(peer, false, 0);
+        }
+    }
+
+  public:
+    StaAssociationCallbacksTest() : cSimpleModule(65536) {}
+
+    virtual void receiveSignal(cComponent *, simsignal_t signal, bool value, cObject *) override
+    {
+        Enter_Method_Silent();
+        ASSERT(signal == Ieee80211Mib::rateStateChangedSignal && value);
+        ++rateNotifications;
+        if (!armed)
+            return;
+        bool atBoundary = boundary == Boundary::RATE && mgmt->associated();
+        atBoundary |= boundary == Boundary::OLD_ASSOCIATION && !mgmt->associated();
+        atBoundary |= boundary == Boundary::REFUSAL && mib->findPeerRateSet(peer) == nullptr;
+        atBoundary |= boundary == Boundary::LIST_CLEAR && mgmt->empty();
+        if (atBoundary)
+            act();
+    }
+
+    virtual void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *details) override
+    {
+        Enter_Method_Silent();
+        if (signal == l2AssociatedSignal) {
+            ++associations;
+            auto ap = check_and_cast<CallbackSta::ApInfo *>(details);
+            auto address = ap->address;
+            auto ssid = ap->ssid;
+            if (armed && boundary == Boundary::ASSOCIATED)
+                act();
+            ASSERT(ap->address == address && ap->ssid == ssid);
+        }
+        else {
+            ASSERT(signal == Ieee80211MgmtSta::htNegotiationFailedSignal);
+            ++failures;
+            if (armed && boundary == Boundary::HT_FAILURE)
+                act();
+        }
+    }
+
+  protected:
+    virtual void activity() override
+    {
+        mgmt = check_and_cast<CallbackSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        mib->setPrimaryChannel(1);
+        mib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        mgmt->subscribe(l2AssociatedSignal, this);
+        mgmt->subscribe(Ieee80211MgmtSta::htNegotiationFailedSignal, this);
+        mgmt->subscribe(l2AssociatedSignal, &observer);
+
+        for (bool reassociation : {false, true}) {
+            for (int ht : {0, 1, 2}) {
+                for (auto point : {Boundary::RATE, Boundary::HT_FAILURE, Boundary::ASSOCIATED}) {
+                    if (point == Boundary::HT_FAILURE && ht != 2)
+                        continue;
+                    for (action = 0; action < 4; ++action) {
+                        if (reassociation) {
+                            mgmt->begin(peer, false, ht != 0);
+                            mgmt->respond(peer, false, ht);
+                        }
+                        mgmt->begin(peer, reassociation, ht != 0);
+                        int confirmsBefore = mgmt->confirmations;
+                        int signalsBefore = associations;
+                        boundary = point;
+                        armed = true;
+                        mgmt->respond(peer, reassociation, ht);
+                        ASSERT(!armed);
+                        ASSERT(mgmt->confirmations == confirmsBefore + (replaces() ? 1 : 0));
+                        ASSERT(associations == signalsBefore + (point == Boundary::ASSOCIATED ? 1 : 0) + (replaces() ? 1 : 0));
+                        ASSERT(!mgmt->pending());
+                        ASSERT(mgmt->hasTimer() == replaces());
+                        if (replaces()) {
+                            ASSERT(mgmt->associated());
+                            ASSERT(mgmt->associatedSsid() == "replacement");
+                            ASSERT(mgmt->lastResult == PRC_SUCCESS && mgmt->lastAddress == peer);
+                            changeState(new ModuleStopOperation());
+                        }
+                        else {
+                            ASSERT(!mgmt->associated() && mgmt->empty());
+                            ASSERT(mib->findPeerRateSet(peer) == nullptr);
+                            ASSERT(mib->findPeerHtState(peer) == nullptr);
+                        }
+                        changeState(new ModuleStartOperation());
+                    }
+                }
+            }
+        }
+
+        for (auto point : {Boundary::OLD_ASSOCIATION, Boundary::REFUSAL, Boundary::LIST_CLEAR}) {
+            for (bool samePeer : {false, true}) {
+                if (!samePeer && point != Boundary::OLD_ASSOCIATION)
+                    continue;
+                for (action = 0; action < 5; ++action) {
+                    if (action == 3 || (action == 4 && point == Boundary::LIST_CLEAR))
+                        continue;
+                    if (point == Boundary::OLD_ASSOCIATION) {
+                        auto oldPeer = samePeer ? peer : MacAddress("02:00:00:00:00:02");
+                        mgmt->begin(oldPeer, false, true);
+                        mgmt->respond(oldPeer, false, 1);
+                    }
+                    mgmt->begin(peer, point == Boundary::OLD_ASSOCIATION, true);
+                    int confirmsBefore = mgmt->confirmations;
+                    boundary = point;
+                    armed = true;
+                    if (point == Boundary::LIST_CLEAR)
+                        mgmt->clearDiscovery();
+                    else
+                        mgmt->respond(peer, point == Boundary::OLD_ASSOCIATION, 1,
+                                point == Boundary::REFUSAL ? SC_UNSPECIFIED : SC_SUCCESSFUL);
+                    ASSERT(!armed);
+                    ASSERT(mgmt->confirmations == confirmsBefore + (replaces() ? 1 : 0));
+                    ASSERT(mgmt->hasTimer() == replaces());
+                    if (replaces() || action == 4)
+                        changeState(new ModuleStopOperation());
+                    changeState(new ModuleStartOperation());
+                }
+            }
+        }
+
+        // Reassociation timeout uses the same cleanup callback and confirmation guard.
+        for (action = 0; action < 5; ++action) {
+            mgmt->begin(peer, false, true);
+            mgmt->respond(peer, false, 1);
+            mgmt->begin(peer, true, true);
+            int confirmsBefore = mgmt->confirmations;
+            boundary = Boundary::OLD_ASSOCIATION;
+            armed = true;
+            mgmt->expire();
+            ASSERT(!armed && !mgmt->pending());
+            ASSERT(mgmt->confirmations == confirmsBefore + (replaces() ? 1 : 0));
+            ASSERT(mgmt->hasTimer() == replaces());
+            if (replaces() || action == 4)
+                changeState(new ModuleStopOperation());
+            changeState(new ModuleStartOperation());
+        }
+
+        ASSERT(observer.observations == associations);
+        ASSERT(rateNotifications > 0 && failures > 0);
+        ASSERT(!mgmt->hasTimer() && !mgmt->pending() && mgmt->empty());
+        wait(SimTime(25, SIMTIME_MS));
+        ASSERT(!mgmt->hasTimer() && !mgmt->pending());
+        mgmt->unsubscribe(l2AssociatedSignal, &observer);
+        mgmt->unsubscribe(l2AssociatedSignal, this);
+        mgmt->unsubscribe(Ieee80211MgmtSta::htNegotiationFailedSignal, this);
+        mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        std::cout << "STA association callback lifetime and cancellation verified.\n";
+    }
+};
+
+Define_Module(StaAssociationCallbacksTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+
+simple CallbackSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::CallbackSta);
+        @lifecycleSupport;
+}
+
+simple StaAssociationCallbacksTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::StaAssociationCallbacksTest);
+}
+
+network StaAssociationCallbacksNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "CallbackSta";
+        }
+        test: StaAssociationCallbacksTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = StaAssociationCallbacksNetwork
+seed-set = 0
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 30ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.hasStatus = true
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].agent.startingTime = 10s
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.channelNumber = 1
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+STA association callback lifetime and cancellation verified.

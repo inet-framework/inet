@@ -20,7 +20,7 @@ simple Ieee80211Mib extends SimpleModule
 {
     parameters:
         @class(Ieee80211Mib);
-        // True after a committed change to rates, HT capabilities, or channel operation.
+        // True once after a complete commit to rates, HT capabilities, or channel operation.
         // Equal updates emit nothing. Listeners query the MIB for current state.
         @signal[rateStateChanged](type=bool);
         // Model-backed subset of IEEE Std 802.11-2024 HT capability/operation state; not a full Annex C MIB.

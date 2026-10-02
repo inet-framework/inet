@@ -27,6 +27,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
   public:
     std::vector<int> sentSubtypes;
     std::vector<Ieee80211ReasonCode> sentDeauthReasons;
+    bool requestHt = true;
 
   protected:
     virtual void start() override
@@ -78,7 +79,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
             body->setSupportedRates(rates);
             body->setExtendedSupportedRatesPresent(false);
         }
-        if (mib->isHtOperationSupported()) {
+        if (requestHt && mib->isHtOperationSupported()) {
             body->setHtCapabilitiesPresent(true);
             body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
             if (refuse) {
@@ -186,6 +187,9 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
     int associationNotifications = 0;
     int stopOnRateNotification = 0;
     bool restartDuringNotification = false;
+    bool stopDuringTeardown = false;
+    bool replaceWithoutStop = false;
+    bool crashDuringTeardown = false;
 
     void changeManagementState(LifecycleOperation *operation)
     {
@@ -201,6 +205,27 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
         Enter_Method_Silent();
         ASSERT(signalID == Ieee80211Mib::rateStateChangedSignal && value);
         ++rateStateNotifications;
+        if (stopDuringTeardown) {
+            stopDuringTeardown = false;
+            ASSERT(!observedMgmt->hasPendingAssociationState(observedPeer));
+            ASSERT(!observedMgmt->hasCommittedAid(observedPeer));
+            ASSERT(!observedMgmt->hasPeerHtState(observedPeer));
+            ASSERT(observedMib->findPeerRateSet(observedPeer) == nullptr);
+            if (!replaceWithoutStop) {
+                if (crashDuringTeardown)
+                    changeManagementState(new ModuleCrashOperation());
+                else
+                    changeManagementState(new ModuleStopOperation());
+            }
+            if (restartDuringNotification || replaceWithoutStop) {
+                if (!replaceWithoutStop)
+                    changeManagementState(new ModuleStartOperation());
+                observedMgmt->submitAuthenticationRequest(observedPeer);
+                observedMgmt->submitAssociationRequest(observedPeer);
+                observedMgmt->finishAssociationResponse(observedPeer);
+            }
+            return;
+        }
         if (stopOnRateNotification == 0)
             return;
         ASSERT(!observedMgmt->hasPendingAssociationState(observedPeer));
@@ -208,6 +233,8 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
             return;
         ASSERT(observedMgmt->hasPeerHtState(observedPeer));
         ASSERT(observedMgmt->getStationStatus(observedPeer) == Ieee80211Mib::ASSOCIATED);
+        // The first publication must already include accepted legacy rates.
+        ASSERT(observedMib->findPeerRateSet(observedPeer) != nullptr);
         changeManagementState(new ModuleStopOperation());
         ASSERT(observedMgmt->isStaListEmpty());
         ASSERT(!observedMgmt->hasStation(observedPeer));
@@ -339,7 +366,7 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
             ASSERT(!mgmt->hasCommittedAid(staAddress));
             ASSERT(!mgmt->hasPeerHtState(staAddress));
             ASSERT(mgmt->getPendingTransactionId(staAddress) == 0);
-            ASSERT(rateStateNotifications == notificationsBeforeTeardown + 2); // HT state and rate state each change.
+            ASSERT(rateStateNotifications == notificationsBeforeTeardown + 1);
             ASSERT(mib->findPeerRateSet(staAddress) == nullptr);
             ASSERT(mib->getBssRateSet() == bssRates);
             ASSERT(*mib->findPeerRateSet(otherPeer) == otherRates);
@@ -359,7 +386,7 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
         // even when a replacement association completes before the listener returns.
         changeManagementState(new ModuleStopOperation());
         changeManagementState(new ModuleStartOperation());
-        for (int notification : {1, 2}) {
+        for (int notification : {1}) {
             for (bool restart : {false, true}) {
                 mgmt->submitAuthenticationRequest(staAddress);
                 mgmt->submitAssociationRequest(staAddress);
@@ -389,6 +416,58 @@ class Ieee80211MgmtApLifecycleTest : public cSimpleModule, public cListener, pub
                     ASSERT(mib->findPeerRateSet(staAddress) == nullptr);
                 }
                 changeManagementState(new ModuleStartOperation());
+            }
+        }
+
+        // Each teardown callback can stop, restart, or replace the same peer.
+        for (bool ht : {false, true}) {
+            mgmt->requestHt = ht;
+            for (auto teardown : {Teardown::DISASSOCIATION, Teardown::REFUSAL, Teardown::AUTHENTICATION, Teardown::DEAUTHENTICATION}) {
+                for (int action : {0, 1, 2, 3}) {
+                    mgmt->submitAuthenticationRequest(staAddress);
+                    mgmt->submitAssociationRequest(staAddress);
+                    mgmt->finishAssociationResponse(staAddress);
+                    if (teardown == Teardown::REFUSAL)
+                        mgmt->submitAssociationRequest(staAddress, true);
+                    auto responsesBefore = mgmt->sentSubtypes.size();
+                    int outcomesBefore = teardownNotifications;
+                    int associationsBefore = associationNotifications;
+                    stopDuringTeardown = true;
+                    restartDuringNotification = action == 1;
+                    replaceWithoutStop = action == 2;
+                    crashDuringTeardown = action == 3;
+                    bool replacement = action == 1 || action == 2;
+                    mib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+                    mgmt->subscribe(l2ApDisassociatedSignal, this);
+                    mgmt->subscribe(l2ApAssociatedSignal, this);
+                    if (teardown == Teardown::REFUSAL)
+                        mgmt->finishAssociationResponse(staAddress);
+                    else if (teardown == Teardown::AUTHENTICATION)
+                        mgmt->submitAuthenticationRequest(staAddress);
+                    else if (teardown == Teardown::DEAUTHENTICATION)
+                        mgmt->submitDeauthentication(staAddress);
+                    else
+                        mgmt->submitDisassociation(staAddress);
+                    mgmt->unsubscribe(l2ApAssociatedSignal, this);
+                    mgmt->unsubscribe(l2ApDisassociatedSignal, this);
+                    mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
+                    ASSERT(!stopDuringTeardown);
+                    ASSERT(teardownNotifications == outcomesBefore);
+                    ASSERT(associationNotifications == associationsBefore + (replacement ? 1 : 0));
+                    ASSERT(mgmt->sentSubtypes.size() == responsesBefore + (replacement ? 2 : 0));
+                    if (replacement) {
+                        ASSERT(mgmt->getStationStatus(staAddress) == Ieee80211Mib::ASSOCIATED);
+                        ASSERT(mgmt->hasCommittedAid(staAddress));
+                        ASSERT(mib->findPeerRateSet(staAddress) != nullptr);
+                        ASSERT(mgmt->hasPeerHtState(staAddress) == ht);
+                        changeManagementState(new ModuleStopOperation());
+                    }
+                    else {
+                        ASSERT(mgmt->isStaListEmpty());
+                        ASSERT(mib->findPeerRateSet(staAddress) == nullptr);
+                    }
+                    changeManagementState(new ModuleStartOperation());
+                }
             }
         }
     }

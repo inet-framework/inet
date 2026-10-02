@@ -182,21 +182,28 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
     else if (msg->getKind() == MK_ASSOC_TIMEOUT) {
         // association timed out
         ASSERT(msg == assocTimeoutMsg);
-        ApInfo *ap = (ApInfo *)msg->getContextPointer();
+        ApInfo snapshot = *static_cast<ApInfo *>(msg->getContextPointer());
+        snapshot.authTimeoutMsg = nullptr;
+        ApInfo *ap = &snapshot;
         bool reassociation = reassociationInProgress;
         EV << "Association timed out, AP address = " << ap->address << "\n";
 
         assocTimeoutMsg = nullptr;
         reassociationInProgress = false;
         delete msg;
+        auto generation = lifecycleGeneration;
+        auto transactionId = associationTransactionId;
 
         // send back failure report to agent
         if (reassociation) {
             handleReassociationFailure(ap);
-            sendReassociationConfirm(ap, PRC_TIMEOUT);
+            if (isCurrentAssociationOperation(generation, transactionId))
+                sendReassociationConfirm(ap, PRC_TIMEOUT);
         }
         else
             sendAssociationConfirm(ap, PRC_TIMEOUT);
+        if (isCurrentAssociationOperation(generation, transactionId))
+            associationTransactionPeer = MacAddress::UNSPECIFIED_ADDRESS;
     }
     else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
         ASSERT(msg == scanTimer);
@@ -277,22 +284,35 @@ Ieee80211MgmtSta::ApInfo *Ieee80211MgmtSta::lookupAP(const MacAddress& address)
 void Ieee80211MgmtSta::clearAPList()
 {
     cancelPendingAssociation();
-
-    for (auto& elem : apList) {
-        if (elem.authTimeoutMsg)
-            cancelAndDelete(elem.authTimeoutMsg);
+    auto generation = lifecycleGeneration;
+    auto transactionId = associationTransactionId;
+    AccessPointList removed;
+    removed.swap(apList);
+    // Detach every record and timer before peer removal can call back into stop().
+    for (auto& elem : removed) {
+        cancelAndDelete(elem.authTimeoutMsg);
+        elem.authTimeoutMsg = nullptr;
+    }
+    for (const auto& elem : removed) {
         if (mib != nullptr && (!mib->bssStationData.isAssociated || elem.address != assocAP.address))
             mib->removePeerRateSet(elem.address);
+        if (!isCurrentAssociationOperation(generation, transactionId))
+            return;
     }
-
-    apList.clear();
 }
 
 void Ieee80211MgmtSta::cancelPendingAssociation()
 {
+    ++associationTransactionId;
+    associationTransactionPeer = MacAddress::UNSPECIFIED_ADDRESS;
     cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
     reassociationInProgress = false;
+}
+
+bool Ieee80211MgmtSta::isCurrentAssociationOperation(uint64_t generation, uint64_t transactionId) const
+{
+    return lifecycleGeneration == generation && associationTransactionId == transactionId;
 }
 
 void Ieee80211MgmtSta::cancelScanTimer()
@@ -372,24 +392,30 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     if (!ap->isAuthenticated)
         throw cRuntimeError("startAssociation: not yet authenticated with AP address='%s'", ap->address.str().c_str());
 
-    prepareTargetRateSet(ap);
-    // switch to that channel
-    changeChannel(ap->channel);
-
-    // create and send association request
-    const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
-    body->setSSID(ap->ssid.c_str());
-    setSupportedRateElements(body);
-    addHtCapabilities(body);
-    body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
+    ApInfo snapshot = *ap;
+    snapshot.authTimeoutMsg = nullptr;
+    auto generation = lifecycleGeneration;
+    auto transactionId = ++associationTransactionId;
+    associationTransactionPeer = snapshot.address;
     reassociationInProgress = false;
-
-    // schedule timeout
-    ASSERT(assocTimeoutMsg == nullptr);
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, assocTimeoutMsg);
+
+    prepareTargetRateSet(&snapshot);
+    if (!isCurrentAssociationOperation(generation, transactionId))
+        return;
+    // switch to that channel
+    changeChannel(snapshot.channel);
+
+    // create and send association request
+    const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
+    body->setSSID(snapshot.ssid.c_str());
+    setSupportedRateElements(body);
+    addHtCapabilities(body);
+    body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
+    if (isCurrentAssociationOperation(generation, transactionId))
+        sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, snapshot.address);
 }
 
 void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
@@ -398,19 +424,28 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
         throw cRuntimeError("startReassociation: not associated or association currently in progress");
     if (!ap->isAuthenticated)
         throw cRuntimeError("startReassociation: not authenticated with AP address='%s'", ap->address.str().c_str());
-    prepareTargetRateSet(ap);
-    changeChannel(ap->channel);
-    const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
-    body->setCurrentAP(assocAP.address);
-    body->setSSID(ap->ssid.c_str());
-    setSupportedRateElements(body);
-    addHtCapabilities(body);
-    body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, ap->address);
+    ApInfo snapshot = *ap;
+    snapshot.authTimeoutMsg = nullptr;
+    auto generation = lifecycleGeneration;
+    auto transactionId = ++associationTransactionId;
+    associationTransactionPeer = snapshot.address;
     reassociationInProgress = true;
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, assocTimeoutMsg);
+
+    prepareTargetRateSet(&snapshot);
+    if (!isCurrentAssociationOperation(generation, transactionId))
+        return;
+    changeChannel(snapshot.channel);
+    const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
+    body->setCurrentAP(assocAP.address);
+    body->setSSID(snapshot.ssid.c_str());
+    setSupportedRateElements(body);
+    addHtCapabilities(body);
+    body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
+    if (isCurrentAssociationOperation(generation, transactionId))
+        sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, snapshot.address);
 }
 
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
@@ -638,13 +673,11 @@ void Ieee80211MgmtSta::disassociate()
 void Ieee80211MgmtSta::clearCurrentAssociation()
 {
     ASSERT(mib->bssStationData.isAssociated);
+    MacAddress address = assocAP.address;
     mib->bssStationData.isAssociated = false;
-    mib->removePeerHtCapabilities(assocAP.address);
-    mib->removePeerRateSet(assocAP.address);
-    mib->clearBssRateSet();
     cancelAndDelete(assocAP.beaconTimeoutMsg);
-    assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
+    mib->clearBssAndPeerState(address);
 }
 
 bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& address)
@@ -652,46 +685,53 @@ bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& add
     if (!mib->bssStationData.isAssociated || address != assocAP.address)
         return false;
 
-    // Keep a stable AP-list object for the primitive confirmation while the
-    // association snapshot is cleared. A pending transaction for a different
-    // AP remains valid after the current association is terminated.
+    if (assocTimeoutMsg == nullptr && associationTransactionPeer == address)
+        cancelPendingAssociation();
+
+    // A local snapshot survives listeners that clear the discovery list.
     ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
     bool pendingReassociation = reassociationInProgress;
     bool terminatesPendingRequest = pendingAp != nullptr && pendingAp->address == address;
+    ApInfo snapshot;
+    if (terminatesPendingRequest) {
+        snapshot = *pendingAp;
+        snapshot.authTimeoutMsg = nullptr;
+    }
     if (terminatesPendingRequest)
         cancelPendingAssociation();
+    auto generation = lifecycleGeneration;
+    auto transactionId = associationTransactionId;
 
     EV << "Setting isAssociated flag to false\n";
     clearCurrentAssociation();
-    if (terminatesPendingRequest) {
+    if (terminatesPendingRequest && isCurrentAssociationOperation(generation, transactionId)) {
         // The primitive API has no peer-aborted result; a termination of a
         // same-peer pending request is reported as a refusal after teardown.
         if (pendingReassociation)
-            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+            sendReassociationConfirm(&snapshot, PRC_REFUSED);
         else
-            sendAssociationConfirm(pendingAp, PRC_REFUSED);
+            sendAssociationConfirm(&snapshot, PRC_REFUSED);
     }
     return true;
 }
 
 void Ieee80211MgmtSta::stop()
 {
+    ++lifecycleGeneration;
     if (host != nullptr && isScanning && scanning.activeScan)
         host->unsubscribe(IRadio::receptionStateChangedSignal, this);
     isScanning = false;
     cancelScanTimer();
     scanning = ScanningInfo();
 
-    clearAPList();
-
-    if (mib->bssStationData.isAssociated)
-        clearCurrentAssociation();
-    else {
-        cancelAndDelete(assocAP.beaconTimeoutMsg);
-        assocAP.beaconTimeoutMsg = nullptr;
-        assocAP = AssociatedApInfo();
-    }
-
+    // Finish all local cleanup before the final MIB commit can invoke listeners.
+    cancelPendingAssociation();
+    for (auto& ap : apList)
+        cancelAndDelete(ap.authTimeoutMsg);
+    apList.clear();
+    mib->bssStationData.isAssociated = false;
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
+    assocAP = AssociatedApInfo();
     Ieee80211MgmtBase::stop();
 }
 
@@ -808,7 +848,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
     EV << "Received Deauthentication frame\n";
     // IEEE Std 802.11-2024, 9.3.3.1: Address 2 is the transmitter/source
     // address used to identify the peer that sent this frame.
-    const MacAddress& address = header->getTransmitterAddress();
+    MacAddress address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
     ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
     bool isPendingAp = pendingAp != nullptr && pendingAp->address == address;
@@ -844,14 +884,19 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
             cancelAndDelete(pendingAp->authTimeoutMsg);
             pendingAp->authTimeoutMsg = nullptr;
         }
-        mib->removePeerHtCapabilities(address);
-        mib->removePeerRateSet(address);
+        ApInfo snapshot = *pendingAp;
+        snapshot.authTimeoutMsg = nullptr;
         cancelPendingAssociation();
-        if (pendingReassociation)
-            sendReassociationConfirm(pendingAp, PRC_REFUSED);
-        else
-            sendAssociationConfirm(pendingAp, PRC_REFUSED);
         delete packet;
+        auto generation = lifecycleGeneration;
+        auto transactionId = associationTransactionId;
+        mib->removePeerState(address);
+        if (isCurrentAssociationOperation(generation, transactionId)) {
+            if (pendingReassociation)
+                sendReassociationConfirm(&snapshot, PRC_REFUSED);
+            else
+                sendAssociationConfirm(&snapshot, PRC_REFUSED);
+        }
         return;
     }
 
@@ -870,8 +915,9 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
 
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
-    mib->removePeerHtCapabilities(address);
-    mib->removePeerRateSet(address);
+    if (associationTransactionPeer == address)
+        cancelPendingAssociation();
+    mib->removePeerState(address);
     delete packet;
 }
 
@@ -948,28 +994,35 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
             statusCode = SC_DATARATE_UNSUP;
     delete packet;
 
+    // Signal listeners can clear apList. This snapshot owns no timers.
+    ApInfo snapshot = *ap;
+    snapshot.authTimeoutMsg = nullptr;
+    ap = &snapshot;
     cancelPendingAssociation();
+    associationTransactionPeer = address;
+    auto generation = lifecycleGeneration;
+    auto transactionId = associationTransactionId;
+    auto isCurrentCompletion = [this, generation, transactionId]() {
+        return isCurrentAssociationOperation(generation, transactionId);
+    };
 
     if (statusCode != SC_SUCCESSFUL) {
         EV << "Association failed with AP address=" << ap->address << "\n";
         if (reassociation)
             handleReassociationFailure(ap);
         else if (!mib->bssStationData.isAssociated || assocAP.address != ap->address)
-            mib->removePeerHtCapabilities(ap->address);
-        if (!mib->bssStationData.isAssociated || assocAP.address != ap->address)
-            mib->removePeerRateSet(ap->address);
+            mib->removePeerState(ap->address);
+        if (!isCurrentCompletion())
+            return;
     }
     else {
         EV << "Association successful, AP address=" << ap->address << "\n";
 
         if (mib->bssStationData.isAssociated) {
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
-            mib->bssStationData.isAssociated = false;
-            mib->removePeerHtCapabilities(assocAP.address);
-            mib->removePeerRateSet(assocAP.address);
-            cancelAndDelete(assocAP.beaconTimeoutMsg);
-            assocAP.beaconTimeoutMsg = nullptr;
-            assocAP = AssociatedApInfo();
+            clearCurrentAssociation();
+            if (!isCurrentCompletion())
+                return;
         }
 
         // change our state to "associated"
@@ -977,27 +1030,29 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
-        if (responseHtStatus == HtAssociationResponseStatus::VALID_HT)
-            mib->setPeerHtCapabilities(ap->address, responseHtCapabilities, responseHtOperation);
-        else {
-            mib->removePeerHtCapabilities(ap->address);
-            if (responseHtStatus == HtAssociationResponseStatus::INVALID_HT) {
-                EV_WARN << "Association succeeded without usable HT negotiation with AP address=" << ap->address
-                        << ": " << responseHtReason << "\n";
-                HtNegotiationFailure notification;
-                notification.setPeerAddress(ap->address);
-                notification.setReassociation(reassociation);
-                notification.setStatus(responseHtStatus);
-                notification.setReason(responseHtReason);
-                emit(htNegotiationFailedSignal, &notification);
-            }
-        }
-
-        mib->installBssAndPeerRateSets(bssRateSet, ap->address, responseRateSet);
-        emit(l2AssociatedSignal, myIface, ap);
-
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        bool installHt = responseHtStatus == HtAssociationResponseStatus::VALID_HT;
+        mib->installBssAndPeerState(bssRateSet, ap->address, responseRateSet,
+                installHt ? &responseHtCapabilities : nullptr, installHt ? &responseHtOperation : nullptr);
+        if (!isCurrentCompletion() || !mib->bssStationData.isAssociated || assocAP.address != address)
+            return;
+        if (responseHtStatus == HtAssociationResponseStatus::INVALID_HT) {
+            EV_WARN << "Association succeeded without usable HT negotiation with AP address=" << ap->address
+                    << ": " << responseHtReason << "\n";
+            HtNegotiationFailure notification;
+            notification.setPeerAddress(ap->address);
+            notification.setReassociation(reassociation);
+            notification.setStatus(responseHtStatus);
+            notification.setReason(responseHtReason);
+            emit(htNegotiationFailedSignal, &notification);
+            if (!isCurrentCompletion() || !mib->bssStationData.isAssociated || assocAP.address != address)
+                return;
+        }
+        // Details are an immutable borrowed snapshot for this complete signal delivery.
+        emit(l2AssociatedSignal, myIface, ap);
+        if (!isCurrentCompletion() || !mib->bssStationData.isAssociated || assocAP.address != address)
+            return;
     }
 
     // report back to agent
@@ -1005,6 +1060,8 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         sendReassociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     else
         sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
+    if (isCurrentCompletion())
+        associationTransactionPeer = MacAddress::UNSPECIFIED_ADDRESS;
 }
 
 Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociationResponse(
@@ -1092,14 +1149,17 @@ const char *Ieee80211MgmtSta::getHtAssociationResponseStatusName(HtAssociationRe
 
 void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
 {
+    MacAddress address = ap->address;
+    auto generation = lifecycleGeneration;
+    auto transactionId = associationTransactionId;
     // IEEE Std 802.11-2024, 11.3.5.4(f): failed or timed-out reassociation
     // disassociates the STA only when the target is its current AP.
-    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address))
-        disassociate();
+    // Both callers already detach the failed request's timeout before this cleanup.
+    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, address))
+        clearCurrentAssociation();
     else {
-        mib->removePeerHtCapabilities(ap->address);
-        mib->removePeerRateSet(ap->address);
-        if (mib->bssStationData.isAssociated)
+        mib->removePeerState(address);
+        if (isCurrentAssociationOperation(generation, transactionId) && mib->bssStationData.isAssociated)
             changeChannel(assocAP.channel);
     }
 }

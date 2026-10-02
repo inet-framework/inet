@@ -263,6 +263,60 @@ void Ieee80211Mib::installBssAndPeerRateSets(const Ieee80211RateSetState& newBss
     emit(rateStateChangedSignal, true);
 }
 
+void Ieee80211Mib::installBssAndPeerState(Ieee80211RateSetState newBssRateSet, MacAddress peerAddress,
+        Ieee80211RateSetState newPeerRateSet, const Ieee80211HtCapabilities *capabilities,
+        const Ieee80211HtOperation *operation)
+{
+    Enter_Method("installBssAndPeerState");
+    validateIeee80211RateSetState(newBssRateSet, "BSS rate state");
+    validateIeee80211RateSetState(newPeerRateSet, "peer rate state");
+    if ((capabilities == nullptr) != (operation == nullptr))
+        throw cRuntimeError("Peer HT capabilities and operation must be present or absent together");
+    // Prepare HT negotiation before any rate mutation. No callback sees a partial commit.
+    bool changed = capabilities != nullptr ? updatePeerHtState(peerAddress, *capabilities, *operation) :
+            peerHtStates.erase(peerAddress) != 0;
+    auto peer = peerRateSets.find(peerAddress);
+    changed |= bssRateSet != newBssRateSet || peer == peerRateSets.end() || peer->second != newPeerRateSet;
+    bssRateSet = std::move(newBssRateSet);
+    peerRateSets[peerAddress] = std::move(newPeerRateSet);
+    if (changed)
+        emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::removePeerState(MacAddress address)
+{
+    Enter_Method("removePeerState");
+    bool changed = peerHtStates.erase(address) != 0;
+    changed |= peerRateSets.erase(address) != 0;
+    if (changed)
+        emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::clearBssAndPeerState(MacAddress address)
+{
+    Enter_Method("clearBssAndPeerState");
+    bool changed = bssRateSet != Ieee80211RateSetState();
+    changed |= peerHtStates.erase(address) != 0;
+    changed |= peerRateSets.erase(address) != 0;
+    bssRateSet = Ieee80211RateSetState();
+    if (changed)
+        emit(rateStateChangedSignal, true);
+}
+
+void Ieee80211Mib::clearManagementState()
+{
+    Enter_Method("clearManagementState");
+    bool changed = !peerHtStates.empty() || !peerRateSets.empty() || bssRateSet != Ieee80211RateSetState();
+    bssAccessPointData.stations.clear();
+    associationIdReservations.clear();
+    bssAccessPointData.associationIds.clear();
+    peerHtStates.clear();
+    peerRateSets.clear();
+    bssRateSet = Ieee80211RateSetState();
+    if (changed)
+        emit(rateStateChangedSignal, true);
+}
+
 void Ieee80211Mib::clearBssRateSet()
 {
     Enter_Method("clearBssRateSet");
@@ -293,22 +347,32 @@ void Ieee80211Mib::setPeerHtCapabilities(const MacAddress& address, const Ieee80
         const Ieee80211HtOperation& operation)
 {
     Enter_Method("setPeerHtCapabilities");
+    if (updatePeerHtState(address, capabilities, operation))
+        emit(rateStateChangedSignal, true);
+}
+
+bool Ieee80211Mib::updatePeerHtState(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
+        const Ieee80211HtOperation& operation)
+{
     if (!localHtCapabilitiesValid)
         throw cRuntimeError("Cannot install peer HT capabilities when local HT operation is disabled");
-    auto& state = peerHtStates[address];
-    bool changed = !state.valid || !(state.advertisedCapabilities == capabilities) ||
-            !(state.negotiatedCapabilities.localAdvertisement == localHtCapabilities) ||
-            !(state.negotiatedCapabilities.operation == operation);
-    state.valid = true;
-    state.advertisedCapabilities = capabilities;
-    state.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities, capabilities, operation);
-    if (++state.generation == 0)
-        state.generation = 1;
+    PeerHtState prepared;
+    prepared.valid = true;
+    prepared.advertisedCapabilities = capabilities;
+    prepared.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities, capabilities, operation);
+    auto peer = peerHtStates.find(address);
+    bool changed = peer == peerHtStates.end() || !peer->second.valid ||
+            !(peer->second.advertisedCapabilities == prepared.advertisedCapabilities) ||
+            !(peer->second.negotiatedCapabilities.localAdvertisement == prepared.negotiatedCapabilities.localAdvertisement) ||
+            !(peer->second.negotiatedCapabilities.operation == prepared.negotiatedCapabilities.operation);
+    prepared.generation = peer == peerHtStates.end() ? 1 : peer->second.generation + 1;
+    if (prepared.generation == 0)
+        prepared.generation = 1;
+    peerHtStates[address] = prepared;
     EV_INFO << "Installed peer HT state, peer = " << address
-            << ", txValid = " << state.negotiatedCapabilities.localTxPeerRx.valid
-            << ", rxValid = " << state.negotiatedCapabilities.localRxPeerTx.valid << endl;
-    if (changed)
-        emit(rateStateChangedSignal, true);
+            << ", txValid = " << prepared.negotiatedCapabilities.localTxPeerRx.valid
+            << ", rxValid = " << prepared.negotiatedCapabilities.localRxPeerTx.valid << endl;
+    return changed;
 }
 
 void Ieee80211Mib::removePeerHtCapabilities(const MacAddress& address)
@@ -411,10 +475,11 @@ short Ieee80211Mib::allocateAssociationId(const MacAddress& address)
 
 void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
 {
-    associationIdReservations.erase(address);
-    bssAccessPointData.associationIds.erase(address);
-    removePeerHtCapabilities(address);
-    removePeerRateSet(address);
+    // The argument can name a management record that a listener erases.
+    MacAddress peerAddress = address;
+    associationIdReservations.erase(peerAddress);
+    bssAccessPointData.associationIds.erase(peerAddress);
+    removePeerState(peerAddress);
 }
 
 void Ieee80211Mib::clearAssociationIds()
@@ -422,8 +487,11 @@ void Ieee80211Mib::clearAssociationIds()
     bssAccessPointData.stations.clear();
     associationIdReservations.clear();
     bssAccessPointData.associationIds.clear();
-    clearPeerHtCapabilities();
-    clearPeerRateSets();
+    bool changed = !peerHtStates.empty() || !peerRateSets.empty();
+    peerHtStates.clear();
+    peerRateSets.clear();
+    if (changed)
+        emit(rateStateChangedSignal, true);
 }
 
 } // namespace ieee80211

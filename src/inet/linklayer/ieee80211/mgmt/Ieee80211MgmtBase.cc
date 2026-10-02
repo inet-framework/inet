@@ -309,9 +309,7 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
-    mib->clearPeerHtCapabilities();
-    mib->clearPeerRateSets();
-    mib->clearBssRateSet();
+    mib->clearManagementState();
 }
 
 } // namespace ieee80211

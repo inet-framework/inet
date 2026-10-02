@@ -142,25 +142,25 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
             // Detach pending state before the first notification. Use value copies after it.
             clearPendingAssociation(&sta->second);
             sta->second.completedAssociationTransactionId = pendingTransactionId;
-            auto isCurrentAssociation = [this, address, pendingTransactionId]() {
+            auto generation = lifecycleGeneration;
+            auto isCurrentAssociation = [this, address, pendingTransactionId, generation]() {
                 auto currentSta = staList.find(address);
-                return currentSta != staList.end() && currentSta->second.completedAssociationTransactionId == pendingTransactionId;
+                return lifecycleGeneration == generation && currentSta != staList.end() &&
+                        currentSta->second.completedAssociationTransactionId == pendingTransactionId;
             };
             if (htStateAvailable) {
                 // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
+                Ieee80211HtOperation currentOperation;
+                bool installHt = false;
                 if (htCapabilitiesValid && mib->isHtOperationSupported()) {
-                    auto currentOperation = mib->getHtOperation();
-                    if (supportsBasicHtMcsSet(htCapabilities, currentOperation))
-                        mib->setPeerHtCapabilities(address, htCapabilities, currentOperation);
-                    else
-                        mib->removePeerHtCapabilities(address);
+                    currentOperation = mib->getHtOperation();
+                    installHt = supportsBasicHtMcsSet(htCapabilities, currentOperation);
                 }
-                else
-                    mib->removePeerHtCapabilities(address);
+                mib->installBssAndPeerState(mib->getBssRateSet(), address, acceptedRates,
+                        installHt ? &htCapabilities : nullptr, installHt ? &currentOperation : nullptr);
             }
-            if (!isCurrentAssociation())
-                return;
-            mib->installBssAndPeerRateSets(mib->getBssRateSet(), address, acceptedRates);
+            else
+                mib->installBssAndPeerRateSets(mib->getBssRateSet(), address, acceptedRates);
             if (!wasAssociated && isCurrentAssociation())
                 sendAssocNotification(address);
         }
@@ -171,10 +171,13 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
             // state to be cleared after this acknowledged refusal.
             mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
             clearPendingAssociation(&sta->second);
+            auto generation = lifecycleGeneration;
+            auto transitionId = sta->second.managementTransitionId;
             mib->releaseAssociationId(address);
             // Signal delivery is synchronous; observers must see the complete
             // downgraded state and no pending response transaction.
-            sendDisAssocNotification(address);
+            if (isCurrentStationTransition(address, generation, transitionId))
+                sendDisAssocNotification(address);
         }
         else
             clearPendingAssociation(&sta->second);
@@ -209,6 +212,7 @@ uint64_t Ieee80211MgmtAp::createAssociationTransactionId()
 
 void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
 {
+    sta->managementTransitionId = createAssociationTransactionId();
     mib->cancelAssociationIdReservation(sta->address);
     sta->pendingAssociationSuccessful = false;
     sta->pendingAssociationTransactionId = 0;
@@ -219,6 +223,14 @@ void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
     sta->pendingHtOperationValid = false;
     sta->pendingHtOperation = Ieee80211HtOperation();
     sta->pendingRateSet = Ieee80211RateSetState();
+}
+
+bool Ieee80211MgmtAp::isCurrentStationTransition(const MacAddress& address, uint64_t generation, uint64_t transitionId) const
+{
+    if (lifecycleGeneration != generation)
+        return false;
+    auto sta = staList.find(address);
+    return sta != staList.end() && sta->second.managementTransitionId == transitionId;
 }
 
 void Ieee80211MgmtAp::sendBeacon()
@@ -240,6 +252,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
+    MacAddress address = header->getTransmitterAddress();
     EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
     // create STA entry if needed
@@ -251,6 +264,9 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
+    delete packet;
+    sta->managementTransitionId = createAssociationTransactionId();
+    auto generation = lifecycleGeneration;
     // reset authentication status, when starting a new auth sequence
     // The statements below are added because the L2 handover time was greater than before when
     // a STA wants to re-connect to an AP with which it was associated before. When the STA wants to
@@ -264,16 +280,20 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         // 11.3.4 does not require an associated peer to downgrade on frame 1;
         // keep this cancellation scoped to this existing model transition.
         clearPendingAssociation(sta);
-        bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
+        auto transitionId = sta->managementTransitionId;
+        bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
+        mib->releaseAssociationId(address);
+        if (!isCurrentStationTransition(address, generation, transitionId))
+            return;
         if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
-        mib->removePeerHtCapabilities(sta->address);
-        mib->removePeerRateSet(sta->address);
-        if (wasAssociated)
-            sendDisAssocNotification(sta->address);
+            sendDisAssocNotification(address);
+        if (!isCurrentStationTransition(address, generation, transitionId))
+            return;
+        sta = &staList.find(address)->second;
     }
+    auto transitionId = sta->managementTransitionId;
 
     // check authentication sequence number is OK
     if (frameAuthSeq != sta->authSeqExpected) {
@@ -281,9 +301,8 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
         const auto& body = makeShared<Ieee80211AuthenticationFrame>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
-        delete packet;
         sta->authSeqExpected = 1; // go back to start square
+        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, address);
         return;
     }
 
@@ -298,20 +317,18 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     body->setStatusCode(SC_SUCCESSFUL);
     body->setIsLast(isLast);
     // TODO frame length could be increased to account for challenge text length etc.
-    sendManagementFrame(isLast ? "Auth-OK" : "Auth", body, ST_AUTHENTICATION, header->getTransmitterAddress());
-
-    delete packet;
+    sendManagementFrame(isLast ? "Auth-OK" : "Auth", body, ST_AUTHENTICATION, address);
+    if (!isCurrentStationTransition(address, generation, transitionId))
+        return;
+    sta = &staList.find(address)->second;
 
     // update status
     if (isLast) {
-        bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
-        if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
-        mib->removePeerHtCapabilities(sta->address);
-        mib->removePeerRateSet(sta->address);
-        if (wasAssociated)
-            sendDisAssocNotification(sta->address);
+        bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
+        mib->releaseAssociationId(address);
+        if (wasAssociated && isCurrentStationTransition(address, generation, transitionId))
+            sendDisAssocNotification(address);
         EV << "STA authenticated\n";
     }
     else {
@@ -328,17 +345,17 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
     delete packet;
 
     if (sta) {
+        MacAddress address = sta->address;
         clearPendingAssociation(sta);
-        bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        auto generation = lifecycleGeneration;
+        auto transitionId = sta->managementTransitionId;
+        bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
         // mark STA as not authenticated; alternatively, it could also be removed from staList
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
-        if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
-        mib->removePeerHtCapabilities(sta->address);
-        mib->removePeerRateSet(sta->address);
-        if (wasAssociated)
-            sendDisAssocNotification(sta->address);
+        mib->releaseAssociationId(address);
+        if (wasAssociated && isCurrentStationTransition(address, generation, transitionId))
+            sendDisAssocNotification(address);
     }
 }
 
@@ -526,15 +543,15 @@ void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const 
     delete packet;
 
     if (sta) {
+        MacAddress address = sta->address;
         clearPendingAssociation(sta);
-        bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;
-        if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
-        mib->removePeerHtCapabilities(sta->address);
-        mib->removePeerRateSet(sta->address);
-        if (wasAssociated)
-            sendDisAssocNotification(sta->address);
+        auto generation = lifecycleGeneration;
+        auto transitionId = sta->managementTransitionId;
+        bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->releaseAssociationId(address);
+        if (wasAssociated && isCurrentStationTransition(address, generation, transitionId))
+            sendDisAssocNotification(address);
     }
 }
 
@@ -599,10 +616,9 @@ void Ieee80211MgmtAp::start()
 
 void Ieee80211MgmtAp::stop()
 {
+    ++lifecycleGeneration;
     cancelEvent(beaconTimer);
     staList.clear();
-    // Keep transaction identities distinct across synchronous stop and restart.
-    mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();
 }
 

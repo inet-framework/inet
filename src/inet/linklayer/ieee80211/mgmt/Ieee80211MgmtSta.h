@@ -129,6 +129,13 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     bool reassociationInProgress = false;
     AssociatedApInfo assocAP;
 
+  private:
+    uint64_t lifecycleGeneration = 0;
+    uint64_t associationTransactionId = 0; // advances on a new attempt or cancellation; survives restart
+    MacAddress associationTransactionPeer; // remains identifiable after completion detaches its timeout
+
+    bool isCurrentAssociationOperation(uint64_t generation, uint64_t transactionId) const;
+
   public:
     Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), scanTimer(nullptr), assocTimeoutMsg(nullptr) {}
     virtual ~Ieee80211MgmtSta();

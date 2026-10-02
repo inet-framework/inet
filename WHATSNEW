@@ -9,6 +9,8 @@ Canceled HCF grants now emit a matching sequence finish signal.
 AP teardown publishes authenticated status before peer-rate removal signals.
 Access points now complete association safely when a rate-state listener stops or restarts management.
 The old completion cannot publish stale association notifications.
+IEEE 802.11 management now publishes complete HT and legacy rate state in one notification.
+Access point teardown and station association also stop stale callbacks after management stops or a new operation replaces the old operation.
 
 1. IEEE 802.11 rate control per receiver
 

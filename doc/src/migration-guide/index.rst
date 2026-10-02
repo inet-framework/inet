@@ -113,6 +113,12 @@ The MIB already removes peer rate and HT state when it releases an association I
 
 Custom ``rateStateChanged`` listeners now observe cleared association response state.
 If a listener stops or replaces the association, the old completion stops further publication.
+The MIB now emits one ``rateStateChanged`` signal after a complete management commit.
+Custom listeners must query the committed state.
+Remove dependencies on separate HT and legacy rate notifications.
+The details of ``l2Associated`` are an immutable ``ApInfo`` snapshot for the whole synchronous signal delivery.
+Copy required values before the callback returns.
+Do not retain the details pointer or modify the snapshot.
 No configuration or method signature changes are required.
 
 The Block Ack policy bypasses ``blockAckReqThreshold`` when no prepared data

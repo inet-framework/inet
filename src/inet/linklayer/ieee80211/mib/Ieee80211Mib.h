@@ -25,7 +25,7 @@ namespace ieee80211 {
 class INET_API Ieee80211Mib : public SimpleModule
 {
   public:
-    // Emitted after a committed rate, HT capability, or channel-operation change.
+    // Emitted once after a complete rate, HT capability, or channel-operation commit.
     // The value is true. There are no details or ownership transfers.
     static simsignal_t rateStateChangedSignal;
 
@@ -95,6 +95,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     Ieee80211RateSetState bssRateSet;
     std::map<MacAddress, Ieee80211RateSetState> peerRateSets;
 
+    // These mutations do not notify listeners; the public commit owns notification.
+    bool updatePeerHtState(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
+            const Ieee80211HtOperation& operation);
+
   protected:
     virtual void initialize(int stage) override;
 
@@ -129,6 +133,15 @@ class INET_API Ieee80211Mib : public SimpleModule
     void setBssRateSet(const Ieee80211RateSetState& rateSet);
     void installBssAndPeerRateSets(const Ieee80211RateSetState& bssRateSet,
             const MacAddress& peerAddress, const Ieee80211RateSetState& peerRateSet);
+    // Null HT arguments remove peer HT state. Both HT arguments must be present or absent.
+    // Inputs are borrowed for this call only. Listeners see all stores after the commit.
+    void installBssAndPeerState(Ieee80211RateSetState bssRateSet, MacAddress peerAddress,
+            Ieee80211RateSetState peerRateSet, const Ieee80211HtCapabilities *capabilities,
+            const Ieee80211HtOperation *operation);
+    void removePeerState(MacAddress address);
+    void clearBssAndPeerState(MacAddress address);
+    // Clears transient relationships and rates before one notification. Local state survives.
+    void clearManagementState();
     void clearBssRateSet();
     void removePeerRateSet(const MacAddress& address);
     void clearPeerRateSets();
