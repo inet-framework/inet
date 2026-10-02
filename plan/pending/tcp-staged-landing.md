@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 landed on master on 2026-10-02. S2 is next.
+Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3 on 2026-10-05. S4 is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -46,8 +46,8 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | Stage | Branch | Commits | Size (src, no tests) | Contents |
 | --- | --- | --- | --- | --- |
 | S1 ✅ | `topic/tcp-header-options` | 1, 52 | +228 −26 | the TCP Fast Open and AccECN header options, the AE bit |
-| S2 | `topic/tcp-tidy-ups` | 4, 5, 6, 21 | +193 −134 | RFC citations, the signals in one place, the ACK callback rename |
-| S3 | `topic/tcp-socket-contract` | 2, 3 | +478 −4 | the socket commands, tags and status fields; mutable window and timestamp parameters |
+| S2 ✅ | `topic/tcp-tidy-ups` | 4, 5, 6, 21 | +193 −134 | RFC citations, the signals in one place, the ACK callback rename |
+| S3 ✅ | `topic/tcp-socket-contract` | 2 | +475 −1 | the socket commands, tags and status fields (commit 3 left the stage, see D-4) |
 | S4 | `topic/tcp-recovery-split` | 7, 8, 9, 10, 50 | +1872 −656 | the recovery interfaces, RFC 5681, RFC 6582, SACK recovery moved into `Rfc6675Recovery` |
 | S5 | `topic/tcp-flavour-split` | 11, 12, 13, 54, 55, 56, 60, 84 | +1101 −1312 | the classic flavours on the split architecture, and the repairs of that move |
 | S6 | `topic/tcp-cubic` | 14, 45, 57, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
@@ -58,7 +58,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S11 | `topic/tcp-connection-lifecycle` | 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
 | S12 | `topic/tcp-fast-open` | 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN |
-| S14 | `topic/tcp-receive-buffer` | 28, 29, 35 | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT` |
+| S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34, 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
 | S16 | `topic/tcp-write-boundaries` | 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61, 74, 86 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
@@ -97,8 +97,14 @@ Known items for later stages, found by the blame:
    `check-seals.sh`, `check-source-seals.sh`, and `check-series-builds.sh master..HEAD debug`.
 5. Build in debug against `omnetpp-6.x` (the pairing of `inet-master`) and run the tests of the
    stage: its unit and module tests, the module `tcp_` suite, the protocol tests `tcp/`, and
-   the fingerprint suite at the stage head. If a row moves, find the commit that moves it and
-   explain the row in that commit (rule 3).
+   the fingerprint ingredients `tplx` and `~tND` at the stage head. If a row moves, find the
+   commit that moves it and explain the row in that commit (rule 3).
+
+   In this environment, many stored fingerprints do not match on master too (for example DHCP,
+   AODV and BGP rows). So a stage compares the calculated values of its head with the calculated
+   values of master in the same environment, not with the stored values. The run at the head of
+   a stage is the baseline of the next stage. The script is
+   `/var/tmp/claude-staged/fp.sh` (it keeps every calculated value in its log).
 6. Stop. Give the owner the branch, the list of commits, and the evidence.
 7. After the owner approves: fast-forward `master` to the stage. Push only when the owner says so.
 8. Mark the stage done in this plan, with its results, in a last commit of the stage. Remove the
@@ -115,6 +121,16 @@ plan gives a reason for.
   case, on 2026-10-02.
 - **D-2 — The `Plan:` line names this plan (rule 6).** The source plan stays on its branch until
   S20.
+- **D-4 — A socket option is not a module parameter.** Commit 3 (`let the window and timestamp
+  parameters change at run time`) made `advertisedWindow`, `windowScalingFactor` and
+  `timestampSupport` `@mutable`. Its only user is `PacketDrillApp` in inet-gpl. That app models
+  `setsockopt(SO_RCVBUF)` before listen or connect with a change of the `tcp` module parameters.
+  The owner rejected this on 2026-10-02: the change applies to every later connection of the
+  host, not to one socket. The receive buffer of one socket must travel with the socket, in the
+  open command, as `tcpAlgorithmClass` does. S14 adds this, because S14 also brings
+  `receiveBufferSize`, which has the same problem. inet-gpl's `PacketDrillApp` then changes. A
+  `@mutable` `timestampSupport` for the host-wide sysctl `net.ipv4.tcp_timestamps` is decided at
+  S14 too; nothing in INET needs it before then. Commit 3 does not land.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -145,4 +161,52 @@ Evidence, debug build against `omnetpp-6.x`, at the stage head:
 `check-series-builds.sh` did not run. The plan commit changes no source, and the head build
 covers the only source commit. The fingerprint suite did not run for S1. S1 and S2 both claim
 that no row moves, so the fingerprint run at the head of S2 checks both stages.
+
+### S2 — `topic/tcp-tidy-ups` — landed 2026-10-02
+
+Four commits by Rudolf Hornig: commits 4, 5, 6 and 21. The owner reviewed and approved S2 on
+2026-10-02, and asked to land it before the tests finished. The code is the same as on the source
+branch. The messages changed (rule 6): the "re-cut" paragraphs and an old "Verified:" line left,
+and the rename commit no longer says that an SCTP rename follows, because that commit left the
+TCP branch (SCTP keeps the old callback names).
+
+| Suite | Result |
+| --- | --- |
+| series builds | all four commits build |
+| unit | 114 PASS |
+| serializer | 4 PASS |
+| module | 346 PASS |
+| protocol `self/` and `tcp/` | as S1: 21 PASS; 25 PASS, 2 FAIL (expected), 306 SKIP (expected) |
+| fingerprint | not compared; see step 5 of section 4 for the method that S3 starts |
+
+### S3 — `topic/tcp-socket-contract` — landed 2026-10-05
+
+One commit by Rudolf Hornig: commit 2, the socket contract. The message no longer says "later
+commits" but names the later stages of this plan, and its old "Verified:" line left. Commit 3
+left the stage (D-4).
+
+| Suite | Result |
+| --- | --- |
+| series builds | commit 2 builds |
+| unit | 114 PASS |
+| serializer | 4 PASS |
+| module | 346 PASS |
+| protocol `self/` and `tcp/` | as S1 |
+
+The suites ran with commit 3 on top. Commit 3 changed only NED properties, so the results apply to
+commit 2 alone.
+
+The owner approved S3 on 2026-10-05. Before the landing, S3 moved onto two QUIC fixes that reached
+master (`f6a48554c3`, `8c29416d8d`). They change no TCP file.
+
+Fingerprints, compared with master `dabcd78282` in the same environment: **no row differs** in the
+753 rows of `tplx` and the 638 rows of `~tND`. The master baseline in this environment is
+`tplx`: 475 PASS, 259 FAIL, 19 ERROR; `~tND`: 262 PASS, 364 FAIL, 12 ERROR. The ERROR rows need
+features that this build does not have (for example `TcpLwip`) or a serializer that does not
+exist (`GpsrBeacon`). The logs are `/var/tmp/claude-staged/fp-<head>-<ingredient>.log`, and
+`/var/tmp/claude-staged/fpcmp.py` compares two of them.
+
+The runner checks one ingredient at a time. With two ingredients in one run, INET's runner stops
+at once: `python/inet/test/fingerprint/task.py:165` uses the undefined name `sim_time_limit`. This
+defect is not TCP, so this plan does not repair it.
 
