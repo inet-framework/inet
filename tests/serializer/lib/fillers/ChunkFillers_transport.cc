@@ -27,6 +27,7 @@ void fillTcpBase(tcp::TcpHeader *h, FillValues& v)
     h->setDestPort(v.u16());
     h->setSequenceNo(v.u32());
     h->setAckNo(v.u32());
+    h->setAeBit(true);
     h->setCwrBit(true);
     h->setEceBit(true);
     h->setUrgBit(true);
