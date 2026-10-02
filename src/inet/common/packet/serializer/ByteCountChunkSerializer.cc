@@ -18,7 +18,18 @@ void ByteCountChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
 {
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     b serializedLength = length == b(-1) ? byteCountChunk->getChunkLength() - offset : length;
-    stream.writeByteRepeatedly(byteCountChunk->getData(), serializedLength.get<B>());
+    // A slice can start and end inside a byte: every byte holds the same value, so the
+    // bit at position p is bit (p % 8) of that value, counted from the most significant.
+    uint8_t data = byteCountChunk->getData();
+    int64_t position = offset.get<b>();
+    int64_t end = position + serializedLength.get<b>();
+    for (; position < end && position % 8 != 0; position++)
+        stream.writeBit(data & (0x80 >> (position % 8)));
+    int64_t byteCount = (end - position) / 8;
+    stream.writeByteRepeatedly(data, byteCount);
+    position += 8 * byteCount;
+    for (; position < end; position++)
+        stream.writeBit(data & (0x80 >> (position % 8)));
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
 
