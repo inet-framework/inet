@@ -24,10 +24,7 @@ the commit it examined; without it a seal is a claim with no evidence.
 
 | | Path | Audit | Rules checked | Accepted exceptions |
 | --- | --- | --- | --- | --- |
-*The seal on `common/packet/` is **lifted** for the four files named in the commit that lifted
-it. The seal owner allowed the edits on 2026-10-02. The commit that restores this row closes the
-window; between the two, the path is unsealed and
-[SR-DEFAULT-OPEN](../rule/sealing.md#sr-default-open) applies to it like any other path.*
+| 🔒 | `common/packet/` *(recursive)* | `audit/subsystem/common-packet.md`, 2026-07-20 | AR-ORG-DOMAINS, AR-ORG-VIS-SPLIT | AS-01, AV-ORG-01, AV-ORG-02 |
 
 The packet and chunk API and its implementation, the umbrella behind
 [`common/packet/PacketAPI.h`](../../../src/inet/common/packet/PacketAPI.h): the chunks (`chunk/`,
