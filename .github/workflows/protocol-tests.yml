@@ -25,6 +25,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: inet
+      # the packetdrill wrappers in tests/protocol/tcp/{linux,packetdrill} run the scripts of
+      # inet-gpl; without it they skip
+      - uses: actions/checkout@v6
+        with:
+          repository: inet-framework/inet-gpl
+          path: inet-gpl
       - run: mkdir -p /home/runner/work/ccache
       - uses: actions/cache/restore@v5
         with:
@@ -54,9 +60,26 @@ jobs:
           source $GITHUB_WORKSPACE/venv/bin/activate
           python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt
           python3 -m pip install -r $GITHUB_WORKSPACE/inet/python/requirements.txt
+          python3 -m pip install pyyaml  # inet-gpl's packetdrill suite reads its YAML configuration
           echo "::endgroup::"
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+
+          echo "::group::Compiling inet-gpl and its packetdrill runner"
+          cd $GITHUB_WORKSPACE/inet-gpl
+          . setenv -q
+          make makefiles
+          make MODE=$MODE -j $(nproc)
+          make -C tests/packetdrill build
+          cd $GITHUB_WORKSPACE/inet
+          echo "::endgroup::"
+
+          echo "::group::Checking that the packetdrill wrappers can run"
+          # one script that passes: a missing or broken inet-gpl fails the job here, instead of
+          # turning the 306 packetdrill wrappers into 306 skips
+          inet_run_packetdrill tcp/packetdrill/fast_retransmit/fr-4pkt-sack | tail -1 \
+            | grep -qx 'PACKETDRILL tcp/packetdrill/fast_retransmit/fr-4pkt-sack: PASS'
+          echo "::endgroup::"
 
           echo "::group::Running protocol tests"
           inet_run_protocol_tests
