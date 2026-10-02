@@ -37,11 +37,14 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         bool pendingAssociationSuccessful = false;
         uint64_t pendingAssociationTransactionId = 0;
+        uint64_t completedAssociationTransactionId = 0; // zero cancels further publication from a completed response
+        uint64_t managementTransitionId = 0; // identifies the current peer transition across callbacks
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
         bool pendingHtOperationValid = false;
         Ieee80211HtOperation pendingHtOperation;
+        Ieee80211RateSetState pendingRateSet;
 //        int consecFailedTrans; // TODO
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };
@@ -73,6 +76,11 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
     uint64_t nextAssociationTransactionId = 0;
+
+  private:
+    uint64_t lifecycleGeneration = 0;
+
+    bool isCurrentStationTransition(const MacAddress& address, uint64_t generation, uint64_t transitionId) const;
 
   public:
     Ieee80211MgmtAp() {}

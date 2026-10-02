@@ -1,0 +1,155 @@
+%description:
+Verify that simplified association shares the AP BSS rate policy while local
+rate limits remain distinct. Check actual data and ACK transmissions in both
+directions with DCF and HCF. The data Duration must cover the actual ACK.
+
+%file: ResponseRateChecker.cc
+#include <iostream>
+#include "inet/common/SimpleModule.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+class ResponseRateChecker : public SimpleModule, public cListener
+{
+  protected:
+    cModule *mac[2] = {};
+    int dataCount[2] = {};
+    int ackCount[2] = {};
+    bool pending[2] = {};
+    MacAddress sender[2];
+    simtime_t duration[2];
+    simtime_t dataEnd[2];
+
+    virtual void initialize() override
+    {
+        mac[0] = getModuleByPath("^.ap.wlan[0].mac");
+        mac[1] = getModuleByPath("^.sta.wlan[0].mac");
+        for (auto module : mac)
+            module->subscribe(packetSentToLowerSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(value);
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        int index = source == mac[0] ? 0 : 1;
+        if (header->getReceiverAddress().isMulticast())
+            return;
+        auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            ASSERT(!pending[index]);
+            ASSERT(!data->getRetry());
+            ASSERT(mode->getDataMode()->getNetBitrate() == bps(Mbps(12)));
+            pending[index] = true;
+            sender[index] = data->getTransmitterAddress();
+            duration[index] = data->getDurationField();
+            dataEnd[index] = simTime() + mode->getDuration(packet->getDataLength());
+            dataCount[index]++;
+        }
+        else if (dynamicPtrCast<const Ieee80211AckFrame>(header)) {
+            int originator = 1 - index;
+            ASSERT(pending[originator]);
+            ASSERT(header->getReceiverAddress() == sender[originator]);
+            auto ackDuration = mode->getDuration(packet->getDataLength());
+            auto expected = mode->getSifsTime() + ackDuration;
+            ASSERT(duration[originator] >= expected);
+            ASSERT(duration[originator] <= expected + SimTime(1, SIMTIME_US));
+            ASSERT(mode->getDataMode()->getNetBitrate() == bps(Mbps(12)));
+            // Allow propagation across the one-metre link; Duration has microsecond precision.
+            ASSERT(simTime() + ackDuration <= dataEnd[originator] + duration[originator] + SimTime(1, SIMTIME_US));
+            pending[originator] = false;
+            ackCount[originator]++;
+        }
+    }
+
+    virtual void finish() override
+    {
+        for (int i = 0; i < 2; i++) {
+            ASSERT(dataCount[i] > 0);
+            ASSERT(ackCount[i] == dataCount[i]);
+            ASSERT(!pending[i]);
+        }
+        std::cout << "Both directions used 12 Mbps ACKs within the reserved Duration.\n";
+    }
+};
+Define_Module(ResponseRateChecker);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple ResponseRateChecker extends SimpleModule
+{
+    parameters:
+        @class(::ResponseRateChecker);
+}
+
+network ResponseRateTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost;
+        ap: WirelessHost;
+        checker: ResponseRateChecker;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ResponseRateTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.ap.wlan[0].mgmt.basicRates = "6Mbps 12Mbps"
+*.ap.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps 24Mbps"
+*.sta.wlan[0].mgmt.basicRates = "6Mbps"
+*.sta.wlan[0].mgmt.operationalRates = "6Mbps 12Mbps"
+**.wlan[0].agent.typename = ""
+**.wlan[0].opMode = "g(erp)"
+**.wlan[0].bitrate = 12Mbps
+**.wlan[0].mac.qosStation = ${qos=false,true}
+**.wlan[0].radio.transmitter.power = 50mW
+**.arp.typename = "GlobalArp"
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.mobility.initialX = 0m
+*.sta.mobility.initialX = 1m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+*.ap.numApps = 1
+*.sta.numApps = 1
+*.*.app[0].typename = "UdpBasicApp"
+*.*.app[0].localPort = 5000
+*.*.app[0].destPort = 5000
+*.*.app[0].messageLength = 100B
+*.*.app[0].sendInterval = 100ms
+*.ap.app[0].destAddresses = "sta"
+*.sta.app[0].destAddresses = "ap"
+*.ap.app[0].startTime = 1ms
+*.sta.app[0].startTime = 5ms
+
+%contains: stdout
+Both directions used 12 Mbps ACKs within the reserved Duration.

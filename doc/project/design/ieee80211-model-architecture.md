@@ -10,7 +10,7 @@ implemented PHY features.
 
 | Kind | Meaning | Owner and writer | Readers |
 |---|---|---|---|
-| **Catalog** | Immutable mode definitions, rates, timing, and physical legality | Mode definitions have no runtime writer. Configuration selects the catalog; the MAC exposes that selection through a read-only provider. | Capability assembly, MAC timing, rate selection, PHY |
+| **Catalog** | Immutable mode definitions, rates, timing, and physical legality | Mode definitions have no runtime writer. Configuration selects the catalog. `Ieee80211Mac::getModeSet()` exposes that selection through a read-only query. | Capability assembly, MAC timing, rate selection, PHY |
 | **Capability** | What the configured implementation can transmit and receive | Each PHY/MAC component supplies its abilities through a typed contract. Initialization assembles the shared profile in the MIB. | Management, peer-capability derivation, feature procedures |
 | **Control** | Chosen policy, enabled features, and operating parameters | The component making the decision: management for BSS policy/operation, PHY for radio control, algorithms for their policies | Components executing those decisions |
 | **Status** | What has happened, been learned, or is currently effective | The component observing or completing the event: management for peers/association, PHY for radio state, algorithms for measurements | Management decisions, selection, and other declared consumers |

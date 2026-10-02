@@ -42,4 +42,3 @@ class INET_API BlockAckRecord
 } /* namespace inet */
 
 #endif
-

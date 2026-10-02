@@ -5,6 +5,13 @@ INET-4.7.x (in development)
 ---------------------------
 
 Notable backward incompatible changes are the following:
+Canceled HCF grants now emit a matching sequence finish signal.
+AP teardown publishes authenticated status before peer-rate removal signals.
+Access points now complete association safely when a rate-state listener stops or restarts management.
+The old completion cannot publish stale association notifications.
+IEEE 802.11 management now publishes complete HT and legacy rate state in one notification.
+Access point teardown and station association also stop stale callbacks after management stops or a new operation replaces the old operation.
+Station scan requests now stop if a rate-state listener stops management or replaces the operation during scan cleanup.
 
 1. IEEE 802.11 rate control per receiver
 
@@ -293,6 +300,35 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. IEEE 802.11 prepared exchanges and rate selection
+
+   HCF now prepares complete EDCA exchanges before transmission opportunity
+   (TXOP) admission. The Duration reservation includes the selected response.
+   Basic, operational, and peer rate sets constrain transmission choices.
+   Invalid response overrides fail explicitly. These changes can alter results
+   and fingerprints.
+   An oversized first exchange above a positive TXOP limit now stops the
+   simulation unless a supported exception applies. A Duration reservation
+   above 32767 microseconds also causes a runtime error.
+   Zero-limit Block Ack traffic can now send one BAR/Block Ack exchange per
+   data frame, even with queued data. See the migration guide for this policy.
+
+   Custom frame sequences, sequence handlers, rate selectors, acknowledgment
+   policies, contention implementations, transmitters, and transmission
+   callbacks require API updates.
+   Prepared receive steps retain response values without a transmit-step pointer.
+   Management rate initialization requires Ieee80211Mac or a derived class.
+   See the migration guide for details.
+
+   HCF stop retains packets with interrupted acknowledgment waits for retry
+   after restart. This lifecycle transition does not consume a retry attempt.
+
+   Detailed stations now use the target AP's advertised rates before
+   authentication and association. Failed reassociation preserves the current
+   BSS rate policy. ACK and CTS predictions use the remote peer's rate context.
+   Explicit rates for later RTS frames now accept the standard mandatory-rate
+   fallback. Initial control frames still require an eligible basic rate.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -347,6 +383,11 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+7. IEEE 802.11 automatic basic rates follow the selected operational rates
+
+   A station with ``basicRates="auto"`` can now start when ``operationalRates``
+   excludes a mandatory PHY rate. Its basic set contains only mandatory rates
+   that remain operational. The old combination failed at initialization.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

@@ -196,4 +196,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

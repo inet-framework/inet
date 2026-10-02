@@ -111,6 +111,9 @@ class INET_API Ieee80211HrDsssMode : public Ieee80211ModeBase
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }
+    virtual bps getNonHtReferenceRate() const override { return dataMode->getNetBitrate(); }
+    virtual ModulationClass getModulationClass() const override { return ModulationClass::DSSS_HRDSSS; }
+    virtual PreambleType getLegacyPreambleType() const override { return preambleMode->getPreambleType() == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? PreambleType::SHORT : PreambleType::LONG; }
 
     virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
@@ -177,4 +180,3 @@ class INET_API Ieee80211HrDsssCompliantModes
 } // namespace inet
 
 #endif
-

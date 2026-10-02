@@ -45,4 +45,3 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

@@ -244,4 +244,3 @@ BlockAckReordering::~BlockAckReordering()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

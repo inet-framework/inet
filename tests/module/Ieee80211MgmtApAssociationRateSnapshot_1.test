@@ -1,0 +1,264 @@
+%description:
+Verify complete AP association publication and production rate selection.
+The first rate callback must see accepted peer rates and the HT decision.
+Equal snapshots emit no rate signal. Invalid input leaves every store unchanged.
+
+%file: TestIeee80211MgmtApAssociationRateSnapshot.cc
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class SnapshotAp : public Ieee80211MgmtAp
+{
+  public:
+    void complete(const MacAddress& address, bool reassociation, bool ht, bool include24)
+    {
+        Enter_Method("complete");
+        if (staList.find(address) == staList.end()) {
+            auto& sta = staList[address];
+            sta.address = address;
+            sta.authSeqExpected = 1;
+            mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        }
+        Ptr<Ieee80211AssociationRequestFrame> body;
+        if (reassociation) {
+            auto reassociationBody = makeShared<Ieee80211ReassociationRequestFrame>();
+            reassociationBody->setCurrentAP(mib->address);
+            body = reassociationBody;
+        }
+        else
+            body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = include24 ? 3 : 2;
+        rates.rate[0] = 6;
+        rates.rate[1] = 12;
+        rates.rate[2] = 24;
+        body->setSupportedRates(rates);
+        if (ht)
+            setHtCapabilities(body, mib->localHtCapabilities);
+        body->setChunkLength(B(100));
+        auto request = new Packet("AssociationRequest");
+        request->insertAtBack(body);
+        auto requestHeader = makeShared<Ieee80211MgmtHeader>();
+        requestHeader->setTransmitterAddress(address);
+        if (reassociation)
+            handleReassociationRequestFrame(request, requestHeader);
+        else
+            handleAssociationRequestFrame(request, requestHeader);
+        ASSERT(staList.at(address).pendingAssociationSuccessful);
+
+        auto response = new Packet("AssociationResponse");
+        auto responseHeader = makeShared<Ieee80211MgmtHeader>();
+        responseHeader->setType(reassociation ? ST_REASSOCIATIONRESPONSE : ST_ASSOCIATIONRESPONSE);
+        responseHeader->setReceiverAddress(address);
+        response->insertAtBack(responseHeader);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(staList.at(address).pendingAssociationTransactionId);
+        frameTransmissionFinished(response, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete response;
+    }
+
+    bool pending(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId != 0; }
+    const MacAddress& addressReference(const MacAddress& address) const { return staList.at(address).address; }
+    bool empty() const { return staList.empty(); }
+    void stopForTest() { Enter_Method("stopForTest"); stop(); }
+
+  protected:
+    virtual void start() override { Ieee80211MgmtApBase::start(); }
+    virtual void sendManagementFrame(const char *, const Ptr<Ieee80211MgmtFrame>&, int, const MacAddress&, uint64_t) override {}
+};
+
+Define_Module(SnapshotAp);
+
+class ApAssociationRateSnapshotTest : public cSimpleModule, public cListener
+{
+    SnapshotAp *mgmt = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    IRateSelection *selection = nullptr;
+    MacAddress peer = MacAddress("02:00:00:00:00:09");
+    std::set<bps> acceptedRates;
+    bool expectedHt = false;
+    bool inspectSnapshot = false;
+    bool stopOnRemoval = false;
+    int notifications = 0;
+
+  public:
+    ApAssociationRateSnapshotTest() : cSimpleModule(65536) {}
+
+    virtual void receiveSignal(cComponent *, simsignal_t signal, bool value, cObject *) override
+    {
+        Enter_Method_Silent();
+        ASSERT(signal == Ieee80211Mib::rateStateChangedSignal && value);
+        ++notifications;
+        if (stopOnRemoval) {
+            stopOnRemoval = false;
+            ASSERT(mib->findPeerHtState(peer) == nullptr && mib->findPeerRateSet(peer) == nullptr);
+            mgmt->stopForTest();
+        }
+        if (!inspectSnapshot)
+            return;
+        ASSERT(mib->bssAccessPointData.stations.at(peer) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mib->bssAccessPointData.associationIds.count(peer) == 1);
+        ASSERT(!mgmt->pending(peer));
+        ASSERT((mib->findPeerHtState(peer) != nullptr) == expectedHt);
+        auto rates = mib->findPeerRateSet(peer);
+        ASSERT(rates != nullptr && rates->supported.known);
+        ASSERT(rates->supported.legacyRates == acceptedRates);
+        ASSERT(mib->getBssRateSet().operational.legacyRates.count(Mbps(24)) == 1);
+
+        // Query the real configured selector during this exact notification.
+        Packet packet("Data");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(peer);
+        bool refused = false;
+        try {
+            auto mode = selection->computeMode(&packet, header);
+            ASSERT(acceptedRates.count(mode->getDataMode()->getNetBitrate()) == 1);
+        }
+        catch (const cRuntimeError&) {
+            refused = true;
+        }
+        ASSERT(refused == (acceptedRates.count(Mbps(24)) == 0));
+    }
+
+  protected:
+    virtual void activity() override
+    {
+        mgmt = check_and_cast<SnapshotAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        selection = check_and_cast<IRateSelection *>(getModuleByPath("^.ap.wlan[0].mac.dcf.rateSelection"));
+        auto bssRates = mib->getBssRateSet();
+        const MacAddress otherPeer("02:00:00:00:00:0a");
+        mgmt->complete(otherPeer, false, true, true);
+        auto otherRates = *mib->findPeerRateSet(otherPeer);
+
+        mib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        acceptedRates = {Mbps(6), Mbps(12)};
+        expectedHt = true;
+        inspectSnapshot = true;
+        mgmt->complete(peer, false, true, false);
+        ASSERT(notifications == 1);
+        mgmt->complete(peer, true, true, false);
+        ASSERT(notifications == 1); // The equal accepted snapshot changes no observable rate state.
+        acceptedRates.insert(Mbps(24));
+        mgmt->complete(peer, true, true, true);
+        ASSERT(notifications == 2);
+        acceptedRates.erase(Mbps(24));
+        expectedHt = false;
+        mgmt->complete(peer, true, false, false);
+        ASSERT(notifications == 3);
+        ASSERT(mib->getBssRateSet() == bssRates);
+        ASSERT(*mib->findPeerRateSet(otherPeer) == otherRates);
+        ASSERT(mib->findPeerHtState(otherPeer) != nullptr);
+        inspectSnapshot = false;
+
+        auto rates = *mib->findPeerRateSet(peer);
+        auto capabilities = mib->localHtCapabilities;
+        auto operation = mib->getHtOperation();
+        mib->installBssAndPeerState(bssRates, peer, rates, &capabilities, &operation);
+        int beforeEqual = notifications;
+        auto peerHt = mib->findPeerHtState(peer);
+        // HT input pointers and the BSS reference deliberately alias current MIB state.
+        mib->installBssAndPeerState(mib->getBssRateSet(), peer, *mib->findPeerRateSet(peer),
+                &peerHt->advertisedCapabilities, &peerHt->negotiatedCapabilities.operation);
+        ASSERT(notifications == beforeEqual);
+        auto htBeforeInvalid = *mib->findPeerHtState(peer);
+        auto invalid = rates;
+        invalid.supported.known = false;
+        bool rejected = false;
+        try {
+            mib->installBssAndPeerState(bssRates, peer, invalid, nullptr, nullptr);
+        }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        ASSERT(mib->getBssRateSet() == bssRates && *mib->findPeerRateSet(peer) == rates);
+        ASSERT(mib->findPeerHtState(peer)->generation == htBeforeInvalid.generation);
+        ASSERT(notifications == beforeEqual);
+        rejected = false;
+        try {
+            mib->installBssAndPeerState(bssRates, peer, rates, &capabilities, nullptr);
+        }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected && notifications == beforeEqual);
+
+        // A public teardown argument can refer directly to a record erased by its listener.
+        stopOnRemoval = true;
+        mib->releaseAssociationId(mgmt->addressReference(peer));
+        ASSERT(!stopOnRemoval && mgmt->empty());
+        ASSERT(mib->findPeerRateSet(peer) == nullptr && mib->findPeerHtState(peer) == nullptr);
+        ASSERT(mib->bssAccessPointData.associationIds.empty());
+        mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        std::cout << "AP association snapshot and synchronous rate selection verified.\n";
+    }
+};
+
+Define_Module(ApAssociationRateSnapshotTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+
+simple SnapshotAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::SnapshotAp);
+}
+
+simple ApAssociationRateSnapshotTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::ApAssociationRateSnapshotTest);
+}
+
+network ApAssociationRateSnapshotNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "SnapshotAp";
+        }
+        test: ApAssociationRateSnapshotTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ApAssociationRateSnapshotNetwork
+seed-set = 0
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].mgmt.ssid = "SSID"
+*.ap.wlan[0].mgmt.basicRates = "6Mbps 12Mbps"
+*.ap.wlan[0].mac.dcf.rateSelection.dataFrameBitrate = 24Mbps
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.channelNumber = 1
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+AP association snapshot and synchronous rate selection verified.

@@ -71,4 +71,3 @@ class INET_API OriginatorBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

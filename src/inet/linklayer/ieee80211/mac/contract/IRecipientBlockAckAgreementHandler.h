@@ -38,4 +38,3 @@ class INET_API IRecipientBlockAckAgreementHandler
 } // namespace inet
 
 #endif
-
