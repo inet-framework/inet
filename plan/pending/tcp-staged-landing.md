@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — stage S1 is built and waits for the owner's review.
+Status: **in progress** — S1 landed on master on 2026-10-02. S2 is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -45,7 +45,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 
 | Stage | Branch | Commits | Size (src, no tests) | Contents |
 | --- | --- | --- | --- | --- |
-| S1 | `topic/tcp-header-options` | 1, 52 | +228 −26 | the TCP Fast Open and AccECN header options, the AE bit |
+| S1 ✅ | `topic/tcp-header-options` | 1, 52 | +228 −26 | the TCP Fast Open and AccECN header options, the AE bit |
 | S2 | `topic/tcp-tidy-ups` | 4, 5, 6, 21 | +193 −134 | RFC citations, the signals in one place, the ACK callback rename |
 | S3 | `topic/tcp-socket-contract` | 2, 3 | +478 −4 | the socket commands, tags and status fields; mutable window and timestamp parameters |
 | S4 | `topic/tcp-recovery-split` | 7, 8, 9, 10, 50 | +1872 −656 | the recovery interfaces, RFC 5681, RFC 6582, SACK recovery moved into `Rfc6675Recovery` |
@@ -101,14 +101,18 @@ Known items for later stages, found by the blame:
    explain the row in that commit (rule 3).
 6. Stop. Give the owner the branch, the list of commits, and the evidence.
 7. After the owner approves: fast-forward `master` to the stage. Push only when the owner says so.
-8. Rebase `topic/tcp-new-audit-fixes` onto the new master, and drop the commits that landed. The
-   final tree must stay the same. Do not run the TCP branch tests at this point.
-9. Mark the stage done in this plan, with its results.
+8. Mark the stage done in this plan, with its results, in a last commit of the stage. Remove the
+   stage branch and its worktree after the landing.
+
+Do not rebase `topic/tcp-new-audit-fixes` after each stage. All stages cut from the same source
+commit, `1826c3f4be`, so the commit numbers of section 3 stay valid. After the last stage, the
+tree of master must be equal to the tree of `1826c3f4be`, except for the differences that this
+plan gives a reason for.
 
 ## 5. Decisions
 
-- **D-1 — The fold rule (rule 4).** Proposed by me, 2026-10-02. The owner confirms it at the
-  review of S1, because S1 is its first case.
+- **D-1 — The fold rule (rule 4).** Proposed on 2026-10-02. The owner approved S1, its first
+  case, on 2026-10-02.
 - **D-2 — The `Plan:` line names this plan (rule 6).** The source plan stays on its branch until
   S20.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
@@ -117,10 +121,28 @@ Known items for later stages, found by the blame:
 
 ## 6. Results
 
-### S1 — `topic/tcp-header-options`
+### S1 — `topic/tcp-header-options` — landed 2026-10-02
 
 Commit 52 (`serialize the experimental TCP Fast Open option (kind 254)`) repairs a gap of
 commit 1: commit 1 reads option kind 254 but cannot write it. Master does not have this code, so
 rule 4 folds 52 into 1. The stage is then one commit with four unit tests:
 `tcp_accecn_option_wire_1`, `tcp_ae_bit_wire_1`, `tcp_fastopen_wireformat_1`,
 `tcp_fastopen_exp_wireformat_1`.
+
+The owner reviewed S1 and approved it on 2026-10-02.
+
+Evidence, debug build against `omnetpp-6.x`, at the stage head:
+
+| Suite | Result |
+| --- | --- |
+| unit | 114 PASS, with the four new wire tests |
+| serializer | 4 PASS, with `serializer_chunk_roundtrip` and the AE bit in its filler |
+| module | 346 PASS |
+| protocol `self/` | 21 PASS |
+| protocol `tcp/` | 25 PASS, 2 FAIL (expected), 306 SKIP (expected: packetdrill needs inet-gpl) |
+| static gates | classification, commits, links, seals and source seals pass |
+
+`check-series-builds.sh` did not run. The plan commit changes no source, and the head build
+covers the only source commit. The fingerprint suite did not run for S1. S1 and S2 both claim
+that no row moves, so the fingerprint run at the head of S2 checks both stages.
+
