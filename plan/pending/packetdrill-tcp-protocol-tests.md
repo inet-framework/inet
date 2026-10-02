@@ -115,38 +115,38 @@ skipped script, an unknown id, a missing `inet-gpl` and a missing id.
   runner and `opp_repl` now select a test when its test folder, its working directory or the
   folder of its `.test` file matches, so a subfolder of a suite can be run on its own.
 
-**Step 6 — CI. — designed 2026-09-29; lands after the rebase of #1155.** At this branch's base the
-protocol tests run in the matrix of `.github/workflows/other-tests.yml`; master split it into one
-workflow per category (`4fda03f612`), so a change here would be replaced at the rebase. The change
-to master's `protocol-tests.yml`:
-
-```yaml
-      - uses: actions/checkout@v6
-        with:
-          repository: inet-framework/inet-gpl
-          path: inet-gpl
-          ref: rh/packetdrill            # master, once rh/packetdrill merges
-```
-
-and, in the *Build and test* step, after `build-inet.sh` and before `inet_run_protocol_tests`:
+**Step 6 — CI. — done 2026-10-02, on master before #1155.** The job of `protocol-tests.yml`
+checks out `inet-framework/inet-gpl` (master) into `inet-gpl`, installs PyYAML, and, after
+`build-inet.sh` and before `inet_run_protocol_tests`:
 
 ```sh
-echo "::group::Building inet-gpl"
-python3 -m pip install pyyaml            # suite.py reads tcp/scripts.yaml and tcp/sysctls.yaml
-cd $GITHUB_WORKSPACE/inet-gpl && . setenv -q && make makefiles && make MODE=$MODE -j $(nproc)
+echo "::group::Compiling inet-gpl and its packetdrill runner"
+cd $GITHUB_WORKSPACE/inet-gpl
+. setenv -q
+make makefiles
+make MODE=$MODE -j $(nproc)
 make -C tests/packetdrill build
+cd $GITHUB_WORKSPACE/inet
 echo "::endgroup::"
+
 echo "::group::Checking that the packetdrill wrappers can run"
 inet_run_packetdrill tcp/packetdrill/fast_retransmit/fr-4pkt-sack | tail -1 \
   | grep -qx 'PACKETDRILL tcp/packetdrill/fast_retransmit/fr-4pkt-sack: PASS'
 echo "::endgroup::"
 ```
 
+**The job fails until #1155 merges.** `inet-gpl` master builds only against #1155, and master
+lacks the APIs that `PacketDrillApp` uses (`TcpZerocopyTag`, `TcpSendEorReq`, the AccECN option,
+the Fast Open parameters), so the job stops at the build of `inet-gpl`. The owner chose this over
+a change on the #1155 branch, and over an optional `inet-gpl` build that could hide a broken build
+as skips. Checked locally under `bash -eo pipefail` against INET `topic/tcp-new-audit-fixes`
+`05c8569672`: `inet-gpl` and the runner build, and the guard passes.
+
 **The guard** runs one script that passes and requires its verdict line, so a job in which
 `inet-gpl` is missing or broken fails at once instead of turning 306 wrappers into 306 skips.
 Checked locally: it passes with `inet-gpl` and fails without it.
 
-**The job is green since 2026-09-29.** Under D-2 each baseline divergence was a plain `FAIL`, not
+**With #1155 the job is green** (since 2026-09-29, on the #1155 branch). Under D-2 each baseline divergence was a plain `FAIL`, not
 an expected one, and each was a defect of INET. The #1155 branch repairs all seven: `c23267fa9b`
 (the loss probe after the last ACK), `3ed9158dd1` (a window update in the classic flavours, four
 wrappers), `e6992aa467` (the loss probe episode at an RTO) and `f5190638cc` (F-RTO and SACK blocks
@@ -158,5 +158,5 @@ from before the RTO). After the third rebase onto `topic/tcp-new-audit-fixes` (`
 `derive-tests-from-a-standard.md` did not exist at this branch's first base. Since the rebase of
 #1155 onto master (2026-09-29) they do, so the two steps can land on this branch.
 
-**Steps 6, 7 and 8 are open.** The rebase of #1155 that they waited for is done: this branch is on
-INET `359db08cc3`, and the CI change above has the names of the new layout.
+**Steps 7 and 8 are open.** Step 6 is on master; the protocol job runs the wrappers once #1155
+merges.
