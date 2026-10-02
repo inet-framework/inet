@@ -18,7 +18,8 @@ void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 {
     const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     b serializedLength = length == b(-1) ? bytesChunk->getChunkLength() - offset : length;
-    stream.writeBytes(bytesChunk->getBytes(), offset, serializedLength);
+    // writeData() also handles a slice that starts or ends inside a byte
+    stream.writeData(bytesChunk->getBytes(), offset, serializedLength);
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
 

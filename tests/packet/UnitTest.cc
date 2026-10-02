@@ -894,6 +894,46 @@ static void testSerialization()
     ASSERT(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
 }
 
+// The bits that a serialization writes, from offset for length.
+static std::vector<bool> serializedBits(const Ptr<const Chunk>& chunk, b offset = b(0), b length = b(-1))
+{
+    MemoryOutputStream stream;
+    Chunk::serialize(stream, chunk, offset, length);
+    std::vector<bool> bits;
+    stream.copyData(bits);
+    return bits;
+}
+
+static void testBitSliceSerialization()
+{
+    // 1. a slice of a ByteCountChunk that starts and ends inside a byte serializes to the
+    //    same bits as that region of the whole chunk
+    auto byteCountChunk1 = makeShared<ByteCountChunk>(B(3), 0xA5);
+    byteCountChunk1->markImmutable();
+    auto all1 = serializedBits(byteCountChunk1);
+    ASSERT(all1.size() == 24);
+    const auto& slice1 = byteCountChunk1->peek(b(3), b(13));
+    ASSERT(dynamicPtrCast<const SliceChunk>(slice1) != nullptr);
+    ASSERT(serializedBits(slice1) == std::vector<bool>(all1.begin() + 3, all1.begin() + 16));
+
+    // 2. the same holds for a BytesChunk
+    auto bytesChunk2 = makeImmutableBytesChunk(makeVector(3));
+    auto all2 = serializedBits(bytesChunk2);
+    const auto& slice2 = bytesChunk2->peek(b(3), b(13));
+    ASSERT(serializedBits(slice2) == std::vector<bool>(all2.begin() + 3, all2.begin() + 16));
+
+    // 3. a packet whose content is cut inside a byte, as a link cuts a frame that a
+    //    disconnect interrupts, still serializes: the result is the leading bits
+    Packet packet3;
+    packet3.insertAtBack(byteCountChunk1);
+    packet3.insertAtBack(bytesChunk2);
+    packet3.removeAtBack(b(11));
+    ASSERT(packet3.getTotalLength() == b(37));
+    std::vector<bool> expected3(all1);
+    expected3.insert(expected3.end(), all2.begin(), all2.begin() + 13);
+    ASSERT(packet3.peekAllAsBits()->getBits() == expected3);
+}
+
 static void testConversion()
 {
     // 1. implicit non-conversion via serialization is an error by default (would unnecessary slow down simulation)
@@ -2126,6 +2166,7 @@ void UnitTest::initialize()
     testPolymorphism();
     testStreaming();
     testSerialization();
+    testBitSliceSerialization();
     testConversion();
     testIteration();
     testCorruption();
