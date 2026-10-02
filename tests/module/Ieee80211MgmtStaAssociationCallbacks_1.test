@@ -3,6 +3,7 @@ Verify STA association completion across synchronous rate and outcome callbacks.
 Stop, restart, and same-lifecycle replacement must cancel the old completion.
 Signal details must remain valid after a listener clears the AP list.
 Verify refusal, old-association cleanup, and detached list cleanup.
+Verify scan command cancellation, replacement, and normal completion.
 
 %file: TestIeee80211MgmtStaAssociationCallbacks.cc
 
@@ -11,11 +12,21 @@ Verify refusal, old-association cleanup, and detached list cleanup.
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
+
+class TrackedScanRequest : public Ieee80211Prim_ScanRequest
+{
+    int& destructions;
+
+  public:
+    explicit TrackedScanRequest(int& destructions) : destructions(destructions) {}
+    virtual ~TrackedScanRequest() override { ++destructions; }
+};
 
 class CallbackSta : public Ieee80211MgmtSta
 {
@@ -23,6 +34,61 @@ class CallbackSta : public Ieee80211MgmtSta
     int confirmations = 0;
     Ieee80211PrimResultCode lastResult = PRC_REFUSED;
     MacAddress lastAddress;
+    int scanConfirmations = 0;
+    int probeRequests = 0;
+    int channelChanges = 0;
+
+    struct ScanSnapshot {
+        cMessage *timer = nullptr;
+        simtime_t deadline;
+        ScanningInfo info{};
+        bool subscribed = false;
+    };
+
+    void requestScan(bool active, const char *ssid, int& destructions)
+    {
+        Enter_Method("requestScan");
+        auto request = new TrackedScanRequest(destructions);
+        request->setBSSType(BSSTYPE_INFRASTRUCTURE);
+        request->setSSID(ssid);
+        request->setActiveScan(active);
+        request->setProbeDelay(SimTime(10, SIMTIME_US));
+        request->setMinChannelTime(SimTime(20, SIMTIME_US));
+        request->setMaxChannelTime(SimTime(40, SIMTIME_US));
+        request->setChannelListArraySize(1);
+        request->setChannelList(0, 1);
+        handleCommand(0, request);
+    }
+
+    bool isScanSubscribed() const
+    {
+        return host->isSubscribed(physicallayer::IRadio::receptionStateChangedSignal, const_cast<CallbackSta *>(this));
+    }
+    bool isScanningNow() const { return isScanning; }
+    bool hasScanTimer() const { return scanTimer != nullptr; }
+    cMessage *getPendingTimer() const { return assocTimeoutMsg; }
+    const ApInfo *findCachedPeer(const MacAddress& address) const
+    {
+        for (const auto& ap : apList)
+            if (ap.address == address)
+                return &ap;
+        return nullptr;
+    }
+    ScanSnapshot getScanSnapshot() const
+    {
+        ASSERT(isScanning && scanTimer != nullptr && scanTimer->isScheduled());
+        return {scanTimer, scanTimer->getArrivalTime(), scanning, isScanSubscribed()};
+    }
+    void checkScanSnapshot(const ScanSnapshot& snapshot) const
+    {
+        ASSERT(isScanning && scanTimer == snapshot.timer && scanTimer->isScheduled());
+        ASSERT(scanTimer->getArrivalTime() == snapshot.deadline && isScanSubscribed() == snapshot.subscribed);
+        ASSERT(scanning.bssid == snapshot.info.bssid && scanning.ssid == snapshot.info.ssid);
+        ASSERT(scanning.activeScan == snapshot.info.activeScan && scanning.probeDelay == snapshot.info.probeDelay);
+        ASSERT(scanning.channelList == snapshot.info.channelList && scanning.currentChannelIndex == snapshot.info.currentChannelIndex);
+        ASSERT(scanning.minChannelTime == snapshot.info.minChannelTime && scanning.maxChannelTime == snapshot.info.maxChannelTime);
+        ASSERT(scanning.busyChannelDetected == snapshot.info.busyChannelDetected);
+    }
 
     void begin(const MacAddress& address, bool reassociation, bool ht, const char *ssid = "original")
     {
@@ -127,8 +193,18 @@ class CallbackSta : public Ieee80211MgmtSta
     const std::string& associatedSsid() const { return assocAP.ssid; }
 
   protected:
-    virtual void sendManagementFrame(const char *, const Ptr<Ieee80211MgmtFrame>&, int, const MacAddress&) override {}
-    virtual void changeChannel(int) override {}
+    virtual void sendManagementFrame(const char *, const Ptr<Ieee80211MgmtFrame>&, int subtype, const MacAddress&) override
+    {
+        if (subtype == ST_PROBEREQUEST)
+            ++probeRequests;
+    }
+    virtual void changeChannel(int) override { ++channelChanges; }
+    virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode result) override
+    {
+        ASSERT(dynamic_cast<Ieee80211Prim_ScanConfirm *>(confirm) != nullptr && result == PRC_SUCCESS);
+        ++scanConfirmations;
+        delete confirm;
+    }
     virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode result) override
     {
         ASSERT(ap->authTimeoutMsg == nullptr);
@@ -156,6 +232,18 @@ class StaAssociationCallbacksTest : public cSimpleModule, public cListener, publ
     int associations = 0;
     int failures = 0;
     int rateNotifications = 0;
+    enum class ScanAction { STOP, CRASH, RESTART, REPLACE_SCAN, REPLACE_ASSOCIATION };
+    bool scanCase = false;
+    bool originalActiveScan = false;
+    ScanAction scanAction = ScanAction::STOP;
+    int scanActions = 0;
+    int replacementDestructions = 0;
+    int channelsAfterAction = 0;
+    CallbackSta::ScanSnapshot replacementScan;
+    cMessage *replacementAssociationTimer = nullptr;
+    simtime_t replacementAssociationDeadline;
+    const CallbackSta::ApInfo *replacementPeer = nullptr;
+    Ieee80211RateSetState replacementPeerRates;
 
     bool replaces() const { return action == 1 || action == 2; }
 
@@ -201,6 +289,141 @@ class StaAssociationCallbacksTest : public cSimpleModule, public cListener, publ
         }
     }
 
+    void actOnScan()
+    {
+        ASSERT(armed);
+        armed = false;
+        ++scanActions;
+        if (scanAction == ScanAction::STOP || scanAction == ScanAction::RESTART)
+            changeState(new ModuleStopOperation());
+        else if (scanAction == ScanAction::CRASH)
+            changeState(new ModuleCrashOperation());
+        if (scanAction == ScanAction::RESTART)
+            changeState(new ModuleStartOperation());
+        else if (scanAction == ScanAction::REPLACE_SCAN) {
+            mgmt->requestScan(!originalActiveScan, "replacement-scan", replacementDestructions);
+            replacementScan = mgmt->getScanSnapshot();
+        }
+        else if (scanAction == ScanAction::REPLACE_ASSOCIATION) {
+            mgmt->begin(peer, false, true, "replacement");
+            replacementAssociationTimer = mgmt->getPendingTimer();
+            replacementAssociationDeadline = replacementAssociationTimer->getArrivalTime();
+            replacementPeer = mgmt->findCachedPeer(peer);
+            ASSERT(mib->findPeerRateSet(peer) != nullptr);
+            replacementPeerRates = *mib->findPeerRateSet(peer);
+        }
+        channelsAfterAction = mgmt->channelChanges;
+    }
+
+    void checkNoScan() const
+    {
+        ASSERT(!mgmt->isScanningNow() && !mgmt->hasScanTimer() && !mgmt->isScanSubscribed());
+    }
+
+    void checkInitialScan(bool active, const char *ssid) const
+    {
+        auto snapshot = mgmt->getScanSnapshot();
+        ASSERT(snapshot.info.activeScan == active && snapshot.info.ssid == ssid);
+        ASSERT(snapshot.info.channelList == std::vector<int>({1}) && snapshot.info.currentChannelIndex == 0);
+        ASSERT(snapshot.subscribed == active);
+        ASSERT(std::string(snapshot.timer->getName()) == (active ? "sendProbe" : "maxChannelTime"));
+        ASSERT(snapshot.deadline == simTime() + SimTime(active ? 10 : 40, SIMTIME_US));
+    }
+
+    void runScanCases()
+    {
+        auto startTime = simTime();
+        scanCase = true;
+        for (auto point : {Boundary::LIST_CLEAR, Boundary::OLD_ASSOCIATION}) {
+            for (bool active : {false, true}) {
+                for (auto selectedAction : {ScanAction::STOP, ScanAction::CRASH, ScanAction::RESTART,
+                        ScanAction::REPLACE_SCAN, ScanAction::REPLACE_ASSOCIATION}) {
+                    mgmt->begin(peer, false, true);
+                    if (point == Boundary::OLD_ASSOCIATION)
+                        mgmt->respond(peer, false, 1);
+                    else
+                        mgmt->terminate(); // Keep the cached peer and its rates, but detach the association timeout.
+                    ASSERT(mib->findPeerRateSet(peer) != nullptr);
+                    int confirmsBefore = mgmt->scanConfirmations;
+                    int probesBefore = mgmt->probeRequests;
+                    int actionsBefore = scanActions;
+                    int destructions = 0;
+                    replacementDestructions = 0;
+                    originalActiveScan = active;
+                    scanAction = selectedAction;
+                    boundary = point;
+                    armed = true;
+                    mgmt->requestScan(active, "original-scan", destructions);
+                    ASSERT(!armed && scanActions == actionsBefore + 1 && destructions == 1);
+                    ASSERT(mgmt->channelChanges == channelsAfterAction);
+                    ASSERT(mgmt->scanConfirmations == confirmsBefore && mgmt->probeRequests == probesBefore);
+                    if (scanAction == ScanAction::REPLACE_SCAN) {
+                        ASSERT(replacementDestructions == 1);
+                        mgmt->checkScanSnapshot(replacementScan);
+                        checkInitialScan(!active, "replacement-scan");
+                    }
+                    else
+                        checkNoScan();
+                    wait(SimTime(60, SIMTIME_US));
+                    checkNoScan();
+                    ASSERT(mgmt->channelChanges == channelsAfterAction);
+                    ASSERT(mgmt->scanConfirmations == confirmsBefore + (scanAction == ScanAction::REPLACE_SCAN ? 1 : 0));
+                    ASSERT(mgmt->probeRequests == probesBefore + (scanAction == ScanAction::REPLACE_SCAN && !active ? 1 : 0));
+                    if (scanAction == ScanAction::REPLACE_ASSOCIATION) {
+                        ASSERT(mgmt->getPendingTimer() == replacementAssociationTimer);
+                        ASSERT(replacementAssociationTimer->isScheduled() && replacementAssociationTimer->getArrivalTime() == replacementAssociationDeadline);
+                        ASSERT(mgmt->findCachedPeer(peer) == replacementPeer);
+                        ASSERT(mib->findPeerRateSet(peer) != nullptr && *mib->findPeerRateSet(peer) == replacementPeerRates);
+                        int associationConfirmsBefore = mgmt->confirmations;
+                        mgmt->respond(peer, false, 1);
+                        ASSERT(mgmt->associated() && mgmt->associatedSsid() == "replacement" && mgmt->hasTimer());
+                        ASSERT(mgmt->confirmations == associationConfirmsBefore + 1 && !mgmt->pending());
+                    }
+                    if (scanAction == ScanAction::RESTART) {
+                        mgmt->requestScan(active, "independent-scan", destructions);
+                        ASSERT(destructions == 2);
+                        checkInitialScan(active, "independent-scan");
+                        wait(SimTime(60, SIMTIME_US));
+                        checkNoScan();
+                        ASSERT(mgmt->scanConfirmations == confirmsBefore + 1);
+                        ASSERT(mgmt->probeRequests == probesBefore + (active ? 1 : 0));
+                    }
+                    if (scanAction != ScanAction::STOP && scanAction != ScanAction::CRASH)
+                        changeState(new ModuleStopOperation());
+                    changeState(new ModuleStartOperation());
+                }
+            }
+        }
+        // Successful scans cover empty discovery, cached rates, completed association, and pending association.
+        for (int setup = 0; setup < 4; ++setup) {
+            for (bool active : {false, true}) {
+                if (setup != 0) {
+                    mgmt->begin(peer, false, true);
+                    if (setup == 1)
+                        mgmt->terminate();
+                    else if (setup == 2)
+                        mgmt->respond(peer, false, 1);
+                }
+                int confirmsBefore = mgmt->scanConfirmations;
+                int probesBefore = mgmt->probeRequests;
+                int channelsBefore = mgmt->channelChanges;
+                int destructions = 0;
+                mgmt->requestScan(active, "successful-scan", destructions);
+                ASSERT(destructions == 1 && !mgmt->pending() && !mgmt->associated());
+                ASSERT(mgmt->channelChanges == channelsBefore + 1);
+                checkInitialScan(active, "successful-scan");
+                wait(SimTime(60, SIMTIME_US));
+                checkNoScan();
+                ASSERT(mgmt->scanConfirmations == confirmsBefore + 1 && mgmt->probeRequests == probesBefore + (active ? 1 : 0));
+                ASSERT(mgmt->channelChanges == channelsBefore + 1);
+                changeState(new ModuleStopOperation());
+                changeState(new ModuleStartOperation());
+            }
+        }
+        ASSERT(simTime() - startTime < SimTime(2, SIMTIME_MS));
+        scanCase = false;
+    }
+
   public:
     StaAssociationCallbacksTest() : cSimpleModule(65536) {}
 
@@ -215,8 +438,12 @@ class StaAssociationCallbacksTest : public cSimpleModule, public cListener, publ
         atBoundary |= boundary == Boundary::OLD_ASSOCIATION && !mgmt->associated();
         atBoundary |= boundary == Boundary::REFUSAL && mib->findPeerRateSet(peer) == nullptr;
         atBoundary |= boundary == Boundary::LIST_CLEAR && mgmt->empty();
-        if (atBoundary)
-            act();
+        if (atBoundary) {
+            if (scanCase)
+                actOnScan();
+            else
+                act();
+        }
     }
 
     virtual void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *details) override
@@ -249,6 +476,8 @@ class StaAssociationCallbacksTest : public cSimpleModule, public cListener, publ
         mgmt->subscribe(l2AssociatedSignal, this);
         mgmt->subscribe(Ieee80211MgmtSta::htNegotiationFailedSignal, this);
         mgmt->subscribe(l2AssociatedSignal, &observer);
+
+        runScanCases();
 
         for (bool reassociation : {false, true}) {
             for (int ht : {0, 1, 2}) {

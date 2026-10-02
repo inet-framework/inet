@@ -468,11 +468,21 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     if (isScanning)
         throw cRuntimeError("processScanCommand: scanning already in progress");
-    if (mib->bssStationData.isAssociated)
+    auto generation = lifecycleGeneration;
+    auto expectedTransactionId = associationTransactionId;
+    // Each cleanup cancels association once before it can notify listeners.
+    if (mib->bssStationData.isAssociated) {
+        ++expectedTransactionId;
         disassociate();
+        if (!isCurrentAssociationOperation(generation, expectedTransactionId))
+            return;
+    }
 
     // clear existing AP list (and cancel any pending authentications) -- we want to start with a clean page
+    ++expectedTransactionId;
     clearAPList();
+    if (!isCurrentAssociationOperation(generation, expectedTransactionId))
+        return;
 
     // fill in scanning state
     ASSERT(ctrl->getBSSType() == BSSTYPE_INFRASTRUCTURE);
