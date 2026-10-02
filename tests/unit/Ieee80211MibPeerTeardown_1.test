@@ -1,0 +1,190 @@
+%description:
+Verify that peer teardown removes all affected MIB state before one notification.
+Check individual removal, bulk removal, and replacement state from a callback.
+Standalone HT and rate removal methods retain their notifications.
+
+%includes:
+#include <functional>
+
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+namespace Ieee80211MibPeerTeardown_1 {
+
+class RateStateObserver : public cListener
+{
+  public:
+    int notifications = 0;
+    std::function<void()> checkState;
+
+    virtual void receiveSignal(cComponent *, simsignal_t signalID, bool value, cObject *details) override
+    {
+        ASSERT(signalID == Ieee80211Mib::rateStateChangedSignal && value && details == nullptr);
+        ++notifications;
+        if (checkState)
+            checkState();
+    }
+};
+
+} // namespace Ieee80211MibPeerTeardown_1
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+network TestNetwork
+{
+    submodules:
+        mib: Ieee80211Mib;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+using namespace Ieee80211MibPeerTeardown_1;
+
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+mib->setPrimaryChannel(1);
+mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
+const auto capabilities = mib->localHtCapabilities;
+const auto operation = mib->getHtOperation();
+const MacAddress first("02:00:00:00:00:01");
+const MacAddress second("02:00:00:00:00:02");
+
+Ieee80211RateSetState rates;
+rates.supported.known = true;
+rates.supported.legacyRates.insert(Mbps(6));
+rates.basic = rates.operational = rates.supported;
+mib->setLocalRateSet(rates);
+mib->setBssRateSet(rates);
+
+auto installPeer = [&](const MacAddress& address, bool hasHt, bool hasRates) {
+    mib->allocateAssociationId(address);
+    mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+    if (hasHt)
+        mib->setPeerHtCapabilities(address, capabilities, operation);
+    if (hasRates)
+        mib->installBssAndPeerRateSets(rates, address, rates);
+};
+auto checkLocalState = [&]() {
+    ASSERT(mib->getLocalRateSet() == rates);
+    ASSERT(mib->getBssRateSet() == rates);
+    ASSERT(mib->localHtCapabilities == capabilities);
+    ASSERT(mib->getHtOperation() == operation);
+};
+
+RateStateObserver observer;
+mib->subscribe(Ieee80211Mib::rateStateChangedSignal, &observer);
+
+// Exercise both stores, either store alone, and association-only state.
+for (bool hasHt : {true, false}) {
+    for (bool hasRates : {true, false}) {
+        installPeer(first, hasHt, hasRates);
+        installPeer(second, true, true);
+        observer.checkState = [&]() {
+            ASSERT(mib->bssAccessPointData.associationIds.count(first) == 0);
+            ASSERT(mib->findPeerHtState(first) == nullptr);
+            ASSERT(mib->findPeerRateSet(first) == nullptr);
+            ASSERT(mib->bssAccessPointData.associationIds.count(second) == 1);
+            ASSERT(mib->findPeerHtState(second) != nullptr);
+            ASSERT(mib->findPeerRateSet(second) != nullptr);
+            checkLocalState();
+        };
+        int before = observer.notifications;
+        mib->releaseAssociationId(first);
+        ASSERT(observer.notifications == before + (hasHt || hasRates ? 1 : 0));
+        ASSERT(mib->findPeerHtState(first) == nullptr);
+        ASSERT(mib->findPeerRateSet(first) == nullptr);
+        mib->releaseAssociationId(first);
+        ASSERT(observer.notifications == before + (hasHt || hasRates ? 1 : 0));
+        observer.checkState = nullptr;
+        mib->clearAssociationIds();
+
+        installPeer(first, hasHt, hasRates);
+        installPeer(second, hasHt, hasRates);
+        observer.checkState = [&]() {
+            ASSERT(mib->bssAccessPointData.stations.empty());
+            ASSERT(mib->bssAccessPointData.associationIds.empty());
+            for (const auto& address : {first, second}) {
+                ASSERT(mib->findPeerHtState(address) == nullptr);
+                ASSERT(mib->findPeerRateSet(address) == nullptr);
+            }
+            checkLocalState();
+        };
+        before = observer.notifications;
+        mib->clearAssociationIds();
+        ASSERT(observer.notifications == before + (hasHt || hasRates ? 1 : 0));
+        mib->clearAssociationIds();
+        ASSERT(observer.notifications == before + (hasHt || hasRates ? 1 : 0));
+        observer.checkState = nullptr;
+    }
+}
+
+// Standalone methods still notify and remove only their own kind of state.
+for (bool bulk : {false, true}) {
+    installPeer(first, true, true);
+    observer.checkState = [&]() {
+        ASSERT(mib->findPeerHtState(first) == nullptr);
+        ASSERT(mib->findPeerRateSet(first) != nullptr);
+    };
+    int before = observer.notifications;
+    if (bulk)
+        mib->clearPeerHtCapabilities();
+    else
+        mib->removePeerHtCapabilities(first);
+    ASSERT(observer.notifications == before + 1);
+    observer.checkState = [&]() {
+        ASSERT(mib->findPeerHtState(first) == nullptr);
+        ASSERT(mib->findPeerRateSet(first) == nullptr);
+    };
+    if (bulk)
+        mib->clearPeerRateSets();
+    else
+        mib->removePeerRateSet(first);
+    ASSERT(observer.notifications == before + 2);
+    observer.checkState = nullptr;
+    mib->clearAssociationIds();
+}
+
+// A callback can install a replacement after the old relationship is removed.
+for (bool bulk : {false, true}) {
+    installPeer(first, true, true);
+    bool replacementInstalled = false;
+    observer.checkState = [&]() {
+        if (replacementInstalled)
+            return;
+        ASSERT(mib->bssAccessPointData.associationIds.count(first) == 0);
+        ASSERT(mib->findPeerHtState(first) == nullptr);
+        ASSERT(mib->findPeerRateSet(first) == nullptr);
+        replacementInstalled = true;
+        installPeer(first, true, true);
+    };
+    if (bulk)
+        mib->clearAssociationIds();
+    else
+        mib->releaseAssociationId(first);
+    ASSERT(replacementInstalled);
+    ASSERT(mib->bssAccessPointData.associationIds.count(first) == 1);
+    ASSERT(mib->findPeerHtState(first) != nullptr);
+    ASSERT(mib->findPeerRateSet(first) != nullptr);
+    ASSERT(*mib->findPeerRateSet(first) == rates);
+    checkLocalState();
+    observer.checkState = nullptr;
+    mib->clearAssociationIds();
+}
+
+mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, &observer);
+EV << "Peer teardown notification checks passed.\n";
+
+%contains: stdout
+Peer teardown notification checks passed.

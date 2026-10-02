@@ -363,6 +363,25 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. IEEE 802.11 MIB rate state and notifications
+
+   The Management Information Base (MIB) now stores supported, basic, and
+   operational rate sets for the local station, Basic Service Set (BSS), and
+   individual peers. A rate set distinguishes unknown information from a
+   known empty set. Rate-set setters validate the input before they commit it.
+   A combined BSS and peer update installs both records before one notification.
+
+   The rateStateChanged signal reports a committed rate, High Throughput (HT)
+   capability, or channel-operation change. Its value is true, with no details
+   object. Listeners query the MIB for current state. Equal rate-set updates
+   emit no signal. The migration guide explains state access and listener use.
+
+   Association release and bulk teardown remove both peer HT capabilities and
+   rate sets before one notification. A listener can install replacement peer
+   state from the callback; teardown does not remove that replacement.
+   Direct HT or rate removal still emits its own notification if state changes.
+   Empty teardown emits no signal. Existing configuration parameters stay unchanged.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
