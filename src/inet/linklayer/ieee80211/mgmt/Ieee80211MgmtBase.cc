@@ -86,6 +86,11 @@ void Ieee80211MgmtBase::addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, con
         setHtOperation(frame, band, mib->getHtOperation());
 }
 
+void Ieee80211MgmtBase::handleClass3FrameIndication(Ieee80211Class3FrameInd *indication)
+{
+    delete indication;
+}
+
 void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
@@ -93,6 +98,8 @@ void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
         EV << "Timer expired: " << msg << "\n";
         handleTimer(msg);
     }
+    else if (msg->arrivedOn("macIn") && dynamic_cast<Ieee80211Class3FrameInd *>(msg))
+        handleClass3FrameIndication(static_cast<Ieee80211Class3FrameInd *>(msg));
     else if (msg->arrivedOn("macIn")) {
         // process incoming frame
         EV << "Frame arrived from MAC: " << msg << "\n";

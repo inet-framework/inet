@@ -84,6 +84,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;
+    virtual void handleClass3FrameIndication(Ieee80211Class3FrameInd *indication) override;
 
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
