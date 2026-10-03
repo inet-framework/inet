@@ -12,12 +12,16 @@
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
 
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
 namespace inet {
 namespace ieee80211 {
 
 class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, public IOriginatorBlockAckAgreementPolicy
 {
   protected:
+    ModuleRefByPar<Ieee80211Mib> mib;
     IOriginatorQoSAckPolicy *ackPolicy = nullptr;
 
     int blockAckReqThreshold = -1;

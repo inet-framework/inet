@@ -4,6 +4,37 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 BlockAck Agreement State
+-----------------------------------
+
+The agreement contracts gain these pure virtual methods:
+
+- ``IOriginatorBlockAckAgreementHandler::getEarliestExpirationTime() const``.
+- ``IRecipientBlockAckAgreementHandler::getEarliestExpirationTime() const``.
+- ``IRecipientBlockAckAgreementHandler::processReceivedBlockAckReq()``.
+- ``IBlockAckAgreementHandlerCallback::rescheduleInactivityTimer()``.
+- ``IBlockAckAgreementHandlerCallback::blockAckAgreementTerminated(cObject *)``.
+- ``IBlockAckAgreementHandlerCallback::recipientAgreementTerminated(MacAddress, Tid)``.
+- ``IRecipientQosMacDataService::clearBlockAckReceiveBuffer(MacAddress, Tid)``.
+
+Both deadline queries return absolute simulation times.
+They return ``SIMTIME_MAX`` when no active agreement requires expiry.
+The request method takes a generic BlockAck request and the existing procedure and agreement callbacks.
+It updates the recipient receive window and inactivity deadline.
+The recipient termination callback clears only the selected recipient buffer.
+The generic termination callback publishes the deleted agreement after expiry.
+The caller retains its payload until the callback returns.
+External implementations must implement these methods.
+
+The old pure virtual ``scheduleInactivityTimer(simtime_t)`` remains deprecated for one release.
+HCF delegates it to ``rescheduleInactivityTimer()``.
+Its argument cannot override the deadlines that the agreement handlers own.
+
+Both agreement policies gain ``mibModule`` with the usual relative path default.
+They require accepted peer HT capability evidence.
+Automatic agreement initiation from ordinary data is disabled.
+The complete radio exchange and aggregate data session remain unimplemented.
+
 IEEE 802.11 PHY Mode Properties
 -------------------------------
 

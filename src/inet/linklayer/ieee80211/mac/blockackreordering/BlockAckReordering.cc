@@ -22,9 +22,9 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
     // recipient to reset the timer to detect Block Ack timeout (see 10.5.4).
     // This allows the recipient to delete the Block Ack if the originator does not switch
     // back to using Block Ack.
+    if (dataHeader->getAckPolicy() == BLOCK_ACK)
+        agreement->blockAckPolicyFrameReceived(dataHeader);
     if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
-        if (dataHeader->getAckPolicy() == BLOCK_ACK)
-            agreement->blockAckPolicyFrameReceived(dataHeader);
         auto earliestCompleteMsduOrAMsdu = getEarliestCompleteMsduOrAMsduIfExists(receiveBuffer);
         if (earliestCompleteMsduOrAMsdu.size() > 0) {
             auto earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
@@ -61,13 +61,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         tid = basicReq->getTidInfo();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
     }
-    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
+    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
         tid = compressedReq->getTidInfo();
         startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }
     else {
         throw cRuntimeError("Multi-Tid BlockAckReq is currently an unimplemented feature");
     }
+    agreement->getBlockAckRecord()->blockAckReqReceived(startingSequenceNumber);
     auto id = std::make_pair(tid, blockAckReq->getTransmitterAddress());
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
@@ -187,8 +188,12 @@ ReceiveBuffer *BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
 
 void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    Tid tid = delba->getTid();
-    MacAddress originatorAddr = delba->getTransmitterAddress();
+    if (delba->getInitiator())
+        clearReceiveBuffer(delba->getTransmitterAddress(), delba->getTid());
+}
+
+void BlockAckReordering::clearReceiveBuffer(MacAddress originatorAddr, Tid tid)
+{
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
@@ -207,7 +212,6 @@ void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, Receive
     receiveBuffer->setNextExpectedSequenceNumber(sequenceNumber + 1);
     receiveBuffer->dropFramesUntil(sequenceNumber);
     receiveBuffer->removeFrame(sequenceNumber);
-    agreement->getBlockAckRecord()->removeAckStates(sequenceNumber);
 }
 
 std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer)

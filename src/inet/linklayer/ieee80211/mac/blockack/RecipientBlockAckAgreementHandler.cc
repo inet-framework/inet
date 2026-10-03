@@ -12,21 +12,18 @@
 namespace inet {
 namespace ieee80211 {
 
-simtime_t RecipientBlockAckAgreementHandler::computeEarliestExpirationTime()
+simtime_t RecipientBlockAckAgreementHandler::getEarliestExpirationTime() const
 {
     simtime_t earliestTime = SIMTIME_MAX;
-    for (auto id : blockAckAgreements) {
-        auto agreement = id.second;
-        earliestTime = std::min(earliestTime, agreement->getExpirationTime());
-    }
+    for (const auto& entry : blockAckAgreements)
+        if (entry.second->getIsAddbaResponseSent())
+            earliestTime = std::min(earliestTime, entry.second->getExpirationTime());
     return earliestTime;
 }
 
 void RecipientBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback)
 {
-    simtime_t earliestExpirationTime = computeEarliestExpirationTime();
-    if (earliestExpirationTime != SIMTIME_MAX)
-        callback->scheduleInactivityTimer(earliestExpirationTime);
+    callback->rescheduleInactivityTimer();
 }
 
 // The inactivity timer at a recipient is reset when MPDUs corresponding to the TID for which the Block Ack
@@ -39,27 +36,55 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
         Tid tid = qosHeader->getTid();
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
-        if (agreement)
+        if (agreement && agreement->getIsAddbaResponseSent() && !qosHeader->isIncorrect() &&
+                qosHeader->getReceiverAddress() == agreement->getRecipientAddr() &&
+                qosHeader->getFragmentNumber() == 0 && !qosHeader->getMoreFragments()) {
+            agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
+        }
+    }
+}
+
+void RecipientBlockAckAgreementHandler::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
+{
+    auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq);
+    if (!compressed || compressed->getFragmentNumber() != 0 || compressed->getMultiTid() ||
+            !compressed->getCompressedBitmap() || compressed->isIncorrect())
+        return;
+    auto agreement = getAgreement(compressed->getTidInfo(), compressed->getTransmitterAddress());
+    if (agreement && agreement->getIsAddbaResponseSent() &&
+            blockAckReq->getReceiverAddress() == agreement->getRecipientAddr()) {
+        agreement->getBlockAckRecord()->blockAckReqReceived(compressed->getStartingSequenceNumber());
+        agreement->calculateExpirationTime();
+        scheduleInactivityTimer(agreementHandlerCallback);
+    }
+    else {
+        // IEEE Std 802.11-2024, 11.5.4: no implicit agreement, no BlockAck response.
+        auto delba = buildDelba(compressed->getTransmitterAddress(), compressed->getTidInfo(), 38); // UNKNOWN_BA
+        procedureCallback->processMgmtFrame(new Packet("Delba", delba), delba);
     }
 }
 
 void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
 {
-    // When a timeout of BlockAckTimeout is detected, the STA shall send a DELBA frame to the
-    // peer STA with the Reason Code field set to TIMEOUT and shall issue a MLME-DELBA.indication
-    // primitive with the ReasonCode parameter having a value of TIMEOUT.
-    // The procedure is illustrated in Figure 10-14.
-    simtime_t now = simTime();
-    for (auto id : blockAckAgreements) {
-        auto agreement = id.second;
-        if (agreement->getExpirationTime() == now) {
-            MacAddress receiverAddr = id.first.first;
-            Tid tid = id.first.second;
-            const auto& delba = buildDelba(receiverAddr, tid, 39);
-            auto delbaPacket = new Packet("Delba", delba);
-            procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
+    // IEEE Std 802.11-2024, 11.5.4: remove all due state before callbacks.
+    std::vector<std::pair<std::unique_ptr<RecipientBlockAckAgreement>, Ptr<Ieee80211Delba>>> expired;
+    for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end(); ) {
+        auto agreement = it->second;
+        if (agreement->getIsAddbaResponseSent() && agreement->getExpirationTime() != SIMTIME_MAX &&
+                agreement->getExpirationTime() <= simTime()) {
+            auto delba = buildDelba(it->first.first, it->first.second, 39); // TIMEOUT
+            expired.emplace_back(std::unique_ptr<RecipientBlockAckAgreement>(agreement), delba);
+            it = blockAckAgreements.erase(it);
         }
+        else
+            ++it;
+    }
+    for (const auto& entry : expired) {
+        const auto& delba = entry.second;
+        agreementHandlerCallback->recipientAgreementTerminated(delba->getReceiverAddress(), delba->getTid());
+        agreementHandlerCallback->blockAckAgreementTerminated(entry.first.get());
+        procedureCallback->processMgmtFrame(new Packet("Delba", delba), delba);
     }
     scheduleInactivityTimer(agreementHandlerCallback);
 }
@@ -71,13 +96,16 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
 // bits. If the intended recipient STA is capable of participating, the originator sends an ADDBA Request frame
 // indicating the TID for which the Block Ack is being set up.
 //
-RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq, const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
 {
     MacAddress originatorAddr = addbaReq->getTransmitterAddress();
     auto id = std::make_pair(originatorAddr, addbaReq->getTid());
     auto it = blockAckAgreements.find(id);
     if (it == blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), addbaReq->getBlockAckTimeoutValue());
+        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue());
+        agreement->setRecipientAddr(addbaReq->getReceiverAddress());
+        agreement->setDialogToken(addbaResponse->getDialogToken());
+        agreement->setIsAMsduSupported(addbaResponse->getAMsduSupported());
         blockAckAgreements[id] = agreement;
         EV_DETAIL << "Block Ack Agreement is added with the following parameters: " << *agreement << endl;
         return agreement;
@@ -104,28 +132,27 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddre
 
 const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
-    auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
-    addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
-    // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
-    Tid tid = addbaRequest->getTid();
-    addbaResponse->setTid(tid);
-    addbaResponse->setBlockAckPolicy(!addbaRequest->getBlockAckPolicy() && blockAckAgreementPolicy->delayedBlockAckPolicySupported() ? false : true);
-    addbaResponse->setBufferSize(addbaRequest->getBufferSize() <= blockAckAgreementPolicy->getMaximumAllowedBufferSize() ? addbaRequest->getBufferSize() : blockAckAgreementPolicy->getMaximumAllowedBufferSize());
-    addbaResponse->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue() == 0 ? blockAckAgreementPolicy->getBlockAckTimeoutValue() : addbaRequest->getBlockAckTimeoutValue());
-    addbaResponse->setAMsduSupported(blockAckAgreementPolicy->aMsduSupported());
-    return addbaResponse;
+    auto response = makeShared<Ieee80211AddbaResponse>();
+    response->setReceiverAddress(addbaRequest->getTransmitterAddress());
+    response->setDialogToken(addbaRequest->getDialogToken());
+    response->setTid(addbaRequest->getTid());
+    response->setBlockAckPolicy(true);
+    response->setBufferSize(std::min(64, std::min<int>(addbaRequest->getBufferSize(), blockAckAgreementPolicy->getMaximumAllowedBufferSize())));
+    response->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue() == 0 ?
+            addbaRequest->getBlockAckTimeoutValue() : blockAckAgreementPolicy->getBlockAckTimeoutValue());
+    response->setAMsduSupported(addbaRequest->getAMsduSupported() && blockAckAgreementPolicy->aMsduSupported());
+    return response;
 }
 
 void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
 {
-    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it != blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = it->second;
+    auto agreement = getAgreement(addbaResponse->getTid(), addbaResponse->getReceiverAddress());
+    if (agreement && !agreement->getIsAddbaResponseSent() && addbaResponse->getStatusCode() == 0 &&
+            agreement->getDialogToken() == addbaResponse->getDialogToken() &&
+            agreement->getBufferSize() == addbaResponse->getBufferSize() &&
+            agreement->getBlockAckTimeoutValue() == addbaResponse->getBlockAckTimeoutValue() &&
+            agreement->getIsAMsduSupported() == addbaResponse->getAMsduSupported() && addbaResponse->getBlockAckPolicy())
         agreement->addbaResposneSent();
-    }
-    else
-        throw cRuntimeError("Agreement is not found");
 }
 
 void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
@@ -154,27 +181,26 @@ void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<co
 
 void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
 {
-    EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
-        EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
-        auto agreement = addAgreement(addbaRequest);
-        EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
-        EV_DETAIL << "Building Addba Response" << endl;
-        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
-        auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
-        callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
-    }
+    auto response = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
+    // IEEE Std 802.11-2024, 10.25.2: a parsed request always receives a response.
+    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest) &&
+            getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress()) == nullptr)
+        addAgreement(addbaRequest, response);
+    else
+        response->setStatusCode(37); // REFUSED
+    callback->processMgmtFrame(new Packet("AddbaResponse", response), response);
 }
 
 void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    if (!delba->getInitiator())
+        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
 }
 
 void RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
-    if (blockAckAgreementPolicy->isDelbaAccepted(delba))
-        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    if (delba->getInitiator() && blockAckAgreementPolicy->isDelbaAccepted(delba))
+        terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
 }
 
 RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()

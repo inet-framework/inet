@@ -16,10 +16,11 @@ import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
 simple RecipientBlockAckAgreementPolicy extends SimpleModule like IRecipientBlockAckAgreementPolicy
 {
     parameters:
+        string mibModule = default("^.^.^.mib");
         @class(RecipientBlockAckAgreementPolicy);
         bool delayedAckPolicySupported = default(false);
         bool aMsduSupported = default(true);
-        int maximumAllowedBufferSize = default(64);
+        int maximumAllowedBufferSize = default(64); // Accepted window size, 1 to 64 sequence numbers
         double blockAckTimeoutValue @unit(s) = default(0s); // 0 means that it depends on the originator
         @display("i=block/control");
 }

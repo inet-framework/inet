@@ -466,8 +466,8 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setType(ST_BLOCKACK_REQ);
         h->setMultiTid(false); // pinned by the class
         h->setCompressedBitmap(true); // pinned by the class: selects the Compressed branch
-        h->setBarAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setBarAckPolicy(false);
+        h->setReserved(0);
         h->setTidInfo((int)v.uint(4));
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
     }});
@@ -502,15 +502,11 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setType(ST_BLOCKACK);
         h->setMultiTid(false); // pinned by the class
         h->setCompressedBitmap(true); // pinned by the class: selects the Compressed bitmap branch
-        h->setBlockAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setBlockAckPolicy(false);
+        h->setReserved(0);
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
         h->setBlockAckBitmap(BitVector(std::vector<uint8_t>{v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8()}));
         h->setTidInfo((int)v.uint(4));
-        // the .msg leaves chunkLength unset ("TODO"); the wire layout is fixed at
-        // 16 (header) + 2 (BA control) + 2 (starting-sequence control) + 8 (compressed
-        // bitmap) = 28 bytes.
-        setChunkLength(c, B(28));
     }});
 
     // --- management frame bodies. Each is content-length-dependent (SSID, rates, the

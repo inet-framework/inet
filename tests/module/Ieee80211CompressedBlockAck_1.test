@@ -1,0 +1,466 @@
+%description:
+Test the independent Compressed BlockAck state changes through real policies,
+HCF management callbacks, recipient data service, and the shared inactivity event.
+The fixture supplies explicit agreements. It captures outgoing management frames.
+It does not claim a radio control exchange or exchange admission.
+
+%file: TestCompressedBlockAck.cc
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestOriginatorBlockAckAgreementHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::buildAddbaRequest;
+    using OriginatorBlockAckAgreementHandler::createAgreement;
+};
+
+class TestReordering : public BlockAckReordering
+{
+  public:
+    bool hasBuffer(MacAddress peer, Tid tid) const { return receiveBuffers.count({tid, peer}); }
+};
+
+class TestRecipientService : public RecipientQosMacDataService
+{
+  protected:
+    void initialize() override {
+        RecipientQosMacDataService::initialize();
+        delete blockAckReordering;
+        blockAckReordering = new TestReordering();
+    }
+  public:
+    bool hasBuffer(MacAddress peer, Tid tid) const {
+        return static_cast<TestReordering *>(blockAckReordering)->hasBuffer(peer, tid);
+    }
+};
+Define_Module(TestRecipientService);
+
+class TestHcf : public Hcf
+{
+  public:
+    std::vector<Ptr<const Ieee80211MgmtHeader>> output;
+    int terminations = 0;
+    int managementSequence = 0;
+    using Hcf::recipientProcessReceivedManagementFrame;
+    void completeManagement(const Ptr<const Ieee80211MgmtHeader>& header) {
+        auto copy = staticPtrCast<Ieee80211MgmtHeader>(header->dupShared());
+        copy->setSequenceNumber(SequenceNumberCyclic(managementSequence++));
+        originatorProcessTransmittedManagementFrame(copy, AC_BE);
+    }
+    using Hcf::rescheduleInactivityTimer;
+    using Hcf::scheduleInactivityTimer;
+    IOriginatorBlockAckAgreementPolicy *originatorPolicy() { return originatorBlockAckAgreementPolicy; }
+    IRecipientBlockAckAgreementPolicy *recipientPolicy() { return recipientBlockAckAgreementPolicy; }
+    TestOriginatorBlockAckAgreementHandler *originator() {
+        return static_cast<TestOriginatorBlockAckAgreementHandler *>(originatorBlockAckAgreementHandler);
+    }
+    IRecipientBlockAckAgreementHandler *recipient() { return recipientBlockAckAgreementHandler; }
+    TestRecipientService *service() { return check_and_cast<TestRecipientService *>(recipientDataService); }
+    simtime_t deadline() const { return inactivityTimer->isScheduled() ? inactivityTimer->getArrivalTime() : SIMTIME_MAX; }
+    IProcedureCallback *procedureCallback() { return this; }
+    IBlockAckAgreementHandlerCallback *agreementCallback() { return this; }
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LAST) {
+            delete originatorBlockAckAgreementHandler;
+            originatorBlockAckAgreementHandler = new TestOriginatorBlockAckAgreementHandler();
+            // The NED submodule has a fixed type. Replace it with a test subclass for buffer inspection.
+            getSubmodule("recipientMacDataService")->deleteModule();
+            auto serviceModule = cModuleType::get("TestRecipientService")->create("recipientMacDataService", this);
+            serviceModule->finalizeParameters();
+            serviceModule->buildInside();
+            serviceModule->callInitialize();
+            recipientDataService = check_and_cast<TestRecipientService *>(serviceModule);
+        }
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        Enter_Method("processMgmtFrame");
+        take(packet);
+        output.push_back(header);
+        delete packet;
+    }
+    void recipientAgreementTerminated(MacAddress peer, Tid tid) override {
+        ++terminations;
+        Hcf::recipientAgreementTerminated(peer, tid);
+    }
+};
+Define_Module(TestHcf);
+
+// These callbacks isolate overdue handler dispatch. The HCF cases test the actual timer.
+class TestExpiryCallbacks : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    int terminated = 0;
+    int cleared = 0;
+    std::vector<Ptr<const Ieee80211MgmtHeader>> output;
+    void rescheduleInactivityTimer() override {}
+    void scheduleInactivityTimer(simtime_t) override {}
+    void recipientAgreementTerminated(MacAddress, Tid) override { ++cleared; }
+    void blockAckAgreementTerminated(cObject *) override { ++terminated; }
+    void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { ASSERT(false); }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        output.push_back(header);
+        delete packet;
+    }
+};
+
+class TestObserver : public cSimpleModule, public cListener
+{
+    TestHcf *hcf = nullptr;
+    Ieee80211Mib *mib = nullptr;
+    MacAddress peer;
+    TestOriginatorBlockAckAgreementHandler overdueOriginator;
+    RecipientBlockAckAgreementHandler overdueRecipient;
+    TestExpiryCallbacks overdueCallbacks;
+    int equalExpiryDeletions = 0;
+    int added = 0;
+    int deleted = 0;
+
+    Ptr<Ieee80211AddbaResponse> establish(Tid tid, simtime_t timeout, int requestedSize = 64) {
+        auto request = hcf->originator()->buildAddbaRequest(peer, tid, SequenceNumberCyclic(4094), hcf->originatorPolicy());
+        request->setTransmitterAddress(mib->address);
+        request->setBlockAckTimeoutValue(timeout);
+        request->setBufferSize(requestedSize);
+        hcf->originator()->createAgreement(request);
+        hcf->originator()->processTransmittedAddbaReq(request);
+        auto response = makeShared<Ieee80211AddbaResponse>();
+        response->setReceiverAddress(mib->address);
+        response->setTransmitterAddress(peer);
+        response->setTid(tid);
+        response->setDialogToken(request->getDialogToken());
+        response->setBlockAckPolicy(true);
+        response->setBufferSize(8);
+        response->setBlockAckTimeoutValue(timeout);
+        response->setAMsduSupported(false);
+        auto wrong = makeShared<Ieee80211AddbaResponse>(*response);
+        wrong->setDialogToken(response->getDialogToken() + 1);
+        hcf->recipientProcessReceivedManagementFrame(wrong);
+        ASSERT(!hcf->originator()->getAgreement(peer, tid)->getIsAddbaResponseReceived());
+        wrong->setDialogToken(response->getDialogToken());
+        wrong->setStatusCode(37);
+        hcf->recipientProcessReceivedManagementFrame(wrong);
+        ASSERT(!hcf->originator()->getAgreement(peer, tid)->getIsAddbaResponseReceived());
+        hcf->recipientProcessReceivedManagementFrame(response);
+        ASSERT(hcf->originator()->getAgreement(peer, tid)->getIsAddbaResponseReceived());
+        ASSERT(hcf->originator()->getAgreement(peer, tid)->getBufferSize() == 8);
+        ASSERT(!hcf->originator()->getAgreement(peer, tid)->getIsAMsduSupported());
+        int count = added;
+        hcf->recipientProcessReceivedManagementFrame(response);
+        ASSERT(added == count);
+        return response;
+    }
+
+    void establishRecipient(Tid tid, simtime_t timeout) {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setReceiverAddress(mib->address);
+        request->setTransmitterAddress(peer);
+        request->setTid(tid);
+        request->setDialogToken(tid + 20);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+        request->setBufferSize(128);
+        request->setBlockAckPolicy(true);
+        request->setBlockAckTimeoutValue(timeout);
+        request->setAMsduSupported(true);
+        hcf->recipientProcessReceivedManagementFrame(request);
+        auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back());
+        ASSERT(response && response->getStatusCode() == 0);
+        ASSERT(response->getDialogToken() == request->getDialogToken());
+        ASSERT(response->getBufferSize() == 64);
+        auto agreement = hcf->recipient()->getAgreement(tid, peer);
+        ASSERT(agreement && !agreement->getIsAddbaResponseSent());
+        ASSERT(hcf->recipient()->getEarliestExpirationTime() == SIMTIME_MAX);
+        auto stale = makeShared<Ieee80211AddbaResponse>(*response);
+        stale->setDialogToken(response->getDialogToken() + 1);
+        hcf->completeManagement(stale);
+        ASSERT(!agreement->getIsAddbaResponseSent());
+        hcf->completeManagement(response);
+        ASSERT(agreement->getIsAddbaResponseSent());
+        ASSERT(agreement->getBlockAckTimeoutValue() == timeout);
+        ASSERT(agreement->getBlockAckRecord()->getWindowSize() == 64);
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->setTransmitterAddress(peer);
+        data->setReceiverAddress(mib->address);
+        data->setTid(tid);
+        data->setSequenceNumber(SequenceNumberCyclic(4095));
+        data->setAckPolicy(BLOCK_ACK);
+        ASSERT(hcf->service()->dataFrameReceived(new Packet("prior data", data), data, hcf->recipient()).empty());
+        ASSERT(hcf->service()->hasBuffer(peer, tid));
+        ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(4095), 0));
+    }
+
+    void delba(bool transmitted, bool initiator, Tid tid) {
+        auto frame = makeShared<Ieee80211Delba>();
+        frame->setReceiverAddress(transmitted ? peer : mib->address);
+        frame->setTransmitterAddress(transmitted ? mib->address : peer);
+        frame->setInitiator(initiator);
+        frame->setTid(tid);
+        if (transmitted)
+            hcf->completeManagement(frame);
+        else
+            hcf->recipientProcessReceivedManagementFrame(frame);
+    }
+
+  protected:
+    void initialize() override { scheduleAt(SimTime(1), new cMessage("setup")); }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        ASSERT(object != nullptr);
+        if (signal == Hcf::blockAckAgreementAddedSignal) {
+            ++added;
+            if (auto recipient = dynamic_cast<RecipientBlockAckAgreement *>(object))
+                ASSERT(recipient->getIsAddbaResponseSent());
+        }
+        else {
+            ++deleted;
+            if (auto recipient = dynamic_cast<RecipientBlockAckAgreement *>(object)) {
+                auto tid = recipient->getBlockAckRecord()->getTid();
+                ASSERT(!hcf->recipient()->getAgreement(tid, peer));
+                ASSERT(!hcf->service()->hasBuffer(peer, tid));
+            }
+            else if (auto originator = dynamic_cast<OriginatorBlockAckAgreement *>(object))
+                ASSERT(!hcf->originator()->getAgreement(peer, originator->getTid()));
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (!strcmp(message->getName(), "setup")) {
+            hcf = check_and_cast<TestHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"));
+            mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+            auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+            peer = apMib->address;
+            ASSERT(mib->findPeerHtState(peer));
+            hcf->subscribe(Hcf::blockAckAgreementAddedSignal, this);
+            hcf->subscribe(Hcf::blockAckAgreementDeletedSignal, this);
+            ASSERT(!hcf->originatorPolicy()->isAddbaReqNeeded(nullptr, nullptr));
+            // Absent capability evidence, disabled HT, and delayed requests elicit rejection.
+            for (int condition = 0; condition < 3; ++condition) {
+                auto request = makeShared<Ieee80211AddbaRequest>();
+                request->setReceiverAddress(mib->address);
+                request->setTransmitterAddress(condition == 0 ? MacAddress("02:00:00:00:00:ff") : peer);
+                request->setTid(7);
+                request->setBufferSize(64);
+                request->setBlockAckPolicy(condition != 2);
+                request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+                bool supported = mib->localHtCapabilitiesValid;
+                if (condition == 1)
+                    mib->localHtCapabilitiesValid = false;
+                hcf->recipientProcessReceivedManagementFrame(request);
+                mib->localHtCapabilitiesValid = supported;
+                auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back());
+                ASSERT(response->getStatusCode() == 37);
+                int count = added;
+                hcf->completeManagement(response);
+                ASSERT(added == count);
+                ASSERT(!hcf->recipient()->getAgreement(7, request->getTransmitterAddress()));
+            }
+            // Each DELBA row removes one direction only.
+            for (bool transmitted : {false, true}) {
+                for (bool initiator : {false, true}) {
+                    establish(5, SIMTIME_ZERO);
+                    establishRecipient(5, SIMTIME_ZERO);
+                    ASSERT(hcf->deadline() == SIMTIME_MAX);
+                    int count = deleted;
+                    delba(transmitted, initiator, 5);
+                    ASSERT(deleted == count + 1);
+                    bool recipientRemoved = transmitted != initiator;
+                    ASSERT((hcf->recipient()->getAgreement(5, peer) == nullptr) == recipientRemoved);
+                    ASSERT(hcf->service()->hasBuffer(peer, 5) != recipientRemoved);
+                    ASSERT((hcf->originator()->getAgreement(peer, 5) == nullptr) != recipientRemoved);
+                    delba(transmitted, initiator, 5);
+                    ASSERT(deleted == count + 1);
+                    delba(false, !recipientRemoved, 5);
+                }
+            }
+            ASSERT(hcf->deadline() == SIMTIME_MAX);
+            establish(5, SimTime(2));
+            establishRecipient(5, SimTime(3));
+            ASSERT(hcf->deadline() == SimTime(3)); // Absolute, at nonzero simTime().
+            hcf->scheduleInactivityTimer(SimTime(100));
+            ASSERT(hcf->deadline() == SimTime(3));
+            scheduleAt(SimTime(2), new cMessage("refresh"));
+            scheduleAt(SimTime(4.5), new cMessage("originator expired"));
+            scheduleAt(SimTime(5.5), new cMessage("recipient expired"));
+        }
+        else if (!strcmp(message->getName(), "refresh")) {
+            auto ba = makeShared<Ieee80211CompressedBlockAck>();
+            ba->setTransmitterAddress(peer);
+            ba->setReceiverAddress(mib->address);
+            ba->setTidInfo(5);
+            ba->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+            auto invalid = makeShared<Ieee80211CompressedBlockAck>(*ba);
+            invalid->setReceiverAddress(peer);
+            hcf->originator()->processReceivedBlockAck(invalid, hcf->agreementCallback());
+            ASSERT(hcf->deadline() == SimTime(3));
+            invalid->setReceiverAddress(mib->address);
+            invalid->setTidInfo(6);
+            hcf->originator()->processReceivedBlockAck(invalid, hcf->agreementCallback());
+            ASSERT(hcf->deadline() == SimTime(3));
+            invalid->setTidInfo(5);
+            invalid->setFragmentNumber(4);
+            hcf->originator()->processReceivedBlockAck(invalid, hcf->agreementCallback());
+            ASSERT(hcf->deadline() == SimTime(3));
+            hcf->originator()->processReceivedBlockAck(ba, hcf->agreementCallback());
+            ASSERT(hcf->deadline() == SimTime(4));
+            auto receivedData = makeShared<Ieee80211DataHeader>();
+            receivedData->setType(ST_DATA_WITH_QOS);
+            receivedData->setTransmitterAddress(peer);
+            receivedData->setReceiverAddress(peer); // Wrong local address cannot refresh the recipient.
+            receivedData->setTid(5);
+            receivedData->setAckPolicy(BLOCK_ACK);
+            receivedData->setSequenceNumber(SequenceNumberCyclic(0));
+            hcf->recipient()->qosFrameReceived(receivedData, hcf->agreementCallback());
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(4));
+            receivedData->setReceiverAddress(mib->address);
+            hcf->recipient()->qosFrameReceived(receivedData, hcf->agreementCallback());
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(5));
+            ASSERT(hcf->deadline() == SimTime(4));
+            auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+            bar->setTransmitterAddress(peer);
+            bar->setReceiverAddress(mib->address);
+            bar->setTidInfo(5);
+            bar->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+            hcf->recipient()->processReceivedBlockAckReq(bar, hcf->procedureCallback(), hcf->agreementCallback());
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(5));
+            ASSERT(hcf->deadline() == SimTime(4));
+        }
+        else if (!strcmp(message->getName(), "originator expired")) {
+            ASSERT(!hcf->originator()->getAgreement(peer, 5));
+            ASSERT(hcf->recipient()->getAgreement(5, peer));
+            ASSERT(hcf->service()->hasBuffer(peer, 5));
+            ASSERT(hcf->deadline() == SimTime(5));
+            auto delbaFrame = dynamicPtrCast<const Ieee80211Delba>(hcf->output.back());
+            ASSERT(delbaFrame && delbaFrame->getInitiator() && delbaFrame->getReasonCode() == 39);
+            hcf->completeManagement(delbaFrame);
+        }
+        else if (!strcmp(message->getName(), "recipient expired")) {
+            ASSERT(!hcf->recipient()->getAgreement(5, peer));
+            ASSERT(!hcf->service()->hasBuffer(peer, 5));
+            ASSERT(hcf->deadline() == SIMTIME_MAX);
+            int count = hcf->terminations;
+            auto delbaFrame = dynamicPtrCast<const Ieee80211Delba>(hcf->output.back());
+            ASSERT(delbaFrame && !delbaFrame->getInitiator() && delbaFrame->getReasonCode() == 39);
+            hcf->completeManagement(delbaFrame);
+            ASSERT(hcf->terminations == count);
+            establish(5, SimTime(0.1));
+            establishRecipient(5, SimTime(0.1));
+            equalExpiryDeletions = deleted;
+            ASSERT(hcf->deadline() == SimTime(5.6));
+            scheduleAt(SimTime(5.7), new cMessage("equal expiry"));
+            auto request = overdueOriginator.buildAddbaRequest(peer, 6, SequenceNumberCyclic(0), hcf->originatorPolicy());
+            request->setTransmitterAddress(mib->address);
+            request->setBlockAckTimeoutValue(SimTime(1));
+            overdueOriginator.createAgreement(request);
+            overdueOriginator.processTransmittedAddbaReq(request);
+            auto response = makeShared<Ieee80211AddbaResponse>();
+            response->setReceiverAddress(mib->address);
+            response->setTransmitterAddress(peer);
+            response->setTid(6);
+            response->setDialogToken(request->getDialogToken());
+            response->setBufferSize(64);
+            response->setBlockAckPolicy(true);
+            response->setBlockAckTimeoutValue(SimTime(1));
+            overdueOriginator.processReceivedAddbaResp(response, hcf->originatorPolicy(), &overdueCallbacks);
+            auto incoming = makeShared<Ieee80211AddbaRequest>(*request);
+            incoming->setReceiverAddress(mib->address);
+            incoming->setTransmitterAddress(peer);
+            overdueRecipient.processReceivedAddbaRequest(incoming, hcf->recipientPolicy(), &overdueCallbacks);
+            auto reply = dynamicPtrCast<const Ieee80211AddbaResponse>(overdueCallbacks.output.back());
+            overdueRecipient.processTransmittedAddbaResp(reply, &overdueCallbacks);
+            ASSERT(overdueOriginator.getEarliestExpirationTime() == SimTime(6.5));
+            ASSERT(overdueRecipient.getEarliestExpirationTime() == SimTime(6.5));
+            scheduleAt(SimTime(7), new cMessage("overdue expiry"));
+        }
+        else if (!strcmp(message->getName(), "equal expiry")) {
+            ASSERT(!hcf->originator()->getAgreement(peer, 5));
+            ASSERT(!hcf->recipient()->getAgreement(5, peer));
+            ASSERT(!hcf->service()->hasBuffer(peer, 5));
+            ASSERT(hcf->deadline() == SIMTIME_MAX);
+            ASSERT(deleted == equalExpiryDeletions + 2);
+        }
+        else {
+            overdueOriginator.blockAckAgreementExpired(&overdueCallbacks, &overdueCallbacks);
+            overdueRecipient.blockAckAgreementExpired(&overdueCallbacks, &overdueCallbacks);
+            ASSERT(!overdueOriginator.getAgreement(peer, 6));
+            ASSERT(!overdueRecipient.getAgreement(6, peer));
+            ASSERT(overdueCallbacks.terminated == 2 && overdueCallbacks.cleared == 1);
+            auto count = overdueCallbacks.output.size();
+            overdueOriginator.blockAckAgreementExpired(&overdueCallbacks, &overdueCallbacks);
+            overdueRecipient.blockAckAgreementExpired(&overdueCallbacks, &overdueCallbacks);
+            ASSERT(overdueCallbacks.output.size() == count);
+            std::cout << "Independent Compressed BlockAck agreement and HCF timer checks passed.\n";
+        }
+        delete message;
+    }
+};
+Define_Module(TestObserver);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+
+module TestHcf extends Hcf
+{
+    @class(::inet::ieee80211::TestHcf);
+}
+module TestRecipientService extends RecipientQosMacDataService
+{
+    @class(::inet::ieee80211::TestRecipientService);
+}
+simple TestObserver extends SimpleModule
+{
+    @class(::inet::ieee80211::TestObserver);
+}
+network TestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta: WirelessHost;
+        observer: TestObserver;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 7.1s
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.sta.wlan[0].mac.hcf.typename = "TestHcf"
+**.wlan[0].agent.typename = ""
+**.wlan[0].mac.qosStation = true
+**.wlan[0].mac.hcf.isBlockAckSupported = true
+**.wlan[0].opMode = "n(mixed-2.4Ghz)"
+**.wlan[0].bitrate = 65Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.channelNumber = 6
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+Independent Compressed BlockAck agreement and HCF timer checks passed.

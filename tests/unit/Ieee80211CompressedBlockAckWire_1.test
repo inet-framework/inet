@@ -1,0 +1,140 @@
+%description:
+IEEE Std 802.11-2024, 9.3.1.7.2, 9.3.1.8.2 and Table 9-38:
+Compare Type 2 control headers with independent bytes. Check bitmap order,
+all four type bits, fragment encodings, and truncated input.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestSerializer : public Ieee80211MacHeaderSerializer
+{
+  public:
+    using Ieee80211MacHeaderSerializer::deserializeFields;
+};
+
+static std::vector<uint8_t> wire(bool response)
+{
+    std::vector<uint8_t> bytes = {
+        uint8_t(response ? 0x94 : 0x84), 0, 0x34, 0x12,
+        2, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 2,
+        4, 0x50, 0xE0, 0xFF
+    };
+    if (response)
+        bytes.insert(bytes.end(), {0x81, 1, 0, 0, 0, 0, 0, 0x80});
+    return bytes;
+}
+
+template<typename T>
+static Ptr<T> header()
+{
+    auto value = makeShared<T>();
+    value->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    value->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+    value->setDurationField(SimTime(0x1234, SIMTIME_US));
+    value->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+    value->setTidInfo(5);
+    return value;
+}
+
+%activity:
+auto request = header<Ieee80211CompressedBlockAckReq>();
+auto response = header<Ieee80211CompressedBlockAck>();
+ASSERT(response->getBlockAckBitmap().getSize() == 64);
+for (int i = 0; i < 64; ++i)
+    ASSERT(!response->getBlockAckBitmap().getBit(i));
+BitVector bitmap(0, 64);
+for (int i : {0, 7, 8, 63})
+    bitmap.setBit(i, true);
+response->setBlockAckBitmap(bitmap);
+// The serializer must clear reserved transmit bits even for older callers.
+request->setReserved(0x1ff);
+request->setBarAckPolicy(true);
+response->setReserved(0x1ff);
+response->setBlockAckPolicy(true);
+Packet encodedRequest("BAR", request);
+Packet encodedResponse("BA", response);
+ASSERT(request->getChunkLength() == B(20));
+ASSERT(response->getChunkLength() == B(28));
+ASSERT(LENGTH_COMPRESSED_BLOCKACK == B(32));
+Packet completeRequest("complete BAR", request);
+completeRequest.insertAtBack(makeShared<Ieee80211MacTrailer>());
+Packet completeResponse("complete BA", response);
+completeResponse.insertAtBack(makeShared<Ieee80211MacTrailer>());
+ASSERT(completeRequest.getDataLength() == B(24));
+ASSERT(completeResponse.getDataLength() == B(32));
+ASSERT(encodedRequest.peekDataAsBytes()->getBytes() == wire(false));
+ASSERT(encodedResponse.peekDataAsBytes()->getBytes() == wire(true));
+TestSerializer serializer;
+for (bool isResponse : {false, true}) {
+    auto bytes = wire(isResponse);
+    MemoryInputStream stream(bytes);
+    auto parsed = serializer.deserialize(stream, typeid(Ieee80211MacHeader));
+    ASSERT(stream.getRemainingLength() == b(0));
+    ASSERT(!parsed->isIncorrect());
+    if (isResponse) {
+        auto ba = dynamicPtrCast<const Ieee80211CompressedBlockAck>(parsed);
+        ASSERT(ba && ba->getTidInfo() == 5 && ba->getFragmentNumber() == 0);
+        ASSERT(ba->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
+        ASSERT(ba->getBlockAckBitmap() == bitmap);
+        ASSERT(ba->getChunkLength() == B(28));
+    }
+    else {
+        auto bar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(parsed);
+        ASSERT(bar && bar->getTidInfo() == 5 && bar->getFragmentNumber() == 0);
+        ASSERT(bar->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
+        ASSERT(bar->getChunkLength() == B(20));
+    }
+    // Receive reserved bits do not select another variant.
+    bytes[16] |= 0xe1;
+    bytes[17] |= 0x0f;
+    MemoryInputStream reserved(bytes);
+    ASSERT(!serializer.deserialize(reserved, typeid(Ieee80211MacHeader))->isIncorrect());
+    for (int type = 1; type < 16; ++type) {
+        if (type == 2)
+            continue;
+        auto unsupported = wire(isResponse);
+        unsupported[16] = type << 1;
+        MemoryInputStream input(unsupported);
+        ASSERT(serializer.deserialize(input, typeid(Ieee80211MacHeader))->isIncorrect());
+    }
+    for (int fragment = 1; fragment < 16; ++fragment) {
+        auto unsupported = wire(isResponse);
+        unsupported[18] |= fragment;
+        MemoryInputStream input(unsupported);
+        ASSERT(serializer.deserialize(input, typeid(Ieee80211MacHeader))->isIncorrect());
+    }
+    for (size_t length = 2; length < wire(isResponse).size(); ++length) {
+        auto truncated = wire(isResponse);
+        truncated.resize(length);
+        MemoryInputStream input(truncated);
+        auto parsed = serializer.deserializeFields(input, typeid(Ieee80211MacHeader));
+        ASSERT(parsed->isIncorrect());
+    }
+}
+auto invalid = makeShared<Ieee80211CompressedBlockAck>(*response);
+invalid->setFragmentNumber(4);
+bool refused = false;
+try {
+    MemoryOutputStream stream;
+    serializer.serialize(stream, invalid, b(0), b(-1));
+}
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+invalid->setFragmentNumber(0);
+invalid->setBlockAckBitmap(BitVector(0, 32));
+refused = false;
+try {
+    MemoryOutputStream stream;
+    serializer.serialize(stream, invalid, b(0), b(-1));
+}
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+EV << "Compressed BlockAck wire checks passed.\n";
+
+%contains: stdout
+Compressed BlockAck wire checks passed.

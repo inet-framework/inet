@@ -58,6 +58,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
+    bool dispatchingInactivityTimer = false;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -158,6 +159,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
     // IProcedureCallback
+    virtual void blockAckAgreementTerminated(cObject *agreement) override;
+    virtual void rescheduleInactivityTimer() override;
+    virtual void recipientAgreementTerminated(MacAddress originatorAddress, Tid tid) override;
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
 
     std::string getFrameSequenceInfo() const;

@@ -582,29 +582,32 @@ the PHY.
 Block acknowledgement
 ~~~~~~~~~~~~~~~~~~~~~
 
-With block acknowledgement a QoS station sends several frames and then asks
-for one Block Ack frame that acknowledges all of them. Set
-:par:`isBlockAckSupported` on ``mac.hcf`` to ``true`` on both sides. The
-station then sets up an agreement with its peer automatically (with ADDBA
-frames) when it sends a QoS data frame shorter than
-:par:`maxBlockAckPolicyFrameLength` (default 1000 bytes). After that, the
-frames of that traffic class go out without an immediate acknowledgement,
-and the station sends a Block Ack Request after :par:`blockAckReqThreshold`
-(default 5) unacknowledged frames. Both parameters are on
-``mac.hcf.originatorAckPolicy``.
+The default ``mac.hcf.isBlockAckSupported = false`` keeps the normal acknowledgement path.
+An enabled mechanism requires explicit agreement setup.
+Ordinary data no longer starts an automatic ADDBA transaction.
 
-The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and
-``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size
-(:par:`maximumAllowedBufferSize`, default 64), the A-MSDU support
-(:par:`aMsduSupported`, default ``true``) and the inactivity timeout
-(:par:`blockAckTimeoutValue`, default ``0s``, which means no timeout). Only
-the basic Block Ack variant is modeled.
+The agreement policies read local and accepted peer capabilities from the MIB.
+They accept only immediate HT agreements with 1 to 64 sequence numbers.
+The policies require permission for HT operation from the active mode set.
+They reject delayed agreements and peers without accepted HT capability evidence.
 
-.. code-block:: ini
+The policies set the accepted buffer size with :par:`maximumAllowedBufferSize`.
+The default size is 64.
+The parameter :par:`aMsduSupported` sets A-MSDU permission.
+The parameter :par:`blockAckTimeoutValue` sets the inactivity timeout.
+A value of ``0s`` disables expiry.
+The recipient retains acknowledgement status after packet delivery.
+Each agreement direction expires independently.
 
-   **.wlan[*].mac.qosStation = true
-   **.wlan[*].mac.hcf.isBlockAckSupported = true
-   **.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 10
+The serializer supports the Type 2 Compressed BlockAck format with a 64-bit bitmap.
+The complete request contains 24 bytes; the complete response contains 32 bytes.
+These lengths include the four-byte FCS.
+The Basic frame classes remain available for older serializer fixtures.
+
+A complete Compressed BlockAck radio exchange remains unimplemented.
+The rate publication and exchange admission foundations must precede that integration.
+The aggregate data path also remains incomplete.
+An enabled mechanism does not provide a complete application data session.
 
 .. _ug:sec:80211:rate:
 
