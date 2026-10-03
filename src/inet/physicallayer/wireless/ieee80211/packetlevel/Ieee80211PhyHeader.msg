@@ -66,7 +66,7 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
     chunkLength = B(6);
     uint8_t signal;
     uint8_t service;
-    // TODO B lengthField;
+    uint16_t plcpLength; // wire LENGTH in microseconds; inherited lengthField remains PSDU octets
     uint16_t fcs;
     ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
