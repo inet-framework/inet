@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211BssidReq_m.h"
 
 #include <algorithm>
 
@@ -164,7 +165,10 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     const auto& header = makeShared<Ieee80211MgmtHeader>();
     header->setType((Ieee80211FrameType)packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
     header->setReceiverAddress(packet->getTag<MacAddressReq>()->getDestAddress());
-    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
+    // IEEE Std 802.11-2024, 9.3.3.1: management supplies its intended BSSID.
+    if (auto bssid = packet->findTag<Ieee80211BssidReq>())
+        header->setAddress3(bssid->getBssid());
+    else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
     packet->insertAtFront(header);
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());

@@ -26,7 +26,7 @@ simple Ieee80211MgmtAp extends SimpleModule like IIeee80211Mgmt
         @class(Ieee80211MgmtAp);
         string ssid = default("SSID");
         double beaconInterval @unit(s) = default(100ms); // 1..65535 TUs; rounded down to whole 1024 us TUs for scheduling and advertisement
-        int numAuthSteps = default(4); // Use 2 for Open System auth, 4 for WEP
+        int numAuthSteps = default(2); // Open System authentication; only 2 is supported
         string interfaceTableModule;
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         string mibModule;
