@@ -123,6 +123,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Dcf();
+    virtual bool isFrameSequenceRunning() const { return frameSequenceHandler->isSequenceRunning(); }
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

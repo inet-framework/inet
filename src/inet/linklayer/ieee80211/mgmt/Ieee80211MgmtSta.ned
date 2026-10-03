@@ -31,6 +31,7 @@ simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // Number of channels to scan
         string mibModule;
+        string radioModule = default("^.radio"); // Own radio for scan channel completion and busy detection
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
         @signal[l2Associated](type=inet::NetworkInterface);
