@@ -21,6 +21,7 @@ for (int ds = 0; ds < 4; ds++) {
     for (int policy = 0; policy < 4; policy++) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
+        header->setDurationField(SIMTIME_ZERO);
         header->setSequenceNumber(SequenceNumberCyclic(0));
         header->setToDS(ds & 1);
         header->setFromDS(ds & 2);

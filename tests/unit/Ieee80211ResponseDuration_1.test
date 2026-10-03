@@ -1,0 +1,60 @@
+%description:
+Reserved/special Duration/ID encodings do not become ordinary ACK or CTS
+reservations; valid ordinary durations preserve their residual airtime.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/recipient/CtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/recipient/QosCtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+template<typename T> class TestCts : public T {
+  public:
+    TestCts() { this->modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a")); }
+  protected:
+    virtual simtime_t computeCtsDuration(Packet *, const Ptr<const Ieee80211RtsFrame>&) const override { return SimTime(10, SIMTIME_US); }
+};
+template<typename T> class FixedAckRate : public T {
+  public:
+    virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) override {
+        return Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(24));
+    }
+};
+template<typename T, typename Rate> class TestAck : public T {
+  protected:
+    FixedAckRate<Rate> rate;
+  public:
+    TestAck() {
+        this->modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+        this->rateSelection = &rate;
+    }
+};
+
+%activity:
+TestCts<CtsPolicy> dcfCts;
+TestCts<QosCtsPolicy> hcfCts;
+TestAck<RecipientAckPolicy, RateSelection> dcfAck;
+TestAck<RecipientQosAckPolicy, QosRateSelection> hcfAck;
+Packet packet("request");
+for (int duration : {-1, 0, 200, 32768, 65535}) {
+    auto rts = makeShared<Ieee80211RtsFrame>();
+    rts->setDurationField(SimTime(duration, SIMTIME_US));
+    auto data = makeShared<Ieee80211DataHeader>();
+    data->setMoreFragments(true);
+    data->setDurationField(SimTime(duration, SIMTIME_US));
+    auto expected = duration == 200 ? SimTime(174, SIMTIME_US) : SIMTIME_ZERO;
+    ASSERT(dcfCts.computeCtsDurationField(&packet, rts) == expected);
+    ASSERT(hcfCts.computeCtsDurationField(&packet, rts) == expected);
+    ASSERT(dcfAck.computeAckDurationField(&packet, data) == (duration == 200 ? SimTime(156, SIMTIME_US) : SIMTIME_ZERO));
+    ASSERT(hcfAck.computeAckDurationField(&packet, data) == (duration == 200 ? SimTime(156, SIMTIME_US) : SIMTIME_ZERO));
+}
+EV << "ACK and CTS policies ignore non-duration encodings.\n";
+
+%contains: stdout
+ACK and CTS policies ignore non-duration encodings.

@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/recipient/QosCtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 
 #include "inet/common/ModuleAccess.h"
 
@@ -36,7 +37,7 @@ simtime_t QosCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<const Ie
 //
 simtime_t QosCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-    simtime_t duration = rtsFrame->getDurationField() - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
+    simtime_t duration = getIeee80211OrdinaryDuration(rtsFrame->getDurationField()) - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
     return duration < 0 ? 0 : duration;
 }
 
