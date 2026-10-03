@@ -103,7 +103,7 @@ void NonQosRecoveryProcedure::ctsFrameReceived(StationRetryCounters *stationCoun
 // This LRC and the SLRC shall be reset when a MAC frame of length greater than dot11RTSThreshold
 // succeeds for that MPDU of type Data or MMPDU.
 //
-void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters)
+void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters, ICwCalculator *successfulCwCalculator)
 {
     auto id = SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
@@ -123,7 +123,14 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
     // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
     // all or part of an MSDU or MMPDU
     //
-    resetContentionWindow();
+    if (successfulCwCalculator) {
+        int oldCw = successfulCwCalculator->getCw();
+        successfulCwCalculator->resetCw();
+        if (oldCw != successfulCwCalculator->getCw())
+            emit(contentionWindowChangedSignal, successfulCwCalculator->getCw());
+    }
+    else
+        resetContentionWindow();
 }
 
 //

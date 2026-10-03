@@ -180,6 +180,12 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
             handleProbeResponseFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
+        case ST_NOACKACTION:
+            // Action bodies are not modeled here; MAC acknowledgement policy still applies.
+            numMgmtFramesReceived++;
+            dropManagementFrame(packet);
+            break;
+
         default:
             throw cRuntimeError("Unexpected frame type (%s)%s", packet->getClassName(), packet->getName());
     }

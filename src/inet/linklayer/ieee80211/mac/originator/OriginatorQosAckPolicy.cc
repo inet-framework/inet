@@ -28,7 +28,8 @@ void OriginatorQosAckPolicy::initialize(int stage)
 
 bool OriginatorQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const
 {
-    return !header->getReceiverAddress().isMulticast();
+    // IEEE Std 802.11-2024, 10.3.2.11: Action No Ack elicits no ACK.
+    return header->getType() != ST_NOACKACTION && !header->getReceiverAddress().isMulticast();
 }
 
 std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
