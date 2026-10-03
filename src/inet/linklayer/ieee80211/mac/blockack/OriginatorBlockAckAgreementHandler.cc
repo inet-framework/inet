@@ -181,7 +181,8 @@ void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<co
 
 void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    if (delba->getInitiator())
+    // TIMEOUT expiry already completed local teardown before it queued this frame.
+    if (delba->getInitiator() && delba->getReasonCode() != 39)
         terminateAgreement(delba->getReceiverAddress(), delba->getTid());
 }
 
@@ -199,4 +200,3 @@ OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()
 
 } // namespace ieee80211
 } // namespace inet
-

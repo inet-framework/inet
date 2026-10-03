@@ -24,11 +24,17 @@ BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNu
 
 void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
+    if (header->getAckPolicy() == BLOCK_ACK)
+        dataFrameReceived(header);
+}
+
+void BlockAckRecord::dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
+{
     if (header->getTransmitterAddress() != originatorAddress || header->getTid() != tid ||
-            header->getType() != ST_DATA_WITH_QOS || header->getAckPolicy() != BLOCK_ACK ||
+            header->getType() != ST_DATA_WITH_QOS ||
             header->getFragmentNumber() != 0 || header->getMoreFragments() || header->isIncorrect())
         return;
-    // IEEE Std 802.11-2024, 10.25.6.3 b): ignore the old half-space.
+    // IEEE Std 802.11-2024, 10.25.6.3 b): each related Data frame updates the record; ignore the old half-space.
     auto sequenceNumber = header->getSequenceNumber();
     if (sequenceNumber != startingSequenceNumber && !(startingSequenceNumber < sequenceNumber))
         return;
@@ -69,4 +75,3 @@ void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

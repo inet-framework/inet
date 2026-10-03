@@ -113,6 +113,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     void startFrameSequence(AccessCategory ac);
     void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
+    void cancelPendingBlockAckTimeout(MacAddress peer, Tid tid, bool initiator);
 
     void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);

@@ -133,18 +133,16 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    clearFrameRetryCounters(header);
     emit(retryLimitReachedSignal, packet);
+}
+
+void NonQosRecoveryProcedure::clearFrameRetryCounters(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    Enter_Method("clearFrameRetryCounters");
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
 }
 
 //
@@ -247,4 +245,3 @@ bool NonQosRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeade
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

@@ -9,6 +9,9 @@ It does not claim a radio control exchange or exchange admission.
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
@@ -42,8 +45,17 @@ class TestRecipientService : public RecipientQosMacDataService
 };
 Define_Module(TestRecipientService);
 
+class TestFrameSequenceHandler : public FrameSequenceHandler
+{
+  public:
+    bool isSequenceRunning() override { return context != nullptr; }
+    void hold(FrameSequenceContext *heldContext) { ASSERT(!context); context = heldContext; }
+    void release() { delete context; context = nullptr; }
+};
+
 class TestHcf : public Hcf
 {
+    bool holdChannelAccess = false;
   public:
     std::vector<Ptr<const Ieee80211MgmtHeader>> output;
     int terminations = 0;
@@ -66,10 +78,41 @@ class TestHcf : public Hcf
     simtime_t deadline() const { return inactivityTimer->isScheduled() ? inactivityTimer->getArrivalTime() : SIMTIME_MAX; }
     IProcedureCallback *procedureCallback() { return this; }
     IBlockAckAgreementHandlerCallback *agreementCallback() { return this; }
+    Edcaf *managementEdcaf() { return edca->getEdcaf(AC_VO); }
+    void queueManagement(const Ptr<const Ieee80211MgmtHeader>& header) {
+        holdChannelAccess = true;
+        Hcf::processMgmtFrame(new Packet("queued management", header), header);
+        holdChannelAccess = false;
+    }
+    void holdActiveFrame(Packet *frame, bool rts) {
+        auto context = buildContext(AC_VO);
+        if (rts)
+            context->addStep(new RtsTransmitStep(frame, new Packet("RTS", makeShared<Ieee80211RtsFrame>()), SIMTIME_ZERO));
+        else
+            context->addStep(new TransmitStep(frame, SIMTIME_ZERO));
+        static_cast<TestFrameSequenceHandler *>(frameSequenceHandler)->hold(context);
+    }
+    void releaseActiveFrame() { static_cast<TestFrameSequenceHandler *>(frameSequenceHandler)->release(); }
+    void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+        if (auto management = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
+            // Capture after the real HCF management callback. Queue cases supply a busy channel.
+            take(packet);
+            if (holdChannelAccess)
+                managementEdcaf()->getPendingQueue()->enqueuePacket(packet);
+            else {
+                output.push_back(management);
+                delete packet;
+            }
+        }
+        else
+            Hcf::processUpperFrame(packet, header);
+    }
   protected:
     void initialize(int stage) override {
         Hcf::initialize(stage);
         if (stage == INITSTAGE_LAST) {
+            delete frameSequenceHandler;
+            frameSequenceHandler = new TestFrameSequenceHandler();
             delete originatorBlockAckAgreementHandler;
             originatorBlockAckAgreementHandler = new TestOriginatorBlockAckAgreementHandler();
             // The NED submodule has a fixed type. Replace it with a test subclass for buffer inspection.
@@ -80,12 +123,6 @@ class TestHcf : public Hcf
             serviceModule->callInitialize();
             recipientDataService = check_and_cast<TestRecipientService *>(serviceModule);
         }
-    }
-    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
-        Enter_Method("processMgmtFrame");
-        take(packet);
-        output.push_back(header);
-        delete packet;
     }
     void recipientAgreementTerminated(MacAddress peer, Tid tid) override {
         ++terminations;
@@ -123,6 +160,8 @@ class TestObserver : public cSimpleModule, public cListener
     int equalExpiryDeletions = 0;
     int added = 0;
     int deleted = 0;
+    bool replaceDuringExpiry = false;
+    int expiryOutputStart = 0;
 
     Ptr<Ieee80211AddbaResponse> establish(Tid tid, simtime_t timeout, int requestedSize = 64) {
         auto request = hcf->originator()->buildAddbaRequest(peer, tid, SequenceNumberCyclic(4094), hcf->originatorPolicy());
@@ -159,6 +198,7 @@ class TestObserver : public cSimpleModule, public cListener
     }
 
     void establishRecipient(Tid tid, simtime_t timeout) {
+        auto previousDeadline = hcf->recipient()->getEarliestExpirationTime();
         auto request = makeShared<Ieee80211AddbaRequest>();
         request->setReceiverAddress(mib->address);
         request->setTransmitterAddress(peer);
@@ -176,13 +216,33 @@ class TestObserver : public cSimpleModule, public cListener
         ASSERT(response->getBufferSize() == 64);
         auto agreement = hcf->recipient()->getAgreement(tid, peer);
         ASSERT(agreement && !agreement->getIsAddbaResponseSent());
-        ASSERT(hcf->recipient()->getEarliestExpirationTime() == SIMTIME_MAX);
+        ASSERT(hcf->recipient()->getEarliestExpirationTime() == previousDeadline);
+        // The first response never transmits. A repeated request must remain negotiable.
+        hcf->recipientProcessReceivedManagementFrame(request);
+        auto repeated = dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back());
+        ASSERT(repeated && repeated->getStatusCode() == 0);
+        auto oldResponse = response;
+        auto changed = makeShared<Ieee80211AddbaRequest>(*request);
+        changed->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        hcf->recipientProcessReceivedManagementFrame(changed);
+        ASSERT(dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back())->getStatusCode() == 37);
+        auto replacement = makeShared<Ieee80211AddbaRequest>(*request);
+        replacement->setDialogToken(request->getDialogToken() + 1);
+        hcf->recipientProcessReceivedManagementFrame(replacement);
+        response = dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back());
+        ASSERT(response && response->getStatusCode() == 0);
+        agreement = hcf->recipient()->getAgreement(tid, peer);
+        hcf->completeManagement(oldResponse);
+        ASSERT(!agreement->getIsAddbaResponseSent());
         auto stale = makeShared<Ieee80211AddbaResponse>(*response);
         stale->setDialogToken(response->getDialogToken() + 1);
         hcf->completeManagement(stale);
         ASSERT(!agreement->getIsAddbaResponseSent());
         hcf->completeManagement(response);
         ASSERT(agreement->getIsAddbaResponseSent());
+        hcf->recipientProcessReceivedManagementFrame(replacement);
+        ASSERT(dynamicPtrCast<const Ieee80211AddbaResponse>(hcf->output.back())->getStatusCode() == 37);
+        ASSERT(hcf->recipient()->getAgreement(tid, peer) == agreement);
         ASSERT(agreement->getBlockAckTimeoutValue() == timeout);
         ASSERT(agreement->getBlockAckRecord()->getWindowSize() == 64);
         auto data = makeShared<Ieee80211DataHeader>();
@@ -209,9 +269,166 @@ class TestObserver : public cSimpleModule, public cListener
             hcf->recipientProcessReceivedManagementFrame(frame);
     }
 
+    void checkQueuedTimeouts() {
+        auto edcaf = hcf->managementEdcaf();
+        auto queue = edcaf->getPendingQueue();
+        auto frames = edcaf->getInProgressFrames();
+        auto clearQueue = [&]() {
+            while (!queue->isEmpty())
+                delete queue->dequeuePacket();
+        };
+        auto timeout = [&](MacAddress receiver, Tid tid, bool initiator) {
+            auto header = makeShared<Ieee80211Delba>();
+            header->setReceiverAddress(receiver);
+            header->setTransmitterAddress(mib->address);
+            header->setTid(tid);
+            header->setInitiator(initiator);
+            header->setReasonCode(39);
+            return header;
+        };
+        auto replacement = [&](bool initiator) -> Ptr<const Ieee80211MgmtHeader> {
+            if (initiator) {
+                auto request = makeShared<Ieee80211AddbaRequest>();
+                request->setReceiverAddress(peer);
+                request->setTid(6);
+                return request;
+            }
+            auto response = makeShared<Ieee80211AddbaResponse>();
+            response->setReceiverAddress(peer);
+            response->setTid(6);
+            response->setStatusCode(0);
+            return response;
+        };
+        for (bool initiator : {false, true}) {
+            hcf->queueManagement(timeout(peer, 6, initiator));
+            hcf->queueManagement(timeout(peer, 7, initiator));
+            hcf->queueManagement(timeout(MacAddress("02:00:00:00:00:ff"), 6, initiator));
+            hcf->queueManagement(timeout(peer, 6, !initiator));
+            ASSERT(queue->getNumPackets() == 4);
+            hcf->queueManagement(replacement(initiator));
+            ASSERT(queue->getNumPackets() == 4);
+            int retained = 0;
+            for (int i = 0; i < queue->getNumPackets(); ++i) {
+                if (auto delba = dynamicPtrCast<const Ieee80211Delba>(queue->getPacket(i)->peekAtFront<Ieee80211MacHeader>())) {
+                    ASSERT(delba->getReceiverAddress() != peer || delba->getTid() != 6 || delba->getInitiator() != initiator);
+                    ++retained;
+                }
+            }
+            ASSERT(retained == 3);
+            clearQueue();
+            hcf->queueManagement(timeout(peer, 6, initiator));
+            auto frame = frames->getFrameToTransmit();
+            ASSERT(frame && frames->getLength() == 1);
+            auto header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            auto queuedDelba = dynamicPtrCast<const Ieee80211Delba>(header);
+            ASSERT(queuedDelba && queuedDelba->getReceiverAddress() == peer && queuedDelba->getTid() == 6);
+            ASSERT(queuedDelba->getReasonCode() == 39);
+            ASSERT(queuedDelba->getInitiator() == initiator);
+            edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(header);
+            auto recovery = edcaf->getMgmtAndNonQoSRecoveryProcedure();
+            recovery->dataOrMgmtFrameTransmissionFailed(frame, header, edcaf->getStationRetryCounters());
+            ASSERT(recovery->getRetryCount(frame, header) == 1);
+            hcf->queueManagement(replacement(initiator));
+            ASSERT(frames->getLength() == 0);
+            ASSERT(recovery->getRetryCount(frame, header) == 0);
+            ASSERT(edcaf->getAckHandler()->getMgmtOrNonQoSAckStatus(header) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+            clearQueue();
+            frames->clearDroppedFrames();
+            // Active direct and RTS-protected frames keep their exchange state.
+            for (bool rts : {false, true}) {
+                hcf->queueManagement(timeout(peer, 6, initiator));
+                auto held = frames->getFrameToTransmit();
+                auto heldHeader = held->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(heldHeader);
+                hcf->holdActiveFrame(held, rts);
+                hcf->queueManagement(replacement(initiator));
+                ASSERT(frames->getLength() == 1);
+                ASSERT(edcaf->getAckHandler()->getMgmtOrNonQoSAckStatus(heldHeader) == QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+                hcf->releaseActiveFrame();
+                frames->dropFrame(held);
+                edcaf->getAckHandler()->dropFrame(heldHeader);
+                frames->clearDroppedFrames();
+                clearQueue();
+            }
+        }
+    }
+
+    void checkReorderDelivery() {
+        auto receive = [&](int sequence, Tid tid, AckPolicy policy = BLOCK_ACK) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->setTransmitterAddress(peer);
+            header->setReceiverAddress(mib->address);
+            header->setTid(tid);
+            header->setAckPolicy(policy);
+            header->setSequenceNumber(SequenceNumberCyclic(sequence));
+            return hcf->service()->dataFrameReceived(new Packet("reorder data", header), header, hcf->recipient());
+        };
+        establishRecipient(6, SIMTIME_ZERO);
+        ASSERT(receive(2046, 6).empty()); // Exactly half the sequence space from 4094.
+        ASSERT(!hcf->recipient()->getAgreement(6, peer)->getBlockAckRecord()->getAckState(SequenceNumberCyclic(2046), 0));
+        ASSERT(receive(0, 6).empty());
+        auto preceding = receive(64, 6);
+        ASSERT(preceding.size() == 2);
+        ASSERT(preceding[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(4095));
+        ASSERT(preceding[1]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(0));
+        for (auto frame : preceding) {
+            take(frame);
+            delete frame;
+        }
+        auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+        bar->setReceiverAddress(mib->address);
+        bar->setTransmitterAddress(peer);
+        bar->setTidInfo(6);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(64));
+        auto request = new Packet("BAR", bar);
+        auto retained = hcf->service()->controlFrameReceived(request, bar, hcf->recipient());
+        ASSERT(retained.size() == 1);
+        ASSERT(retained[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(64));
+        ASSERT(hcf->recipient()->getAgreement(6, peer)->getBlockAckRecord()->getAckState(SequenceNumberCyclic(64), 0));
+        take(retained[0]);
+        delete retained[0];
+        delete request;
+        delba(false, true, 6);
+        establishRecipient(7, SIMTIME_ZERO);
+        ASSERT(receive(0, 7).empty());
+        auto consecutive = receive(4094, 7);
+        ASSERT(consecutive.size() == 3);
+        for (int i = 0; i < 3; ++i) {
+            ASSERT(consecutive[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(4094) + i);
+            take(consecutive[i]);
+            delete consecutive[i];
+        }
+        delba(false, true, 7);
+        establishRecipient(7, SIMTIME_ZERO);
+        auto flushed = receive(94, 7, NORMAL_ACK); // 100 positions after the initial start at 4094.
+        ASSERT(flushed.size() == 1);
+        ASSERT(flushed[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(4095));
+        take(flushed[0]);
+        delete flushed[0];
+        ASSERT(receive(8, 7).empty());
+        auto record = hcf->recipient()->getAgreement(7, peer)->getBlockAckRecord();
+        ASSERT(!record->getAckState(SequenceNumberCyclic(8), 0));
+        ASSERT(record->getAckState(SequenceNumberCyclic(94), 0));
+        auto mixedBar = makeShared<Ieee80211CompressedBlockAckReq>();
+        mixedBar->setReceiverAddress(mib->address);
+        mixedBar->setTransmitterAddress(peer);
+        mixedBar->setTidInfo(7);
+        mixedBar->setStartingSequenceNumber(SequenceNumberCyclic(94));
+        auto mixedRequest = new Packet("mixed policy BAR", mixedBar);
+        auto normal = hcf->service()->controlFrameReceived(mixedRequest, mixedBar, hcf->recipient());
+        ASSERT(normal.size() == 1);
+        ASSERT(normal[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(94));
+        take(normal[0]);
+        delete normal[0];
+        delete mixedRequest;
+        delba(false, true, 7);
+    }
+
   protected:
     void initialize() override { scheduleAt(SimTime(1), new cMessage("setup")); }
     void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
         ASSERT(object != nullptr);
         if (signal == Hcf::blockAckAgreementAddedSignal) {
             ++added;
@@ -224,9 +441,14 @@ class TestObserver : public cSimpleModule, public cListener
                 auto tid = recipient->getBlockAckRecord()->getTid();
                 ASSERT(!hcf->recipient()->getAgreement(tid, peer));
                 ASSERT(!hcf->service()->hasBuffer(peer, tid));
+                if (replaceDuringExpiry && tid == 8)
+                    establishRecipient(8, SIMTIME_ZERO);
             }
-            else if (auto originator = dynamic_cast<OriginatorBlockAckAgreement *>(object))
+            else if (auto originator = dynamic_cast<OriginatorBlockAckAgreement *>(object)) {
                 ASSERT(!hcf->originator()->getAgreement(peer, originator->getTid()));
+                if (replaceDuringExpiry && originator->getTid() == 8)
+                    establish(8, SIMTIME_ZERO);
+            }
         }
     }
     void handleMessage(cMessage *message) override {
@@ -239,6 +461,8 @@ class TestObserver : public cSimpleModule, public cListener
             hcf->subscribe(Hcf::blockAckAgreementAddedSignal, this);
             hcf->subscribe(Hcf::blockAckAgreementDeletedSignal, this);
             ASSERT(!hcf->originatorPolicy()->isAddbaReqNeeded(nullptr, nullptr));
+            checkQueuedTimeouts();
+            checkReorderDelivery();
             // Absent capability evidence, disabled HT, and delayed requests elicit rejection.
             for (int condition = 0; condition < 3; ++condition) {
                 auto request = makeShared<Ieee80211AddbaRequest>();
@@ -287,6 +511,23 @@ class TestObserver : public cSimpleModule, public cListener
             scheduleAt(SimTime(2), new cMessage("refresh"));
             scheduleAt(SimTime(4.5), new cMessage("originator expired"));
             scheduleAt(SimTime(5.5), new cMessage("recipient expired"));
+            expiryOutputStart = hcf->output.size();
+            establish(8, SimTime(0.01));
+            establishRecipient(8, SimTime(0.01));
+            replaceDuringExpiry = true;
+            scheduleAt(SimTime(1.02), new cMessage("reentrant expiry"));
+        }
+        else if (!strcmp(message->getName(), "reentrant expiry")) {
+            ASSERT(hcf->originator()->getAgreement(peer, 8)->getIsAddbaResponseReceived());
+            ASSERT(hcf->recipient()->getAgreement(8, peer)->getIsAddbaResponseSent());
+            ASSERT(hcf->service()->hasBuffer(peer, 8));
+            for (int i = expiryOutputStart; i < (int)hcf->output.size(); ++i)
+                if (auto delbaFrame = dynamicPtrCast<const Ieee80211Delba>(hcf->output[i]))
+                    ASSERT(delbaFrame->getTid() != 8 || delbaFrame->getReasonCode() != 39);
+            replaceDuringExpiry = false;
+            delba(false, false, 8);
+            delba(false, true, 8);
+            ASSERT(hcf->deadline() == SimTime(3));
         }
         else if (!strcmp(message->getName(), "refresh")) {
             auto ba = makeShared<Ieee80211CompressedBlockAck>();
@@ -318,6 +559,17 @@ class TestObserver : public cSimpleModule, public cListener
             hcf->recipient()->qosFrameReceived(receivedData, hcf->agreementCallback());
             ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(4));
             receivedData->setReceiverAddress(mib->address);
+            auto normalData = makeShared<Ieee80211DataHeader>(*receivedData);
+            normalData->setAckPolicy(NORMAL_ACK);
+            normalData->setSequenceNumber(SequenceNumberCyclic(100));
+            hcf->recipient()->qosFrameReceived(normalData, hcf->agreementCallback());
+            auto normalDelivery = hcf->service()->dataFrameReceived(new Packet("normal receipt", normalData), normalData, hcf->recipient());
+            for (auto frame : normalDelivery) {
+                take(frame);
+                delete frame;
+            }
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getBlockAckRecord()->getAckState(SequenceNumberCyclic(100), 0));
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(4));
             hcf->recipient()->qosFrameReceived(receivedData, hcf->agreementCallback());
             ASSERT(hcf->recipient()->getAgreement(5, peer)->getExpirationTime() == SimTime(5));
             ASSERT(hcf->deadline() == SimTime(4));
@@ -337,7 +589,15 @@ class TestObserver : public cSimpleModule, public cListener
             ASSERT(hcf->deadline() == SimTime(5));
             auto delbaFrame = dynamicPtrCast<const Ieee80211Delba>(hcf->output.back());
             ASSERT(delbaFrame && delbaFrame->getInitiator() && delbaFrame->getReasonCode() == 39);
+            establish(5, SIMTIME_ZERO);
+            int count = deleted;
+            hcf->queueManagement(delbaFrame);
+            ASSERT(hcf->managementEdcaf()->getPendingQueue()->isEmpty());
             hcf->completeManagement(delbaFrame);
+            ASSERT(hcf->originator()->getAgreement(peer, 5)->getIsAddbaResponseReceived());
+            ASSERT(hcf->recipient()->getAgreement(5, peer));
+            ASSERT(hcf->service()->hasBuffer(peer, 5));
+            ASSERT(deleted == count);
         }
         else if (!strcmp(message->getName(), "recipient expired")) {
             ASSERT(!hcf->recipient()->getAgreement(5, peer));
@@ -346,8 +606,17 @@ class TestObserver : public cSimpleModule, public cListener
             int count = hcf->terminations;
             auto delbaFrame = dynamicPtrCast<const Ieee80211Delba>(hcf->output.back());
             ASSERT(delbaFrame && !delbaFrame->getInitiator() && delbaFrame->getReasonCode() == 39);
+            establishRecipient(5, SIMTIME_ZERO);
+            count = hcf->terminations;
+            int deletionCount = deleted;
+            hcf->queueManagement(delbaFrame);
+            ASSERT(hcf->managementEdcaf()->getPendingQueue()->isEmpty());
             hcf->completeManagement(delbaFrame);
             ASSERT(hcf->terminations == count);
+            ASSERT(deleted == deletionCount);
+            ASSERT(hcf->recipient()->getAgreement(5, peer)->getIsAddbaResponseSent());
+            ASSERT(hcf->service()->hasBuffer(peer, 5));
+            delba(false, true, 5);
             establish(5, SimTime(0.1));
             establishRecipient(5, SimTime(0.1));
             equalExpiryDeletions = deleted;

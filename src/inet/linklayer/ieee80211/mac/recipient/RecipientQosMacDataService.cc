@@ -77,7 +77,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     }
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
-        for (auto it : frames) {
+        for (const auto& it : BlockAckReordering::getFramesInOrder(frames)) {
             auto fragments = it.second;
             Packet *frame = defragment(fragments);
             // TODO revise
@@ -86,7 +86,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         }
     }
     else {
-        for (auto it : frames) {
+        for (const auto& it : BlockAckReordering::getFramesInOrder(frames)) {
             auto fragments = it.second;
             if (fragments.size() == 1)
                 defragmentedFrames.push_back(fragments.at(0));
@@ -163,13 +163,13 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         }
         std::vector<Packet *> defragmentedFrames;
         if (basicReassembly) { // FIXME defragmentation
-            for (auto it : frames) {
+            for (const auto& it : BlockAckReordering::getFramesInOrder(frames)) {
                 auto fragments = it.second;
                 defragmentedFrames.push_back(defragment(fragments));
             }
         }
         else {
-            for (auto it : frames) {
+            for (const auto& it : BlockAckReordering::getFramesInOrder(frames)) {
                 auto fragments = it.second;
                 if (fragments.size() == 1) {
                     defragmentedFrames.push_back(fragments.at(0));
@@ -210,4 +210,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

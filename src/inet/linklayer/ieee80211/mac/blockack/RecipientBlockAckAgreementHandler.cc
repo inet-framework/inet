@@ -183,17 +183,29 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
 {
     auto response = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
     // IEEE Std 802.11-2024, 10.25.2: a parsed request always receives a response.
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest) &&
-            getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress()) == nullptr)
-        addAgreement(addbaRequest, response);
-    else
+    auto agreement = getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+    if (!blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest) || (agreement && agreement->getIsAddbaResponseSent()))
         response->setStatusCode(37); // REFUSED
+    else if (agreement && agreement->getDialogToken() == addbaRequest->getDialogToken()) {
+        // A retry reuses the same pending transaction; it cannot change its receive window.
+        if (agreement->getStartingSequenceNumber() != addbaRequest->getStartingSequenceNumber() ||
+                agreement->getBufferSize() != response->getBufferSize() ||
+                agreement->getBlockAckTimeoutValue() != response->getBlockAckTimeoutValue() ||
+                agreement->getIsAMsduSupported() != response->getAMsduSupported())
+            response->setStatusCode(37); // REFUSED
+    }
+    else {
+        // Replace inactive state after acceptance. Old response tokens cannot activate this agreement.
+        terminateAgreement(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+        addAgreement(addbaRequest, response);
+    }
     callback->processMgmtFrame(new Packet("AddbaResponse", response), response);
 }
 
 void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    if (!delba->getInitiator())
+    // TIMEOUT expiry already completed local teardown before it queued this frame.
+    if (!delba->getInitiator() && delba->getReasonCode() != 39)
         terminateAgreement(delba->getReceiverAddress(), delba->getTid());
 }
 
@@ -211,4 +223,3 @@ RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
 
 } // namespace ieee80211
 } // namespace inet
-

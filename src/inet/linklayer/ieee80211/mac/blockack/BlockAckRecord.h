@@ -33,6 +33,7 @@ class INET_API BlockAckRecord
     virtual ~BlockAckRecord() {}
 
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
+    void dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
     void removeAckStates(SequenceNumberCyclic sequenceNumber);
     void blockAckReqReceived(SequenceNumberCyclic sequenceNumber);
