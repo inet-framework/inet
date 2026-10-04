@@ -74,7 +74,7 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
 
 void QuicDiscardServer::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
-    auto data = packet->popAtFront();
+    auto data = packet->popAtFront(packet->getDataLength());
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
     numReceived++;

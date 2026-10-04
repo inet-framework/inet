@@ -8,11 +8,27 @@ The invalid token example sends 1500 bytes on the first connection and 3000 on t
 
 namespace inet {
 
-class StreamPayloadServer : public QuicDiscardServer
+class StreamPayloadServer : public QuicDiscardServer, public cListener
 {
+  public:
+    ~StreamPayloadServer() { unsubscribe("bytesReceived", this); }
+
   protected:
     B receivedBytes = B(0);
+    intval_t recordedBytes = 0;
     bool receivedComposite = false;
+
+    void initialize(int stage) override
+    {
+        QuicDiscardServer::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            subscribe("bytesReceived", this);
+    }
+
+    void receiveSignal(cComponent *, simsignal_t, intval_t value, cObject *) override
+    {
+        recordedBytes += value;
+    }
 
     void socketDataArrived(QuicSocket *socket, Packet *packet) override
     {
@@ -24,8 +40,9 @@ class StreamPayloadServer : public QuicDiscardServer
     void finish() override
     {
         ASSERT(receivedBytes == B(4500));
+        ASSERT(recordedBytes == 4500);
         ASSERT(receivedComposite);
-        std::cout << "Composite STREAM payload reached the application: 4500 bytes.\n";
+        std::cout << "Composite STREAM payload reached the application and its byte statistic: 4500 bytes.\n";
     }
 };
 Define_Module(StreamPayloadServer);
@@ -68,4 +85,4 @@ record-scalar-results = false
 **.server.quic.sendZeroRttTokenAsServer = true
 
 %contains: stdout
-Composite STREAM payload reached the application: 4500 bytes.
+Composite STREAM payload reached the application and its byte statistic: 4500 bytes.
