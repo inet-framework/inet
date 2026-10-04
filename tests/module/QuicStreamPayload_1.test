@@ -1,0 +1,71 @@
+%description:
+A STREAM payload can contain chunks from several application writes.
+The receiver must consume the declared byte count before it reads another frame header.
+The invalid token example sends 1500 bytes on the first connection and 3000 on the second.
+
+%file: QuicStreamPayload.cc
+#include "inet/applications/quicapp/QuicDiscardServer.h"
+
+namespace inet {
+
+class StreamPayloadServer : public QuicDiscardServer
+{
+  protected:
+    B receivedBytes = B(0);
+    bool receivedComposite = false;
+
+    void socketDataArrived(QuicSocket *socket, Packet *packet) override
+    {
+        receivedBytes += packet->getDataLength();
+        receivedComposite |= packet->peekAtFront()->getChunkLength() < packet->getDataLength();
+        QuicDiscardServer::socketDataArrived(socket, packet);
+    }
+
+    void finish() override
+    {
+        ASSERT(receivedBytes == B(4500));
+        ASSERT(receivedComposite);
+        std::cout << "Composite STREAM payload reached the application: 4500 bytes.\n";
+    }
+};
+Define_Module(StreamPayloadServer);
+
+} // namespace inet
+
+%file: test.ned
+import inet.applications.quicapp.QuicDiscardServer;
+
+simple StreamPayloadServer extends QuicDiscardServer
+{
+    parameters:
+        @class(::inet::StreamPayloadServer);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.examples.quic.zerortt.zerortt
+ned-path = .;../../../../src;../../../../examples;../../lib
+sim-time-limit = 0.2s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.quic.typename = "Quic"
+**.ppp[*].ppp.mtu = 1500B
+**.client.hasQuic = true
+**.client.numApps = 1
+**.client.app[0].typename = "QuicZeroRttClient"
+**.client.app[0].localPort = 1001
+**.client.app[0].connectPort = 1000
+**.client.app[0].connectAddress = "server"
+**.client.app[0].invalidClientTokenString = true
+**.client.app[0].sendInvalidToken = false
+**.server.hasQuic = true
+**.server.numApps = 1
+**.server.app[0].typename = "StreamPayloadServer"
+**.server.app[0].localAddress = ""
+**.server.app[0].localPort = 1000
+**.server.quic.sendZeroRttTokenAsServer = true
+
+%contains: stdout
+Composite STREAM payload reached the application: 4500 bytes.
