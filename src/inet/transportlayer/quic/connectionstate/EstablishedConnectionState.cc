@@ -63,8 +63,9 @@ void EstablishedConnectionState::processStreamFrame(const Ptr<const StreamFrameH
 {
     EV_DEBUG << "processStreamFrame in " << name << endl;
 
-    // TODO: Check if data is following (it might be an empty Stream Frame)
-    auto data = pkt->popAtFront();
+    if (frameHeader->getLength() == 0)
+        return;
+    auto data = pkt->popAtFront(B(frameHeader->getLength()));
     EV_DEBUG << "process data, found chunk: " << data << endl;
 
     context->processReceivedData(frameHeader->getStreamId(), frameHeader->getOffset(), data);
