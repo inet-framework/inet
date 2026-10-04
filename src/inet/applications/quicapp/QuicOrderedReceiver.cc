@@ -68,7 +68,7 @@ void QuicOrderedReceiver::handleMessageWhenUp(cMessage *msg)
 
 void QuicOrderedReceiver::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
-    auto data = packet->popAtFront();
+    auto data = packet->peekDataAsBytes();
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     long chunkBytes = (long)B(data->getChunkLength()).get();
     emit(bytesReceivedSignal, chunkBytes);

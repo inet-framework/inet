@@ -1,0 +1,103 @@
+%description:
+The ordered QUIC receiver counts and checks all bytes in a composite payload.
+The next delivery continues the byte sequence across its wrap at 256.
+A corrupt byte after the first chunk must raise the production validation error.
+
+%file: QuicOrderedPayload.cc
+#include "inet/applications/quicapp/QuicOrderedReceiver.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+namespace inet {
+
+class OrderedPayloadReceiver : public QuicOrderedReceiver, public cListener
+{
+  public:
+    ~OrderedPayloadReceiver() { unsubscribe("bytesReceived", this); }
+
+  protected:
+    intval_t recordedBytes = 0;
+
+    void receiveSignal(cComponent *, simsignal_t, intval_t value, cObject *) override
+    {
+        recordedBytes += value;
+    }
+
+    Ptr<BytesChunk> makeBytes(int offset, int length)
+    {
+        std::vector<uint8_t> bytes;
+        for (int i = 0; i < length; i++)
+            bytes.push_back(static_cast<uint8_t>(offset + i));
+        return makeShared<BytesChunk>(bytes);
+    }
+
+    void initialize(int stage) override
+    {
+        // Exercise the application callback without a transport connection.
+        if (stage != INITSTAGE_LOCAL)
+            return;
+        subscribe("bytesReceived", this);
+        bool corrupt = par("corrupt");
+        auto packet = new Packet("composite");
+        packet->insertAtBack(makeBytes(0, 1000));
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(1), 232));
+        auto tail = makeBytes(1001, 499);
+        if (corrupt)
+            tail->setByte(0, 0);
+        packet->insertAtBack(tail);
+        ASSERT(packet->getDataLength() == B(1500));
+        ASSERT(packet->peekAtFront()->getChunkLength() < packet->getDataLength());
+
+        bool rejected = false;
+        try {
+            socketDataArrived(nullptr, packet);
+        }
+        catch (const cRuntimeError& error) {
+            delete packet;
+            ASSERT(corrupt);
+            ASSERT(std::string(error.what()).find("Received wrong bytes. Received byte is 0, expected byte is 233") != std::string::npos);
+            rejected = true;
+        }
+        ASSERT(rejected == corrupt);
+        ASSERT(bytesReceived == 1500);
+        ASSERT(recordedBytes == 1500);
+        if (!corrupt) {
+            auto next = new Packet("next", makeBytes(1500, 256));
+            socketDataArrived(nullptr, next);
+            ASSERT(bytesReceived == 1756);
+            ASSERT(recordedBytes == 1756);
+        }
+        std::cout << "Complete QUIC application accounting and content validation verified.\n";
+    }
+};
+Define_Module(OrderedPayloadReceiver);
+
+} // namespace inet
+
+%file: test.ned
+import inet.applications.quicapp.QuicOrderedReceiver;
+
+simple OrderedPayloadReceiver extends QuicOrderedReceiver
+{
+    parameters:
+        bool corrupt;
+        @class(::inet::OrderedPayloadReceiver);
+}
+
+network Test
+{
+    submodules:
+        receiver: OrderedPayloadReceiver;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 0s
+seed-set = 0
+*.receiver.corrupt = ${false,true}
+
+%contains: stdout
+Complete QUIC application accounting and content validation verified.
