@@ -25,25 +25,30 @@ class RecipientBlockAckAgreement;
 class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgreementHandler
 {
   protected:
+    // IEEE Std 802.11-2024, Table 9-79.
+    static constexpr int UNKNOWN_BA = 38;
     std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *> blockAckAgreements;
+    uint64_t lastAgreementId = 0;
 
   protected:
-    virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
+    virtual void terminateAgreement(MacAddress originatorAddr, Tid tid, IBlockAckAgreementHandlerCallback *callback);
     virtual RecipientBlockAckAgreement *addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq);
     virtual void updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse);
     virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
     virtual ~RecipientBlockAckAgreementHandler();
-    virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) override;
+    [[nodiscard]] simtime_t getEarliestExpirationTime() const override;
+    // A response belongs to the current setup only if its local identity and deadline match.
+    [[nodiscard]] bool isAddbaResponseCurrent(const Ptr<const Ieee80211AddbaResponse>& addbaResp, uint64_t agreementId) const override;
+    virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, uint64_t agreementId, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
-    virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
-    virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
-    virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
+    void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual bool qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback, IProcedureCallback *procedureCallback) override;
+    void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback) override;
+    std::vector<Ptr<Ieee80211Delba>> blockAckAgreementExpired(IBlockAckAgreementHandlerCallback *callback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;
 };

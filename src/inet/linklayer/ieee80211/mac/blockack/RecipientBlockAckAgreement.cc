@@ -12,7 +12,8 @@
 namespace inet {
 namespace ieee80211 {
 
-RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
+RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t lastUsedTime, uint64_t agreementId) :
+    agreementId(agreementId),
     startingSequenceNumber(startingSequenceNumber),
     bufferSize(bufferSize),
     blockAckTimeoutValue(lastUsedTime)

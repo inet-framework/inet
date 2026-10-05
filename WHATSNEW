@@ -12,6 +12,20 @@ IEEE 802.11 Tx request identities
 
    Hypothetical: request A waits for IFS. Its permission callback replaces A with B. Tx detects the changed identity and cannot transmit A. Custom Tx modules and handlers require the new request callbacks.
 
+   The hybrid coordination function (HCF) serves quality of service traffic. MAC resets Tx before coordination functions retire exchanges on stop or crash. A new lifecycle epoch rejects old requests after restart. Group, Block Ack, and No Ack transmissions do not enter Normal Ack failure processing.
+
+   Block Ack reports reception status for multiple frames under an agreement. Add block acknowledgment (ADDBA) establishes the agreement. Delete block acknowledgment (DELBA) ends it. HCF restores finite Block Ack inactivity deadlines after stop or crash. Downtime counts toward the deadline; restart retires overdue agreements before channel access.
+
+   Hypothetical: an agreement expires at 5 s, and the node restarts at 6 s. HCF retires the agreement before channel access. Timeout zero disables inactivity expiry. Late Block Ack activity cannot renew an overdue agreement. HCF discards Block Ack data without an active agreement and sends DELBA. Normal Ack data follows its current receive path.
+
+   Recipient retirement clears only that agreement's reorder buffer. For example, expiry removes buffered sequence 20 from an agreement that starts at sequence 19. A replacement ADDBA starts at sequence 100 without the old window. Other peers and traffic identifiers retain their buffers. Active agreement statistics decrease once for each retirement.
+
+   Recipient inactivity starts at the first matching ADDBA response transmission completion. A queued response can survive stop or crash without premature inactivity expiry. Response retries preserve the first deadline. HCF rejects stale queued responses through a local setup identity. Late completion cannot activate or renew a replacement agreement.
+
+   Hypothetical: an ADDBA response waits in the queue during two seconds of downtime. Its agreement has a one-second inactivity timeout. Restart preserves pending setup. The first response transmission starts the one-second deadline.
+
+   External Tx modules, handlers, ACK owners, and Block Ack services require the applicable new interfaces and a rebuild.
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate

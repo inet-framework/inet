@@ -39,8 +39,9 @@ class INET_API ITx
     enum class Cancellation { CANCELED, TOO_LATE, NOT_FOUND };
     virtual void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
     virtual Cancellation cancelPendingTransmission(TxRequestId id) = 0;
+    virtual void resetForLifecycle(uint64_t epoch) = 0;
     /**
-     * The query returns true while Tx retains an accepted frame, including any wait before transmission and the transmission itself. Tx clears this state before it calls ICallback::transmissionComplete(), so the callback can release pending radio commands. The query returns false after completion or cancellation releases the request. For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
+     * The query returns true while Tx retains an accepted frame, including any wait before transmission and the transmission itself. Tx clears this state before it calls ICallback::transmissionComplete(), so the callback can release pending radio commands. The query returns false after completion, cancellation, or lifecycle reset releases the request. For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
      */
     [[nodiscard]] virtual bool hasTransmission() const = 0;
     virtual void radioTransmissionFinished() = 0;

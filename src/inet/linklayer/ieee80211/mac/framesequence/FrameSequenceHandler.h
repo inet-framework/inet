@@ -54,6 +54,7 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     bool isSequenceRunning() override { return running; }
     void setPendingTransmission(TxRequestId id) override { pendingRequest = id; }
     void pendingTransmissionCanceled(TxRequestId id) override;
+    void resetForLifecycle(bool onAir) override;
     void beginCallback() override { callbackDepth++; }
     void endCallback() override { ASSERT(callbackDepth > 0); if (--callbackDepth == 0) disposeRetired(); }
 
