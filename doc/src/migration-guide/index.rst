@@ -4,6 +4,26 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Management Rate Context
+----------------------------------
+
+``Ieee80211RateSetState`` preserves unknown facts and known empty sets.
+``snapshotRateContext()`` returns an owned ``RateContextSnapshot`` with copied rates and identities.
+The query takes the peer, frame subtype, optional BSSID, and optional ``BssRateContextRef``.
+An unresolved or conflicting identity returns ``known == false``.
+An unknown target never falls back to the active BSS.
+
+Custom management implementations must publish facts at their actual commit points.
+Use ``Ieee80211Mib::RateUpdate`` around related management and MIB changes.
+Its outer scope emits ``rateStateChanged`` after the transition completes.
+Install a new target with generation zero and a transaction identifier that remains unique across restart.
+Bind its expected incoming subtype before the first frame enters the queue.
+Use the matching snapshot to obtain the MIB-assigned reference with its nonzero generation.
+Retain that exact reference for queued frames and target removal.
+Target removal also removes its incoming bindings.
+
+These records do not change rate-selection or TXOP policies.
+
 IEEE 802.11 Prepared Exchanges and Tx Requests
 ---------------------------------------------
 

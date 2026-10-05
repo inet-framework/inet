@@ -6,6 +6,11 @@ INET-4.7.x (in development)
 
 Notable backward incompatible changes are the following:
 
+IEEE 802.11 management rate context
+
+   Custom rate-selection models can query local, BSS, peer, and target rate
+   facts through Ieee80211Mib.
+
 IEEE 802.11 HCF complete exchange admission
 
    HCF checks complete exchange airtime when isBlockAckSupported is false.

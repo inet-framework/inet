@@ -1,0 +1,71 @@
+%description:
+Check owned rate snapshots, target identities, ambiguous bindings, and empty facts.
+
+%includes:
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+network TestNetwork
+{
+    submodules:
+        mib: Ieee80211Mib;
+        peer: Ieee80211Mib;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+auto b = check_and_cast<Ieee80211Mib *>(getModuleByPath("peer"));
+b->address = MacAddress("02:00:00:00:00:02");
+        // MIB-only identity and empty-set probes use explicit fixture records.
+        Ieee80211RateSetState empty;
+        empty.supported.known = empty.basic.known = empty.operational.known = true;
+        BssRateContextRef first{BssRateContextRef::TARGET, b->address, 10000, 0};
+        staMib->installTargetRateContext(first, empty, b->address, Ieee80211RateSetState());
+        staMib->bindIncomingRateContext(b->address, ST_AUTHENTICATION, first);
+        auto emptySnapshot = staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, std::nullopt);
+        first = emptySnapshot.context;
+        ASSERT(emptySnapshot.known && emptySnapshot.bssRates.supported.known);
+        ASSERT(emptySnapshot.bssRates.supported.legacyRates.empty() && !emptySnapshot.peerRates.supported.known);
+        BssRateContextRef second{BssRateContextRef::TARGET, b->address, 10001, 0};
+        staMib->installTargetRateContext(second, empty, b->address, empty);
+        staMib->bindIncomingRateContext(b->address, ST_AUTHENTICATION, second);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, std::nullopt).known);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_RTS, std::nullopt, std::nullopt).known);
+        ASSERT(staMib->snapshotRateContext(b->address, ST_RTS, b->address, first).known);
+        staMib->bindIncomingRateContext(b->address, ST_ASSOCIATIONREQUEST, first);
+        staMib->bindIncomingRateContext(b->address, ST_ASSOCIATIONRESPONSE, first);
+        for (int subtype : {ST_ASSOCIATIONREQUEST, ST_ASSOCIATIONRESPONSE})
+            ASSERT(staMib->snapshotRateContext(b->address, subtype, b->address, first).known);
+        staMib->bindIncomingRateContext(b->address, ST_ASSOCIATIONRESPONSE, second);
+        for (int subtype : {ST_ASSOCIATIONREQUEST, ST_ASSOCIATIONRESPONSE}) {
+            ASSERT(!staMib->snapshotRateContext(b->address, subtype, b->address, std::nullopt).known);
+            ASSERT(!staMib->snapshotRateContext(b->address, subtype, b->address, first).known);
+        }
+        staMib->clearTargetRateContexts();
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, std::nullopt).known);
+        ASSERT(staMib->snapshotRateContext(MacAddress::BROADCAST_ADDRESS, ST_PROBEREQUEST, std::nullopt, BssRateContextRef()).known);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, std::nullopt, BssRateContextRef()).known);
+
+auto saved = emptySnapshot;
+ASSERT(saved.bssRates.supported.known && saved.bssRates.supported.legacyRates.empty());
+ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, first).known);
+std::cout << "MIB rate context snapshots passed.\n";
+
+%contains: stdout
+MIB rate context snapshots passed.
+
+%not-contains: stdout
+undisposed object

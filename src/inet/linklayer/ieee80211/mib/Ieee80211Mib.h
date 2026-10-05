@@ -9,9 +9,11 @@
 #define __INET_IEEE80211MIB_H
 
 #include "inet/common/SimpleModule.h"
+#include <optional>
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211RateSet.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211RateContext.h"
 
 namespace inet {
 
@@ -86,6 +88,21 @@ class INET_API Ieee80211Mib : public SimpleModule
     Ieee80211HtCapabilities localHtCapabilities;
 
   private:
+    struct TargetRateContext {
+        BssRateContextRef ref;
+        MacAddress peer;
+        Ieee80211RateSetState bssRates;
+        Ieee80211RateSetState peerRates;
+    };
+    std::map<uint64_t, TargetRateContext> targetRateContexts;
+    std::map<std::pair<MacAddress, int>, std::vector<BssRateContextRef>> incomingRateContexts;
+    uint64_t rateGeneration = 0;
+    BssRateContextRef activeRateContext;
+    unsigned int rateUpdateDepth = 0;
+    bool rateUpdatePending = false;
+    void rateStateChanged();
+    void flushRateStateChanged();
+
     Ieee80211HtOperation htOperation;
     int configuredSecondaryChannelOffset = 0;
     bool primaryChannelAvailable = false;
@@ -99,6 +116,17 @@ class INET_API Ieee80211Mib : public SimpleModule
     virtual void initialize(int stage) override;
 
   public:
+    // Management completes its state transition before the outer update emits.
+    class INET_API RateUpdate {
+      private:
+        Ieee80211Mib& mib;
+      public:
+        explicit RateUpdate(Ieee80211Mib& mib) : mib(mib) { ++mib.rateUpdateDepth; }
+        ~RateUpdate() noexcept(false) { if (--mib.rateUpdateDepth == 0) mib.flushRateStateChanged(); }
+        RateUpdate(const RateUpdate&) = delete;
+        RateUpdate& operator=(const RateUpdate&) = delete;
+    };
+
     static const char *getModeStr(Ieee80211Mib::Mode mode);
     static const char *getStationTypeStr(Ieee80211Mib::BssStationType stationType);
     std::string getSsidStr() const;
@@ -132,6 +160,15 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearBssRateSet();
     void removePeerRateSet(const MacAddress& address);
     void clearPeerRateSets();
+    void setPeerRateSet(const MacAddress& peer, const Ieee80211RateSetState& state);
+    // A new target uses generation zero. Bind it before the first frame is queued.
+    void installTargetRateContext(const BssRateContextRef& ref, const Ieee80211RateSetState& bssRates,
+            const MacAddress& peer, const Ieee80211RateSetState& peerRates);
+    void removeTargetRateContext(const BssRateContextRef& ref);
+    void clearTargetRateContexts();
+    void bindIncomingRateContext(const MacAddress& peer, int requestSubtype, const BssRateContextRef& ref);
+    RateContextSnapshot snapshotRateContext(const MacAddress& peer, int frameSubtype,
+            const std::optional<MacAddress>& bssid, const std::optional<BssRateContextRef>& explicitContext) const;
 };
 
 } // namespace ieee80211

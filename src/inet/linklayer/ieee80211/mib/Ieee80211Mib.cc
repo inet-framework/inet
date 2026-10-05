@@ -8,6 +8,9 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 #include <algorithm>
+#include <limits>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -19,6 +22,193 @@ namespace ieee80211 {
 Define_Module(Ieee80211Mib);
 
 simsignal_t Ieee80211Mib::rateStateChangedSignal = cComponent::registerSignal("rateStateChanged");
+
+void Ieee80211Mib::rateStateChanged()
+{
+    if (rateGeneration == std::numeric_limits<uint64_t>::max())
+        throw cRuntimeError("Rate context generation exhausted");
+    ++rateGeneration;
+    rateUpdatePending = true;
+    if (rateUpdateDepth == 0)
+        flushRateStateChanged();
+}
+
+void Ieee80211Mib::flushRateStateChanged()
+{
+    Enter_Method("flushRateStateChanged");
+    if (rateUpdatePending) {
+        rateUpdatePending = false;
+        emit(rateStateChangedSignal, true);
+    }
+}
+
+void Ieee80211Mib::setPeerRateSet(const MacAddress& peer, const Ieee80211RateSetState& state)
+{
+    Enter_Method("setPeerRateSet");
+    if (peer.isUnspecified() || peer.isMulticast())
+        throw cRuntimeError("Peer rate state requires a unicast address");
+    validateIeee80211RateSetState(state, "peer rate state");
+    auto it = peerRateSets.find(peer);
+    if (it != peerRateSets.end() && it->second == state)
+        return;
+    peerRateSets[peer] = state;
+    rateStateChanged();
+}
+
+void Ieee80211Mib::installTargetRateContext(const BssRateContextRef& ref,
+        const Ieee80211RateSetState& bssRates, const MacAddress& peer, const Ieee80211RateSetState& peerRates)
+{
+    Enter_Method("installTargetRateContext");
+    validateIeee80211RateSetState(bssRates, "target BSS rate state");
+    validateIeee80211RateSetState(peerRates, "target peer rate state");
+    if (ref.kind != BssRateContextRef::TARGET || ref.transactionId == 0 || ref.generation != 0 ||
+            ref.bssid.isUnspecified() || ref.bssid.isMulticast() || peer.isUnspecified() || peer.isMulticast())
+        throw cRuntimeError("Invalid new target rate reference");
+    if (targetRateContexts.count(ref.transactionId))
+        throw cRuntimeError("Target rate transaction already exists");
+    auto committedRef = ref;
+    committedRef.generation = rateGeneration + 1;
+    targetRateContexts.emplace(ref.transactionId, TargetRateContext{committedRef, peer, bssRates, peerRates});
+    rateStateChanged();
+}
+
+void Ieee80211Mib::bindIncomingRateContext(const MacAddress& peer, int requestSubtype, const BssRateContextRef& ref)
+{
+    Enter_Method("bindIncomingRateContext");
+    auto it = targetRateContexts.find(ref.transactionId);
+    if (it == targetRateContexts.end() || it->second.peer != peer || ref.kind != BssRateContextRef::TARGET ||
+            it->second.ref.bssid != ref.bssid || (ref.generation != 0 && it->second.ref.generation != ref.generation))
+        throw cRuntimeError("Incoming rate binding has no matching target");
+    auto& refs = incomingRateContexts[{peer, requestSubtype}];
+    if (std::find(refs.begin(), refs.end(), it->second.ref) != refs.end())
+        return;
+    refs.push_back(it->second.ref);
+    rateStateChanged();
+}
+
+void Ieee80211Mib::removeTargetRateContext(const BssRateContextRef& ref)
+{
+    Enter_Method("removeTargetRateContext");
+    auto it = targetRateContexts.find(ref.transactionId);
+    if (it == targetRateContexts.end() || it->second.ref != ref)
+        return;
+    targetRateContexts.erase(it);
+    for (auto binding = incomingRateContexts.begin(); binding != incomingRateContexts.end(); ) {
+        auto& refs = binding->second;
+        refs.erase(std::remove(refs.begin(), refs.end(), ref), refs.end());
+        if (refs.empty())
+            binding = incomingRateContexts.erase(binding);
+        else
+            ++binding;
+    }
+    rateStateChanged();
+}
+
+void Ieee80211Mib::clearTargetRateContexts()
+{
+    Enter_Method("clearTargetRateContexts");
+    if (targetRateContexts.empty())
+        return;
+    targetRateContexts.clear();
+    incomingRateContexts.clear();
+    rateStateChanged();
+}
+
+RateContextSnapshot Ieee80211Mib::snapshotRateContext(const MacAddress& peer, int frameSubtype,
+        const std::optional<MacAddress>& bssid, const std::optional<BssRateContextRef>& explicitContext) const
+{
+    RateContextSnapshot result;
+    result.localAddress = address;
+    result.peerAddress = peer;
+    result.localRates = localRateSet;
+    result.generation = rateGeneration;
+    int pairedSubtype = frameSubtype;
+    if (frameSubtype == ST_ASSOCIATIONREQUEST)
+        pairedSubtype = ST_ASSOCIATIONRESPONSE;
+    else if (frameSubtype == ST_ASSOCIATIONRESPONSE)
+        pairedSubtype = ST_ASSOCIATIONREQUEST;
+    else if (frameSubtype == ST_REASSOCIATIONREQUEST)
+        pairedSubtype = ST_REASSOCIATIONRESPONSE;
+    else if (frameSubtype == ST_REASSOCIATIONRESPONSE)
+        pairedSubtype = ST_REASSOCIATIONREQUEST;
+    // Both directions belong to the same management exchange.
+    std::vector<BssRateContextRef> bindings;
+    for (int subtype : {frameSubtype, pairedSubtype}) {
+        auto binding = incomingRateContexts.find({peer, subtype});
+        if (binding != incomingRateContexts.end())
+            for (const auto& ref : binding->second)
+                if (std::find(bindings.begin(), bindings.end(), ref) == bindings.end())
+                    bindings.push_back(ref);
+    }
+    auto useTarget = [&](const BssRateContextRef& ref) {
+        auto it = targetRateContexts.find(ref.transactionId);
+        if (it == targetRateContexts.end() || it->second.ref != ref || it->second.peer != peer ||
+                (bssid && *bssid != ref.bssid))
+            return;
+        bool applicable = false;
+        for (const auto& entry : incomingRateContexts) {
+            if (entry.first.first == peer && (frameSubtype == ST_RTS ||
+                    entry.first.second == frameSubtype || entry.first.second == pairedSubtype))
+                applicable |= std::find(entry.second.begin(), entry.second.end(), ref) != entry.second.end();
+        }
+        if (!applicable)
+            return;
+        result.known = true;
+        result.context = ref;
+        result.bssRates = it->second.bssRates;
+        result.peerRates = it->second.peerRates;
+    };
+    if (!explicitContext && frameSubtype == ST_RTS) {
+        std::vector<BssRateContextRef> refs;
+        for (const auto& entry : incomingRateContexts)
+            if (entry.first.first == peer)
+                for (const auto& ref : entry.second)
+                    if ((!bssid || *bssid == ref.bssid) && std::find(refs.begin(), refs.end(), ref) == refs.end())
+                        refs.push_back(ref);
+        if (!refs.empty()) {
+            if (refs.size() == 1)
+                useTarget(refs.front());
+            return result;
+        }
+    }
+    if (explicitContext) {
+        const auto& ref = *explicitContext;
+        if (bssid && *bssid != ref.bssid)
+            return result;
+        if (ref.kind == BssRateContextRef::NONE) {
+            // Active wildcard probing has no selected BSS.
+            result.known = frameSubtype == ST_PROBEREQUEST && peer.isBroadcast() && !bssid && ref == BssRateContextRef();
+            return result;
+        }
+        if (!bindings.empty() && (bindings.size() != 1 || bindings.front() != ref))
+            return result;
+        if (ref.kind == BssRateContextRef::TARGET) {
+            useTarget(ref);
+            return result;
+        }
+        if (ref != activeRateContext)
+            return result;
+    }
+    else if (!bindings.empty()) {
+        if (bindings.size() == 1)
+            useTarget(bindings.front());
+        return result;
+    }
+    // A tuned channel or a discovered AP is not an active relationship.
+    bool activePeer = mode == INDEPENDENT ||
+            bssStationData.stationType == ACCESS_POINT ||
+            (bssStationData.isAssociated && peer == bssData.bssid);
+    if (activeRateContext.kind != BssRateContextRef::ACTIVE || !activePeer ||
+            (bssid && *bssid != activeRateContext.bssid))
+        return result;
+    result.known = true;
+    result.context = activeRateContext;
+    result.bssRates = bssRateSet;
+    auto peerIt = peerRateSets.find(peer);
+    if (peerIt != peerRateSets.end())
+        result.peerRates = peerIt->second;
+    return result;
+}
 
 void Ieee80211Mib::initialize(int stage)
 {
@@ -112,7 +302,7 @@ void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::II
         }
     }
     if (!wasPrimaryChannelAvailable || !(previousOperation == htOperation) || peerStateChanged)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
@@ -143,7 +333,7 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
         peerHtStates.clear();
         if (wasLocalHtCapabilitiesValid || hadPeers || !(previousCapabilities == localHtCapabilities) ||
                 !(previousOperation == htOperation))
-            emit(rateStateChangedSignal, true);
+            rateStateChanged();
         return;
     }
     if (operationalHtSpatialStreamLimit <= 0)
@@ -212,7 +402,7 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     }
     if (!wasLocalHtCapabilitiesValid || !(previousCapabilities == localHtCapabilities) ||
             !(previousOperation == htOperation) || peerStateChanged)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerHtState(const MacAddress& address) const
@@ -234,17 +424,18 @@ void Ieee80211Mib::setLocalRateSet(const Ieee80211RateSetState& rateSet)
     if (localRateSet == rateSet)
         return;
     localRateSet = rateSet;
-    emit(rateStateChangedSignal, true);
+    rateStateChanged();
 }
 
 void Ieee80211Mib::setBssRateSet(const Ieee80211RateSetState& rateSet)
 {
     Enter_Method("setBssRateSet");
     validateIeee80211RateSetState(rateSet, "BSS rate state");
-    if (bssRateSet == rateSet)
+    if (bssRateSet == rateSet && activeRateContext.kind == BssRateContextRef::ACTIVE && activeRateContext.bssid == bssData.bssid)
         return;
     bssRateSet = rateSet;
-    emit(rateStateChangedSignal, true);
+    activeRateContext = {BssRateContextRef::ACTIVE, bssData.bssid, 0, rateGeneration + 1};
+    rateStateChanged();
 }
 
 void Ieee80211Mib::installBssAndPeerRateSets(const Ieee80211RateSetState& newBssRateSet,
@@ -253,23 +444,27 @@ void Ieee80211Mib::installBssAndPeerRateSets(const Ieee80211RateSetState& newBss
     Enter_Method("installBssAndPeerRateSets");
     validateIeee80211RateSetState(newBssRateSet, "BSS rate state");
     validateIeee80211RateSetState(newPeerRateSet, "peer rate state");
-    bool bssChanged = bssRateSet != newBssRateSet;
+    bool bssChanged = bssRateSet != newBssRateSet || activeRateContext.kind != BssRateContextRef::ACTIVE ||
+            activeRateContext.bssid != bssData.bssid;
     auto peerIt = peerRateSets.find(peerAddress);
     bool peerChanged = peerIt == peerRateSets.end() || peerIt->second != newPeerRateSet;
     if (!bssChanged && !peerChanged)
         return;
     bssRateSet = newBssRateSet;
+    if (bssChanged)
+        activeRateContext = {BssRateContextRef::ACTIVE, bssData.bssid, 0, rateGeneration + 1};
     peerRateSets[peerAddress] = newPeerRateSet;
-    emit(rateStateChangedSignal, true);
+    rateStateChanged();
 }
 
 void Ieee80211Mib::clearBssRateSet()
 {
     Enter_Method("clearBssRateSet");
-    if (!bssRateSet.supported.known && !bssRateSet.basic.known && !bssRateSet.operational.known)
+    if (activeRateContext.kind != BssRateContextRef::ACTIVE && !bssRateSet.supported.known && !bssRateSet.basic.known && !bssRateSet.operational.known)
         return;
     bssRateSet = Ieee80211RateSetState();
-    emit(rateStateChangedSignal, true);
+    activeRateContext = BssRateContextRef();
+    rateStateChanged();
 }
 
 void Ieee80211Mib::removePeerRateSet(const MacAddress& address)
@@ -277,7 +472,7 @@ void Ieee80211Mib::removePeerRateSet(const MacAddress& address)
     Enter_Method("removePeerRateSet");
     if (peerRateSets.erase(address) == 0)
         return;
-    emit(rateStateChangedSignal, true);
+    rateStateChanged();
 }
 
 void Ieee80211Mib::clearPeerRateSets()
@@ -286,7 +481,7 @@ void Ieee80211Mib::clearPeerRateSets()
     if (peerRateSets.empty())
         return;
     peerRateSets.clear();
-    emit(rateStateChangedSignal, true);
+    rateStateChanged();
 }
 
 void Ieee80211Mib::setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
@@ -308,14 +503,14 @@ void Ieee80211Mib::setPeerHtCapabilities(const MacAddress& address, const Ieee80
             << ", txValid = " << state.negotiatedCapabilities.localTxPeerRx.valid
             << ", rxValid = " << state.negotiatedCapabilities.localRxPeerTx.valid << endl;
     if (changed)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 void Ieee80211Mib::removePeerHtCapabilities(const MacAddress& address)
 {
     Enter_Method("removePeerHtCapabilities");
     if (peerHtStates.erase(address) != 0)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 void Ieee80211Mib::clearPeerHtCapabilities()
@@ -323,7 +518,7 @@ void Ieee80211Mib::clearPeerHtCapabilities()
     Enter_Method("clearPeerHtCapabilities");
     if (!peerHtStates.empty()) {
         peerHtStates.clear();
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
     }
 }
 
@@ -417,7 +612,7 @@ void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
     bool changed = peerHtStates.erase(address) != 0;
     changed |= peerRateSets.erase(address) != 0;
     if (changed)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 void Ieee80211Mib::clearAssociationIds()
@@ -430,7 +625,7 @@ void Ieee80211Mib::clearAssociationIds()
     peerHtStates.clear();
     peerRateSets.clear();
     if (changed)
-        emit(rateStateChangedSignal, true);
+        rateStateChanged();
 }
 
 } // namespace ieee80211
