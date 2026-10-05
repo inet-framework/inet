@@ -403,8 +403,10 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
-    else
+    else {
         recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+    }
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)

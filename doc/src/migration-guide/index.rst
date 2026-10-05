@@ -4,6 +4,16 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 HCF Complete Exchange Admission
+------------------------------------------
+
+The IEEE 802.11 MAC interfaces add support for complete exchange admission.
+External implementations require the applicable changes below.
+
+Implement ``ITx::hasTransmission()`` in custom Tx modules.
+Return true while Tx retains an accepted transmission.
+Ordinary radio commands wait until an accepted recipient response completes.
+
 IEEE 802.11 PHY Mode Properties
 -------------------------------
 

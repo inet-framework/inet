@@ -1,0 +1,168 @@
+%description:
+Radio configuration waits for the required response.
+
+%file: Cancellation.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+
+namespace inet::ieee80211 {
+class CancellationMac : public Ieee80211Mac {
+  public:
+    void configureDuringResponse() {
+        Enter_Method("configureDuringResponse");
+        auto command = new cMessage("response-config", physicallayer::RADIO_C_CONFIGURE);
+        auto control = new physicallayer::Ieee80211ConfigureRadioCommand();
+        control->setBitrate(bps(24000000));
+        command->setControlInfo(control);
+        handleUpperCommand(command);
+        ASSERT(pendingRadioConfigMsg == command);
+    }
+    bool hasPendingConfiguration() const { return pendingRadioConfigMsg != nullptr; }
+};
+Define_Module(CancellationMac);
+
+class CancellationHcf : public Hcf {
+  public:
+    int acknowledgments = 0;
+    int responses = 0;
+    bool triggered = false;
+    int scenario() const { return par("scenario"); }
+    bool sender() const { return getFullPath().find("sender") != std::string::npos; }
+    bool hasPendingTransmission() const { return tx->hasTransmission(); }
+    void inject() {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("request-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(200)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+  protected:
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) { take(frame); delete frame; }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override {
+        Hcf::transmitControlResponseFrame(packet, header, received, receivedHeader);
+        if (scenario() == 5) {
+            ASSERT(tx->hasTransmission());
+            check_and_cast<CancellationMac *>(mac)->configureDuringResponse();
+        }
+    }
+    void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        responses++;
+        Hcf::recipientProcessTransmittedControlResponseFrame(packet, header);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) acknowledgments++;
+        Hcf::originatorProcessReceivedFrame(packet, request);
+    }
+
+};
+Define_Module(CancellationHcf);
+
+class CancellationTest : public cSimpleModule {
+  public:
+    CancellationTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto sender = check_and_cast<CancellationHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
+        auto receiver = check_and_cast<CancellationHcf *>(getModuleByPath("^.receiver.wlan[0].mac.hcf"));
+        sender->inject();
+        wait(SimTime(4, SIMTIME_MS));
+        ASSERT(sender->acknowledgments == 1 && receiver->responses == 1);
+        ASSERT(!sender->hasPendingTransmission() && !receiver->hasPendingTransmission());
+        ASSERT(!check_and_cast<CancellationMac *>(getModuleByPath("^.receiver.wlan[0].mac"))->hasPendingConfiguration());
+        std::cout << "Radio response and Tx request checks passed.\n";
+    }
+};
+Define_Module(CancellationTest);
+} // namespace inet::ieee80211
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module CancellationMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::inet::ieee80211::CancellationMac);
+}
+module CancellationHcf extends Hcf
+{
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::CancellationHcf);
+}
+simple CancellationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::CancellationTest);
+}
+network CancellationNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: CancellationTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CancellationNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 12ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].mac.typename = "CancellationMac"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "CancellationHcf"
+**.wlan[*].mac.hcf.scenario = ${scenario=5}
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 9 ? 0B : 4096B
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 2ms
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+Radio response and Tx request checks passed.

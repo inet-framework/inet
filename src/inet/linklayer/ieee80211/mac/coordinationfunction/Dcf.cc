@@ -264,8 +264,10 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
     }
-    else
+    else {
         recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+    }
 }
 
 bool Dcf::hasFrameToTransmit()
