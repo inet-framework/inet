@@ -891,7 +891,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         return;
     }
 
-    if (!ap || !ap->isAuthenticated) {
+    if (!ap || (!ap->isAuthenticated && !ap->authTimeoutMsg)) {
         EV << "Unknown AP, or not authenticated with that AP -- ignoring frame\n";
         delete packet;
         return;
@@ -902,6 +902,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         mib->removeTargetRateContext(ap->authRateContext);
         ap->authRateContext = BssRateContextRef();
         EV << "Cancelling pending authentication\n";
+        sendAuthenticationConfirm(ap, PRC_REFUSED);
         delete packet;
         return;
     }

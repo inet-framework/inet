@@ -5,6 +5,7 @@ The fixture supplies no MIB rates. Separate MIB probes cover ambiguous bindings,
 unknown and empty facts. Radio exchange coverage remains in HtAssociation_1.
 Check rescan cleanup, active peer preservation, and complete cleanup notifications.
 Check both reassociation subtypes against the active and target contexts.
+Check that deauthentication completes authentication once and triggers an agent scan.
 
 %file: TestRateContext.cc
 
@@ -87,8 +88,15 @@ class RateSta : public QueuedManagement<Ieee80211MgmtSta>
 {
   protected:
     void changeChannel(int channel) override {}
-    void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode) override { delete confirm; }
+    void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode code) override
+    {
+        if (forwardAuthenticationConfirms && dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(confirm))
+            Ieee80211MgmtSta::sendConfirm(confirm, code);
+        else
+            delete confirm;
+    }
   public:
+    bool forwardAuthenticationConfirms = false;
     bool discover(Packet *packet, const MacAddress& address)
     {
         Enter_Method("discover");
@@ -128,8 +136,19 @@ Define_Module(RateSta);
 
 class RateAgent : public Ieee80211AgentSta
 {
+  public:
+    int authenticationConfirms = 0;
+    int scanRequests = 0;
+    Ieee80211PrimResultCode lastResult = PRC_SUCCESS;
   protected:
     void initialize(int stage) override { SimpleModule::initialize(stage); }
+    void sendScanRequest() override { ++scanRequests; }
+    void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *confirm) override
+    {
+        ++authenticationConfirms;
+        lastResult = confirm->getResultCode();
+        Ieee80211AgentSta::processAuthenticateConfirm(confirm);
+    }
 };
 Define_Module(RateAgent);
 
@@ -409,6 +428,30 @@ class RateContextTest : public cSimpleModule, public cListener
         ASSERT(sta->cached(b->address)->authTimeoutMsg == nullptr);
         ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, restartedRef).known);
 
+        // The real agent receives one refusal and resumes its scan path.
+        sta->forwardAuthenticationConfirms = true;
+        auto agent = check_and_cast<RateAgent *>(getModuleByPath("^.sta.wlan[0].agent"));
+        sta->authenticate(b->address);
+        auto canceled = sta->pop();
+        take(canceled);
+        auto canceledRef = reference(canceled);
+        delete canceled;
+        auto deauthenticate = [&]() {
+            auto packet = new Packet("deauthentication", makeShared<Ieee80211DeauthenticationFrame>());
+            packet->addTag<Ieee80211SubtypeReq>()->setSubtype(ST_DEAUTHENTICATION);
+            sta->receive(packet, b->address);
+        };
+        deauthenticate();
+        ASSERT(sta->cached(b->address)->authTimeoutMsg == nullptr);
+        ASSERT(sta->cached(b->address)->authRateContext == BssRateContextRef());
+        ASSERT(!sta->cached(b->address)->isAuthenticated);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, canceledRef).known);
+        deauthenticate();
+        wait(SimTime(1, SIMTIME_US));
+        ASSERT(agent->authenticationConfirms == 1 && agent->lastResult == PRC_REFUSED);
+        ASSERT(agent->scanRequests == 1);
+        wait(1);
+        ASSERT(agent->authenticationConfirms == 1 && agent->scanRequests == 1);
         sta->shutdown();
         staMib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
         std::cout << "Production rates, target identity, copies, bindings, rejection, and cleanup passed.\n";
