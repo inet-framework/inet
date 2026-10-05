@@ -27,4 +27,3 @@ class INET_API IAckHandler
 } // namespace inet
 
 #endif
-

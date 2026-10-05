@@ -207,4 +207,3 @@ AlternativesFs::~AlternativesFs()
 
 } // namespace ieee80211
 } // namespace inet
-
