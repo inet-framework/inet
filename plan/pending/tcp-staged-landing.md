@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05. S5b is next.
+Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05, S5b on 2026-10-06. S5c is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -50,7 +50,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S3 ✅ | `topic/tcp-socket-contract` | 2 | +475 −1 | the socket commands, tags and status fields (commit 3 left the stage, see D-4) |
 | S4 ✅ | `topic/tcp-recovery-split` | 7, 8, 9, 10 + 50 | +1872 −4 | the recovery interfaces and the RFC 5681, RFC 6582 and RFC 6675 strategies, which nothing selects yet (D-5) |
 | S5 ✅ | `topic/tcp-flavour-split` | 11, 12 | +152 −136 | the move and the rename of the two base classes (D-6) |
-| S5b | `topic/tcp-flavour-strategies` | 13 (part), 55 (part) | — | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
+| S5b ✅ | `topic/tcp-flavour-strategies` | 13 (part), new | +450 −470 (about) | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
 | S5c | `topic/tcp-classic-recovery` | 13 (part), 54, 55 (part), 56, 70 | — | the behavior changes B4 to B8, B10, B11 of D-6, one change per commit |
 | S5d | `topic/tcp-sack-recovery` | 13 (part) | — | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
@@ -136,11 +136,16 @@ behavior goes.
    the fingerprint ingredients `tplx` and `~tND` at the stage head. If a row moves, find the
    commit that moves it and explain the row in that commit (rule 3).
 
-   In this environment, many stored fingerprints do not match on master too (for example DHCP,
-   AODV and BGP rows). So a stage compares the calculated values of its head with the calculated
-   values of master in the same environment, not with the stored values. The run at the head of
-   a stage is the baseline of the next stage. The script is
-   `/var/tmp/claude-staged/fp.sh` (it keeps every calculated value in its log).
+   **The CI job is the fingerprint oracle.** `/var/tmp/claude-staged/ghci-fp.sh` runs INET's own
+   fingerprint job (`fingerprinttest -f tplx -f '~tNl' -f '~tND'`, every row of the CSV files,
+   1752 tests) in the GitHub-like container of `~/workspace/ghci-statistical`, and compares with
+   the stored values. A refactor must pass; a change writes `.UPDATED` files with the new values,
+   which go into the commit that moves them, with an explanation of each row.
+
+   The local runs (`/var/tmp/claude-staged/fp.sh`, debug, `omnetpp-6.x`) are a second check only:
+   the Python runner reads the JSON store, which has fewer than half of the CSV rows (753 `tplx`
+   rows; for example no `examples/inet/tcp_pmtud` row), and many stored values do not match in
+   this environment even on master. They compare the calculated values of two commits.
 6. Stop. Give the owner the branch, the list of commits, and the evidence.
 7. After the owner approves: fast-forward `master` to the stage. Push only when the owner says so.
 8. Mark the stage done in this plan, with its results, in a last commit of the stage. Remove the
@@ -188,6 +193,14 @@ plan gives a reason for.
   refactor keeps master's behavior exactly, and every new behavior comes as its own change, with
   its own evidence. S5 therefore holds commits 11 and 12 only. The content of commit 13 and its
   folded repairs (54, 55, 56, 84) becomes the stages S5b to S5d below.
+- **D-7 — Path MTU discovery updates the effective MSS.** Master's ICMP-based PMTUD changes
+  `snd_mss` after the establishment, in three places: an ICMP "fragmentation needed" for IPv4 and
+  for IPv6, and the probe that restores the original MSS. Source commit 15 sets `snd_effmss` at
+  eight places, but not at these three, and nothing else does on the source branch. So after a
+  PMTUD reduction the strategies, and later CUBIC, keep counting with the old MSS. The CI job found
+  it: at the first S5b head, `examples/inet/tcp_pmtud` `PmtudEnabled` and `PmtudProbe` moved. S5b
+  sets `snd_effmss = snd_mss` at the three places; when commit 15 lands (S7), they become
+  `calculateEffectiveMss()`. This is a deliberate difference from the source tree.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -337,4 +350,58 @@ longer says that "the architecture commit after it" touches the same files.
 The move broke four links of the TCP evidence documents (`notes.md`, `results.md`) that point into
 `TcpBaseAlg.cc`; commit 12 points them at `TcpAlgorithmBase.cc`, at the same line numbers, which
 hold the same code.
+
+### S5b — `topic/tcp-flavour-strategies` — landed 2026-10-06
+
+The owner reviewed and approved S5b on 2026-10-06. Before the landing, S5b moved onto the new
+rules of master (`03e927c18a`): the opening of each body now answers the reviewer's questions.
+
+Six refactor commits by Levente Meszaros, written from the source commit 13 and the master code. The
+new rules of master (`d9e14c5af2`, PR-SPLIT-ONE-CHANGE and PR-SPLIT-SIZE) divide the work wherever a
+part stands alone:
+
+| Commit | What it does | B of D-6 |
+| --- | --- | --- |
+| `tcp: refactor: count duplicate ACKs in the algorithm` | the connection passes every old ACK to `receivedAckForAlreadyAckedData()`; `TcpAlgorithmBase` counts with master's test, in master's order | B1 |
+| `tcp: refactor: share the per-segment send times in TcpAlgorithmBase` | one `sentInfo` list in the base state, filled by the base class; Vegas and Westwood read it | B2 |
+| `tcp: refactor: derive TcpTahoe from TcpAlgorithmBase` | Tahoe leaves the classic base class and keeps its own logic | B3 |
+| `tcp: refactor: start the effective MSS as the negotiated MSS` | `snd_effmss = snd_mss` at establishment and where PMTUD changes `snd_mss` (D-7); nothing reads it yet | B3 |
+| `tcp: refactor: run Reno on a congestion control and a recovery strategy` | `TcpClassicAlgorithmBase` drives `Rfc5681CongestionControl` and `Rfc5681Recovery`, which carry master's Reno | B3 |
+| `tcp: refactor: run NewReno on the RFC 6582 recovery strategy` | `Rfc6582Recovery` carries master's NewReno | B3 |
+
+The S5b code holds temporary forms. Each one ends in a later change commit, which brings the
+code of the source branch and the evidence of that change:
+
+| Temporary form in S5b | Source form | Ends in |
+| --- | --- | --- |
+| `TcpAlgorithmBase::sendData()` is public; the recovery strategies send through it | they send with `conn->sendData(cwnd)`; `sendData()` is protected | S5c |
+| `isInFastRecovery()`: Reno answers `dupacks >= dupthresh` | `lossRecovery` for every flavour | S5c (B5) |
+| `processEce()`: Reno only, master's arithmetic | every classic flavour, commit 54 | S5c (B10) |
+| `ackProcessed()`: Reno's SACK step, NewReno's `recover = snd_una - 2` | gone: SACK recovery in `Rfc6675Recovery`; `recover` set only at a fast retransmit and a timeout | S5d (B12), S5c (B7) |
+| `Rfc5681CongestionControl`: `+SMSS` per ACK in slow start | `+min(acked, SMSS)` and the cwnd-limited gate | S7 (B9) |
+| `Rfc5681Recovery`, `Rfc6582Recovery`: master's Reno and NewReno | the RFC 5681 and RFC 6582 strategies of the source | S5c (B4 to B8) |
+| ssthresh from `calculateSsthresh(min(cwnd, snd_wnd))` | from FlightSize | S5c (B6, commit 70) |
+| `TcpTahoe` on `TcpAlgorithmBase` with master's logic | the Tahoe of commit 13 | S5c (B11) |
+| `snd_effmss = snd_mss` at establishment and at the three PMTUD places | `calculateEffectiveMss()`, at the PMTUD places too (D-7) | S7 (commit 15) |
+| `DumbTcp` counts duplicate ACKs for the `dupAcks` statistic | it does not count | S5c |
+| the RTT estimator, `rttvar` starts at 3/4 | the estimator on the state fields, `rttvar` starts at 0, `minRtt` | S8 (commit 17) |
+
+Two details of the output change, and the commit messages state them: NewReno's window
+growth logs Reno's wording, and Reno no longer records an unchanged `ssthresh` at each growth
+step. `ssthresh` is a vector statistic only; its values over time stay the same.
+
+Evidence, debug build against `omnetpp-6.x`:
+
+| Suite | Result |
+| --- | --- |
+| builds | each commit builds alone, with no undefined `inet::` symbol |
+| unit, serializer | 114 PASS and 4 PASS at each commit |
+| module | 348 PASS at each commit, with no trace re-recorded |
+| protocol `self/` and `tcp/` | as master at each commit |
+| fingerprint, CI | the job passes at every commit: 1752 tests, only the expected error; the first head, before D-7, failed `tcp_pmtud` `PmtudEnabled` and `PmtudProbe` |
+| fingerprint, local | at the head before D-7, no row differs from master: 0 of 753 `tplx`, 0 of 744 `~tNl`, 0 of 638 `~tND` |
+
+At master `649d4756ae` the CI job passed: 1752 tests, with only the expected
+`ethernet-nonstandardspeed` error. The local `~tNl` baseline comes from `inet-tcp-tidy-ups` at
+`dabcd78282`, which has master's TCP code.
 
