@@ -107,6 +107,10 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
 
+    // Check original MPDU transmitter identity before recipient data processing.
+    virtual void notifyClass3FrameRejected(const Ptr<const Ieee80211DataHeader>& header);
+    virtual bool isDataFrameFromAssociatedStation(const Ptr<const Ieee80211DataHeader>& header) const;
+
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 };

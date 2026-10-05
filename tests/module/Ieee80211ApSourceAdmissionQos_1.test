@@ -1,0 +1,244 @@
+%description:
+An infrastructure AP must reject an individually addressed ToDS data frame
+from a transmitter that is no longer in the AP's associated-station table.
+The simplified source STA keeps believing it is associated, so the test
+exercises the real wireless transmission and AP DCF receive path rather than
+only testing the table lookup helper.
+
+%file: Ieee80211ApSourceAdmissionQos.cc
+
+#include "inet/applications/udpapp/UdpSink.h"
+#include "inet/common/InitStages.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+namespace inet {
+
+class Ieee80211ApSourceAdmissionQosSink : public UdpSink
+{
+  public:
+    int getNumReceived() const { return numReceived; }
+};
+
+Define_Module(Ieee80211ApSourceAdmissionQosSink);
+
+class Ieee80211ApSourceAdmissionQosTest : public cSimpleModule, public cListener
+{
+  protected:
+    using cListener::finish;
+
+    cMessage *removeSourceTimer = nullptr;
+    cMessage *checkTimer = nullptr;
+    cMessage *restoreSourceTimer = nullptr;
+    cMessage *checkPositiveTimer = nullptr;
+    ieee80211::Ieee80211Mib *apMib = nullptr;
+    ieee80211::Ieee80211Mib *sourceMib = nullptr;
+    Ieee80211ApSourceAdmissionQosSink *sink = nullptr;
+    cComponent *apHcf = nullptr;
+    MacAddress sourceAddress;
+    int sourceAckCount = 0;
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            apMib = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+            sourceMib = check_and_cast<ieee80211::Ieee80211Mib *>(getModuleByPath("^.source.wlan[0].mib"));
+            sink = check_and_cast<Ieee80211ApSourceAdmissionQosSink *>(getModuleByPath("^.destination.app[0]"));
+            apHcf = getModuleByPath("^.ap.wlan[0].mac.hcf");
+            sourceAddress = sourceMib->address;
+            ASSERT(!sourceAddress.isUnspecified());
+            ASSERT(sourceMib->bssStationData.isAssociated);
+            ASSERT(apMib->bssAccessPointData.stations.at(sourceAddress) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            apHcf->subscribe(packetSentToPeerSignal, this);
+            removeSourceTimer = new cMessage("removeSourceFromAp");
+            checkTimer = new cMessage("checkAdmission");
+            restoreSourceTimer = new cMessage("restoreSourceToAp");
+            checkPositiveTimer = new cMessage("checkAssociatedDelivery");
+            scheduleAt(SimTime(500, SIMTIME_US), removeSourceTimer);
+            scheduleAt(SimTime(5, SIMTIME_MS), checkTimer);
+            scheduleAt(SimTime(5500, SIMTIME_US), restoreSourceTimer);
+            scheduleAt(SimTime(9, SIMTIME_MS), checkPositiveTimer);
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *) override
+    {
+        if (source == apHcf && signalID == packetSentToPeerSignal && value != nullptr) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+            if (header->getType() == ieee80211::ST_ACK && header->getReceiverAddress() == sourceAddress)
+                sourceAckCount++;
+        }
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message == removeSourceTimer) {
+            delete removeSourceTimer;
+            removeSourceTimer = nullptr;
+            auto it = apMib->bssAccessPointData.stations.find(sourceAddress);
+            ASSERT(it != apMib->bssAccessPointData.stations.end());
+            ASSERT(it->second == ieee80211::Ieee80211Mib::ASSOCIATED);
+            apMib->bssAccessPointData.stations.erase(it);
+            ASSERT(sourceMib->bssStationData.isAssociated);
+            ASSERT(apMib->bssAccessPointData.stations.find(sourceAddress) == apMib->bssAccessPointData.stations.end());
+            std::cout << "Removed source from AP association table while source remained associated locally.\n";
+        }
+        else if (message == checkTimer) {
+            delete checkTimer;
+            checkTimer = nullptr;
+            ASSERT(sourceMib->bssStationData.isAssociated);
+            ASSERT(apMib->bssAccessPointData.stations.find(sourceAddress) == apMib->bssAccessPointData.stations.end());
+            ASSERT(sourceAckCount > 0);
+            ASSERT(sink->getNumReceived() == 0);
+            std::cout << "AP rejected individually addressed ToDS data from an unassociated source STA.\n";
+        }
+        else if (message == restoreSourceTimer) {
+            delete restoreSourceTimer;
+            restoreSourceTimer = nullptr;
+            apMib->bssAccessPointData.stations[sourceAddress] = ieee80211::Ieee80211Mib::ASSOCIATED;
+            ASSERT(sourceMib->bssStationData.isAssociated);
+            ASSERT(apMib->bssAccessPointData.stations.at(sourceAddress) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            std::cout << "Restored source to AP association table while source remained associated locally.\n";
+        }
+        else if (message == checkPositiveTimer) {
+            delete checkPositiveTimer;
+            checkPositiveTimer = nullptr;
+            ASSERT(sourceMib->bssStationData.isAssociated);
+            ASSERT(apMib->bssAccessPointData.stations.at(sourceAddress) == ieee80211::Ieee80211Mib::ASSOCIATED);
+            ASSERT(sink->getNumReceived() == 1);
+            std::cout << "AP forwarded the subsequent data frame after source re-association.\n";
+        }
+        else
+            throw cRuntimeError("Unexpected timer");
+    }
+
+    virtual void finish() override
+    {
+        if (apHcf != nullptr)
+            apHcf->unsubscribe(packetSentToPeerSignal, this);
+        if (removeSourceTimer != nullptr)
+            cancelAndDelete(removeSourceTimer);
+        if (checkTimer != nullptr)
+            cancelAndDelete(checkTimer);
+        if (restoreSourceTimer != nullptr)
+            cancelAndDelete(restoreSourceTimer);
+        if (checkPositiveTimer != nullptr)
+            cancelAndDelete(checkPositiveTimer);
+    }
+};
+
+Define_Module(Ieee80211ApSourceAdmissionQosTest);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.applications.udpapp.UdpSink;
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211ApSourceAdmissionQosSink extends UdpSink
+{
+    parameters:
+        @class(::inet::Ieee80211ApSourceAdmissionQosSink);
+}
+
+simple Ieee80211ApSourceAdmissionQosTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::Ieee80211ApSourceAdmissionQosTest);
+}
+
+network Ieee80211ApSourceAdmissionQosTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        ap: AccessPoint;
+        source: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        destination: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211ApSourceAdmissionQosTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211ApSourceAdmissionQosTestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 10ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+*.configurator.addStaticRoutes = true
+**.arp.typename = "GlobalArp"
+
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.source.wlan[0].address = "02:00:00:00:00:02"
+*.destination.wlan[0].address = "02:00:00:00:00:03"
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtAp"
+*.ap.wlan[0].mgmt.ssid = "audit-bss"
+*.source.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.destination.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+
+**.wlan[*].opMode = "g(erp)"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].radio.transmitter.power = 50mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+*.ap.mobility.typename = "StationaryMobility"
+*.source.mobility.typename = "StationaryMobility"
+*.destination.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 5m
+*.ap.mobility.initialY = 0m
+*.ap.mobility.initialZ = 0m
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.source.mobility.initialZ = 0m
+*.destination.mobility.initialX = 10m
+*.destination.mobility.initialY = 0m
+*.destination.mobility.initialZ = 0m
+
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "destination"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 100B
+*.source.app[0].startTime = 2ms
+*.source.app[0].stopTime = 8ms
+*.source.app[0].sendInterval = 5ms
+*.destination.numApps = 1
+*.destination.app[0].typename = "Ieee80211ApSourceAdmissionQosSink"
+*.destination.app[0].localPort = 5000
+
+%contains: stdout
+Removed source from AP association table while source remained associated locally.
+
+%contains: stdout
+AP rejected individually addressed ToDS data from an unassociated source STA.
+
+%contains: stdout
+Restored source to AP association table while source remained associated locally.
+
+%contains: stdout
+AP forwarded the subsequent data frame after source re-association.

@@ -15,6 +15,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211Class3FrameInd_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
@@ -56,6 +57,8 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cObject *ctrl) = 0;
+
+    virtual void handleClass3FrameIndication(Ieee80211Class3FrameInd *indication);
 
     /** Utility method for implementing handleUpperMessage(): send message to MAC */
     virtual void sendDown(Packet *frame);
