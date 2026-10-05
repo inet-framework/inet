@@ -21,7 +21,9 @@ A transmission opportunity (TXOP) gives a QoS station time to start frame exchan
 
 Hypothetical: the complete continuation costs 100 µs and exactly fits the available TXOP time. Its cost without SIFS before the first transmission is 84 µs. An available TXNAV interval of 84 µs refuses it because that comparison requires strictly less time. The TXOP budget check accepts equality, while the TXNAV check rejects equality.
 
-Production HCF retains its legacy path at this commit.
+HCF uses prepared exchanges when ``isBlockAckSupported`` is false. The duration guarantee assumes zero propagation delay and responses after nominal SIFS. The actual response mode and complete frame length must match the prediction. HCF uses actual elapsed time for each continuation check. The exchange regression uses a 350 µs limit with three separate data frames. HCF admits two data/ACK exchanges and retains the third frame for another channel grant.
+
+An oversized initial exchange without a supported exception raises a model-limit error before transmission. The model does not fragment a frame automatically to meet an airtime budget. ``TxopProcedure::getDuration()`` keeps its elapsed-time meaning.
 
 External implementations require these changes:
 
@@ -43,7 +45,7 @@ Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``. Only `
 
 For example, a plan references a frame that the store must remove. HCF invalidates that plan before the store removes the frame.
 
-Rebuild external implementations after these interface changes. Preserve the accepted-request contract in `IEEE 802.11 Radio Command Deferral`_ below. That section defines ``ITx::hasTransmission()`` and supplies the ACK/SIFS example. The query also returns false after cancellation or lifecycle reset releases the accepted request.
+The distributed coordination function (DCF) uses the legacy path with null prepared metadata. HCF configurations with Block Ack support retain the legacy path without the new duration guarantee. Rebuild external implementations after these interface changes. Preserve the accepted-request contract in `IEEE 802.11 Radio Command Deferral`_ below. That section defines ``ITx::hasTransmission()`` and supplies the ACK/SIFS example. The query also returns false after cancellation or lifecycle reset releases the accepted request.
 
 IEEE 802.11 Block Ack Inactivity Deadlines
 ------------------------------------------

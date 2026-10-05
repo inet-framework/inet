@@ -1,5 +1,5 @@
 %description:
-The distributed coordination function (DCF) and hybrid coordination function (HCF) release exchange contexts before frame-store deletion. The test checks the legacy HCF path. Prepared HCF remains disabled in production at this commit. Each case ends the simulation or deletes the sender during transmission or a response wait. A model-change listener checks the frame store before its destructor starts.
+The distributed coordination function (DCF) and hybrid coordination function (HCF) release exchange contexts before frame-store deletion. The test checks the legacy and prepared HCF paths. Each case ends the simulation or deletes the sender during transmission or a response wait. A model-change listener checks the frame store before its destructor starts.
 
 %file: ExchangeTeardown.cc
 #include <functional>
@@ -183,7 +183,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.profile = ${profile=0,1}
+*.profile = ${profile=0,1,2}
 *.responseWait = ${false,true}
 *.deleteNode = ${false,true}
 *.radioMedium.propagation.typename = "ConstantTimePropagation"

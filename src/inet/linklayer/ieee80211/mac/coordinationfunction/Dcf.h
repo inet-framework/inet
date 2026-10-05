@@ -77,6 +77,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     OriginatorProtectionMechanism *originatorProtectionMechanism = nullptr;
 
     TxRequestId activeRequest;
+    const PreparedTransmit *preparedTransmit = nullptr;
     bool responseRequest = false;
     bool requestOnAir = false;
     bool lifecycleStopped = false;
