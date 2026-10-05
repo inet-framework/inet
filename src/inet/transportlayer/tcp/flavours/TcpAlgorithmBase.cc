@@ -634,10 +634,19 @@ void TcpAlgorithmBase::dataSent(uint32_t fromseq)
     }
 
     state->time_last_data_sent = simTime();
+
+    // record per-segment transmit times (used by Vegas and Westwood RTT sampling).
+    // A send that starts below the range this list covers is not recorded: the
+    // list only records forward progress and must stay contiguous.
+    state->sentInfo.clearTo(state->snd_una);
+    if (seqLess(fromseq, state->snd_max) && state->sentInfo.isInRange(fromseq))
+        state->sentInfo.set(fromseq, state->snd_max, simTime());
 }
 
 void TcpAlgorithmBase::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
+    if (seqLess(fromseq, toseq) && state->sentInfo.isInRange(fromseq))
+        state->sentInfo.set(fromseq, toseq, simTime());
 }
 
 void TcpAlgorithmBase::restartRexmitTimer()

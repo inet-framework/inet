@@ -5,6 +5,7 @@
 //
 
 import inet.transportlayer.tcp.TcpConnectionState;
+import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 cplusplus {{
     #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -58,6 +59,11 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     //@{
     uint32_t recover = iss; ///< recover (RFC 3782)
     bool firstPartialACK = false; ///< first partial acknowledgement (RFC 3782)
+    //@}
+
+    /// per-segment transmit times, shared by all flavours (RTT sampling)
+    //@{
+    TcpSegmentTransmitInfoList sentInfo;
     //@}
 };
 
