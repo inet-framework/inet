@@ -146,6 +146,29 @@ class CheckCommitsTest(unittest.TestCase):
         self.assertNotIn("describe the final change", result.stdout)
         self.assertNotIn("paragraph: test logs", result.stdout)
 
+    def test_a_body_that_opens_with_actions_gives_a_note(self):
+        self.commit("a: add: a module\n\nAdd the module and wire it into the node.\n\n"
+                    "Change: src | behavior.add | -", {"src/inet/a/A.cc": "int a = 1;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn('opens with an action and names no problem — which problem does it solve? '
+                      '"Add the module and wire it into the node."', result.stdout)
+
+    def test_an_action_with_its_reason_is_quiet(self):
+        self.commit("a: add: a module\n\nAdd the module, because the node cannot route without it.\n\n"
+                    "Change: src | behavior.add | -", {"src/inet/a/A.cc": "int a = 1;\n"})
+        self.assertNotIn("opens with an action", self.check().stdout)
+
+    def test_a_problem_first_body_is_quiet(self):
+        self.commit("a: fix: one value\n\nThe node drops every frame after a restart. Reset the value.\n\n"
+                    "Change: src | behavior.change.fix | -", {"src/inet/a/A.cc": "int a = 1;\n"})
+        self.assertNotIn("opens with an action", self.check().stdout)
+
+    def test_a_mechanical_body_is_quiet(self):
+        self.commit("a: name: rename a value\n\nRename the value to its role.\n\n"
+                    "Change: src | name | -", {"src/inet/a/A.cc": "int a = 1;\n"})
+        self.assertNotIn("opens with an action", self.check().stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

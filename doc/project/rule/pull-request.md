@@ -450,8 +450,9 @@ A commit whose subject is the whole story needs no body ([PR-MSG-BODY](#pr-msg-b
 one short paragraph, that paragraph is the summary.
 
 *Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) gives a note when the first
-paragraph has more than 120 words or the body more than 300; T4 — agent review: can a reviewer
-restate the answers to the reviewer's questions from the summary alone?*
+paragraph has more than 120 words or the body more than 300, and when the body opens with an action
+and names no problem; T4 — agent review: can a reviewer restate the answers to the reviewer's
+questions from the summary alone?*
 
 ### PR-MSG-WHY
 
@@ -677,6 +678,6 @@ argue about.
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior, and does one commit both add a mechanism and turn on its first user? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |
 | PR-MSG-BODY | T3+T4 | commit-message lint: an empty body above 50 changed lines, outside the exempt kinds; agent review for a body that restates the subject |
-| PR-MSG-SUMMARY | T3+T4 | note: a first paragraph above 120 words or a body above 300 words (T3) + agent review: does the summary state the problem and the idea of the solution? (T4) |
+| PR-MSG-SUMMARY | T3+T4 | note: a first paragraph above 120 words, a body above 300 words, or a body that opens with an action and names no problem (T3) + agent review: can a reviewer restate the answers to the reviewer's questions from the summary alone? (T4) |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |

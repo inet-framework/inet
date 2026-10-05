@@ -17,7 +17,8 @@
 #   PR-MSG-FACTS         — no attribution trailer; note: words of revision history, a test log
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
-#   PR-MSG-SUMMARY       — note: a first paragraph above 120 words, or a body above 300 words
+#   PR-MSG-SUMMARY       — note: a first paragraph above 120 words, a body above 300 words, or a
+#                          body that opens with an action and names no problem
 #
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-commits.sh origin/master..HEAD
@@ -111,6 +112,14 @@ while read -r sha; do
   fi
   if [ "$words" -gt 300 ]; then
     note "${sha:0:9} has a body of $words words, above 300: one change, and no pull-request evidence?"
+    quiet=0
+  fi
+  # A mechanical commit is its own explanation; its body may say only what it does.
+  kind=$(git log -1 --format='%(trailers:key=Change,valueonly)' "$sha" | awk -F'|' '{gsub(/ /,""); print $2}')
+  case "$kind" in comment|format|location|name) continue ;; esac
+  action=$(python3 "$(dirname "$0")/message_opening.py" <<< "$body" | cut -f2)
+  if [ -n "$action" ]; then
+    note "${sha:0:9} opens with an action and names no problem — which problem does it solve? \"$action\""
     quiet=0
   fi
 done <<< "$COMMITS"
