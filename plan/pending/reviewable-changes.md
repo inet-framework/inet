@@ -124,7 +124,7 @@ Each row is one commit with the group `reviewable-changes` and a `Plan:` line th
 | 9 | done | A step useful alone goes first | `pull-request.md` | amend `PR-REQ-TOPIC` | `check-links.sh` |
 | 10 | done | A mixed direction marks a commit that cannot divide | `classification.md`, `check-classification.sh` | align `CR-DEPTH-DIRECTION` and `CR-TAG-SUBJECT`; note for mixed directions | gate on the nine-commit series of pull request 1273 |
 | 11 | done | The commits follow the plan's steps | `planning.md`, `write-an-implementation-plan.md`, `review-a-pull-request.md` | amend `PLR-PROPORTION`; review question | `check-links.sh` |
-| 12 | pending | Close the plan | this file | move to `plan/done/` | `check-links.sh` |
+| 12 | done | Close the plan | this file | move to `plan/done/` | `check-links.sh` |
 
 ## 7. Verification
 
@@ -160,4 +160,54 @@ commits; they cannot show that reviewers act on the notes.
 
 ## 9. Implementation record
 
-Filled in as the steps land.
+All twelve steps are done on `topic/reviewable-changes`, in twelve commits and a move. The branch
+is local and not pushed.
+
+The autosquash rebases used the `master` ref while it moved, so the series sits on master
+`649d4756ae`, three commits after the start. Those three commits change only TCP files and the TCP
+plan. The checks in the evidence table ran on that base.
+
+### Decisions and facts from the implementation
+
+- `fingerprint_moves.py` first printed two patterns with the same row count in an order that
+  depended on the Python hash seed, because it iterated over a set. A gate must give the same
+  output on every run. The reader now sorts its keys and its output. The correction went into
+  step 3, and the tests pass under `PYTHONHASHSEED` 0 to 3.
+- Steps 4 and 6 first left the gate inventory in `enforcement/README.md` unchanged. Each step now
+  updates its own row.
+- The new `PR-MSG-FACTS` note fired on the message of step 7, which quoted a phrase of revision
+  history as an example. The message now describes the case without the quote. A quoted phrase can
+  give a note; that is acceptable for a note, and the reviewer decides.
+- The nine-commit series of pull request 1273 has five mixed directions, not six.
+- `check-classification.sh` had no regression test. Step 10 adds `test_check_classification.py`.
+- The steps also update `contribute-a-change.md` and add review-guide bullets for `PR-REQ-TOPIC`
+  and `PR-REQ-STORY`, which section 6 did not list.
+
+### Evidence
+
+Commands ran from the worktree root on 2026-10-05.
+
+| Check | Result |
+| --- | --- |
+| `python3 -m unittest discover -s doc/project/enforcement -p 'test_*.py'` | 121 tests, OK; 12 of them are new |
+| The same tests, `check-seals.sh` and `check-links.sh` at each commit of the series, in a detached copy under `/var/tmp` | tests OK and seals exit 0 at every commit; the broken-link count stays the same at every commit |
+| `check-links.sh` in the worktree | 1 broken link, to the generated `MplsPacket_m.h`, as on master |
+| `check-commits.sh master..HEAD` | PASS, no note |
+| `check-classification.sh master..HEAD` | PASS |
+| New `check-commits.sh` notes, as in the second table below | exit status unchanged |
+
+The `/var/tmp` copy has 164 broken links at every commit, because the sibling `../standards/`
+project is absent next to it. The count does not change across the series.
+
+The gates on pull request 1273. Both ranges exit with status 0, as before the change:
+
+| Range | New notes |
+| --- | --- |
+| `0c69196d37~1..0c69196d37`, the single commit | rows move in 2 ways (26 `tplx`; 11 `tplx,~tND,~tNl`); 2098 source lines; body of 541 words; "Audit correction"; a `Validation:` paragraph |
+| `8c29416d8d..6d935f633f`, the nine commits | 409 source lines in `06bc632d16`; 828 in `1cc9905c7d`; a `Validation:` paragraph in each commit; five mixed directions |
+
+### Limits
+
+The checks show that the notes fire on real commits and stay quiet on this series. They cannot
+show that reviewers act on the notes. `check-commits.sh` and `check-classification.sh` still run by
+hand only.
