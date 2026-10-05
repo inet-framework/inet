@@ -149,7 +149,11 @@ a short reason where its absence could confuse a reviewer.
 
 Order implementation steps by their dependencies under
 [PR-SERIES-ORDER](pull-request.md#pr-series-order). Give each step a coherent purpose and a
-verification method. Use the
+verification method. Each step becomes one commit, or a short series of commits, under
+[PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change). A commit does not span two steps unless
+the plan says why. When the implementation shows that a step divides further, or that two steps
+cannot be divided, update the plan; [PLR-REVISION](#plr-revision) decides whether that needs
+approval. Use the
 [plan template](../guide/write-an-implementation-plan.md#plan-template) as an initial structure.
 Avoid empty sections and repeated policy text.
 

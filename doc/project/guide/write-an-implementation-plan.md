@@ -53,7 +53,9 @@ Use only the rows that apply. Each linked document owns its technical requiremen
 
 ## 4. Define the steps and verification
 
-Order the steps by their dependencies. Use this compact table for each coherent change:
+Order the steps by their dependencies. Each row becomes one commit or a short series of commits,
+and a commit does not span two rows ([PLR-PROPORTION](../rule/planning.md#plr-proportion)). Use this
+compact table for each coherent change:
 
 | Purpose | Files and responsible component | Proposed change | Expected behavior | Verification |
 | --- | --- | --- | --- | --- |

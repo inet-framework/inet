@@ -169,7 +169,9 @@ abstract subject passes every mechanical check and can still hold several change
   came from a misread standard. `git log --format='%h %s' --grep='^Change:.*\.fix' $MB..HEAD` lists
   the candidates once the branch carries trailers.
 - **[PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan)** — if the series follows a plan, does each
-  commit name it, and does the path still exist?
+  commit name it, and does the path still exist? Do the commits follow the plan's steps, one or more
+  commits for each step? A commit that spans two steps without a reason in the plan is a `FLAG` under
+  [PR-SPLIT-ONE-CHANGE](../rule/pull-request.md#pr-split-one-change).
 - **[PR-REQ-TOPIC](../rule/pull-request.md#pr-req-topic)** — does a commit move behavior outside
   the topic, such as the fingerprints of configurations that the topic does not reach? Can it land
   first, in a pull request of its own?
