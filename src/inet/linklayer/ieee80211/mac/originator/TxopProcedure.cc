@@ -85,6 +85,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
     protectionMechanism = selectProtectionMechanism(ac);
     start = simTime();
+    resetTransmissionHistory();
     emit(txopStartedSignal, this);
     EV_INFO << "Txop started: limit = " << limit << ".\n";
 }
@@ -94,6 +95,7 @@ void TxopProcedure::endTxop()
     Enter_Method("endTxop");
     emit(txopEndedSignal, this);
     start = -1;
+    resetTransmissionHistory();
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
     EV_INFO << "Txop ended.\n";
 }
@@ -111,6 +113,51 @@ simtime_t TxopProcedure::getDuration() const
     if (start == -1)
         throw cRuntimeError("Txop has not started yet");
     return simTime() - start;
+}
+
+// IEEE Std 802.11-2024, 10.23.2.9: use retained frame facts and actual transmission history for overrun eligibility. The count includes a projected predecessor when the check considers a next exchange. For example, a group address can permit an overrun without an earlier transmission.
+TxopProcedure::Admission TxopProcedure::admitExchange(simtime_t cost, const StagedFrameView& candidate,
+        simtime_t at, const StagedFrameView *precedingCandidate) const
+{
+    if (start < SIMTIME_ZERO || cost < SIMTIME_ZERO || candidate.identity < 0)
+        throw cRuntimeError("Invalid TXOP admission inputs");
+    auto count = dataOrMgmtTransmissions + (precedingCandidate ? 1 : 0);
+    auto unit = firstUnitIdentity != -1 ? firstUnitIdentity : (precedingCandidate ? precedingCandidate->unitIdentity : -1);
+    if (limit == SIMTIME_ZERO)
+        return count == 0 || unit == candidate.unitIdentity ? Admission::ZERO_LIMIT_UNIT : Admission::REFUSED;
+    if (cost <= std::max(SIMTIME_ZERO, start + limit - at))
+        return Admission::FIT;
+    if (count != 0)
+        return Admission::REFUSED;
+    bool retransmission = candidate.transmissions > 0 && candidate.length == candidate.originalLength;
+    bool laterFragment = candidate.transmissions == 0 && candidate.earlierFragmentRetransmitted;
+    bool sixteenFragments = candidate.fragmentCount == 16;
+    return retransmission || laterFragment || sixteenFragments || candidate.receiver.isMulticast() ?
+        Admission::OVERRUN_EXCEPTION : Admission::REFUSED;
+}
+
+// IEEE Std 802.11-2024, 10.23.2.8: this strict comparison excludes SIFS before the next originator transmission. Hypothetical: an 84 us cost without that SIFS fails against an 84 us TXNAV interval. Equality can pass the separate TXOP budget check, which includes that SIFS.
+bool TxopProcedure::fitsTxnav(simtime_t costWithoutLeadingIfs, simtime_t at) const
+{
+    return costWithoutLeadingIfs < std::max(SIMTIME_ZERO, txnavEnd - at);
+}
+
+void TxopProcedure::recordDataOrMgmtTransmission(const StagedFrameView& candidate)
+{
+    if (dataOrMgmtTransmissions++ == 0)
+        firstUnitIdentity = candidate.unitIdentity;
+}
+
+void TxopProcedure::recordTransmittedReservation(simtime_t ppduEnd, simtime_t serializedDuration)
+{
+    txnavEnd = std::max(txnavEnd, ppduEnd + serializedDuration);
+}
+
+void TxopProcedure::resetTransmissionHistory()
+{
+    txnavEnd = SIMTIME_ZERO;
+    dataOrMgmtTransmissions = 0;
+    firstUnitIdentity = -1;
 }
 
 // FIXME implement!

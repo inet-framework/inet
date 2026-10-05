@@ -152,7 +152,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void originatorProcessFailedFrame(Packet *packet) override;
     virtual void frameSequenceFinished() override;
     void frameSequenceStarted() override;
-    void transmitFrame(Packet *packet, simtime_t ifs) override;
+    void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override;
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
     // IChannelAccess::ICallback

@@ -77,7 +77,14 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
         running = true;
         terminating = false;
         generation++;
-        frameSequence->startSequence(context, 0);
+        if (context->usesPlanning()) {
+            if (!context->prepareInitialExchange(frameSequence)) {
+                finishFrameSequence();
+                return;
+            }
+        }
+        else
+            frameSequence->startSequence(context, 0);
         auto currentGeneration = generation;
         callback->frameSequenceStarted();
         if (running && generation == currentGeneration)
@@ -94,6 +101,15 @@ void FrameSequenceHandler::startFrameSequenceStep()
     auto nextStep = frameSequence->prepareStep(context);
     if (!running || generation != currentGeneration)
         return;
+    if (nextStep == nullptr && context->usesPlanning() && context->advanceExchange(frameSequence))
+        nextStep = frameSequence->prepareStep(context);
+    if (!running || generation != currentGeneration)
+        return;
+    // An on-air request retains its response wait. Invalidation prevents future transmissions.
+    if (nextStep && nextStep->getType() == IFrameSequenceStep::Type::TRANSMIT && context->usesPlanning() && !context->isPlanValid()) {
+        finishFrameSequence();
+        return;
+    }
     EV_INFO << "Starting next frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (nextStep == nullptr)
         finishFrameSequence();
@@ -103,7 +119,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
-                callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
+                callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs(), transmitStep->getPreparedTransmit());
                 // TODO lifetime
 //                if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
 //                    transmitLifetimeHandler->frameTransmitted(dataFrame);
@@ -158,6 +174,7 @@ void FrameSequenceHandler::finishFrameSequence()
     auto oldSequence = frameSequence;
     running = false;
     generation++;
+    context->invalidatePlans();
     callback->frameSequenceFinished();
     retired.push_back({oldContext, oldSequence});
     if (context == oldContext) {
@@ -173,6 +190,7 @@ void FrameSequenceHandler::abortFrameSequence()
     if (terminating)
         return;
     terminating = true;
+    context->invalidatePlans();
     auto currentGeneration = generation;
     EV_INFO << "Frame sequence aborted.\n";
     auto step = context->getLastStep();
@@ -209,6 +227,7 @@ void FrameSequenceHandler::pendingTransmissionCanceled(TxRequestId id)
     if (!running || id != pendingRequest)
         return;
     pendingRequest = {};
+    context->invalidatePlans();
     finishFrameSequence();
 }
 
@@ -217,6 +236,7 @@ void FrameSequenceHandler::resetForLifecycle(bool onAir)
     CallGuard guard(*this);
     if (!running || terminating)
         return;
+    context->invalidatePlans();
     auto last = context->getLastStep();
     auto currentGeneration = generation;
     if (onAir && last && last->getType() == IFrameSequenceStep::Type::TRANSMIT) {

@@ -86,10 +86,10 @@ class CancellationHcf : public Hcf {
         }
         return Hcf::isTransmissionPermitted(id);
     }
-    void transmitFrame(Packet *packet, simtime_t ifs) override {
+    void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override {
         bool check = sender() && (scenario() < 4 || scenario() == 6) && !triggered;
         if (check) ifs = scenario() == 2 ? SIMTIME_ZERO : SimTime(10, SIMTIME_US);
-        Hcf::transmitFrame(packet, ifs);
+        Hcf::transmitFrame(packet, ifs, prepared);
         if (!check) return;
         triggered = true;
         auto id = activeRequest;

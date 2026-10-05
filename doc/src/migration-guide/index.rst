@@ -17,13 +17,17 @@ Staged frames are frames that the data service extracted and registered for tran
 
 A prepared exchange records its frames, physical layer (PHY) modes, responses, and required intervals before transmission. The current sequence tree supplies these choices. Prepared execution uses the recorded choices without another selector call. For example, the unit test's mode provider returns 24 Mbps first and 6 Mbps on another query. Preparation records 24 Mbps; prepared execution must use 24 Mbps without another query.
 
+A transmission opportunity (TXOP) gives a QoS station time to start frame exchange sequences. TxopProcedure checks the complete prepared exchange cost. Each continuation includes SIFS before its first transmission. TXNAV is the medium reservation that this station transmits during its TXOP. A separate TXNAV check reads the reservation from actual transmissions.
+
+Hypothetical: the complete continuation costs 100 µs and exactly fits the available TXOP time. Its cost without SIFS before the first transmission is 84 µs. An available TXNAV interval of 84 µs refuses it because that comparison requires strictly less time. The TXOP budget check accepts equality, while the TXNAV check rejects equality.
+
 Production HCF retains its legacy path at this commit.
 
 External implementations require these changes:
 
 * Implement ``IFrameSequence::planSequence()``. Implement ``startPlannedSequence()``. Return ``READY`` when a complete plan exists. Return ``EMPTY`` when no candidate exists. Return ``UNSUPPORTED`` when the selected sequence or required input has no supported representation. Duration refusal is a separate admission result.
 * Implement ``ITransmitStep::getPreparedTransmit()``. Implement ``IReceiveStep::getPreparedReceive()``. Return a null record for a legacy step. Plans own prepared steps and generated controls. The frame store owns staged data and management frames.
-* Adapt the sequence handler callbacks below. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
+* Add the prepared record argument to the handler's ``transmitFrame()`` callback. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
 
   Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope. Implement ``resetForLifecycle()``.
 * Implement ``IAckHandler::snapshotFrameState()``. Implement ``dropFrame()``. The snapshot query must preserve the exact phase without insertion or protocol progress. A staged frame without an ACK registration is an error.

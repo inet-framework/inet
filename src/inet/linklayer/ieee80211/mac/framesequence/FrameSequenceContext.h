@@ -66,7 +66,12 @@ class INET_API FrameSequenceContext : public cObject
 
     NonQoSContext *nonQoSContext = nullptr;
     QoSContext *qosContext = nullptr;
-
+    IQosRateSelection *planningRateSelection = nullptr;
+    std::unique_ptr<FrameSequencePlan> activePlan;
+    std::unique_ptr<FrameSequencePlan> nextPlan;
+    std::vector<std::unique_ptr<FrameSequencePlan>> retiredPlans;
+    int activeFirstStep = 0;
+    bool planValid = true;
 
   public:
     FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
@@ -93,6 +98,21 @@ class INET_API FrameSequenceContext : public cObject
     [[nodiscard]] virtual bool isPlanning() const { return false; }
     virtual AckPolicy getAckPolicy();
     virtual bool isBlockAckReqNeeded();
+
+    void enablePlanning(IQosRateSelection *rateSelection) { planningRateSelection = rateSelection; }
+    [[nodiscard]] bool usesPlanning() const { return planningRateSelection != nullptr; }
+    [[nodiscard]] FrameSequencePlan *getActivePlan() const { return activePlan.get(); }
+    [[nodiscard]] FrameSequencePlan *getNextPlan() const { return nextPlan.get(); }
+    [[nodiscard]] bool isPlanValid() const { return planValid; }
+    void invalidatePlans() { planValid = false; }
+    bool prepareInitialExchange(IFrameSequence *sequence);
+    bool advanceExchange(IFrameSequence *sequence);
+    [[nodiscard]] bool isPreparedTransmissionPermitted(const PreparedTransmit& record) const;
+
+  protected:
+    void prepareNextExchange(IFrameSequence *sequence);
+
+  public:
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;

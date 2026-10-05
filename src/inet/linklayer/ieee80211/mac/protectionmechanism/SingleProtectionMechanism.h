@@ -14,6 +14,9 @@
 namespace inet {
 namespace ieee80211 {
 
+struct FrameSequencePlan;
+struct PreparedTransmit;
+
 //
 // 8.2.5 Duration/ID field (QoS STA)
 //   8.2.5.1 General
@@ -41,6 +44,9 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
 
   public:
     virtual ~SingleProtectionMechanism() {}
+
+    static simtime_t computePreparedDurationField(const PreparedTransmit& transmitted,
+            const FrameSequencePlan& active, const FrameSequencePlan *next);
 
     // TODO QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
     virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);

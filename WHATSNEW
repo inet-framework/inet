@@ -24,6 +24,8 @@ IEEE 802.11 Tx request identities
 
    Frame sequences can prepare frames, modes, responses, and complete duration. Custom sequences require preparation methods and step records. Response timeout policies accept the selected response mode without another rate query. Production HCF still uses its legacy path at this stage.
 
+   TxopProcedure checks complete prepared duration and this station's transmitted reservation separately. SingleProtectionMechanism derives Duration/ID from prepared exchanges.
+
    External Tx modules, handlers, ACK owners, and Block Ack services require the applicable new interfaces and a rebuild.
 
 1. IEEE 802.11 rate control per receiver
