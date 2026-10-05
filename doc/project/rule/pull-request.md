@@ -618,8 +618,11 @@ the end of the description, or into the plan.
 commit's message as its whole description. A series needs a summary of its own, because no single
 commit answers the questions for the whole series. Headings are optional.
 
-*Enforced at T4 — agent review: can a reviewer restate the answers to the reviewer's questions, and
-the risk, from the summary alone, in about five minutes?*
+*Enforced at T3 — [check-pr-description.sh](../enforcement/check-pr-description.sh) gives notes for
+a description with no opening, with evidence before the summary, or with an opening that starts with
+actions or is a list of changes and names no problem, and for a large series or a long description
+whose first 150 words name no problem; T4 — agent review: can a reviewer restate the answers to the reviewer's
+questions, and the risk, from the summary alone, in about five minutes?*
 
 ### PR-REQ-ARCH
 
@@ -685,4 +688,5 @@ argue about.
 | PR-MSG-BODY | T3+T4 | commit-message lint: an empty body above 50 changed lines, outside the exempt kinds; agent review for a body that restates the subject |
 | PR-MSG-SUMMARY | T3+T4 | note: a first paragraph above 120 words, a body above 300 words, or a body that opens with an action and names no problem (T3) + agent review: can a reviewer restate the answers to the reviewer's questions from the summary alone? (T4) |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
+| PR-REQ-STORY | T3+T4 | notes from the description gate (T3) + agent review: can a reviewer restate the answers from the summary alone? (T4) |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |

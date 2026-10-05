@@ -30,6 +30,7 @@ not repeatable.
 
 ```bash
 doc/project/enforcement/check-commits.sh $MB..refs/pr/<n>
+doc/project/enforcement/check-pr-description.sh --pr <n> --range $MB..refs/pr/<n>
 ```
 
 What it covers, and what to run by hand when you want the detail:

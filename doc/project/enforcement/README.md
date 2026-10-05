@@ -52,6 +52,7 @@ measured.
 | [check-naming.sh](check-naming.sh) | T3 | by hand; not yet in CI | the path and asset half of `NR-*`: directory names, generated pairs, icon names, workflow names |
 | [check-ned-msg-naming.py](check-ned-msg-naming.py) | T3 | by hand; not yet in CI | declaration-level `NR-*`: NED/MSG package and file/type agreement, casing, fields, signals/statistics, and gate names |
 | [check-commits.sh](check-commits.sh) | T3 | by hand; not yet in CI | `PR-SPLIT-WHITESPACE`, `PR-SPLIT-MOVE`, `PR-SPLIT-BASELINE`, `PR-SERIES-ORDER`, `PR-SERIES-LINEAR`, `PR-MSG-SUBJECT`, `PR-MSG-FACTS`; notes for `PR-SPLIT-ONE-CHANGE` (through [fingerprint_moves.py](fingerprint_moves.py)), `PR-SPLIT-SIZE`, `PR-MSG-SUMMARY` (through [message_opening.py](message_opening.py)) and `PR-MSG-FACTS` |
+| [check-pr-description.sh](check-pr-description.sh) | T3 | by hand; not yet in CI | notes for `PR-REQ-STORY` on one pull request description, through [check_pr_description.py](check_pr_description.py) and [message_opening.py](message_opening.py) |
 | [check-interfaces.sh](check-interfaces.sh) | T3 | by hand; not yet in CI | the `I<Stem>` promise of `NR-CPP-TYPE` and `AR-ORG-CONTRACT-PURITY`: a C++ interface holds no implementation |
 | [check-seals.sh](check-seals.sh) | T3 | by hand; not yet in CI | `SR-FLAG-PLACEMENT`, `SR-FLAG-COVERAGE`, and the generated index of [seal-list.md](../audit/seal-list.md) |
 | [check-source-seals.sh](check-source-seals.sh) | T3 | pull-request CI and by hand | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
@@ -84,6 +85,7 @@ python3 doc/project/enforcement/check-ned-msg-naming.py       # working-tree dec
 python3 doc/project/enforcement/check-ned-msg-naming.py --staged
 python3 doc/project/enforcement/check-ned-msg-naming.py --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
+doc/project/enforcement/check-pr-description.sh --pr <n> --range origin/master..refs/pr/<n>
 doc/project/enforcement/check-interfaces.sh                # every I<Stem> class holds no body
 doc/project/enforcement/check-source-seals.sh --diff       # changed source paths against seals
 doc/project/enforcement/check-source-seals.sh --base origin/master  # committed branch paths
