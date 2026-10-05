@@ -4,11 +4,23 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
-IEEE 802.11 HCF Complete Exchange Admission
-------------------------------------------
+IEEE 802.11 Prepared Exchanges and Tx Requests
+---------------------------------------------
 
-The IEEE 802.11 MAC interfaces add support for complete exchange admission.
-External implementations require the applicable changes below.
+HCF uses prepared exchanges when ``isBlockAckSupported`` is false.
+The existing sequence tree selects the frames, modes, ACK policy, and protection branch before transmission.
+``TxopProcedure`` checks the complete exchange cost.
+Each continuation includes its leading SIFS.
+The separate TXNAV check uses the reservation from this station's actual transmissions.
+
+The duration guarantee assumes zero propagation delay and responses after nominal SIFS.
+The actual response mode and complete frame length must match the prediction.
+HCF uses actual elapsed time for each continuation check.
+An oversized initial exchange without a supported exception raises a model-limit error before transmission.
+The model does not fragment a frame automatically to meet an airtime budget.
+``TxopProcedure::getDuration()`` keeps its elapsed-time meaning.
+
+External implementations require these changes:
 
 * Implement ``IFrameSequence::planSequence()`` and ``startPlannedSequence()``.
   Return ``READY``, ``EMPTY``, or ``UNSUPPORTED`` as appropriate.
@@ -39,6 +51,20 @@ External implementations require the applicable changes below.
   The final permission check runs for zero IFS too.
   Tx must check the identity again after a callback that can replace the request.
 
+Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``.
+Only ``CANCELED`` removes the matching delayed copy.
+Explicit cancellation emits no completion callback.
+The caller reports successful explicit cancellation to the matching handler once.
+An on-air request keeps its normal completion path unless lifecycle cleanup aborts it.
+Ordinary radio commands wait until an accepted recipient response completes.
+``InProgressFrames`` calls its typed removal callback before it removes a referenced frame.
+HCF registers ``IInProgressFramesCallback`` through ``setRemovalCallback()``.
+Custom frame stores must preserve the ``frameWillBeRemoved()`` call before removal.
+Contexts retain frame references until their deferred disposal completes.
+``clearDroppedFrames()`` preserves originals while a context still borrows them.
+
+DCF uses the legacy path with null prepared metadata.
+HCF configurations with Block Ack support retain the existing path without the new duration guarantee.
 Rebuild all external implementations after these interface changes.
 
 IEEE 802.11 PHY Mode Properties

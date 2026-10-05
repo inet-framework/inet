@@ -6,25 +6,22 @@ INET-4.7.x (in development)
 
 Notable backward incompatible changes are the following:
 
-IEEE 802.11 radio commands wait until Tx completes an accepted transmission.
-Custom Tx modules must implement ITx::hasTransmission().
+IEEE 802.11 HCF complete exchange admission
 
-Tx uses request identities to cancel an exact delayed transmission.
-Custom Tx modules and handlers require the new request callbacks.
+   HCF checks complete exchange airtime when isBlockAckSupported is false.
+   The check includes protection, responses, and each required SIFS interval.
+   Execution uses the exact frames and modes from that check.
+   A refused continuation retains its frames for later channel access.
+   An oversized initial exchange without a supported exception reports a model-limit error.
+   Automatic fragmentation to an airtime budget remains unsupported.
 
-MAC stop and crash reset pending transmission and frame exchange state.
-External Tx modules, handlers, and ACK owners require lifecycle reset methods.
+   The duration guarantee assumes zero propagation delay and responses at nominal SIFS.
+   Actual response modes and lengths must match the local predictions.
+   Block Ack configurations retain their existing execution path.
+   TXOP duration statistics still report elapsed time.
 
-ACK owners expose read-only frame state for exchange preparation.
-Frame stores retain referenced frames until their contexts end.
-Custom ACK owners require snapshotFrameState().
-
-Frame sequences can prepare their frames, modes, responses, and complete duration.
-Custom sequences require the preparation methods and step records.
-Response timeout policies require a query for the supplied mode.
-
-TxopProcedure exposes complete exchange admission and transmitted reservation checks.
-SingleProtectionMechanism can derive Duration/ID from the prepared exchanges.
+   External sequence, step, handler, ACK, timeout-policy, and Tx implementations
+   require source changes and a rebuild. The migration guide describes the new contracts.
 
 1. IEEE 802.11 rate control per receiver
 

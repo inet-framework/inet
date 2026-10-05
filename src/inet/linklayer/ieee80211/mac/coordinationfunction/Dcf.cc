@@ -118,7 +118,7 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     activeRequest = mac->allocateTxRequest();
     responseRequest = true;
     requestOnAir = false;
-
+    preparedTransmit = nullptr;
     tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
@@ -209,7 +209,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *p
     activeRequest = mac->allocateTxRequest();
     responseRequest = false;
     requestOnAir = false;
-
+    preparedTransmit = prepared;
     frameSequenceHandler->setPendingTransmission(activeRequest);
     tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
 }
@@ -284,7 +284,7 @@ void Dcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const I
         return;
     bool recipient = responseRequest;
     activeRequest = {};
-
+    preparedTransmit = nullptr;
     responseRequest = false;
     requestOnAir = false;
     if (recipient) {

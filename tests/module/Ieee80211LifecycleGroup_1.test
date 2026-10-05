@@ -114,8 +114,7 @@ class LifecycleGroupTest : public cSimpleModule
         else {
             ASSERT(hcf->stopped == stop && hcf->failures == 0);
             ASSERT(hcf->acknowledgments == (stop ? 0 : 3));
-            // The legacy path sends five RTS frames and three data frames.
-            ASSERT(hcf->events.size() == (stop ? 1 : 8));
+            ASSERT(hcf->events.size() == (stop ? 1 : 6));
             ASSERT(!hcf->hasPendingTransmission());
         }
         std::cout << "Group shutdown and deferred frame ownership verified.\n";

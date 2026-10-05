@@ -185,7 +185,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.profile = ${profile=0,1}
+*.profile = ${profile=0,1,2}
 *.responseWait = ${false,true}
 *.deleteNode = ${false,true}
 *.radioMedium.propagation.typename = "ConstantTimePropagation"

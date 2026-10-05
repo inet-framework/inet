@@ -69,8 +69,10 @@ void Hcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue signal listeners after all child initialization has completed.
-        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
             check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+            edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->setRemovalCallback(this);
+        }
     }
 }
 
@@ -157,8 +159,8 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
     if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast<Packet *>(obj);
         if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
             FrameTransmissionDetails transmissionDetails;
@@ -168,8 +170,37 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
     else
         ModeSetListener::receiveSignal(source, signalID, obj, details);
+    if (signalID == modesetChangedSignal && frameSequenceHandler && frameSequenceHandler->isSequenceRunning()) {
+        auto context = const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext());
+        if (context->usesPlanning() && context->getModeSet() != modeSet) {
+            context->invalidatePlans();
+            if (!responseRequest && tx->cancelPendingTransmission(activeRequest) == ITx::Cancellation::CANCELED)
+                transmissionCanceled(activeRequest);
+        }
+    }
 }
 
+void Hcf::frameWillBeRemoved(InProgressFrames *owner, const Packet *frame)
+{
+    Enter_Method("frameWillBeRemoved");
+    if (!frameSequenceHandler->isSequenceRunning())
+        return;
+    auto context = const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext());
+    if (!context->usesPlanning() || context->getInProgressFrames() != owner)
+        return;
+    auto active = context->getActivePlan();
+    auto next = context->getNextPlan();
+    auto last = context->getLastStep();
+    bool activeRemoved = active && active->candidate.frame == frame;
+    bool completed = active && last && last->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+        (last->getType() == IFrameSequenceStep::Type::RECEIVE || active->candidate.receiver.isMulticast());
+    if ((activeRemoved && !completed) || (next && next->candidate.frame == frame)) {
+        context->invalidatePlans();
+        auto id = activeRequest;
+        if (!responseRequest && tx->cancelPendingTransmission(id) == ITx::Cancellation::CANCELED)
+            transmissionCanceled(id);
+    }
+}
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
@@ -248,7 +279,10 @@ FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
     auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure());
-    return new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
+    auto context = new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
+    if (!par("isBlockAckSupported").boolValue())
+        context->enablePlanning(rateSelection);
+    return context;
 }
 
 void Hcf::startFrameSequence(AccessCategory ac)
@@ -410,7 +444,7 @@ void Hcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const I
         return;
     bool recipient = responseRequest;
     activeRequest = {};
-
+    preparedTransmit = nullptr;
     responseRequest = false;
     requestOnAir = false;
     if (recipient) {
@@ -420,6 +454,9 @@ void Hcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const I
     }
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        auto context = frameSequenceHandler->getContext();
+        if (context && context->usesPlanning())
+            edcaf->getTxopProcedure()->recordTransmittedReservation(simTime(), SimTime(header->getDurationField().inUnit(SIMTIME_US), SIMTIME_US));
         frameSequenceHandler->transmissionComplete();
     }
     else if (hcca->isOwning())
@@ -478,7 +515,6 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
-        edcaf->emit(packetSentToPeerSignal, packet);
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader))
@@ -494,6 +530,7 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
             originatorProcessTransmittedManagementFrame(mgmtHeader, ac);
         else // TODO Ieee80211ControlFrame
             originatorProcessTransmittedControlFrame(transmittedHeader, ac);
+        edcaf->emit(packetSentToPeerSignal, packet);
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented");
@@ -736,6 +773,23 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *p
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto txop = channelOwner->getTxopProcedure();
+        if (prepared) {
+            if (prepared->frame != packet || prepared->length != packet->getDataLength() || prepared->ifs != ifs)
+                throw cRuntimeError("Prepared transmission identity, length, or IFS mismatch");
+            auto mutableHeader = packet->removeAtFront<Ieee80211MacHeader>();
+            if (auto dataHeader = dynamicPtrCast<Ieee80211DataHeader>(mutableHeader))
+                dataHeader->setAckPolicy(prepared->ackPolicy);
+            mutableHeader->setDurationField(prepared->duration);
+            packet->insertAtFront(mutableHeader);
+            setFrameMode(packet, mutableHeader, prepared->mode);
+            activeRequest = mac->allocateTxRequest();
+            responseRequest = false;
+            requestOnAir = false;
+            preparedTransmit = prepared;
+            frameSequenceHandler->setPendingTransmission(activeRequest);
+            tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+            return;
+        }
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             OriginatorBlockAckAgreement *agreement = nullptr;
             if (originatorBlockAckAgreementHandler)
@@ -765,7 +819,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *p
         activeRequest = mac->allocateTxRequest();
         responseRequest = false;
         requestOnAir = false;
-
+        preparedTransmit = prepared;
         frameSequenceHandler->setPendingTransmission(activeRequest);
         tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
     }
@@ -792,7 +846,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     activeRequest = mac->allocateTxRequest();
     responseRequest = true;
     requestOnAir = false;
-
+    preparedTransmit = nullptr;
     tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
@@ -880,7 +934,13 @@ Hcf::~Hcf()
 
 bool Hcf::isTransmissionPermitted(TxRequestId id)
 {
-    return id == activeRequest && !lifecycleStopped && mac->isCurrentTxRequest(id);
+    if (id != activeRequest || lifecycleStopped || !mac->isCurrentTxRequest(id))
+        return false;
+    if (responseRequest || !preparedTransmit)
+        return true;
+    auto context = frameSequenceHandler->getContext();
+    return frameSequenceHandler->isSequenceRunning() && context->getModeSet() == modeSet &&
+        context->isPreparedTransmissionPermitted(*preparedTransmit);
 }
 
 void Hcf::beginCallback()
@@ -896,8 +956,20 @@ void Hcf::endCallback()
 
 void Hcf::transmissionStarted(TxRequestId id)
 {
-    if (id == activeRequest)
-        requestOnAir = true;
+    if (id != activeRequest)
+        return;
+    requestOnAir = true;
+    if (preparedTransmit) {
+        auto context = frameSequenceHandler->getContext();
+        auto packet = preparedTransmit->frame;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+            const auto& candidate = context->getActivePlan()->candidate;
+            context->getInProgressFrames()->recordTransmission(candidate);
+            context->getQoSContext()->txopProcedure->recordDataOrMgmtTransmission(candidate);
+        }
+        RateSelection::emitDatarateSelected(this, header, preparedTransmit->mode);
+    }
 }
 
 void Hcf::transmissionCanceled(TxRequestId id)
@@ -905,7 +977,7 @@ void Hcf::transmissionCanceled(TxRequestId id)
     if (id != activeRequest)
         return;
     activeRequest = {};
-
+    preparedTransmit = nullptr;
     requestOnAir = false;
     frameSequenceHandler->pendingTransmissionCanceled(id);
 }
@@ -922,7 +994,7 @@ void Hcf::resetForLifecycle()
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->resetForLifecycle();
     activeRequest = {};
-
+    preparedTransmit = nullptr;
     responseRequest = false;
     requestOnAir = false;
 }

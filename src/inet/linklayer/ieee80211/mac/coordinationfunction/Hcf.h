@@ -15,6 +15,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IInProgressFramesCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckProcedure.h"
@@ -45,7 +46,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IInProgressFramesCallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
@@ -97,6 +98,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     InProgressFrames *hccaInProgressFrame = nullptr;
 
     TxRequestId activeRequest;
+    const PreparedTransmit *preparedTransmit = nullptr;
     bool responseRequest = false;
     bool requestOnAir = false;
     bool lifecycleStopped = false;
@@ -151,6 +153,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void originatorProcessFailedFrame(Packet *packet) override;
     virtual void frameSequenceFinished() override;
     void frameSequenceStarted() override;
+    void frameWillBeRemoved(InProgressFrames *owner, const Packet *frame) override;
     void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override;
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 

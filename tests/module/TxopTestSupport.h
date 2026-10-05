@@ -67,33 +67,41 @@ class ExchangeHcf : public Hcf
     {
         grants++;
         currentBurst = 0;
-        Hcf::channelGranted(access);
-    }
-
-    Packet *observedFrame = nullptr;
-    virtual void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override
-    {
-        observedFrame = packet;
-        Hcf::transmitFrame(packet, ifs, prepared);
+        try {
+            Hcf::channelGranted(access);
+        }
+        catch (const cRuntimeError& error) {
+            if (!hasPar("expectInitialRefusal") || !par("expectInitialRefusal").boolValue())
+                throw;
+            std::string message = error.what();
+            ASSERT(message.find("INET model limit: initial exchange exceeds TXOP") != std::string::npos);
+            ASSERT(message.find("fragmentationThreshold=") != std::string::npos);
+            ASSERT(message.find("mode=") != std::string::npos);
+            ASSERT(message.find("response=") != std::string::npos);
+            ASSERT(events.empty());
+            auto frames = check_and_cast<Edcaf *>(access)->getInProgressFrames()->inspectStagedFrames();
+            ASSERT(frames.size() >= 2);
+            ASSERT(frames[0].transmissions == 0 && frames[0].ack.phase == AckFrameState::Phase::FRAME_NOT_YET_TRANSMITTED);
+            initialRefused = true;
+            lifecycleStopped = true;
+            frameSequenceHandler->resetForLifecycle(false);
+        }
     }
 
     virtual void transmissionStarted(TxRequestId id) override
     {
-        if (responseRequest) {
-            Hcf::transmissionStarted(id);
-            return;
+        if (preparedTransmit) {
+            ASSERT(sequenceStarts == grants);
+            ASSERT(preparedTransmit->frame->getTag<physicallayer::Ieee80211ModeReq>()->getMode() == preparedTransmit->mode);
+            auto header = preparedTransmit->frame->peekAtFront<Ieee80211MacHeader>();
+            auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+            auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
+            events.push_back({header->getType(), simTime(), preparedTransmit->airtime, header->getDurationField(), preparedTransmit->length, preparedTransmit->mode,
+                header->getRetry(), dataOrMgmt ? dataOrMgmt->getSequenceNumber().get() : -1,
+                dataOrMgmt ? dataOrMgmt->getFragmentNumber() : -1, data && data->getAMsduPresent()});
+            if (dataOrMgmt)
+                currentBurst++;
         }
-        ASSERT(sequenceStarts == grants);
-        auto packet = observedFrame;
-        auto header = packet->peekAtFront<Ieee80211MacHeader>();
-        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
-        auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
-        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
-        events.push_back({header->getType(), simTime(), mode->getDuration(packet->getDataLength()), header->getDurationField(), packet->getDataLength(), mode,
-            header->getRetry(), dataOrMgmt ? dataOrMgmt->getSequenceNumber().get() : -1,
-            dataOrMgmt ? dataOrMgmt->getFragmentNumber() : -1, data && data->getAMsduPresent()});
-        if (dataOrMgmt)
-            currentBurst++;
         Hcf::transmissionStarted(id);
     }
 
