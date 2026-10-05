@@ -65,6 +65,32 @@ class CancellationHcf : public Hcf {
         if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) acknowledgments++;
         Hcf::originatorProcessReceivedFrame(packet, request);
     }
+    bool isTransmissionPermitted(TxRequestId id) override {
+        if (sender() && scenario() == 4 && !triggered) {
+            triggered = true;
+            ASSERT(tx->cancelPendingTransmission(id) == ITx::Cancellation::CANCELED);
+            transmissionCanceled(id);
+        }
+        return Hcf::isTransmissionPermitted(id);
+    }
+    void transmitFrame(Packet *packet, simtime_t ifs) override {
+        bool check = sender() && scenario() < 4 && !triggered;
+        if (check) ifs = scenario() == 2 ? SIMTIME_ZERO : SimTime(10, SIMTIME_US);
+        Hcf::transmitFrame(packet, ifs);
+        if (!check) return;
+        triggered = true;
+        auto id = activeRequest;
+        ASSERT(tx->cancelPendingTransmission({id.epoch, id.serial + 1}) == ITx::Cancellation::NOT_FOUND);
+        ASSERT(tx->cancelPendingTransmission({id.epoch + 1, id.serial}) == ITx::Cancellation::NOT_FOUND);
+        if (scenario() == 2) {
+            ASSERT(tx->cancelPendingTransmission(id) == ITx::Cancellation::TOO_LATE);
+        }
+        else if (scenario() != 1) {
+            ASSERT(tx->cancelPendingTransmission(id) == ITx::Cancellation::CANCELED);
+            transmissionCanceled(id);
+            ASSERT(tx->cancelPendingTransmission(id) == ITx::Cancellation::NOT_FOUND);
+        }
+    }
 
 };
 Define_Module(CancellationHcf);
@@ -137,7 +163,7 @@ record-scalar-results = false
 **.wlan[*].mac.typename = "CancellationMac"
 **.wlan[*].mac.qosStation = true
 **.wlan[*].mac.hcf.typename = "CancellationHcf"
-**.wlan[*].mac.hcf.scenario = ${scenario=5}
+**.wlan[*].mac.hcf.scenario = ${scenario=0,1,2,3,4,5}
 **.wlan[*].mac.hcf.isBlockAckSupported = false
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""

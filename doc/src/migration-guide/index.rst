@@ -10,9 +10,21 @@ IEEE 802.11 HCF Complete Exchange Admission
 The IEEE 802.11 MAC interfaces add support for complete exchange admission.
 External implementations require the applicable changes below.
 
-Implement ``ITx::hasTransmission()`` in custom Tx modules.
-Return true while Tx retains an accepted transmission.
-Ordinary radio commands wait until an accepted recipient response completes.
+* Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation.
+  Implement ``setPendingTransmission()``, ``pendingTransmissionCanceled()`` in custom handlers.
+  Preserve borrowed objects until all synchronous callbacks return.
+  Implement ``beginCallback()`` and ``endCallback()`` to defer disposal across Tx callbacks too.
+* Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``.
+  The MAC allocates ``TxRequestId`` before the call.
+  The identity contains a lifecycle epoch and a serial.
+  Implement ``cancelPendingTransmission()``, ``hasTransmission()``.
+* Implement the Tx callbacks ``isTransmissionPermitted()``, ``transmissionStarted()``, and ``transmissionCanceled()``.
+  Implement ``beginCallback()`` and ``endCallback()`` to protect borrowed sequence objects throughout each callback scope.
+  Add the request identity to ``transmissionComplete()``.
+  The final permission check runs for zero IFS too.
+  Tx must check the identity again after a callback that can replace the request.
+
+Rebuild all external implementations after these interface changes.
 
 IEEE 802.11 PHY Mode Properties
 -------------------------------

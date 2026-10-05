@@ -81,7 +81,6 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
-        emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     }
 }
 
@@ -112,7 +111,11 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     RateSelection::setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = true;
+    requestOnAir = false;
+
+    tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
 
@@ -197,7 +200,12 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
-    tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = false;
+    requestOnAir = false;
+
+    frameSequenceHandler->setPendingTransmission(activeRequest);
+    tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
 }
 
 /*
@@ -205,6 +213,11 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
  * the STA concludes that the transmission of the MPDU has failed, and this STA shall invoke its
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
+
+void Dcf::frameSequenceStarted()
+{
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
+}
 
 void Dcf::frameSequenceFinished()
 {
@@ -258,16 +271,26 @@ FrameSequenceContext *Dcf::buildContext()
     return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
 }
 
-void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+void Dcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
+    if (id != activeRequest || !mac->isCurrentTxRequest(id))
+        return;
+    bool recipient = responseRequest;
+    activeRequest = {};
+
+    responseRequest = false;
+    requestOnAir = false;
+    if (recipient) {
+        recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+        return;
+    }
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
     }
-    else {
+    else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-        mac->sendDownPendingRadioConfigMsg();
-    }
 }
 
 bool Dcf::hasFrameToTransmit()
@@ -419,6 +442,7 @@ void Dcf::corruptedFrameReceived()
         EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
+
 Dcf::~Dcf()
 {
     cancelAndDelete(startRxTimer);
@@ -428,6 +452,39 @@ Dcf::~Dcf()
     delete ctsProcedure;
     delete frameSequenceHandler;
 }
+
+bool Dcf::isTransmissionPermitted(TxRequestId id)
+{
+    return id == activeRequest && mac->isCurrentTxRequest(id);
+}
+
+void Dcf::beginCallback()
+{
+    frameSequenceHandler->beginCallback();
+}
+
+void Dcf::endCallback()
+{
+    Enter_Method("endCallback");
+    frameSequenceHandler->endCallback();
+}
+
+void Dcf::transmissionStarted(TxRequestId id)
+{
+    if (id == activeRequest)
+        requestOnAir = true;
+}
+
+void Dcf::transmissionCanceled(TxRequestId id)
+{
+    if (id != activeRequest)
+        return;
+    activeRequest = {};
+    requestOnAir = false;
+    frameSequenceHandler->pendingTransmissionCanceled(id);
+}
+
+
 
 } // namespace ieee80211
 } // namespace inet

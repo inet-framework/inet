@@ -170,6 +170,7 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
+
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
     Enter_Method("scheduleStartRxTimer");
@@ -249,7 +250,6 @@ FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
-    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
 }
 
 void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
@@ -303,6 +303,11 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
  * the STA concludes that the transmission of the MPDU has failed, and this STA shall invoke its
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
+
+void Hcf::frameSequenceStarted()
+{
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
+}
 
 void Hcf::frameSequenceFinished()
 {
@@ -394,19 +399,29 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
         ; // Optional modules
 }
 
-void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+void Hcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
+    if (id != activeRequest || !mac->isCurrentTxRequest(id))
+        return;
+    bool recipient = responseRequest;
+    activeRequest = {};
+
+    responseRequest = false;
+    requestOnAir = false;
+    if (recipient) {
+        recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+        return;
+    }
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         frameSequenceHandler->transmissionComplete();
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
-    else {
+    else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-        mac->sendDownPendingRadioConfigMsg();
-    }
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
@@ -743,7 +758,12 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             throw cRuntimeError("Multiple protection is unsupported");
         else
             throw cRuntimeError("Undefined protection mechanism");
-        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+        activeRequest = mac->allocateTxRequest();
+        responseRequest = false;
+        requestOnAir = false;
+
+        frameSequenceHandler->setPendingTransmission(activeRequest);
+        tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
     }
     else
         throw cRuntimeError("Hcca is unimplemented");
@@ -765,7 +785,11 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = true;
+    requestOnAir = false;
+
+    tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
 
@@ -828,6 +852,7 @@ void Hcf::corruptedFrameReceived()
         EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
+
 Hcf::~Hcf()
 {
     cancelAndDelete(startRxTimer);
@@ -841,6 +866,40 @@ Hcf::~Hcf()
     delete recipientBlockAckProcedure;
     delete frameSequenceHandler;
 }
+
+bool Hcf::isTransmissionPermitted(TxRequestId id)
+{
+    return id == activeRequest && mac->isCurrentTxRequest(id);
+}
+
+void Hcf::beginCallback()
+{
+    frameSequenceHandler->beginCallback();
+}
+
+void Hcf::endCallback()
+{
+    Enter_Method("endCallback");
+    frameSequenceHandler->endCallback();
+}
+
+void Hcf::transmissionStarted(TxRequestId id)
+{
+    if (id == activeRequest)
+        requestOnAir = true;
+}
+
+void Hcf::transmissionCanceled(TxRequestId id)
+{
+    if (id != activeRequest)
+        return;
+    activeRequest = {};
+
+    requestOnAir = false;
+    frameSequenceHandler->pendingTransmissionCanceled(id);
+}
+
+
 
 } // namespace ieee80211
 } // namespace inet

@@ -9,6 +9,9 @@ Notable backward incompatible changes are the following:
 IEEE 802.11 radio commands wait until Tx completes an accepted transmission.
 Custom Tx modules must implement ITx::hasTransmission().
 
+Tx uses request identities to cancel an exact delayed transmission.
+Custom Tx modules and handlers require the new request callbacks.
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate

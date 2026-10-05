@@ -10,13 +10,15 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/common/TxRequestId.h"
 
 namespace inet {
 namespace ieee80211 {
 
 /**
- * Abstract interface for unconditionally transmitting a frame immediately
- * or after waiting for a specified inter-frame space (usually SIFS).
+ * Abstract interface for an identified transmission request, immediately
+ * or after a specified inter-frame space (usually SIFS).
+ * The callback checks permission before the request reaches the medium.
  */
 class INET_API ITx
 {
@@ -25,14 +27,20 @@ class INET_API ITx
       public:
         virtual ~ICallback() {}
 
-        virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        virtual void beginCallback() = 0;
+        virtual void endCallback() = 0;
+        virtual bool isTransmissionPermitted(TxRequestId id) = 0;
+        virtual void transmissionStarted(TxRequestId id) = 0;
+        virtual void transmissionCanceled(TxRequestId id) = 0;
+        virtual void transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
     };
 
   public:
     virtual ~ITx() {}
 
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    enum class Cancellation { CANCELED, TOO_LATE, NOT_FOUND };
+    virtual void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    virtual Cancellation cancelPendingTransmission(TxRequestId id) = 0;
     [[nodiscard]] virtual bool hasTransmission() const = 0;
     virtual void radioTransmissionFinished() = 0;
 };
