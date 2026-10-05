@@ -135,6 +135,8 @@ abstract subject passes every mechanical check and can still hold several change
   stand alone: does it build, pass its tests, and have a reason of its own? Look for the signs that
   the rule lists. For a `FLAG`, name the parts and the order in which they can land. For a `PASS` on
   a large commit, give the reason why it does not divide.
+- **[PR-SPLIT-SIZE](../rule/pull-request.md#pr-split-size)** — for each commit with the size note,
+  does the body say why it does not divide, and is that reason true?
 - **[PR-SPLIT-UPSTREAM](../rule/pull-request.md#pr-split-upstream)** — does a commit change a shared
   component to serve one protocol? Try to describe the shared change without naming that protocol; if
   you cannot, the feature is in the wrong place or it is too narrow.

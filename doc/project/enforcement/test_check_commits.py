@@ -69,6 +69,32 @@ class CheckCommitsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("moves fingerprint rows", result.stdout)
 
+    def test_a_commit_above_400_source_lines_gives_a_size_note(self):
+        self.commit("a: add: a large module\n\nThe module is large.", {
+            "src/inet/a/Big.cc": "".join(f"int b{i} = {i};\n" for i in range(401)),
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("changes 401 source lines, above 400", result.stdout)
+
+    def test_a_commit_at_the_limit_is_quiet(self):
+        self.commit("a: add: a module at the limit\n\nThe module is at the limit.", {
+            "src/inet/a/Big.cc": "".join(f"int b{i} = {i};\n" for i in range(400)),
+        })
+        result = self.check()
+        self.assertNotIn("source lines, above 400", result.stdout)
+
+    def test_mechanical_and_generated_lines_do_not_count(self):
+        self.commit("a: name: rename a large module\n\nThe rename is mechanical.\n\n"
+                    "Change: src | name | -", {
+            "src/inet/a/Big.cc": "".join(f"int b{i} = {i};\n" for i in range(500)),
+        })
+        self.commit("a: add: a generated module\n\nThe module is generated.", {
+            "src/inet/a/Big_m.cc": "".join(f"int g{i} = {i};\n" for i in range(500)),
+        })
+        result = self.check()
+        self.assertNotIn("source lines, above 400", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

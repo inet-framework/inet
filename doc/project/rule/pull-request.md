@@ -32,6 +32,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [PR-SPLIT-ONE-CHANGE](#pr-split-one-change) | One commit makes exactly one change |
+| [PR-SPLIT-SIZE](#pr-split-size) | A commit above 400 changed source lines says why it does not divide |
 | [PR-SPLIT-WHITESPACE](#pr-split-whitespace) | A whitespace change touches only whitespace |
 | [PR-SPLIT-MECHANICAL](#pr-split-mechanical) | A mechanical sweep is separate from work that needs thought |
 | [PR-SPLIT-MOVE](#pr-split-move) | A file move is its own commit |
@@ -108,6 +109,30 @@ not divide.
 *Enforced at T4 — agent review: can a part of the commit stand alone? T3 gives a note:
 [check-commits.sh](../enforcement/check-commits.sh) names a commit whose fingerprint rows move in
 more than one way.*
+
+### PR-SPLIT-SIZE
+
+**A commit above 400 changed source lines says why it does not divide**
+
+Count the changed lines of `.cc`, `.h`, `.ned` and `.msg` files under `src/`, without the generated
+`_m.h` and `_m.cc` files. Tests, recorded expectations and documentation do not count. Above 400
+lines, the body of the commit says why the commit cannot be divided
+([PR-SPLIT-ONE-CHANGE](#pr-split-one-change)).
+
+The number is measured, not chosen. Across master's last 1000 commits, 95 % of the commits that
+change source change at most 425 source lines, and the median is 34. Most commits above the line add
+a new protocol, import reference code, or do a sweep. A reviewer can hold a commit below the line in
+the head at once. Above it, the reviewer reads the commit in pieces and must find the boundaries that
+the author did not draw.
+
+The limit asks a question; it does not forbid a large commit. A new protocol module, imported
+reference code, a mechanical sweep ([PR-SPLIT-MECHANICAL](#pr-split-mechanical)) and a move
+([PR-SPLIT-MOVE](#pr-split-move)) can be larger, and one sentence in the body says so. A large
+commit that builds one feature in several steps is the case that this rule is for: divide it.
+
+*Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) gives a note above 400 changed
+source lines, except on a `comment`, `format`, `location` or `name` commit; T4 — agent review: is
+the reason in the body true?*
 
 ### PR-SPLIT-WHITESPACE
 
@@ -511,6 +536,7 @@ draft.
 | A reviewer finds a defect in commit 2 of 5 | add commit 6 | rebase the correction into commit 2 (PR-SERIES-ORDER) |
 | The target branch moved under you | merge it in | rebase the series (PR-SERIES-LINEAR) |
 | The subject needs an "and" | write the "and" | divide the commit (PR-SPLIT-ONE-CHANGE) |
+| The commit changes more than 400 source lines | leave the size unexplained | divide it, or say in the body why it does not divide (PR-SPLIT-SIZE) |
 | A part of the commit builds and has its own reason | keep it inside the feature commit | make it a commit of its own (PR-SPLIT-ONE-CHANGE) |
 
 ## Enforcement
@@ -526,6 +552,7 @@ argue about.
 | PR-SPLIT-MOVE | T3 | per-commit check: a delete/add pair with high similarity plus a content change |
 | PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body (T3) + agent review that the commit which moves the values explains the movement (T4) |
 | PR-SPLIT-MECHANICAL | T3+T4 | diff-size and hunk-uniformity heuristic (T3) + agent review |
+| PR-SPLIT-SIZE | T3+T4 | note: more than 400 changed source lines (T3) + agent review of the reason in the body (T4) |
 | PR-SERIES-BUILDS | T2 | CI builds and tests every commit of the branch, not only the head |
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |

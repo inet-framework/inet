@@ -83,7 +83,7 @@ section indexes them so the registry stays one place to look.
 | `rule/documentation.md` | whole | 0 | 0 | 1 |
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
 | `rule/planning.md` | by rule | 0 | 0 | 8 |
-| `rule/pull-request.md` | by rule | 0 | 0 | 23 |
+| `rule/pull-request.md` | by rule | 0 | 0 | 24 |
 | `rule/quality.md` | by rule | 0 | 0 | 14 |
 | `rule/release.md` | by rule | 0 | 0 | 9 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |

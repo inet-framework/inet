@@ -16,6 +16,7 @@
 #                          and is reported as a note between 73 and 80
 #   PR-MSG-FACTS         — no attribution trailer
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
+#   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
 #
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-commits.sh origin/master..HEAD
@@ -133,6 +134,25 @@ while read -r sha; do
   if [ "$ways" -gt 1 ]; then
     detail=$(awk -F'\t' '{printf "%s%s %s %s", (NR > 1 ? "; " : ""), $1, ($1 == 1 ? "row changes" : "rows change"), $2}' <<< "$moves")
     note "${sha:0:9} moves fingerprint rows in $ways ways, one explanation each? $detail"; quiet=0
+  fi
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
+
+echo
+echo "== PR-SPLIT-SIZE: a large commit says why it does not divide (notes only) =="
+# 400 is measured: 95 % of master's last 1000 commits that change source change at most 425
+# source lines. A comment, format, location or name commit is mechanical, and
+# PR-SPLIT-MECHANICAL owns its size.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  kind=$(git log -1 --format='%(trailers:key=Change,valueonly)' "$sha" | awk -F'|' '{gsub(/ /,""); print $2}')
+  case "$kind" in comment|format|location|name) continue ;; esac
+  lines=$(git show --numstat --format= "$sha" -- 'src/*.cc' 'src/*.h' 'src/*.ned' 'src/*.msg' \
+          | awk -F'\t' '$1 != "-" && $3 !~ /_m\.(h|cc)$/ {n += $1 + $2} END {print n + 0}')
+  if [ "$lines" -gt 400 ]; then
+    note "${sha:0:9} changes $lines source lines, above 400: does the body say why it does not divide?"
+    quiet=0
   fi
 done <<< "$COMMITS"
 [ "$quiet" -eq 1 ] && echo "  ok"
