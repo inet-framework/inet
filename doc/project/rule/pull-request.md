@@ -68,7 +68,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [PR-REQ-TOPIC](#pr-req-topic) | One pull request, one topic |
-| [PR-REQ-STORY](#pr-req-story) | The description states the topic, the reason, and the reading order |
+| [PR-REQ-STORY](#pr-req-story) | The description starts with a summary, then gives the commits and the evidence |
 | [PR-REQ-ARCH](#pr-req-arch) | The description names the architectural surface |
 | [PR-REQ-CLEAN](#pr-req-clean) | No leftovers |
 
@@ -557,12 +557,26 @@ on one topic is fine; a short series on three topics is not.
 
 ### PR-REQ-STORY
 
-**The description states the topic, the reason, and the reading order**
+**The description starts with a summary, then gives the commits and the evidence**
 
-The description says what the change achieves and why it is needed, and it names the order in
-which the commits should be read when that order is not obvious. It lists the tests that were
-run, with the exact commands and the resulting status, and it names every baseline update
-(*Contributor workflow*, step 6).
+A description has three parts, in this order:
+
+1. **A summary of a few short paragraphs.** What the change achieves, why it is needed, the idea of
+   the solution, and its risk. A reviewer reads the summary in about five minutes and then knows
+   what to expect from the commits. The summary describes the change at the level of components and
+   contracts; it does not repeat the commit messages.
+2. **The commits, in the order to read them**, one line each. Say which commits only prepare and
+   which commit moves behavior ([PR-SPLIT-PREPARE](#pr-split-prepare)). The architectural surface
+   ([PR-REQ-ARCH](#pr-req-arch)) follows the commits.
+3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every
+   baseline update (*Contributor workflow*, step 6), and what remains unverified.
+
+A reviewer who stops after the summary must still be able to say what the pull request does and
+why. Long material — a table for each test, a log excerpt, the complete account of moved baselines —
+goes to the end of the description, or into the plan.
+
+*Enforced at T4 — agent review: does the summary state the change, the reason and the risk, and can
+a reviewer read it in about five minutes?*
 
 ### PR-REQ-ARCH
 

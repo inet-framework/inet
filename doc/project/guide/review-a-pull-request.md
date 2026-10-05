@@ -170,6 +170,9 @@ abstract subject passes every mechanical check and can still hold several change
   the candidates once the branch carries trailers.
 - **[PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan)** — if the series follows a plan, does each
   commit name it, and does the path still exist?
+- **[PR-REQ-STORY](../rule/pull-request.md#pr-req-story)** — read only the summary of the
+  description. After about five minutes, do you know what the pull request does, why, and what its
+  risk is? Do the commits follow in the order to read them, with the evidence last?
 - **[TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance)** — **every moved row is
   accounted for**, not the set as a whole. Rows that share one explanation are named together; a
   count is not an explanation. An unexplained row is an unintended change until somebody shows
