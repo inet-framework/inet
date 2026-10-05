@@ -8,7 +8,8 @@
 #ifndef __INET_TCPTAHOE_H
 #define __INET_TCPTAHOE_H
 
-#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -21,7 +22,7 @@ typedef TcpClassicAlgorithmBaseStateVariables TcpTahoeStateVariables;
 /**
  * Implements Tahoe.
  */
-class INET_API TcpTahoe : public TcpClassicAlgorithmBase
+class INET_API TcpTahoe : public TcpAlgorithmBase
 {
   protected:
     TcpTahoeStateVariables *& state; // alias to TCLAlgorithm's 'state'
@@ -32,6 +33,8 @@ class INET_API TcpTahoe : public TcpClassicAlgorithmBase
     {
         return new TcpTahoeStateVariables();
     }
+
+    virtual void initialize() override;
 
     /** Utility function to recalculate ssthresh */
     virtual void recalculateSlowStartThreshold();
