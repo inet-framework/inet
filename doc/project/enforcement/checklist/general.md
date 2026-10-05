@@ -65,6 +65,12 @@ separate symptom, a new mechanism together with its first production user. FLAG 
 size limit whose body does not say why it does not divide. *Not a violation:* a contract and the
 update of every implementation of it, or another change whose body says why it does not divide.
 
+**[PR-SPLIT-PREPARE] Does preparation come before the change that needs it?**
+FLAG a commit called a refactor that changes behavior, a feature commit that holds the fix of a
+separate symptom, and a commit that adds a mechanism and also turns on its first production user.
+*Not a violation:* a mechanism that lands before its user in the same pull request, with tests that
+reach it directly.
+
 **[PR-MSG-BODY / PR-MSG-WHY] Does a substantial commit explain itself?**
 FLAG a commit that repairs a defect, changes behavior, or implements a standard and carries no body —
 the gate catches the empty ones above 50 lines, you catch the small ones. FLAG a body that restates

@@ -141,7 +141,8 @@ abstract subject passes every mechanical check and can still hold several change
   component to serve one protocol? Try to describe the shared change without naming that protocol; if
   you cannot, the feature is in the wrong place or it is too narrow.
 - **[PR-SPLIT-PREPARE](../rule/pull-request.md#pr-split-prepare)** — does a commit called a refactor
-  change behavior?
+  change behavior? Does a feature commit hold a fix that can land first? Does one commit both add a
+  mechanism and turn on its first production user?
 - **[PR-SPLIT-DRIVEBY](../rule/pull-request.md#pr-split-driveby)** — is a hunk unrelated to the
   subject line?
 - **[PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline)** — the regenerated values belong

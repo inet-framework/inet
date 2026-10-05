@@ -189,13 +189,28 @@ from a rename git cannot see is permanent, and the loss from a broken middle com
 
 **Preparation comes before the change that needs it**
 
-When a fix needs a refactor first, commit the refactor alone, and keep it behavior-preserving.
-The fix follows in the next commit.
+When a change needs preparation, commit the preparation first, in one or more commits of its own.
+Preparation has three forms:
 
-The reviewer then answers two simple questions instead of one hard one: *is the refactor
-safe?* — and the fingerprint tests answer it — and *is the fix right?*, on a diff of a few
-lines. In a mixed commit neither question has a safe answer, because every changed line is a
-candidate cause of the behavior change.
+- **A refactor.** Keep it behavior-preserving. The fingerprint tests then answer the question *is
+  the refactor safe?*, and the change that follows is a diff of a few lines.
+- **A prerequisite fix.** A defect that the change exposes, or that the change needs repaired, is a
+  fix of its own. It has its own symptom, its own reproduction
+  ([PR-MSG-REPRODUCE](#pr-msg-reproduce)) and often its own baselines. Commit it before the change.
+- **A new mechanism before its first user.** A contract, a data structure or a procedure that the
+  change needs can land before the commit that uses it, with tests that reach it directly. No
+  behavior moves, so every recorded expectation stays where it is, and the reviewer judges the
+  mechanism alone. Say in the body which later commit of the series uses it; a mechanism whose user
+  is not in the pull request is speculative ([AR-EXT-REUSE](architecture.md#ar-ext-reuse)).
+
+A last, small commit then turns the behavior on. It carries the baselines that move
+([PR-SPLIT-BASELINE](#pr-split-baseline)), and its diff shows exactly where the behavior changes.
+
+The reviewer then answers several simple questions instead of one hard one. In a mixed commit no
+question has a safe answer, because every changed line is a candidate cause of the behavior change.
+
+*Enforced at T4 — agent review: does a refactor commit change behavior, and does one commit both
+add a mechanism and turn on its first user?*
 
 ### PR-SPLIT-UPSTREAM
 
@@ -529,6 +544,8 @@ draft.
 | You rename a class in 200 files and add a feature | one commit | mechanical commit, then feature commit (PR-SPLIT-MECHANICAL) |
 | You move a file and edit it | one commit | move commit, then edit commit (PR-SPLIT-MOVE) |
 | A refactor makes the fix possible | one commit | behavior-preserving refactor, then fix (PR-SPLIT-PREPARE) |
+| A feature needs a defect repaired first | fold the fix into the feature | the fix with its own baselines, then the feature (PR-SPLIT-PREPARE) |
+| A feature needs a new contract | the contract and its first user in one commit | the contract with its tests, then a small commit that turns the behavior on (PR-SPLIT-PREPARE) |
 | An 802.11 fix needs a queueing feature | one commit | generic queueing feature, then 802.11 fix (PR-SPLIT-UPSTREAM) |
 | Your fix changes fingerprints | a baseline commit after the fix | the source and the `.csv` in one commit, with the reason in the message (PR-SPLIT-BASELINE) |
 | A compiler update moves fingerprints | fold them into the next fix | a baseline-only commit that names the cause (PR-SPLIT-BASELINE) |
@@ -560,7 +577,7 @@ argue about.
 | PR-MSG-FACTS | T3 | commit-message lint: no attribution trailers |
 | PR-SPLIT-ONE-CHANGE | T3+T4 | note: the fingerprint rows of one commit move in more than one way (T3) + agent review: can a part of the commit stand alone? The rule lists the signs (T4) |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
-| PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior? |
+| PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior, and does one commit both add a mechanism and turn on its first user? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |
 | PR-MSG-BODY | T3+T4 | commit-message lint: an empty body above 50 changed lines, outside the exempt kinds; agent review for a body that restates the subject |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
