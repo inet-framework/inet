@@ -212,6 +212,36 @@ void FrameSequenceHandler::pendingTransmissionCanceled(TxRequestId id)
     finishFrameSequence();
 }
 
+void FrameSequenceHandler::resetForLifecycle(bool onAir)
+{
+    CallGuard guard(*this);
+    if (!running || terminating)
+        return;
+    auto last = context->getLastStep();
+    auto currentGeneration = generation;
+    if (onAir && last && last->getType() == IFrameSequenceStep::Type::TRANSMIT) {
+        // Reject recursive lifecycle cleanup until actual transmission state is committed.
+        terminating = true;
+        auto frame = static_cast<ITransmitStep *>(last)->getFrameToTransmit();
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
+        bool noImmediateResponse = header->getReceiverAddress().isMulticast();
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+            noImmediateResponse |= dataHeader->getAckPolicy() == BLOCK_ACK || dataHeader->getAckPolicy() == NO_ACK;
+        callback->originatorProcessTransmittedFrame(frame);
+        if (!running || generation != currentGeneration)
+            return;
+        terminating = false;
+        if (noImmediateResponse) {
+            // These transmissions do not enter a Normal ACK wait or its failure transition.
+            finishFrameSequence();
+            return;
+        }
+    }
+    if (last && (onAir || last->getType() == IFrameSequenceStep::Type::RECEIVE))
+        abortFrameSequence();
+    else
+        finishFrameSequence();
+}
 
 FrameSequenceHandler::~FrameSequenceHandler()
 {

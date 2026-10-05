@@ -1,0 +1,153 @@
+%description:
+Node shutdown and crash during real Block Ack data transmission must not invoke Normal ACK failure processing.
+The example establishes the agreement through its normal ADDBA exchange.
+
+%extraargs: -c BlockAckLifecycle
+
+%file: BlockAckLifecycle.cc
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+
+namespace inet::ieee80211 {
+
+class BlockAckLifecycleHcf;
+
+class BlockAckLifecycleDriver : public cSimpleModule, public LifecycleController
+{
+  protected:
+    cMessage *timer = nullptr;
+    BlockAckLifecycleHcf *sender = nullptr;
+    bool stopped = false;
+    bool checked = false;
+    void initialize() override { timer = new cMessage("lifecycleCheck"); }
+    void handleMessage(cMessage *message) override;
+    void finish() override
+    {
+        ASSERT(checked);
+        std::cout << "Block Ack lifecycle reset completed without Normal ACK failure.\n";
+    }
+  public:
+    ~BlockAckLifecycleDriver() { cancelAndDelete(timer); }
+    void arm(BlockAckLifecycleHcf *hcf)
+    {
+        Enter_Method("arm");
+        if (sender)
+            return;
+        sender = hcf;
+        scheduleAfter(SimTime(1, SIMTIME_US), timer);
+    }
+};
+Define_Module(BlockAckLifecycleDriver);
+
+class BlockAckLifecycleHcf : public Hcf
+{
+  protected:
+    bool lifecycleTest = false;
+    void transmissionStarted(TxRequestId id) override
+    {
+        Hcf::transmissionStarted(id);
+        if (getFullPath().find("cliHost") != std::string::npos && hasBlockAckDataOnAir())
+            check_and_cast<BlockAckLifecycleDriver *>(getSimulation()->getSystemModule()->getSubmodule("test"))->arm(this);
+    }
+    void originatorProcessFailedFrame(Packet *frame) override
+    {
+        ASSERT(!lifecycleTest);
+        Hcf::originatorProcessFailedFrame(frame);
+    }
+  public:
+    bool hasBlockAckDataOnAir() const
+    {
+        if (!requestOnAir || responseRequest || !frameSequenceHandler->isSequenceRunning())
+            return false;
+        auto step = dynamic_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        if (!step)
+            return false;
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(step->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>());
+        return header && header->getAckPolicy() == BLOCK_ACK;
+    }
+    void markLifecycleTest() { lifecycleTest = true; }
+    void checkStopped() const
+    {
+        ASSERT(lifecycleStopped && !requestOnAir && !tx->hasTransmission());
+        ASSERT(!frameSequenceHandler->isSequenceRunning());
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+            ASSERT(edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->getLength() == 0);
+    }
+};
+Define_Module(BlockAckLifecycleHcf);
+
+void BlockAckLifecycleDriver::handleMessage(cMessage *message)
+{
+    ASSERT(message == timer && sender);
+    auto host = getParentModule()->getSubmodule("cliHost");
+    if (!stopped) {
+        ASSERT(sender->hasBlockAckDataOnAir());
+        sender->markLifecycleTest();
+        LifecycleOperation *operation = par("crash").boolValue() ?
+            static_cast<LifecycleOperation *>(new ModuleCrashOperation()) : new ModuleStopOperation();
+        LifecycleOperation::StringMap parameters;
+        operation->initialize(host, parameters);
+        initiateOperation(operation);
+        stopped = true;
+        scheduleAfter(SimTime(1, SIMTIME_MS), timer);
+    }
+    else {
+        sender->checkStopped();
+        ASSERT(check_and_cast<NodeStatus *>(host->getSubmodule("status"))->getState() == NodeStatus::DOWN);
+        checked = true;
+        endSimulation();
+    }
+}
+
+} // namespace inet::ieee80211
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.examples.wireless.qos.QosThroughput;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+
+module BlockAckLifecycleHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::BlockAckLifecycleHcf);
+}
+simple BlockAckLifecycleDriver extends SimpleModule
+{
+    parameters:
+        bool crash;
+        @class(::inet::ieee80211::BlockAckLifecycleDriver);
+}
+network BlockAckLifecycleNetwork extends QosThroughput
+{
+    submodules:
+        test: BlockAckLifecycleDriver;
+}
+
+%inifile: omnetpp.ini
+include ../../../../examples/wireless/qos/omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples;../../lib
+
+[Config BlockAckLifecycle]
+extends = MacQosWithBlockAck
+network = BlockAckLifecycleNetwork
+sim-time-limit = 2s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.cliHost.hasStatus = true
+*.cliHost.wlan[*].mac.hcf.typename = "BlockAckLifecycleHcf"
+*.test.crash = ${false,true}
+
+%contains: stdout
+Block Ack lifecycle reset completed without Normal ACK failure.
+
+%not-contains: stdout
+<!> Warning:
+
+%not-contains: stderr
+<!> Warning:

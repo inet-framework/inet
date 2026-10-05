@@ -41,6 +41,7 @@ class INET_API ITx
     enum class Cancellation { CANCELED, TOO_LATE, NOT_FOUND };
     virtual void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
     virtual Cancellation cancelPendingTransmission(TxRequestId id) = 0;
+    virtual void resetForLifecycle(uint64_t epoch) = 0;
     [[nodiscard]] virtual bool hasTransmission() const = 0;
     virtual void radioTransmissionFinished() = 0;
 };

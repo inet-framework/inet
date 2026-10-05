@@ -30,6 +30,7 @@ class INET_API InProgressFrames : public SimpleModule
     IAckHandler *ackHandler = nullptr;
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
+    uint64_t lifecycleEpoch = 0;
 
   protected:
     virtual void initialize(int stage) override;
@@ -46,6 +47,7 @@ class INET_API InProgressFrames : public SimpleModule
     virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
     virtual Packet *getFrameToTransmit();
     virtual Packet *getPendingFrameFor(Packet *frame);
+    void resetForLifecycle();
     virtual void dropFrame(Packet *packet);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 

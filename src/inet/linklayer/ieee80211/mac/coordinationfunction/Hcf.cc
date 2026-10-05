@@ -223,6 +223,10 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 void Hcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
+    if (lifecycleStopped) {
+        channelAccess->releaseChannel(this);
+        return;
+    }
     auto edcaf = check_and_cast<Edcaf *>(channelAccess);
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -315,7 +319,7 @@ void Hcf::frameSequenceFinished()
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
-        bool startContention = hasFrameToTransmit(); // TODO outstanding frame
+        bool startContention = !lifecycleStopped && hasFrameToTransmit(); // TODO outstanding frame
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO review
         edcaf->getTxopProcedure()->endTxop();
@@ -869,7 +873,7 @@ Hcf::~Hcf()
 
 bool Hcf::isTransmissionPermitted(TxRequestId id)
 {
-    return id == activeRequest && mac->isCurrentTxRequest(id);
+    return id == activeRequest && !lifecycleStopped && mac->isCurrentTxRequest(id);
 }
 
 void Hcf::beginCallback()
@@ -899,7 +903,30 @@ void Hcf::transmissionCanceled(TxRequestId id)
     frameSequenceHandler->pendingTransmissionCanceled(id);
 }
 
+void Hcf::resetForLifecycle()
+{
+    Enter_Method("resetForLifecycle");
+    if (lifecycleStopped)
+        return;
+    lifecycleStopped = true;
+    cancelEvent(startRxTimer);
+    cancelEvent(inactivityTimer);
+    frameSequenceHandler->resetForLifecycle(requestOnAir);
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->resetForLifecycle();
+    activeRequest = {};
 
+    responseRequest = false;
+    requestOnAir = false;
+}
+
+void Hcf::resumeAfterLifecycle()
+{
+    lifecycleStopped = false;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        if (hasFrameToTransmit(static_cast<AccessCategory>(ac)))
+            edca->requestChannelAccess(static_cast<AccessCategory>(ac), this);
+}
 
 } // namespace ieee80211
 } // namespace inet
