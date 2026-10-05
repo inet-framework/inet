@@ -4,8 +4,8 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
-IEEE 802.11 Tx Request Identities
----------------------------------
+IEEE 802.11 Prepared Exchanges and Tx Requests
+----------------------------------------------
 
 Tx is the component that transmits frames for medium access control (MAC). The hybrid coordination function (HCF) serves quality of service (QoS) traffic. Interframe space (IFS) is a required interval between specified frame transmissions. Short interframe space (SIFS) separates specified immediate responses and frames within an exchange. An acknowledgment (ACK) frame confirms reception when the selected policy requires it.
 
@@ -15,14 +15,19 @@ Restart changes the epoch so that old identities cannot identify new requests.
 
 Staged frames are frames that the data service extracted and registered for transmission. The frame store owns those frames. A copied ACK snapshot reports their real ACK phase without protocol progress. For example, preparation reads a staged frame that has not transmitted. The real ACK state remains FRAME_NOT_YET_TRANSMITTED after that query.
 
+A prepared exchange records its frames, physical layer (PHY) modes, responses, and required intervals before transmission. The current sequence tree supplies these choices. Prepared execution uses the recorded choices without another selector call. For example, the unit test's mode provider returns 24 Mbps first and 6 Mbps on another query. Preparation records 24 Mbps; prepared execution must use 24 Mbps without another query.
+
 Production HCF retains its legacy path at this commit.
 
 External implementations require these changes:
 
+* Implement ``IFrameSequence::planSequence()``. Implement ``startPlannedSequence()``. Return ``READY`` when a complete plan exists. Return ``EMPTY`` when no candidate exists. Return ``UNSUPPORTED`` when the selected sequence or required input has no supported representation. Duration refusal is a separate admission result.
+* Implement ``ITransmitStep::getPreparedTransmit()``. Implement ``IReceiveStep::getPreparedReceive()``. Return a null record for a legacy step. Plans own prepared steps and generated controls. The frame store owns staged data and management frames.
 * Adapt the sequence handler callbacks below. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
 
   Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope. Implement ``resetForLifecycle()``.
 * Implement ``IAckHandler::snapshotFrameState()``. Implement ``dropFrame()``. The snapshot query must preserve the exact phase without insertion or protocol progress. A staged frame without an ACK registration is an error.
+* Implement ``IOriginatorQoSAckPolicy::getAckTimeoutForMode()``. Implement ``IRtsPolicy::getCtsTimeoutForMode()``. These methods use the supplied response mode and preserve configured timeout overrides. They must not select another mode.
 * Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``. The MAC allocates ``TxRequestId`` before the call. Implement ``cancelPendingTransmission()``. Implement ``resetForLifecycle()``.
 * Implement the Tx callback ``isTransmissionPermitted()``. Implement ``transmissionStarted()``. Implement ``transmissionCanceled()``. Implement ``beginCallback()`` to protect borrowed sequence objects throughout each callback scope. Implement ``endCallback()`` to release that callback scope. Add the request identity to ``transmissionComplete()``.
 

@@ -34,13 +34,13 @@ HcfFs::HcfFs() :
 
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    auto frameToTransmit = context->getFrameToTransmit();
     return frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
 }
 
 int HcfFs::selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    auto frameToTransmit = context->getFrameToTransmit();
     const auto& header = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
     if (dynamicPtrCast<const Ieee80211DataHeader>(header))
         return 0;
@@ -57,9 +57,11 @@ bool HcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    bool hasFrameToTransmit = context->getInProgressFrames()->hasInProgressFrames();
+    if (context->isPlanning())
+        return context->hasFrameToTransmit();
+    bool hasFrameToTransmit = context->hasFrameToTransmit();
     if (hasFrameToTransmit) {
-        auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+        auto nextFrameToTransmit = context->getFrameToTransmit();
         const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
         return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
     }
@@ -68,7 +70,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
 
 bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
+    return hasMoreTxOps(frameSequence, context) && context->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211

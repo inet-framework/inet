@@ -17,6 +17,7 @@ SequentialFs::SequentialFs(std::vector<IFrameSequence *> elements) :
 
 void SequentialFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
     elementIndex = 0;
@@ -32,8 +33,12 @@ IFrameSequenceStep *SequentialFs::prepareStep(FrameSequenceContext *context)
             return elementStep;
         else {
             elementIndex++;
-            if (elementIndex < (int)elements.size())
-                elements[elementIndex]->startSequence(context, firstStep + step);
+            if (elementIndex < (int)elements.size()) {
+                if (executionPlan)
+                    elements[elementIndex]->startPlannedSequence(context, firstStep + step, *executionPlan->children.at(elementIndex));
+                else
+                    elements[elementIndex]->startSequence(context, firstStep + step);
+            }
         }
     }
     return nullptr;
@@ -75,6 +80,7 @@ OptionalFs::OptionalFs(IFrameSequence *element, std::function<bool(OptionalFs *,
 
 void OptionalFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
     apply = isSequenceApply(context);
@@ -108,6 +114,7 @@ RepeatingFs::RepeatingFs(IFrameSequence *element, std::function<bool(RepeatingFs
 
 void RepeatingFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
     apply = isSequenceApply(context);
@@ -135,6 +142,10 @@ IFrameSequenceStep *RepeatingFs::prepareStep(FrameSequenceContext *context)
         if (elementStep != nullptr)
             return elementStep;
         else {
+            if (executionPlan) {
+                apply = false;
+                return nullptr;
+            }
             repeatSequence(context);
             return prepareStep(context);
         }
@@ -175,6 +186,7 @@ AlternativesFs::AlternativesFs(std::vector<IFrameSequence *> elements, std::func
 
 void AlternativesFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
     elementIndex = selectSequence(context);
@@ -203,6 +215,118 @@ AlternativesFs::~AlternativesFs()
 {
     for (auto element : elements)
         delete element;
+}
+
+
+FrameSequencePlanResult SequentialFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    auto plan = context.makePlan(this);
+    for (auto element : elements) {
+        auto result = element->planSequence(context);
+        if (result.status != FrameSequencePlanResult::Status::READY)
+            return result.status;
+        plan->append(std::move(result.plan));
+    }
+    return plan;
+}
+
+void SequentialFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    ASSERT(plan.sequence == this);
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+    elementIndex = 0;
+    if (!elements.empty())
+        elements[0]->startPlannedSequence(context, firstStep, *plan.children.at(0));
+}
+
+FrameSequencePlanResult OptionalFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!predicate)
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    auto plan = context.makePlan(this);
+    if (predicate(const_cast<OptionalFs *>(this), &context)) {
+        auto result = element->planSequence(context);
+        if (result.status != FrameSequencePlanResult::Status::READY)
+            return result.status;
+        plan->append(std::move(result.plan));
+    }
+    return plan;
+}
+
+void OptionalFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    ASSERT(plan.sequence == this);
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+    apply = !plan.children.empty();
+    if (apply)
+        element->startPlannedSequence(context, firstStep, *plan.children.at(0));
+}
+
+FrameSequencePlanResult AlternativesFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (elements.empty() || !selector)
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    plan->selectedChild = selector(const_cast<AlternativesFs *>(this), &context);
+    if (plan->selectedChild < 0 || plan->selectedChild >= (int)elements.size())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    auto result = elements[plan->selectedChild]->planSequence(context);
+    if (result.status != FrameSequencePlanResult::Status::READY)
+        return result.status;
+    plan->append(std::move(result.plan));
+    return plan;
+}
+
+void AlternativesFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    ASSERT(plan.sequence == this);
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+    elementIndex = plan.selectedChild;
+    elements.at(elementIndex)->startPlannedSequence(context, firstStep, *plan.children.at(0));
+}
+
+FrameSequencePlanResult RepeatingFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!predicate)
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    auto plan = context.makePlan(this);
+    if (predicate(const_cast<RepeatingFs *>(this), &context)) {
+        if (!context.enterRepetition())
+            return FrameSequencePlanResult::Status::UNSUPPORTED;
+        // One finite use per admission point. An empty repeated child cannot make progress.
+        auto result = element->planSequence(context);
+        if (result.status != FrameSequencePlanResult::Status::READY)
+            return result.status;
+        if (result.plan->stepCount == 0)
+            return FrameSequencePlanResult::Status::UNSUPPORTED;
+        plan->append(std::move(result.plan));
+    }
+    return plan;
+}
+
+void RepeatingFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    ASSERT(plan.sequence == this);
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+    histories.clear();
+    apply = !plan.children.empty();
+    count = apply ? 1 : 0;
+    if (apply) {
+        element->startPlannedSequence(context, firstStep, *plan.children.at(0));
+        histories.push_back(element->getHistory());
+    }
 }
 
 } // namespace ieee80211

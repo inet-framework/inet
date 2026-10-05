@@ -9,6 +9,7 @@
 #define __INET_FRAMESEQUENCESTEP_H
 
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlan.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -20,6 +21,7 @@ class INET_API TransmitStep : public ITransmitStep
     Packet *frameToTransmit = nullptr;
     simtime_t ifs = -1;
     bool owner = false;
+    std::unique_ptr<PreparedTransmit> prepared;
 
   public:
     TransmitStep(Packet *frame, simtime_t ifs, bool owner = false) :
@@ -34,6 +36,9 @@ class INET_API TransmitStep : public ITransmitStep
     virtual void setCompletion(Completion completion) override { this->completion = completion; }
     virtual Packet *getFrameToTransmit() override { return frameToTransmit; }
     virtual simtime_t getIfs() override { return ifs; }
+    [[nodiscard]] const PreparedTransmit *getPreparedTransmit() const override { return prepared.get(); }
+    void setPreparedTransmit(const PreparedTransmit& value) { prepared = std::make_unique<PreparedTransmit>(value); }
+    void setPreparedDuration(simtime_t duration) { prepared->duration = duration; }
 };
 
 class INET_API RtsTransmitStep : public TransmitStep
@@ -56,6 +61,7 @@ class INET_API ReceiveStep : public IReceiveStep
     Completion completion = Completion::UNDEFINED;
     simtime_t timeout = -1;
     Packet *receivedFrame = nullptr;
+    std::unique_ptr<PreparedReceive> prepared;
 
   public:
     ReceiveStep(simtime_t timeout = -1) :
@@ -68,6 +74,8 @@ class INET_API ReceiveStep : public IReceiveStep
     virtual simtime_t getTimeout() override { return timeout; }
     virtual Packet *getReceivedFrame() override { return receivedFrame; }
     virtual void setFrameToReceive(Packet *frame) override { this->receivedFrame = frame; }
+    [[nodiscard]] const PreparedReceive *getPreparedReceive() const override { return prepared.get(); }
+    void setPreparedReceive(const PreparedReceive& value) { prepared = std::make_unique<PreparedReceive>(value); }
 };
 
 } // namespace ieee80211
