@@ -406,6 +406,7 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
                 state->snd_mss = newMss;
+                state->snd_effmss = state->snd_mss;
                 state->pmtudLastMssReduction = simTime();
                 retransmitOneSegment(true);
             }
@@ -470,6 +471,7 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
                 state->snd_mss = newMss;
+                state->snd_effmss = state->snd_mss;
                 state->pmtudLastMssReduction = simTime();
                 retransmitOneSegment(true);
             }
@@ -950,6 +952,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         EV_INFO << "PMTUD: probe timeout elapsed, restoring snd_mss from " << state->snd_mss
                 << " to original " << state->pmtudOriginalMss << "\n";
         state->snd_mss = state->pmtudOriginalMss;
+        state->snd_effmss = state->snd_mss;
         state->pmtudLastMssReduction = -1;
     }
 
