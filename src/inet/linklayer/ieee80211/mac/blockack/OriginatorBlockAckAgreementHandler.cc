@@ -33,32 +33,26 @@ simtime_t OriginatorBlockAckAgreementHandler::getEarliestExpirationTime() const
     return earliestTime;
 }
 
-void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
+std::vector<Ptr<Ieee80211Delba>> OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IBlockAckAgreementHandlerCallback *callback)
 {
-    // When a timeout of BlockAckTimeout is detected, the STA shall send a DELBA frame to the
-    // peer STA with the Reason Code field set to TIMEOUT and shall issue a MLME-DELBA.indication
-    // primitive with the ReasonCode parameter having a value of TIMEOUT.
-    // The procedure is illustrated in Figure 10-14.
+    // IEEE Std 802.11-2024, 11.5.4: inactivity expiry ends the agreement and requires timeout DELBA.
     simtime_t now = simTime();
-    std::vector<Ptr<Ieee80211Delba>> expiredAgreements;
-    for (auto id : blockAckAgreements) {
-        auto agreement = id.second;
-        // IEEE Std 802.11-2024, 11.5.4: send DELBA when inactivity expires.
-        // A retained deadline can expire while the node is down.
+    std::vector<Ptr<Ieee80211Delba>> delbas;
+    std::vector<std::unique_ptr<OriginatorBlockAckAgreement>> expiredAgreements;
+    for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end();) {
+        auto agreement = it->second;
         if (agreement->getIsAddbaResponseReceived() && agreement->getExpirationTime() <= now) {
-            MacAddress receiverAddr = id.first.first;
-            Tid tid = id.first.second;
-            expiredAgreements.push_back(buildDelba(receiverAddr, tid, 39));
+            delbas.push_back(buildDelba(it->first.first, it->first.second, 39));
+            expiredAgreements.emplace_back(agreement);
+            it = blockAckAgreements.erase(it);
         }
+        else
+            ++it;
     }
-    // Retire all expired state before a callback can re-enter the handler.
-    for (const auto& delba : expiredAgreements)
-        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
-    for (const auto& delba : expiredAgreements) {
-        auto delbaPacket = new Packet("Delba", delba);
-        procedureCallback->processMgmtFrame(delbaPacket, delba);
-    }
-    scheduleInactivityTimer(agreementHandlerCallback);
+    // Detach the entire batch before a callback can enter the handler again.
+    for (const auto& agreement : expiredAgreements)
+        callback->originatorBlockAckAgreementDeleted(agreement.get());
+    return delbas;
 }
 
 const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
@@ -83,7 +77,12 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
 {
     if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {
         auto agreement = getAgreement(basicBlockAck->getTransmitterAddress(), basicBlockAck->getTidInfo());
-        if (agreement) {
+        if (agreement && agreement->getIsAddbaResponseReceived()) {
+            // IEEE Std 802.11-2024, 11.5.4: late activity cannot renew an expired agreement.
+            if (agreement->getExpirationTime() <= simTime()) {
+                callback->expireBlockAckAgreements();
+                return;
+            }
             agreement->setStartingSequenceNumber(basicBlockAck->getStartingSequenceNumber());
             agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
@@ -116,14 +115,15 @@ const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MacAddr
     return delba;
 }
 
-void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
+void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid, IBlockAckAgreementHandlerCallback *callback)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
     if (it != blockAckAgreements.end()) {
-        OriginatorBlockAckAgreement *agreement = it->second;
+        std::unique_ptr<OriginatorBlockAckAgreement> agreement(it->second);
         blockAckAgreements.erase(it);
-        delete agreement;
+        if (agreement->getIsAddbaResponseReceived())
+            callback->originatorBlockAckAgreementDeleted(agreement.get());
     }
 }
 
@@ -167,18 +167,18 @@ void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<co
         throw cRuntimeError("Block Ack Agreement should have already been added");
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
+void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback)
 {
     // Timeout DELBA already retired its agreement before the frame entered the queue.
     // Its completion must preserve any replacement agreement for the same peer and TID.
     if (delba->getReasonCode() != 39)
-        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+        terminateAgreement(delba->getReceiverAddress(), delba->getTid(), callback);
 }
 
-void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
+void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     if (blockAckAgreementPolicy->isDelbaAccepted(delba))
-        terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
+        terminateAgreement(delba->getTransmitterAddress(), delba->getTid(), callback);
 }
 
 OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()

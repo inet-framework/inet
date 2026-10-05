@@ -71,19 +71,41 @@ IEEE 802.11 Block Ack Inactivity Deadlines
 ----------------------------------------
 
 HCF retains Block Ack agreements across stop and crash.
-Restart restores the earliest absolute deadline from both agreement handlers.
-Downtime counts toward the deadline. An elapsed deadline queues DELBA after restart.
+Downtime counts toward each absolute inactivity deadline.
+Restart retires overdue agreements before timeout DELBA or other traffic requests channel access.
+HCF restores the earliest deadline from the remaining agreements.
 An agreement with timeout zero has no inactivity deadline.
-Each handler retires expired agreements before it queues their DELBA frames.
-Later activity cannot rearm an expired agreement.
+Late Block Ack activity cannot renew an overdue agreement.
+HCF discards a data frame that reaches an overdue recipient agreement.
 
-External agreement handlers must implement ``getEarliestExpirationTime() const``.
-Return the earliest active absolute deadline, or ``SIMTIME_MAX`` if none exists.
-Retire expired agreements before a callback can enter the handler again.
-The timer callback now uses ``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` without an argument.
-The callback reads both handlers and schedules their earliest deadline.
-Use ``scheduleAt()`` for a future deadline. Use the current time for an elapsed deadline.
-Rebuild external agreement handlers and timer callbacks after these interface changes.
+Recipient retirement releases the corresponding reorder buffer.
+A replacement ADDBA therefore uses its own starting sequence number and buffer size.
+HCF emits one deletion notification for each retired agreement.
+Delayed timeout DELBA completion preserves a replacement agreement without another deletion notification.
+
+External implementations require these changes:
+
+* Implement ``getEarliestExpirationTime() const`` in both agreement handlers.
+  Return the earliest active absolute deadline, or ``SIMTIME_MAX`` if none exists.
+* Change ``blockAckAgreementExpired()`` to accept an agreement callback and return timeout DELBA chunks.
+  Remove all overdue entries before deletion callbacks.
+  HCF queues the chunks after both roles complete retirement.
+* Implement ``IBlockAckAgreementHandlerCallback::expireBlockAckAgreements()`` to coordinate both roles.
+  Implement ``originatorBlockAckAgreementDeleted()`` and ``recipientBlockAckAgreementDeleted()``.
+  The handler owns each borrowed agreement until the deletion callback returns.
+  The callback must not retain or modify the agreement.
+  Complete recipient buffer cleanup before the deletion notification.
+* Add the agreement callback argument to ``processReceivedDelba()`` and ``processTransmittedDelba()``.
+  Notify only when the handler removes an agreement.
+* Return false from ``qosFrameReceived()`` when the frame reaches an overdue agreement.
+  Request expiry before this return. The caller discards the frame.
+* Implement ``IRecipientQosMacDataService::clearReorderBuffer(originatorAddress, tid)``.
+  Release only that peer and TID's buffer, including its retained frames.
+  Other peers and TIDs keep their buffers.
+
+The timer callback uses ``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` without an argument.
+The callback reads both handlers and schedules their earliest absolute deadline.
+Rebuild external agreement handlers, callbacks, and recipient data services after these interface changes.
 
 IEEE 802.11 PHY Mode Properties
 -------------------------------

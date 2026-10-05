@@ -10,6 +10,7 @@ IEEE Std 802.11-2024, 11.5.4 defines inactivity timeout and DELBA behavior.
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
 namespace inet::ieee80211 {
@@ -51,6 +52,7 @@ class BlockAckRestartHcf : public Hcf
     Tid tid = -1;
     bool recipient = false;
     int timeoutFrames = 0;
+    int deletions = 0;
     simtime_t deadline;
     void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
     {
@@ -59,6 +61,21 @@ class BlockAckRestartHcf : public Hcf
                 delba->getInitiator() != recipient && delba->getReasonCode() == 39)
                 ASSERT(++timeoutFrames == 1);
         Hcf::processMgmtFrame(packet, header);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        if (signal == blockAckAgreementDeletedSignal) {
+            if (auto agreement = dynamic_cast<RecipientBlockAckAgreement *>(object)) {
+                auto record = agreement->getBlockAckRecord();
+                if (recipient && record->getOriginatorAddress() == peer && record->getTid() == tid)
+                    deletions++;
+            }
+            else if (auto agreement = dynamic_cast<OriginatorBlockAckAgreement *>(object))
+                if (!recipient && agreement->getReceiverAddr() == peer && agreement->getTid() == tid)
+                    deletions++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, object, details);
     }
     void transmissionStarted(TxRequestId id) override
     {
@@ -87,6 +104,7 @@ class BlockAckRestartHcf : public Hcf
         recipient = atRecipient;
         peer = recipient ? header->getTransmitterAddress() : header->getReceiverAddress();
         tid = header->getTid();
+        subscribe(blockAckAgreementDeletedSignal, this);
         if (recipient) {
             auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
             ASSERT(agreement);
@@ -105,6 +123,13 @@ class BlockAckRestartHcf : public Hcf
         ASSERT(!lifecycleStopped);
         if (deadline == SIMTIME_MAX)
             ASSERT(!inactivityTimer->isScheduled());
+        else if (deadline <= simTime()) {
+            ASSERT(timeoutFrames == 1 && deletions == 1);
+            if (recipient)
+                ASSERT(!recipientBlockAckAgreementHandler->getAgreement(tid, peer));
+            else
+                ASSERT(!originatorBlockAckAgreementHandler->getAgreement(peer, tid));
+        }
         else {
             ASSERT(inactivityTimer->isScheduled());
             auto earliest = std::min(originatorBlockAckAgreementHandler->getEarliestExpirationTime(),
@@ -120,6 +145,7 @@ class BlockAckRestartHcf : public Hcf
     void checkTimeout() const
     {
         ASSERT(timeoutFrames == (deadline == SIMTIME_MAX ? 0 : 1));
+        ASSERT(deletions == timeoutFrames);
         if (recipient) {
             auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
             ASSERT(deadline == SIMTIME_MAX || !agreement);

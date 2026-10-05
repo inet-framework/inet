@@ -172,8 +172,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
-    // IProcedureCallback
+    // IBlockAckAgreementHandlerCallback
     virtual void scheduleInactivityTimer() override;
+    void expireBlockAckAgreements() override;
+    void originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement) override;
+    void recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement) override;
 
     std::string getFrameSequenceInfo() const;
 

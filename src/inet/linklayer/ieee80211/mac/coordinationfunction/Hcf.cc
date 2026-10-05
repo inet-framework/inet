@@ -104,8 +104,7 @@ void Hcf::handleMessage(cMessage *msg)
     }
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
-            originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
-            recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            expireBlockAckAgreements();
         }
         else
             throw cRuntimeError("Unknown event");
@@ -206,6 +205,36 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
     Enter_Method("scheduleStartRxTimer");
     scheduleAfter(timeout, startRxTimer);
+}
+
+void Hcf::expireBlockAckAgreements()
+{
+    Enter_Method("expireBlockAckAgreements");
+    std::vector<Ptr<Ieee80211Delba>> delbas;
+    if (originatorBlockAckAgreementHandler)
+        delbas = originatorBlockAckAgreementHandler->blockAckAgreementExpired(this);
+    if (recipientBlockAckAgreementHandler) {
+        auto recipientDelbas = recipientBlockAckAgreementHandler->blockAckAgreementExpired(this);
+        delbas.insert(delbas.end(), recipientDelbas.begin(), recipientDelbas.end());
+    }
+    // Both maps and recipient buffers are consistent before DELBA can request channel access.
+    scheduleInactivityTimer();
+    for (const auto& delba : delbas)
+        processMgmtFrame(new Packet("Delba", delba), delba);
+}
+
+void Hcf::originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement)
+{
+    Enter_Method("originatorBlockAckAgreementDeleted");
+    emit(blockAckAgreementDeletedSignal, agreement);
+}
+
+void Hcf::recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement)
+{
+    Enter_Method("recipientBlockAckAgreementDeleted");
+    auto record = agreement->getBlockAckRecord();
+    recipientDataService->clearReorderBuffer(record->getOriginatorAddress(), record->getTid());
+    emit(blockAckAgreementDeletedSignal, agreement);
 }
 
 void Hcf::scheduleInactivityTimer()
@@ -385,8 +414,11 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
-            recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
+        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler &&
+            !recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this)) {
+            delete packet;
+            return;
+        }
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
@@ -429,14 +461,10 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
             if (delba->getInitiator()) {
-                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
-                emit(blockAckAgreementDeletedSignal, agreement);
-                recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy, this);
             }
             else {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid());
-                emit(blockAckAgreementDeletedSignal, agreement);
-                originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy);
+                originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy, this);
             }
         }
         else
@@ -570,9 +598,9 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211M
         recipientBlockAckAgreementHandler->processTransmittedAddbaResp(addbaResp, this);
     else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
         if (delba->getInitiator())
-            originatorBlockAckAgreementHandler->processTransmittedDelba(delba);
+            originatorBlockAckAgreementHandler->processTransmittedDelba(delba, this);
         else
-            recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+            recipientBlockAckAgreementHandler->processTransmittedDelba(delba, this);
         scheduleInactivityTimer();
     }
     else ; // TODO other mgmt frames if needed
@@ -1013,7 +1041,9 @@ void Hcf::resumeAfterLifecycle()
 {
     Enter_Method("resumeAfterLifecycle");
     lifecycleStopped = false;
-    scheduleInactivityTimer();
+    // IEEE Std 802.11-2024, 11.5.4: downtime counts toward the retained inactivity deadline.
+    // Retire overdue agreements within this event before traffic can renew them.
+    expireBlockAckAgreements();
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         if (hasFrameToTransmit(static_cast<AccessCategory>(ac)))
             edca->requestChannelAccess(static_cast<AccessCategory>(ac), this);

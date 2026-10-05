@@ -1,0 +1,236 @@
+%description:
+HCF retires both roles before timeout DELBA reaches the queue callback.
+Late activity at the deadline cannot renew an agreement.
+Recipient expiry clears its reorder buffer before replacement ADDBA.
+Other peers and TIDs retain their buffers. Deletion counts follow actual retirement.
+IEEE Std 802.11-2024, 11.5.4 defines inactivity expiry and late Block Ack data discard.
+This module test supplies frames through HCF and data-service APIs without radio transmission.
+
+%extraargs: -c BlockAckRetirement
+
+%file: BlockAckRetirement.cc
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+
+namespace inet::ieee80211 {
+
+class RetirementHcf : public Hcf
+{
+  protected:
+    MacAddress peer{"02:00:00:00:00:11"};
+    MacAddress otherPeer{"02:00:00:00:00:12"};
+    int added = 0;
+    int deleted = 0;
+    int timeouts = 0;
+    std::vector<SequenceNumber> delivered;
+    Ptr<const Ieee80211Delba> recipientTimeout;
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            ASSERT(delba->getReasonCode() == 39);
+            ASSERT(!originatorBlockAckAgreementHandler->getAgreement(peer, 5));
+            ASSERT(!recipientBlockAckAgreementHandler->getAgreement(5, peer));
+            ASSERT(deleted == 2);
+            timeouts++;
+            if (!delba->getInitiator())
+                recipientTimeout = delba;
+        }
+        // The test observes the real HCF queue boundary without a radio exchange.
+        delete packet;
+    }
+    void sendUp(const std::vector<Packet *>& frames) override
+    {
+        for (auto frame : frames) {
+            if (auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>())) {
+                delivered.push_back(header->getSequenceNumber().get());
+                take(frame);
+                delete frame;
+            }
+            else
+                Hcf::sendUp({frame});
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        if (signal == blockAckAgreementAddedSignal) {
+            ASSERT(object);
+            added++;
+        }
+        else if (signal == blockAckAgreementDeletedSignal) {
+            ASSERT(object);
+            deleted++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, object, details);
+    }
+    Ptr<Ieee80211DataHeader> data(MacAddress transmitter, Tid tid, int sequence)
+    {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setTransmitterAddress(transmitter);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTid(tid);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        header->setAckPolicy(BLOCK_ACK);
+        return header;
+    }
+    void receiveData(MacAddress transmitter, Tid tid, int sequence)
+    {
+        auto header = data(transmitter, tid, sequence);
+        recipientProcessReceivedFrame(new Packet("data", header), header);
+    }
+    void addRecipient(MacAddress transmitter, Tid tid, int sequence, simtime_t timeout)
+    {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(transmitter);
+        request->setReceiverAddress(mac->getAddress());
+        request->setTid(tid);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(sequence));
+        request->setBufferSize(64);
+        request->setBlockAckTimeoutValue(timeout);
+        recipientProcessReceivedManagementFrame(request);
+    }
+  public:
+    void establish()
+    {
+        Enter_Method("establish");
+        subscribe(blockAckAgreementAddedSignal, this);
+        subscribe(blockAckAgreementDeletedSignal, this);
+        auto header = data(mac->getAddress(), 5, 18);
+        header->setReceiverAddress(peer);
+        auto packet = new Packet("originatorSetup", header);
+        originatorBlockAckAgreementHandler->processTransmittedDataFrame(packet, header, originatorBlockAckAgreementPolicy, this);
+        delete packet;
+        auto response = makeShared<Ieee80211AddbaResponse>();
+        response->setTransmitterAddress(peer);
+        response->setReceiverAddress(mac->getAddress());
+        response->setTid(5);
+        response->setBufferSize(64);
+        response->setBlockAckTimeoutValue(SimTime(1));
+        recipientProcessReceivedManagementFrame(response);
+        addRecipient(peer, 5, 19, SimTime(1));
+        addRecipient(peer, 6, 0, SIMTIME_ZERO);
+        addRecipient(otherPeer, 5, 0, SIMTIME_ZERO);
+        receiveData(peer, 5, 20);
+        receiveData(peer, 6, 1);
+        receiveData(otherPeer, 5, 1);
+        ASSERT(delivered.empty() && added == 4 && deleted == 0);
+        ASSERT(inactivityTimer->getArrivalTime() == simTime() + 1);
+    }
+    void checkRetirement(bool recipientActivity)
+    {
+        Enter_Method("checkRetirement");
+        ASSERT(inactivityTimer->isScheduled() && inactivityTimer->getArrivalTime() == simTime());
+        if (recipientActivity)
+            receiveData(peer, 5, 21);
+        else {
+            auto blockAck = makeShared<Ieee80211BasicBlockAck>();
+            blockAck->setTransmitterAddress(peer);
+            blockAck->setTidInfo(5);
+            blockAck->setStartingSequenceNumber(SequenceNumberCyclic(19));
+            originatorBlockAckAgreementHandler->processReceivedBlockAck(blockAck, this);
+        }
+        ASSERT(timeouts == 2 && deleted == 2 && added - deleted == 2);
+        ASSERT(delivered.empty() && !inactivityTimer->isScheduled());
+        // The replacement starts beyond the old buffer's window.
+        addRecipient(peer, 5, 100, SIMTIME_ZERO);
+        receiveData(peer, 5, 100);
+        ASSERT(delivered == std::vector<SequenceNumber>({100}));
+        recipientBlockAckAgreementHandler->processTransmittedDelba(recipientTimeout, this);
+        ASSERT(recipientBlockAckAgreementHandler->getAgreement(5, peer));
+        ASSERT(deleted == 2);
+        // Each independent buffer retains the frame that arrived before retirement.
+        receiveData(peer, 6, 0);
+        receiveData(peer, 6, 2);
+        receiveData(otherPeer, 5, 0);
+        receiveData(otherPeer, 5, 2);
+        ASSERT(delivered == std::vector<SequenceNumber>({100, 0, 1, 0, 1}));
+        auto delba = makeShared<Ieee80211Delba>();
+        delba->setTransmitterAddress(peer);
+        delba->setReceiverAddress(mac->getAddress());
+        delba->setTid(5);
+        delba->setInitiator(true);
+        recipientProcessReceivedManagementFrame(delba);
+        recipientProcessReceivedManagementFrame(delba);
+        ASSERT(deleted == 3 && added - deleted == 2);
+        ASSERT(!recipientBlockAckAgreementHandler->getAgreement(5, peer));
+        addRecipient(peer, 5, 200, SIMTIME_ZERO);
+        receiveData(peer, 5, 200);
+        ASSERT(delivered.back() == 200 && added - deleted == 3);
+        expireBlockAckAgreements();
+        ASSERT(deleted == 3 && timeouts == 2);
+    }
+};
+Define_Module(RetirementHcf);
+
+class RetirementDriver : public cSimpleModule
+{
+  protected:
+    cMessage *timer = nullptr;
+    RetirementHcf *hcf = nullptr;
+    int phase = 0;
+    void initialize() override
+    {
+        timer = new cMessage("retirementCheck");
+        scheduleAt(SimTime(1), timer);
+    }
+    void handleMessage(cMessage *message) override
+    {
+        if (phase++ == 0) {
+            hcf = check_and_cast<RetirementHcf *>(getParentModule()->getSubmodule("cliHost")->getSubmodule("wlan", 0)->getSubmodule("mac")->getSubmodule("hcf"));
+            // This event precedes the inactivity event at the same simulation time.
+            scheduleAfter(SimTime(1), timer);
+            hcf->establish();
+        }
+        else {
+            hcf->checkRetirement(par("recipientActivity").boolValue());
+            std::cout << "Block Ack retirement, replacement buffers, and deletion counts passed.\n";
+            endSimulation();
+        }
+    }
+  public:
+    ~RetirementDriver() { cancelAndDelete(timer); }
+};
+Define_Module(RetirementDriver);
+}
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.examples.wireless.qos.QosThroughput;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+module RetirementHcf extends Hcf { parameters: @class(::inet::ieee80211::RetirementHcf); }
+simple RetirementDriver extends SimpleModule
+{
+    parameters:
+        bool recipientActivity;
+        @class(::inet::ieee80211::RetirementDriver);
+}
+network RetirementNetwork extends QosThroughput { submodules: test: RetirementDriver; }
+
+%inifile: omnetpp.ini
+include ../../../../examples/wireless/qos/omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../../../examples;../../lib
+[Config BlockAckRetirement]
+extends = MacQosWithBlockAck
+network = RetirementNetwork
+sim-time-limit = 3s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.cliHost.numApps = 0
+*.srvHost.numApps = 0
+*.cliHost.wlan[*].mac.hcf.typename = "RetirementHcf"
+*.test.recipientActivity = ${false,true}
+**.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = 1s
+
+%contains: stdout
+Block Ack retirement, replacement buffers, and deletion counts passed.
+
+%not-contains: stdout
+<!> Warning:
+
+%not-contains: stderr
+<!> Warning:
