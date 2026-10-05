@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3 on 2026-10-05. S4 is next.
+Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3 and S4 on 2026-10-05. S5 is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -48,7 +48,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S1 ✅ | `topic/tcp-header-options` | 1, 52 | +228 −26 | the TCP Fast Open and AccECN header options, the AE bit |
 | S2 ✅ | `topic/tcp-tidy-ups` | 4, 5, 6, 21 | +193 −134 | RFC citations, the signals in one place, the ACK callback rename |
 | S3 ✅ | `topic/tcp-socket-contract` | 2 | +475 −1 | the socket commands, tags and status fields (commit 3 left the stage, see D-4) |
-| S4 | `topic/tcp-recovery-split` | 7, 8, 9, 10, 50 | +1872 −656 | the recovery interfaces, RFC 5681, RFC 6582, SACK recovery moved into `Rfc6675Recovery` |
+| S4 ✅ | `topic/tcp-recovery-split` | 7, 8, 9, 10 + 50 | +1872 −4 | the recovery interfaces and the RFC 5681, RFC 6582 and RFC 6675 strategies, which nothing selects yet (D-5) |
 | S5 | `topic/tcp-flavour-split` | 11, 12, 13, 54, 55, 56, 60, 84 | +1101 −1312 | the classic flavours on the split architecture, and the repairs of that move |
 | S6 | `topic/tcp-cubic` | 14, 45, 57, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
@@ -84,6 +84,13 @@ Known items for later stages, found by the blame:
 - 70, 71 and 72 repair `Rfc5681Recovery` (S4 code), but they change lines of 68 and of the test
   commit. They stay in S19 unless they apply cleanly earlier.
 - The fold rule (rule 4) must be decided for each fix with evidence: does master show the defect?
+- The connection's copy of the SACK recovery stays until its declarations go (D-5). Commit 26
+  (S12) removes `TcpConnection::processSACKOption()` with its declaration, and commit 39 (S17)
+  removes `TcpConnectionSackUtil.cc` with the other six declarations.
+- `TcpBaseAlg::calculateSsthresh()` (commit 8) uses `state->snd_effmss` for the 2 * SMSS floor.
+  Nothing sets that field before commit 15 (S7), so its value is 0. Commit 13 (S5) makes the
+  flavours call this function. S5 must not land a missing floor: it either sets `snd_effmss`
+  earlier or uses `snd_mss` until S7.
 
 ## 4. The procedure of one stage
 
@@ -95,7 +102,8 @@ Known items for later stages, found by the blame:
    commit where the stage ends, or the difference must have a reason in this plan.
 4. Run the gates: `check-classification.sh`, `check-commits.sh`, `check-links.sh`,
    `check-seals.sh`, `check-source-seals.sh`, and `check-series-builds.sh master..HEAD debug`.
-5. Build in debug against `omnetpp-6.x` (the pairing of `inet-master`) and run the tests of the
+5. Check that every commit builds and that `libINET` has no undefined `inet::` symbol (D-5).
+   Build in debug against `omnetpp-6.x` (the pairing of `inet-master`) and run the tests of the
    stage: its unit and module tests, the module `tcp_` suite, the protocol tests `tcp/`, and
    the fingerprint ingredients `tplx` and `~tND` at the stage head. If a row moves, find the
    commit that moves it and explain the row in that commit (rule 3).
@@ -131,6 +139,16 @@ plan gives a reason for.
   `receiveBufferSize`, which has the same problem. inet-gpl's `PacketDrillApp` then changes. A
   `@mutable` `timestampSupport` for the host-wide sysctl `net.ipv4.tcp_timestamps` is decided at
   S14 too; nothing in INET needs it before then. Commit 3 does not land.
+- **D-5 — The connection keeps its SACK recovery until its last caller goes.** Source commit 10
+  deleted `TcpConnectionSackUtil.cc`, but `TcpConnection` kept the declarations of its seven
+  virtual functions, and the flavours and the connection kept calling them. `make` still passes,
+  because a shared library links with undefined symbols, but `libINET` then does not load:
+  `undefined symbol: ...TcpConnection17processSACKOption...`. On the source branch this holds for
+  commits 10 to 38, so no simulation can run at 29 of its commits, and `check-series-builds.sh`
+  does not see it. The stages keep the file: S4 adds `Rfc6675Recovery` next to the connection's
+  copy, and each function of the copy goes in the commit that removes its declaration. The stage
+  scripts check every commit for undefined `inet::` symbols
+  (`nm -DC --undefined-only src/libINET_dbg.so`).
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -209,4 +227,48 @@ exist (`GpsrBeacon`). The logs are `/var/tmp/claude-staged/fp-<head>-<ingredient
 The runner checks one ingredient at a time. With two ingredients in one run, INET's runner stops
 at once: `python/inet/test/fingerprint/task.py:165` uses the undefined name `sim_time_limit`. This
 defect is not TCP, so this plan does not repair it.
+
+### S4 — `topic/tcp-recovery-split` — landed 2026-10-05
+
+The owner reviewed and approved S4, and decision D-5, on 2026-10-05.
+
+Four commits by Rudolf Hornig: commits 7, 8 and 9, and commit 10 with commit 50 folded in.
+
+- **Commit 10 changes form (D-5).** It no longer deletes `TcpConnectionSackUtil.cc`. Its kind
+  changes from `refactor` to `behavior.add`, because the class is new code that nothing calls
+  yet, and the old code stays.
+- **Commit 10 is not a move.** Against the connection's copy, `Rfc6675Recovery` differs in
+  `isLost()` (the RFC 6675 threshold), `setPipe()` (the scan end), `nextSeg()` rule (2),
+  `processSACKOption()` (delivered octets), `addSacks()` (the `rcv_nxt` condition, the AccECN
+  room, no NOP options), and it runs the RFC 6675 steps of each ACK itself. Its message lists
+  these points. They take effect in S5, when the flavours select the class, and the
+  fingerprints of S5 must explain them.
+- **Commit 50 folds into commit 10 (rule 4).** It repairs the wrap of `snd_wnd - pipe` in
+  `nextSeg()` rule (2) of the new class. Master's connection copy has the same unsigned
+  subtraction. The fix stays out of the connection's copy: the flavours stop calling that copy in
+  S5. On master, the wrap makes rule (2) report unsent data as sendable; with the window guard of
+  the new class, it stopped recovery until the timeout.
+- **Messages.** The paragraphs about the source branch history left (rule 6). Commit 8 says that
+  the flavours still have their own copies.
+- **Review points that this stage does not change.** Commits 8 and 10 declare state fields that
+  later features use: `maxPacketsOut`, `snd_effmss`, the AccECN fields, `deliveredBytes`,
+  `lastRcvdTSecr`, `minRtt`, `prrDeliveredMark`. `Rfc6675Recovery::addSacks()` already holds the
+  AccECN block reduction. These come from the source branch, where the strategy classes hold their
+  final code.
+
+Evidence, debug build against `omnetpp-6.x`, at the stage head:
+
+| Suite | Result |
+| --- | --- |
+| series builds | all four commits build, and no commit leaves an undefined `inet::` symbol |
+| unit | 114 PASS |
+| serializer | 4 PASS |
+| module | 348 PASS, with the two QUIC tests of master |
+| protocol `self/` and `tcp/` | as S1 |
+| fingerprint | no row differs from S3: 0 of 753 `tplx` rows, 0 of 638 `~tND` rows |
+
+The first module run had two QUIC failures. The cause was the build, not S4: the reused build
+tree got a fresh timestamp after the QUIC fixes of master were checked out, so `make` kept the old
+QUIC objects. After a rebuild of the three QUIC sources, all 348 tests pass. The fingerprints of
+both builds are equal, so the QUIC fixes move no row, and the S4 run is the baseline of S5.
 
