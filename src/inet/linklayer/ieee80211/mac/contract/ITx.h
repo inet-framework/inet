@@ -10,13 +10,13 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/common/TxRequestId.h"
 
 namespace inet {
 namespace ieee80211 {
 
 /**
- * Abstract interface for unconditionally transmitting a frame immediately
- * or after waiting for a specified inter-frame space (usually SIFS).
+ * Tx accepts an identified frame request. It transmits the frame immediately or after the specified interframe space (IFS). The callback checks permission before the request reaches the medium. Hypothetical: a permission callback replaces request A with request B. Tx rechecks identity and cannot transmit A after that replacement.
  */
 class INET_API ITx
 {
@@ -25,21 +25,22 @@ class INET_API ITx
       public:
         virtual ~ICallback() {}
 
-        virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        virtual void beginCallback() = 0;
+        virtual void endCallback() = 0;
+        virtual bool isTransmissionPermitted(TxRequestId id) = 0;
+        virtual void transmissionStarted(TxRequestId id) = 0;
+        virtual void transmissionCanceled(TxRequestId id) = 0;
+        virtual void transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
     };
 
   public:
     virtual ~ITx() {}
 
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    enum class Cancellation { CANCELED, TOO_LATE, NOT_FOUND };
+    virtual void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    virtual Cancellation cancelPendingTransmission(TxRequestId id) = 0;
     /**
-     * The query returns true while Tx retains an accepted frame,
-     * including any wait before transmission and the transmission itself.
-     * Tx clears this state before it calls ICallback::transmissionComplete(),
-     * so the callback can release pending radio commands.
-     * The query returns false when Tx holds no accepted transmission.
-     * For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
+     * The query returns true while Tx retains an accepted frame, including any wait before transmission and the transmission itself. Tx clears this state before it calls ICallback::transmissionComplete(), so the callback can release pending radio commands. The query returns false after completion or cancellation releases the request. For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
      */
     [[nodiscard]] virtual bool hasTransmission() const = 0;
     virtual void radioTransmissionFinished() = 0;

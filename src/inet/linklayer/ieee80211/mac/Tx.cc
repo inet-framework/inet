@@ -39,15 +39,13 @@ void Tx::initialize(int stage)
     }
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback)
-{
-    transmitFrame(packet, header, SIMTIME_ZERO, txCallback);
-}
-
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback)
+void Tx::transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback)
 {
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     ASSERT(this->txCallback == nullptr);
+    if (id.epoch != lifecycleEpoch || id.serial == 0)
+        throw cRuntimeError("Invalid or stale Tx request identity");
+    requestId = id;
     this->txCallback = txCallback;
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
@@ -75,8 +73,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     if (ifs == 0) {
         // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        sendPendingFrame();
     }
     else
         scheduleAfter(ifs, endIfsTimer);
@@ -93,11 +90,16 @@ void Tx::radioTransmissionFinished()
         auto duration = header->getDurationField();
         auto tmpFrame = frame;
         auto tmpTxCallback = txCallback;
+        auto completedId = requestId;
+        CallbackGuard guard(tmpTxCallback);
         frame = nullptr;
         txCallback = nullptr;
-        tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
+        requestId = {};
+        tmpTxCallback->transmissionComplete(completedId, tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
         delete tmpFrame;
-        rx->frameTransmitted(duration);
+        // Keep response timers ahead of the NAV timer when their deadlines coincide.
+        if (completedId.epoch == lifecycleEpoch)
+            rx->frameTransmitted(duration);
     }
 }
 
@@ -105,11 +107,49 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        sendPendingFrame();
     }
     else
         ASSERT(false);
+}
+
+ITx::Cancellation Tx::cancelPendingTransmission(TxRequestId id)
+{
+    Enter_Method("cancelPendingTransmission");
+    if (!txCallback || id != requestId)
+        return Cancellation::NOT_FOUND;
+    if (transmitting)
+        return Cancellation::TOO_LATE;
+    cancelEvent(endIfsTimer);
+    auto canceledFrame = frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    requestId = {};
+    delete canceledFrame;
+    return Cancellation::CANCELED;
+}
+
+
+void Tx::sendPendingFrame()
+{
+    auto id = requestId;
+    auto callback = txCallback;
+    if (!callback)
+        return;
+    CallbackGuard guard(callback);
+    bool permitted = callback->isTransmissionPermitted(id);
+    // The callback can cancel this request or replace it synchronously.
+    if (requestId != id || txCallback != callback)
+        return;
+    if (!permitted) {
+        if (cancelPendingTransmission(id) == Cancellation::CANCELED)
+            callback->transmissionCanceled(id);
+        return;
+    }
+    transmitting = true;
+    mac->sendDownFrame(frame->dup());
+    if (requestId == id && txCallback == callback && transmitting)
+        callback->transmissionStarted(id);
 }
 
 } // namespace ieee80211

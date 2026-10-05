@@ -170,9 +170,10 @@ void Contention::handleMessage(cMessage *msg)
     }
     else if (msg == channelGrantedEvent) {
         EV_INFO << "Channel granted: startTime = " << startTime << std::endl;
-        emit(channelAccessGrantedSignal, this);
-        callback->channelAccessGranted();
+        auto grantedCallback = callback;
         callback = nullptr;
+        emit(channelAccessGrantedSignal, this);
+        grantedCallback->channelAccessGranted();
     }
     else
         throw cRuntimeError("Unknown msg");
