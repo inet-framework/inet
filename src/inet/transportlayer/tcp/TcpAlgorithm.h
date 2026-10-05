@@ -120,6 +120,11 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receiveSeqChanged() = 0;
 
     /**
+     * Called after we received an ACK for which ackNo <= snd_una.
+     */
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+
+    /**
      * Called after we received an ACK which acked some data (that is,
      * we could advance snd_una). At this point the state variables
      * (snd_una, snd_wnd) have already been updated. The argument firstSeqAcked
@@ -128,14 +133,6 @@ class INET_API TcpAlgorithm : public cObject
      * (needed for Reno and NewReno); it'll be reset to 0 after this call returns.
      */
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) = 0;
-
-    /**
-     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
-     * no data in segment, segment doesn't carry window update, and also,
-     * we have unacked data). The dupack counter got already updated
-     * when calling this method (i.e. dupacks == 1 on first duplicate ACK.)
-     */
-    virtual void receivedDuplicateAck() = 0;
 
     /**
      * Whether this flavour implements SACK-based (RFC 6675) loss recovery.

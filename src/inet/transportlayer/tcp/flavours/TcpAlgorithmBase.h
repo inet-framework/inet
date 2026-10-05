@@ -81,6 +81,14 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual bool sendData(bool sendCommandInvoked);
 
+    /**
+     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
+     * no data in segment, and also, we have unacked data). The dupack counter
+     * got already updated when calling this method (i.e. dupacks == 1 on the
+     * first duplicate ACK.)
+     */
+    virtual void receivedDuplicateAck();
+
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 
@@ -115,9 +123,15 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedDuplicateAck() override;
+    /** The duplicate-ACK test: ackNo == snd_una, no data, and unacked data. */
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
+
+    /** Maintains state->dupacks and dispatches receivedDuplicateAck(). */
+    virtual void countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
+
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedAckForUnsentData(uint32_t seq) override;
 
