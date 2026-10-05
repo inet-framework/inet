@@ -10,6 +10,7 @@
 #   CR-TAG-SUBJECT   — the subject carries the kind, and every prefix agrees with the trailer
 #   CR-SCOPE-AREA    — the claimed area matches the paths the commit touches
 #   CR-DEPTH-ONE     — one commit reaches one depth level
+#   CR-DEPTH-DIRECTION — note: a mixed direction asks whether its parts can stand alone
 #   CR-OBL-INERT     — a commit below the behavior level moves no recorded expectation
 #
 # Usage (from the INET repository root):
@@ -77,6 +78,20 @@ while read -r sha; do
   [ "$n" -gt 1 ] && { flag "${sha:0:9} claims $n depth levels: $kind"; ok=0; }
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
+
+echo
+echo "== CR-DEPTH-DIRECTION: a mixed direction asks whether the parts divide (notes only) =="
+# A note never changes the exit status. 'name+refactor' is two depths, and CR-DEPTH-ONE fails it;
+# 'behavior.add+change' is one depth with two directions, which is one change only when the parts
+# cannot stand alone.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  kind=$(git log -1 --format='%(trailers:key=Change,valueonly)' "$sha" | awk -F'|' '{gsub(/ /,"");print $2}')
+  case "$kind" in behavior.*+*) ;; *) continue ;; esac
+  note "${sha:0:9} claims $kind: can a part stand alone? $(git log -1 --format=%s "$sha")"; quiet=0
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
 
 echo
 echo "== CR-TAG-SUBJECT: the subject carries the kind and agrees with the trailer =="

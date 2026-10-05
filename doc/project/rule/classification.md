@@ -174,6 +174,11 @@ change mixed with a content change.*
 
 Three directions, and they are not exclusive. One commit can add and remove in the same change.
 
+**Write a mixed direction only when the parts cannot be divided.** A replacement that removes an old
+function and adds its successor, when no caller can build against both, is one change with two
+directions. When the added, changed or removed part can stand alone, it is a commit of its own
+([PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change)), and each commit carries one direction.
+
 | Direction | Means |
 | --- | --- |
 | `add` | something exists that did not exist |
@@ -185,7 +190,8 @@ sections. The trailer states them per commit, which the summary cannot do for fr
 compares two trees and not two commits.
 
 *Enforced at T3 for a public interface, where the summary derives the direction; T4 for a private
-one.*
+one. [check-classification.sh](../enforcement/check-classification.sh) lists each mixed direction
+as a question for the T4 review.*
 
 ### CR-DEPTH-FIX
 
@@ -506,9 +512,10 @@ follows it and is not written:
 | `refactor`, `comment`, `format`, `location`, `name` | the same word |
 | a mixed depth or direction | both, as in `add+change:` or `name+refactor:` |
 
-A mixed marker is meant to look wrong. `add+change:` and `name+refactor:` are the subjects of
-commits that hold two changes, and [CR-DEPTH-ONE](#cr-depth-one) and
-[PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change) both say so.
+A mixed marker is meant to stand out. `name+refactor:` is the subject of a commit that holds two
+changes, and [CR-DEPTH-ONE](#cr-depth-one) says so. `add+change:` asks a question: it is one change
+only when its parts cannot be divided ([CR-DEPTH-DIRECTION](#cr-depth-direction),
+[PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change)).
 
 Five shapes, each one legal:
 

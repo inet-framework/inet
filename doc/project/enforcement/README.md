@@ -62,7 +62,7 @@ measured.
 | [check-series-builds.sh](check-series-builds.sh) | T2 | by hand; minutes per commit | `PR-SERIES-BUILDS` and `TR-CI-EVERY-COMMIT` in full — it compiles every commit of a range. The static gates beside it find a header, a parameter or a state field used early; only a compiler finds a method or a signal used early |
 | [check-includes.sh](check-includes.sh) | T3 | by hand; not yet in CI | that every `#include "inet/…"` a commit writes resolves at that commit — a header that arrives later makes every commit before it fail to compile |
 | [check-ned-params.sh](check-ned-params.sh) | T3 | by hand; not yet in CI | that every `par("x")` a commit reads is declared by a NED in the tree at that commit — a read ahead of its declaration compiles and cannot run |
-| [check-classification.sh](check-classification.sh) | T3 | by hand; not yet in CI | `CR-TAG-TRAILER`, `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
+| [check-classification.sh](check-classification.sh) | T3 | by hand; not yet in CI | `CR-TAG-TRAILER`, `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`, and a note for each mixed direction under `CR-DEPTH-DIRECTION`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
 
 The pull-request [enforcement-tests workflow](../../../.github/workflows/enforcement-tests.yml) runs
 the checker regressions without privileged credentials. The trusted
