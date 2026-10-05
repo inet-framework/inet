@@ -102,7 +102,7 @@ Each row is one commit with the group `reviewer-questions` and a `Plan:` line th
 | 4 | done | A description opens with the answers | `pull-request.md`, `review-a-pull-request.md` | rewrite part 1 of `PR-REQ-STORY`; proportion for small pull requests | `check-links.sh` |
 | 5 | done | GitHub shows the questions to the author | new `.github/pull_request_template.md` | comment-only template | render check |
 | 6 | done | A gate reads a description | new `check-pr-description.sh`, new `check_pr_description.py`, new `test_check_pr_description.py`, `pull-request.md`, `review-a-pull-request.md`, `enforcement/README.md` | notes for a missing opening, evidence first, an action-first opening, and a large pull request with a one-line opening | unit tests; recent descriptions |
-| 7 | pending | The review restates the answers and asks the open questions | `review-a-pull-request.md`, `checklist/general.md` | read-back in the report | `check-links.sh` |
+| 7 | done | The review restates the answers and asks the open questions | `review-a-pull-request.md`, `checklist/general.md` | read-back in the report | `check-links.sh` |
 | 8 | pending | Close the plan | this file | record, then move to `plan/done/` | — |
 
 ## 7. Verification

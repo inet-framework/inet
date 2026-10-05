@@ -92,6 +92,13 @@ round, an earlier revision — and a message that carries a test log that belong
 description. *Not a violation:* the regression test of a fix, or the case that shows that a moved
 baseline is right.
 
+**[PR-REQ-STORY] Does a pull request description answer the reviewer's questions up front?**
+For a pull request, restate from the summary of the description alone: the problem, how we know that
+it is real and worth solving, what changes, how, and the risk. FLAG a description whose summary
+leaves one of them open, and list each open question for the author. *Not a violation:* a pull
+request of one small commit whose message answers the questions, or a short description in
+proportion to a small change.
+
 **[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
 FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
 C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves
