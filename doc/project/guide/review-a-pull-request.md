@@ -177,8 +177,9 @@ abstract subject passes every mechanical check and can still hold several change
   the topic, such as the fingerprints of configurations that the topic does not reach? Can it land
   first, in a pull request of its own?
 - **[PR-REQ-STORY](../rule/pull-request.md#pr-req-story)** — read only the summary of the
-  description. After about five minutes, do you know what the pull request does, why, and what its
-  risk is? Do the commits follow in the order to read them, with the evidence last?
+  description, and restate the answers to the reviewer's questions and the risk without the commits.
+  A question that the summary does not answer is a `FLAG` and a question to the author. Do the
+  commits follow in the order to read them, with the evidence last?
 - **[TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance)** — **every moved row is
   accounted for**, not the set as a whole. Rows that share one explanation are named together; a
   count is not an explanation. An unexplained row is an unintended change until somebody shows

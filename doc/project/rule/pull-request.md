@@ -599,22 +599,27 @@ alone? T5 — the size of the topic is human judgment.*
 
 A description has three parts, in this order:
 
-1. **A summary of a few short paragraphs.** What the change achieves, why it is needed, the idea of
-   the solution, and its risk. A reviewer reads the summary in about five minutes and then knows
-   what to expect from the commits. The summary describes the change at the level of components and
-   contracts; it does not repeat the commit messages.
+1. **A summary that answers the [reviewer's questions](#the-reviewers-questions)** for the whole
+   pull request: the problem, how we know that it is real and worth solving, what changes, and how.
+   Then the risk: what can break, and for whom. A few short paragraphs: a reviewer reads them in
+   about five minutes and then knows what to expect from the commits. The summary describes the
+   change at the level of components and contracts; it does not repeat the commit messages.
 2. **The commits, in the order to read them**, one line each. Say which commits only prepare and
    which commit moves behavior ([PR-SPLIT-PREPARE](#pr-split-prepare)). The architectural surface
    ([PR-REQ-ARCH](#pr-req-arch)) follows the commits.
 3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every
    baseline update (*Contributor workflow*, step 6), and what remains unverified.
 
-A reviewer who stops after the summary must still be able to say what the pull request does and
-why. Long material — a table for each test, a log excerpt, the complete account of moved baselines —
-goes to the end of the description, or into the plan.
+A reviewer who stops after the summary must still be able to answer the reviewer's questions. Long
+material — a table for each test, a log excerpt, the complete account of moved baselines — goes to
+the end of the description, or into the plan.
 
-*Enforced at T4 — agent review: does the summary state the change, the reason and the risk, and can
-a reviewer read it in about five minutes?*
+**The description scales with the pull request.** A pull request of one small commit can use that
+commit's message as its whole description. A series needs a summary of its own, because no single
+commit answers the questions for the whole series. Headings are optional.
+
+*Enforced at T4 — agent review: can a reviewer restate the answers to the reviewer's questions, and
+the risk, from the summary alone, in about five minutes?*
 
 ### PR-REQ-ARCH
 
