@@ -12,7 +12,6 @@ namespace tcp {
 
 void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
-    ASSERT(!state->lossRecovery);
     //"
     // 3.1. Slow Start and Congestion Avoidance
     // ...
@@ -50,17 +49,11 @@ void Rfc5681CongestionControl::slowStart(uint32_t numBytesAcked)
     // TCP that increments cwnd by SMSS for each such ACK will
     // inappropriately inflate the amount of data injected into the network.
     //"
-    // Cwnd-limited gate (RFC 5681 principle, Linux tcp_is_cwnd_limited): grow only
-    // while the sender actually fills the window (cwnd < 2 * max_packets_out, in
-    // segments). An application-limited flow that never fills cwnd must not be
-    // allowed to inflate it -- otherwise a trickle of ACKs grows cwnd without any
-    // evidence the path can carry it.
-    if (state->snd_effmss > 0 && (state->snd_cwnd / state->snd_effmss) >= 2 * state->maxPacketsOut) {
-        EV_DETAIL << "Not growing cwnd in slow start: not cwnd-limited\n";
-        return;
-    }
-    state->snd_cwnd += std::min(numBytesAcked, state->snd_effmss);
+    // The traditional increase: precisely SMSS bytes per ACK of new data.
+    EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
+    state->snd_cwnd += state->snd_effmss;
     conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
 }
 
 void Rfc5681CongestionControl::congestionAvoidance(uint32_t numBytesAcked)
@@ -100,6 +93,7 @@ void Rfc5681CongestionControl::congestionAvoidance(uint32_t numBytesAcked)
     if (i == 0) i = 1;
     state->snd_cwnd += i;
     conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
 }
 
 } // namespace tcp

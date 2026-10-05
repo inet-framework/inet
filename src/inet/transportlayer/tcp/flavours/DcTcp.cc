@@ -33,7 +33,7 @@ void DcTcp::initialize()
 
 void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpClassicAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     if (state->dupacks >= state->dupthresh) {
         //

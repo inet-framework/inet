@@ -12,6 +12,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -50,52 +51,42 @@ bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
 
 void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
-    throw cRuntimeError("Not implemented");
+    //"
+    // 6. When the next ACK arrives that acknowledges previously
+    //    unacknowledged data, a TCP MUST set cwnd to ssthresh (the value
+    //    set in step 2).  This is termed "deflating" the window.
+    //"
+    EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(cwndSignal, state->snd_cwnd);
 }
 
 void Rfc5681Recovery::receivedDuplicateAck()
 {
-    //"
-    // 3.2. Fast Retransmit/Fast Recovery
-    //
-    // ...
-    //
-    // The fast retransmit and fast recovery algorithms are implemented
-    // together as follows.
-    //
-    // 1. On the first and second duplicate ACKs received at a sender, a
-    //    TCP SHOULD send a segment of previously unsent data per [RFC3042]
-    //    provided that the receiver's advertised window allows, the total
-    //    FlightSize would remain less than or equal to cwnd plus 2*SMSS,
-    //    and that new data is available for transmission.  Further, the
-    //    TCP sender MUST NOT change cwnd to reflect these two segments
-    //    [RFC3042].  Note that a sender using SACK [RFC2018] MUST NOT send
-    //    new data unless the incoming duplicate acknowledgment contains
-    //    new SACK information.
-    //"
-    if (state->dupacks < state->dupthresh)
-        // TODO FlightSize would remain less than or equal to cwnd plus 2*SMSS
-        conn->sendData(state->snd_cwnd);
+    TcpAlgorithmBase *algorithm = check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate());
+
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
-    //    to no more than the value given in equation (4).  When [RFC3042]
-    //    is in use, additional data sent in limited transmit MUST NOT be
-    //    included in this calculation.
+    //    to no more than the value given in equation (4).
     //"
-    else if (state->dupacks == state->dupthresh) {
-        //"
-        // When a TCP sender detects segment loss using the retransmission timer
-        // and the given segment has not yet been resent by way of the
-        // retransmission timer, the value of ssthresh MUST be set to no more
-        // than the value given in equation (4):
-        //
-        //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
-        //
-        // where, as discussed above, FlightSize is the amount of outstanding
-        // data in the network.
-        //"
-        uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_effmss; // the +1 MSS accounts for the retransmitOneSegment call below
-        state->ssthresh = conn->getTcpAlgorithmForUpdate()->calculateSsthresh(flightSize);
+    if (state->dupacks == state->dupthresh) {
+        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
+
+        if (state->sack_enabled) {
+            // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
+            // DupThresh ACKs, the scoreboard MUST be updated with the new SACK information (via
+            // Update ()).  If no previous loss event has occurred on the connection or the cumulative
+            // acknowledgment point is beyond the last value of RecoveryPoint, a loss recovery phase
+            // SHOULD be initiated, per the fast retransmit algorithm outlined in [RFC2581]."
+            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) { // HighACK = snd_una
+                state->recoveryPoint = state->snd_max; // HighData = snd_max
+                state->lossRecovery = true;
+                EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
+            }
+        }
+
+        // The flight size is estimated as min(cwnd, snd_wnd).
+        state->ssthresh = algorithm->calculateSsthresh(std::min(state->snd_cwnd, state->snd_wnd));
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"
@@ -104,9 +95,28 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //    the congestion window by the number of segments (three) that have
         //    left the network and which the receiver has buffered.
         //"
-        conn->retransmitOneSegment(false);
-        state->snd_cwnd = state->ssthresh; // no +3*SMSS inflation: getBytesInFlight already accounts for the 3 segments in sackedOut
+        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
         conn->emit(cwndSignal, state->snd_cwnd);
+
+        EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
+
+        conn->retransmitOneSegment(false);
+
+        if (state->sack_enabled) {
+            // RFC 3517, page 7: "(4) Run SetPipe ()" and "(5) In order to take advantage of
+            // potential additional available cwnd, proceed to step (C) below."
+            conn->setPipe();
+            if (state->lossRecovery) {
+                EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
+                algorithm->restartRexmitTimer();
+
+                if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
+                    conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+            }
+        }
+
+        // try to transmit new segments (RFC 2581)
+        algorithm->sendData(false);
     }
     //"
     // 4. For each additional duplicate ACK received (after the third),
@@ -115,15 +125,17 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    has left the network.
     //"
     else if (state->dupacks > state->dupthresh) {
-        state->snd_cwnd += state->snd_effmss;
+        state->snd_cwnd += state->snd_mss;
+        EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
         conn->emit(cwndSignal, state->snd_cwnd);
+
+        //"
+        // 5.  When previously unsent data is available and the new value of
+        //     cwnd and the receiver's advertised window allow, a TCP SHOULD
+        //     send 1*SMSS bytes of previously unsent data.
+        //"
+        algorithm->sendData(false);
     }
-    //"
-    // 5.  When previously unsent data is available and the new value of
-    //     cwnd and the receiver's advertised window allow, a TCP SHOULD
-    //     send 1*SMSS bytes of previously unsent data.
-    //"
-    conn->sendData(state->snd_cwnd);
 }
 
 } // namespace tcp

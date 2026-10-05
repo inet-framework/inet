@@ -32,21 +32,19 @@ class INET_API TcpReno : public TcpClassicAlgorithmBase
         return new TcpRenoStateVariables();
     }
 
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
+    virtual ITcpCongestionControl *createCongestionControl() override;
+    virtual ITcpRecovery *createRecovery() override;
 
-    /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TcpEventCode& event) override;
+    /** Reno is in fast recovery from the third duplicate ACK to the next ACK of new data */
+    virtual bool isInFastRecovery() const override { return state->dupacks >= state->dupthresh; }
+
+    virtual bool processEce() override;
+
+    virtual void ackProcessed(bool inFastRecovery) override;
 
   public:
     /** Ctor */
     TcpReno();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
-
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
 };
 
 } // namespace tcp

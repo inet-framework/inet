@@ -31,6 +31,9 @@ class INET_API TcpNewReno : public TcpClassicAlgorithmBase
         return new TcpNewRenoStateVariables();
     }
 
+    virtual ITcpCongestionControl *createCongestionControl() override;
+    virtual ITcpRecovery *createRecovery() override;
+
     /** Utility function to recalculate ssthresh */
     virtual void recalculateSlowStartThreshold();
 

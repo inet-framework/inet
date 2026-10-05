@@ -10,6 +10,8 @@
 
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
+#include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
 
 namespace inet {
 namespace tcp {
@@ -19,6 +21,16 @@ Register_Class(TcpNewReno);
 TcpNewReno::TcpNewReno() : TcpClassicAlgorithmBase(),
     state((TcpNewRenoStateVariables *&)TcpAlgorithm::state)
 {
+}
+
+ITcpCongestionControl *TcpNewReno::createCongestionControl()
+{
+    return new Rfc5681CongestionControl(state, conn);
+}
+
+ITcpRecovery *TcpNewReno::createRecovery()
+{
+    return new Rfc6582Recovery(state, conn);
 }
 
 void TcpNewReno::recalculateSlowStartThreshold()
@@ -44,7 +56,7 @@ void TcpNewReno::recalculateSlowStartThreshold()
 
 void TcpNewReno::processRexmitTimer(TcpEventCode& event)
 {
-    TcpClassicAlgorithmBase::processRexmitTimer(event);
+    TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -87,7 +99,7 @@ void TcpNewReno::processRexmitTimer(TcpEventCode& event)
 
 void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpClassicAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     // RFC 3782, page 5:
     // "5) When an ACK arrives that acknowledges new data, this ACK could be
@@ -249,7 +261,7 @@ void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
 void TcpNewReno::receivedDuplicateAck()
 {
-    TcpClassicAlgorithmBase::receivedDuplicateAck();
+    TcpAlgorithmBase::receivedDuplicateAck();
 
     if (state->dupacks == state->dupthresh) {
         if (!state->lossRecovery) {

@@ -77,11 +77,6 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) override;
 
     /**
-     * Send data, observing Nagle's algorithm and congestion window
-     */
-    virtual bool sendData(bool sendCommandInvoked);
-
-    /**
      * Called after we received a duplicate ACK (that is: ackNo == snd_una,
      * no data in segment, and also, we have unacked data). The dupack counter
      * got already updated when calling this method (i.e. dupacks == 1 on the
@@ -93,6 +88,12 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 
   public:
+    /**
+     * Send data, observing Nagle's algorithm and congestion window. Public,
+     * because the recovery strategies of the classic flavours send through it.
+     */
+    virtual bool sendData(bool sendCommandInvoked);
+
     /**
      * Ctor.
      */
