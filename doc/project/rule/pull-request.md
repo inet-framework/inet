@@ -555,6 +555,15 @@ A pull request carries one topic, at a size a reviewer can hold in the head at o
 are two pull requests, even when the same developer wrote them on the same day. A long series
 on one topic is fine; a short series on three topics is not.
 
+**A step that is useful alone and moves behavior outside the topic goes first, in a pull request of
+its own.** A fix that moves the fingerprints of configurations that the topic does not reach is the
+usual case. The reviewers of that behavior are not always the reviewers of the topic, and the fix
+can land while the topic is still in review. The topic pull request then builds on it. When a pull
+request keeps such a step, the description says why.
+
+*Enforced at T4 — agent review: does a commit move behavior outside the topic, and can it land
+alone? T5 — the size of the topic is human judgment.*
+
 ### PR-REQ-STORY
 
 **The description starts with a summary, then gives the commits and the evidence**

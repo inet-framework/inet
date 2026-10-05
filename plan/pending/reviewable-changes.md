@@ -121,7 +121,7 @@ Each row is one commit with the group `reviewable-changes` and a `Plan:` line th
 | 6 | done | A body starts with a summary | `pull-request.md`, `check-commits.sh`, `test_check_commits.py`, `review-a-pull-request.md`, `checklist/general.md`, `audit/seal-list.md` | new `PR-MSG-SUMMARY`; amend the `PR-MSG-WHY` table; notes for paragraph and body length | unit tests; gate on `0c69196d37` |
 | 7 | done | A message holds no revision history and no test log | `pull-request.md`, `check-commits.sh`, `test_check_commits.py`, `checklist/general.md` | amend `PR-MSG-FACTS`; note for history words and `Validation:` | unit tests; gate on `0c69196d37` |
 | 8 | done | A description starts with a summary | `pull-request.md`, `review-a-pull-request.md` | rewrite `PR-REQ-STORY` | `check-links.sh` |
-| 9 | pending | A step useful alone goes first | `pull-request.md` | amend `PR-REQ-TOPIC` | `check-links.sh` |
+| 9 | done | A step useful alone goes first | `pull-request.md` | amend `PR-REQ-TOPIC` | `check-links.sh` |
 | 10 | pending | A mixed direction marks a commit that cannot divide | `classification.md`, `check-classification.sh` | align `CR-DEPTH-DIRECTION` and `CR-TAG-SUBJECT`; note for mixed directions | gate on the nine-commit series of pull request 1273 |
 | 11 | pending | The commits follow the plan's steps | `planning.md`, `write-an-implementation-plan.md`, `review-a-pull-request.md` | amend `PLR-PROPORTION`; review question | `check-links.sh` |
 | 12 | pending | Close the plan | this file | move to `plan/done/` | `check-links.sh` |

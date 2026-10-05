@@ -170,6 +170,9 @@ abstract subject passes every mechanical check and can still hold several change
   the candidates once the branch carries trailers.
 - **[PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan)** — if the series follows a plan, does each
   commit name it, and does the path still exist?
+- **[PR-REQ-TOPIC](../rule/pull-request.md#pr-req-topic)** — does a commit move behavior outside
+  the topic, such as the fingerprints of configurations that the topic does not reach? Can it land
+  first, in a pull request of its own?
 - **[PR-REQ-STORY](../rule/pull-request.md#pr-req-story)** — read only the summary of the
   description. After about five minutes, do you know what the pull request does, why, and what its
   risk is? Do the commits follow in the order to read them, with the evidence last?
