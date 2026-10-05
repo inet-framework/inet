@@ -230,7 +230,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree()) { // TODO this should be just the physical channel sense!!!!
+        if (rx->isMediumFree() && !tx->hasTransmission()) { // TODO this should be just the physical channel sense!!!!
             EV_DEBUG << "Sending it down immediately\n";
 //            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
 //            if (phyControlInfo)
@@ -387,9 +387,10 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
 
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigMsg != nullptr) {
-        sendDown(pendingRadioConfigMsg);
+    if (pendingRadioConfigMsg != nullptr && !tx->hasTransmission()) {
+        auto message = pendingRadioConfigMsg;
         pendingRadioConfigMsg = nullptr;
+        sendDown(message);
     }
 }
 

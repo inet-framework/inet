@@ -113,7 +113,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void startFrameSequence(AccessCategory ac);
     void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
-    void sendUp(const std::vector<Packet *>& completeFrames);
+    // Tests can consume received frames here without an upper protocol stack.
+    virtual void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);

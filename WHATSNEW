@@ -309,6 +309,22 @@ Notable backward incompatible changes are the following:
    Ieee80211ModeBase supplies default unknown values for custom subclasses.
    The migration guide explains the return values and required overrides.
 
+18. IEEE 802.11 radio commands wait for an accepted frame
+
+   Tx is the component that transmits frames for medium access control (MAC).
+   Radio reconfiguration now waits until Tx completes an accepted transmission.
+   This includes the short interframe space (SIFS) before a response.
+   The MAC previously used only the medium state, which cannot identify that wait.
+
+   For example, a radio command arrives while Tx waits to transmit an
+   acknowledgment (ACK) frame. The MAC keeps the command until the ACK completes.
+   This prevents radio reconfiguration before the accepted response completes.
+   The change affects event order and the event fingerprints of IEEE 802.11 simulations.
+
+   Custom implementations of ITx must implement hasTransmission() before they compile again.
+   The method identifies both the wait before transmission and the transmission itself.
+   The migration guide explains the return values and the order of the completion callback.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
