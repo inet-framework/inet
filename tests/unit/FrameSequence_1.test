@@ -35,6 +35,8 @@ class DataFs : public IFrameSequence
         int step = -1;
 
     public:
+        virtual FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override { return FrameSequencePlanResult::Status::UNSUPPORTED; }
+        virtual void startPlannedSequence(FrameSequenceContext *, int, FrameSequencePlan&) override { throw cRuntimeError("Legacy fixture"); }
         virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
             this->firstStep = firstStep;
             step = 0;
@@ -103,6 +105,8 @@ class INET_API AckFs : public IFrameSequence
         int step = -1;
 
     public:
+        virtual FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override { return FrameSequencePlanResult::Status::UNSUPPORTED; }
+        virtual void startPlannedSequence(FrameSequenceContext *, int, FrameSequencePlan&) override { throw cRuntimeError("Legacy fixture"); }
         virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
             this->firstStep = firstStep;
             step = 0;
@@ -173,6 +177,8 @@ class RtsCtsFs : public IFrameSequence
     public:
         RtsCtsFs() { }
 
+        virtual FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override { return FrameSequencePlanResult::Status::UNSUPPORTED; }
+        virtual void startPlannedSequence(FrameSequenceContext *, int, FrameSequencePlan&) override { throw cRuntimeError("Legacy fixture"); }
         virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
             step = 0;
             this->firstStep = firstStep;

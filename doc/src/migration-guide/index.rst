@@ -10,6 +10,14 @@ IEEE 802.11 HCF Complete Exchange Admission
 The IEEE 802.11 MAC interfaces add support for complete exchange admission.
 External implementations require the applicable changes below.
 
+* Implement ``IFrameSequence::planSequence()`` and ``startPlannedSequence()``.
+  Return ``READY``, ``EMPTY``, or ``UNSUPPORTED`` as appropriate.
+  Duration refusal is a separate admission result.
+  Prepared execution must use the recorded choices without another selector call.
+* Implement ``ITransmitStep::getPreparedTransmit()`` and ``IReceiveStep::getPreparedReceive()``.
+  Return a null record for a legacy step.
+  Plans own prepared steps and generated controls.
+  The frame store retains ownership of staged data and management frames.
 * Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation.
   Implement ``setPendingTransmission()``, ``pendingTransmissionCanceled()``, and ``resetForLifecycle()`` in custom handlers.
   Preserve borrowed objects until all synchronous callbacks return.
@@ -17,6 +25,9 @@ External implementations require the applicable changes below.
 * Implement ``IAckHandler::snapshotFrameState()`` and ``dropFrame()``.
   The snapshot query must preserve the exact phase without insertion or protocol progress.
   A staged frame without an ACK registration is an error.
+* Implement ``IOriginatorQoSAckPolicy::getAckTimeoutForMode()`` and ``IRtsPolicy::getCtsTimeoutForMode()``.
+  These methods use the supplied response mode and preserve configured timeout overrides.
+  They must not select another mode.
 * Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``.
   The MAC allocates ``TxRequestId`` before the call.
   The identity contains a lifecycle epoch and a serial.

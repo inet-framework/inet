@@ -59,12 +59,33 @@ bool FrameSequenceContext::isSentByUs(const Ptr<const Ieee80211MacHeader>& heade
 FrameSequenceContext::~FrameSequenceContext()
 {
     for (auto step : steps)
-        delete step;
+        if ((step->getType() == IFrameSequenceStep::Type::TRANSMIT && !static_cast<ITransmitStep *>(step)->getPreparedTransmit()) ||
+            (step->getType() == IFrameSequenceStep::Type::RECEIVE && !static_cast<IReceiveStep *>(step)->getPreparedReceive()))
+            delete step;
     delete nonQoSContext;
     delete qosContext;
     if (inProgressFrames)
         inProgressFrames->releaseFrameReferences();
 }
+
+AckPolicy FrameSequenceContext::getAckPolicy()
+{
+    auto packet = getFrameToTransmit();
+    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    OriginatorBlockAckAgreement *agreement = nullptr;
+    if (qosContext->blockAckAgreementHandler)
+        agreement = qosContext->blockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid());
+    return qosContext->ackPolicy->computeAckPolicy(packet, header, agreement);
+}
+
+bool FrameSequenceContext::isBlockAckReqNeeded()
+{
+    return qosContext->ackPolicy->isBlockAckReqNeeded(inProgressFrames, qosContext->txopProcedure);
+}
+
+
+
+
 
 Register_ResultFilter("frameSequenceDuration", FrameSequenceDurationFilter);
 

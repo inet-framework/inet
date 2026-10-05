@@ -14,6 +14,11 @@ namespace inet {
 namespace ieee80211 {
 
 class FrameSequenceContext;
+class FrameSequencePlanningContext;
+struct FrameSequencePlan;
+struct FrameSequencePlanResult;
+struct PreparedTransmit;
+struct PreparedReceive;
 
 class INET_API IFrameSequenceStep
 {
@@ -45,6 +50,7 @@ class INET_API ITransmitStep : public IFrameSequenceStep
 
     virtual Packet *getFrameToTransmit() = 0;
     virtual simtime_t getIfs() = 0;
+    [[nodiscard]] virtual const PreparedTransmit *getPreparedTransmit() const = 0;
 };
 
 class INET_API IReceiveStep : public IFrameSequenceStep
@@ -55,12 +61,16 @@ class INET_API IReceiveStep : public IFrameSequenceStep
     virtual simtime_t getTimeout() = 0;
     virtual Packet *getReceivedFrame() = 0;
     virtual void setFrameToReceive(Packet *frame) = 0;
+    [[nodiscard]] virtual const PreparedReceive *getPreparedReceive() const = 0;
 };
 
 class INET_API IFrameSequence
 {
   public:
     virtual ~IFrameSequence() {}
+
+    [[nodiscard]] virtual FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const = 0;
+    virtual void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) = 0;
 
     virtual void startSequence(FrameSequenceContext *context, int step) = 0;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) = 0;
