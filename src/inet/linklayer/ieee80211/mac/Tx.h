@@ -29,6 +29,14 @@ class INET_API Tx : public SimpleModule, public ITx
     Packet *frame = nullptr;
     cMessage *endIfsTimer = nullptr;
     bool transmitting = false;
+    TxRequestId requestId;
+    uint64_t lifecycleEpoch = 0;
+    struct CallbackGuard {
+        ITx::ICallback *callback;
+        CallbackGuard(ITx::ICallback *callback) : callback(callback) { callback->beginCallback(); }
+        ~CallbackGuard() noexcept(false) { callback->endCallback(); }
+    };
+    void sendPendingFrame();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -39,8 +47,8 @@ class INET_API Tx : public SimpleModule, public ITx
     Tx() {}
     ~Tx();
 
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
+    void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
+    Cancellation cancelPendingTransmission(TxRequestId id) override;
     [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
     virtual void radioTransmissionFinished() override;
 };

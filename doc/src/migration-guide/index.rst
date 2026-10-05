@@ -4,6 +4,29 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Tx Request Identities
+---------------------------------
+
+Tx is the component that transmits frames for medium access control (MAC). The hybrid coordination function (HCF) serves quality of service (QoS) traffic. Interframe space (IFS) is a required interval between specified frame transmissions. Short interframe space (SIFS) separates specified immediate responses and frames within an exchange. An acknowledgment (ACK) frame confirms reception when the selected policy requires it.
+
+Each Tx request has an identity before any synchronous callback can occur. The identity contains a lifecycle epoch and a serial. A lifecycle epoch identifies one MAC lifecycle instance. A borrowed pointer gives access without ownership; its owner must keep the object alive during that access. A callback scope covers callback entry, nested callbacks, and return.
+
+Production HCF retains its legacy path at this commit.
+
+External implementations require these changes:
+
+* Adapt the sequence handler callbacks below. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
+
+  Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope.
+* Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``. The MAC allocates ``TxRequestId`` before the call. Implement ``cancelPendingTransmission()``.
+* Implement the Tx callback ``isTransmissionPermitted()``. Implement ``transmissionStarted()``. Implement ``transmissionCanceled()``. Implement ``beginCallback()`` to protect borrowed sequence objects throughout each callback scope. Implement ``endCallback()`` to release that callback scope. Add the request identity to ``transmissionComplete()``.
+
+The final permission check runs for zero IFS too. Tx must check identity again after a callback that can replace the request. Hypothetical: request A waits for IFS, and its permission callback replaces A with B. Tx detects the changed identity and cannot transmit A. The check leaves B under its own request identity.
+
+Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``. Only ``CANCELED`` removes the matching delayed copy. Explicit cancellation emits no completion callback. The caller reports successful explicit cancellation to the matching handler once. An on-air request keeps its normal completion path.
+
+Rebuild external implementations after these interface changes. Preserve the accepted-request contract in `IEEE 802.11 Radio Command Deferral`_ below. That section defines ``ITx::hasTransmission()`` and supplies the ACK/SIFS example. The query also returns false after cancellation or lifecycle reset releases the accepted request.
+
 IEEE 802.11 Radio Command Deferral
 ---------------------------------
 
