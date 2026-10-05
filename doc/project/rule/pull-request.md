@@ -521,6 +521,22 @@ the fact itself. An issue or pull request number is a useful addition, never a r
 No attribution trailers for tools or assistants, no progress notes, no apologies, and no
 speculation about future work. Keep a `Fixes #<n>` style reference when it is accurate.
 
+**The message describes the final change, not the way to it.** A pull request goes through
+revisions, and the commits that land show only the result ([PR-SERIES-ORDER](#pr-series-order)). A
+section such as "audit correction", "after review" or "the earlier revision" records the history of
+the pull request, and it means nothing to a reader of `git log`. Write the message for the final
+change.
+
+**Test logs belong in the pull request.** The commands that ran, their results, the run counts and
+the seeds go in the description ([PR-REQ-STORY](#pr-req-story)). They describe one run on one
+machine, and they are often the same for every commit of a series. A message names a test only when
+the test is part of the reason: the regression test of a fix
+([PR-MSG-REPRODUCE](#pr-msg-reproduce)), or the case that shows that a moved baseline is right.
+
+*Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) fails an attribution trailer
+and gives a note for words of revision history and for a `Validation:` paragraph; T4 — agent review
+for other progress notes.*
+
 ### The classification trailer
 
 Every commit also ends with one `Change:` line that states its scope, its depth, what must move
@@ -604,7 +620,7 @@ argue about.
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
 | PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
-| PR-MSG-FACTS | T3 | commit-message lint: no attribution trailers |
+| PR-MSG-FACTS | T3+T4 | commit-message lint: no attribution trailers; note for words of revision history and for a `Validation:` paragraph (T3) + agent review for other progress notes (T4) |
 | PR-SPLIT-ONE-CHANGE | T3+T4 | note: the fingerprint rows of one commit move in more than one way (T3) + agent review: can a part of the commit stand alone? The rule lists the signs (T4) |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior, and does one commit both add a mechanism and turn on its first user? |

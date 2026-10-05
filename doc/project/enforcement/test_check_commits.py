@@ -126,6 +126,26 @@ class CheckCommitsTest(unittest.TestCase):
         self.assertNotIn("starts its body with", result.stdout)
         self.assertNotIn("has a body of", result.stdout)
 
+    def test_revision_history_and_a_test_log_give_notes(self):
+        self.commit("a: change: one value\n\nThe value was wrong.\n\n"
+                    "Audit correction validation: the earlier revision failed.\n\n"
+                    "Validation: debug and release builds pass.", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("says 'Audit correction': describe the final change", result.stdout)
+        self.assertIn("has a 'Validation:' paragraph", result.stdout)
+
+    def test_a_message_about_the_final_change_is_quiet(self):
+        self.commit("a: fix: one value\n\nThe value was wrong. The regression test fails against "
+                    "the old code, and the validation of the input stays as it is.", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertNotIn("describe the final change", result.stdout)
+        self.assertNotIn("paragraph: test logs", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

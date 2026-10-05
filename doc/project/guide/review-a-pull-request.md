@@ -160,6 +160,9 @@ abstract subject passes every mechanical check and can still hold several change
   actions, or a body that needs the diff to make sense, is a `FLAG`.
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
+- **[PR-MSG-FACTS](../rule/pull-request.md#pr-msg-facts)** — does a message describe only the final
+  change? A section on the history of the pull request, or a test log that the description should
+  carry, is a `FLAG`.
 - **[PR-MSG-REPRODUCE](../rule/pull-request.md#pr-msg-reproduce)** — every commit the breakdown
   counts under `fix` must say how to see the defect happen. Steps are enough for most; ask for a
   regression test only where the defect sits on a crossed path, could return under a refactor, or

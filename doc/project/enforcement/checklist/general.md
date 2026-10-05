@@ -85,6 +85,12 @@ starts with a list of actions that the diff already shows. FLAG a body that a re
 understand in about two minutes without the diff. *Not a violation:* a commit without a body under
 PR-MSG-BODY, or a body of one short paragraph that states the reason.
 
+**[PR-MSG-FACTS] Does a commit message describe only the final change?**
+FLAG a message with a section on the history of the pull request — an audit correction, a review
+round, an earlier revision — and a message that carries a test log that belongs in the pull request
+description. *Not a violation:* the regression test of a fix, or the case that shows that a moved
+baseline is right.
+
 **[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
 FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
 C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves

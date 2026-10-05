@@ -14,7 +14,7 @@
 #   PR-MSG-BODY          — an empty body above 50 changed lines, outside the exempt kinds
 #   PR-MSG-SUBJECT       — "area: what it does", no file path, no link; length fails above 80,
 #                          and is reported as a note between 73 and 80
-#   PR-MSG-FACTS         — no attribution trailer
+#   PR-MSG-FACTS         — no attribution trailer; note: words of revision history, a test log
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
 #   PR-MSG-SUMMARY       — note: a first paragraph above 120 words, or a body above 300 words
@@ -112,6 +112,24 @@ while read -r sha; do
   if [ "$words" -gt 300 ]; then
     note "${sha:0:9} has a body of $words words, above 300: one change, and no pull-request evidence?"
     quiet=0
+  fi
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
+
+echo
+echo "== PR-MSG-FACTS: the final change, without revision history or test logs (notes only) =="
+# The phrases are the ones that only the history of a pull request explains. A 'Validation:'
+# paragraph is a test log: one run on one machine, which the pull request description carries.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  msg=$(git log -1 --format=%b "$sha")
+  history=$(grep -oiE 'audit correction|correction validation|after review|review round|former library|(earlier|previous) revision' <<< "$msg" | head -1)
+  if [ -n "$history" ]; then
+    note "${sha:0:9} says '$history': describe the final change, not the way to it"; quiet=0
+  fi
+  if grep -qE '^Validation:' <<< "$msg"; then
+    note "${sha:0:9} has a 'Validation:' paragraph: test logs belong in the pull request"; quiet=0
   fi
 done <<< "$COMMITS"
 [ "$quiet" -eq 1 ] && echo "  ok"
