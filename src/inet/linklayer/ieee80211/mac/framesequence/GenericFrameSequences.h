@@ -117,4 +117,3 @@ class INET_API AlternativesFs : public IFrameSequence
 } // namespace inet
 
 #endif
-

@@ -78,4 +78,3 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 } /* namespace inet */
 
 #endif
-

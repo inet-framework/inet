@@ -96,4 +96,3 @@ bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequen
 
 } // namespace ieee80211
 } // namespace inet
-

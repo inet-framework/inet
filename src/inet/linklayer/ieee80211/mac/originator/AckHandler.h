@@ -57,4 +57,3 @@ class INET_API AckHandler : public SimpleModule, public IAckHandler
 } /* namespace inet */
 
 #endif
-

@@ -434,4 +434,3 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
 
 } // namespace ieee80211
 } // namespace inet
-
