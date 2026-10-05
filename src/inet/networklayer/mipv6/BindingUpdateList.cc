@@ -161,7 +161,7 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
 }
 
 void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& addr,
-        const simtime_t sentTime, const int cookie, bool HoTI = false)
+        const simtime_t sentTime, const uint64_t cookie, bool HoTI = false)
 {
     EV_INFO << "\n++++++++++++++++++++Binding Update List for HoTI/CoTI Being Updated in Routing Table6 ++++++++++++++\n";
     // search for entry

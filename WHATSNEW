@@ -309,6 +309,19 @@ Notable backward incompatible changes are the following:
    Ieee80211ModeBase supplies default unknown values for custom subclasses.
    The migration guide explains the return values and required overrides.
 
+18. A Mobile IPv6 mobile node uses a new cookie in every test init message
+
+   Every Home Test Init carried the Home Init Cookie 11 and every Care-of Test
+   Init the Care-of Init Cookie 21, retransmissions included, so a mobile node
+   could not tell the answers to two transmissions apart. Each transmission
+   now carries a new random 64-bit cookie (RFC 6275 Sections 5.2.3 and 11.8),
+   drawn from random number generator 0 of the Mipv6 module. This changes the
+   results of simulations that use route optimization.
+
+   The HO_COOKIE and CO_COOKIE constants are removed, and
+   BindingUpdateList::addOrUpdateBUL() takes the cookie as uint64_t, as
+   described in the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -381,6 +394,16 @@ Notable backward compatible changes are the following:
    state from the callback; teardown does not remove that replacement.
    Direct HT or rate removal still emits its own notification if state changes.
    Empty teardown emits no signal. Existing configuration parameters stay unchanged.
+
+7. A Mobile IPv6 mobile node ignores a second Home Test or Care-of Test
+
+   A mobile node accepted a Home Test or Care-of Test for a correspondent
+   node whose keygen token it already held, and sent the correspondent node
+   another Binding Update. This happened when the Home Test arrived after the
+   1 s retransmission interval, so the mobile node had retransmitted the Home
+   Test Init and both transmissions were answered.
+   The mobile node now ignores such a message, as RFC 6275 Section 11.6.2
+   requires.
 
 
 INET-4.7 (July 2026) — feature release
