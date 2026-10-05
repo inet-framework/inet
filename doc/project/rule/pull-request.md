@@ -55,6 +55,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | --- | --- |
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
+| [PR-MSG-SUMMARY](#pr-msg-summary) | The body starts with a summary that a reviewer understands in two minutes |
 | [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
 | [PR-MSG-REPRODUCE](#pr-msg-reproduce) | A fix says how to reproduce the defect |
 | [PR-MSG-PLAN](#pr-msg-plan) | A commit that implements a plan names it |
@@ -388,7 +389,7 @@ itself. Of the nine commits above it that carry no body, six are the exempt kind
 
 | | Where it belongs |
 | --- | --- |
-| **what** the commit does | the subject names it; the diff shows it. The body must not restate it. |
+| **what** the commit does | the subject names it, and the summary describes it at the level of components and contracts ([PR-MSG-SUMMARY](#pr-msg-summary)). The diff shows the lines; the body must not restate them. |
 | **how** it does it | the diff shows it. *Which* mechanism, and *why that one and not the obvious alternative*, is part of the reason and belongs in the body. |
 | **why** it was done | the body, and nothing else carries it. The symptom, the cause, the alternative rejected, and what the change deliberately leaves unrepaired. |
 
@@ -398,11 +399,40 @@ the time to discover that it says nothing.
 *Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) fails an empty body above 50
 changed lines, outside the exempt kinds; T4 for whether the body gives a reason at all.*
 
+### PR-MSG-SUMMARY
+
+**The body starts with a summary that a reviewer understands in two minutes**
+
+Start the body with a summary of one to three short paragraphs. The summary says which problem the
+commit solves, what the solution does at the level of components and contracts, and which effect a
+user or a later developer sees. A reviewer who reads only the summary knows what the commit does and
+why, without the diff.
+
+Details come after the summary: the mechanism and why it was chosen, edge cases, standard clauses,
+migration notes, the account of moved baselines. A reader who needs them reads on. A reader who
+scans `git log` stops after the summary.
+
+The summary is not a list of actions. "Add X. Change Y. Remove Z." repeats the diff and leaves the
+reader to find the reason. Write the problem first, then the idea of the solution.
+
+**Keep the body short.** The first paragraph aims for about 100 words, and the whole body for about
+300. Both numbers are measured: across master's last 1000 commits, 99 % of first paragraphs have at
+most 121 words, and 95 % of bodies have at most 291. A body that needs much more usually describes
+more than one change ([PR-SPLIT-ONE-CHANGE](#pr-split-one-change)), or carries evidence that belongs
+in the pull request ([PR-MSG-FACTS](#pr-msg-facts)).
+
+A commit whose subject is the whole story needs no body ([PR-MSG-BODY](#pr-msg-body)). In a body of
+one short paragraph, that paragraph is the summary.
+
+*Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) gives a note when the first
+paragraph has more than 120 words or the body more than 300; T4 — agent review: does the summary
+state the problem and the idea of the solution?*
+
 ### PR-MSG-WHY
 
 **The body gives the reason, not the content**
 
-The diff already shows what changed. The body says why: the symptom, the cause, why this
+The diff already shows what changed, line by line. The body says why: the symptom, the cause, why this
 solution and not an obvious alternative, and what the change deliberately does not repair.
 
 For a bug fix, write the symptom in the words a future reader will search for — the error
@@ -580,5 +610,6 @@ argue about.
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior, and does one commit both add a mechanism and turn on its first user? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |
 | PR-MSG-BODY | T3+T4 | commit-message lint: an empty body above 50 changed lines, outside the exempt kinds; agent review for a body that restates the subject |
+| PR-MSG-SUMMARY | T3+T4 | note: a first paragraph above 120 words or a body above 300 words (T3) + agent review: does the summary state the problem and the idea of the solution? (T4) |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |

@@ -95,6 +95,37 @@ class CheckCommitsTest(unittest.TestCase):
         result = self.check()
         self.assertNotIn("source lines, above 400", result.stdout)
 
+    def words(self, count):
+        return " ".join("word" for _ in range(count))
+
+    def test_a_long_first_paragraph_gives_a_summary_note(self):
+        self.commit(f"a: change: one value\n\n{self.words(121)}\n\nChange: src | behavior.change | -", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("starts its body with 121 words, above 120", result.stdout)
+        self.assertNotIn("has a body of", result.stdout)
+
+    def test_a_long_body_gives_a_length_note(self):
+        paragraphs = "\n\n".join(self.words(100) for _ in range(3))
+        self.commit(f"a: change: one value\n\n{paragraphs}\n\n{self.words(1)}\n\n"
+                    "Change: src | behavior.change | -", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertIn("has a body of 301 words, above 300", result.stdout)
+        self.assertNotIn("starts its body with", result.stdout)
+
+    def test_a_short_summary_is_quiet(self):
+        self.commit(f"a: change: one value\n\n{self.words(120)}\n\n{self.words(180)}\n\n"
+                    "Plan: plan/pending/a.md\nChange: src | behavior.change | -", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertNotIn("starts its body with", result.stdout)
+        self.assertNotIn("has a body of", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -79,6 +79,12 @@ body: does it give the symptom, the cause, and why this solution rather than the
 *Not a violation:* a bare subject on a rename, an include ordering, a whitespace commit, a plan or
 documentation commit, a regenerated file, or a `WHATSNEW` entry.
 
+**[PR-MSG-SUMMARY] Does a commit body start with a summary?**
+FLAG a body whose first paragraphs do not state the problem and the idea of the solution, or that
+starts with a list of actions that the diff already shows. FLAG a body that a reviewer cannot
+understand in about two minutes without the diff. *Not a violation:* a commit without a body under
+PR-MSG-BODY, or a body of one short paragraph that states the reason.
+
 **[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
 FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
 C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves

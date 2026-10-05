@@ -155,6 +155,9 @@ abstract subject passes every mechanical check and can still hold several change
   a different thing from one where the habit is absent. `git log --format='%h %s' --no-walk
   $(git log --format=%H $MB..HEAD | while read c; do [ -z "$(git log -1 --format=%b $c | grep -v '^$')" ] && echo $c; done)`
   lists every commit with no body at all.
+- **[PR-MSG-SUMMARY](../rule/pull-request.md#pr-msg-summary)** — read only the summary of each body.
+  After about two minutes, do you know what the commit does and why? A summary that is a list of
+  actions, or a body that needs the diff to make sense, is a `FLAG`.
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
 - **[PR-MSG-REPRODUCE](../rule/pull-request.md#pr-msg-reproduce)** — every commit the breakdown

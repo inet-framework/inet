@@ -17,6 +17,7 @@
 #   PR-MSG-FACTS         — no attribution trailer
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
+#   PR-MSG-SUMMARY       — note: a first paragraph above 120 words, or a body above 300 words
 #
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-commits.sh origin/master..HEAD
@@ -92,6 +93,28 @@ while read -r sha; do
   flag "$short has no body and changes $lines lines: $(git log -1 --format=%s "$sha")"; ok=0
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
+
+echo
+echo "== PR-MSG-SUMMARY: the body starts with a short summary (notes only) =="
+# 120 and 300 are measured: across master's last 1000 commits, 99 % of first paragraphs have at
+# most 121 words and 95 % of bodies have at most 291. The trailers are not part of the body.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  body=$(git log -1 --format=%b "$sha" \
+         | grep -vE '^(Change|Plan|Fixes|Closes|Refs|Co-Authored-By|Signed-off-by|Reviewed-by):')
+  words=$(wc -w <<< "$body")
+  first=$(awk 'NF == 0 && seen {exit} NF {seen = 1; print}' <<< "$body" | wc -w)
+  if [ "$first" -gt 120 ]; then
+    note "${sha:0:9} starts its body with $first words, above 120: is the first paragraph a summary?"
+    quiet=0
+  fi
+  if [ "$words" -gt 300 ]; then
+    note "${sha:0:9} has a body of $words words, above 300: one change, and no pull-request evidence?"
+    quiet=0
+  fi
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
 
 echo
 echo "== PR-SPLIT-BASELINE: a baseline update travels with the change that causes it =="
