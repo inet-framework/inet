@@ -49,6 +49,7 @@ class INET_API Tx : public SimpleModule, public ITx
 
     void transmitFrame(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
     Cancellation cancelPendingTransmission(TxRequestId id) override;
+    void resetForLifecycle(uint64_t epoch) override;
     [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
     virtual void radioTransmissionFinished() override;
 };

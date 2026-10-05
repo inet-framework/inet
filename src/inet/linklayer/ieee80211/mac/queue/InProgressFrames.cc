@@ -78,6 +78,18 @@ void InProgressFrames::ensureHasFrameToTransmit()
     }
 }
 
+void InProgressFrames::resetForLifecycle()
+{
+    Enter_Method("resetForLifecycle");
+    lifecycleEpoch++;
+    auto retained = inProgressFrames;
+    for (auto frame : retained) {
+        ackHandler->dropFrame(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        dropFrame(frame);
+    }
+    // A synchronous callback can still borrow a dropped frame. Normal deferred cleanup owns disposal.
+}
+
 Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();

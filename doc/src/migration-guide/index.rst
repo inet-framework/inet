@@ -11,21 +11,54 @@ Tx is the component that transmits frames for medium access control (MAC). The h
 
 Each Tx request has an identity before any synchronous callback can occur. The identity contains a lifecycle epoch and a serial. A lifecycle epoch identifies one MAC lifecycle instance. A borrowed pointer gives access without ownership; its owner must keep the object alive during that access. A callback scope covers callback entry, nested callbacks, and return.
 
+Restart changes the epoch so that old identities cannot identify new requests.
+
 Production HCF retains its legacy path at this commit.
 
 External implementations require these changes:
 
 * Adapt the sequence handler callbacks below. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
 
-  Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope.
-* Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``. The MAC allocates ``TxRequestId`` before the call. Implement ``cancelPendingTransmission()``.
+  Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope. Implement ``resetForLifecycle()``.
+* Implement ``IAckHandler::dropFrame()`` for MAC lifecycle reset.
+* Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``. The MAC allocates ``TxRequestId`` before the call. Implement ``cancelPendingTransmission()``. Implement ``resetForLifecycle()``.
 * Implement the Tx callback ``isTransmissionPermitted()``. Implement ``transmissionStarted()``. Implement ``transmissionCanceled()``. Implement ``beginCallback()`` to protect borrowed sequence objects throughout each callback scope. Implement ``endCallback()`` to release that callback scope. Add the request identity to ``transmissionComplete()``.
 
 The final permission check runs for zero IFS too. Tx must check identity again after a callback that can replace the request. Hypothetical: request A waits for IFS, and its permission callback replaces A with B. Tx detects the changed identity and cannot transmit A. The check leaves B under its own request identity.
 
-Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``. Only ``CANCELED`` removes the matching delayed copy. Explicit cancellation emits no completion callback. The caller reports successful explicit cancellation to the matching handler once. An on-air request keeps its normal completion path.
+Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``. Only ``CANCELED`` removes the matching delayed copy. Explicit cancellation emits no completion callback. The caller reports successful explicit cancellation to the matching handler once. An on-air request keeps its normal completion path unless lifecycle cleanup aborts it.
 
 Rebuild external implementations after these interface changes. Preserve the accepted-request contract in `IEEE 802.11 Radio Command Deferral`_ below. That section defines ``ITx::hasTransmission()`` and supplies the ACK/SIFS example. The query also returns false after cancellation or lifecycle reset releases the accepted request.
+
+IEEE 802.11 Block Ack Inactivity Deadlines
+------------------------------------------
+
+Block Ack reports reception status for multiple frames under an agreement. Add block acknowledgment (ADDBA) establishes the agreement. Delete block acknowledgment (DELBA) ends it. The traffic identifier (TID) identifies the agreement's traffic class or stream.
+
+HCF retains Block Ack agreements across stop and crash. Downtime counts toward each absolute inactivity deadline. Restart retires overdue agreements before timeout DELBA or other traffic requests channel access. HCF restores the earliest deadline from the remaining agreements. An agreement with timeout zero has no inactivity deadline.
+
+Hypothetical: an agreement expires at 5 s, and the node restarts at 6 s. HCF retires the agreement before channel access because downtime counts toward the deadline. With timeout zero, downtime causes no inactivity expiry.
+
+Late Block Ack activity cannot renew an overdue agreement. HCF discards a data frame that reaches an overdue recipient agreement. HCF also discards Block Ack data after retirement removes the agreement.
+
+The recipient handler sends UNKNOWN_BA DELBA when no agreement exists. Normal Ack and No Ack data retain their current receive paths.
+
+Recipient retirement releases the corresponding reorder buffer. A replacement ADDBA therefore uses its own starting sequence number and buffer size. For example, the retirement test buffers sequence 20 under an agreement that starts at sequence 19. Expiry clears that buffer, and a replacement agreement starts at sequence 100. HCF can deliver sequence 100 without the old window. Other peers and TIDs retain their buffers.
+
+HCF emits one deletion notification for each retired agreement. Delayed timeout DELBA completion preserves a replacement agreement without another deletion notification. Delayed UNKNOWN_BA DELBA completion also preserves a replacement agreement.
+
+External implementations require these changes:
+
+* Implement ``getEarliestExpirationTime() const`` in both agreement handlers. Return the earliest active absolute deadline, or ``SIMTIME_MAX`` if none exists.
+* Add the agreement callback argument to ``blockAckAgreementExpired()``. Return timeout DELBA chunks. Remove all overdue entries before deletion callbacks. HCF queues the chunks after both roles complete retirement.
+* Implement ``IBlockAckAgreementHandlerCallback::expireBlockAckAgreements()`` to coordinate both roles. Implement ``originatorBlockAckAgreementDeleted()``. Implement ``recipientBlockAckAgreementDeleted()``. The handler owns each borrowed agreement until the deletion callback returns. The callback must not retain or modify the agreement. Complete recipient buffer cleanup before the deletion notification.
+* Add the agreement callback argument to ``processReceivedDelba()`` and ``processTransmittedDelba()``. Notify only when the handler removes an agreement.
+* Add an ``IProcedureCallback *`` argument to ``qosFrameReceived()``. Return false for Block Ack data when the agreement is absent or overdue. Request expiry for overdue state before this return. For absent state, queue UNKNOWN_BA DELBA through the procedure callback. The procedure callback takes ownership of the new management Packet. The caller discards the data frame on a false result.
+
+  DELBA completion must preserve a replacement after TIMEOUT or UNKNOWN_BA.
+* Implement ``IRecipientQosMacDataService::clearReorderBuffer(originatorAddress, tid)``. Release only that peer and TID's buffer with its retained frames. Other peers and TIDs keep their buffers.
+
+The timer callback uses ``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` without an argument. The callback reads both handlers and schedules their earliest absolute deadline. Rebuild external agreement handlers, callbacks, and recipient data services after these interface changes.
 
 IEEE 802.11 Radio Command Deferral
 ---------------------------------

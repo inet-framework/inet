@@ -129,6 +129,18 @@ ITx::Cancellation Tx::cancelPendingTransmission(TxRequestId id)
     return Cancellation::CANCELED;
 }
 
+void Tx::resetForLifecycle(uint64_t epoch)
+{
+    Enter_Method("resetForLifecycle");
+    cancelEvent(endIfsTimer);
+    auto oldFrame = frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    requestId = {};
+    transmitting = false;
+    lifecycleEpoch = epoch;
+    delete oldFrame;
+}
 
 void Tx::sendPendingFrame()
 {

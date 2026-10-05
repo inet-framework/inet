@@ -53,6 +53,12 @@ Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
         return nullptr;
 }
 
+void RecipientQosMacDataService::clearReorderBuffer(MacAddress originatorAddress, Tid tid)
+{
+    Enter_Method("clearReorderBuffer");
+    blockAckReordering->clearReceiveBuffer(originatorAddress, tid);
+}
+
 std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     Enter_Method("dataFrameReceived");
@@ -122,8 +128,6 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     if (basicReassembly) { // FIXME defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
-    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
-        blockAckReordering->processReceivedDelba(delba);
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
     if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
         delete mgmtPacket;

@@ -78,6 +78,10 @@ void Dcf::handleMessage(cMessage *msg)
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
+    if (lifecycleStopped) {
+        channelAccess->releaseChannel(this);
+        return;
+    }
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
@@ -224,7 +228,7 @@ void Dcf::frameSequenceFinished()
     Enter_Method("frameSequenceFinished");
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     channelAccess->releaseChannel(this);
-    if (hasFrameToTransmit())
+    if (!lifecycleStopped && hasFrameToTransmit())
         channelAccess->requestChannel(this);
     mac->sendDownPendingRadioConfigMsg(); // TODO review
 }
@@ -455,7 +459,7 @@ Dcf::~Dcf()
 
 bool Dcf::isTransmissionPermitted(TxRequestId id)
 {
-    return id == activeRequest && mac->isCurrentTxRequest(id);
+    return id == activeRequest && !lifecycleStopped && mac->isCurrentTxRequest(id);
 }
 
 void Dcf::beginCallback()
@@ -484,7 +488,26 @@ void Dcf::transmissionCanceled(TxRequestId id)
     frameSequenceHandler->pendingTransmissionCanceled(id);
 }
 
+void Dcf::resetForLifecycle()
+{
+    Enter_Method("resetForLifecycle");
+    if (lifecycleStopped)
+        return;
+    lifecycleStopped = true;
+    cancelEvent(startRxTimer);
+    frameSequenceHandler->resetForLifecycle(requestOnAir);
+    channelAccess->getInProgressFrames()->resetForLifecycle();
+    activeRequest = {};
+    responseRequest = false;
+    requestOnAir = false;
+}
 
+void Dcf::resumeAfterLifecycle()
+{
+    lifecycleStopped = false;
+    if (hasFrameToTransmit())
+        channelAccess->requestChannel(this);
+}
 
 } // namespace ieee80211
 } // namespace inet

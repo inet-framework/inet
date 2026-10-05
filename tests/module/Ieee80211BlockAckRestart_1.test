@@ -1,0 +1,262 @@
+%description:
+A real add block acknowledgment (ADDBA) exchange establishes Block Ack agreements before stop or crash. Block Ack reports reception status for multiple frames under an agreement. Restart restores finite deadlines for the originator and the recipient. An expired deadline queues one delete block acknowledgment (DELBA) frame. Timeout zero has no deadline. IEEE Std 802.11-2024, 11.5.4 defines inactivity timeout and DELBA behavior.
+
+%extraargs: -c BlockAckRestart
+
+%file: BlockAckRestart.cc
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+
+namespace inet::ieee80211 {
+
+class BlockAckRestartHcf;
+
+class BlockAckRestartDriver : public cSimpleModule, public LifecycleController
+{
+  protected:
+    cMessage *timer = nullptr;
+    BlockAckRestartHcf *sender = nullptr;
+    bool checked = false;
+    BlockAckRestartHcf *target = nullptr;
+    int phase = 0;
+    void initialize() override { timer = new cMessage("lifecycleCheck"); }
+    void handleMessage(cMessage *message) override;
+    void finish() override
+    {
+        ASSERT(checked);
+        std::cout << "Block Ack restart preserves inactivity timeout semantics.\n";
+    }
+  public:
+    ~BlockAckRestartDriver() { cancelAndDelete(timer); }
+    void arm(BlockAckRestartHcf *hcf)
+    {
+        Enter_Method("arm");
+        if (sender)
+            return;
+        sender = hcf;
+        scheduleAfter(SimTime(1, SIMTIME_US), timer);
+    }
+};
+Define_Module(BlockAckRestartDriver);
+
+class BlockAckRestartHcf : public Hcf
+{
+  protected:
+    MacAddress peer;
+    Tid tid = -1;
+    bool recipient = false;
+    int timeoutFrames = 0;
+    int deletions = 0;
+    simtime_t deadline;
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header))
+            if (delba->getReceiverAddress() == peer && delba->getTid() == tid &&
+                delba->getInitiator() != recipient && delba->getReasonCode() == 39)
+                ASSERT(++timeoutFrames == 1);
+        Hcf::processMgmtFrame(packet, header);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        if (signal == blockAckAgreementDeletedSignal) {
+            if (auto agreement = dynamic_cast<RecipientBlockAckAgreement *>(object)) {
+                auto record = agreement->getBlockAckRecord();
+                if (recipient && record->getOriginatorAddress() == peer && record->getTid() == tid)
+                    deletions++;
+            }
+            else if (auto agreement = dynamic_cast<OriginatorBlockAckAgreement *>(object))
+                if (!recipient && agreement->getReceiverAddr() == peer && agreement->getTid() == tid)
+                    deletions++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, object, details);
+    }
+    void transmissionStarted(TxRequestId id) override
+    {
+        Hcf::transmissionStarted(id);
+        if (getFullPath().find("cliHost") != std::string::npos && hasBlockAckDataOnAir())
+            check_and_cast<BlockAckRestartDriver *>(getSimulation()->getSystemModule()->getSubmodule("test"))->arm(this);
+    }
+  public:
+    bool hasBlockAckDataOnAir() const
+    {
+        if (!requestOnAir || responseRequest || !frameSequenceHandler->isSequenceRunning())
+            return false;
+        auto step = dynamic_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        if (!step)
+            return false;
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(step->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>());
+        return header && header->getAckPolicy() == BLOCK_ACK;
+    }
+    Ptr<const Ieee80211DataHeader> getActiveDataHeader() const
+    {
+        auto step = check_and_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        return step->getFrameToTransmit()->peekAtFront<Ieee80211DataHeader>();
+    }
+    void observeAgreement(const Ptr<const Ieee80211DataHeader>& header, bool atRecipient)
+    {
+        recipient = atRecipient;
+        peer = recipient ? header->getTransmitterAddress() : header->getReceiverAddress();
+        tid = header->getTid();
+        subscribe(blockAckAgreementDeletedSignal, this);
+        if (recipient) {
+            auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
+            ASSERT(agreement);
+            deadline = agreement->getExpirationTime();
+        }
+        else {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+            ASSERT(agreement && agreement->getIsAddbaResponseReceived());
+            deadline = agreement->getExpirationTime();
+        }
+        ASSERT(deadline == SIMTIME_MAX || deadline > simTime());
+        ASSERT(inactivityTimer->isScheduled() == (deadline != SIMTIME_MAX));
+    }
+    void checkRestart() const
+    {
+        ASSERT(!lifecycleStopped);
+        if (deadline == SIMTIME_MAX)
+            ASSERT(!inactivityTimer->isScheduled());
+        else if (deadline <= simTime()) {
+            ASSERT(timeoutFrames == 1 && deletions == 1);
+            if (recipient)
+                ASSERT(!recipientBlockAckAgreementHandler->getAgreement(tid, peer));
+            else
+                ASSERT(!originatorBlockAckAgreementHandler->getAgreement(peer, tid));
+        }
+        else {
+            ASSERT(inactivityTimer->isScheduled());
+            auto earliest = std::min(originatorBlockAckAgreementHandler->getEarliestExpirationTime(),
+                                     recipientBlockAckAgreementHandler->getEarliestExpirationTime());
+            ASSERT(inactivityTimer->getArrivalTime() == std::max(simTime(), earliest));
+        }
+    }
+    simtime_t getCheckTime() const
+    {
+        return deadline == SIMTIME_MAX ? simTime() + SimTime(2, SIMTIME_S) :
+               std::max(simTime(), deadline) + SimTime(1, SIMTIME_US);
+    }
+    void checkTimeout() const
+    {
+        ASSERT(timeoutFrames == (deadline == SIMTIME_MAX ? 0 : 1));
+        ASSERT(deletions == timeoutFrames);
+        if (recipient) {
+            auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
+            ASSERT(deadline == SIMTIME_MAX || !agreement);
+        }
+        else {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+            ASSERT(deadline == SIMTIME_MAX || !agreement);
+        }
+        ASSERT(!inactivityTimer->isScheduled() || inactivityTimer->getArrivalTime() > simTime());
+    }
+    void checkStopped() const
+    {
+        ASSERT(lifecycleStopped && !requestOnAir && !tx->hasTransmission());
+        ASSERT(!frameSequenceHandler->isSequenceRunning());
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+            ASSERT(edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->getLength() == 0);
+    }
+};
+Define_Module(BlockAckRestartHcf);
+
+void BlockAckRestartDriver::handleMessage(cMessage *message)
+{
+    ASSERT(message == timer && sender);
+    auto client = getParentModule()->getSubmodule("cliHost");
+    auto ap = getParentModule()->getSubmodule("ap");
+    auto host = par("recipient").boolValue() ? ap : client;
+    if (phase == 0) {
+        ASSERT(sender->hasBlockAckDataOnAir());
+        target = check_and_cast<BlockAckRestartHcf *>(host->getSubmodule("wlan", 0)->getSubmodule("mac")->getSubmodule("hcf"));
+        target->observeAgreement(sender->getActiveDataHeader(), par("recipient").boolValue());
+        // Stop both peers so that no new Block Ack activity extends the observed deadline.
+        for (auto node : {client, ap}) {
+            LifecycleOperation *operation = par("crash").boolValue() ?
+                static_cast<LifecycleOperation *>(new ModuleCrashOperation()) : new ModuleStopOperation();
+            LifecycleOperation::StringMap parameters;
+            operation->initialize(node, parameters);
+            initiateOperation(operation);
+        }
+        phase = 1;
+        scheduleAfter(par("downtime"), timer);
+    }
+    else if (phase == 1) {
+        target->checkStopped();
+        ASSERT(check_and_cast<NodeStatus *>(host->getSubmodule("status"))->getState() == NodeStatus::DOWN);
+        auto operation = new ModuleStartOperation();
+        LifecycleOperation::StringMap parameters;
+        operation->initialize(host, parameters);
+        initiateOperation(operation);
+        target->checkRestart();
+        phase = 2;
+        scheduleAt(target->getCheckTime(), timer);
+    }
+    else {
+        target->checkTimeout();
+        checked = true;
+        endSimulation();
+    }
+}
+
+} // namespace inet::ieee80211
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.examples.wireless.qos.QosThroughput;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+
+module BlockAckRestartHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::BlockAckRestartHcf);
+}
+simple BlockAckRestartDriver extends SimpleModule
+{
+    parameters:
+        bool crash;
+        bool recipient;
+        double downtime @unit(s);
+        @class(::inet::ieee80211::BlockAckRestartDriver);
+}
+network BlockAckRestartNetwork extends QosThroughput
+{
+    submodules:
+        test: BlockAckRestartDriver;
+}
+
+%inifile: omnetpp.ini
+include ../../../../examples/wireless/qos/omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples;../../lib
+
+[Config BlockAckRestart]
+extends = MacQosWithBlockAck
+network = BlockAckRestartNetwork
+sim-time-limit = 6s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.cliHost.hasStatus = true
+*.ap.hasStatus = true
+*.cliHost.wlan[*].mac.hcf.typename = "BlockAckRestartHcf"
+*.ap.wlan[*].mac.hcf.typename = "BlockAckRestartHcf"
+*.test.crash = ${false,true}
+*.test.recipient = ${false,true}
+*.test.downtime = ${1ms,2s}
+**.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = ${timeout=0s,1s}
+**.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = ${timeout}
+
+%contains: stdout
+Block Ack restart preserves inactivity timeout semantics.
+
+%not-contains: stdout
+<!> Warning:
+
+%not-contains: stderr
+<!> Warning:

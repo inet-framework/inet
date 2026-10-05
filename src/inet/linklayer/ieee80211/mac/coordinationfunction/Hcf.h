@@ -99,6 +99,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     TxRequestId activeRequest;
     bool responseRequest = false;
     bool requestOnAir = false;
+    bool lifecycleStopped = false;
 
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
@@ -168,14 +169,19 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
-    // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    // IBlockAckAgreementHandlerCallback
+    virtual void scheduleInactivityTimer() override;
+    void expireBlockAckAgreements() override;
+    void originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement) override;
+    void recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement) override;
 
     std::string getFrameSequenceInfo() const;
 
   public:
     virtual ~Hcf();
 
+    void resetForLifecycle();
+    void resumeAfterLifecycle();
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

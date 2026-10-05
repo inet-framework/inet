@@ -79,6 +79,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     TxRequestId activeRequest;
     bool responseRequest = false;
     bool requestOnAir = false;
+    bool lifecycleStopped = false;
 
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
@@ -134,6 +135,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
   public:
     virtual ~Dcf();
 
+    void resetForLifecycle();
+    void resumeAfterLifecycle();
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

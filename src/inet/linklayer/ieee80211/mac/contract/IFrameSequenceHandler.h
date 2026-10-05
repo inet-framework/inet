@@ -50,6 +50,7 @@ class INET_API IFrameSequenceHandler
     virtual void handleStartRxTimeout() = 0;
     virtual void setPendingTransmission(TxRequestId id) = 0;
     virtual void pendingTransmissionCanceled(TxRequestId id) = 0;
+    virtual void resetForLifecycle(bool onAir) = 0;
     virtual void beginCallback() = 0;
     virtual void endCallback() = 0;
 };
