@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3 and S4 on 2026-10-05. S5 is next.
+Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05. S5b is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -49,8 +49,11 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S2 ✅ | `topic/tcp-tidy-ups` | 4, 5, 6, 21 | +193 −134 | RFC citations, the signals in one place, the ACK callback rename |
 | S3 ✅ | `topic/tcp-socket-contract` | 2 | +475 −1 | the socket commands, tags and status fields (commit 3 left the stage, see D-4) |
 | S4 ✅ | `topic/tcp-recovery-split` | 7, 8, 9, 10 + 50 | +1872 −4 | the recovery interfaces and the RFC 5681, RFC 6582 and RFC 6675 strategies, which nothing selects yet (D-5) |
-| S5 | `topic/tcp-flavour-split` | 11, 12, 13, 54, 55, 56, 60, 84 | +1101 −1312 | the classic flavours on the split architecture, and the repairs of that move |
-| S6 | `topic/tcp-cubic` | 14, 45, 57, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
+| S5 ✅ | `topic/tcp-flavour-split` | 11, 12 | +152 −136 | the move and the rename of the two base classes (D-6) |
+| S5b | `topic/tcp-flavour-strategies` | 13 (part), 55 (part) | — | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
+| S5c | `topic/tcp-classic-recovery` | 13 (part), 54, 55 (part), 56, 70 | — | the behavior changes B4 to B8, B10, B11 of D-6, one change per commit |
+| S5d | `topic/tcp-sack-recovery` | 13 (part) | — | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6 |
+| S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
 | S8 | `topic/tcp-rack` | 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
@@ -91,6 +94,31 @@ Known items for later stages, found by the blame:
   Nothing sets that field before commit 15 (S7), so its value is 0. Commit 13 (S5) makes the
   flavours call this function. S5 must not land a missing floor: it either sets `snd_effmss`
   earlier or uses `snd_mss` until S7.
+
+### The behavior changes inside commit 13
+
+Against master, the folded commit 13 changes these behaviors. Each line names where the
+behavior goes.
+
+| # | Behavior | Master | Commit 13 | Goes to |
+| --- | --- | --- | --- | --- |
+| B1 | who counts duplicate ACKs | the connection | the algorithm | S5b, refactor |
+| B2 | send times of Vegas and Westwood | a list in each flavour | one list in `TcpAlgorithmBase`, with a range guard | S5b, refactor if the guard never refuses |
+| B3 | the flavours as a choice of strategies | logic in each flavour | `Rfc5681CongestionControl`, `Rfc5681Recovery`, `Rfc6582Recovery`, `Rfc6675Recovery` | S5b, refactor: the strategies carry master's arithmetic |
+| B4 | what a duplicate ACK is | same ACK number, no data, data outstanding | RFC 5681: also the same window, no SYN and no FIN | S5c |
+| B5 | Reno fast retransmit and recovery | `cwnd = ssthresh + 3*SMSS`; recovery while `dupacks >= dupthresh` | `cwnd = ssthresh`; recovery while `lossRecovery`, which a timeout ends | S5c |
+| B6 | ssthresh at fast retransmit and timeout | `max(min(cwnd, snd_wnd)/2, 2*SMSS)` (a `FIXME` of master) | `max(FlightSize/2, 2*SMSS)` | S5c, with commit 70, the RFC 5681 equation (4) |
+| B7 | NewReno | full ACK: `min(ssthresh, FlightSize + SMSS)`; partial ACK deflates cwnd | full ACK: `ssthresh`; partial ACK does not deflate; the head is marked lost | S5c |
+| B8 | bytes in flight | `snd_max - snd_una` | minus SACKed and lost, plus retransmitted (Linux) | S5c, where B5 to B7 need it |
+| B9 | slow-start growth | `+SMSS` per ACK | `+min(acked, SMSS)` (RFC 5681 byte counting) and the cwnd-limited gate | S7, with `maxPacketsOut` (commit 16) |
+| B10 | ECN reaction | Reno only; `ssthresh = cwnd/2`, floor 1 octet | every classic flavour; `ssthresh = cwnd` after halving, floor 1 SMSS (commit 54) | S5c |
+| B11 | Tahoe at the third duplicate ACK | ssthresh from B6, `cwnd = SMSS`, one retransmission | `ssthresh = cwnd/2`, the timeout path | S5c |
+| B12 | SACK loss recovery | the connection's copy (D-5) | `Rfc6675Recovery`, with the differences of commit 10, and `ensureRexmitTimerArmed()` | S5d |
+| B13 | immediate ACK while the own sender recovers | yes | no | S5d |
+| B14 | a pure window update with nothing in flight | ignored; the persist timer probes | updates the window and sends (commit 84) | S15 |
+| B15 | first zero-window probe | after `persist_timeout` | after one RTO (Linux) | S15 |
+| B16 | DCTCP | its own SACK path on the connection | `Rfc6675Recovery`; `ecnMarkAll`; an AccECN branch | S5d, the AccECN branch in S13 |
+| B17 | bookkeeping without effect | — | `minRtt`, `zeroWindowProbesSent`, `time_last_data_sent` at establishment, the Fast Open window | their feature stages: S8, S12 |
 
 ## 4. The procedure of one stage
 
@@ -149,6 +177,17 @@ plan gives a reason for.
   copy, and each function of the copy goes in the commit that removes its declaration. The stage
   scripts check every commit for undefined `inet::` symbols
   (`nm -DC --undefined-only src/libINET_dbg.so`).
+- **D-6 — Commit 13 is not a refactor, so S5 holds only the refactor (owner, 2026-10-05).**
+  Commit 13 (`move the classic flavours onto the split architecture`) says `refactor`, but at S5
+  it failed 17 module tests and 3 TCP standards tests that pass on master, and it moved 62 `tplx`
+  and 57 `~tND` fingerprint rows. Slow start did not grow at all: the cwnd-limited gate of
+  `Rfc5681CongestionControl` reads `maxPacketsOut`, which nothing sets before commit 16. The
+  strategy classes hold their final code, with behaviors of later commits, and that code needs
+  state that only later commits maintain. On the source branch nobody saw this, because
+  `libINET` did not load at commits 10 to 38 (D-5). The owner chose option A: a stage that says
+  refactor keeps master's behavior exactly, and every new behavior comes as its own change, with
+  its own evidence. S5 therefore holds commits 11 and 12 only. The content of commit 13 and its
+  folded repairs (54, 55, 56, 84) becomes the stages S5b to S5d below.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -271,4 +310,31 @@ The first module run had two QUIC failures. The cause was the build, not S4: the
 tree got a fresh timestamp after the QUIC fixes of master were checked out, so `make` kept the old
 QUIC objects. After a rebuild of the three QUIC sources, all 348 tests pass. The fingerprints of
 both builds are equal, so the QUIC fixes move no row, and the S4 run is the baseline of S5.
+
+### S5 — `topic/tcp-flavour-split` — landed 2026-10-05
+
+The owner reviewed and approved S5, and decision D-6, on 2026-10-05. Each commit of S5b to S5d
+that moves a fingerprint gets its new stored values from the CI environment (owner, 2026-10-05).
+
+Two commits by Levente Meszaros: commits 11 and 12, the move and the rename of `TcpBaseAlg` and
+`TcpTahoeRenoFamily`. The first cut of S5 held commit 13 with commits 54, 55, 56 and 84 folded in,
+and with `snd_effmss = snd_mss` set before `established()`. That cut failed: see D-6. It is kept
+as the local branch `s5-folded-13`, for the stages S5b to S5d. Commit 60 moves to S6, because its
+subject is `TcpCubic`.
+
+| Suite | Result |
+| --- | --- |
+| series builds | commit 12 builds, with no undefined `inet::` symbol; commit 11 does not build alone, and PR-SERIES-BUILDS exempts it, because it only moves files |
+| unit | 114 PASS |
+| serializer | 4 PASS |
+| module | 348 PASS |
+| protocol `self/` and `tcp/` | as S1 |
+| fingerprint | no row differs from S4: 0 of 753 `tplx` rows, 0 of 638 `~tND` rows |
+
+Commit 12 owes `whatsnew migration`: the old names stay as deprecated aliases, and the release
+note (commit 66) lands with S20. The messages of both commits name this plan, and commit 12 no
+longer says that "the architecture commit after it" touches the same files.
+The move broke four links of the TCP evidence documents (`notes.md`, `results.md`) that point into
+`TcpBaseAlg.cc`; commit 12 points them at `TcpAlgorithmBase.cc`, at the same line numbers, which
+hold the same code.
 
