@@ -208,10 +208,19 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
     scheduleAfter(timeout, startRxTimer);
 }
 
-void Hcf::scheduleInactivityTimer(simtime_t timeout)
+void Hcf::scheduleInactivityTimer()
 {
     Enter_Method("scheduleInactivityTimer");
-    rescheduleAfter(timeout, inactivityTimer);
+    cancelEvent(inactivityTimer);
+    if (lifecycleStopped)
+        return;
+    simtime_t expirationTime = SIMTIME_MAX;
+    if (originatorBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, originatorBlockAckAgreementHandler->getEarliestExpirationTime());
+    if (recipientBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, recipientBlockAckAgreementHandler->getEarliestExpirationTime());
+    if (expirationTime != SIMTIME_MAX)
+        scheduleAt(std::max(simTime(), expirationTime), inactivityTimer);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -564,6 +573,7 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211M
             originatorBlockAckAgreementHandler->processTransmittedDelba(delba);
         else
             recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+        scheduleInactivityTimer();
     }
     else ; // TODO other mgmt frames if needed
 }
@@ -1001,7 +1011,9 @@ void Hcf::resetForLifecycle()
 
 void Hcf::resumeAfterLifecycle()
 {
+    Enter_Method("resumeAfterLifecycle");
     lifecycleStopped = false;
+    scheduleInactivityTimer();
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         if (hasFrameToTransmit(static_cast<AccessCategory>(ac)))
             edca->requestChannelAccess(static_cast<AccessCategory>(ac), this);

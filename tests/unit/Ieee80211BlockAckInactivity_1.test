@@ -1,0 +1,115 @@
+%description:
+Inactivity expiry retires agreements before callbacks and preserves replacement agreements on delayed DELBA completion.
+The handlers preserve later deadlines and ignore agreements without an accepted ADDBA response.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestOriginatorAgreements : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::createAgreement;
+    using OriginatorBlockAckAgreementHandler::updateAgreement;
+};
+
+class TestRecipientAgreements : public RecipientBlockAckAgreementHandler
+{
+  public:
+    using RecipientBlockAckAgreementHandler::addAgreement;
+};
+
+class InactivityCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    TestOriginatorAgreements *originator = nullptr;
+    TestRecipientAgreements *recipient = nullptr;
+    Ptr<Ieee80211AddbaRequest> request;
+    Ptr<Ieee80211AddbaResponse> response;
+    Ptr<const Ieee80211Delba> timeout;
+    int frames = 0;
+    int timerUpdates = 0;
+    void scheduleInactivityTimer() override { timerUpdates++; }
+    void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { ASSERT(false); }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        timeout = dynamicPtrCast<const Ieee80211Delba>(header);
+        ASSERT(timeout && timeout->getTid() == request->getTid() && timeout->getReasonCode() == 39);
+        ASSERT(++frames == 1);
+        // Re-enter the real handler after expiry. No expired agreement can remain visible.
+        if (originator) {
+            ASSERT(!originator->getAgreement(request->getReceiverAddress(), request->getTid()));
+            originator->createAgreement(request);
+            originator->updateAgreement(originator->getAgreement(request->getReceiverAddress(), request->getTid()), response);
+        }
+        else {
+            ASSERT(!recipient->getAgreement(request->getTid(), request->getTransmitterAddress()));
+            recipient->addAgreement(request);
+        }
+        delete packet;
+    }
+};
+
+%activity:
+wait(1);
+for (bool atRecipient : {false, true}) {
+    TestOriginatorAgreements originator;
+    TestRecipientAgreements recipient;
+    InactivityCallback callback;
+    callback.request = makeShared<Ieee80211AddbaRequest>();
+    callback.request->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    callback.request->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+    callback.request->setTid(5);
+    callback.request->setBufferSize(64);
+    callback.request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    callback.request->setBlockAckTimeoutValue(SimTime(1));
+    callback.response = makeShared<Ieee80211AddbaResponse>();
+    callback.response->setBlockAckTimeoutValue(SimTime(1));
+    callback.response->setBufferSize(64);
+    if (atRecipient) {
+        callback.recipient = &recipient;
+        recipient.addAgreement(callback.request);
+        ASSERT(recipient.getEarliestExpirationTime() == simTime() + 1);
+    }
+    else {
+        callback.originator = &originator;
+        originator.createAgreement(callback.request);
+        ASSERT(originator.getEarliestExpirationTime() == SIMTIME_MAX);
+        originator.updateAgreement(originator.getAgreement(callback.request->getReceiverAddress(), 5), callback.response);
+        ASSERT(originator.getEarliestExpirationTime() == simTime() + 1);
+    }
+    // A second TID expires later. The first timeout must preserve that agreement.
+    auto laterRequest = staticPtrCast<Ieee80211AddbaRequest>(callback.request->dupShared());
+    laterRequest->setTid(6);
+    laterRequest->setBlockAckTimeoutValue(SimTime(4));
+    auto laterResponse = staticPtrCast<Ieee80211AddbaResponse>(callback.response->dupShared());
+    laterResponse->setBlockAckTimeoutValue(SimTime(4));
+    if (atRecipient)
+        recipient.addAgreement(laterRequest);
+    else {
+        originator.createAgreement(laterRequest);
+        originator.updateAgreement(originator.getAgreement(laterRequest->getReceiverAddress(), 6), laterResponse);
+    }
+    wait(2); // Observe expiry after downtime, rather than only at exact deadline equality.
+    if (atRecipient) {
+        recipient.blockAckAgreementExpired(&callback, &callback);
+        ASSERT(recipient.getAgreement(6, callback.request->getTransmitterAddress()));
+        recipient.processTransmittedDelba(callback.timeout);
+        ASSERT(recipient.getAgreement(5, callback.request->getTransmitterAddress()));
+        ASSERT(recipient.getEarliestExpirationTime() == simTime() + 1);
+    }
+    else {
+        originator.blockAckAgreementExpired(&callback, &callback);
+        ASSERT(originator.getAgreement(callback.request->getReceiverAddress(), 6));
+        originator.processTransmittedDelba(callback.timeout);
+        ASSERT(originator.getAgreement(callback.request->getReceiverAddress(), 5));
+        ASSERT(originator.getEarliestExpirationTime() == simTime() + 1);
+    }
+    ASSERT(callback.frames == 1 && callback.timerUpdates == 1);
+}
+EV << "Block Ack inactivity retirement and replacement passed.\n";
+
+%contains: stdout
+Block Ack inactivity retirement and replacement passed.

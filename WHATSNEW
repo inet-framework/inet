@@ -20,8 +20,13 @@ IEEE 802.11 HCF complete exchange admission
    Block Ack configurations retain their existing execution path.
    TXOP duration statistics still report elapsed time.
 
+   HCF restores finite Block Ack inactivity deadlines after stop or crash.
+   Downtime counts toward the deadline. An elapsed deadline queues one DELBA frame after restart.
+   Timeout zero still disables inactivity expiry.
+
    External sequence, step, handler, ACK, timeout-policy, and Tx implementations
    require source changes and a rebuild. The migration guide describes the new contracts.
+   External Block Ack agreement handlers and timer callbacks also require source changes.
 
 1. IEEE 802.11 rate control per receiver
 

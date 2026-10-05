@@ -24,6 +24,9 @@ class INET_API IRecipientBlockAckAgreementHandler
   public:
     virtual ~IRecipientBlockAckAgreementHandler() {}
 
+    // Return the earliest active absolute deadline, or SIMTIME_MAX if none exists.
+    virtual simtime_t getEarliestExpirationTime() const = 0;
+
     virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;

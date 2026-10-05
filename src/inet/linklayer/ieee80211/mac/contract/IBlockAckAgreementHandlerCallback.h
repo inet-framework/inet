@@ -18,7 +18,8 @@ class INET_API IBlockAckAgreementHandlerCallback
   public:
     virtual ~IBlockAckAgreementHandlerCallback() {}
 
-    virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
+    // Recompute the shared timer from the absolute deadlines in both agreement handlers.
+    virtual void scheduleInactivityTimer() = 0;
 };
 
 } // namespace ieee80211

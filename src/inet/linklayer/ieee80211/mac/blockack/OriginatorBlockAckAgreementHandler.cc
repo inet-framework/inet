@@ -19,7 +19,7 @@ void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee802
     blockAckAgreements[agreementId] = blockAckAgreement;
 }
 
-simtime_t OriginatorBlockAckAgreementHandler::computeEarliestExpirationTime()
+simtime_t OriginatorBlockAckAgreementHandler::getEarliestExpirationTime() const
 {
     simtime_t earliestTime = SIMTIME_MAX;
     for (auto id : blockAckAgreements) {
@@ -40,15 +40,23 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     // primitive with the ReasonCode parameter having a value of TIMEOUT.
     // The procedure is illustrated in Figure 10-14.
     simtime_t now = simTime();
+    std::vector<Ptr<Ieee80211Delba>> expiredAgreements;
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
-        if (agreement->getExpirationTime() == now) {
+        // IEEE Std 802.11-2024, 11.5.4: send DELBA when inactivity expires.
+        // A retained deadline can expire while the node is down.
+        if (agreement->getIsAddbaResponseReceived() && agreement->getExpirationTime() <= now) {
             MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
-            const auto& delba = buildDelba(receiverAddr, tid, 39);
-            auto delbaPacket = new Packet("Delba", delba);
-            procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
+            expiredAgreements.push_back(buildDelba(receiverAddr, tid, 39));
         }
+    }
+    // Retire all expired state before a callback can re-enter the handler.
+    for (const auto& delba : expiredAgreements)
+        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    for (const auto& delba : expiredAgreements) {
+        auto delbaPacket = new Packet("Delba", delba);
+        procedureCallback->processMgmtFrame(delbaPacket, delba);
     }
     scheduleInactivityTimer(agreementHandlerCallback);
 }
@@ -87,9 +95,7 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
 
 void OriginatorBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback)
 {
-    simtime_t earliestExpirationTime = computeEarliestExpirationTime();
-    if (earliestExpirationTime != SIMTIME_MAX)
-        callback->scheduleInactivityTimer(earliestExpirationTime);
+    callback->scheduleInactivityTimer();
 }
 
 OriginatorBlockAckAgreement *OriginatorBlockAckAgreementHandler::getAgreement(MacAddress receiverAddr, Tid tid)
@@ -163,7 +169,10 @@ void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<co
 
 void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    // Timeout DELBA already retired its agreement before the frame entered the queue.
+    // Its completion must preserve any replacement agreement for the same peer and TID.
+    if (delba->getReasonCode() != 39)
+        terminateAgreement(delba->getReceiverAddress(), delba->getTid());
 }
 
 void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)

@@ -67,6 +67,24 @@ DCF uses the legacy path with null prepared metadata.
 HCF configurations with Block Ack support retain the existing path without the new duration guarantee.
 Rebuild all external implementations after these interface changes.
 
+IEEE 802.11 Block Ack Inactivity Deadlines
+----------------------------------------
+
+HCF retains Block Ack agreements across stop and crash.
+Restart restores the earliest absolute deadline from both agreement handlers.
+Downtime counts toward the deadline. An elapsed deadline queues DELBA after restart.
+An agreement with timeout zero has no inactivity deadline.
+Each handler retires expired agreements before it queues their DELBA frames.
+Later activity cannot rearm an expired agreement.
+
+External agreement handlers must implement ``getEarliestExpirationTime() const``.
+Return the earliest active absolute deadline, or ``SIMTIME_MAX`` if none exists.
+Retire expired agreements before a callback can enter the handler again.
+The timer callback now uses ``IBlockAckAgreementHandlerCallback::scheduleInactivityTimer()`` without an argument.
+The callback reads both handlers and schedules their earliest deadline.
+Use ``scheduleAt()`` for a future deadline. Use the current time for an elapsed deadline.
+Rebuild external agreement handlers and timer callbacks after these interface changes.
+
 IEEE 802.11 PHY Mode Properties
 -------------------------------
 
