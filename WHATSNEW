@@ -325,6 +325,19 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. IPv6 reports a discarded unicast datagram that a router answers with an error
+
+   An IPv6 router that discarded a forwarded unicast datagram and answered it
+   with an Internet Control Message Protocol for IPv6 (ICMPv6) error emitted
+   no packetDropped signal. This affected a datagram with no route to its
+   destination, one whose hop limit ran out, and one too large for the next
+   link. PacketDropVisualizer drew nothing for these drops, and no listener on
+   the signal saw them. The signal is now emitted, with the reasons
+   NO_ROUTE_FOUND, HOP_LIMIT_REACHED and OTHER_PACKET_DROP, as IPv4 does at
+   the same places.
+   A listener that counts packetDropped from Ipv6 sees these new emissions.
+   No fingerprint or statistic changes.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
