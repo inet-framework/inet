@@ -39,6 +39,8 @@ class INET_API AckHandler : public SimpleModule, public IAckHandler
   public:
     virtual ~AckHandler() {}
 
+    [[nodiscard]] AckFrameState snapshotFrameState(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const override;
+
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
 
     virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override; // TODO rename

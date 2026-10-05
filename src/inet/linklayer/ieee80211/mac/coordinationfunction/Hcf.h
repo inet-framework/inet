@@ -110,6 +110,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void preDelete(cComponent *root) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

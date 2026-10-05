@@ -15,6 +15,10 @@ Custom Tx modules and handlers require the new request callbacks.
 MAC stop and crash reset pending transmission and frame exchange state.
 External Tx modules, handlers, and ACK owners require lifecycle reset methods.
 
+ACK owners expose read-only frame state for exchange preparation.
+Frame stores retain referenced frames until their contexts end.
+Custom ACK owners require snapshotFrameState().
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate

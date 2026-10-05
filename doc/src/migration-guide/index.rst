@@ -14,6 +14,9 @@ External implementations require the applicable changes below.
   Implement ``setPendingTransmission()``, ``pendingTransmissionCanceled()``, and ``resetForLifecycle()`` in custom handlers.
   Preserve borrowed objects until all synchronous callbacks return.
   Implement ``beginCallback()`` and ``endCallback()`` to defer disposal across Tx callbacks too.
+* Implement ``IAckHandler::snapshotFrameState()`` and ``dropFrame()``.
+  The snapshot query must preserve the exact phase without insertion or protocol progress.
+  A staged frame without an ACK registration is an error.
 * Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``.
   The MAC allocates ``TxRequestId`` before the call.
   The identity contains a lifecycle epoch and a serial.
@@ -23,8 +26,6 @@ External implementations require the applicable changes below.
   Add the request identity to ``transmissionComplete()``.
   The final permission check runs for zero IFS too.
   Tx must check the identity again after a callback that can replace the request.
-
-* Implement ``IAckHandler::dropFrame()`` for MAC lifecycle reset.
 
 Rebuild all external implementations after these interface changes.
 

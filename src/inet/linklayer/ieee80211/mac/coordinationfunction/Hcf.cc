@@ -856,6 +856,13 @@ void Hcf::corruptedFrameReceived()
         EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
+void Hcf::preDelete(cComponent *root)
+{
+    // Contexts borrow child frame stores, which die before this module's destructor.
+    delete frameSequenceHandler;
+    frameSequenceHandler = nullptr;
+    ModeSetListener::preDelete(root);
+}
 
 Hcf::~Hcf()
 {
