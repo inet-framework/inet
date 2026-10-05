@@ -105,7 +105,9 @@ A sign is a question, not a verdict. Some changes do not divide: a contract and 
 implementation of it must build together, for example. The body of such a commit says why it does
 not divide.
 
-*Enforced at T4 — agent review: can a part of the commit stand alone?*
+*Enforced at T4 — agent review: can a part of the commit stand alone? T3 gives a note:
+[check-commits.sh](../enforcement/check-commits.sh) names a commit whose fingerprint rows move in
+more than one way.*
 
 ### PR-SPLIT-WHITESPACE
 
@@ -529,7 +531,7 @@ argue about.
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
 | PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
 | PR-MSG-FACTS | T3 | commit-message lint: no attribution trailers |
-| PR-SPLIT-ONE-CHANGE | T4 | agent review: can a part of the commit stand alone? The rule lists the signs |
+| PR-SPLIT-ONE-CHANGE | T3+T4 | note: the fingerprint rows of one commit move in more than one way (T3) + agent review: can a part of the commit stand alone? The rule lists the signs (T4) |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |

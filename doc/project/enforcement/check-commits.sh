@@ -3,7 +3,8 @@
 # The commit gate for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
 # It enforces the mechanical half of doc/project/rule/pull-request.md over a commit range.
 # The judgment rules — PR-SPLIT-ONE-CHANGE, PR-SPLIT-UPSTREAM, PR-SPLIT-PREPARE,
-# PR-SPLIT-DRIVEBY, PR-MSG-WHY — are T4 agent review.
+# PR-SPLIT-DRIVEBY, PR-MSG-WHY — are T4 agent review. For some of their signs the gate gives a
+# note: a note asks the reviewer a question and never changes the exit status.
 #
 #   PR-SPLIT-WHITESPACE  — a file whose diff is empty ignoring whitespace, in a commit with real changes
 #   PR-SPLIT-MOVE        — a rename together with a content change
@@ -14,6 +15,7 @@
 #   PR-MSG-SUBJECT       — "area: what it does", no file path, no link; length fails above 80,
 #                          and is reported as a note between 73 and 80
 #   PR-MSG-FACTS         — no attribution trailer
+#   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-commits.sh origin/master..HEAD
@@ -116,6 +118,24 @@ while read -r sha; do
   fi
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
+
+echo
+echo "== PR-SPLIT-ONE-CHANGE: signs of a second change (notes only) =="
+# Fingerprint rows that move in different ways usually have different causes. 26 rows that move
+# only in the event order and 11 rows that move in every ingredient set are two explanations, and
+# each explanation is a behavior change that can be a commit of its own.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  moves=$(git show -U0 --format= "$sha" -- 'tests/fingerprint/*.csv' \
+          | python3 "$(dirname "$0")/fingerprint_moves.py")
+  ways=$(grep -c . <<< "$moves")
+  if [ "$ways" -gt 1 ]; then
+    detail=$(awk -F'\t' '{printf "%s%s %s %s", (NR > 1 ? "; " : ""), $1, ($1 == 1 ? "row changes" : "rows change"), $2}' <<< "$moves")
+    note "${sha:0:9} moves fingerprint rows in $ways ways, one explanation each? $detail"; quiet=0
+  fi
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
 
 echo
 echo "== PR-SPLIT-WHITESPACE: a whitespace-only file inside a functional commit =="
