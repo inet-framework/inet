@@ -48,7 +48,8 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     /**
      * Called after the window update of an ACK of new data, before the sending:
-     * TcpReno continues its SACK-based loss recovery here.
+     * TcpReno continues its SACK-based loss recovery here, TcpNewReno moves the
+     * recover point.
      */
     virtual void ackProcessed(bool inFastRecovery) {}
 

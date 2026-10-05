@@ -33,11 +33,11 @@ class INET_API Rfc6582Recovery : public ITcpRecovery
     virtual void receivedDuplicateAck() override;
 
     // NewReno tracks recovery with the recover variable alone, not with a
-    // scoreboard or a timer, so the five remaining hooks do nothing here.
+    // scoreboard or a timer, so three of the remaining hooks do nothing here.
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override {}
     virtual void dataSent(uint32_t fromSeq) override {}
     virtual void segmentRetransmitted(uint32_t fromSeq, uint32_t toSeq) override {}
-    virtual void onRexmitTimeout() override {}
+    virtual void onRexmitTimeout() override;
 };
 
 } // namespace tcp

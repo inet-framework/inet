@@ -23,7 +23,7 @@ typedef TcpClassicAlgorithmBaseStateVariables TcpNewRenoStateVariables;
 class INET_API TcpNewReno : public TcpClassicAlgorithmBase
 {
   protected:
-    TcpNewRenoStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpNewRenoStateVariables *& state; // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TcpNewRenoStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override
@@ -34,21 +34,11 @@ class INET_API TcpNewReno : public TcpClassicAlgorithmBase
     virtual ITcpCongestionControl *createCongestionControl() override;
     virtual ITcpRecovery *createRecovery() override;
 
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
-
-    /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TcpEventCode& event) override;
+    virtual void ackProcessed(bool inFastRecovery) override;
 
   public:
     /** Ctor */
     TcpNewReno();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
-
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
 };
 
 } // namespace tcp
