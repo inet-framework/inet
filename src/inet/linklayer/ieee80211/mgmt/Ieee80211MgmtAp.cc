@@ -565,6 +565,7 @@ void Ieee80211MgmtAp::start()
 
 void Ieee80211MgmtAp::stop()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     cancelEvent(beaconTimer);
     staList.clear();
     nextAssociationTransactionId = 0;

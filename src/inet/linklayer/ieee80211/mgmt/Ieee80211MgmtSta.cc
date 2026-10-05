@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtRateSet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 
 #include "inet/common/INETUtils.h"
@@ -276,11 +277,15 @@ Ieee80211MgmtSta::ApInfo *Ieee80211MgmtSta::lookupAP(const MacAddress& address)
 
 void Ieee80211MgmtSta::clearAPList()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     cancelPendingAssociation();
 
-    for (auto& elem : apList)
+    for (auto& elem : apList) {
         if (elem.authTimeoutMsg)
             cancelAndDelete(elem.authTimeoutMsg);
+        if (!mib->bssStationData.isAssociated || elem.address != assocAP.address)
+            mib->removePeerRateSet(elem.address);
+    }
 
     apList.clear();
 }
@@ -527,6 +532,7 @@ void Ieee80211MgmtSta::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequ
 
 void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_DeauthenticateRequest *ctrl)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     const MacAddress& address = ctrl->getAddress();
     ApInfo *ap = lookupAP(address);
     if (!ap)
@@ -547,6 +553,7 @@ void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     }
 
     // create and send deauthentication request
+    mib->removePeerRateSet(address);
     const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
     body->setReasonCode(ctrl->getReasonCode());
     sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, address);
@@ -590,6 +597,7 @@ void Ieee80211MgmtSta::processReassociateCommand(Ieee80211Prim_ReassociateReques
 
 void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     const MacAddress& address = ctrl->getAddress();
 
     if (mib->bssStationData.isAssociated && address == assocAP.address) {
@@ -620,9 +628,13 @@ void Ieee80211MgmtSta::disassociate()
 
 void Ieee80211MgmtSta::clearCurrentAssociation()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
-    mib->removePeerHtCapabilities(assocAP.address);
+    auto retiredAddress = assocAP.address;
+    mib->removePeerHtCapabilities(retiredAddress);
+    mib->removePeerRateSet(retiredAddress);
+    mib->clearBssRateSet();
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
@@ -657,6 +669,7 @@ bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& add
 
 void Ieee80211MgmtSta::stop()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     if (host != nullptr && isScanning && scanning.activeScan)
         host->unsubscribe(IRadio::receptionStateChangedSignal, this);
     isScanning = false;
@@ -786,6 +799,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
 
 void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Received Deauthentication frame\n";
     // IEEE Std 802.11-2024, 9.3.3.1: Address 2 is the transmitter/source
     // address used to identify the peer that sent this frame.
@@ -827,6 +841,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         }
         mib->removePeerHtCapabilities(address);
         cancelPendingAssociation();
+        mib->removePeerRateSet(address);
         if (pendingReassociation)
             sendReassociationConfirm(pendingAp, PRC_REFUSED);
         else
@@ -851,6 +866,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
     mib->removePeerHtCapabilities(address);
+    mib->removePeerRateSet(address);
     delete packet;
 }
 
@@ -1085,6 +1101,7 @@ void Ieee80211MgmtSta::handleReassociationResponseFrame(Packet *packet, const Pt
 
 void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Received Disassociation frame\n";
     // IEEE Std 802.11-2024, 9.3.3.1: Address 2 carries the transmitter (TA/SA).
     const MacAddress& address = header->getTransmitterAddress();
@@ -1135,6 +1152,8 @@ void Ieee80211MgmtSta::handleProbeResponseFrame(Packet *packet, const Ptr<const 
 bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
 {
     auto address = header->getTransmitterAddress();
+    if (address.isUnspecified() || address.isMulticast())
+        return false;
     ApInfo *ap = lookupAP(address);
     ApInfo candidate;
     if (ap != nullptr) {
@@ -1152,6 +1171,9 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     candidate.supportedRates = body->getSupportedRates();
     candidate.extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
     candidate.extendedSupportedRates = body->getExtendedSupportedRates();
+    if (!decodeMgmtRateSet(candidate.supportedRates, candidate.extendedSupportedRatesPresent,
+            candidate.extendedSupportedRates, candidate.rateSet))
+        return false;
     bool htCapabilitiesPresent = body->getHtCapabilitiesPresent();
     bool htOperationPresent = body->getHtOperationPresent();
     bool ignoreHt = mib != nullptr && !mib->isHtOperationSupported();
@@ -1220,6 +1242,18 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
         else
             candidate.channel = legacyChannel;
     }
+    if (candidate.htCapabilitiesPresent)
+        addHtRateSet(candidate.rateSet, candidate.htCapabilities,
+                candidate.htOperationPresent ? &candidate.htOperation : nullptr);
+    try {
+        validateIeee80211RateSetState(candidate.rateSet, "AP advertisement");
+    }
+    catch (const cRuntimeError&) {
+        return false;
+    }
+    std::optional<Ieee80211Mib::RateUpdate> rateUpdate;
+    if (mib != nullptr)
+        rateUpdate.emplace(*mib);
     candidate.beaconInterval = body->getBeaconInterval();
     auto signalPowerInd = packet->getTag<SignalPowerInd>();
     bool currentAp = address == assocAP.address;
@@ -1240,6 +1274,7 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->supportedRates = candidate.supportedRates;
     ap->extendedSupportedRatesPresent = candidate.extendedSupportedRatesPresent;
     ap->extendedSupportedRates = candidate.extendedSupportedRates;
+    ap->rateSet = candidate.rateSet;
     ap->htCapabilitiesPresent = candidate.htCapabilitiesPresent;
     ap->htCapabilities = candidate.htCapabilities;
     ap->htOperationPresent = candidate.htOperationPresent;
@@ -1255,6 +1290,7 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     if (currentAssociatedAp && isBeacon) {
         (ApInfo&)assocAP = *ap;
         mib->bssData.ssid = ap->ssid;
+        mib->installBssAndPeerRateSets(ap->rateSet, address, ap->rateSet);
         if (mib->isHtOperationSupported() && candidate.htCapabilitiesPresent && candidate.htOperationPresent) {
             auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, candidate.htCapabilities, candidate.htOperation);
             if (supportsBasicHtMcsSet(mib->localHtCapabilities, candidate.htOperation) &&
@@ -1274,6 +1310,8 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     }
     else if (signalPowerInd != nullptr && currentAp)
         assocAP.rxPower = candidate.rxPower;
+    if (mib != nullptr && !currentAssociatedAp)
+        mib->setPeerRateSet(address, ap->rateSet);
     return true;
 }
 

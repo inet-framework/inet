@@ -366,7 +366,7 @@ class Ieee80211MgmtStaBeaconUpdateTest : public cSimpleModule
 
         // 7. Subsequent Beacon advertises unusable HT (unsupported Basic MCS 32 only)
         wait(SimTime(1, SIMTIME_US));
-        mgmt->deliverBeaconFrame(apAddress, true, 20, 0, true, false, {0, 1, 2, 3, 4, 5, 6, 7}, {32});
+        mgmt->deliverBeaconFrame(apAddress, true, 40, 1, true, false, {0, 1, 2, 3, 4, 5, 6, 7, 32}, {32});
         // Association is PRESERVED
         ASSERT(mgmt->isAssociatedForTest());
         ASSERT(mgmt->hasBeaconTimeoutForTest());

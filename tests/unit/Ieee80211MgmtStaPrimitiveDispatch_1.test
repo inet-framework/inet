@@ -44,6 +44,7 @@ class TestIeee80211AgentSta : public Ieee80211AgentSta
 class TestIeee80211MgmtSta : public Ieee80211MgmtSta
 {
   public:
+    void bindMib(cModule *owner) { mib.reference(owner, "mibModule", true); }
     using Ieee80211MgmtSta::handleCommand;
     using Ieee80211MgmtSta::shouldDisassociateOnReassociationFailure;
 
@@ -143,6 +144,25 @@ static void deliverConfirm(TestIeee80211AgentSta& agent, Ieee80211PrimConfirm *c
     agent.handleResponse(message);
 }
 
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+network TestNetwork
+{
+    parameters:
+        string mibModule = "mib";
+    submodules:
+        mib: Ieee80211Mib;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+record-vector-results = false
+record-scalar-results = false
+
 %activity:
 
 TestIeee80211AgentSta agent;
@@ -166,6 +186,7 @@ ASSERT(agent.lastReassociateResult == PRC_REFUSED);
 ASSERT(agent.scanRequests == 0);
 
 TestIeee80211MgmtSta mgmt;
+mgmt.bindMib(getParentModule());
 mgmt.handleCommand(PR_ASSOCIATE_REQUEST, new Ieee80211Prim_AssociateRequest());
 ASSERT(mgmt.associateRequests == 1);
 ASSERT(mgmt.reassociateRequests == 0);

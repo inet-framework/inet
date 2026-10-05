@@ -39,8 +39,10 @@ void Ieee80211MgmtApBase::initialize(int stage)
         radio = getModuleFromPar<cModule>(par("radioModule"), this);
         radio->subscribe(ieee80211RadioChannelChangedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER) {
         mib->bssData.bssid = mib->address;
+        publishLocalRateSet();
+    }
     else if (stage == INITSTAGE_LAST && mib->isHtOperationSupported()) {
         mib->setPrimaryChannel(mib->requirePrimaryChannel(), getHtOperationBand());
         const auto& operation = mib->getHtOperation();
@@ -56,6 +58,7 @@ void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
     if (source == radio && signalID == ieee80211RadioChannelChangedSignal) {
+        Ieee80211Mib::RateUpdate rateUpdate(*mib);
         EV << "Updating AP primary channel to " << value << ".\n";
         const auto *channelDetails = dynamic_cast<const physicallayer::Ieee80211RadioChannelChangedDetails *>(details);
         const auto *band = channelDetails == nullptr ? nullptr : channelDetails->getBand();

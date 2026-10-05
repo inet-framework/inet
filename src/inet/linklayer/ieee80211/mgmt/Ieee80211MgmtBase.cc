@@ -15,6 +15,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtRateSet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -38,6 +39,8 @@ void Ieee80211MgmtBase::initialize(int stage)
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
+    else if (stage == INITSTAGE_LAST)
+        publishLocalRateSet();
 }
 
 void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -71,7 +74,28 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
         }
         supportedRates.numRates = rateIndex;
         extendedSupportedRates.numRates = extendedRateIndex;
+        publishLocalRateSet();
     }
+}
+
+void Ieee80211MgmtBase::publishLocalRateSet()
+{
+    if (modeSet == nullptr)
+        return;
+    Ieee80211Mib::RateUpdate update(*mib);
+    Ieee80211RateSetState rates;
+    if (!decodeMgmtRateSet(supportedRates, extendedSupportedRates.numRates > 0, extendedSupportedRates, rates))
+        throw cRuntimeError("Invalid local Supported Rates advertisement");
+    if (mib->isHtOperationSupported()) {
+        addHtRateSet(rates, mib->localHtCapabilities, nullptr);
+        const auto& mandatoryMcs = modeSet->getHtMcsMandatory();
+        for (int mcs = 0; mcs < 77; ++mcs)
+            if (mandatoryMcs[mcs] && mib->localHtCapabilities.rxMcsSupported[mcs])
+                rates.basic.htMcs.insert(mcs);
+    }
+    mib->setLocalRateSet(rates);
+    if (mib->mode == Ieee80211Mib::INDEPENDENT || mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
+        mib->setBssRateSet(rates);
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
@@ -187,11 +211,16 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
 
 void Ieee80211MgmtBase::start()
 {
+    publishLocalRateSet();
 }
 
 void Ieee80211MgmtBase::stop()
 {
+    Ieee80211Mib::RateUpdate update(*mib);
     mib->clearPeerHtCapabilities();
+    mib->clearTargetRateContexts();
+    mib->clearPeerRateSets();
+    mib->clearBssRateSet();
 }
 
 } // namespace ieee80211

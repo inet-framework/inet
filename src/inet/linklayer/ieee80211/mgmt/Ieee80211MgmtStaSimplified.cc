@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtRateSet.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -66,13 +67,21 @@ void Ieee80211MgmtStaSimplified::handleStartOperation(LifecycleOperation *operat
 
 void Ieee80211MgmtStaSimplified::configureAssociation()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     L3AddressResolver addressResolver;
     auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
     mib->bssData.bssid = accessPointAddress;
     auto apMib = findAccessPointMib(accessPointAddress);
+    Ieee80211Mib::RateUpdate apRateUpdate(*apMib);
     apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
     mib->bssData.ssid = apMib->bssData.ssid;
     mib->bssStationData.isAssociated = true;
+    if (mib->getLocalRateSet().supported.known && apMib->getBssRateSet().basic.known) {
+        if (!supportsBasicRateSet(mib->getLocalRateSet(), apMib->getBssRateSet()))
+            throw cRuntimeError("Simplified station does not support the AP basic rate set");
+        mib->installBssAndPeerRateSets(apMib->getBssRateSet(), accessPointAddress, apMib->getLocalRateSet());
+        apMib->setPeerRateSet(mib->address, mib->getLocalRateSet());
+    }
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
     if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
@@ -83,11 +92,14 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
 
 void Ieee80211MgmtStaSimplified::stop()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     mib->bssStationData.isAssociated = false;
     auto apMib = findAccessPointMib(mib->bssData.bssid, false);
     if (apMib != nullptr) {
+        Ieee80211Mib::RateUpdate apRateUpdate(*apMib);
         apMib->bssAccessPointData.stations.erase(mib->address);
         apMib->removePeerHtCapabilities(mib->address);
+        apMib->removePeerRateSet(mib->address);
     }
     Ieee80211MgmtBase::stop();
 }

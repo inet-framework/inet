@@ -1,34 +1,201 @@
 %description:
-Check owned rate snapshots, target identities, ambiguous bindings, and empty facts.
+Check local publication, discovery cleanup, simplified association, and MIB snapshots.
 
-%includes:
-#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-using namespace inet;
-using namespace inet::ieee80211;
+%file: TestRateContext.cc
 
-%file: TestNetwork.ned
-import inet.linklayer.ieee80211.mib.Ieee80211Mib;
-network TestNetwork
+#include <functional>
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+template<typename Base>
+class QueuedManagement : public Base
 {
-    submodules:
-        mib: Ieee80211Mib;
-        peer: Ieee80211Mib;
-        test: Test;
-}
+  protected:
+    std::vector<Packet *> frames;
+    void sendDown(Packet *packet) override { frames.push_back(packet); }
+  public:
+    ~QueuedManagement() { for (auto frame : frames) delete frame; }
+    Packet *pop()
+    {
+        Enter_Method("pop");
+        ASSERT(!frames.empty());
+        auto packet = frames.front();
+        frames.erase(frames.begin());
+        this->drop(packet);
+        return packet;
+    }
+    void receive(Packet *packet, const MacAddress& sender)
+    {
+        Enter_Method("receive");
+        this->take(packet);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(static_cast<Ieee80211FrameType>(packet->getTag<Ieee80211SubtypeReq>()->getSubtype()));
+        header->setTransmitterAddress(sender);
+        header->setReceiverAddress(this->mib->address);
+        this->processFrame(packet, header);
+    }
+};
 
-%inifile: omnetpp.ini
-[General]
-network = TestNetwork
-ned-path = .;../../../../src;../../lib
-seed-set = 0
-record-vector-results = false
-record-scalar-results = false
+class RateAp : public QueuedManagement<Ieee80211MgmtAp>
+{
+  protected:
+    void start() override { Ieee80211MgmtApBase::start(); }
+  public:
+    void beacon() { Enter_Method("beacon"); sendBeacon(); }
+    void acknowledge(Packet *response)
+    {
+        Enter_Method("acknowledge");
+        auto frame = response->dup();
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(static_cast<Ieee80211FrameType>(frame->getTag<Ieee80211SubtypeReq>()->getSubtype()));
+        header->setReceiverAddress(frame->getTag<MacAddressReq>()->getDestAddress());
+        frame->insertAtFront(header);
+        frameTransmissionFinished(frame, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        delete frame;
+    }
+    bool pending(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId != 0; }
+};
+Define_Module(RateAp);
 
-%activity:
-auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-auto b = check_and_cast<Ieee80211Mib *>(getModuleByPath("peer"));
-b->address = MacAddress("02:00:00:00:00:02");
+class RateSta : public QueuedManagement<Ieee80211MgmtSta>
+{
+  protected:
+    void changeChannel(int channel) override {}
+    void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode) override { delete confirm; }
+  public:
+    bool discover(Packet *packet, const MacAddress& address)
+    {
+        Enter_Method("discover");
+        take(packet);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_BEACON);
+        header->setTransmitterAddress(address);
+        packet->addTagIfAbsent<SignalPowerInd>()->setPower(W(1));
+        auto result = storeAPInfo(packet, header, packet->peekData<Ieee80211BeaconFrame>());
+        delete packet;
+        return result;
+    }
+    void authenticate(const MacAddress& address) { Enter_Method("authenticate"); startAuthentication(lookupAP(address), 1); }
+    void associate(const MacAddress& address) { Enter_Method("associate"); startAssociation(lookupAP(address), 1); }
+    void reassociate(const MacAddress& address) { Enter_Method("reassociate"); startReassociation(lookupAP(address), 1); }
+    void cancel() { Enter_Method("cancel"); cancelPendingAssociation(); }
+    void clearDiscovery() { Enter_Method("clearDiscovery"); clearAPList(); }
+    void scan()
+    {
+        Enter_Method("scan");
+        auto request = new Ieee80211Prim_ScanRequest();
+        request->setBSSType(BSSTYPE_INFRASTRUCTURE);
+        request->setActiveScan(false);
+        request->setChannelListArraySize(1);
+        request->setChannelList(0, 0);
+        request->setMaxChannelTime(1);
+        handleCommand(0, request);
+    }
+    void disconnect() { Enter_Method("disconnect"); disassociate(); }
+    void shutdown() { Enter_Method("shutdown"); stop(); }
+    void restart() { Enter_Method("restart"); start(); }
+    bool pending() const { return assocTimeoutMsg != nullptr; }
+    const ApInfo *cached(const MacAddress& address) { return lookupAP(address); }
+};
+Define_Module(RateSta);
+
+class RateAgent : public Ieee80211AgentSta
+{
+  protected:
+    void initialize(int stage) override { SimpleModule::initialize(stage); }
+};
+Define_Module(RateAgent);
+
+class RateContextTest : public cSimpleModule, public cListener
+{
+    RateSta *sta = nullptr;
+    Ieee80211Mib *staMib = nullptr;
+    int notifications = 0;
+    std::function<void()> checkCleanup;
+  public:
+    RateContextTest() : cSimpleModule(65536) {}
+  protected:
+    void receiveSignal(cComponent *, simsignal_t, bool, cObject *) override
+    {
+        ++notifications;
+        if (checkCleanup)
+            checkCleanup();
+    }
+    void activity() override
+    {
+        int before = 0;
+        sta = check_and_cast<RateSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        auto apA = check_and_cast<RateAp *>(getModuleByPath("^.apA.wlan[0].mgmt"));
+        auto apB = check_and_cast<RateAp *>(getModuleByPath("^.apB.wlan[0].mgmt"));
+        auto a = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.apA.wlan[0].mib"));
+        auto b = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.apB.wlan[0].mib"));
+        auto simple = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.simpleSta.wlan[0].mib"));
+        auto adhoc = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.adhoc.wlan[0].mib"));
+        ASSERT(adhoc->getBssRateSet().supported.known);
+        ASSERT(adhoc->getBssRateSet() == adhoc->getLocalRateSet());
+        ASSERT(staMib->getLocalRateSet() == simple->getLocalRateSet());
+        ASSERT(simple->getBssRateSet() == a->getBssRateSet());
+        ASSERT(staMib->getLocalRateSet().supported.known);
+        staMib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+
+        apA->beacon(); ASSERT(sta->discover(apA->pop(), a->address));
+        apB->beacon(); ASSERT(sta->discover(apB->pop(), b->address));
+        ASSERT(staMib->findPeerRateSet(a->address) != nullptr);
+        ASSERT(staMib->findPeerRateSet(b->address) != nullptr);
+        checkCleanup = [&]() {
+            ASSERT(sta->cached(a->address) == nullptr && sta->cached(b->address) == nullptr);
+            ASSERT(staMib->findPeerRateSet(a->address) == nullptr);
+            ASSERT(staMib->findPeerRateSet(b->address) == nullptr);
+        };
+        int beforeScan = notifications;
+        sta->scan();
+        checkCleanup();
+        ASSERT(notifications == beforeScan + 1);
+        sta->clearDiscovery();
+        ASSERT(notifications == beforeScan + 1);
+        checkCleanup = nullptr;
+        sta->shutdown(); sta->restart();
+        apA->beacon(); ASSERT(sta->discover(apA->pop(), a->address));
+        apB->beacon(); ASSERT(sta->discover(apB->pop(), b->address));
+        ASSERT(!staMib->getBssRateSet().supported.known);
+        // Invalid extended values leave the AP cache and MIB unchanged.
+        apB->beacon();
+        auto malformed = apB->pop();
+        take(malformed);
+        auto body = malformed->removeAtFront<Ieee80211BeaconFrame>();
+        Ieee80211ExtendedSupportedRatesElement extended;
+        extended.numRates = 1; extended.rate[0] = 6.25;
+        body->setExtendedSupportedRatesPresent(true);
+        body->setExtendedSupportedRates(extended);
+        malformed->insertAtFront(body);
+        before = notifications;
+        auto cachedRates = sta->cached(b->address)->rateSet;
+        ASSERT(!sta->discover(malformed, b->address));
+        ASSERT(sta->cached(b->address)->rateSet == cachedRates && notifications == before);
+        apB->beacon();
+        malformed = apB->pop();
+        take(malformed);
+        body = malformed->removeAtFront<Ieee80211BeaconFrame>();
+        Ieee80211SupportedRatesElement missing;
+        missing.numRates = 0;
+        body->setSupportedRates(missing);
+        malformed->insertAtFront(body);
+        ASSERT(!sta->discover(malformed, b->address));
+        ASSERT(sta->cached(b->address)->rateSet == cachedRates && notifications == before);
+
         // MIB-only identity and empty-set probes use explicit fixture records.
         Ieee80211RateSetState empty;
         empty.supported.known = empty.basic.known = empty.operational.known = true;
@@ -59,13 +226,79 @@ b->address = MacAddress("02:00:00:00:00:02");
         ASSERT(staMib->snapshotRateContext(MacAddress::BROADCAST_ADDRESS, ST_PROBEREQUEST, std::nullopt, BssRateContextRef()).known);
         ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, std::nullopt, BssRateContextRef()).known);
 
-auto saved = emptySnapshot;
-ASSERT(saved.bssRates.supported.known && saved.bssRates.supported.legacyRates.empty());
-ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, first).known);
-std::cout << "MIB rate context snapshots passed.\n";
+        sta->shutdown();
+        staMib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        std::cout << "Local rates, discovery, simplified association, and MIB snapshots passed.\n";
+    }
+};
+Define_Module(RateContextTest);
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple RateAp extends Ieee80211MgmtAp { parameters: @class(::inet::ieee80211::RateAp); }
+simple RateSta extends Ieee80211MgmtSta { parameters: @class(::inet::ieee80211::RateSta); }
+simple RateAgent extends Ieee80211AgentSta { parameters: @class(::inet::ieee80211::RateAgent); }
+simple RateContextTest extends SimpleModule { parameters: @class(::inet::ieee80211::RateContextTest); }
+network RateContextNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        apA: AccessPoint;
+        apB: AccessPoint;
+        sta: WirelessHost;
+        simpleSta: WirelessHost;
+        adhoc: WirelessHost;
+        test: RateContextTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RateContextNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1100ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap*.wlan[0].mgmt.typename = "RateAp"
+*.ap*.wlan[0].mgmt.numAuthSteps = 2
+*.sta.wlan[0].mgmt.typename = "RateSta"
+*.sta.wlan[0].agent.typename = "RateAgent"
+*.simpleSta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.adhoc.wlan[0].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.simpleSta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.apA.wlan[0].address = "02:00:00:00:00:01"
+*.apB.wlan[0].address = "02:00:00:00:00:02"
+*.apB.wlan[0].opMode = "g(erp)"
+**.wlan[0].opMode = "g(mixed)"
+**.wlan[0].agent.typename = ""
+**.wlan[0].bitrate = 6Mbps
+**.wlan[0].radio.bandName = "5 GHz"
+**.wlan[0].radio.channelNumber = 0
+**.wlan[0].radio.centerFrequency = 5GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
 
 %contains: stdout
-MIB rate context snapshots passed.
+Local rates, discovery, simplified association, and MIB snapshots passed.
 
 %not-contains: stdout
 undisposed object
+
+%not-contains: stdout
+Warning:

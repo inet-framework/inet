@@ -38,6 +38,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+    void publishLocalRateSet();
 
     // statistics
     long numMgmtFramesReceived;

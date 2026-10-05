@@ -77,6 +77,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         Ieee80211SupportedRatesElement supportedRates;
         bool extendedSupportedRatesPresent = false;
         Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+        Ieee80211RateSetState rateSet;
         bool htCapabilitiesPresent = false;
         Ieee80211HtCapabilities htCapabilities;
         bool htOperationPresent = false;
