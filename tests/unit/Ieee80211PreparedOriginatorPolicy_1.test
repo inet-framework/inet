@@ -1,0 +1,177 @@
+%description:
+The acknowledgment (ACK) handlers return snapshots without protocol progress. The frame store extracts candidates explicitly and preserves their order and common fragment history.
+
+%includes:
+#include <deque>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class SnapshotAck : public QosAckHandler
+{
+  public:
+    void setPhase(const Ptr<const Ieee80211DataOrMgmtHeader>& header, Status status)
+    {
+        auto sequence = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+        if (header->getType() == ST_DATA_WITH_QOS)
+            ackStatuses[{header->getReceiverAddress(), {staticPtrCast<const Ieee80211DataHeader>(header)->getTid(), sequence}}] = status;
+        else
+            mgmtAckStatuses[{header->getReceiverAddress(), sequence}] = status;
+    }
+    size_t size() const { return ackStatuses.size() + mgmtAckStatuses.size(); }
+};
+Define_Module(SnapshotAck);
+
+class SnapshotLegacyAck : public AckHandler
+{
+  public:
+    void setPhase(const Ptr<const Ieee80211DataOrMgmtHeader>& header, Status status)
+    {
+        ackStatuses[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = status;
+    }
+};
+Define_Module(SnapshotLegacyAck);
+
+class SnapshotDataService : public IOriginatorMacDataService
+{
+  public:
+    int extractions = 0;
+    std::deque<std::vector<Packet *>> units;
+    virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *) override
+    {
+        if (units.empty())
+            return nullptr;
+        extractions++;
+        auto result = new std::vector<Packet *>(std::move(units.front()));
+        units.pop_front();
+        return result;
+    }
+};
+
+class SnapshotStore : public InProgressFrames
+{
+  protected:
+    virtual void initialize(int) override {}
+  public:
+    void configure(IAckHandler *ack, IOriginatorMacDataService *service) { ackHandler = ack; dataService = service; }
+    size_t historySize() const { return frameHistories.size(); }
+};
+Define_Module(SnapshotStore);
+
+%file: TestNetwork.ned
+simple SnapshotStore { parameters: @class(::SnapshotStore); }
+simple SnapshotAck { parameters: @class(::SnapshotAck); }
+simple SnapshotLegacyAck { parameters: @class(::SnapshotLegacyAck); }
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        store: SnapshotStore;
+        ack: SnapshotAck;
+        legacy: SnapshotLegacyAck;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+
+%activity:
+auto ack = check_and_cast<SnapshotAck *>(getModuleByPath("^.ack"));
+auto legacy = check_and_cast<SnapshotLegacyAck *>(getModuleByPath("^.legacy"));
+auto store = check_and_cast<SnapshotStore *>(getModuleByPath("^.store"));
+for (bool management : {false, true}) {
+    Ptr<Ieee80211DataOrMgmtHeader> header;
+    if (management)
+        header = makeShared<Ieee80211MgmtHeader>();
+    else {
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->setTid(5);
+        header = data;
+    }
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    header->setSequenceNumber(SequenceNumberCyclic(90));
+    bool missingThrows = false;
+    auto before = ack->size();
+    try { ack->snapshotFrameState(header); }
+    catch (const cRuntimeError&) { missingThrows = true; }
+    ASSERT(missingThrows && ack->size() == before);
+    for (int phase = 0; phase < 10; phase++) {
+        ack->setPhase(header, static_cast<QosAckHandler::Status>(phase));
+        auto snapshot = ack->snapshotFrameState(header);
+        ASSERT(static_cast<int>(snapshot.phase) == phase);
+        ASSERT(snapshot.eligible == ack->isEligibleToTransmit(header));
+        ASSERT(snapshot.outstanding == ack->isOutstandingFrame(header));
+        ASSERT(snapshot.transmitted == (phase != 0));
+        ASSERT(ack->snapshotFrameState(header).phase == snapshot.phase);
+    }
+    ack->dropFrame(header);
+    for (int phase = 0; phase < 5; phase++) {
+        legacy->setPhase(header, static_cast<AckHandler::Status>(phase));
+        auto snapshot = legacy->snapshotFrameState(header);
+        ASSERT(snapshot.eligible == legacy->isEligibleToTransmit(header));
+        ASSERT(!snapshot.outstanding);
+        ASSERT(snapshot.transmitted == (phase != 0));
+    }
+    legacy->dropFrame(header);
+}
+
+SnapshotDataService service;
+store->configure(ack, &service);
+std::vector<Packet *> fragments;
+for (int i = 0; i < 16; i++) {
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    header->setSequenceNumber(SequenceNumberCyclic(100));
+    header->setFragmentNumber(i);
+    header->setMoreFragments(i < 15);
+    auto packet = new Packet("fragment", header);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100 + i)));
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    fragments.push_back(packet);
+}
+service.units.push_back(fragments);
+store->stageForPlanning();
+auto original = store->inspectStagedFrames();
+ASSERT(original.size() == 16 && service.extractions == 1);
+for (int repetition = 0; repetition < 3; repetition++) {
+    store->stageForPlanning();
+    auto again = store->inspectStagedFrames();
+    ASSERT(service.extractions == 1);
+    for (int i = 0; i < 16; i++) {
+        ASSERT(again[i].identity == original[i].identity);
+        ASSERT(again[i].length == original[i].length);
+        ASSERT(again[i].sequenceControl.getFragmentNumber() == i);
+        ASSERT(again[i].sequenceControl.getSequenceNumber() == 100);
+        ASSERT(again[i].fragmentCount == 16);
+        ASSERT(again[i].unitIdentity == original[0].unitIdentity);
+        ASSERT(again[i].ack.phase == AckFrameState::Phase::FRAME_NOT_YET_TRANSMITTED);
+        ASSERT(store->isRetained(again[i]));
+    }
+}
+store->recordTransmission(original[0]);
+store->recordTransmission(original[0]);
+auto firstHeader = fragments[0]->peekAtFront<Ieee80211DataOrMgmtHeader>();
+store->dropFrame(fragments[0]);
+ack->dropFrame(firstHeader);
+ASSERT(!store->isRetained(original[0]));
+store->clearDroppedFrames();
+auto rest = store->inspectStagedFrames();
+ASSERT(rest.size() == 15 && rest[0].earlierFragmentRetransmitted && rest[0].fragmentCount == 16);
+for (int i = 1; i < 16; i++) {
+    auto header = fragments[i]->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    store->dropFrame(fragments[i]);
+    ack->dropFrame(header);
+}
+ASSERT(store->historySize() == 0);
+store->clearDroppedFrames();
+EV << "ACK snapshots, extraction, retained order, and fragment history verified.\n";
+
+%contains: stdout
+ACK snapshots, extraction, retained order, and fragment history verified.

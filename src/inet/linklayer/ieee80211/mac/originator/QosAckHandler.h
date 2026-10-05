@@ -54,6 +54,8 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
   public:
     virtual ~QosAckHandler() {}
 
+    [[nodiscard]] AckFrameState snapshotFrameState(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const override;
+
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
     virtual std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
     virtual void processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);

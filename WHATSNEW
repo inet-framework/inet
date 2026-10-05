@@ -20,6 +20,8 @@ IEEE 802.11 Tx request identities
 
    Recipient retirement clears only that agreement's reorder buffer. For example, expiry removes buffered sequence 20 from an agreement that starts at sequence 19. A replacement ADDBA starts at sequence 100 without the old window. Other peers and traffic identifiers retain their buffers. Active agreement statistics decrease once for each retirement.
 
+   Frame stores retain referenced originals until their contexts end. ACK owners expose read-only frame state through snapshotFrameState(). An acknowledgment (ACK) frame confirms reception when the selected policy requires it. Hypothetical: preparation reads the state of a frame that has not transmitted. The real ACK state remains FRAME_NOT_YET_TRANSMITTED.
+
    External Tx modules, handlers, ACK owners, and Block Ack services require the applicable new interfaces and a rebuild.
 
 1. IEEE 802.11 rate control per receiver

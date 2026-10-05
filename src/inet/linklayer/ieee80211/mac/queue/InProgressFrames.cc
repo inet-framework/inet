@@ -49,7 +49,7 @@ void InProgressFrames::forEachChild(cVisitor *v)
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (!removingFrames.count(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return true;
     }
     return false;
@@ -62,20 +62,99 @@ void InProgressFrames::ensureHasFrameToTransmit()
 //        if (transmitLifetimeHandler->isLifetimeExpired(dataFrame))
 //            return frame;
 //    }
-    if (!hasEligibleFrameToTransmit()) {
-        auto frames = dataService->extractFramesToTransmit(pendingQueue);
-        if (frames) {
-            for (auto frame : *frames) {
-                EV_DEBUG << "Inserting frame " << frame->getName() << " extracted from MAC data service.\n";
-                take(frame);
-                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
-                inProgressFrames.push_back(frame);
-                frame->setArrivalTime(simTime());
-                emit(packetEnqueuedSignal, frame);
-            }
-            delete frames;
-        }
+    if (!hasEligibleFrameToTransmit())
+        extractAndRegisterFrames();
+}
+
+bool InProgressFrames::extractAndRegisterFrames()
+{
+    std::unique_ptr<std::vector<Packet *>> frames(dataService->extractFramesToTransmit(pendingQueue));
+    if (!frames || frames->empty())
+        return false;
+    if (frames->size() > 16)
+        throw cRuntimeError("A conventional fragment set cannot exceed 16 fragments");
+    // The data service returns the complete conventional fragment set in one extraction.
+    auto unit = std::make_shared<UnitHistory>();
+    unit->identity = frames->front()->getId();
+    unit->transmissions.resize(frames->size(), 0);
+    for (auto frame : *frames) {
+        auto header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        if (header->getFragmentNumber() >= unit->transmissions.size())
+            throw cRuntimeError("Incomplete conventional fragment set from the data service");
+        take(frame);
+        ackHandler->frameGotInProgress(header);
+        frameHistories.emplace(frame->getId(), FrameHistory{unit, frame->getDataLength(), header->getFragmentNumber()});
+        inProgressFrames.push_back(frame);
+        frame->setArrivalTime(simTime());
+        emit(packetEnqueuedSignal, frame);
     }
+    return true;
+}
+
+void InProgressFrames::stageForPlanning()
+{
+    Enter_Method("stageForPlanning");
+    for (;;) {
+        size_t eligible = 0;
+        for (auto frame : inProgressFrames)
+            if (!removingFrames.count(frame))
+                eligible += ackHandler->snapshotFrameState(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()).eligible;
+        if (eligible >= 2 || !extractAndRegisterFrames())
+            return;
+    }
+}
+
+std::vector<StagedFrameView> InProgressFrames::inspectStagedFrames() const
+{
+    std::vector<StagedFrameView> result;
+    for (auto frame : inProgressFrames) {
+        if (removingFrames.count(frame))
+            continue;
+        const auto& history = frameHistories.at(frame->getId());
+        auto header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        StagedFrameView view;
+        view.frame = frame;
+        view.owner = this;
+        view.identity = frame->getId();
+        view.epoch = lifecycleEpoch;
+        view.unitIdentity = history.unit->identity;
+        view.receiver = header->getReceiverAddress();
+        if (header->getType() == ST_DATA_WITH_QOS)
+            view.tid = staticPtrCast<const Ieee80211DataHeader>(header)->getTid();
+        view.sequenceControl = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+        view.length = frame->getDataLength();
+        view.originalLength = history.originalLength;
+        view.fragmentCount = history.unit->transmissions.size();
+        view.transmissions = history.unit->transmissions.at(history.fragment);
+        for (int i = 0; i < history.fragment; i++)
+            view.earlierFragmentRetransmitted |= history.unit->transmissions[i] > 1;
+        view.ack = ackHandler->snapshotFrameState(header);
+        result.push_back(view);
+    }
+    return result;
+}
+
+bool InProgressFrames::isRetained(const StagedFrameView& view) const
+{
+    if (view.owner != this || view.epoch != lifecycleEpoch)
+        return false;
+    for (auto frame : inProgressFrames)
+        if (frame == view.frame && frame->getId() == view.identity && !removingFrames.count(frame)) {
+            auto header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            auto tid = header->getType() == ST_DATA_WITH_QOS ? staticPtrCast<const Ieee80211DataHeader>(header)->getTid() : -1;
+            return frame->getDataLength() == view.length && header->getReceiverAddress() == view.receiver && tid == view.tid &&
+                header->getSequenceNumber().get() == view.sequenceControl.getSequenceNumber() &&
+                header->getFragmentNumber() == view.sequenceControl.getFragmentNumber();
+        }
+    return false;
+}
+
+void InProgressFrames::recordTransmission(const StagedFrameView& view)
+{
+    if (!isRetained(view))
+        throw cRuntimeError("Transmission refers to a removed staged frame");
+    auto& history = frameHistories.at(view.identity);
+    history.unit->transmissions.at(history.fragment)++;
 }
 
 void InProgressFrames::resetForLifecycle()
@@ -90,11 +169,21 @@ void InProgressFrames::resetForLifecycle()
     // A synchronous callback can still borrow a dropped frame. Normal deferred cleanup owns disposal.
 }
 
+std::string InProgressFrames::getFragmentationDescription() const
+{
+    auto service = dynamic_cast<cModule *>(dataService);
+    auto policy = service ? service->getSubmodule("fragmentationPolicy") : nullptr;
+    if (!policy)
+        return "fragmentationPolicy=absent";
+    return "fragmentationPolicy=" + policy->getFullPath() + " fragmentationThreshold=" +
+        (policy->hasPar("fragmentationThreshold") ? policy->par("fragmentationThreshold").str() : "absent");
+}
+
 Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (!removingFrames.count(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return frame;
     }
     return nullptr;
@@ -110,17 +199,9 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
             if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
                 return frame;
         }
-        auto frames = dataService->extractFramesToTransmit(pendingQueue);
-        if (frames) {
-            auto firstFrame = (*frames)[0];
-            for (auto frame : *frames) {
-                take(frame);
-                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
-                inProgressFrames.push_back(frame);
-                frame->setArrivalTime(simTime());
-                emit(packetEnqueuedSignal, frame);
-            }
-            delete frames;
+        auto previousSize = inProgressFrames.size();
+        if (extractAndRegisterFrames()) {
+            auto firstFrame = inProgressFrames.at(previousSize);
             // FIXME If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
             // a wrong pending frame.
             return firstFrame;
@@ -132,30 +213,34 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 
 void InProgressFrames::dropFrame(Packet *packet)
 {
+    if (removingFrames.count(packet) || std::find(inProgressFrames.begin(), inProgressFrames.end(), packet) == inProgressFrames.end())
+        return;
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
+    removingFrames.insert(packet);
+    // Cancellation can retire a context synchronously. Preserve its borrowed original until this call returns.
+    retainFrameReferences();
+    if (removalCallback)
+        removalCallback->frameWillBeRemoved(this, packet);
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
+    frameHistories.erase(packet->getId());
     droppedFrames.push_back(packet);
     emit(packetDequeuedSignal, packet);
+    removingFrames.erase(packet);
+    releaseFrameReferences();
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
-    for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
-        auto frame = *it;
+    auto retained = inProgressFrames;
+    for (auto frame : retained) {
         auto header = frame->peekAtFront<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
-            auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
-            if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber().get(), dataheader->getFragmentNumber())))) != 0) {
-                EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
-                it = inProgressFrames.erase(it);
-                droppedFrames.push_back(frame);
-                emit(packetDequeuedSignal, frame);
-            }
-            else
-                it++;
+            auto dataHeader = staticPtrCast<const Ieee80211DataHeader>(header);
+            auto key = std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(),
+                SequenceControlField(dataHeader->getSequenceNumber().get(), dataHeader->getFragmentNumber())));
+            if (seqAndFragNums.count(key))
+                dropFrame(frame);
         }
-        else
-            it++;
     }
 }
 
@@ -172,6 +257,8 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 void InProgressFrames::clearDroppedFrames()
 {
     Enter_Method("clearDroppedFrames");
+    if (frameReferenceUsers != 0)
+        return;
     for (auto frame : droppedFrames)
         delete frame;
     droppedFrames.clear();

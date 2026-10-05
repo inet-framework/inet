@@ -12,6 +12,45 @@ namespace ieee80211 {
 
 Define_Module(QosAckHandler);
 
+AckFrameState QosAckHandler::snapshotFrameState(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
+{
+    Status status;
+    auto sequenceControl = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    if (header->getType() == ST_DATA_WITH_QOS) {
+        auto dataHeader = staticPtrCast<const Ieee80211DataHeader>(header);
+        auto it = ackStatuses.find({header->getReceiverAddress(), {dataHeader->getTid(), sequenceControl}});
+        if (it == ackStatuses.end())
+            throw cRuntimeError("Staged QoS frame has no ACK registration");
+        status = it->second;
+    }
+    else {
+        auto it = mgmtAckStatuses.find({header->getReceiverAddress(), sequenceControl});
+        if (it == mgmtAckStatuses.end())
+            throw cRuntimeError("Staged management or non-QoS frame has no ACK registration");
+        status = it->second;
+    }
+    AckFrameState result;
+    using Phase = AckFrameState::Phase;
+    switch (status) {
+        case Status::FRAME_NOT_YET_TRANSMITTED: result.phase = Phase::FRAME_NOT_YET_TRANSMITTED; break;
+        case Status::NO_ACK_REQUIRED: result.phase = Phase::NO_ACK_REQUIRED; break;
+        case Status::BLOCK_ACK_NOT_YET_REQUESTED: result.phase = Phase::BLOCK_ACK_NOT_YET_REQUESTED; break;
+        case Status::WAITING_FOR_NORMAL_ACK: result.phase = Phase::WAITING_FOR_NORMAL_ACK; break;
+        case Status::WAITING_FOR_BLOCK_ACK: result.phase = Phase::WAITING_FOR_BLOCK_ACK; break;
+        case Status::NORMAL_ACK_NOT_ARRIVED: result.phase = Phase::NORMAL_ACK_NOT_ARRIVED; break;
+        case Status::NORMAL_ACK_ARRIVED: result.phase = Phase::NORMAL_ACK_ARRIVED; break;
+        case Status::BLOCK_ACK_ARRIVED_UNACKED: result.phase = Phase::BLOCK_ACK_ARRIVED_UNACKED; break;
+        case Status::BLOCK_ACK_ARRIVED_ACKED: result.phase = Phase::BLOCK_ACK_ARRIVED_ACKED; break;
+        case Status::BLOCK_ACK_NOT_ARRIVED: result.phase = Phase::BLOCK_ACK_NOT_ARRIVED; break;
+        default: throw cRuntimeError("Unknown ACK phase");
+    }
+    result.eligible = status == Status::FRAME_NOT_YET_TRANSMITTED || status == Status::NO_ACK_REQUIRED ||
+        status == Status::NORMAL_ACK_NOT_ARRIVED || status == Status::BLOCK_ACK_NOT_ARRIVED || status == Status::BLOCK_ACK_ARRIVED_UNACKED;
+    result.outstanding = header->getType() == ST_DATA_WITH_QOS && status == Status::BLOCK_ACK_NOT_YET_REQUESTED;
+    result.transmitted = status != Status::FRAME_NOT_YET_TRANSMITTED;
+    return result;
+}
+
 std::ostream& operator<<(std::ostream& os, const Tid tid) { return os << (int)tid; }
 
 std::ostream& operator<<(std::ostream& os, const QosAckHandler::Status& status) { return os << QosAckHandler::getStatusString(status); }

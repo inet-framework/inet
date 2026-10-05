@@ -21,6 +21,8 @@ FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet 
     nonQoSContext(nonQoSContext),
     qosContext(qosContext)
 {
+    if (inProgressFrames)
+        inProgressFrames->retainFrameReferences();
 }
 
 simtime_t FrameSequenceContext::getIfs() const
@@ -60,6 +62,8 @@ FrameSequenceContext::~FrameSequenceContext()
         delete step;
     delete nonQoSContext;
     delete qosContext;
+    if (inProgressFrames)
+        inProgressFrames->releaseFrameReferences();
 }
 
 Register_ResultFilter("frameSequenceDuration", FrameSequenceDurationFilter);

@@ -13,6 +13,8 @@ Each Tx request has an identity before any synchronous callback can occur. The i
 
 Restart changes the epoch so that old identities cannot identify new requests.
 
+Staged frames are frames that the data service extracted and registered for transmission. The frame store owns those frames. A copied ACK snapshot reports their real ACK phase without protocol progress. For example, preparation reads a staged frame that has not transmitted. The real ACK state remains FRAME_NOT_YET_TRANSMITTED after that query.
+
 Production HCF retains its legacy path at this commit.
 
 External implementations require these changes:
@@ -20,13 +22,17 @@ External implementations require these changes:
 * Adapt the sequence handler callbacks below. Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation. Implement ``setPendingTransmission()`` in custom handlers. Implement ``pendingTransmissionCanceled()``.
 
   Preserve borrowed objects until all synchronous callbacks return. Implement ``beginCallback()`` to defer disposal across Tx callbacks. Implement ``endCallback()`` to release that callback scope. Implement ``resetForLifecycle()``.
-* Implement ``IAckHandler::dropFrame()`` for MAC lifecycle reset.
+* Implement ``IAckHandler::snapshotFrameState()``. Implement ``dropFrame()``. The snapshot query must preserve the exact phase without insertion or protocol progress. A staged frame without an ACK registration is an error.
 * Replace unidentified Tx calls with ``transmitFrame(id, packet, header, ifs, callback)``. The MAC allocates ``TxRequestId`` before the call. Implement ``cancelPendingTransmission()``. Implement ``resetForLifecycle()``.
 * Implement the Tx callback ``isTransmissionPermitted()``. Implement ``transmissionStarted()``. Implement ``transmissionCanceled()``. Implement ``beginCallback()`` to protect borrowed sequence objects throughout each callback scope. Implement ``endCallback()`` to release that callback scope. Add the request identity to ``transmissionComplete()``.
 
 The final permission check runs for zero IFS too. Tx must check identity again after a callback that can replace the request. Hypothetical: request A waits for IFS, and its permission callback replaces A with B. Tx detects the changed identity and cannot transmit A. The check leaves B under its own request identity.
 
 Cancellation distinguishes ``CANCELED``, ``TOO_LATE``, and ``NOT_FOUND``. Only ``CANCELED`` removes the matching delayed copy. Explicit cancellation emits no completion callback. The caller reports successful explicit cancellation to the matching handler once. An on-air request keeps its normal completion path unless lifecycle cleanup aborts it.
+
+``InProgressFrames`` calls its typed removal callback before it removes a referenced frame. HCF registers ``IInProgressFramesCallback`` through ``setRemovalCallback()``. Custom frame stores must preserve the ``frameWillBeRemoved()`` call before removal. Contexts retain frame references until their deferred disposal completes. ``clearDroppedFrames()`` preserves originals while a context still borrows them.
+
+For example, a plan references a frame that the store must remove. HCF invalidates that plan before the store removes the frame.
 
 Rebuild external implementations after these interface changes. Preserve the accepted-request contract in `IEEE 802.11 Radio Command Deferral`_ below. That section defines ``ITx::hasTransmission()`` and supplies the ACK/SIFS example. The query also returns false after cancellation or lifecycle reset releases the accepted request.
 
