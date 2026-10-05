@@ -71,8 +71,9 @@ explanation of its exact scope, cause and correctness — see
 
 Divide the work into commits by concern: each part that can stand alone in a commit of its own,
 the whitespace and mechanical sweeps apart from the logic, the shared-component change before the
-model that needs it, the regenerated baselines inside the commit that moves them. Write messages that start with a short summary and state the reason. Every rule for this step is in
-[pull-request.md](../rule/pull-request.md).
+model that needs it, the regenerated baselines inside the commit that moves them. Start each message
+with the answers to the [reviewer's questions](../rule/pull-request.md#the-reviewers-questions), in
+proportion to the change. Every rule for this step is in [pull-request.md](../rule/pull-request.md).
 
 ## 9. Sealing last
 

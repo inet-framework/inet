@@ -23,6 +23,31 @@ changes, the reviewer must first separate them mentally, and the reviewer does t
 again for every later reader of the history. Divide the work in advance, because you are the
 only person who knows where the boundaries are.
 
+## The reviewer's questions
+
+A reviewer meets every change with the same four questions. The opening of each commit body and of
+each pull request description answers them, before any detail:
+
+1. **Which problem does the change solve?** What is wrong or missing today, and for whom.
+2. **Is it a real problem, and do we want to solve it?** How we know: a symptom with a way to
+   reproduce it, a failing test, a standard clause, a requirement, a user report, a measurement.
+   What it costs to leave the problem, and why the change is worth its own cost. For a commit that
+   prepares a later one: which later commit needs it, and for what.
+3. **What changes?** What a user or a developer sees after the change: behavior, contracts,
+   configuration, recorded results.
+4. **How does the change reach its goal?** The approach in a sentence or two, and why this approach
+   and not the obvious alternative.
+
+**The answers scale with the change.** A typo fix answers all four in its subject. A small fix
+answers them in a few sentences. A feature answers them in the first paragraphs of each commit and
+of the pull request. Headings such as "Why", "What" and "How" can help a long text; a short text
+does not need them. What counts is that the answers are there, that they come first, and that a
+reviewer without the author's context understands them.
+
+**Length is not an answer.** Ten pages that never state the problem leave the reviewer with the
+questions. Three sentences that answer them are enough. A link to a plan or an issue supports the
+answers but does not replace them ([PR-MSG-STANDALONE](#pr-msg-standalone)).
+
 ## Index
 
 Every rule in document order. The identifier links to the rule; the statement is its lead sentence.
@@ -389,9 +414,9 @@ itself. Of the nine commits above it that carry no body, six are the exempt kind
 
 | | Where it belongs |
 | --- | --- |
-| **what** the commit does | the subject names it, and the summary describes it at the level of components and contracts ([PR-MSG-SUMMARY](#pr-msg-summary)). The diff shows the lines; the body must not restate them. |
-| **how** it does it | the diff shows it. *Which* mechanism, and *why that one and not the obvious alternative*, is part of the reason and belongs in the body. |
-| **why** it was done | the body, and nothing else carries it. The symptom, the cause, the alternative rejected, and what the change deliberately leaves unrepaired. |
+| **why** it was done | the summary gives the problem, and how we know that it is real and worth solving ([PR-MSG-SUMMARY](#pr-msg-summary)). The rest of the body adds the cause, the alternative rejected, and what the change deliberately leaves unrepaired. Nothing else carries the reason. |
+| **what** it changes | the subject names it, and the summary says what a user or a developer sees after the change, at the level of components and contracts. The diff shows the lines; the body does not restate them. |
+| **how** it reaches the goal | the summary gives the approach in a sentence or two. The body says *which* mechanism, and *why that one and not the obvious alternative*. The diff shows the code. |
 
 A body that restates the subject in longer words is worse than no body, because it costs a reader
 the time to discover that it says nothing.
@@ -403,10 +428,10 @@ changed lines, outside the exempt kinds; T4 for whether the body gives a reason 
 
 **The body starts with a summary that a reviewer understands in two minutes**
 
-Start the body with a summary of one to three short paragraphs. The summary says which problem the
-commit solves, what the solution does at the level of components and contracts, and which effect a
-user or a later developer sees. A reviewer who reads only the summary knows what the commit does and
-why, without the diff.
+Start the body with a summary of one to three short paragraphs. The summary answers the
+[reviewer's questions](#the-reviewers-questions) for this commit: the problem, how we know that it
+is real and worth solving, what changes, and how. A reviewer who reads only the summary knows what
+the commit does and why, without the diff.
 
 Details come after the summary: the mechanism and why it was chosen, edge cases, standard clauses,
 migration notes, the account of moved baselines. A reader who needs them reads on. A reader who
@@ -425,8 +450,8 @@ A commit whose subject is the whole story needs no body ([PR-MSG-BODY](#pr-msg-b
 one short paragraph, that paragraph is the summary.
 
 *Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) gives a note when the first
-paragraph has more than 120 words or the body more than 300; T4 — agent review: does the summary
-state the problem and the idea of the solution?*
+paragraph has more than 120 words or the body more than 300; T4 — agent review: can a reviewer
+restate the answers to the reviewer's questions from the summary alone?*
 
 ### PR-MSG-WHY
 
@@ -437,7 +462,10 @@ solution and not an obvious alternative, and what the change deliberately does n
 
 For a bug fix, write the symptom in the words a future reader will search for — the error
 message, the wrong packet, the failed assertion. For a behavior change, name the standard
-clause or the reference that makes the new behavior the correct one.
+clause or the reference that makes the new behavior the correct one. For a new feature, say who
+needs it and how we know: a requirement, a standard clause, a user report, or the later commit that
+uses it. A commit that prepares a later one names that commit and what it needs from this one;
+"needed later" alone is not a reason.
 
 ### PR-MSG-REPRODUCE
 
