@@ -1,6 +1,6 @@
 # Agent-Review Checklist (T4 enforcement)
 
-> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/architecture.md](../../rule/architecture.md), [rule/quality.md](../../rule/quality.md), [rule/release.md](../../rule/release.md), [review-a-code-change.md](../../guide/review-a-code-change.md), [README.md](../README.md)
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/architecture.md](../../rule/architecture.md), [rule/quality.md](../../rule/quality.md), [rule/release.md](../../rule/release.md), [rule/pull-request.md](../../rule/pull-request.md), [review-a-code-change.md](../../guide/review-a-code-change.md), [README.md](../README.md)
 The tier-4 gate from [enforcement/README.md](../README.md). It enforces the **semantic project
 rules** that no compiler or linter can express by having an LLM reviewer judge a diff against each
 item. Run it as a CI step on every change (and locally before pushing). For diffs touching
@@ -57,6 +57,13 @@ FLAG a changed implementation, adapter, caller, or default that deviates from or
 outcome distinction declared by its contract, including a default argument whose meaning varies
 with the caller's static type. *Not a violation:* a contract that deliberately combines outcome
 categories and whose implementations and callers preserve that declared meaning.
+
+**[PR-SPLIT-ONE-CHANGE] Does a commit hold a part that can stand alone?**
+FLAG a commit with a part that builds, passes its tests and has a reason of its own, and name the
+part. Use the signs that the rule lists: baseline rows with more than one explanation, a test for a
+separate symptom, a new mechanism together with its first production user. *Not a violation:* a
+contract and the update of every implementation of it, or another change whose body says why it
+does not divide.
 
 **[PR-MSG-BODY / PR-MSG-WHY] Does a substantial commit explain itself?**
 FLAG a commit that repairs a defect, changes behavior, or implements a standard and carries no body —

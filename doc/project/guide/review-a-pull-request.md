@@ -127,10 +127,14 @@ sections. `opp_summarize_changes` does not generate it yet.
 
 ## 5. Judge what a script cannot
 
-Read each commit against the rules that need judgment:
+Read each commit against the rules that need judgment. **Give each judgment rule a verdict with
+evidence for each commit.** A gate that gives no signal is not evidence: a large commit with an
+abstract subject passes every mechanical check and can still hold several changes.
 
-- **[PR-SPLIT-ONE-CHANGE](../rule/pull-request.md#pr-split-one-change)** — does the subject need an
-  "and"? Then the commit holds two decisions.
+- **[PR-SPLIT-ONE-CHANGE](../rule/pull-request.md#pr-split-one-change)** — can a part of the commit
+  stand alone: does it build, pass its tests, and have a reason of its own? Look for the signs that
+  the rule lists. For a `FLAG`, name the parts and the order in which they can land. For a `PASS` on
+  a large commit, give the reason why it does not divide.
 - **[PR-SPLIT-UPSTREAM](../rule/pull-request.md#pr-split-upstream)** — does a commit change a shared
   component to serve one protocol? Try to describe the shared change without naming that protocol; if
   you cannot, the feature is in the wrong place or it is too narrow.

@@ -69,9 +69,9 @@ explanation of its exact scope, cause and correctness — see
 
 ## 8. Submit a reviewable change
 
-Divide the work into commits by concern: the whitespace and mechanical sweeps apart from the logic,
-the shared-component change before the model that needs it, the regenerated baselines inside the
-commit that moves them. Write messages that state the reason. Every rule for this step is in
+Divide the work into commits by concern: each part that can stand alone in a commit of its own,
+the whitespace and mechanical sweeps apart from the logic, the shared-component change before the
+model that needs it, the regenerated baselines inside the commit that moves them. Write messages that state the reason. Every rule for this step is in
 [pull-request.md](../rule/pull-request.md).
 
 ## 9. Sealing last

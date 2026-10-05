@@ -76,13 +76,36 @@ Every rule in document order. The identifier links to the rule; the statement is
 
 **One commit makes exactly one change**
 
-A commit contains one self-contained change, and the whole of that change.
+A commit contains one self-contained change, and the whole of that change. Half a change is not
+a commit: the tree after the commit must build, and the model after the commit must be consistent
+(PR-SERIES-BUILDS). "One change" means one *decision*, not one file — a decision that touches eight
+files is still one commit.
 
-Use the subject line as the test: if you cannot say what the commit does in one line without
-"and" or a list, the commit holds more than one change. The opposite fault counts too. Half a
-change is not a commit: the tree after the commit must build, and the model after the commit
-must be consistent (PR-SERIES-BUILDS). "One change" means one *decision*, not one file — a
-decision that touches eight files is still one commit.
+**Divide a commit wherever a part of it can stand alone.** A part stands alone when it builds,
+passes its tests, and has a reason of its own that its own message can give. That part is a commit
+of its own, even when the larger feature needs it. One change is the smallest step that a reviewer
+can judge alone, not the largest feature that the steps serve: a feature that five steps build is
+five commits.
+
+The subject line is a quick test, but a weak one. If you cannot say what the commit does in one
+line without "and" or a list, the commit holds more than one change. But an abstract subject such
+as "enforce the TXOP limit" passes this test and can still cover several changes. These signs show
+a second change:
+
+| Sign | What it usually shows |
+| --- | --- |
+| the moved baseline rows need more than one explanation | one behavior change for each explanation |
+| a new test shows a symptom that the rest of the commit does not need | a fix or a feature that can land first |
+| the commit adds a mechanism and also turns on its first production user | two steps ([PR-SPLIT-PREPARE](#pr-split-prepare)) |
+| the subject carries a mixed marker such as `add+change:` | two changes, unless the parts cannot be divided ([CR-TAG-SUBJECT](classification.md#cr-tag-subject)) |
+| the plan of the work lists the content as more than one step | one commit for each step |
+| the body needs a paragraph for each of several topics | one topic for each commit |
+
+A sign is a question, not a verdict. Some changes do not divide: a contract and the update of every
+implementation of it must build together, for example. The body of such a commit says why it does
+not divide.
+
+*Enforced at T4 — agent review: can a part of the commit stand alone?*
 
 ### PR-SPLIT-WHITESPACE
 
@@ -486,6 +509,7 @@ draft.
 | A reviewer finds a defect in commit 2 of 5 | add commit 6 | rebase the correction into commit 2 (PR-SERIES-ORDER) |
 | The target branch moved under you | merge it in | rebase the series (PR-SERIES-LINEAR) |
 | The subject needs an "and" | write the "and" | divide the commit (PR-SPLIT-ONE-CHANGE) |
+| A part of the commit builds and has its own reason | keep it inside the feature commit | make it a commit of its own (PR-SPLIT-ONE-CHANGE) |
 
 ## Enforcement
 
@@ -505,7 +529,7 @@ argue about.
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
 | PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
 | PR-MSG-FACTS | T3 | commit-message lint: no attribution trailers |
-| PR-SPLIT-ONE-CHANGE | T4 | agent review: does the commit contain two independent decisions? |
+| PR-SPLIT-ONE-CHANGE | T4 | agent review: can a part of the commit stand alone? The rule lists the signs |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
 | PR-SPLIT-PREPARE | T4 | agent review: does a "refactor" commit change behavior? |
 | PR-SPLIT-DRIVEBY | T4 | agent review: is a hunk unrelated to the subject line? |
