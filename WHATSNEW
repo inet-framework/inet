@@ -23,6 +23,9 @@ Frame sequences can prepare their frames, modes, responses, and complete duratio
 Custom sequences require the preparation methods and step records.
 Response timeout policies require a query for the supplied mode.
 
+TxopProcedure exposes complete exchange admission and transmitted reservation checks.
+SingleProtectionMechanism can derive Duration/ID from the prepared exchanges.
+
 1. IEEE 802.11 rate control per receiver
 
    IEEE 802.11 rate control now selects and adapts the transmission rate

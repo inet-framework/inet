@@ -190,8 +190,10 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
 }
 
-void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
+void Dcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared)
 {
+    if (prepared)
+        throw cRuntimeError("DCF does not execute prepared HCF exchanges");
     Enter_Method("transmitFrame");
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
     auto mode = rateSelection->computeMode(packet, header);

@@ -40,7 +40,7 @@ class DurationTxop : public TxopProcedure
   protected:
     virtual void initialize(int) override {}
   public:
-    void configure(simtime_t value) { limit = value; start = simTime(); }
+    void configure(simtime_t value) { limit = value; start = simTime(); resetTransmissionHistory(); }
 };
 Define_Module(DurationTxop);
 
@@ -141,6 +141,46 @@ ASSERT(firstStep->getPreparedTransmit()->mode == rates.first);
 tree.startPlannedSequence(&real, 0, *initial.plan);
 ASSERT(tree.prepareStep(&real) == firstStep);
 ASSERT(rates.originated == 2 && rtsPolicy.queries == 2);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*firstStep->getPreparedTransmit(), *initial.plan, nullptr) == sifs + response);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*firstStep->getPreparedTransmit(), *initial.plan, next.plan.get()) == sifs + response + next.plan->duration);
+
+auto candidate = initial.plan->candidate;
+auto cost = initial.plan->duration;
+auto tick = SimTime::fromRaw(1);
+using Admission = TxopProcedure::Admission;
+for (auto delta : {-tick, SIMTIME_ZERO, tick}) {
+    txop->configure(cost + delta);
+    ASSERT((txop->admitExchange(cost, candidate, simTime()) != Admission::REFUSED) == (delta >= SIMTIME_ZERO));
+    txop->configure(cost + sifs + delta);
+    txop->recordDataOrMgmtTransmission(candidate);
+    ASSERT((txop->admitExchange(cost + sifs, next.plan->candidate, simTime()) != Admission::REFUSED) == (delta >= SIMTIME_ZERO));
+    txop->recordTransmittedReservation(simTime(), cost + delta);
+    ASSERT(txop->fitsTxnav(cost, simTime()) == (delta > SIMTIME_ZERO));
+}
+txop->configure(SIMTIME_ZERO);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::ZERO_LIMIT_UNIT);
+txop->recordDataOrMgmtTransmission(candidate);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::ZERO_LIMIT_UNIT);
+ASSERT(txop->admitExchange(cost, next.plan->candidate, simTime()) == Admission::REFUSED);
+for (int exception = 0; exception < 4; exception++) {
+    auto input = candidate;
+    if (exception == 0) input.transmissions = 1;
+    if (exception == 1) input.earlierFragmentRetransmitted = true;
+    if (exception == 2) input.fragmentCount = 16;
+    if (exception == 3) input.receiver = MacAddress::BROADCAST_ADDRESS;
+    txop->configure(tick);
+    ASSERT(txop->admitExchange(cost, input, simTime()) == Admission::OVERRUN_EXCEPTION);
+    txop->recordDataOrMgmtTransmission(input);
+    ASSERT(txop->admitExchange(cost, input, simTime()) == Admission::REFUSED);
+}
+txop->configure(tick);
+candidate.transmissions = 1;
+candidate.length += B(1);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::REFUSED);
+candidate = initial.plan->candidate;
+candidate.fragmentCount = 15;
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::REFUSED);
+
 DurationRates protectedRates;
 rtsPolicy.protect = true;
 FrameSequencePlanningContext protectedPlanning(real, &protectedRates, false);
@@ -148,6 +188,7 @@ auto protectedPlan = tree.planSequence(protectedPlanning);
 ASSERT(protectedPlan.plan->stepCount == 4);
 ASSERT(protectedPlan.plan->duration == protectedRates.first->getDuration(B(20)) + 2 * response + protectedRates.second->getDuration(B(230)) + 3 * sifs);
 auto rtsStep = static_cast<ITransmitStep *>(protectedPlan.plan->flatten()[0]);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*rtsStep->getPreparedTransmit(), *protectedPlan.plan, next.plan.get()) == protectedPlan.plan->duration - protectedRates.first->getDuration(B(20)));
 AlternativesFs empty({}, [](AlternativesFs *, FrameSequenceContext *) { throw cRuntimeError("Selector must not run"); return 0; });
 ASSERT(empty.planSequence(protectedPlanning).status == FrameSequencePlanResult::Status::UNSUPPORTED);
 FrameSequencePlanningContext nestedPlanning(real, &rates, false);

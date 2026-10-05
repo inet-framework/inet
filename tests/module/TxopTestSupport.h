@@ -71,10 +71,10 @@ class ExchangeHcf : public Hcf
     }
 
     Packet *observedFrame = nullptr;
-    virtual void transmitFrame(Packet *packet, simtime_t ifs) override
+    virtual void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override
     {
         observedFrame = packet;
-        Hcf::transmitFrame(packet, ifs);
+        Hcf::transmitFrame(packet, ifs, prepared);
     }
 
     virtual void transmissionStarted(TxRequestId id) override

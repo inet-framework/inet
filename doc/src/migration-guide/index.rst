@@ -18,7 +18,8 @@ External implementations require the applicable changes below.
   Return a null record for a legacy step.
   Plans own prepared steps and generated controls.
   The frame store retains ownership of staged data and management frames.
-* Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation.
+* Add the prepared record argument to the handler's ``transmitFrame()`` callback.
+  Implement ``frameSequenceStarted()`` to report the start before any synchronous transmission or cancellation.
   Implement ``setPendingTransmission()``, ``pendingTransmissionCanceled()``, and ``resetForLifecycle()`` in custom handlers.
   Preserve borrowed objects until all synchronous callbacks return.
   Implement ``beginCallback()`` and ``endCallback()`` to defer disposal across Tx callbacks too.

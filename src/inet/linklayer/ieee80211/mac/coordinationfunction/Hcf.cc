@@ -729,7 +729,7 @@ void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
         mac->sendUpFrame(frame);
 }
 
-void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
+void Hcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared)
 {
     Enter_Method("transmitFrame");
     auto channelOwner = edca->getChannelOwner();

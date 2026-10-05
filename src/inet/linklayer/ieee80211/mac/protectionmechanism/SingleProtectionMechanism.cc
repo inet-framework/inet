@@ -5,6 +5,7 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlan.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
@@ -12,6 +13,35 @@
 
 namespace inet {
 namespace ieee80211 {
+
+// IEEE Std 802.11-2024, 9.2.5.2 a): reserve only the selected single-protection interval.
+simtime_t SingleProtectionMechanism::computePreparedDurationField(const PreparedTransmit& transmitted,
+        const FrameSequencePlan& active, const FrameSequencePlan *next)
+{
+    simtime_t duration = active.remainingDuration(transmitted.offset + 1, false);
+    if (transmitted.frame->peekAtFront<Ieee80211MacHeader>()->getType() != ST_RTS && next) {
+        bool includedTransmit = false;
+        for (auto step : next->flatten()) {
+            if (auto tx = dynamic_cast<ITransmitStep *>(step)) {
+                if (includedTransmit)
+                    break;
+                auto record = tx->getPreparedTransmit();
+                duration += record->ifs + record->airtime;
+                includedTransmit = true;
+            }
+            else {
+                auto record = static_cast<IReceiveStep *>(step)->getPreparedReceive();
+                duration += record->ifs + record->airtime;
+            }
+        }
+    }
+    auto microseconds = duration.inUnit(SIMTIME_US);
+    if (SimTime(microseconds, SIMTIME_US) < duration)
+        microseconds++;
+    if (microseconds < 0 || microseconds > 32767)
+        throw cRuntimeError("Prepared Duration/ID exceeds the 15-bit duration field");
+    return {microseconds, SIMTIME_US};
+}
 Define_Module(SingleProtectionMechanism);
 
 void SingleProtectionMechanism::initialize(int stage)
