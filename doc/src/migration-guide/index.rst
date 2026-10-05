@@ -7,11 +7,17 @@ Release: |release|
 IEEE 802.11 Management Rate Context
 ----------------------------------
 
+Management publishes local, BSS, peer, and target rate facts through ``Ieee80211Mib``.
 ``Ieee80211RateSetState`` preserves unknown facts and known empty sets.
 ``snapshotRateContext()`` returns an owned ``RateContextSnapshot`` with copied rates and identities.
 The query takes the peer, frame subtype, optional BSSID, and optional ``BssRateContextRef``.
 An unresolved or conflicting identity returns ``known == false``.
 An unknown target never falls back to the active BSS.
+
+``Ieee80211RateContextTag`` carries a sender-local reference through queues, copies, fragmentation, and RTS creation.
+The receiver discards this tag and resolves its own context.
+The tag contains no rate values and changes no wire format.
+``Ieee80211MgmtTransactionTag`` still identifies association response outcomes.
 
 Custom management implementations must publish facts at their actual commit points.
 Use ``Ieee80211Mib::RateUpdate`` around related management and MIB changes.

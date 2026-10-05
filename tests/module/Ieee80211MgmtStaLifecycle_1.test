@@ -16,6 +16,7 @@ namespace ieee80211 {
 class TestIeee80211MgmtSta : public Ieee80211MgmtSta
 {
   protected:
+    std::vector<BssRateContextRef> priorRateContexts;
     static MacAddress getCurrentAccessPointAddress()
     {
         return MacAddress("02:00:00:00:00:01");
@@ -73,6 +74,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         Enter_Method("startAuthenticationPhase");
         assertCleanEntryState();
         startAuthentication(addAccessPoint(getTargetAccessPointAddress(), false), timerDelay);
+        priorRateContexts.push_back(lookupAP(getTargetAccessPointAddress())->authRateContext);
     }
 
     void startAssociationPhase(simtime_t timerDelay)
@@ -80,6 +82,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         Enter_Method("startAssociationPhase");
         assertCleanEntryState();
         startAssociation(addAccessPoint(getTargetAccessPointAddress(), true), timerDelay);
+        priorRateContexts.push_back(associationRateContext);
     }
 
     void startReassociationPhase(simtime_t timerDelay)
@@ -111,6 +114,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         operation.basicMcsSupported[0] = true;
         mib->setPeerHtCapabilities(currentAddress, mib->localHtCapabilities, operation);
         startReassociation(targetAp, timerDelay);
+        priorRateContexts.push_back(associationRateContext);
     }
 
     bool hasScanTimer() const { return scanTimer != nullptr; }
@@ -125,6 +129,14 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
     bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
     bool hasCurrentPeerHtState() const { return mib->findPeerHtState(getCurrentAccessPointAddress()) != nullptr; }
+    bool hasRetiredRateContext() const
+    {
+        for (const auto& ref : priorRateContexts)
+            if (mib->snapshotRateContext(ref.bssid, ST_RTS, std::nullopt, ref).known)
+                return true;
+        return false;
+    }
+    bool hasBssRates() const { return mib->getBssRateSet().supported.known; }
     bool isAssociated() const { return mib->bssStationData.isAssociated; }
     bool isReassociationPending() const { return reassociationInProgress; }
     bool isScanningNow() const { return isScanning; }
@@ -233,6 +245,8 @@ class Ieee80211MgmtStaLifecycleTest : public cSimpleModule
         ASSERT(mgmt->getAssociatedAddress().isUnspecified());
         ASSERT(!mgmt->hasBeaconTimer());
         ASSERT(!mgmt->hasCurrentPeerHtState());
+        ASSERT(!mgmt->hasRetiredRateContext());
+        ASSERT(!mgmt->hasBssRates());
         ASSERT(mgmt->isApListEmpty());
         if (expectCachedAssociation) {
             ASSERT(mgmt->getCachedSsid() == "lifecycle-ssid");

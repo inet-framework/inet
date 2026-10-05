@@ -172,11 +172,16 @@ void Ieee80211MgmtSta::initialize(int stage)
 
 void Ieee80211MgmtSta::handleTimer(cMessage *msg)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     if (msg->getKind() == MK_AUTH_TIMEOUT) {
         // authentication timed out
         ApInfo *ap = (ApInfo *)msg->getContextPointer();
         EV << "Authentication timed out, AP address = " << ap->address << "\n";
 
+        ap->authTimeoutMsg = nullptr;
+        mib->removeTargetRateContext(ap->authRateContext);
+        ap->authRateContext = BssRateContextRef();
+        delete msg;
         // send back failure report to agent
         sendAuthenticationConfirm(ap, PRC_TIMEOUT);
     }
@@ -189,6 +194,8 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
 
         assocTimeoutMsg = nullptr;
         reassociationInProgress = false;
+        mib->removeTargetRateContext(associationRateContext);
+        associationRateContext = BssRateContextRef();
         delete msg;
 
         // send back failure report to agent
@@ -283,6 +290,7 @@ void Ieee80211MgmtSta::clearAPList()
     for (auto& elem : apList) {
         if (elem.authTimeoutMsg)
             cancelAndDelete(elem.authTimeoutMsg);
+        mib->removeTargetRateContext(elem.authRateContext);
         if (!mib->bssStationData.isAssociated || elem.address != assocAP.address)
             mib->removePeerRateSet(elem.address);
     }
@@ -292,9 +300,13 @@ void Ieee80211MgmtSta::clearAPList()
 
 void Ieee80211MgmtSta::cancelPendingAssociation()
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
     reassociationInProgress = false;
+    auto retired = associationRateContext;
+    associationRateContext = BssRateContextRef();
+    mib->removeTargetRateContext(retired);
 }
 
 void Ieee80211MgmtSta::cancelScanTimer()
@@ -326,11 +338,25 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
     packet->addTag<MacAddressReq>()->setDestAddress(address);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
+    auto ap = lookupAP(address);
+    if (subtype == ST_AUTHENTICATION && ap != nullptr && ap->authRateContext.kind == BssRateContextRef::TARGET)
+        tagRateContext(packet, ap->authRateContext);
+    else if ((subtype == ST_ASSOCIATIONREQUEST || subtype == ST_REASSOCIATIONREQUEST) &&
+            associationRateContext.kind == BssRateContextRef::TARGET)
+        tagRateContext(packet, associationRateContext);
+    else if (subtype == ST_PROBEREQUEST)
+        tagRateContext(packet, BssRateContextRef());
+    else {
+        auto snapshot = mib->snapshotRateContext(address, subtype, std::nullopt, std::nullopt);
+        if (snapshot.known)
+            tagRateContext(packet, snapshot.context);
+    }
     sendDown(packet);
 }
 
 void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     if (ap->authTimeoutMsg)
         throw cRuntimeError("startAuthentication: authentication currently in progress with AP address='%s'", ap->address.str().c_str());
     if (ap->isAuthenticated)
@@ -344,8 +370,6 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     const auto& body = makeShared<Ieee80211AuthenticationFrame>();
     body->setSequenceNumber(1);
     // TODO frame length could be increased to account for challenge text length etc.
-    sendManagementFrame("Auth", body, ST_AUTHENTICATION, ap->address);
-
     ap->authSeqExpected = 2;
 
     // schedule timeout
@@ -353,10 +377,13 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     ap->authTimeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
     ap->authTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, ap->authTimeoutMsg);
+    ap->authRateContext = installRateTarget(ap->address, ap->rateSet, ST_AUTHENTICATION);
+    sendManagementFrame("Auth", body, ST_AUTHENTICATION, ap->address);
 }
 
 void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     if (mib->bssStationData.isAssociated || assocTimeoutMsg)
         throw cRuntimeError("startAssociation: already associated or association currently in progress");
     if (!ap->isAuthenticated)
@@ -371,7 +398,6 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
     reassociationInProgress = false;
 
     // schedule timeout
@@ -379,10 +405,13 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, assocTimeoutMsg);
+    associationRateContext = installRateTarget(ap->address, ap->rateSet, ST_ASSOCIATIONRESPONSE);
+    sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
 }
 
 void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     if (!mib->bssStationData.isAssociated || assocTimeoutMsg)
         throw cRuntimeError("startReassociation: not associated or association currently in progress");
     if (!ap->isAuthenticated)
@@ -394,11 +423,12 @@ void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, ap->address);
     reassociationInProgress = true;
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, assocTimeoutMsg);
+    associationRateContext = installRateTarget(ap->address, ap->rateSet, ST_REASSOCIATIONRESPONSE);
+    sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, ap->address);
 }
 
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
@@ -550,6 +580,8 @@ void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     if (ap->authTimeoutMsg) {
         cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
+        mib->removeTargetRateContext(ap->authRateContext);
+        ap->authRateContext = BssRateContextRef();
     }
 
     // create and send deauthentication request
@@ -725,6 +757,7 @@ Ieee80211PrimResultCode Ieee80211MgmtSta::statusCodeToPrimResultCode(int statusC
 
 void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     MacAddress address = header->getTransmitterAddress();
     int frameAuthSeq = requestBody->getSequenceNumber();
@@ -763,6 +796,8 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         // cancel timeout, send error to agent
         cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
+        mib->removeTargetRateContext(ap->authRateContext);
+        ap->authRateContext = BssRateContextRef();
         sendAuthenticationConfirm(ap, PRC_REFUSED); // TODO or what resultCode?
         return;
     }
@@ -791,6 +826,8 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         ap->isAuthenticated = (statusCode == SC_SUCCESSFUL);
         cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
+        mib->removeTargetRateContext(ap->authRateContext);
+        ap->authRateContext = BssRateContextRef();
         sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
 
@@ -821,6 +858,8 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
             if (ap->authTimeoutMsg) {
                 cancelAndDelete(ap->authTimeoutMsg);
                 ap->authTimeoutMsg = nullptr;
+                mib->removeTargetRateContext(ap->authRateContext);
+                ap->authRateContext = BssRateContextRef();
             }
         }
         ASSERT(terminateCurrentAssociationFromPeer(address));
@@ -838,6 +877,8 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         if (pendingAp->authTimeoutMsg) {
             cancelAndDelete(pendingAp->authTimeoutMsg);
             pendingAp->authTimeoutMsg = nullptr;
+            mib->removeTargetRateContext(pendingAp->authRateContext);
+            pendingAp->authRateContext = BssRateContextRef();
         }
         mib->removePeerHtCapabilities(address);
         cancelPendingAssociation();
@@ -858,6 +899,8 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
     if (ap->authTimeoutMsg) {
         cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
+        mib->removeTargetRateContext(ap->authRateContext);
+        ap->authRateContext = BssRateContextRef();
         EV << "Cancelling pending authentication\n";
         delete packet;
         return;
@@ -882,6 +925,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
 
 void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Received Association or Reassociation Response frame\n";
 
     if (!assocTimeoutMsg) {
@@ -911,6 +955,14 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
     // extract frame contents
     const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     int statusCode = responseBody->getStatusCode();
+    Ieee80211RateSetState responseRates;
+    if (statusCode == SC_SUCCESSFUL &&
+            (!decodeMgmtRateSet(responseBody->getSupportedRates(), responseBody->getExtendedSupportedRatesPresent(),
+                    responseBody->getExtendedSupportedRates(), responseRates) ||
+             !supportsBasicRateSet(mib->getLocalRateSet(), responseRates))) {
+        dropManagementFrame(packet);
+        return;
+    }
 
     HtAssociationResponseStatus responseHtStatus = HtAssociationResponseStatus::LEGACY;
     Ieee80211HtCapabilities responseHtCapabilities;
@@ -930,6 +982,20 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
                 "successful HT association response has no received channel indication" :
                 "HT Operation primary channel does not match the received channel";
     }
+    if (responseHtStatus == HtAssociationResponseStatus::VALID_HT) {
+        addHtRateSet(responseRates, responseHtCapabilities, nullptr);
+        auto target = mib->snapshotRateContext(address,
+                reassociation ? ST_REASSOCIATIONRESPONSE : ST_ASSOCIATIONRESPONSE, address, associationRateContext);
+        if (target.known)
+            responseRates.basic.htMcs = target.bssRates.basic.htMcs;
+    }
+    try {
+        validateIeee80211RateSetState(responseRates, "association response rate state");
+    }
+    catch (const cRuntimeError&) {
+        dropManagementFrame(packet);
+        return;
+    }
     delete packet;
 
     cancelPendingAssociation();
@@ -948,6 +1014,8 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
             mib->bssStationData.isAssociated = false;
             mib->removePeerHtCapabilities(assocAP.address);
+            mib->removePeerRateSet(assocAP.address);
+            mib->clearBssRateSet();
             cancelAndDelete(assocAP.beaconTimeoutMsg);
             assocAP.beaconTimeoutMsg = nullptr;
             assocAP = AssociatedApInfo();
@@ -958,6 +1026,10 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
+        assocAP.authTimeoutMsg = nullptr;
+        assocAP.authRateContext = BssRateContextRef();
+        assocAP.rateSet = responseRates;
+        mib->installBssAndPeerRateSets(responseRates, ap->address, responseRates);
         if (responseHtStatus == HtAssociationResponseStatus::VALID_HT)
             mib->setPeerHtCapabilities(ap->address, responseHtCapabilities, responseHtOperation);
         else {

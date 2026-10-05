@@ -10,6 +10,7 @@
 
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlan.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211RateContextTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -50,7 +51,10 @@ class INET_API RtsTransmitStep : public TransmitStep
     RtsTransmitStep(Packet *protectedFrame, Packet *frame, simtime_t ifs) :
         TransmitStep(frame, ifs, true),
         protectedFrame(protectedFrame)
-    {}
+    {
+        if (auto tag = protectedFrame->findTag<Ieee80211RateContextTag>())
+            *frame->addTag<Ieee80211RateContextTag>() = *tag;
+    }
 
     virtual const Packet *getProtectedFrame() { return protectedFrame; }
 };

@@ -38,7 +38,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+    uint64_t nextRateTransactionId = 0;
     void publishLocalRateSet();
+    BssRateContextRef installRateTarget(const MacAddress& bssid, const Ieee80211RateSetState& rates, int incomingSubtype);
+    void tagRateContext(Packet *packet, const BssRateContextRef& ref) const;
 
     // statistics
     long numMgmtFramesReceived;

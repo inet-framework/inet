@@ -16,6 +16,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtRateSet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211RateContextTag_m.h"
+#include <limits>
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -96,6 +98,26 @@ void Ieee80211MgmtBase::publishLocalRateSet()
     mib->setLocalRateSet(rates);
     if (mib->mode == Ieee80211Mib::INDEPENDENT || mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         mib->setBssRateSet(rates);
+}
+
+BssRateContextRef Ieee80211MgmtBase::installRateTarget(const MacAddress& bssid,
+        const Ieee80211RateSetState& rates, int incomingSubtype)
+{
+    if (nextRateTransactionId == std::numeric_limits<uint64_t>::max())
+        throw cRuntimeError("Management rate transaction identifier exhausted");
+    BssRateContextRef ref{BssRateContextRef::TARGET, bssid, ++nextRateTransactionId, 0};
+    mib->installTargetRateContext(ref, rates, bssid, rates);
+    mib->bindIncomingRateContext(bssid, incomingSubtype, ref);
+    return mib->snapshotRateContext(bssid, incomingSubtype, bssid, std::nullopt).context;
+}
+
+void Ieee80211MgmtBase::tagRateContext(Packet *packet, const BssRateContextRef& ref) const
+{
+    auto tag = packet->addTagIfAbsent<Ieee80211RateContextTag>();
+    tag->setContextKind(ref.kind);
+    tag->setBssid(ref.bssid);
+    tag->setTransactionId(ref.transactionId);
+    tag->setGeneration(ref.generation);
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const

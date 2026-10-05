@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211RateContextTag_m.h"
 
 #include <algorithm>
 
@@ -166,6 +167,13 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     header->setReceiverAddress(packet->getTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
+    else if (auto tag = packet->findTag<Ieee80211RateContextTag>()) {
+        BssRateContextRef ref{static_cast<BssRateContextRef::Kind>(tag->getContextKind()),
+                tag->getBssid(), tag->getTransactionId(), tag->getGeneration()};
+        auto snapshot = mib->snapshotRateContext(header->getReceiverAddress(), header->getType(), std::nullopt, ref);
+        if (snapshot.known && snapshot.context.kind != BssRateContextRef::NONE)
+            header->setAddress3(snapshot.context.bssid);
+    }
     packet->insertAtFront(header);
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(packet, header);
@@ -202,6 +210,7 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
+    packet->removeTagIfPresent<Ieee80211RateContextTag>();
     if (rx->lowerFrameReceived(packet)) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         processLowerFrame(packet, header);

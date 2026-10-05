@@ -16,6 +16,8 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtRateSet.h"
+#include <limits>
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
@@ -113,6 +115,7 @@ Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationR
 
 void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     Enter_Method("frameTransmissionFinished");
     if (responseFrame == nullptr)
         return;
@@ -146,6 +149,7 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
                 else
                     mib->removePeerHtCapabilities(address);
             }
+            mib->setPeerRateSet(address, sta->second.pendingRateSet);
             clearPendingAssociation(&sta->second);
             // Signal delivery is synchronous; observers must see committed
             // station/peer state and no pending response transaction.
@@ -185,19 +189,30 @@ void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211M
     packet->insertAtBack(body);
     if (transactionId != 0)
         packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+    auto snapshot = mib->snapshotRateContext(destAddr, subtype, mib->bssData.bssid, std::nullopt);
+    auto sta = staList.find(destAddr);
+    if (transactionId != 0 && sta != staList.end())
+        tagRateContext(packet, sta->second.pendingRateContext);
+    else if (snapshot.known)
+        tagRateContext(packet, snapshot.context);
     sendDown(packet);
 }
 
 uint64_t Ieee80211MgmtAp::createAssociationTransactionId()
 {
-    if (++nextAssociationTransactionId == 0)
-        ++nextAssociationTransactionId;
-    return nextAssociationTransactionId;
+    if (nextAssociationTransactionId == std::numeric_limits<uint64_t>::max())
+        throw cRuntimeError("Association transaction identifier exhausted");
+    return ++nextAssociationTransactionId;
 }
 
 void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     mib->cancelAssociationIdReservation(sta->address);
+    auto retired = sta->pendingRateContext;
+    sta->pendingRateContext = BssRateContextRef();
+    sta->pendingRateSet = Ieee80211RateSetState();
+    mib->removeTargetRateContext(retired);
     sta->pendingAssociationSuccessful = false;
     sta->pendingAssociationTransactionId = 0;
     sta->pendingHtStateAvailable = false;
@@ -224,6 +239,7 @@ void Ieee80211MgmtAp::sendBeacon()
 
 void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
@@ -306,6 +322,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
 
 void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Processing Deauthentication frame\n";
 
     StaInfo *sta = lookupSenderSTA(header);
@@ -327,6 +344,7 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
 
 void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Processing AssociationRequest frame\n";
 
     // "11.3.2 AP association procedures"
@@ -368,6 +386,13 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
             htCapabilitiesMalformed = true;
         }
     }
+    Ieee80211RateSetState peerRates;
+    bool ratesValid = decodeMgmtRateSet(requestBody->getSupportedRates(), requestBody->getExtendedSupportedRatesPresent(),
+            requestBody->getExtendedSupportedRates(), peerRates);
+    if (ratesValid && pendingHtCapabilitiesValid)
+        addHtRateSet(peerRates, pendingHtCapabilities, nullptr);
+    // IEEE Std 802.11-2024, 11.3.5.3(f): require every BSS basic legacy rate.
+    bool basicRatesSupported = ratesValid && supportsBasicRateSet(peerRates, mib->getBssRateSet());
     bool basicHtMcsSupported = !htCapabilitiesMalformed &&
             (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
     delete packet;
@@ -383,7 +408,7 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
         setHtOperation(body, getHtOperationBand(), responseHtOperation);
     }
     Ieee80211StatusCode statusCode = htCapabilitiesMalformed ? SC_UNSUP_CAP :
-            (basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
+            (basicRatesSupported && basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
     body->setStatusCode(statusCode);
     bool associationSuccessful = statusCode == SC_SUCCESSFUL;
     short associationId = associationSuccessful ? mib->reserveAssociationId(sta->address) : 0;
@@ -395,6 +420,12 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     sta->pendingHtOperationValid = pendingHtOperationValid;
     sta->pendingHtOperation = pendingHtOperation;
     sta->pendingAssociationTransactionId = createAssociationTransactionId();
+    sta->pendingRateSet = peerRates;
+    BssRateContextRef ref{BssRateContextRef::TARGET, mib->bssData.bssid, sta->pendingAssociationTransactionId, 0};
+    mib->installTargetRateContext(ref, mib->getBssRateSet(), sta->address, peerRates);
+    int requestSubtype = ST_ASSOCIATIONREQUEST;
+    mib->bindIncomingRateContext(sta->address, requestSubtype, ref);
+    sta->pendingRateContext = mib->snapshotRateContext(sta->address, requestSubtype, mib->bssData.bssid, std::nullopt).context;
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
@@ -410,6 +441,7 @@ void Ieee80211MgmtAp::handleAssociationResponseFrame(Packet *packet, const Ptr<c
 
 void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     EV << "Processing ReassociationRequest frame\n";
 
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
@@ -448,6 +480,13 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
             htCapabilitiesMalformed = true;
         }
     }
+    Ieee80211RateSetState peerRates;
+    bool ratesValid = decodeMgmtRateSet(requestBody->getSupportedRates(), requestBody->getExtendedSupportedRatesPresent(),
+            requestBody->getExtendedSupportedRates(), peerRates);
+    if (ratesValid && pendingHtCapabilitiesValid)
+        addHtRateSet(peerRates, pendingHtCapabilities, nullptr);
+    // IEEE Std 802.11-2024, 11.3.5.3(f): require every BSS basic legacy rate.
+    bool basicRatesSupported = ratesValid && supportsBasicRateSet(peerRates, mib->getBssRateSet());
     bool basicHtMcsSupported = !htCapabilitiesMalformed &&
             (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
     delete packet;
@@ -462,7 +501,7 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
         setHtOperation(body, getHtOperationBand(), responseHtOperation);
     }
     Ieee80211StatusCode statusCode = htCapabilitiesMalformed ? SC_UNSUP_CAP :
-            (basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
+            (basicRatesSupported && basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
     body->setStatusCode(statusCode);
     bool associationSuccessful = statusCode == SC_SUCCESSFUL;
     short associationId = associationSuccessful ? mib->reserveAssociationId(sta->address) : 0;
@@ -474,6 +513,12 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sta->pendingHtOperationValid = pendingHtOperationValid;
     sta->pendingHtOperation = pendingHtOperation;
     sta->pendingAssociationTransactionId = createAssociationTransactionId();
+    sta->pendingRateSet = peerRates;
+    BssRateContextRef ref{BssRateContextRef::TARGET, mib->bssData.bssid, sta->pendingAssociationTransactionId, 0};
+    mib->installTargetRateContext(ref, mib->getBssRateSet(), sta->address, peerRates);
+    int requestSubtype = ST_REASSOCIATIONREQUEST;
+    mib->bindIncomingRateContext(sta->address, requestSubtype, ref);
+    sta->pendingRateContext = mib->snapshotRateContext(sta->address, requestSubtype, mib->bssData.bssid, std::nullopt).context;
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
@@ -489,6 +534,7 @@ void Ieee80211MgmtAp::handleReassociationResponseFrame(Packet *packet, const Ptr
 
 void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
+    Ieee80211Mib::RateUpdate rateUpdate(*mib);
     StaInfo *sta = lookupSenderSTA(header);
     delete packet;
 
@@ -568,7 +614,6 @@ void Ieee80211MgmtAp::stop()
     Ieee80211Mib::RateUpdate rateUpdate(*mib);
     cancelEvent(beaconTimer);
     staList.clear();
-    nextAssociationTransactionId = 0;
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();
 }

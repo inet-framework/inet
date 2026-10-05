@@ -1,5 +1,10 @@
 %description:
-Check local publication, discovery cleanup, simplified association, and MIB snapshots.
+Exercise production management rate publication and target identity. The full
+management case exchanges real management bodies through a controlled queue.
+The fixture supplies no MIB rates. Separate MIB probes cover ambiguous bindings,
+unknown and empty facts. Radio exchange coverage remains in HtAssociation_1.
+Check rescan cleanup, active peer preservation, and complete cleanup notifications.
+Check both reassociation subtypes against the active and target contexts.
 
 %file: TestRateContext.cc
 
@@ -8,6 +13,7 @@ Check local publication, discovery cleanup, simplified association, and MIB snap
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211RateContextTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
@@ -18,6 +24,13 @@ Check local publication, discovery cleanup, simplified association, and MIB snap
 
 namespace inet {
 namespace ieee80211 {
+
+static BssRateContextRef reference(const Packet *packet)
+{
+    auto tag = packet->getTag<Ieee80211RateContextTag>();
+    return {static_cast<BssRateContextRef::Kind>(tag->getContextKind()), tag->getBssid(),
+            tag->getTransactionId(), tag->getGeneration()};
+}
 
 template<typename Base>
 class QueuedManagement : public Base
@@ -44,6 +57,7 @@ class QueuedManagement : public Base
         header->setType(static_cast<Ieee80211FrameType>(packet->getTag<Ieee80211SubtypeReq>()->getSubtype()));
         header->setTransmitterAddress(sender);
         header->setReceiverAddress(this->mib->address);
+        packet->removeTagIfPresent<Ieee80211RateContextTag>();
         this->processFrame(packet, header);
     }
 };
@@ -107,6 +121,7 @@ class RateSta : public QueuedManagement<Ieee80211MgmtSta>
     void shutdown() { Enter_Method("shutdown"); stop(); }
     void restart() { Enter_Method("restart"); start(); }
     bool pending() const { return assocTimeoutMsg != nullptr; }
+    BssRateContextRef pendingReference() const { return associationRateContext; }
     const ApInfo *cached(const MacAddress& address) { return lookupAP(address); }
 };
 Define_Module(RateSta);
@@ -122,6 +137,8 @@ class RateContextTest : public cSimpleModule, public cListener
 {
     RateSta *sta = nullptr;
     Ieee80211Mib *staMib = nullptr;
+    MacAddress expectedActive;
+    bool observe = false;
     int notifications = 0;
     std::function<void()> checkCleanup;
   public:
@@ -132,10 +149,29 @@ class RateContextTest : public cSimpleModule, public cListener
         ++notifications;
         if (checkCleanup)
             checkCleanup();
+        if (observe) {
+            ASSERT(staMib->bssStationData.isAssociated);
+            ASSERT(staMib->bssData.bssid == expectedActive);
+            ASSERT(sta->getAssociatedAp()->address == expectedActive);
+            ASSERT(staMib->getBssRateSet().supported.known);
+            if (sta->pending()) {
+                auto ref = sta->pendingReference();
+                ASSERT(ref.kind == BssRateContextRef::TARGET);
+                ASSERT(staMib->snapshotRateContext(ref.bssid, ST_REASSOCIATIONRESPONSE, ref.bssid, ref).known);
+            }
+        }
+    }
+    void exchange(RateAp *ap, Ieee80211Mib *apMib)
+    {
+        ap->receive(sta->pop(), staMib->address);
+        auto response = ap->pop();
+        take(response);
+        sta->receive(response->dup(), apMib->address);
+        ap->acknowledge(response);
+        delete response;
     }
     void activity() override
     {
-        int before = 0;
         sta = check_and_cast<RateSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
         staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
         auto apA = check_and_cast<RateAp *>(getModuleByPath("^.apA.wlan[0].mgmt"));
@@ -171,6 +207,100 @@ class RateContextTest : public cSimpleModule, public cListener
         apA->beacon(); ASSERT(sta->discover(apA->pop(), a->address));
         apB->beacon(); ASSERT(sta->discover(apB->pop(), b->address));
         ASSERT(!staMib->getBssRateSet().supported.known);
+        sta->authenticate(a->address); exchange(apA, a);
+        sta->associate(a->address); exchange(apA, a);
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssRateSet() == simple->getBssRateSet());
+        ASSERT(a->findPeerRateSet(staMib->address) != nullptr);
+        ASSERT(!apA->pending(staMib->address));
+        expectedActive = a->address;
+        observe = true;
+
+        // A same-AP target excludes the active context in both exchange directions.
+        auto active = staMib->snapshotRateContext(a->address, ST_DATA, a->address, std::nullopt).context;
+        sta->reassociate(a->address);
+        auto sameApRequest = sta->pop();
+        take(sameApRequest);
+        auto sameApTarget = reference(sameApRequest);
+        for (int subtype : {ST_REASSOCIATIONREQUEST, ST_REASSOCIATIONRESPONSE}) {
+            ASSERT(!staMib->snapshotRateContext(a->address, subtype, a->address, active).known);
+            ASSERT(staMib->snapshotRateContext(a->address, subtype, a->address, sameApTarget).known);
+            ASSERT(staMib->snapshotRateContext(a->address, subtype, a->address, std::nullopt).context == sameApTarget);
+        }
+        ASSERT(staMib->snapshotRateContext(a->address, ST_DATA, a->address, active).known);
+        ASSERT(staMib->snapshotRateContext(a->address, ST_RTS, a->address, sameApTarget).known);
+        sta->cancel();
+        ASSERT(!staMib->snapshotRateContext(a->address, ST_REASSOCIATIONREQUEST, a->address, sameApTarget).known);
+        ASSERT(staMib->snapshotRateContext(a->address, ST_DATA, a->address, active).known);
+        delete sameApRequest;
+
+        // Discovery cleanup preserves the active association and its rates.
+        auto activeRates = *staMib->findPeerRateSet(a->address);
+        auto activeBssRates = staMib->getBssRateSet();
+        checkCleanup = [&]() {
+            ASSERT(sta->cached(a->address) == nullptr && sta->cached(b->address) == nullptr);
+            ASSERT(staMib->findPeerRateSet(a->address) != nullptr);
+            ASSERT(*staMib->findPeerRateSet(a->address) == activeRates);
+            ASSERT(staMib->getBssRateSet() == activeBssRates);
+            ASSERT(staMib->findPeerRateSet(b->address) == nullptr);
+        };
+        int beforeCleanup = notifications;
+        sta->clearDiscovery();
+        checkCleanup();
+        ASSERT(notifications == beforeCleanup + 1);
+        sta->clearDiscovery();
+        ASSERT(notifications == beforeCleanup + 1);
+        checkCleanup = nullptr;
+        apA->beacon(); ASSERT(sta->discover(apA->pop(), a->address));
+        apB->beacon(); ASSERT(sta->discover(apB->pop(), b->address));
+
+        sta->authenticate(b->address); exchange(apB, b);
+        int before = notifications;
+        apA->beacon(); ASSERT(sta->discover(apA->pop(), a->address));
+        ASSERT(notifications == before);
+        sta->reassociate(b->address);
+        auto queued = sta->pop();
+        take(queued);
+        auto ref = reference(queued);
+        ASSERT(ref.kind == BssRateContextRef::TARGET && ref.bssid == b->address);
+        auto snapshot = staMib->snapshotRateContext(b->address, ST_REASSOCIATIONREQUEST, b->address, ref);
+        ASSERT(snapshot.known && snapshot.bssRates == b->getBssRateSet());
+        ASSERT(staMib->getBssRateSet() == a->getBssRateSet());
+        ASSERT(staMib->snapshotRateContext(b->address, ST_REASSOCIATIONRESPONSE, b->address, std::nullopt).context == ref);
+        ASSERT(!staMib->snapshotRateContext(a->address, ST_REASSOCIATIONREQUEST, b->address, ref).known);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_REASSOCIATIONREQUEST, a->address, ref).known);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, ref).known);
+        ASSERT(staMib->snapshotRateContext(b->address, ST_RTS, std::nullopt, std::nullopt).context == ref);
+        auto copy = queued->dup(); ASSERT(reference(copy) == ref);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_REASSOCIATIONREQUEST);
+        header->setReceiverAddress(b->address);
+        copy->insertAtFront(header);
+        copy->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        int length = B(copy->getDataLength() - B(28)).get();
+        Fragmentation fragmentation;
+        auto fragments = fragmentation.fragmentFrame(copy, {length / 2, length - length / 2});
+        for (auto fragment : *fragments) {
+            ASSERT(reference(fragment) == ref);
+            RtsTransmitStep rts(fragment, new Packet("RTS", makeShared<Ieee80211RtsFrame>()), 0);
+            ASSERT(reference(rts.getFrameToTransmit()) == ref);
+            delete fragment;
+        }
+        delete fragments;
+        sta->cancel();
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_REASSOCIATIONREQUEST, b->address, ref).known);
+        ASSERT(snapshot.bssRates == b->getBssRateSet()); // Owned snapshot survives removal.
+        sta->reassociate(b->address);
+        auto replacement = sta->pop();
+        take(replacement);
+        auto newRef = reference(replacement);
+        ASSERT(newRef.transactionId != ref.transactionId && newRef.generation != ref.generation);
+        staMib->removeTargetRateContext(ref);
+        ASSERT(staMib->snapshotRateContext(b->address, ST_REASSOCIATIONRESPONSE, b->address, newRef).known);
+        delete queued;
+        delete replacement;
+        sta->cancel();
+
         // Invalid extended values leave the AP cache and MIB unchanged.
         apB->beacon();
         auto malformed = apB->pop();
@@ -195,6 +325,28 @@ class RateContextTest : public cSimpleModule, public cListener
         malformed->insertAtFront(body);
         ASSERT(!sta->discover(malformed, b->address));
         ASSERT(sta->cached(b->address)->rateSet == cachedRates && notifications == before);
+
+        // The AP rejects a request that omits its required basic legacy rates.
+        sta->reassociate(b->address);
+        auto unsupported = sta->pop();
+        take(unsupported);
+        auto failedRef = reference(unsupported);
+        auto request = unsupported->removeAtFront<Ieee80211ReassociationRequestFrame>();
+        Ieee80211SupportedRatesElement limited;
+        limited.numRates = 1; limited.rate[0] = 1;
+        request->setSupportedRates(limited);
+        request->setExtendedSupportedRatesPresent(false);
+        unsupported->insertAtFront(request);
+        apB->receive(unsupported, staMib->address);
+        auto refusal = apB->pop();
+        take(refusal);
+        ASSERT(refusal->peekData<Ieee80211AssociationResponseFrame>()->getStatusCode() == SC_DATARATE_UNSUP);
+        sta->receive(refusal->dup(), b->address);
+        apB->acknowledge(refusal);
+        delete refusal;
+        ASSERT(!sta->pending() && !apB->pending(staMib->address));
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_REASSOCIATIONREQUEST, b->address, failedRef).known);
+        ASSERT(b->findPeerRateSet(staMib->address) == nullptr);
 
         // MIB-only identity and empty-set probes use explicit fixture records.
         Ieee80211RateSetState empty;
@@ -226,12 +378,44 @@ class RateContextTest : public cSimpleModule, public cListener
         ASSERT(staMib->snapshotRateContext(MacAddress::BROADCAST_ADDRESS, ST_PROBEREQUEST, std::nullopt, BssRateContextRef()).known);
         ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, std::nullopt, BssRateContextRef()).known);
 
+        observe = false;
+        sta->disconnect();
+        ASSERT(!staMib->getBssRateSet().supported.known);
+        ASSERT(staMib->findPeerRateSet(a->address) == nullptr);
+        ASSERT(staMib->findPeerRateSet(b->address) != nullptr);
+        sta->associate(b->address);
+        auto interrupted = sta->pop();
+        take(interrupted);
+        auto interruptedRef = reference(interrupted);
+        delete interrupted;
+        sta->shutdown(); sta->restart();
+        ASSERT(!staMib->bssStationData.isAssociated && staMib->getLocalRateSet().supported.known);
+        ASSERT(staMib->findPeerRateSet(b->address) == nullptr);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_ASSOCIATIONRESPONSE, b->address, interruptedRef).known);
+        apB->beacon(); ASSERT(sta->discover(apB->pop(), b->address));
+        sta->authenticate(b->address);
+        auto restarted = sta->pop();
+        take(restarted);
+        auto restartedRef = reference(restarted);
+        ASSERT(restartedRef.transactionId > interruptedRef.transactionId);
+        apB->receive(restarted, staMib->address);
+        auto failedAuthentication = apB->pop();
+        take(failedAuthentication);
+        auto authentication = failedAuthentication->removeAtFront<Ieee80211AuthenticationFrame>();
+        authentication->setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        failedAuthentication->insertAtFront(authentication);
+        sta->receive(failedAuthentication, b->address);
+        ASSERT(!sta->cached(b->address)->isAuthenticated);
+        ASSERT(sta->cached(b->address)->authTimeoutMsg == nullptr);
+        ASSERT(!staMib->snapshotRateContext(b->address, ST_AUTHENTICATION, b->address, restartedRef).known);
+
         sta->shutdown();
         staMib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, this);
-        std::cout << "Local rates, discovery, simplified association, and MIB snapshots passed.\n";
+        std::cout << "Production rates, target identity, copies, bindings, rejection, and cleanup passed.\n";
     }
 };
 Define_Module(RateContextTest);
+
 } // namespace ieee80211
 } // namespace inet
 
@@ -295,7 +479,7 @@ record-scalar-results = false
 **.mobility.constraintAreaMaxZ = 0m
 
 %contains: stdout
-Local rates, discovery, simplified association, and MIB snapshots passed.
+Production rates, target identity, copies, bindings, rejection, and cleanup passed.
 
 %not-contains: stdout
 undisposed object

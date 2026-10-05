@@ -9,7 +9,17 @@ Notable backward incompatible changes are the following:
 IEEE 802.11 management rate context
 
    Custom rate-selection models can query local, BSS, peer, and target rate
-   facts through Ieee80211Mib.
+   facts through Ieee80211Mib. Target references preserve the intended BSS
+   through queues, fragmentation, and RTS creation. Unknown target facts
+   remain unknown instead of using facts from the active BSS.
+
+   Access points reject association requests that lack required basic rates.
+   Custom management implementations must publish rate facts at each state
+   transition. The migration guide describes the publication contract.
+
+   Full STA management now puts the selected BSSID in Address 3 of transmitted
+   management frames. The frame format stays the same, but its bytes change.
+   The ~tND fingerprints change in simulations that use these frames.
 
 IEEE 802.11 HCF complete exchange admission
 

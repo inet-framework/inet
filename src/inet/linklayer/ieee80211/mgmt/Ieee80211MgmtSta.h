@@ -78,6 +78,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         bool extendedSupportedRatesPresent = false;
         Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
         Ieee80211RateSetState rateSet;
+        BssRateContextRef authRateContext;
         bool htCapabilitiesPresent = false;
         Ieee80211HtCapabilities htCapabilities;
         bool htOperationPresent = false;
@@ -128,6 +129,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     // associated Access Point
     cMessage *assocTimeoutMsg; // if non-nullptr: association is in progress
     bool reassociationInProgress = false;
+    BssRateContextRef associationRateContext;
     AssociatedApInfo assocAP;
 
   public:
