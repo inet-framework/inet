@@ -103,7 +103,7 @@ Each row is one commit with the group `reviewer-questions` and a `Plan:` line th
 | 5 | done | GitHub shows the questions to the author | new `.github/pull_request_template.md` | comment-only template | render check |
 | 6 | done | A gate reads a description | new `check-pr-description.sh`, new `check_pr_description.py`, new `test_check_pr_description.py`, `pull-request.md`, `review-a-pull-request.md`, `enforcement/README.md` | notes for a missing opening, evidence first, an action-first opening, and a large pull request with a one-line opening | unit tests; recent descriptions |
 | 7 | done | The review restates the answers and asks the open questions | `review-a-pull-request.md`, `checklist/general.md` | read-back in the report | `check-links.sh` |
-| 8 | pending | Close the plan | this file | record, then move to `plan/done/` | — |
+| 8 | done | Close the plan | this file | record, then move to `plan/done/` | — |
 
 ## 7. Verification
 
@@ -127,4 +127,47 @@ true or that a problem is worth solving; that stays with the reviewer and the ma
 
 ## 9. Implementation record
 
-Filled in as the steps land.
+All eight steps are done on `topic/reviewer-questions`, in eight commits and a move, on the pinned
+base `d9e14c5af2`. The branch is local and not pushed.
+
+### Decisions and facts from the implementation
+
+- **Commit note.** The final reader also skips reference lines ("Fixes #12."), rule lines and HTML,
+  and it treats a list that comes first as the opening. With it, the combined test fires on 18 of
+  924 bodies on master (1.9 %); the first calibration script gave 1.6 %.
+- **Description calibration.** The last 100 INET pull requests (2026-08-06 to 2026-10-05) were read
+  through the public API. The first version of the gate gave five notes. Two were wrong: it took
+  "Fixes #1194." (#1195) and a "Dependency" section (#1154) as the opening. One gave the wrong text:
+  #1144 summarizes as a bullet list of changes, which the gate did not read. The reader now skips
+  reference paragraphs and dependency sections, and a list opening gets its own note.
+- **No opening-length note.** 29 of 100 openings have fewer than 30 words, and short openings are
+  often followed at once by a "Motivation" or "Why" section (#1127, #1187). The gate instead asks a
+  large series (more than 3 commits or 400 source lines) or a long description (more than 1000
+  words) to name its problem in its first 150 words.
+- **Final result.** 6 of 100 descriptions get a note, each with a real gap: #1155 (61 commits, no
+  description, only a badge), #1153 and #1150 (open with "Move ..." and "Define ..."), and #1144,
+  #1135 and #1126 (open with a list of changes that names no problem).
+- **Pull request 1273.** The description gate gives no note: its 40-word opening names a problem. The
+  read-back in `audit/pull-request/pr-1273-summary.md` (repository root, not in git) still finds
+  open questions; `audit/pull-request/pr-1273.md` lists seven for the author.
+- Three test expectations of mine were wrong (a diff line count, a word count, a test sentence
+  without a reason word). The gate was right each time, and the tests now hold the right values.
+- The subject of step 2 was shortened to 67 characters.
+
+### Evidence
+
+Commands ran from the worktree root on 2026-10-05.
+
+| Check | Result |
+| --- | --- |
+| `python3 -m unittest discover -s doc/project/enforcement -p 'test_*.py'` | 135 tests, OK, under `PYTHONHASHSEED` 0, 1 and 2 |
+| The same tests and `check-seals.sh` at each commit, in a detached copy under `/var/tmp` | OK at every commit; the broken-link count stays the same at every commit |
+| `check-links.sh` in the worktree | 1 broken link, to the generated `MplsPacket_m.h`, as on master |
+| `check-commits.sh d9e14c5af2..HEAD` | PASS, no note |
+| `check-classification.sh d9e14c5af2..HEAD` | PASS |
+
+### Limits
+
+A word list cannot tell whether an answer is true or a problem worth solving; the read-back and the
+maintainer decide that. The size condition of the description gate was checked with the unit tests
+and on pull request 1273 only, because the list API gives no commit counts.
