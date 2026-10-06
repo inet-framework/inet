@@ -1,0 +1,43 @@
+%description:
+TcpTahoe fast retransmit: the tester drops segment a12. At the third
+duplicate ACK, Tahoe has no fast recovery. It sets ssthresh to
+max(cwnd/2, 2*SMSS) and cwnd to one segment, and it restarts slow start
+from the first unacknowledged segment, as a timeout does: after the
+retransmission of the lost segment, it sends the segments that follow it
+again, in slow start.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=32768B # 32 1024-byte segments
+
+*.tcptester.script="a12 delete; a14 delete"  # drop two segments: Tahoe must go back to the second one
+
+*.*_tcp.tcpAlgorithmClass = "TcpTahoe"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.219 B009] A.1000 < B.2000: A ack 9217 win 16384 
+[1.219 B010] A.1000 < B.2000: A ack 9217 win 16384 
+[1.221 A018] A.1000 > B.2000: A 9217:10241(1024) ack 501 win 16384 
+[1.423 B011] A.1000 < B.2000: A ack 11265 win 14336 
+[1.425 A019] A.1000 > B.2000: A 11265:12289(1024) ack 501 win 16384 
+[1.425 A020] A.1000 > B.2000: A 12289:13313(1024) ack 501 win 16384 
+[1.427 B012] A.1000 < B.2000: A ack 15361 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

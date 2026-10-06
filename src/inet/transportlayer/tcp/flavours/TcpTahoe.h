@@ -36,8 +36,8 @@ class INET_API TcpTahoe : public TcpAlgorithmBase
 
     virtual void initialize() override;
 
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
+    /** Halves ssthresh from cwnd and restarts slow start from the first unacknowledged segment */
+    virtual void resetToSlowStart();
 
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;

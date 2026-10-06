@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
 
 #include <algorithm> // min,max
@@ -29,17 +28,6 @@ void TcpTahoe::initialize()
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 
-void TcpTahoe::recalculateSlowStartThreshold()
-{
-    // set ssthresh to flight size / 2, but at least 2 MSS
-    // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
-//    uint32_t flight_size = state->snd_max - state->snd_una;
-    state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
-
-    conn->emit(ssthreshSignal, state->ssthresh);
-}
-
 void TcpTahoe::processRexmitTimer(TcpEventCode& event)
 {
     TcpAlgorithmBase::processRexmitTimer(event);
@@ -47,19 +35,7 @@ void TcpTahoe::processRexmitTimer(TcpEventCode& event)
     if (event == TCP_E_ABORT)
         return;
 
-    // begin Slow Start (RFC 2581)
-    recalculateSlowStartThreshold();
-    state->snd_cwnd = state->snd_mss;
-
-    conn->emit(cwndSignal, state->snd_cwnd);
-
-    EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
-            << ", ssthresh=" << state->ssthresh << "\n";
-
-    state->afterRto = true;
-
-    // Tahoe retransmits only one segment at the front of the queue
-    conn->retransmitOneSegment(true);
+    resetToSlowStart();
 }
 
 void TcpTahoe::receivedAckForUnackedData(uint32_t firstSeqAcked)
@@ -118,25 +94,23 @@ void TcpTahoe::receivedDuplicateAck()
 {
     TcpAlgorithmBase::receivedDuplicateAck();
 
+    // Tahoe has no fast recovery: the third duplicate ACK starts the same
+    // slow start from the first unacknowledged segment as a timeout does
     if (state->dupacks == state->dupthresh) {
         EV_DETAIL << "Tahoe on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Slow Start:\n";
-
-        // enter Slow Start
-        recalculateSlowStartThreshold();
-        state->snd_cwnd = state->snd_mss;
-
-        conn->emit(cwndSignal, state->snd_cwnd);
-
-        EV_DETAIL << "Set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
-
-        // Fast Retransmission: retransmit missing segment without waiting
-        // for the REXMIT timer to expire
-        conn->retransmitOneSegment(false);
-
-        // Do not restart REXMIT timer.
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+        resetToSlowStart();
     }
+}
+
+void TcpTahoe::resetToSlowStart()
+{
+    state->ssthresh = std::max(state->snd_cwnd / 2, 2 * state->snd_mss);
+    conn->emit(ssthreshSignal, state->ssthresh);
+    state->snd_cwnd = state->snd_mss;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "Beginning slow start" << EV_FIELD(ssthresh, state->ssthresh) << EV_FIELD(cwnd, state->snd_cwnd) << EV_ENDL;
+    state->afterRto = true;
+    conn->retransmitOneSegment(true);
 }
 
 } // namespace tcp
