@@ -153,7 +153,7 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     4fea-ce55/tplx;ba3e-99de/~tNl;21bc-bc31/~tND;37ed-6720/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         e1ca-028f/tplx;8e52-2609/~tNl;ce8b-12d8/~tND;0ad1-d012/tyf, PASS, EthernetMac Ipv4
-/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         fe41-7c30/tplx;5404-87d5/~tNl;7907-73c8/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         f436-d2a1/tplx;2917-6bbf/~tNl;ce7f-4510/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            1452-430c/tplx;c4ce-f860/~tNl;1280-616e/~tND;2b32-31ec/tyf, PASS, Ipv4
 
