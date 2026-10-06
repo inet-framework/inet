@@ -163,6 +163,28 @@ class INET_API TcpSackRexmitQueue
      */
     virtual void checkSackBlock(uint32_t seqNum, uint32_t& length, bool& sacked, bool& rexmitted) const;
 
+    /**
+     * Emulates SACK for a connection without it, as Linux tcp_add_reno_sack()
+     * does: called on a duplicate ACK, it marks the first segment after the
+     * head that is not yet SACKed as SACKed.
+     */
+    virtual void addInferredSack();
+
+    /**
+     * Returns the total number of lost bytes in the queue.
+     */
+    virtual uint32_t getLost() const;
+
+    /**
+     * Returns the total number of sacked bytes in the queue.
+     */
+    virtual uint32_t getSacked() const;
+
+    /**
+     * Returns the total number of retransmitted bytes in the queue.
+     */
+    virtual uint32_t getRetrans() const;
+
   protected:
     /*
      * Returns if TcpSackRexmitQueue is valid or not.

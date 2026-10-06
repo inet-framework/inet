@@ -69,6 +69,20 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         }
     }
 
+    // conn is null only when the queue is exercised standalone (unit tests); the
+    // inferred-SACK emulation below is a connection-level concern.
+    if (conn != nullptr && !conn->getState()->sack_enabled && !rexmitQueue.empty()) {
+        auto& head = rexmitQueue.front();
+        if (head.sacked) {
+            // The first unacknowledged segment cannot be SACKed, otherwise the
+            // cumulative ACK would cover it: an inferred SACK guessed wrong. The
+            // head is lost, and the mark moves to the next segment.
+            head.lost = true;
+            head.sacked = false;
+            addInferredSack();
+        }
+    }
+
     begin = seqNum;
 
     // TESTING queue:
@@ -382,6 +396,45 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
     length = (i->endSeqNum - fromSeqNum);
     sacked = i->sacked;
     rexmitted = i->rexmitted;
+}
+
+void TcpSackRexmitQueue::addInferredSack()
+{
+    // skip the head, which is assumed to be lost
+    auto i = ++rexmitQueue.begin();
+    while (i != rexmitQueue.end() && i->sacked)
+        i++;
+    if (i != rexmitQueue.end()) {
+        i->lost = false;
+        i->sacked = true;
+    }
+}
+
+uint32_t TcpSackRexmitQueue::getLost() const
+{
+    uint32_t lost = 0;
+    for (auto& region : rexmitQueue)
+        if (region.lost)
+            lost += region.endSeqNum - region.beginSeqNum;
+    return lost;
+}
+
+uint32_t TcpSackRexmitQueue::getSacked() const
+{
+    uint32_t sacked = 0;
+    for (auto& region : rexmitQueue)
+        if (region.sacked)
+            sacked += region.endSeqNum - region.beginSeqNum;
+    return sacked;
+}
+
+uint32_t TcpSackRexmitQueue::getRetrans() const
+{
+    uint32_t retrans = 0;
+    for (auto& region : rexmitQueue)
+        if (region.rexmitted)
+            retrans += region.endSeqNum - region.beginSeqNum;
+    return retrans;
 }
 
 } // namespace tcp
