@@ -104,6 +104,7 @@ void RadioMedium::initialize(int stage)
         if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
         sameTransmissionStartTimeCheck = par("sameTransmissionStartTimeCheck");
+        purgeOnTransmission = !strcmp(par("transmissionPurgeMode"), "onTransmission");
 
         WATCH(transmissionCount);
         WATCH(signalSendCount);
@@ -181,8 +182,10 @@ std::ostream& RadioMedium::printToStream(std::ostream& stream, int level, int ev
 
 void RadioMedium::handleMessage(cMessage *message)
 {
-    if (message == removeNonInterferingTransmissionsTimer)
+    if (message == removeNonInterferingTransmissionsTimer) {
         removeNonInterferingTransmissions();
+        scheduleRemoveNonInterferingTransmissionsTimer();
+    }
     else
         throw cRuntimeError("Unknown message");
 }
@@ -248,6 +251,10 @@ void RadioMedium::removeNonInterferingTransmissions()
     communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
         emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
     });
+}
+
+void RadioMedium::scheduleRemoveNonInterferingTransmissionsTimer()
+{
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         auto interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
         if (!removeNonInterferingTransmissionsTimer->isScheduled() && interferenceEndTime > simTime())
@@ -516,7 +523,9 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         }
     });
     communicationCache->setCachedInterferenceEndTime(transmission, maxArrivalEndTime + mediumLimitCache->getMaxTransmissionDuration());
-    if (!removeNonInterferingTransmissionsTimer->isScheduled())
+    if (purgeOnTransmission)
+        removeNonInterferingTransmissions();
+    else if (!removeNonInterferingTransmissionsTimer->isScheduled())
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmission), removeNonInterferingTransmissionsTimer);
     emit(signalAddedSignal, check_and_cast<const cObject *>(transmission));
 }
