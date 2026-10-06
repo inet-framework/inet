@@ -1,6 +1,6 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05, S5b on 2026-10-06. S5c is next.
+Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05, S5b and S5c on 2026-10-06. S5d is next.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
 Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
@@ -51,8 +51,9 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S4 ✅ | `topic/tcp-recovery-split` | 7, 8, 9, 10 + 50 | +1872 −4 | the recovery interfaces and the RFC 5681, RFC 6582 and RFC 6675 strategies, which nothing selects yet (D-5) |
 | S5 ✅ | `topic/tcp-flavour-split` | 11, 12 | +152 −136 | the move and the rename of the two base classes (D-6) |
 | S5b ✅ | `topic/tcp-flavour-strategies` | 13 (part), new | +450 −470 (about) | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
-| S5c | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 54, 55 (part), 56, 70, 71, 72 | — | the behavior changes B4 to B8, B10, B11 of D-6, one change per commit |
+| S5c ✅ | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 41 (part), 54, 70 | +320 −40 (about) | the behavior changes B4, B6, B10, B11 of D-6, and the preparation of the pipe accounting |
 | S5d | `topic/tcp-sack-recovery` | 13 (part) | — | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6 |
+| S5e | `topic/tcp-pipe-recovery` | 13 (part), 39 (part), 56, 71, 72 | — | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
 | S8 | `topic/tcp-rack` | 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window |
@@ -201,6 +202,16 @@ plan gives a reason for.
   it: at the first S5b head, `examples/inet/tcp_pmtud` `PmtudEnabled` and `PmtudProbe` moved. S5b
   sets `snd_effmss = snd_mss` at the three places; when commit 15 lands (S7), they become
   `calculateEffectiveMss()`. This is a deliberate difference from the source tree.
+- **D-8 — Tahoe keeps Limited Transmit.** Source commit 13 gives TcpTahoe its own
+  duplicate-ACK path, which counts without the base class: it drops Limited Transmit although
+  `limitedTransmitEnabled` names TcpTahoe, and it does not reset the counter on an old ACK that is
+  no duplicate. S5c keeps master's path through the base class for Tahoe and changes only its
+  reaction at the third duplicate ACK (step 4a). This is a deliberate difference from the source
+  tree: `TcpTahoe` keeps `receivedDuplicateAck()` and has no `receivedAckForAlreadyAckedData()`.
+- **D-9 — DumbTcp keeps counting duplicate ACKs.** The source branch leaves
+  `DumbTcp::receivedAckForAlreadyAckedData()` empty with a `TODO`, so the `dupAcks` statistic of a
+  DumbTcp connection stays 0. S5b keeps master's counter; this is a deliberate difference from the
+  source tree.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -405,28 +416,53 @@ At master `649d4756ae` the CI job passed: 1752 tests, with only the expected
 `ethernet-nonstandardspeed` error. The local `~tNl` baseline comes from `inet-tcp-tidy-ups` at
 `dabcd78282`, which has master's TCP code.
 
-### S5c — `topic/tcp-classic-recovery`: the steps
+### S5c — `topic/tcp-classic-recovery` — landed 2026-10-06
+
+The owner reviewed and approved S5c on 2026-10-06, with D-8 ("the more important goal is
+correctness and passing the protocol tests"), D-9 and the order S5d before S5e. Before the landing,
+S5c moved onto an IEEE 802.11 fix of master (`93210f4955`), which also moves the row
+`showcases/visualizer/canvas/styling` `Annotation`; the FlightSize commit carries its new value. The
+CI job ran again at every commit of S5c on the new base: only that row differed, at the FlightSize
+commit, with the same `~tNl` and `~tND` as on the old base.
 
 The source branch changes the recovery of Reno and NewReno to the Linux model: the window is not
-inflated, and duplicate ACKs make room in the pipe instead. That model needs three parts that the
-source branch brings much later: the connection sends against the bytes in flight (commit 16, S7),
-a duplicate ACK without SACK counts as an inferred SACK (commit 39, S17), and the head of the queue
-is marked lost (commit 72). Without them, a window that is not inflated leaves no room to send in
-fast recovery. So S5c brings these parts forward, into the commit that needs them. Each step is
-one commit, and each `change` commit carries the moved fingerprints of the CI job and an
-explanation of each moved row and trace:
+inflated, and duplicate ACKs make room in the pipe instead. That model needs parts that the source
+branch brings much later: the connection sends against the bytes in flight (commit 16, S7), and a
+duplicate ACK without SACK counts as an inferred SACK (commit 39, S17). S5c brings the behavior
+changes that stand alone, and the preparation of the pipe accounting. Each `change` commit carries
+the moved fingerprints of the CI job and an explanation of each moved row and trace:
 
-| Step | Commit | B of D-6 | Source |
+| Commit | B of D-6 | Source | Moved CI rows |
 | --- | --- | --- | --- |
-| 1 | change: a duplicate ACK is what RFC 5681 defines: the same window, and no SYN or FIN | B4 | 13 |
-| 2 | change: ssthresh from FlightSize (RFC 5681 equation (4)), without the data that Limited Transmit sent | B6 | 13, 70 |
-| 3 | change: every classic flavour reacts to an ECN-Echo | B10 | 54 |
-| 4 | change: Tahoe at the third duplicate ACK | B11 | 13 |
-| 5 | refactor: the connection sends against the bytes in flight that the algorithm reports | — | 16 (part) |
-| 6 | refactor: the connection keeps the retransmission scoreboard without SACK | — | 39 (part) |
-| 7 | change: Reno and NewReno recover by pipe accounting | B5, B7, B8 | 13, 39 (part), 56, 71, 72 |
-| 8 | change: DumbTcp does not count duplicate ACKs | — | 13 |
+| `tcp: change: count a duplicate ACK as RFC 5681 defines it` | B4 | 13 | 2: `bulktransfer` `inet__inet`, `inet_inet_2b` |
+| `tcp: change: set ssthresh from FlightSize, as RFC 5681 equation (4) says` | B6 | 13, 70 | 42 Reno and NewReno runs; 4 stress test traces |
+| `tests: add: let the TCP module tester mark a segment CE` | — | 41 (part) | — |
+| `tcp: change: react to an ECN-Echo in every classic flavour` | B10 | 54 | 1: `dctcp` `TcpRenoIncast` |
+| `examples: fix: let the inet-tahoe configuration run TcpTahoe` | — | new | 7: `tcpclientserver` `inet-tahoe` |
+| `tcp: change: let Tahoe answer the third duplicate ACK as a timeout` | B11 | 13 | 6: `tcpclientserver` `inet-tahoe` |
+| `tcp: refactor: send against the bytes in flight that the algorithm reports` | — | 16 (part) | — |
+| `tcp: refactor: keep the retransmission scoreboard without SACK` | — | 39 (part) | — |
+| `tcp: add: count lost, SACKed and retransmitted bytes, and infer a SACK` | — | 13, 39 (part) | — |
 
-The order can change when a step shows that it depends on a later one. The hooks of S5b that a
-step removes are named in its commit.
+The pipe accounting itself (B5, B7, B8) moves to S5e, after S5d. With SACK, Reno and NewReno still
+run master's SACK path in the same recovery classes; when S5d has moved SACK recovery into
+`Rfc6675Recovery`, those classes run only without SACK, and S5e changes them without a condition
+on `sack_enabled`.
+
+New tests: `tcp_ecn_reno_1` and `tcp_ecn_newreno_1` (the NewReno one fails before the ECN commit),
+and `tcp_tahoe_fastrexmit_1` (it fails before the Tahoe commit: the second loss waits for a
+timeout). Each failure was checked on the commit before.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol; unit 114, serializer 4 and the module suite (351 tests at the head) pass at each commit;
+the protocol tests are as master; the CI fingerprint job passes at each commit that changes code,
+after the commit's own new values.
+
+The configuration `inet-tahoe` of `examples/inet/tcpclientserver` set `tcpAlgorithmClass =
+"TcpReno"` since 2017, so no fingerprint row ran TcpTahoe. The owner agreed on 2026-10-06 to fix
+it in S5c, before the Tahoe change, so that the Tahoe change moves rows of its own.
+
+Source commits 55, 56, 71 and 72 do not land here: 55 repairs the duplicate-ACK counting that the
+source commit 13 broke for Vegas and Westwood, which S5b never broke; 56, 71 and 72 belong to the
+pipe accounting (S5e).
 
