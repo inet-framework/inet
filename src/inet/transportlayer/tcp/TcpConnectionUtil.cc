@@ -1075,11 +1075,12 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     if (buffered == 0)
         return false;
 
-    // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
-    uint32_t maxWindow = std::min(state->snd_wnd, congestionWindow);
-
-    // effectiveWindow: number of bytes we're allowed to send now
-    int64_t effectiveWin = (int64_t)maxWindow - (state->snd_nxt - state->snd_una);
+    // effectiveWindow: number of bytes we're allowed to send now. The advertised
+    // window limits the unacknowledged sequence space, and the congestion window
+    // limits the bytes in flight that the algorithm reports.
+    uint32_t unackedInWindow = state->snd_nxt - state->snd_una;
+    uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
+    int64_t effectiveWin = std::min((int64_t)state->snd_wnd - unackedInWindow, (int64_t)congestionWindow - bytesInFlight);
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
