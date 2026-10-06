@@ -193,6 +193,12 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void continueReception(cMessage *timer);
     virtual void endReception(cMessage *timer);
     virtual void abortReception(cMessage *timer);
+    /**
+     * Stops attempting the reception in progress, after a reconfiguration
+     * that invalidates it or when a new attempt replaces it. Its signal keeps
+     * arriving and is ignored when it ends.
+     */
+    virtual void abandonAttemptedReceptions();
     virtual void captureReception(cMessage *timer);
 
     virtual void sendUp(Packet *macFrame);
