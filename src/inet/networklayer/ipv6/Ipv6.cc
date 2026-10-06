@@ -368,18 +368,20 @@ void Ipv6::handleTunnelIcmpErrorIndication(Indication *indication)
         return;
     }
 
-    if (rt->isLocalAddress(innerHeader->getSrcAddress())) {
-        // this node is also the source of the original packet
-        handleIcmpErrorIndication(indication);
-        return;
-    }
-
     // RFC 2473 Section 8.2: a Packet Too Big reports the MTU minus the tunnel
     // header. Section 7.1 (a) reports no less than the IPv6 minimum link MTU,
     // because a smaller original packet is encapsulated and fragmented.
     int innerMtu = errorInd->getMtu();
     if (packetTooBig && innerMtu > 0)
         innerMtu = std::max(innerMtu - (int)IPv6_HEADER_BYTES.get<B>(), IPv6_MIN_MTU);
+
+    if (rt->isLocalAddress(innerHeader->getSrcAddress())) {
+        // this node is also the source of the original packet
+        if (packetTooBig)
+            errorInd->setMtu(innerMtu);
+        handleIcmpErrorIndication(indication);
+        return;
+    }
 
     // RFC 2473 Section 8.2: report the error to the source of the original packet.
     // Hop limit exceeded and unreachable node become a Destination Unreachable with
