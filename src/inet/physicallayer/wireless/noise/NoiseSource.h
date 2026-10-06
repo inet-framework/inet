@@ -60,7 +60,9 @@ class INET_API NoiseSource : public SimpleModule, public virtual IRadio
     virtual const IRadioMedium *getMedium() const override { return medium; }
 
     virtual const ITransmission *getTransmissionInProgress() const override;
+    virtual std::vector<const ITransmission *> getTransmissionsInProgress() const override;
     virtual const ITransmission *getReceptionInProgress() const override { return nullptr; }
+    virtual std::vector<const ITransmission *> getReceptionsInProgress() const override { return {}; }
 
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override { return IRadioSignal::SIGNAL_PART_NONE; }
