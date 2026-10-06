@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -48,14 +49,15 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         return false;
     else if (simTime() == reception->getStartTime(part)) {
         // TODO isn't there a better way for this optimization? see also in RadioMedium::isReceptionAttempted
-        auto transmission = reception->getReceiverRadio()->getReceptionInProgress();
-        return transmission == nullptr || transmission == reception->getTransmission();
+        auto receptionsInProgress = reception->getReceiverRadio()->getReceptionsInProgress();
+        return receptionsInProgress.empty() || contains(receptionsInProgress, reception->getTransmission());
     }
     else {
         // determining whether the reception is attempted or not for the future
         auto radio = reception->getReceiverRadio();
         auto radioMedium = radio->getMedium();
         auto interferingReceptions = interference->getInterferingReceptions();
+        auto receptionsInProgress = radio->getReceptionsInProgress();
         for (auto interferingReception : *interferingReceptions) {
             auto isPrecedingReception = interferingReception->getStartTime() < reception->getStartTime() ||
                 (interferingReception->getStartTime() == reception->getStartTime() &&
@@ -63,7 +65,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
             if (isPrecedingReception) {
                 auto interferingTransmission = interferingReception->getTransmission();
                 if (interferingReception->getStartTime() <= simTime()) {
-                    if (radio->getReceptionInProgress() == interferingTransmission)
+                    if (contains(receptionsInProgress, interferingTransmission))
                         return false;
                 }
                 else if (radioMedium->isReceptionAttempted(radio, interferingTransmission, part))
