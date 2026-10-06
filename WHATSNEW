@@ -337,8 +337,10 @@ Notable backward incompatible changes are the following:
    only for an original packet larger than 1280 bytes. A Destination Unreachable,
    or a Time Exceeded for an exceeded hop limit, becomes a Destination Unreachable
    with code 3. Other errors about a tunnel packet are dropped at the entry point.
-   This also covers the tunnels that Mobile IPv6 (MIPv6) and Proxy Mobile IPv6
-   (PMIPv6) create.
+   A node that is itself the tunnel entry point and the source of the original
+   packet now gets the MTU that leaves room for the tunnel header, for example
+   1360 bytes instead of 1400. This also covers the tunnels that Mobile IPv6
+   (MIPv6) and Proxy Mobile IPv6 (PMIPv6) create.
 
 Notable backward compatible changes are the following:
 
