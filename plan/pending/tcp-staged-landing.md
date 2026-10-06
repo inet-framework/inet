@@ -51,7 +51,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S4 ✅ | `topic/tcp-recovery-split` | 7, 8, 9, 10 + 50 | +1872 −4 | the recovery interfaces and the RFC 5681, RFC 6582 and RFC 6675 strategies, which nothing selects yet (D-5) |
 | S5 ✅ | `topic/tcp-flavour-split` | 11, 12 | +152 −136 | the move and the rename of the two base classes (D-6) |
 | S5b ✅ | `topic/tcp-flavour-strategies` | 13 (part), new | +450 −470 (about) | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
-| S5c | `topic/tcp-classic-recovery` | 13 (part), 54, 55 (part), 56, 70 | — | the behavior changes B4 to B8, B10, B11 of D-6, one change per commit |
+| S5c | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 54, 55 (part), 56, 70, 71, 72 | — | the behavior changes B4 to B8, B10, B11 of D-6, one change per commit |
 | S5d | `topic/tcp-sack-recovery` | 13 (part) | — | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
@@ -404,4 +404,29 @@ Evidence, debug build against `omnetpp-6.x`:
 At master `649d4756ae` the CI job passed: 1752 tests, with only the expected
 `ethernet-nonstandardspeed` error. The local `~tNl` baseline comes from `inet-tcp-tidy-ups` at
 `dabcd78282`, which has master's TCP code.
+
+### S5c — `topic/tcp-classic-recovery`: the steps
+
+The source branch changes the recovery of Reno and NewReno to the Linux model: the window is not
+inflated, and duplicate ACKs make room in the pipe instead. That model needs three parts that the
+source branch brings much later: the connection sends against the bytes in flight (commit 16, S7),
+a duplicate ACK without SACK counts as an inferred SACK (commit 39, S17), and the head of the queue
+is marked lost (commit 72). Without them, a window that is not inflated leaves no room to send in
+fast recovery. So S5c brings these parts forward, into the commit that needs them. Each step is
+one commit, and each `change` commit carries the moved fingerprints of the CI job and an
+explanation of each moved row and trace:
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | change: a duplicate ACK is what RFC 5681 defines: the same window, and no SYN or FIN | B4 | 13 |
+| 2 | change: ssthresh from FlightSize (RFC 5681 equation (4)), without the data that Limited Transmit sent | B6 | 13, 70 |
+| 3 | change: every classic flavour reacts to an ECN-Echo | B10 | 54 |
+| 4 | change: Tahoe at the third duplicate ACK | B11 | 13 |
+| 5 | refactor: the connection sends against the bytes in flight that the algorithm reports | — | 16 (part) |
+| 6 | refactor: the connection keeps the retransmission scoreboard without SACK | — | 39 (part) |
+| 7 | change: Reno and NewReno recover by pipe accounting | B5, B7, B8 | 13, 39 (part), 56, 71, 72 |
+| 8 | change: DumbTcp does not count duplicate ACKs | — | 13 |
+
+The order can change when a step shows that it depends on a later one. The hooks of S5b that a
+step removes are named in its commit.
 
