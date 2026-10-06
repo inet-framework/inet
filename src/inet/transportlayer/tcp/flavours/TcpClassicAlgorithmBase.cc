@@ -112,6 +112,11 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     sendData(false);
 }
 
+bool TcpClassicAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    return recovery->isDuplicateAck(tcpHeader, payloadLength);
+}
+
 void TcpClassicAlgorithmBase::receivedDuplicateAck()
 {
     TcpAlgorithmBase::receivedDuplicateAck();

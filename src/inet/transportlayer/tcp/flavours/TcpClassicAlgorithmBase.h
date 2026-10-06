@@ -59,6 +59,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /** Called by the base class for each duplicate ACK; the recovery strategy reacts */
     virtual void receivedDuplicateAck() override;
 
+    /** The recovery strategy decides what a duplicate ACK is */
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
   public:
     /** Ctor */
     TcpClassicAlgorithmBase();
