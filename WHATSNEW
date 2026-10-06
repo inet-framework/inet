@@ -325,6 +325,21 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. ICMPv6 errors about IPv6 tunnel packets reach the source of the original packet
+
+   An ICMPv6 (Internet Control Message Protocol for IPv6) error about a User
+   Datagram Protocol (UDP) or Transmission Control Protocol (TCP) packet that a
+   router had sent into an Ipv6TunnelInterface stopped the simulation with an
+   "Unknown protocol" error on that router. As RFC 2473 (Generic Packet Tunneling
+   in IPv6) Section 8 requires, the tunnel entry point now reports the errors that
+   Section 8.1 lists to the source of the original packet. A Packet Too Big reports the MTU (maximum transmission
+   unit) minus the 40-byte tunnel header, and at least 1280 bytes, and is reported
+   only for an original packet larger than 1280 bytes. A Destination Unreachable,
+   or a Time Exceeded for an exceeded hop limit, becomes a Destination Unreachable
+   with code 3. Other errors about a tunnel packet are dropped at the entry point.
+   This also covers the tunnels that Mobile IPv6 (MIPv6) and Proxy Mobile IPv6
+   (PMIPv6) create.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

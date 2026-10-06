@@ -148,6 +148,16 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void handleIndication(Indication *indication);
     virtual void handleIcmpErrorIndication(Indication *indication);
+
+    /**
+     * Handles an ICMPv6 error indication about a tunnel packet that this node
+     * encapsulated (RFC 2473 Section 8), after the tunnel header has been popped.
+     * An error that Section 8.1 does not report to the source of the original
+     * packet is dropped. If this node is also the source of the original packet,
+     * the indication is processed again for the original packet. Otherwise the
+     * error is reported to the source of the original packet.
+     */
+    virtual void handleTunnelIcmpErrorIndication(Indication *indication);
     virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
 
     /**
