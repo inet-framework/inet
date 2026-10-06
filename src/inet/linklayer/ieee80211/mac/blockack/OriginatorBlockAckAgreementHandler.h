@@ -20,6 +20,7 @@ namespace ieee80211 {
 class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAgreementHandler
 {
   protected:
+    uint8_t nextDialogToken = 1;
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
 
   protected:
@@ -28,7 +29,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
+
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
@@ -39,6 +40,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual void processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
+    virtual simtime_t getEarliestExpirationTime() const override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) override;

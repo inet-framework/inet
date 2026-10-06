@@ -102,8 +102,11 @@ void Hcf::handleMessage(cMessage *msg)
     }
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
+            dispatchingInactivityTimer = true;
             originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
             recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            dispatchingInactivityTimer = false;
+            rescheduleInactivityTimer();
         }
         else
             throw cRuntimeError("Unknown event");
@@ -179,7 +182,33 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
 void Hcf::scheduleInactivityTimer(simtime_t timeout)
 {
     Enter_Method("scheduleInactivityTimer");
-    rescheduleAfter(timeout, inactivityTimer);
+    rescheduleInactivityTimer();
+}
+
+void Hcf::blockAckAgreementTerminated(cObject *agreement)
+{
+    Enter_Method("blockAckAgreementTerminated");
+    emit(blockAckAgreementDeletedSignal, agreement);
+}
+
+void Hcf::rescheduleInactivityTimer()
+{
+    Enter_Method("rescheduleInactivityTimer");
+    if (dispatchingInactivityTimer)
+        return;
+    auto originatorDeadline = originatorBlockAckAgreementHandler ? originatorBlockAckAgreementHandler->getEarliestExpirationTime() : SIMTIME_MAX;
+    auto recipientDeadline = recipientBlockAckAgreementHandler ? recipientBlockAckAgreementHandler->getEarliestExpirationTime() : SIMTIME_MAX;
+    auto deadline = std::min(originatorDeadline, recipientDeadline);
+    if (deadline == SIMTIME_MAX)
+        cancelEvent(inactivityTimer);
+    else
+        rescheduleAt(std::max(simTime(), deadline), inactivityTimer);
+}
+
+void Hcf::recipientAgreementTerminated(MacAddress originatorAddress, Tid tid)
+{
+    Enter_Method("recipientAgreementTerminated");
+    recipientDataService->clearBlockAckReceiveBuffer(originatorAddress, tid);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -365,26 +394,40 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header)
 {
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
-        if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
+        if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
-            auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
-            emit(blockAckAgreementAddedSignal, agreement);
-        }
         else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+            auto before = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
+            bool wasActive = before && before->getIsAddbaResponseReceived();
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-            emit(blockAckAgreementAddedSignal, agreement);
+            if (!wasActive && agreement && agreement->getIsAddbaResponseReceived())
+                emit(blockAckAgreementAddedSignal, agreement);
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            // IEEE Std 802.11-2024, Figure 9-154: Initiator identifies the sender's role.
+            auto peer = delba->getTransmitterAddress();
+            auto tid = delba->getTid();
             if (delba->getInitiator()) {
-                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
-                emit(blockAckAgreementDeletedSignal, agreement);
+                auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
+                std::unique_ptr<RecipientBlockAckAgreement> snapshot(agreement ? agreement->dup() : nullptr);
                 recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                if (snapshot && !recipientBlockAckAgreementHandler->getAgreement(tid, peer)) {
+                    recipientAgreementTerminated(peer, tid);
+                    rescheduleInactivityTimer();
+                    if (snapshot->getIsAddbaResponseSent())
+                        emit(blockAckAgreementDeletedSignal, snapshot.get());
+                }
             }
             else {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid());
-                emit(blockAckAgreementDeletedSignal, agreement);
+                auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+                std::unique_ptr<OriginatorBlockAckAgreement> snapshot(agreement ? agreement->dup() : nullptr);
                 originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy);
+                if (snapshot && !originatorBlockAckAgreementHandler->getAgreement(peer, tid)) {
+                    rescheduleInactivityTimer();
+                    if (snapshot->getIsAddbaResponseReceived())
+                        emit(blockAckAgreementDeletedSignal, snapshot.get());
+                }
             }
         }
         else
@@ -499,13 +542,39 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211M
         if (originatorBlockAckAgreementHandler)
             originatorBlockAckAgreementHandler->processTransmittedAddbaReq(addbaReq);
     }
-    else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader))
+    else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader)) {
+        auto before = recipientBlockAckAgreementHandler->getAgreement(addbaResp->getTid(), addbaResp->getReceiverAddress());
+        bool wasActive = before && before->getIsAddbaResponseSent();
         recipientBlockAckAgreementHandler->processTransmittedAddbaResp(addbaResp, this);
+        auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaResp->getTid(), addbaResp->getReceiverAddress());
+        if (!wasActive && agreement && agreement->getIsAddbaResponseSent())
+            emit(blockAckAgreementAddedSignal, agreement);
+    }
     else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
-        if (delba->getInitiator())
+        // TIMEOUT expiry already removed local state. A late callback cannot own its replacement.
+        if (delba->getReasonCode() == 39)
+            return;
+        auto peer = delba->getReceiverAddress();
+        auto tid = delba->getTid();
+        if (delba->getInitiator()) {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+            std::unique_ptr<OriginatorBlockAckAgreement> snapshot(agreement ? agreement->dup() : nullptr);
             originatorBlockAckAgreementHandler->processTransmittedDelba(delba);
-        else
+            rescheduleInactivityTimer();
+            if (snapshot && snapshot->getIsAddbaResponseReceived())
+                emit(blockAckAgreementDeletedSignal, snapshot.get());
+        }
+        else {
+            auto agreement = recipientBlockAckAgreementHandler->getAgreement(tid, peer);
+            std::unique_ptr<RecipientBlockAckAgreement> snapshot(agreement ? agreement->dup() : nullptr);
             recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+            rescheduleInactivityTimer();
+            if (snapshot) {
+                recipientAgreementTerminated(peer, tid);
+                if (snapshot->getIsAddbaResponseSent())
+                    emit(blockAckAgreementDeletedSignal, snapshot.get());
+            }
+        }
     }
     else ; // TODO other mgmt frames if needed
 }
@@ -782,9 +851,73 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
         throw cRuntimeError("Unknown control response frame");
 }
 
+void Hcf::cancelPendingBlockAckTimeout(MacAddress peer, Tid tid, bool initiator)
+{
+    auto context = frameSequenceHandler->isSequenceRunning() ? frameSequenceHandler->getContext() : nullptr;
+    auto isReferenced = [context](Packet *packet) {
+        if (context) {
+            for (int i = 0; i < context->getNumSteps(); ++i) {
+                auto step = context->getStep(i);
+                if (step->getType() == IFrameSequenceStep::Type::TRANSMIT) {
+                    auto transmit = static_cast<ITransmitStep *>(step);
+                    if (transmit->getFrameToTransmit() == packet)
+                        return true;
+                    if (auto rts = dynamic_cast<RtsTransmitStep *>(step))
+                        if (rts->getProtectedFrame() == packet)
+                            return true;
+                }
+            }
+        }
+        return false;
+    };
+    auto isObsolete = [peer, tid, initiator, &isReferenced](Packet *packet) {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        return delba && delba->getReasonCode() == 39 && delba->getReceiverAddress() == peer &&
+               delba->getTid() == tid && delba->getInitiator() == initiator && !isReferenced(packet);
+    };
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac) {
+        auto edcaf = edca->getEdcaf(static_cast<AccessCategory>(ac));
+        auto pending = edcaf->getPendingQueue();
+        for (int i = pending->getNumPackets() - 1; i >= 0; --i) {
+            auto packet = pending->getPacket(i);
+            if (isObsolete(packet)) {
+                pending->removePacket(packet);
+                take(packet);
+                delete packet;
+            }
+        }
+        auto frames = edcaf->getInProgressFrames();
+        for (int i = frames->getLength() - 1; i >= 0; --i) {
+            auto packet = frames->getFrames(i);
+            if (isObsolete(packet)) {
+                auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                edcaf->getMgmtAndNonQoSRecoveryProcedure()->clearFrameRetryCounters(header);
+                edcaf->getAckHandler()->dropFrame(header);
+                frames->dropFrame(packet);
+            }
+        }
+    }
+}
+
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     Enter_Method("processMgmtFrame");
+    if (auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(mgmtHeader))
+        cancelPendingBlockAckTimeout(request->getReceiverAddress(), request->getTid(), true);
+    else if (auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader)) {
+        if (response->getStatusCode() == 0)
+            cancelPendingBlockAckTimeout(response->getReceiverAddress(), response->getTid(), false);
+    }
+    else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
+        // An expiry notification can establish replacement state before this old DELBA reaches the queue.
+        if (delba->getReasonCode() == 39 && (delba->getInitiator() ?
+                originatorBlockAckAgreementHandler && originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid()) :
+                recipientBlockAckAgreementHandler && recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress()))) {
+            take(mgmtPacket);
+            delete mgmtPacket;
+            return;
+        }
+    }
     mgmtPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(mgmtPacket, mgmtHeader);
 }

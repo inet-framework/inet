@@ -18,6 +18,8 @@ class OriginatorBlockAckAgreementHandler;
 class INET_API OriginatorBlockAckAgreement : public cObject
 {
   protected:
+    MacAddress originatorAddr;
+    uint8_t dialogToken = 0;
     MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
     Tid tid = -1;
     int numSentBaPolicyFrames = 0;
@@ -31,6 +33,10 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     simtime_t expirationTime = -1;
 
   public:
+    MacAddress getOriginatorAddr() const { return originatorAddr; }
+    void setOriginatorAddr(MacAddress address) { originatorAddr = address; }
+    uint8_t getDialogToken() const { return dialogToken; }
+    void setDialogToken(uint8_t token) { dialogToken = token; }
     OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
         receiverAddr(receiverAddr),
         tid(tid),
@@ -42,6 +48,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     }
 
     virtual ~OriginatorBlockAckAgreement() {}
+    virtual OriginatorBlockAckAgreement *dup() const override { return new OriginatorBlockAckAgreement(*this); }
 
     virtual int getBufferSize() const { return bufferSize; }
     virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }

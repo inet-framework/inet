@@ -4,6 +4,21 @@ Recent changes in the INET Framework
 INET-4.7.x (in development)
 ---------------------------
 
+IEEE 802.11 Compressed BlockAck now has a Type 2 wire format and receive window state.
+Agreement policies require accepted peer HT capabilities and immediate responses.
+The shared inactivity event uses absolute deadlines for both agreement directions.
+Recipient packet delivery retains acknowledgement status.
+Directional teardown clears only the selected agreement and buffer.
+Forward data advances the reorder window and remains available for delivery.
+Repeated ADDBA requests can replace inactive pending agreements.
+Late timeout DELBA completion preserves replacement agreements.
+Replacement negotiation cancels obsolete queued timeout DELBA frames.
+
+Automatic agreement initiation from ordinary data is disabled.
+Enabled BlockAck configurations no longer start the former automatic data session.
+The Compressed BlockAck radio exchange and aggregate data session remain incomplete.
+See the migration guide for the new pure virtual methods and policy MIB references.
+
 Notable backward incompatible changes are the following:
 
 1. IEEE 802.11 rate control per receiver

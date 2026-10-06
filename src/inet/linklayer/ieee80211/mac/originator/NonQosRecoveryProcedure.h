@@ -65,6 +65,7 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
     virtual bool isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader);
 
     virtual void retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+    void clearFrameRetryCounters(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
     virtual int getLongRetryLimit() { return longRetryLimit; }
     virtual int getShortRetryLimit() { return shortRetryLimit; }
@@ -74,4 +75,3 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
 } /* namespace inet */
 
 #endif
-

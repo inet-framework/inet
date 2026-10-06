@@ -29,11 +29,11 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 
   protected:
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
-    virtual RecipientBlockAckAgreement *addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq);
+    virtual RecipientBlockAckAgreement *addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq, const Ptr<const Ieee80211AddbaResponse>& addbaResponse);
     virtual void updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse);
     virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
+
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
@@ -41,8 +41,10 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
+    virtual void processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
+    virtual simtime_t getEarliestExpirationTime() const override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;

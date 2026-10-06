@@ -1,0 +1,169 @@
+%description:
+IEEE Std 802.11-2024, 10.25.6.3: receive status follows the accepted window.
+Check empty state, gaps, duplicates, delivery, bounds, wrap, and half-space comparisons.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+static const MacAddress peer("02:00:00:00:00:02");
+
+static Ptr<Ieee80211DataHeader> data(int sequence, Tid tid = 5)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setAckPolicy(BLOCK_ACK);
+    header->setTransmitterAddress(peer);
+    header->setTid(tid);
+    header->setSequenceNumber(SequenceNumberCyclic(sequence));
+    return header;
+}
+
+%activity:
+ASSERT(SequenceNumberCyclic(0) - 1 == SequenceNumberCyclic(4095));
+ASSERT(SequenceNumberCyclic(4095) + 1 == SequenceNumberCyclic(0));
+for (int size : {1, 64}) {
+    BlockAckRecord record(peer, 5, SequenceNumberCyclic(4094), size);
+    ASSERT(record.getWindowSize() == size);
+    ASSERT(!record.getAckState(SequenceNumberCyclic(4094), 0));
+    record.blockAckPolicyFrameReceived(data(4094));
+    record.blockAckPolicyFrameReceived(data(4094));
+    ASSERT(record.getAckState(SequenceNumberCyclic(4094), 0));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(4095), 0));
+    record.blockAckPolicyFrameReceived(data(0));
+    ASSERT(record.getAckState(SequenceNumberCyclic(0), 0));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(0), 1));
+    record.blockAckReqReceived(SequenceNumberCyclic(0));
+    ASSERT(record.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+    ASSERT(record.getAckState(SequenceNumberCyclic(0), 0));
+    record.blockAckReqReceived(SequenceNumberCyclic(4095));
+    record.blockAckReqReceived(SequenceNumberCyclic(2048));
+    record.blockAckPolicyFrameReceived(data(2048));
+    ASSERT(record.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(2048), 0));
+    record.blockAckPolicyFrameReceived(data(1, 6));
+    auto foreign = data(1);
+    foreign->setTransmitterAddress(MacAddress("02:00:00:00:00:03"));
+    record.blockAckPolicyFrameReceived(foreign);
+    ASSERT(!record.getAckState(SequenceNumberCyclic(1), 0));
+    record.blockAckReqReceived(SequenceNumberCyclic(64));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(0), 0));
+    ASSERT(!record.getAckState(SequenceNumberCyclic(64), 0));
+}
+BlockAckRecord boundary(peer, 5, SequenceNumberCyclic(0), 64);
+boundary.blockAckPolicyFrameReceived(data(2047));
+ASSERT(boundary.getStartingSequenceNumber() == SequenceNumberCyclic(1984));
+ASSERT(boundary.getAckState(SequenceNumberCyclic(2047), 0));
+boundary.blockAckReqReceived(SequenceNumberCyclic(4032)); // Exactly 2048 positions ahead.
+ASSERT(boundary.getStartingSequenceNumber() == SequenceNumberCyclic(1984));
+boundary.blockAckReqReceived(SequenceNumberCyclic(4031)); // The last position in the newer half-space.
+ASSERT(boundary.getStartingSequenceNumber() == SequenceNumberCyclic(4031));
+ASSERT(!boundary.getAckState(SequenceNumberCyclic(2047), 0));
+for (int size : {0, 65}) {
+    bool refused = false;
+    try { BlockAckRecord invalid(peer, 5, SequenceNumberCyclic(0), size); }
+    catch (const cRuntimeError&) { refused = true; }
+    ASSERT(refused);
+}
+// Packet delivery cannot retire receive status.
+RecipientBlockAckAgreement agreement(peer, 5, SequenceNumberCyclic(4094), 64, SIMTIME_ZERO);
+BlockAckReordering reorder;
+auto first = data(4094);
+auto delivered = reorder.processReceivedQoSFrame(&agreement, new Packet("data", first), first);
+ASSERT(delivered.size() == 1);
+for (auto& entry : delivered)
+    for (auto packet : entry.second)
+        delete packet;
+ASSERT(agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(4094), 0));
+auto third = data(0);
+ASSERT(reorder.processReceivedQoSFrame(&agreement, new Packet("data", third), third).empty());
+auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+bar->setTransmitterAddress(peer);
+bar->setTidInfo(5);
+bar->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+ASSERT(reorder.processReceivedBlockAckReq(&agreement, bar).empty());
+ASSERT(agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(4094), 0));
+ASSERT(!agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(4095), 0));
+ASSERT(agreement.getBlockAckRecord()->getAckState(SequenceNumberCyclic(0), 0));
+BlockAckRecord independent(peer, 6, SequenceNumberCyclic(4094), 64);
+ASSERT(!independent.getAckState(SequenceNumberCyclic(4094), 0));
+reorder.clearReceiveBuffer(peer, 6);
+reorder.clearReceiveBuffer(peer, 5);
+reorder.clearReceiveBuffer(peer, 5);
+// A forward MPDU must survive reorder-window movement as well as receipt recording.
+for (int start : {0, 4090}) {
+    for (int size : {1, 64}) {
+        RecipientBlockAckAgreement forward(peer, 5, SequenceNumberCyclic(start), size, SIMTIME_ZERO);
+        BlockAckReordering forwardReorder;
+        auto sequence = SequenceNumberCyclic(start) + size + 20;
+        auto header = data(sequence.get());
+        auto frames = forwardReorder.processReceivedQoSFrame(&forward, new Packet("forward", header), header);
+        ASSERT(forward.getBlockAckRecord()->getAckState(sequence, 0));
+        auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+        request->setTransmitterAddress(peer);
+        request->setTidInfo(5);
+        request->setStartingSequenceNumber(sequence);
+        auto remaining = forwardReorder.processReceivedBlockAckReq(&forward, request);
+        ASSERT(frames.size() + remaining.size() == 1);
+        frames.insert(remaining.begin(), remaining.end());
+        for (const auto& entry : frames)
+            for (auto frame : entry.second)
+                delete frame;
+        forwardReorder.clearReceiveBuffer(peer, 5);
+    }
+}
+// Window movement delivers complete preceding MSDUs across the sequence wrap.
+RecipientBlockAckAgreement shifted(peer, 5, SequenceNumberCyclic(4094), 64, SIMTIME_ZERO);
+BlockAckReordering shiftedReorder;
+for (int sequence : {4095, 0}) {
+    auto header = data(sequence);
+    ASSERT(shiftedReorder.processReceivedQoSFrame(&shifted, new Packet("preceding", header), header).empty());
+}
+auto forwardHeader = data(64);
+auto preceding = shiftedReorder.processReceivedQoSFrame(&shifted, new Packet("forward", forwardHeader), forwardHeader);
+ASSERT(preceding.size() == 2);
+ASSERT(preceding.count(4095) && preceding.count(0));
+for (const auto& entry : preceding)
+    for (auto frame : entry.second)
+        delete frame;
+auto shiftedBar = makeShared<Ieee80211CompressedBlockAckReq>();
+shiftedBar->setTransmitterAddress(peer);
+shiftedBar->setTidInfo(5);
+shiftedBar->setStartingSequenceNumber(SequenceNumberCyclic(64));
+auto last = shiftedReorder.processReceivedBlockAckReq(&shifted, shiftedBar);
+ASSERT(last.size() == 1 && last.count(64));
+for (const auto& entry : last)
+    for (auto frame : entry.second)
+        delete frame;
+shiftedReorder.clearReceiveBuffer(peer, 5);
+// Receipt state follows related data regardless of its acknowledgment policy.
+for (int start : {0, 4090}) {
+    RecipientBlockAckAgreement mixed(peer, 5, SequenceNumberCyclic(start), 64, SIMTIME_ZERO);
+    BlockAckReordering mixedReorder;
+    auto normalSequence = SequenceNumberCyclic(start) + 100;
+    auto normal = data(normalSequence.get());
+    normal->setAckPolicy(NORMAL_ACK);
+    ASSERT(mixedReorder.processReceivedQoSFrame(&mixed, new Packet("normal forward", normal), normal).empty());
+    auto oldSequence = SequenceNumberCyclic(start) + 10;
+    auto old = data(oldSequence.get());
+    ASSERT(mixedReorder.processReceivedQoSFrame(&mixed, new Packet("old", old), old).empty());
+    ASSERT(!mixed.getBlockAckRecord()->getAckState(oldSequence, 0));
+    ASSERT(mixed.getBlockAckRecord()->getAckState(normalSequence, 0));
+    auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+    request->setTransmitterAddress(peer);
+    request->setTidInfo(5);
+    request->setStartingSequenceNumber(normalSequence);
+    auto retained = mixedReorder.processReceivedBlockAckReq(&mixed, request);
+    ASSERT(retained.size() == 1 && retained.count(normalSequence.get()));
+    for (const auto& entry : retained)
+        for (auto frame : entry.second)
+            delete frame;
+    mixedReorder.clearReceiveBuffer(peer, 5);
+}
+EV << "Compressed BlockAck receive-state checks passed.\n";
+
+%contains: stdout
+Compressed BlockAck receive-state checks passed.

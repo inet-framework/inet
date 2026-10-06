@@ -17,8 +17,22 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddr
     bufferSize(bufferSize),
     blockAckTimeoutValue(lastUsedTime)
 {
-    calculateExpirationTime();
-    blockAckRecord = new BlockAckRecord(originatorAddress, tid);
+    blockAckRecord = new BlockAckRecord(originatorAddress, tid, startingSequenceNumber, bufferSize);
+}
+
+RecipientBlockAckAgreement::RecipientBlockAckAgreement(const RecipientBlockAckAgreement& other) :
+    cObject(other),
+    recipientAddr(other.recipientAddr),
+    dialogToken(other.dialogToken),
+    blockAckRecord(new BlockAckRecord(*other.blockAckRecord)),
+    startingSequenceNumber(other.startingSequenceNumber),
+    bufferSize(other.bufferSize),
+    blockAckTimeoutValue(other.blockAckTimeoutValue),
+    isAMsduSupported(other.isAMsduSupported),
+    isDelayedBlockAckPolicySupported(other.isDelayedBlockAckPolicySupported),
+    isAddbaResponseSent(other.isAddbaResponseSent),
+    expirationTime(other.expirationTime)
+{
 }
 
 void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)

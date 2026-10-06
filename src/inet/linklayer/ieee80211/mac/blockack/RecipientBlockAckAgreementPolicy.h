@@ -8,16 +8,20 @@
 #ifndef __INET_RECIPIENTBLOCKACKAGREEMENTPOLICY_H
 #define __INET_RECIPIENTBLOCKACKAGREEMENTPOLICY_H
 
-#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
+
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RecipientBlockAckAgreementPolicy : public SimpleModule, public IRecipientBlockAckAgreementPolicy
+class INET_API RecipientBlockAckAgreementPolicy : public ModeSetListener, public IRecipientBlockAckAgreementPolicy
 {
   protected:
+    ModuleRefByPar<Ieee80211Mib> mib;
     int maximumAllowedBufferSize = -1;
     bool isAMsduSupported = false;
     bool isDelayedBlockAckPolicySupported = false;

@@ -253,7 +253,7 @@ management frames and the classifier. The table maps the letters to the code.
      - ``Ht``, ``Msdu``, ``Mpdu``
      - the HT mode classes; mode set ``n(mixed-2.4Ghz)``; the aggregation
        classes; the HT elements of the MIB and of the management frames
-     - partial: 20 MHz only, A-MPDU not wired, compressed block ack absent
+     - partial: 20 MHz only, A-MPDU not wired; compressed wire format and receive state exist; radio exchange incomplete
    * - ac
      - the VHT PHY
      - ``Vht``
@@ -273,6 +273,30 @@ management frames and the classifier. The table maps the letters to the code.
 
 The EPD encapsulation that the model pairs with 802.11p comes from IEEE Std
 802, not from the amendment.
+
+Compressed BlockAck state
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compressed BlockAck uses one bitmap bit per sequence number.
+The serializer supports Type 2 with eight bitmap bytes and zero Fragment Number.
+``BlockAckRecord`` owns the mutable receive window and its acknowledgement status.
+Packet delivery does not remove that status.
+The agreement handlers own accepted parameters, transaction tokens, and absolute inactivity deadlines.
+HCF schedules one event at the earlier deadline of the two handlers.
+A zero timeout disables expiry.
+
+The policies use the active mode set and accepted MIB peer capabilities.
+An agreement requires immediate HT operation and an accepted size from 1 to 64.
+The recipient activates its agreement after successful response transmission.
+A rejected response creates no agreement.
+Each DELBA removes the agreement direction identified by its Initiator field.
+The recipient termination callback clears only that agreement's receive buffer.
+
+Automatic agreement initiation from ordinary data is disabled.
+The independent state tests supply explicit agreements and prior unfragmented data.
+They do not establish a Compressed BlockAck radio exchange.
+Radio integration still requires production rate publication and complete exchange admission.
+The aggregate data path remains incomplete.
 
 .. _dg:sec:80211:parts:
 
