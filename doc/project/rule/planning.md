@@ -79,6 +79,8 @@ Record the existing mechanisms considered for reuse under
 architecture rule. The justification names its responsibility and required consumers. It explains
 why reuse or a smaller change is insufficient.
 
+Apply [QR-DESIGN-MINIMAL](quality.md#qr-design-minimal) before you propose stronger invariants or additional state. Explain each safeguard through its requirement and reachable failure. Include simulation execution and supported lifecycle behavior where they affect that choice.
+
 Cite the applicable rules. Keep their text in the document that owns them. The
 [design review map](../guide/write-an-implementation-plan.md#design-review-map) routes each concern
 to its owner.
@@ -147,14 +149,15 @@ Explain difficult decisions and material risks in detail. Keep routine edits bri
 may combine sections when the required information remains clear. Omit inapplicable detail with
 a short reason where its absence could confuse a reviewer.
 
+Use an existing plan explanation to answer a review question when it already supplies the required evidence. Do not duplicate that explanation in a separate checklist report. Choose the [compact example or expanded template](../guide/write-an-implementation-plan.md#plan-template) according to the interactions that need explanation.
+
 Order implementation steps by their dependencies under
 [PR-SERIES-ORDER](pull-request.md#pr-series-order). Give each step a coherent purpose and a
 verification method. Each step becomes one commit, or a short series of commits, under
 [PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change). A commit does not span two steps unless
 the plan says why. When the implementation shows that a step divides further, or that two steps
 cannot be divided, update the plan; [PLR-REVISION](#plr-revision) decides whether that needs
-approval. Use the
-[plan template](../guide/write-an-implementation-plan.md#plan-template) as an initial structure.
+approval.
 Avoid empty sections and repeated policy text.
 
 *Enforced at T4 — agent review through the [plan review checklist](../guide/write-an-implementation-plan.md#review-checklist).*

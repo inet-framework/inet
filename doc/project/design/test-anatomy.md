@@ -6,26 +6,26 @@ The twelve test categories under `tests/`, what each one can establish, and what
 a change owes is [rule/testing.md](../rule/testing.md); how to run them is
 `doc/src/developers-guide/ch-testing.rst`.
 
-The categories are not twelve flavours of the same thing. Each answers a different question, and a
-test in the wrong category is persuasive and empty
-([TR-CAT-MATCH](../rule/testing.md#tr-cat-match)).
+The categories identify typical test infrastructure and uses. Assess each claim from the actual fixture, executed path, inputs, and assertions under [TR-CAT-MATCH](../rule/testing.md#tr-cat-match).
 
 ## The categories
 
 | Category | Establishes | Cannot establish |
 | --- | --- | --- |
 | `unit` | a computation, a serializer round-trip, a data structure | anything about a running network |
-| `module` | one module behaves so, given these inputs | that the module composes with others |
+| `module` | module behavior, including integration when the fixture connects production components | behavior outside the exercised components, paths, and assertions |
 | `protocol` | an interaction between peers follows this sequence | a distribution, or a rate |
 | `queueing` | datapath elements chain and transfer correctly | end-to-end behavior |
 | `packet` | the chunk algebra holds | how a protocol uses it |
 | `networks` | a pre-assembled network builds and runs | that its results are right |
 | `statistical` | recorded simulation statistics match their baseline; a distribution only when the test explicitly checks it | distributional validity from baseline equality alone, or which mechanism produced a difference |
 | `validation` | the model agrees with the real world or an analytical result | that nothing else changed |
-| `fingerprint` | **nothing else changed** | whether the behavior is correct |
+| `fingerprint` | selected runs match recorded hashes for the chosen ingredients | correctness, unselected behavior, or changes outside those ingredients |
 | `speed` | a run costs this much time | correctness of any kind |
 | `features` | a feature builds with its neighbours off | that it works |
 | `misc` | what does not fit above | — |
+
+For example, [udpapp_lifecycle_6.test](../../../tests/module/udpapp_lifecycle_6.test) connects two `StandardHost` nodes. It changes their lifecycle state and checks received traffic. Its module-test location does not prevent integration evidence; its configured operations and assertions bound that evidence.
 
 ## The production path
 
@@ -36,17 +36,11 @@ same limitation: it tests the reproduced path, not the integrated one.
 
 A claim that a helper is integrated into model behavior therefore needs module or protocol evidence
 that enters through the production gate, API or configuration and observes the resulting behavior.
-The helper-level unit test remains valuable for boundaries and computations; the production-path
-test establishes the wiring and use. Both must be selected and reported as directly related evidence
-under [TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence).
+Helper tests remain useful for computation boundaries that the integration test does not cover. Select complementary checks for the actual claims under [TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence). Do not duplicate a sufficient assertion solely to populate another test category.
 
 ## The one that is different
 
-**A fingerprint is not a test of correctness.** It hashes the event trajectory of a configuration and
-compares it against a recorded value. That is a wide net for an *unintended* change, and it is the
-only instrument that covers everything at once. It is also blind in a specific way: a model that has
-been wrong since the day it was written has a perfectly stable fingerprint, and a repair and a
-regression look identical to it.
+**A fingerprint is not a test of correctness.** It hashes selected ingredients from a configured run and compares the result with a recorded value. A match supplies regression evidence within that scope; it does not prove that every behavior remains unchanged. A model can preserve the same defect and produce a stable fingerprint. A mismatch alone cannot distinguish a correction from a regression.
 
 This is why [TR-FP-NOT-ENOUGH](../rule/testing.md#tr-fp-not-enough) exists, and why
 [REJ-09](rejected-designs.md#rej-09) records the argument for fingerprints as the whole suite and why
