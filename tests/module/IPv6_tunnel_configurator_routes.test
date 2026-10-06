@@ -1,0 +1,122 @@
+%description:
+Tests that Ipv6NetworkConfigurator treats an Ipv6TunnelInterface as a wired,
+point-to-point interface, not as a member of a wireless LAN.
+
+Topology: hostA --- borderA --- transitA --- transitB --- borderB --- hostB.
+borderA and borderB each have an Ipv6TunnelInterface whose exit point is the
+other border router, and a manual route sends the far host's prefix into the
+tunnel. The configurator computes all other routes.
+
+An interface without phys gates counts as wireless unless it declares
+isWireless. The configurator puts all wireless interfaces that have no radio
+into one wireless LAN and links them all with each other, so the two tunnel
+interfaces got a link between them. borderB then routed borderA's prefix, which
+contains the tunnel exit point, into its own tunnel, and every packet from
+hostB to hostA was encapsulated again and again at t=1s. Traffic in both
+directions must arrive.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelConfiguratorTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost6;
+        borderA: Router6;
+        transitA: Router6;
+        transitB: Router6;
+        borderB: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> borderA.ethg++;
+        borderA.ethg++ <--> ethline <--> transitA.ethg++;
+        transitA.ethg++ <--> ethline <--> transitB.ethg++;
+        transitB.ethg++ <--> ethline <--> borderB.ethg++;
+        borderB.ethg++ <--> ethline <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelConfiguratorTestNetwork
+ned-path = ../../../../src;.
+sim-time-limit = 3s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+cpu-time-limit = 20s
+**.app[*].cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.config = xml("<config> \
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::a'/> \
+    <interface hosts='borderA' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='borderA' names='eth1' address='2001:db8:2::1'/> \
+    <interface hosts='transitA' names='eth0' address='2001:db8:2::2'/> \
+    <interface hosts='transitA' names='eth1' address='2001:db8:3::1'/> \
+    <interface hosts='transitB' names='eth0' address='2001:db8:3::2'/> \
+    <interface hosts='transitB' names='eth1' address='2001:db8:4::1'/> \
+    <interface hosts='borderB' names='eth0' address='2001:db8:4::2'/> \
+    <interface hosts='borderB' names='eth1' address='2001:db8:5::1'/> \
+    <interface hosts='hostB' names='eth0' address='2001:db8:5::b'/> \
+    <route hosts='borderA' destination='2001:db8:5::' prefixLength='64' interface='tun0'/> \
+    <route hosts='borderB' destination='2001:db8:1::' prefixLength='64' interface='tun0'/> \
+  </config>")
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.neighbourDiscovery.hostBootupTime = 0s
+**.neighbourDiscovery.routerBootupTime = 0s
+
+*.border*.numTunInterfaces = 1
+*.border*.tun[0].typename = "Ipv6TunnelInterface"
+*.borderA.tun[0].source = "2001:db8:2::1"
+*.borderA.tun[0].destination = "2001:db8:4::2"
+*.borderB.tun[0].source = "2001:db8:4::2"
+*.borderB.tun[0].destination = "2001:db8:2::1"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "2001:db8:5::b"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].sendInterval = 0.5s
+*.hostA.app[0].stopTime = 2.9s
+*.hostA.app[1].typename = "UdpSink"
+*.hostA.app[1].localPort = 5000
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].typename = "UdpBasicApp"
+*.hostB.app[1].destAddresses = "2001:db8:1::a"
+*.hostB.app[1].destPort = 5000
+*.hostB.app[1].messageLength = 100B
+*.hostB.app[1].startTime = 1s
+*.hostB.app[1].sendInterval = 0.5s
+*.hostB.app[1].stopTime = 2.9s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelConfiguratorTestNetwork.hostB.app[0]: received 4 packets
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelConfiguratorTestNetwork.hostA.app[1]: received 4 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
