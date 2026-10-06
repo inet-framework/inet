@@ -88,6 +88,15 @@ const ITransmission *NoiseSource::getTransmissionInProgress() const
         return static_cast<WirelessSignal *>(transmissionTimer->getContextPointer())->getTransmission();
 }
 
+std::vector<const ITransmission *> NoiseSource::getTransmissionsInProgress() const
+{
+    auto transmission = getTransmissionInProgress();
+    if (transmission == nullptr)
+        return {};
+    else
+        return { transmission };
+}
+
 } // namespace physicallayer
 } // namespace inet
 
