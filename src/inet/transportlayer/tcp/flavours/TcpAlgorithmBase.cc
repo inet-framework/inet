@@ -695,6 +695,13 @@ void TcpAlgorithmBase::processEcnInEstablished()
 {
 }
 
+uint32_t TcpAlgorithmBase::calculateSsthreshForFastRecovery()
+{
+    // RFC 5681 equation (4), also RFC 6675 section 5 step (4.2):
+    // ssthresh = max(FlightSize / 2, 2*SMSS)
+    return std::max(conn->getFlightSize() / 2, 2 * state->snd_mss);
+}
+
 uint32_t TcpAlgorithmBase::calculateSsthresh(uint32_t bytesInFlight)
 {
     return std::max(bytesInFlight / 2, 2 * state->snd_effmss);
