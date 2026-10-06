@@ -206,6 +206,26 @@ class INET_API IRadioMedium : public virtual IPrintableObject
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
+     * Computes the interference at the provided receiver over the provided
+     * listening, which the receiver created (see IReceiver::createListening())
+     * and which need not belong to any transmission on the medium. The result
+     * is the background noise plus the receptions, at the receiver, of the
+     * transmissions on the medium that overlap the listening in time and are
+     * in interference range, except the receiver's own.
+     *
+     * The result is not cached, but the receptions in it are taken from the
+     * medium's reception cache, as getReception() does: the ones not computed
+     * yet are computed and cached now. A reception whose computation draws
+     * random numbers (e.g. a stochastic path loss) therefore draws them at
+     * this call, earlier than the simulation would otherwise do.
+     *
+     * The caller owns the result; deleting it deletes the background noise
+     * and the reception vector, but not the receptions, which the medium
+     * owns. This function never returns nullptr.
+     */
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const = 0;
+
+    /**
      * Returns the total noise computed from the interference of the transmission
      * arriving at the provided receiver. This function never returns nullptr as
      * long as the transmission is live on the medium.

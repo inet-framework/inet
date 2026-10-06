@@ -294,7 +294,6 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception) const;
 
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const;
     virtual const IReceptionResult *computeReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
@@ -334,6 +333,7 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
     virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const ISnir *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
