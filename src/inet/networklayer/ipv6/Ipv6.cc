@@ -19,6 +19,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -1057,6 +1058,14 @@ void Ipv6::fragmentAndSend(Packet *packet)
     }
 
     int mtu = ie->getMtu();
+    // A locally-originated packet may ask for smaller fragments than the MTU of the
+    // outgoing interface: a tunnel entry point fragments its tunnel packets to the
+    // Path MTU to the tunnel exit point (RFC 2473 Section 7.1 (b)).
+    if (fromHL) {
+        const auto& fragmentationReq = packet->findTag<FragmentationReq>();
+        if (fragmentationReq != nullptr && fragmentationReq->getMtu() != -1)
+            mtu = std::min(mtu, fragmentationReq->getMtu());
+    }
 
     // check if datagram does not require fragmentation
     if (packet->getDataLength() <= B(mtu)) {
