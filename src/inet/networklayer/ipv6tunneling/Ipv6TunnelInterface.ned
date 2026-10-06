@@ -21,7 +21,7 @@ module Ipv6TunnelInterface extends NetworkInterface like ITunnelInterface
         string interfaceTableModule;
         string source;      // tunnel entry point (an address of this node)
         string destination; // tunnel exit point
-        int mtu @unit(B) = default(1500B);
+        int mtu @unit(B) = default(1500B); // the tunnel MTU; the interface MTU is at least 1280B (RFC 2473 Section 7.1 (b))
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/tunnel");
     gates:

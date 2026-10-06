@@ -325,6 +325,21 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. An IPv6 tunnel with an mtu below 1280 bytes carries packets of up to 1280 bytes
+
+   An Ipv6TunnelInterface whose mtu parameter was below 1280 bytes refused every
+   forwarded packet larger than the tunnel mtu with an ICMPv6 (Internet Control
+   Message Protocol for IPv6) Packet Too Big that reported the tunnel mtu, for
+   example 1200. RFC 8201 (Path MTU Discovery for IPv6) does not let a source
+   lower its path MTU (maximum transmission unit) below 1280 bytes, so packets
+   between the tunnel mtu and 1280 bytes never got through. As RFC 2473 (Generic
+   Packet Tunneling in IPv6) Section 7.1 requires, the tunnel now accepts packets
+   of up to 1280 bytes, and the entry point fragments the tunnel packet to the
+   MTU of its outgoing interface. The interface MTU of such a tunnel is 1280
+   bytes, which also changes the size to which a node fragments its own packets
+   before it sends them into the tunnel. The results of simulations that
+   configure a tunnel mtu below 1280 bytes change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
