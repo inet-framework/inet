@@ -1,0 +1,43 @@
+%description:
+Immediate ACK when a segment fills the first part of a gap: the tester
+drops the adjacent segments a12 and a13, and no SACK is in use. The fast
+retransmission of a12 fills the first part of the gap, and the segments
+that follow a13 stay out of order. RFC 5681 section 3.2 says that the
+receiver SHOULD send an immediate ACK for such a segment, so B does not
+delay the ACK of the retransmission.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=15360B # 15 1024-byte segments: no new data after a17
+
+*.tcptester.script="a12 delete; a13 delete"  # drop two adjacent segments
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.219 B010] A.1000 < B.2000: A ack 9217 win 16384
+[1.221 A018] A.1000 > B.2000: A 9217:10241(1024) ack 501 win 16384
+[1.223 B011] A.1000 < B.2000: A ack 10241 win 15360
+[2.225 A019] A.1000 > B.2000: A 10241:11265(1024) ack 501 win 16384
+[2.227 B012] A.1000 < B.2000: A ack 15361 win 16384
+
+%contains: stdout
+[2.228] tcpdump finished, A:19 B:12 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

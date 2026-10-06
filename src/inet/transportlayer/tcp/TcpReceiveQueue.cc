@@ -158,6 +158,12 @@ uint32_t TcpReceiveQueue::getFirstSeqNo()
     return seqMin(offsetToSeq(reorderBuffer.getRegionStartOffset(0)), rcv_nxt);
 }
 
+bool TcpReceiveQueue::hasOutOfOrderData() const
+{
+    int numRegions = reorderBuffer.getNumRegions();
+    return numRegions != 0 && seqGreater(offsetToSeq(reorderBuffer.getRegionEndOffset(numRegions - 1)), rcv_nxt);
+}
+
 } // namespace tcp
 
 } // namespace inet

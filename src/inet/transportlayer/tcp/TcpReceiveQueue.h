@@ -122,6 +122,12 @@ class INET_API TcpReceiveQueue : public cObject
 
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32_t getFirstSeqNo();
+
+    /**
+     * Returns true if the queue holds data above rcv_nxt, that is, data
+     * that arrived after a gap in the sequence space.
+     */
+    virtual bool hasOutOfOrderData() const;
 };
 
 } // namespace tcp

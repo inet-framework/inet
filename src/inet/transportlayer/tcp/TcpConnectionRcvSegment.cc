@@ -504,6 +504,19 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 uint32_t old_usedRcvBuffer = state->usedRcvBuffer;
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
 
+                // RFC 5681, page 8:
+                // "3.2 Fast Retransmit/Fast Recovery
+                // (...)
+                // In addition, a TCP receiver SHOULD send an immediate ACK
+                // when the incoming segment fills in all or part of a gap in the
+                // sequence space."
+                // The segment filled all of a gap if rcv_nxt moved past its end, and
+                // the first part of a gap if out-of-order data stays above rcv_nxt.
+                // Set ack_now before the notification below: a data segment that it
+                // sends carries the ACK and clears ack_now.
+                if (state->rcv_nxt != old_rcv_nxt && (tcpHeader->getSequenceNo() + payloadLength != state->rcv_nxt || receiveQueue->hasOutOfOrderData()))
+                    state->ack_now = true;
+
                 if (seqGreater(state->snd_una, old_snd_una)) {
                     // notify
                     tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
