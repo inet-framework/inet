@@ -47,6 +47,9 @@ Ground rules:
 
 ## Checklist
 
+**[QR-DESIGN-MINIMAL] Does the change preserve required behavior with the least complex sufficient mechanism?**
+Apply [QR-DESIGN-MINIMAL](../../rule/quality.md#qr-design-minimal) to proposed safeguards and invariant changes. Trace the failure through actual calls, permitted extension behavior, event boundaries, and supported lifecycle operations. FLAG a safeguard whose only justification contradicts those contracts or assumes behavior outside their scope. State the simpler sufficient correction and why it preserves required behavior. Missing investigation is not proof that a safeguard is unnecessary.
+
 **[AR-ORG-CONTRACTS] Does a new interface define a concrete replacement role?**
 Check the stated alternative implementation or documented external extension point.
 FLAG an interface whose only justification is speculative flexibility.

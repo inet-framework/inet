@@ -49,6 +49,7 @@ Every quality rule in document order.
 
 | Rule | Statement |
 | --- | --- |
+| [QR-DESIGN-MINIMAL](#qr-design-minimal) | First, do not harm; second, do not overengineer |
 | [QR-SIZE](#qr-size) | A function, a file and a line have budgets |
 | [QR-STATE-OWNER](#qr-state-owner) | One piece of state has one owner |
 | [QR-OBJECT-OWNERSHIP](#qr-object-ownership) | Every object follows its declared exclusive, shared, or borrowed ownership contract |
@@ -165,6 +166,40 @@ meaningless. Build the expensive string inside the `EV_` guard, not before it.
 *Enforced at T2 — a fingerprint run with logging on and off; T4 for the side-effect case.*
 
 ## Size and shape
+
+### QR-DESIGN-MINIMAL
+
+**Apply these priorities in order: (1) DO NOT HARM; (2) DO NOT OVERENGINEER.**
+
+Preserve required protocol behavior, supported configurations, ownership, and lifecycle behavior outside the intended change. Choose the least complex solution that meets those obligations. Fewer lines do not justify a regression or a broken contract.
+
+Before you add a safeguard, establish these facts:
+
+1. Identify the requirement from the applicable standard revision and clause, accepted project requirement, or supported API contract.
+2. Trace the actual caller, callee, applicable overrides, and state changes in the supported configuration.
+3. Identify the reachable failure that needs the safeguard and why the current mechanism cannot prevent it.
+
+Keep standard requirements, model assumptions, and implementation choices distinct. Do not strengthen a protocol invariant unless a separate supported requirement needs that restriction. Do not invent alternate callee behavior that the implementation and its contract exclude. For a documented extension point, respect its permitted behavior; one built-in implementation does not narrow that contract. An unresolved call path requires investigation, not speculative recovery code.
+
+Account for simulation execution before you propose concurrency or stale-state protection. Ordinary synchronous processing consumes no simulation time; a scheduled event does not interrupt that call chain. Separate events can occur at the same simulation time. Trace actual callbacks, behavioral signal listeners, and explicit suspension or deferred work where they apply. Zero elapsed simulation time alone does not exclude synchronous re-entry.
+
+Preserve event boundaries and evaluation effects outside the intended change. A zero-delay self-message creates a separate event boundary even though simulation time does not advance. For example, a hypothetical direct calculation becomes a self-message at the current time. Another event at that time can now run before the calculation completes. Justify that boundary through the required behavior under [AR-COM-DIRECT](architecture.md#ar-com-direct).
+
+Choose state representation from its required lifetime and existing owner. Prefer a local value for a calculation whose result needs no retained storage. Reuse existing state when it represents the required condition exactly. For example, a hypothetical dedicated timer represents a pending timeout through its scheduled state. An additional boolean for that same condition creates a second value that every terminal path must maintain.
+
+Recompute derived values only when that choice preserves required history, evaluation effects, and acceptable cost. For example, a hypothetical volatile delay parameter draws a random value on each evaluation. A second deadline calculation can therefore change the result. Conversely, a cache can freeze a value that must change on each read. Preserve the required evaluation point when you choose between local, retained, and derived values.
+
+For a safeguard against stale state, identify the reachable state change that requires protection. Do not add such mechanisms solely because a different future implementation might need them. For example, consider a hypothetical helper that only reads a value and returns without callbacks or suspension. The caller needs no generation check to detect a timer expiry inside that call. If the caller instead retains the value across a scheduled event, inspect which state changes can occur before use. Add protection only for the relevant changes that the existing owner does not already handle.
+
+A snapshot can also satisfy an ownership or output requirement. Assess that purpose directly. Do not invent a concurrent mutation to justify it. For example, a hypothetical result record must remain available after its producer destroys the source object. A value copy can satisfy that lifetime requirement without a generation counter.
+
+For stop, start, crash, or reset, trace the component's supported operations and inherited handlers under [AR-LIFE-OPERATIONS](architecture.md#ar-life-operations). Use the existing owner to cancel pending work when its contract requires cancellation. Clear transient state through that owner when its contract requires cleanup. Preserve configuration and statistics when their contracts require retention. Do not add a parallel lifecycle state machine or a new reset operation without a supported need. Distinguish graceful shutdown from crash where the component does.
+
+For example, after a hypothetical shutdown handler cancels the sole timer, startup can reuse that timer with fresh transient state. An epoch counter adds no protection unless an old completion can still arrive through another supported path.
+
+Verify the intended change and affected supported behavior with focused evidence under [testing.md](testing.md). Do not add production complexity or test permutations for paths excluded by the traced contract. Keep the requirement, reachable failure, and reason for the chosen solution in the normal design or review explanation. This rule requires no separate report.
+
+*Enforced at T4 — agent review through the [general checklist](../enforcement/checklist/general.md).*
 
 ### QR-SIZE
 

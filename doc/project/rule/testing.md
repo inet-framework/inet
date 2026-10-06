@@ -6,10 +6,7 @@ Which test backs which claim, when a recorded expectation may change, and what C
 twelve test categories *are* is [design/test-anatomy.md](../design/test-anatomy.md); this document
 says what a change owes them.
 
-The rules exist because of one asymmetry: **a fingerprint proves that behavior changed, never that
-behavior is correct.** A model that has been wrong since the day it was written has a perfectly
-stable fingerprint. The wide net and the specific claim are two different instruments, and a change
-needs both.
+**A fingerprint detects a difference in selected ingredients; it does not establish correctness.** A model can produce a stable fingerprint while it retains a defect. Use fingerprints for regression evidence within the selected runs and direct checks for the specific behavior claim.
 
 A rule has a stable identifier `TR-<AREA>`, and the identifier is the heading:
 [TR-CAT-MATCH](testing.md#tr-cat-match).
@@ -58,7 +55,7 @@ Every test rule in document order.
 
 **The test category matches the kind of claim the change makes.**
 
-| The change claims | The test that establishes it |
+| The change claims | Typical test infrastructure |
 | --- | --- |
 | a computation is right | `unit` |
 | a module behaves so, given these inputs | `module` |
@@ -69,12 +66,11 @@ Every test rule in document order.
 | a statistic has this distribution | `statistical` with an explicit distributional check and justified repetitions |
 | the model matches the real world or an analytical result | `validation` |
 | a feature builds alone | `features` |
-| nothing else changed | `fingerprint` |
+| selected fingerprint ingredients match recorded runs | `fingerprint` |
 
-A test in the wrong category is persuasive and empty. A module test cannot establish a distribution,
-and a statistical test cannot establish that a field is encoded correctly.
-The limits of the statistical runner's evidence are described in
-[test-anatomy.md](../design/test-anatomy.md#the-recorded-expectations).
+The category identifies suitable infrastructure, not proof by itself. Verify that the fixture reaches the claimed production path and that its observations establish the expected result. A module fixture can check integration when it connects the required production components. A recorded scalar cannot establish frame encoding unless it directly measures the required byte-level property. A distributional claim needs appropriate samples and a statistical check, regardless of the directory that contains the test. The limits of statistical baseline evidence are in [test-anatomy.md](../design/test-anatomy.md#the-recorded-expectations).
+
+For example, a hypothetical module test drives a production sender and checks the emitted header's receiver address. That test can establish the address claim. Its directory does not require a second protocol test with the same assertion.
 
 *Enforced at T4 — agent review: does the test type match the claim?*
 

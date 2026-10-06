@@ -84,7 +84,7 @@ section indexes them so the registry stays one place to look.
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
 | `rule/planning.md` | by rule | 0 | 0 | 8 |
 | `rule/pull-request.md` | by rule | 0 | 0 | 25 |
-| `rule/quality.md` | by rule | 0 | 0 | 14 |
+| `rule/quality.md` | by rule | 0 | 0 | 15 |
 | `rule/release.md` | by rule | 0 | 0 | 9 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |
 | `rule/testing.md` | by rule | 0 | 0 | 14 |

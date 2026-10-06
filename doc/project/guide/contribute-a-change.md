@@ -1,6 +1,6 @@
 # Contribute a change
 
-> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [planning.md](../rule/planning.md), [testing.md](../rule/testing.md), [pull-request.md](../rule/pull-request.md), [sealing.md](../rule/sealing.md)
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [quality.md](../rule/quality.md), [planning.md](../rule/planning.md), [testing.md](../rule/testing.md), [pull-request.md](../rule/pull-request.md), [sealing.md](../rule/sealing.md)
 
 The nine steps from a task to a merged change. The rules work as a design map, not as a reading
 assignment: the question is not *does this patch look reasonable?* but **which contracts does this
@@ -27,6 +27,8 @@ today [domain/ieee80211.md](../domain/ieee80211.md). Read both exception ledgers
 deviation does not look like a finding.
 
 ## 4. The smallest surface
+
+Apply [QR-DESIGN-MINIMAL](../rule/quality.md#qr-design-minimal) to design and code changes, including changes that need no separate plan.
 
 For a task that calls for a plan, use
 [write-an-implementation-plan.md](write-an-implementation-plan.md) before implementation.
