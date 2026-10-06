@@ -1,0 +1,110 @@
+%description:
+Tests that a tunnel entry point reports an ICMPv6 Destination Unreachable about
+one of its tunnel packets to the source of the original packet, as Destination
+Unreachable, code 3 (address unreachable) (RFC 2473 Section 8.2).
+
+Topology: hostA --- borderA --- transit --- borderB --- hostB. borderA routes
+traffic for hostB's prefix into an Ipv6TunnelInterface whose exit point is an
+address on the transit -- borderB link that no node has. transit's address
+resolution for it fails, and transit sends a Destination Unreachable to
+borderA. borderA must report it to hostA, whose UDP module receives it. Before
+the fix, borderA dispatched the error to a UDP module it does not have, and the
+simulation stopped.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelUnreachableTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost6;
+        borderA: Router6;
+        transit: Router6;
+        borderB: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> borderA.ethg++;
+        borderA.ethg++ <--> ethline <--> transit.ethg++;
+        transit.ethg++ <--> ethline <--> borderB.ethg++;
+        borderB.ethg++ <--> ethline <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelUnreachableTestNetwork
+ned-path = ../../../../src;.
+sim-time-limit = 6s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.addStaticRoutes = false
+**.configurator.config = xml("<config> \
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::a'/> \
+    <interface hosts='borderA' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='borderA' names='eth1' address='2001:db8:2::1'/> \
+    <interface hosts='transit' names='eth0' address='2001:db8:2::2'/> \
+    <interface hosts='transit' names='eth1' address='2001:db8:3::1'/> \
+    <interface hosts='borderB' names='eth0' address='2001:db8:3::2'/> \
+    <interface hosts='borderB' names='eth1' address='2001:db8:4::1'/> \
+    <interface hosts='hostB' names='eth0' address='2001:db8:4::b'/> \
+    <route hosts='hostA' destination='::' prefixLength='0' gateway='2001:db8:1::1' interface='eth0'/> \
+    <route hosts='hostB' destination='::' prefixLength='0' gateway='2001:db8:4::1' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:1::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:2::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderA' destination='::' prefixLength='0' gateway='2001:db8:2::2' interface='eth1'/> \
+    <route hosts='borderA' destination='2001:db8:4::' prefixLength='64' interface='tun0'/> \
+    <route hosts='transit' destination='2001:db8:2::' prefixLength='64' interface='eth0'/> \
+    <route hosts='transit' destination='2001:db8:3::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderB' destination='2001:db8:3::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderB' destination='2001:db8:4::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderB' destination='::' prefixLength='0' gateway='2001:db8:3::1' interface='eth0'/> \
+  </config>")
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.neighbourDiscovery.hostBootupTime = 0s
+**.neighbourDiscovery.routerBootupTime = 0s
+
+*.borderA.numTunInterfaces = 1
+*.borderA.tun[0].typename = "Ipv6TunnelInterface"
+*.borderA.tun[0].source = "2001:db8:2::1"
+*.borderA.tun[0].destination = "2001:db8:3::99"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "2001:db8:4::b"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].sendInterval = 0.5s
+*.hostA.app[0].stopTime = 2.9s
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelUnreachableTestNetwork.borderA.ipv6.ipv6: Reporting ICMPv6 error (type=1 code=3) about a tunnel packet to 2001:db8:1::a as Destination Unreachable, code 3
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelUnreachableTestNetwork.hostA.ipv6.ipv6: Forwarding ICMPv6 error indication to transport protocol udp
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

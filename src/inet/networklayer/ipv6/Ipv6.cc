@@ -316,6 +316,14 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
     l3Ind->setDestAddress(ipv6Header->getDestAddress());
     originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 
+    // A datagram whose next header is IPv6 is a tunnel packet that this node
+    // encapsulated, so the error is about the original packet inside it
+    // (RFC 2473 Section 8).
+    if (ipv6Header->getProtocolId() == IP_PROT_IPv6) {
+        handleTunnelIcmpErrorIndication(indication);
+        return;
+    }
+
     // Dispatch the same Indication to the appropriate transport protocol.
     // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
     // The offending packet may begin with an IPv6 extension header (e.g. a Type-2
@@ -336,6 +344,64 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
 
     EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
     send(indication, "transportOut");
+}
+
+void Ipv6::handleTunnelIcmpErrorIndication(Indication *indication)
+{
+    auto& errorInd = indication->getTagForUpdate<Icmpv6ErrorInd>();
+    Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
+    const auto& innerHeader = originalPacket->peekAtFront<Ipv6Header>();
+    int type = errorInd->getType();
+    bool packetTooBig = type == ICMPv6_PACKET_TOO_BIG;
+
+    // RFC 2473 Section 8: a problem with the tunnel header is reported to the tunnel
+    // entry point only. A problem with the original packet is also reported to its
+    // source, and Section 8.1 lists those: hop limit exceeded, unreachable node, packet
+    // too big, and a Parameter Problem about the Tunnel Encapsulation Limit option,
+    // which INET does not send.
+    if (!packetTooBig && type != ICMPv6_DESTINATION_UNREACHABLE
+        && !(type == ICMPv6_TIME_EXCEEDED && errorInd->getCode() == ND_HOP_LIMIT_EXCEEDED))
+    {
+        EV_WARN << "ICMPv6 error (type=" << type << " code=" << errorInd->getCode()
+                << ") about a tunnel packet is a tunnel problem, not reported to the source of the original packet\n";
+        delete indication;
+        return;
+    }
+
+    if (rt->isLocalAddress(innerHeader->getSrcAddress())) {
+        // this node is also the source of the original packet
+        handleIcmpErrorIndication(indication);
+        return;
+    }
+
+    // RFC 2473 Section 8.2: a Packet Too Big reports the MTU minus the tunnel
+    // header. Section 7.1 (a) reports no less than the IPv6 minimum link MTU,
+    // because a smaller original packet is encapsulated and fragmented.
+    int innerMtu = errorInd->getMtu();
+    if (packetTooBig && innerMtu > 0)
+        innerMtu = std::max(innerMtu - (int)IPv6_HEADER_BYTES.get<B>(), IPv6_MIN_MTU);
+
+    // RFC 2473 Section 8.2: report the error to the source of the original packet.
+    // Hop limit exceeded and unreachable node become a Destination Unreachable with
+    // code 3 (address unreachable). A Packet Too Big stays one, but only for an
+    // original packet larger than the IPv6 minimum link MTU: Section 7.1 (b)
+    // encapsulates a smaller one and fragments the tunnel packet.
+    const Ipv6Address& originalSource = innerHeader->getSrcAddress();
+    if (!packetTooBig) {
+        EV_INFO << "Reporting ICMPv6 error (type=" << type << " code=" << errorInd->getCode() << ") about a tunnel packet to "
+                << originalSource << " as Destination Unreachable, code 3\n";
+        icmp->sendErrorMessage(originalPacket, ICMPv6_DESTINATION_UNREACHABLE, ADDRESS_UNREACHABLE);
+    }
+    else if (innerMtu <= 0)
+        EV_WARN << "Packet Too Big about a tunnel packet reports no MTU, not reported to " << originalSource << "\n";
+    else if (innerHeader->getPayloadLength() > B(0) && IPv6_HEADER_BYTES + innerHeader->getPayloadLength() <= B(IPv6_MIN_MTU))
+        EV_INFO << "Packet Too Big about a tunnel packet whose original packet of " << IPv6_HEADER_BYTES + innerHeader->getPayloadLength()
+                << " is not larger than the IPv6 minimum link MTU, not reported to " << originalSource << "\n";
+    else {
+        EV_INFO << "Reporting Packet Too Big (MTU=" << innerMtu << ") about a tunnel packet to " << originalSource << "\n";
+        icmp->sendErrorMessage(originalPacket, ICMPv6_PACKET_TOO_BIG, 0, innerMtu);
+    }
+    delete indication;
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)
