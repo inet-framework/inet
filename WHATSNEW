@@ -325,6 +325,20 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. Every transmission and reception in progress of a radio
+
+   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
+   which return every transmission the radio is transmitting and every
+   reception it is attempting, in no particular order. ReceiverBase and the
+   canvas visualizers use them instead of getTransmissionInProgress() and
+   getReceptionInProgress(), so that they also work for a radio that has
+   several signals in progress at once (see the next item). For Radio,
+   NoiseSource and ShortcutRadio, which have at most one in each direction,
+   the vectors hold at most one element, and nothing else changes.
+
+   This change requires the modification of C++ code that implements IRadio
+   without deriving from Radio: the two methods are pure virtual.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

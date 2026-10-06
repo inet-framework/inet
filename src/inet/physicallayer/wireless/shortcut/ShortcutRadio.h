@@ -53,7 +53,9 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     virtual const IReceiver *getReceiver() const override { return nullptr; }
     virtual const IRadioMedium *getMedium() const override { return nullptr; }
     virtual const ITransmission *getTransmissionInProgress() const override { return nullptr; }
+    virtual std::vector<const ITransmission *> getTransmissionsInProgress() const override { return {}; }
     virtual const ITransmission *getReceptionInProgress() const override { return nullptr; }
+    virtual std::vector<const ITransmission *> getReceptionsInProgress() const override { return {}; }
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
 

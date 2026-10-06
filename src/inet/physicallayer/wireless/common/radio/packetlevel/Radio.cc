@@ -190,12 +190,30 @@ const ITransmission *Radio::getTransmissionInProgress() const
         return static_cast<WirelessSignal *>(transmissionTimer->getContextPointer())->getTransmission();
 }
 
+std::vector<const ITransmission *> Radio::getTransmissionsInProgress() const
+{
+    auto transmission = getTransmissionInProgress();
+    if (transmission == nullptr)
+        return {};
+    else
+        return { transmission };
+}
+
 const ITransmission *Radio::getReceptionInProgress() const
 {
     if (receptionTimer == nullptr)
         return nullptr;
     else
         return static_cast<WirelessSignal *>(receptionTimer->getControlInfo())->getTransmission();
+}
+
+std::vector<const ITransmission *> Radio::getReceptionsInProgress() const
+{
+    auto transmission = getReceptionInProgress();
+    if (transmission == nullptr)
+        return {};
+    else
+        return { transmission };
 }
 
 IRadioSignal::SignalPart Radio::getTransmittedSignalPart() const
