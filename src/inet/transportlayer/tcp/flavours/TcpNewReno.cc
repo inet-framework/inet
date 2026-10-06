@@ -13,6 +13,7 @@
 
 #include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
 #include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 
 namespace inet {
 namespace tcp {
@@ -31,7 +32,10 @@ ITcpCongestionControl *TcpNewReno::createCongestionControl()
 
 ITcpRecovery *TcpNewReno::createRecovery()
 {
-    return new Rfc6582Recovery(state, conn);
+    if (state->sack_enabled)
+        return new Rfc6675Recovery(state, conn);
+    else
+        return new Rfc6582Recovery(state, conn);
 }
 
 void TcpNewReno::ackProcessed(bool inFastRecovery)

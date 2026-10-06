@@ -39,6 +39,9 @@ class INET_API TcpNewReno : public TcpClassicAlgorithmBase
   public:
     /** Ctor */
     TcpNewReno();
+
+    /** Recovers with SACK by RFC 6675 (Rfc6675Recovery) when SACK is negotiated */
+    virtual bool supportsSackRecovery() const override { return true; }
 };
 
 } // namespace tcp

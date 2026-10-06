@@ -653,6 +653,16 @@ void TcpConnection::configureStateVariables()
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
+    // can return an Rfc6675Recovery (TcpReno, TcpNewReno). Other flavours (TcpTahoe,
+    // TcpVegas, TcpWestwood, DumbTcp, ...) have no SACK recovery path. Rather than error,
+    // treat sackSupport as a willingness (as Linux does; SACK is orthogonal to the congestion
+    // control) and simply do not use SACK for a flavour that cannot recover with it.
+    if (state->sack_support && !tcpAlgorithm->supportsSackRecovery()) {
+        EV_WARN << "sackSupport=true but tcpAlgorithmClass=\"" << tcpAlgorithm->getClassName()
+                << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
+        state->sack_support = false;
+    }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
@@ -661,16 +671,6 @@ void TcpConnection::configureStateVariables()
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
     WATCH_EXPR("snd_una", state->snd_una);
 
-    if (state->sack_support) {
-        std::string algorithmName1 = "TcpReno";
-        std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
-
-        if (algorithmName1 != algorithmName2) { // TODO add additional checks for new SACK supporting algorithms here once they are implemented
-            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
-
-            ASSERT(false);
-        }
-    }
 }
 
 void TcpConnection::selectInitialSeqNum()
