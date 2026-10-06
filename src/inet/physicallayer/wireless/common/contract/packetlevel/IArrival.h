@@ -17,6 +17,8 @@ namespace inet {
 
 namespace physicallayer {
 
+class IRadio;
+
 /**
  * This interface represents the space and time coordinates of a transmission
  * arriving at a receiver.
@@ -26,6 +28,14 @@ namespace physicallayer {
 class INET_API IArrival : public virtual IPrintableObject
 {
   public:
+    /**
+     * Returns the radio this arrival was computed for. Together with the
+     * transmission's transmitter radio it identifies the link, which is what
+     * a model keeping per-link state (e.g. a correlated shadowing) is keyed
+     * by. This function never returns nullptr.
+     */
+    virtual const IRadio *getReceiverRadio() const = 0;
+
     virtual const simtime_t getStartPropagationTime() const = 0;
     virtual const simtime_t getEndPropagationTime() const = 0;
 

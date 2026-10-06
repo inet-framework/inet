@@ -29,7 +29,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
     ConstantSpeedPropagation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const override;
+    virtual const IArrival *computeArrival(const ITransmission *transmission, const IRadio *receiverRadio) const override;
 };
 
 } // namespace physicallayer

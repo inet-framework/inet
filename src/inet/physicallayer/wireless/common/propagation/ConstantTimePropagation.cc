@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/propagation/ConstantTimePropagation.h"
 
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/signal/Arrival.h"
 
 namespace inet {
@@ -27,9 +28,10 @@ void ConstantTimePropagation::initialize(int stage)
         propagationTime = par("propagationTime");
 }
 
-const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const
+const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *transmission, const IRadio *receiverRadio) const
 {
     arrivalComputationCount++;
+    IMobility *mobility = receiverRadio->getAntenna()->getMobility();
     const Coord& position = mobility->getCurrentPosition();
     const Quaternion& orientation = mobility->getCurrentAngularPosition();
     const simtime_t startTime = transmission->getStartTime();
@@ -37,7 +39,7 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
     const simtime_t preambleDuration = transmission->getPreambleDuration();
     const simtime_t headerDuration = transmission->getHeaderDuration();
     const simtime_t dataDuration = transmission->getDataDuration();
-    return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, preambleDuration, headerDuration, dataDuration, position, position, orientation, orientation);
+    return new Arrival(receiverRadio, propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, preambleDuration, headerDuration, dataDuration, position, position, orientation, orientation);
 }
 
 std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level, int evFlags) const
