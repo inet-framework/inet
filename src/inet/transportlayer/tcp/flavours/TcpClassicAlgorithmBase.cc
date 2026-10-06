@@ -119,6 +119,7 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     ackProcessed(inFastRecovery);
 
     sendData(false);
+    ensureRexmitTimerArmed();
 }
 
 bool TcpClassicAlgorithmBase::processEce()
@@ -180,7 +181,10 @@ bool TcpClassicAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_
 
 void TcpClassicAlgorithmBase::receivedDuplicateAck()
 {
-    TcpAlgorithmBase::receivedDuplicateAck();
+    // Without SACK, TcpAlgorithmBase sends the Limited Transmit data; with SACK,
+    // the recovery sends it itself, by NextSeg()
+    if (!state->sack_enabled)
+        TcpAlgorithmBase::receivedDuplicateAck();
 
     recovery->receivedDuplicateAck();
 }

@@ -64,6 +64,15 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void startRexmitTimer();
 
     /**
+     * Re-establish the TCP RTO invariant (Linux tcp_rearm_rto): if any
+     * unacknowledged data is outstanding but no retransmission timer is
+     * running, arm it. Call after ACK processing has finished sending, to
+     * cover data transmitted by RFC 6675 recovery (stepC), which does not
+     * arm the timer.
+     */
+    void ensureRexmitTimerArmed();
+
+    /**
      * Update state vars with new measured RTT value. Passing two simtime_t's
      * will allow rttMeasurementComplete() to do calculations in double or
      * in 200ms/500ms ticks, as needed)

@@ -278,7 +278,8 @@ void Rfc6675Recovery::receivedDuplicateAck()
                 //       update HighData to reflect this transmission, then return
                 //       to (3.2).
                 //"
-                while ((int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
+                while (state->limited_transmit_enabled
+                       && (int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
                     uint32_t seqNum;
                     if (!nextSeg(seqNum))
                         break;
@@ -286,8 +287,10 @@ void Rfc6675Recovery::receivedDuplicateAck()
                     // PREVIOUSLY UNSENT data (HighData+1), never a retransmission.
                     if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
                         state->snd_nxt = seqNum;
+                        uint32_t oldSndMax = state->snd_max;
                         uint32_t sentBytes = conn->sendSegment(state->snd_mss);
                         state->pipe += sentBytes;
+                        state->limitedTransmitBytes += state->snd_max - oldSndMax;
                     }
                     else
                         break;

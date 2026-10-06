@@ -308,6 +308,12 @@ void TcpAlgorithmBase::startRexmitTimer()
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
 }
 
+void TcpAlgorithmBase::ensureRexmitTimerArmed()
+{
+    if (state->snd_una != state->snd_max && !rexmitTimer->isScheduled())
+        startRexmitTimer();
+}
+
 void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
 {
     //
