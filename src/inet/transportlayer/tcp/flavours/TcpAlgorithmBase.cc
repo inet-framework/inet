@@ -573,6 +573,7 @@ void TcpAlgorithmBase::countDuplicateAck(const TcpHeader *tcpHeader, uint32_t pa
 
         // reset counter
         state->dupacks = 0;
+        state->limitedTransmitBytes = 0;
         conn->emit(dupAcksSignal, state->dupacks);
     }
 }
@@ -582,8 +583,11 @@ void TcpAlgorithmBase::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 
     bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
-    if (state->dupacks < state->dupthresh && state->limited_transmit_enabled) // DUPTRESH = 3
+    if (state->dupacks < state->dupthresh && state->limited_transmit_enabled) { // DUPTRESH = 3
+        uint32_t oldSndMax = state->snd_max;
         conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
+        state->limitedTransmitBytes += state->snd_max - oldSndMax;
+    }
 
     //
     // Leave to subclasses (e.g. TcpTahoe, TcpReno) whatever they want to do

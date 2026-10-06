@@ -1699,6 +1699,12 @@ uint16_t TcpConnection::updateRcvWnd()
     return (uint16_t)scaled_rcv_wnd;
 }
 
+uint32_t TcpConnection::getFlightSize() const
+{
+    uint32_t outstanding = state->snd_max - state->snd_una;
+    return outstanding > state->limitedTransmitBytes ? outstanding - state->limitedTransmitBytes : 0;
+}
+
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();

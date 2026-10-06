@@ -130,8 +130,9 @@ void Rfc6582Recovery::receivedDuplicateAck()
                 // If so, then set ssthresh to no more than the value given in
                 // equation 3 of [RFC2581], and record the highest sequence number
                 // transmitted in the variable "recover", and go to Step 2."
-                // The flight size is estimated as min(cwnd, snd_wnd).
-                state->ssthresh = algorithm->calculateSsthresh(std::min(state->snd_cwnd, state->snd_wnd));
+                // RFC 5681 equation (4): ssthresh = max(FlightSize / 2, 2*SMSS), without
+                // the data that Limited Transmit sent.
+                state->ssthresh = algorithm->calculateSsthresh(conn->getFlightSize());
                 conn->emit(ssthreshSignal, state->ssthresh);
                 state->recover = (state->snd_max - 1);
                 state->firstPartialACK = false;

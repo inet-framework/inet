@@ -81,8 +81,17 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // from 1 full-sized segment to the new value of ssthresh, at which
     // point congestion avoidance again takes over."
     //
-    // The flight size is estimated as min(cwnd, snd_wnd).
-    state->ssthresh = calculateSsthresh(std::min(state->snd_cwnd, state->snd_wnd));
+    // RFC 5681, page 7:
+    // "When a TCP sender detects segment loss using the retransmission
+    // timer and the given segment has not yet been resent by way of the
+    // retransmission timer, the value of ssthresh MUST be set to no more
+    // than the value given in equation (4):
+    //
+    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
+    //
+    // where, as discussed above, FlightSize is the amount of outstanding
+    // data in the network."
+    state->ssthresh = calculateSsthreshForRto();
     conn->emit(ssthreshSignal, state->ssthresh);
 
     state->snd_cwnd = state->snd_mss;

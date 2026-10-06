@@ -332,6 +332,13 @@ class INET_API TcpConnection : public SimpleModule
     virtual uint16_t updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
+    /**
+     * FlightSize for the ssthresh of fast retransmit (RFC 5681 equation (4)): the data
+     * that was sent but is not cumulatively acknowledged. Step 2 of RFC 5681 section
+     * 3.2 leaves out the data that Limited Transmit sent on the duplicate ACKs.
+     */
+    virtual uint32_t getFlightSize() const;
+
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
   public:

@@ -510,6 +510,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                     // in the receivedAckForUnackedData we need the old value
                     state->dupacks = 0;
+                    state->limitedTransmitBytes = 0;
 
                     emit(dupAcksSignal, state->dupacks);
                 }
@@ -1239,6 +1240,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
             // in the receivedAckForUnackedData we need the old value
             state->dupacks = 0;
+            state->limitedTransmitBytes = 0;
 
             emit(dupAcksSignal, state->dupacks);
         }
@@ -1249,6 +1251,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // send an ACK, drop the segment, and return.
         tcpAlgorithm->receivedAckForUnsentData(tcpHeader->getAckNo());
         state->dupacks = 0;
+        state->limitedTransmitBytes = 0;
 
         emit(dupAcksSignal, state->dupacks);
 

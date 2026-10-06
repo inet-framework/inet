@@ -85,8 +85,13 @@ void Rfc5681Recovery::receivedDuplicateAck()
             }
         }
 
-        // The flight size is estimated as min(cwnd, snd_wnd).
-        state->ssthresh = algorithm->calculateSsthresh(std::min(state->snd_cwnd, state->snd_wnd));
+        //"
+        //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
+        //
+        // When [RFC3042] is in use, additional data sent in limited transmit
+        // MUST NOT be included in this calculation.
+        //"
+        state->ssthresh = algorithm->calculateSsthresh(conn->getFlightSize());
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"

@@ -53,6 +53,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
      */
     virtual void ackProcessed(bool inFastRecovery) {}
 
+    /** The ssthresh that an expired retransmission timer sets: RFC 5681 equation (4), with the outstanding data as FlightSize. */
+    virtual uint32_t calculateSsthreshForRto() { return std::max((state->snd_max - state->snd_una) / 2, 2 * state->snd_mss); }
+
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
