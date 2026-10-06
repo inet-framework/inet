@@ -997,6 +997,16 @@ void Ipv6::encapsulate(Packet *transportPacket)
     // setting IP options is currently not supported
 }
 
+// Returns true if the datagram carries a Neighbor Discovery message (RFC 4861).
+static bool isNeighbourDiscoveryMessage(Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6_ICMP)
+        return false;
+    const auto& icmpHeader = packet->peekDataAt<Icmpv6Header>(ipv6Header->getChunkLength());
+    return dynamicPtrCast<const Ipv6NdMessage>(icmpHeader) != nullptr;
+}
+
 void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL)
 {
 //    const NetworkInterface *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -1021,6 +1031,21 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         // DAD the address may be used right away, so the deferral is skipped.
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)
                 && !ie->getProtocolData<Ipv6InterfaceData>()->isOptimisticDad()) {
+            EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
+            ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
+            take(sDgram);
+            pendingDadQueue.push_back(sDgram);
+            return;
+        }
+    }
+    else if (fromHL && !ipv6Header->getSrcAddress().isUnspecified() && !isNeighbourDiscoveryMessage(packet)) {
+        // The sender chose the source address, for example Icmpv6 for an Echo
+        // Reply to a multicast Echo Request. The same rule applies. Neighbor
+        // Discovery chooses its source addresses under RFC 4861 itself, so its
+        // messages are not held here. An interface without Ipv6InterfaceData,
+        // such as a tunnel interface that Mipv6 creates, has no tentative address.
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data != nullptr && ipv6Data->isTentativeAddress(ipv6Header->getSrcAddress()) && !ipv6Data->isOptimisticDad()) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             take(sDgram);

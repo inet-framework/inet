@@ -1,0 +1,59 @@
+%description:
+Tests that a datagram whose source address is tentative waits for Duplicate
+Address Detection (DAD) also when the sender chose the source address itself.
+
+The router pings ff02::1 every 0.2 s from t=0. The host answers each Echo
+Request, and Icmpv6 sets the source address of a reply to a multicast request
+itself, to the preferred address of the interface (RFC 4443 Section 4.2 asks
+for a unicast address of the interface). The host's link-local address is
+tentative until about t=2.15 s and its global address until about t=4.53 s,
+and replies that the host sends in these windows must be held until DAD
+completes. If Ipv6 checked only the source addresses it chooses itself, these
+replies would leave with a tentative source.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network TentativeEchoReplyNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = TentativeEchoReplyNetwork
+sim-time-limit = 6s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.router.numApps = 1
+**.router.app[0].typename = "PingApp"
+**.router.app[0].destAddr = "ff02::1"
+**.router.app[0].startTime = 0s
+**.router.app[0].sendInterval = 0.2s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TentativeEchoReplyNetwork.host.ipv6.ipv6: Source address is tentative - enqueueing datagram for later resubmission.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
