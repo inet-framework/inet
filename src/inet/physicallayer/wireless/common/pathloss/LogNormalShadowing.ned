@@ -19,6 +19,7 @@ module LogNormalShadowing extends FreeSpacePathLoss
 {
     parameters:
         double sigma = default(1);
+        double correlationDistance @unit(m) = default(nan m); // NaN: a new shadowing value on every computation; otherwise the value is kept per pair of radios, the same in both directions, until either radio has moved farther than this distance from where it was when the value was drawn; needs a medium analog model that computes the path loss per link (e.g. the scalar one, not the dimensional one)
         @class(LogNormalShadowing);
 }
 
