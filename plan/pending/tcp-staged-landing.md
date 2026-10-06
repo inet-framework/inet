@@ -52,7 +52,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5 ✅ | `topic/tcp-flavour-split` | 11, 12 | +152 −136 | the move and the rename of the two base classes (D-6) |
 | S5b ✅ | `topic/tcp-flavour-strategies` | 13 (part), new | +450 −470 (about) | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
 | S5c ✅ | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 41 (part), 54, 70 | +320 −40 (about) | the behavior changes B4, B6, B10, B11 of D-6, and the preparation of the pipe accounting |
-| S5d | `topic/tcp-sack-recovery` | 13 (part) | — | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6 |
+| S5d ✅ | `topic/tcp-sack-recovery` | 10 (part), 13 (part) | +91 −77 | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6; SACK only for a flavour that can recover with it |
 | S5e | `topic/tcp-pipe-recovery` | 13 (part), 39 (part), 56, 71, 72 | — | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
@@ -212,6 +212,25 @@ plan gives a reason for.
   `DumbTcp::receivedAckForAlreadyAckedData()` empty with a `TODO`, so the `dupAcks` statistic of a
   DumbTcp connection stays 0. S5b keeps master's counter; this is a deliberate difference from the
   source tree.
+- **D-10 — The gap-fill ACK also covers the first part of a gap, and a data segment can carry
+  it.** RFC 5681 section 3.2 asks
+  for an immediate ACK when a segment fills "all or part of a gap in the sequence space". The
+  source branch sets `ack_now` only when `rcv_nxt` moves past the end of the segment, that is,
+  when the segment reaches the buffered data. A segment that fills the first part of a gap, and
+  leaves a hole before the buffered data, got a delayed ACK. With SACK, master's SACK branch of
+  the connection already sends that ACK at once; without SACK, nothing did. S5d also sets
+  `ack_now` when out-of-order data stays above `rcv_nxt` (`TcpReceiveQueue::hasOutOfOrderData()`),
+  as Linux does while its out-of-order queue is not empty. The new test `tcp_gapfill_ack_1` shows
+  the case: with the source condition, B sends the ACK 200 ms later. The source also sets
+  `ack_now` at the end of the segment processing, after `receivedAckForUnackedData()`. A data
+  segment that this call sends already carries the new ACK number, so the source then sends a
+  second, pure ACK with the same number. RFC 5681 section 4.2 says that a receiver MUST NOT send
+  more than one ACK for each incoming segment, except to update the window, and the sender can
+  count the second ACK as a duplicate ACK. The CI job found such an ACK in `bulktransfer`
+  `inet__lwip`: with the source placement, four rows moved only for these second ACKs
+  (`arptest2`, and `bulktransfer` `inet__inet`, `inet_inet_2a`, `inet__lwip`). S5d sets `ack_now`
+  directly after the insert into the receive queue, so the data segment clears it, and the four
+  rows keep master's values. These are deliberate differences from the source tree.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -466,3 +485,46 @@ Source commits 55, 56, 71 and 72 do not land here: 55 repairs the duplicate-ACK 
 source commit 13 broke for Vegas and Westwood, which S5b never broke; 56, 71 and 72 belong to the
 pipe accounting (S5e).
 
+
+### S5d — `topic/tcp-sack-recovery` — landed 2026-10-07
+
+The owner reviewed and approved S5d on 2026-10-07. Before the landing, S5d moved onto a
+documentation commit of master (`c3ab2dda13`), which changes only `doc/project/`.
+
+S5d moves the SACK loss recovery of Reno, NewReno and DCTCP into `Rfc6675Recovery` (S4 code), and
+removes master's rule that sent an immediate ACK while the connection's own sender recovers. Each
+`change` commit carries the moved fingerprints of the CI job and an explanation of each moved row
+and trace:
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: the ssthresh of a SACK-based fast recovery` | B12 | 13 | — |
+| `tcp: change: let Reno with SACK recover as RFC 6675 says` | B12, B16 | 13 | 1: `bulktransfer` `inet_inet_2b` |
+| `tcp: change: let every flavour with SACK recovery use SACK` | B12 | 10, 13 | — |
+| `tcp: change: send an immediate ACK when a segment fills a gap` | B13 | 13 | 1: `bulktransfer` `inet_inet_2b` |
+| `tcp: refactor: remove the SACK path of the RFC 5681 recovery` | — | 13 | — |
+
+`Rfc6675Recovery` replaces master's RFC 3517 steps on top of Reno's window inflation: it enters
+recovery also when `IsLost()` holds, it sets cwnd to ssthresh without inflation, and it sends what
+cwnd minus the pipe allows. It sends Limited Transmit data only when `limitedTransmitEnabled` is
+set. After an ACK, `ensureRexmitTimerArmed()` starts the retransmission timer when data is
+outstanding, because step (C) sends without it. DCTCP calls the same class.
+
+Master stopped the simulation with an assertion when `sackSupport` was set for any flavour other
+than TcpReno. `TcpAlgorithm::supportsSackRecovery()` (source commits 10 and 13) now decides:
+Reno, NewReno and DCTCP recover with SACK; for Tahoe, Vegas, Westwood, DumbTcp and
+TcpNoCongestionControl, the connection writes a warning and does not offer SACK, as on the source
+branch.
+
+The gap-fill ACK differs from the source tree (D-10). Master's rule looked at the wrong direction
+of the connection; RFC 5681 asks for an immediate ACK when a segment fills all or part of a gap.
+
+New tests: `tcp_newreno_sack_1`, `tcp_dctcp_sack_1` and `tcp_tahoe_sack_1` (each stopped at the
+assertion before the third commit), and `tcp_gapfill_ack_1` (with the source condition, B sends
+the ACK 200 ms later). `tcp_sack_3`, `tcp_fastrexmit_1`, `tcp_tahoe_fastrexmit_1` and the four
+stress tests have new traces; the commit messages explain them.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (352 at the first commit, 356 at the head);
+unit 114, serializer 4 and the TCP protocol tests pass at the head, as on master. The CI
+fingerprint job passes at each commit, after the commit's own new values.
