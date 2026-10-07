@@ -116,6 +116,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Tests can consume received frames here without an upper protocol stack.
     virtual void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);
+    static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
+            simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual bool isReceptionInProgress();

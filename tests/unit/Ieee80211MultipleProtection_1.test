@@ -1,0 +1,66 @@
+%description:
+Verify the four multiple protection equations and field encoding before production use.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211MultipleProtection_1 {
+class ArithmeticHcf : public Hcf {
+  public:
+    using Hcf::computeMultipleProtectionDuration;
+};
+}
+
+%file: TestNetwork.ned
+network TestNetwork {
+    submodules:
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+seed-set = 0
+
+%activity:
+auto us = [](double value) { return SimTime(value * 1e-6); };
+auto field = [&](double limit, double remaining, double reservation, double ppdu, double exchange, bool reservationEstablished) {
+    return ArithmeticHcf::computeMultipleProtectionDuration(us(limit), us(remaining), us(reservation), us(ppdu), us(exchange), reservationEstablished);
+};
+ASSERT(field(0, 0, 0, 100, 160, false) == us(60));
+ASSERT(field(0, 0, 0, 100, 160, true) == us(60));
+ASSERT(field(0, 0, 80, 100, 0, true) == 0);
+ASSERT(field(0, 0, 847.6, 100, 0, true) == us(748));
+ASSERT(field(1024, 1024, 0, 200, 0, false) == us(824));
+ASSERT(field(1024, 847.6, 847.6, 100, 0, true) == us(748));
+ASSERT(field(1024, 50, 50, 100, 0, true) == 0);
+ASSERT(field(1024, 0, 0, 100, 0, true) == 0);
+ASSERT(field(1024, 1024, 0, 1100, 0, false) == 0);
+ASSERT(field(32767, 32767, 0, 0, 0, false) == us(32767));
+bool threw = false;
+try { field(32767.1, 32767.1, 0, 0, 0, false); }
+catch (const cRuntimeError&) { threw = true; }
+ASSERT(threw);
+threw = false;
+try { field(1024, 671.2, 671.6, 100, 0, true); }
+catch (const cRuntimeError&) { threw = true; }
+ASSERT(threw);
+for (int encoded : {0, 1, 748, 32767}) {
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setSequenceNumber(SequenceNumberCyclic(0));
+    header->setDurationField(us(encoded));
+    Packet packet("wire-field", header);
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    ASSERT(bytes[2] == (encoded & 255));
+    ASSERT(bytes[3] == (encoded >> 8));
+}
+
+EV << "Multiple protection arithmetic and encoding passed.\n";
+
+%contains: stdout
+Multiple protection arithmetic and encoding passed.

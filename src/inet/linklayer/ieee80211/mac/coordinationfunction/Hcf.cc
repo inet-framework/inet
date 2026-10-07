@@ -725,6 +725,24 @@ simtime_t encodeDuration(simtime_t duration, bool holder)
 
 } // namespace
 
+simtime_t Hcf::computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
+        simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished)
+{
+    // IEEE Std 802.11-2024, 9.2.5.2(b): select the upper bound for a positive limit.
+    simtime_t duration;
+    if (limit == 0)
+        duration = (reservation == 0 ? exchangeDuration : reservation) - ppduDuration;
+    // An expired positive-limit reservation must not select the initial full-limit field again.
+    else if (!reservationEstablished)
+        duration = limit - ppduDuration;
+    else {
+        if (reservation - ppduDuration > remaining - ppduDuration)
+            throw cRuntimeError("Multiple protection duration has an empty raw interval");
+        duration = remaining - ppduDuration;
+    }
+    return encodeDuration(duration, true);
+}
+
 void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
