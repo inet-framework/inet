@@ -233,6 +233,8 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
             handleInternalCollision(internallyCollidedEdcafs);
             emit(edcaCollisionDetectedSignal, (unsigned long)internallyCollidedEdcafs.size());
         }
+        // Preserve same-time collision accounting before the shared contention gate changes.
+        rx->setContentionBlocked(true);
         startFrameSequence(ac);
     }
     else
@@ -319,6 +321,7 @@ void Hcf::frameSequenceFinished()
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO review
         edcaf->getTxopProcedure()->endTxop();
+        rx->setContentionBlocked(false);
         if (startContention)
             edcaf->requestChannel(this);
     }
@@ -404,6 +407,8 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     Enter_Method("transmissionComplete");
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        step->setPpduEnd(simTime());
         edcaf->getTxopProcedure()->recordTransmittedDuration(header->getDurationField());
         frameSequenceHandler->transmissionComplete();
     }
@@ -463,6 +468,12 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
     Enter_Method("originatorProcessTransmittedFrame");
     EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
+    if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
+        if (!recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
+            auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+            rx->successfulFrameTransmitted(step->getPpduEnd(), transmittedHeader->getDurationField());
+        }
+    }
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         edcaf->emit(packetSentToPeerSignal, packet);
@@ -600,6 +611,8 @@ void Hcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
     emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
     auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
+    auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getStepBeforeLast());
+    rx->successfulFrameTransmitted(step->getPpduEnd(), lastTransmittedHeader->getDurationField());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -822,7 +835,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         else
             throw cRuntimeError("Undefined protection mechanism");
-        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, true, this);
+        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
     }
     else
         throw cRuntimeError("Hcca is unimplemented");
