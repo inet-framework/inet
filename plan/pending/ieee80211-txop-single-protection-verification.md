@@ -53,6 +53,8 @@ The focused inventory contains ten rows. These commands ran from `tests/fingerpr
 
 The first campaign exposed four runtime errors from the missing contention permission. A targeted trace reproduced the exact showcase event and time. The corrected source removes those runtime errors. Five final HCF rows complete with fingerprint mismatches; that runner exits one. Five final control rows explicitly verify all three expected fingerprints; that runner exits zero.
 
+The five changed rows contain fifteen changed fingerprint values: three values for each configuration. The five control rows verify fifteen values. Each row represents one simulation trajectory with three fingerprint ingredients.
+
 | Changed row, run 0 | Final `tplx` | Final `~tNl` | Final `~tND` |
 | --- | --- | --- | --- |
 | Showcase `Qos` | `b300-b302` | `f942-332c` | `a8a4-3d2e` |
@@ -66,6 +68,8 @@ The controls are example/showcase non-QoS, example rate control `Mac`, and showc
 All five rows first differ in their first Beacon. The original field is 44 µs; the final field is zero. Frame time, type, addresses, sequence number, length, and selected mode remain equal. Raw frame bytes differ only at Duration offset 2 and the four computed FCS bytes. A3 removes the incorrect current-frame ACK estimate from group management. Original AP and receiver NAV reservations consequently disappear for this zero-field Beacon.
 
 Ten short comparison runs use the same native configuration names, run 0, computed FCS/checksums, and 1.05 s window. All ten exit zero. The first-divergence report is `/tmp/txop-field-first-divergence-report.md`. Decoded headers and raw-byte comparisons are `/tmp/txop-field-first-divergences.json` and `/tmp/txop-field-first-byte-differences.json`. Each configuration retains AP and station PCAPs, header CSVs, and logs under `/tmp/txop-field-{base,final}-` prefixes. The group production fixture directly verifies the corrected equation. Later trajectories can also reflect the other planned changes.
+
+The first-divergence evidence covers all five changed configurations. It does not attribute all fifteen final values to A3 alone. The intermediate campaigns also show additional changes after A1, B publication, and C admission. For example, showcase `Qos` has different values at A3, B publication, and the final source. The [local commit series](#local-commit-series) records those values and A1's unresolved Block Ack attribution. Further causal evidence remains necessary for a baseline proposal.
 
 The original-source comparison uses the same five-row fingerprint command, with `/tmp/txop-fingerprint-prerequisite-runner.log` as its log argument. Its summary is `/tmp/txop-fingerprints-prerequisite.log`. The original build log is `/tmp/txop-build-prerequisite.log`. Original simulation output is preserved under `/tmp/txop-prerequisite-fingerprint-results/`.
 
