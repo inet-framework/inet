@@ -53,17 +53,17 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5b ✅ | `topic/tcp-flavour-strategies` | 13 (part), new | +450 −470 (about) | the refactor part of commit 13: B1 to B3 of D-6, with master's arithmetic |
 | S5c ✅ | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 41 (part), 54, 70 | +320 −40 (about) | the behavior changes B4, B6, B10, B11 of D-6, and the preparation of the pipe accounting |
 | S5d ✅ | `topic/tcp-sack-recovery` | 10 (part), 13 (part) | +91 −77 | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6; SACK only for a flavour that can recover with it |
-| S5e | `topic/tcp-pipe-recovery` | 13 (part), 39 (part), 56, 71, 72 | — | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
+| S5e | `topic/tcp-pipe-recovery` | 13 (part), 34 (part), 39 (part), 56, 71, 72 | — | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
-| S8 | `topic/tcp-rack` | 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window |
+| S8 | `topic/tcp-rack` | 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
 | S11 | `topic/tcp-connection-lifecycle` | 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
 | S12 | `topic/tcp-fast-open` | 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
-| S15 | `topic/tcp-timers` | 31, 32, 33, 34, 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
+| S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
 | S16 | `topic/tcp-write-boundaries` | 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61, 74, 86 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
@@ -528,3 +528,32 @@ Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no un
 symbol, and the TCP module tests pass at each commit (352 at the first commit, 356 at the head);
 unit 114, serializer 4 and the TCP protocol tests pass at the head, as on master. The CI
 fingerprint job passes at each commit, after the commit's own new values.
+
+### S5e — `topic/tcp-pipe-recovery`: the steps
+
+Without SACK, master's Reno and NewReno inflate cwnd in fast recovery, as RFC 5681 and RFC 6582
+describe. The source branch counts the pipe instead, as Linux does: each duplicate ACK takes one
+segment out of the bytes in flight (an inferred SACK), the retransmitted head is marked lost, and
+cwnd stays at ssthresh. The sending room, cwnd minus the pipe, is the same as the RFC's inflated
+cwnd minus FlightSize. The later stages need this count: PRR (S9) reduces the window against it.
+
+The count reads the loss marks of the retransmission queue. After a timeout, Linux marks all
+outstanding data lost and clears the retransmitted marks (`tcp_timeout_mark_lost()`), so the
+retransmissions of the go-back-N are the only bytes in flight. The source branch does this from
+commit 34 (S15) on, and only with SACK. Without these marks, the count keeps `snd_max - snd_una`
+in flight after a timeout, and the go-back-N stops until a cumulative ACK arrives. So S5e brings the
+loss marking forward, for connections with and without SACK.
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: a timeout marks the outstanding data lost; nothing reads the marks yet | — | 34 (part) |
+| 2a | change: a timeout ends the fast recovery of Reno, and an old ACK does not | B5 | 13, 56 |
+| 2b | change: NewReno keeps "recover" from the fast retransmit and the timeout | B7 | 13 |
+| 2c | change: Reno and NewReno without SACK count the pipe instead of inflating cwnd | B5, B7, B8 | 13, 39 (part), 72 |
+
+Source commits 56, 71 and 72 repair the source's own recovery code (rule D-1), so their repairs are
+in step 2 from the start. The order can change when a step shows that it depends on a later one.
+
+With SACK, the count of the bytes in flight stays `snd_nxt - snd_una` in S5e. The Linux count needs
+loss marks during the recovery, and with SACK these come from RACK (commit 17). So B8 with SACK
+moves to S8.
