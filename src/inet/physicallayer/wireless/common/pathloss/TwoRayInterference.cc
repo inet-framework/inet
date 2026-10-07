@@ -1,7 +1,7 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayInterference.h"
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
@@ -48,15 +48,34 @@ std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level, int
     return os;
 }
 
-double TwoRayInterference::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
+/**
+ * The path loss of one link over frequency: the positions of its two ends are
+ * taken when the function is created.
+ */
+class TwoRayInterference::TwoRayInterferenceFunction : public math::FunctionBase<double, math::Domain<Hz>>
 {
-    auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
-    mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
-    const m waveLength = propagationSpeed / centerFrequency;
+  protected:
+    const TwoRayInterference *pathLoss;
+    const mps propagationSpeed;
+    const Coord transmitterPosition;
+    const Coord receiverPosition;
 
-    return computeTwoRayInterference(transmission->getStartPosition(), arrival->getStartPosition(), waveLength);
+  public:
+    TwoRayInterferenceFunction(const TwoRayInterference *pathLoss, mps propagationSpeed, const Coord& transmitterPosition, const Coord& receiverPosition) :
+        pathLoss(pathLoss), propagationSpeed(propagationSpeed), transmitterPosition(transmitterPosition), receiverPosition(receiverPosition) {}
+
+    virtual double getValue(const math::Point<Hz>& p) const override {
+        const m waveLength = propagationSpeed / std::get<0>(p);
+        return pathLoss->computeTwoRayInterference(transmitterPosition, receiverPosition, waveLength);
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *pathLoss << EV_FIELD(transmitterPosition) << EV_FIELD(receiverPosition) << ")"; }
+};
+
+Ptr<const math::IFunction<double, math::Domain<Hz>>> TwoRayInterference::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+{
+    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
+    return makeShared<TwoRayInterferenceFunction>(this, propagationSpeed, transmission->getStartPosition(), arrival->getStartPosition());
 }
 
 double TwoRayInterference::computeTwoRayInterference(const Coord& pos_t, const Coord& pos_r, m lambda) const

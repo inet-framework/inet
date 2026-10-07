@@ -28,14 +28,18 @@ namespace physicallayer {
 class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 {
   protected:
+    class TwoRayGroundReflectionFunction;
+
+  protected:
     const physicalenvironment::IPhysicalEnvironment *physicalEnvironment = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual double computeTwoRayGroundReflection(mps propagationSpeed, Hz frequency, m distance, m transmitterAltitude, m receiverAltitude) const;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-    virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual Ptr<const math::IFunction<double, math::Domain<Hz>>> computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const override;
 };
 
 } // namespace physicallayer

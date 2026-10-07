@@ -19,7 +19,7 @@ class INET_API PathLossBase : public Module, public IPathLoss
 {
   public:
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override = 0;
-    virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual Ptr<const math::IFunction<double, math::Domain<Hz>>> computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const override;
 };
 
 } // namespace physicallayer
