@@ -4,6 +4,13 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 DATA ACK Policy Publication
+-------------------------------------
+
+TxOpFs publishes the selected DATA ACK policy before execution. HCF consumes that policy without a second DATA-submission query. Custom ACK policies must not require effects from that removed query. Their method signatures remain unchanged.
+
+For example, DATA selects Block Ack before RTS. The RTS estimate omits an immediate ACK, and DATA retains Block Ack after CTS.
+
 IEEE 802.11 Local NAV Choice
 ---------------------------
 

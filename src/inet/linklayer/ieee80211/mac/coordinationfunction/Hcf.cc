@@ -788,15 +788,6 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto txop = channelOwner->getTxopProcedure();
-        if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            OriginatorBlockAckAgreement *agreement = nullptr;
-            if (originatorBlockAckAgreementHandler)
-                agreement = originatorBlockAckAgreementHandler->getAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
-            auto ackPolicy = originatorAckPolicy->computeAckPolicy(packet, dataFrame, agreement);
-            auto dataHeader = packet->removeAtFront<Ieee80211DataHeader>();
-            dataHeader->setAckPolicy(ackPolicy);
-            packet->insertAtFront(dataHeader);
-        }
         auto mode = rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
         RateSelection::emitDatarateSelected(this, header, mode);

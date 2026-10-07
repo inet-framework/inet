@@ -56,6 +56,9 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
         if (context->getQoSContext()->blockAckAgreementHandler)
             agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataHeaderToTransmit->getReceiverAddress(), dataHeaderToTransmit->getTid());
         auto ackPolicy = context->getQoSContext()->ackPolicy->computeAckPolicy(frameToTransmit, dataHeaderToTransmit, agreement);
+        auto updatedHeader = frameToTransmit->removeAtFront<Ieee80211DataHeader>();
+        updatedHeader->setAckPolicy(ackPolicy);
+        frameToTransmit->insertAtFront(updatedHeader);
         if (ackPolicy == AckPolicy::BLOCK_ACK)
             return 0;
         else if (ackPolicy == AckPolicy::NORMAL_ACK)

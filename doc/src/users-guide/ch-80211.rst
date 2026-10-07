@@ -507,6 +507,8 @@ helps against hidden nodes at the cost of overhead. The CTS timeout,
 Multiple protection in an EDCA TXOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+TxOpFs publishes the selected DATA ACK policy before execution. HCF uses that policy through the exchange. For example, DATA that selects Block Ack before RTS retains Block Ack after CTS. Single protection's RTS field therefore omits the unnecessary immediate ACK and its SIFS.
+
 A transmission opportunity (TXOP) lets one access category send frame exchanges after one channel
 access. To reserve time for several frames, select multiple
 protection on that category's ``txopProcedure``. The holder retains the selection until the TXOP
