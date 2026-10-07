@@ -1,7 +1,7 @@
 %description:
 Check start and finish order through the production frame sequence handler.
-Check empty first preparation and synchronous accepted DATA/ACK completion.
-Require ordered callbacks and valid history in both result filters.
+Check empty first preparation and first transmit refusal with empty history.
+Check refusal after a completed DATA/ACK exchange without a failed-frame callback.
 
 %file: Observations.cc
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
@@ -25,7 +25,7 @@ class ObservationSequence : public IFrameSequence {
     ObservationSequence(int kind) : kind(kind) {}
     void startSequence(FrameSequenceContext *, int) override {}
     IFrameSequenceStep *prepareStep(FrameSequenceContext *) override {
-        if (kind == 0 || index == 2)
+        if (kind == 0 || index == 3)
             return nullptr;
         if (index == 1)
             return new ReceiveStep(SimTime(100, SIMTIME_US));
@@ -54,19 +54,18 @@ class ObservationTest : public cSimpleModule, public IFrameSequenceHandler::ICal
         ASSERT(starts == finishes);
         starts++;
     }
-    void transmitFrame(Packet *, simtime_t) override {
+    bool transmitFrame(Packet *, simtime_t) override {
         ASSERT(starts == finishes + 1);
         submissions++;
-        ASSERT(kind == 1 && submissions == 1);
-        handler.transmissionComplete();
+        return kind == 2 && submissions == 1;
     }
     void frameSequenceFinished() override {
         ASSERT(starts == finishes + 1);
         auto context = handler.getContext();
         ASSERT(context != nullptr && handler.isSequenceRunning());
         ASSERT(context->getDuration() == SIMTIME_ZERO);
-        ASSERT(context->getNumSteps() == (kind == 1 ? 2 : 0));
-        if (kind == 1) {
+        ASSERT(context->getNumSteps() == (kind == 2 ? 2 : 0));
+        if (kind == 2) {
             ASSERT(dynamic_cast<ReceiveStep *>(context->getLastStep()) != nullptr);
             ASSERT(context->getLastStep()->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED);
         }
@@ -75,36 +74,40 @@ class ObservationTest : public cSimpleModule, public IFrameSequenceHandler::ICal
         durationFilter.receiveSignal(nullptr, simTime(), const_cast<FrameSequenceContext *>(context), nullptr);
         countFilter.receiveSignal(nullptr, simTime(), const_cast<FrameSequenceContext *>(context), nullptr);
         ASSERT(durationValue->value == 0);
-        ASSERT(countValue->value == (kind == 1 ? 2 : 0));
+        ASSERT(countValue->value == (kind == 2 ? 2 : 0));
         finishes++;
     }
     void originatorProcessRtsProtectionFailed(Packet *) override { ASSERT(false); }
     void originatorProcessFailedFrame(Packet *) override { ASSERT(false); }
     void originatorProcessTransmittedFrame(Packet *) override {
-        ASSERT(kind == 1);
-        ASSERT(handler.getContext()->getLastStep()->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED);
+        ASSERT(kind == 2);
+        auto step = check_and_cast<TransmitStep *>(handler.getContext()->getLastStep());
+        ASSERT(step->getPpduEnd() == simTime());
     }
-    void originatorProcessReceivedFrame(Packet *, Packet *) override { ASSERT(kind == 1); }
-    void scheduleStartRxTimer(simtime_t) override {
-        ASSERT(kind == 1);
-        timers++;
-        handler.processResponse(new Packet("ACK", makeShared<Ieee80211AckFrame>()));
-    }
+    void originatorProcessReceivedFrame(Packet *, Packet *) override { ASSERT(kind == 2); }
+    void scheduleStartRxTimer(simtime_t) override { ASSERT(kind == 2); timers++; }
   protected:
     void initialize() override {
         durationFilter.addDelegate(durationValue);
         countFilter.addDelegate(countValue);
-        for (kind = 0; kind < 2; kind++) {
+        for (kind = 0; kind < 3; kind++) {
             ObservationFrames frames;
             submissions = timers = 0;
             auto context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &frames, nullptr, nullptr, nullptr, nullptr);
             handler.startFrameSequence(new ObservationSequence(kind), context, this);
-            ASSERT(submissions == kind && timers == kind);
+            if (kind == 2) {
+                ASSERT(handler.isSequenceRunning());
+                check_and_cast<TransmitStep *>(handler.getContext()->getLastStep())->setPpduEnd(simTime());
+                handler.transmissionComplete();
+                ASSERT(timers == 1);
+                handler.processResponse(new Packet("ACK", makeShared<Ieee80211AckFrame>()));
+                ASSERT(submissions == 2);
+            }
             ASSERT(!handler.isSequenceRunning());
             ASSERT(handler.getContext() == nullptr);
         }
-        ASSERT(starts == 2 && finishes == 2);
-        ASSERT(durationValue->calls == 2 && countValue->calls == 2);
+        ASSERT(starts == 3 && finishes == 3);
+        ASSERT(durationValue->calls == 3 && countValue->calls == 3);
         std::cout << "Frame sequence observation assertions passed.\n";
     }
 };

@@ -72,6 +72,7 @@ class INET_API FrameSequenceContext : public cObject
     virtual simtime_t getDuration() const { return simTime() - startTime; }
 
     virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }
+    void removeLastStep();
     virtual int getNumSteps() const { return steps.size(); }
     virtual IFrameSequenceStep *getStep(int i) const { return steps[i]; }
     virtual IFrameSequenceStep *getLastStep() const { return steps.size() > 0 ? steps.back() : nullptr; }

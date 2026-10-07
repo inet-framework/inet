@@ -151,16 +151,17 @@ class ProtectionHcf : public Hcf {
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
         processUpperFrame(packet, header);
     }
-    void transmitFrame(Packet *packet, simtime_t ifs) override {
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
         ASSERT(starts == finishes + 1);
         auto owner = edca->getChannelOwner()->getTxopProcedure();
         if (currentData == 0 && owner->getDuration() == 0)
             ASSERT(owner->getReservationEnd() == 0);
-        Hcf::transmitFrame(packet, ifs);
+        bool accepted = Hcf::transmitFrame(packet, ifs);
         if (sender() && scenario() == 5 && !injectedOtherAc) {
             injectedOtherAc = true;
             inject(24, false, false, 0);
         }
+        return accepted;
     }
     void frameSequenceStarted() override {
         ASSERT(starts == finishes);

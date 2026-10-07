@@ -103,7 +103,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // IFrameSequenceHandler::ICallback
-    virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+    virtual bool transmitFrame(Packet *packet, simtime_t ifs) override;
     virtual void frameSequenceStarted() override;
     virtual void originatorProcessRtsProtectionFailed(Packet *packet) override;
     virtual void originatorProcessTransmittedFrame(Packet *packet) override;
