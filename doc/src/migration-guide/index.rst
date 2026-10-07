@@ -4,15 +4,8 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
-IEEE 802.11 Sequence Submission Result
-------------------------------------
-
-Custom sequence callbacks must provide ``bool transmitFrame(Packet *packet, simtime_t ifs)``. Return true after submission to Tx. Return false before submission to end the sequence normally. The handler destroys the refused step before finish observers inspect history. It does not advance the sequence or schedule the refused response timeout.
-
-For example, refusal after DATA and its ACK leaves that completed ACK as the last observed step. The handler destroys an owned RTS but retains borrowed unsent DATA. Immediate refusal leaves empty history with one ordered start and finish.
-
-IEEE 802.11 Shared TXNAV Operations
----------------------------------
+IEEE 802.11 TXNAV and Sequence Callbacks
+--------------------------------------
 
 Custom ``IRx`` implementations must provide these operations:
 
@@ -26,17 +19,18 @@ Keep TXNAV separate from received NAV. Replace its endpoint with ``ppduEnd + dur
 
 Honor HCF's separate contention permission through ``setContentionBlocked()``. HCF blocks contention after internal-collision handling and restores it after channel release and TXOP end. This permission prevents a second grant during an initial response wait, when successful TXNAV does not yet exist. Preserve the CTS medium query.
 
-IEEE 802.11 Sequence Start Notification
--------------------------------------
+Custom single-protection admission must compare the complete exchange cost strictly against TXNAV at the decision before SIFS. Exclude the initial SIFS from that exchange cost. Include the initial SIFS in the separate positive TXOP limit check. For example, a 238 us DATA/ACK exchange passes with 246.67 us TXNAV and at least 248 us of positive TXOP time. This example uses 10 us initial SIFS. The timer sample instant follows INET's stated interpretation of IEEE Std 802.11-2024, Clause 10.23.2.8.
 
-Custom sequence callbacks must implement ``void frameSequenceStarted()``. Emit the existing start observation from this callback. The handler installs its context and initializes the sequence before this call. It starts the first step after this call. For example, an empty first preparation produces one start followed by one finish with valid contexts.
+Custom sequence callbacks must provide these signatures:
 
-IEEE 802.11 DATA ACK Policy Publication
--------------------------------------
+.. code-block:: c++
+
+   void frameSequenceStarted() override;
+   bool transmitFrame(Packet *packet, simtime_t ifs) override;
+
+Emit the start observation from ``frameSequenceStarted()``. The handler installs its context and initializes the sequence before this call. Return true after submission to Tx. Return false before submission to end the sequence normally. The handler destroys the refused step before finish observers inspect history. An empty preparation or immediate refusal therefore produces one start and one finish with valid contexts.
 
 TxOpFs publishes the selected DATA ACK policy before execution. HCF consumes that policy without a second DATA-submission query. Custom ACK policies must not require effects from that removed query. Their method signatures remain unchanged.
-
-For example, DATA selects Block Ack before RTS. The RTS estimate omits an immediate ACK, and DATA retains Block Ack after CTS.
 
 IEEE 802.11 Local NAV Choice
 ---------------------------
