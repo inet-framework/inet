@@ -1,0 +1,115 @@
+%description:
+Check RX TXNAV replacement, countdown, expiry, and zero fields directly.
+Check the CTS medium query separately from contention permission.
+Check received NAV and the explicit contention block independently of TXNAV.
+
+%file: Txnav.cc
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+namespace inet::ieee80211 {
+class TxnavTimerRx : public Rx {
+  public:
+    void receivedReservation(simtime_t duration) {
+        Enter_Method("receivedReservation");
+        setOrExtendNav(duration);
+    }
+};
+Define_Module(TxnavTimerRx);
+class TxnavContentionProbe : public IContention {
+  public:
+    bool free = false;
+    int notifications = 0;
+    void startContention(int, simtime_t, simtime_t, simtime_t, ICallback *) override { ASSERT(false); }
+    bool isContentionInProgress() override { return false; }
+    void mediumStateChanged(bool value) override { free = value; notifications++; }
+    void corruptedFrameReceived() override { ASSERT(false); }
+};
+class TxnavTimerTest : public cSimpleModule {
+  public:
+    TxnavTimerTest() : cSimpleModule(65536) {}
+    TxnavContentionProbe contention;
+    TxnavContentionProbe lateContention;
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto rx = check_and_cast<TxnavTimerRx *>(getModuleByPath("^.host.wlan[0].mac.rx"));
+        ASSERT(rx->isMediumFree() && rx->getTxnavRemaining() == SIMTIME_ZERO);
+        rx->registerContention(&contention);
+        ASSERT(contention.free && contention.notifications == 1);
+        rx->successfulFrameTransmitted(simTime() - SimTime(20, SIMTIME_US), SimTime(120, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SimTime(100, SIMTIME_US));
+        ASSERT(rx->isMediumFree() && !contention.free);
+        rx->registerContention(&lateContention);
+        ASSERT(!lateContention.free && lateContention.notifications == 1);
+        wait(SimTime(30, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SimTime(70, SIMTIME_US));
+        rx->successfulFrameTransmitted(simTime(), SimTime(40, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SimTime(40, SIMTIME_US));
+        ASSERT(!contention.free && !lateContention.free);
+        rx->receivedReservation(SimTime(300, SIMTIME_US));
+        ASSERT(!rx->isMediumFree());
+        rx->successfulFrameTransmitted(simTime(), SIMTIME_ZERO);
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        ASSERT(!rx->isMediumFree() && !contention.free);
+        rx->successfulFrameTransmitted(simTime() - SimTime(20, SIMTIME_US), SimTime(10, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        ASSERT(!rx->isMediumFree() && !contention.free);
+        wait(SimTime(301, SIMTIME_US));
+        ASSERT(rx->isMediumFree() && contention.free && lateContention.free);
+        rx->setContentionBlocked(true);
+        ASSERT(rx->isMediumFree() && !contention.free && !lateContention.free);
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        rx->successfulFrameTransmitted(simTime(), SimTime(40, SIMTIME_US));
+        wait(SimTime(41, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        ASSERT(rx->isMediumFree() && !contention.free && !lateContention.free);
+        rx->setContentionBlocked(false);
+        ASSERT(rx->isMediumFree() && contention.free && lateContention.free);
+        rx->successfulFrameTransmitted(simTime(), SimTime(40, SIMTIME_US));
+        ASSERT(!contention.free && !lateContention.free);
+        wait(SimTime(41, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        ASSERT(rx->isMediumFree() && contention.free && lateContention.free);
+        std::cout << "TXNAV timer and permission assertions passed.\n";
+    }
+};
+Define_Module(TxnavTimerTest);
+}
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple TxnavTimerRx extends Rx { parameters: @class(::inet::ieee80211::TxnavTimerRx); }
+simple TxnavTimerTest { parameters: @class(::inet::ieee80211::TxnavTimerTest); }
+network TxnavTimerNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: TxnavTimerTest;
+}
+%inifile: omnetpp.ini
+[General]
+network = TxnavTimerNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.rx.typename = "TxnavTimerRx"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host.mobility.initialX = 0m
+*.host.mobility.initialY = 0m
+%contains: stdout
+TXNAV timer and permission assertions passed.
