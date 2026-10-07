@@ -259,6 +259,18 @@ void Ipv6::handleMessageWhenUp(cMessage *msg)
     }
 }
 
+// Returns the IPv6 data of the interface that holds the source address of a datagram
+// held in pendingDadQueue: the outgoing interface, or, if that has no IPv6 data (a
+// tunnel interface created at run time), the interface that holds the address.
+// Returns nullptr if no interface holds the address.
+static const Ipv6InterfaceData *findSourceIpv6Data(IInterfaceTable *ift, const NetworkInterface *ie, const Ipv6Address& srcAddr)
+{
+    if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())
+        return ipv6Data;
+    auto holder = ift->findInterfaceByAddress(srcAddr);
+    return holder != nullptr ? holder->findProtocolData<Ipv6InterfaceData>() : nullptr;
+}
+
 void Ipv6::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
@@ -267,7 +279,8 @@ void Ipv6::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         // DAD completed: send out all queued datagrams whose source address is no longer tentative
         for (auto it = pendingDadQueue.begin(); it != pendingDadQueue.end(); ) {
             ScheduledDatagram *sDgram = *it;
-            if (!sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
+            auto srcIpv6Data = findSourceIpv6Data(ift.get(), sDgram->getIE(), sDgram->getSrcAddress());
+            if (srcIpv6Data == nullptr || !srcIpv6Data->isTentativeAddress(sDgram->getSrcAddress())) {
                 it = pendingDadQueue.erase(it);
                 numForwarded++;
                 fragmentPostRouting(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
@@ -282,7 +295,8 @@ void Ipv6::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         // DAD failed: drop all queued datagrams whose source address was removed
         for (auto it = pendingDadQueue.begin(); it != pendingDadQueue.end(); ) {
             ScheduledDatagram *sDgram = *it;
-            if (!sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->hasAddress(sDgram->getSrcAddress())) {
+            auto srcIpv6Data = findSourceIpv6Data(ift.get(), sDgram->getIE(), sDgram->getSrcAddress());
+            if (srcIpv6Data == nullptr || !srcIpv6Data->hasAddress(sDgram->getSrcAddress())) {
                 EV_WARN << "Dropping queued datagram -- source address " << sDgram->getSrcAddress() << " DAD failed\n";
                 it = pendingDadQueue.erase(it);
                 delete sDgram;
@@ -1006,7 +1020,30 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
     {
         // source address can be unspecified during DAD
-        const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+        // An Ipv6TunnelInterface that Ipv6RoutingTable creates at run time, such as
+        // the Mobile IPv6 reverse tunnel, has no IPv6 data. RFC 6275 Section 11.3.1
+        // reverse tunnels "packets that have the mobile node's home address as the
+        // Source Address", so take a home address first, and otherwise the preferred
+        // global address of another interface.
+        const Ipv6InterfaceData *srcIpv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        Ipv6Address srcAddr = srcIpv6Data != nullptr ? srcIpv6Data->getPreferredAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+        for (int pass = 0; srcIpv6Data == nullptr && pass < 2; pass++) {
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                const NetworkInterface *candidateIE = ift->getInterface(i);
+                auto candidateData = candidateIE->findProtocolData<Ipv6InterfaceData>();
+                if (candidateData == nullptr || !candidateIE->isUp())
+                    continue;
+                Ipv6Address candidate = pass == 0 ? candidateData->getGlobalAddress(Ipv6InterfaceData::HoA) : candidateData->getPreferredAddress();
+                if (!candidate.isUnspecified() && candidate.getScope() == Ipv6Address::GLOBAL) {
+                    srcIpv6Data = candidateData;
+                    srcAddr = candidate;
+                    break;
+                }
+            }
+        }
+        if (srcIpv6Data == nullptr)
+            throw cRuntimeError("No source address for a datagram to %s: interface %s has no IPv6 data and no other interface has a global address",
+                    ipv6Header->getDestAddress().str().c_str(), ie->getInterfaceName());
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
 
         // TODO factor out
@@ -1019,8 +1056,7 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         // RFC 4862: a tentative source address (DAD still in progress) must not be
         // used, so defer the datagram until DAD completes. Under RFC 4429 Optimistic
         // DAD the address may be used right away, so the deferral is skipped.
-        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)
-                && !ie->getProtocolData<Ipv6InterfaceData>()->isOptimisticDad()) {
+        if (srcIpv6Data->isTentativeAddress(srcAddr) && !srcIpv6Data->isOptimisticDad()) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             take(sDgram);
