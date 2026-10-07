@@ -11,6 +11,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
 
@@ -32,7 +33,12 @@ void Ipv6Tunnel::initialize(int stage)
 void Ipv6Tunnel::configureNetworkInterface()
 {
     networkInterface = getContainingNicModule(this);
-    networkInterface->setMtu(par("mtu"));
+    // RFC 2473 Section 7.1 (b): an original packet of up to the IPv6 minimum
+    // link MTU is encapsulated whatever the tunnel MTU, and the tunnel packet is
+    // fragmented. So the interface accepts packets of up to that size. Ipv6
+    // originates the tunnel packet and fragments it to the MTU of its outgoing
+    // interface.
+    networkInterface->setMtu(std::max(par("mtu").intValue(), (intval_t)IPv6_MIN_MTU));
     networkInterface->setPointToPoint(true);
 }
 
