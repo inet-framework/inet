@@ -325,6 +325,19 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. IPv6 no longer accepts the solicited-node group of the loopback address
+
+   Every IPv6 node with a loopback interface accepted datagrams sent to
+   ff02::1:ff00:1 on each of its links, because its loopback address ::1
+   maps to that solicited-node multicast group. The interface that gets the
+   first automatic MAC address, 0A:AA:00:00:00:01, has an interface
+   identifier ending in 00:00:01, so every node on its link passed that
+   interface's Duplicate Address Detection probes to its own Neighbour
+   Discovery. The loopback address no longer maps to a solicited-node
+   group, so a node accepts ff02::1:ff00:1 only when one of its own
+   addresses maps to it. This changes event-level fingerprints of IPv6
+   simulations but no packet exchanged between nodes.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

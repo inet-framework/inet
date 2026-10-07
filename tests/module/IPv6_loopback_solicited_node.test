@@ -1,0 +1,62 @@
+%description:
+Tests that a node does not accept the solicited-node multicast group of the
+loopback address ::1, which is ff02::1:ff00:1.
+
+A router and a host share one link. The router's automatic MAC address ends in
+00:00:01, so the Duplicate Address Detection (DAD) Neighbor Solicitation for
+its link-local address goes to ff02::1:ff00:1. None of the host's addresses
+maps to that group; only the host's loopback address ::1 does. The host must
+not deliver the solicitation locally.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network LoopbackSolicitedNodeNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = LoopbackSolicitedNodeNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 1
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+LoopbackSolicitedNodeNetwork.host.ipv6.ipv6: destination address ff02::1:ff00:1 is multicast, doing multicast routing
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -A1 "host.ipv6.ipv6: destination address ff02::1:ff00:1 is multicast" test.out > host_solicited_node.out || true
+%not-contains: host_solicited_node.out
+local delivery of multicast packet
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
