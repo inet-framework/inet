@@ -4,6 +4,11 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Sequence Start Notification
+-------------------------------------
+
+Custom sequence callbacks must implement ``void frameSequenceStarted()``. Emit the existing start observation from this callback. The handler installs its context and initializes the sequence before this call. It starts the first step after this call. For example, an empty first preparation produces one start followed by one finish with valid contexts.
+
 IEEE 802.11 DATA ACK Policy Publication
 -------------------------------------
 

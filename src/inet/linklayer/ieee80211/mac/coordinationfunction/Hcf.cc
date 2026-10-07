@@ -249,6 +249,11 @@ FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
+}
+
+void Hcf::frameSequenceStarted()
+{
+    Enter_Method("frameSequenceStarted");
     emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
 }
 

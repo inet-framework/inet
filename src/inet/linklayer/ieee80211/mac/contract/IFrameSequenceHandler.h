@@ -27,6 +27,7 @@ class INET_API IFrameSequenceHandler
         virtual ~ICallback() {}
 
         virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
+        virtual void frameSequenceStarted() = 0;
 
         virtual void originatorProcessRtsProtectionFailed(Packet *packet) = 0;
         virtual void originatorProcessTransmittedFrame(Packet *packet) = 0;
