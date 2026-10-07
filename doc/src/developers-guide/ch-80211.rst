@@ -403,15 +403,14 @@ class is the frame codec and the dispatcher; the submodules do the protocol.
      - ``IRx``
      - Checks the FCS of every received frame. Owns received NAV and shared TXNAV. Derives
        *medium free* from the reception state, the transmission state and the
-       NAV. Contention also requires expired TXNAV and available contention permission.
-       Rx tells every registered contention when this state changes. Reports a
+       NAV. Contention also requires expired TXNAV. Rx tells every registered contention when this state changes. Reports a
        corrupt frame so that contentions switch to EIFS.
    * - ``tx``
      - ``ITx``
      - Transmits one frame after a given inter-frame space, unconditionally.
        Fills the transmitter address and the FCS. Calls back the requester
-       when the radio has finished, and extends the NAV by the frame's
-       duration field.
+       when the radio completes transmission. An explicit submission choice enables local NAV updates for DCF.
+       HCF disables that choice and publishes successful holder fields to Rx's TXNAV.
    * - ``ds``
      - ``IDs``
      - The distribution service: for a received data frame, decides between
@@ -489,9 +488,9 @@ Access decides *when* the station may transmit.
      - The transmit opportunity: its start, its limit per access category,
        and the time left, which bounds a frame exchange.
      - EDCA only, one per access category.
-   * - the NAV and the medium state
-     - The recipient side of access: ``rx`` keeps the NAV from the duration
-       fields it receives and derives the medium state.
+   * - NAV, TXNAV, and the medium state
+     - Rx keeps received NAV and successful holder TXNAV separately.
+       TXNAV blocks contention until expiry. The CTS medium query uses received NAV and radio state only.
      - Shared by all access functions.
 
 The contention window changes only on request of the recovery procedure,

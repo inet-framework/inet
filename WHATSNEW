@@ -329,8 +329,8 @@ Notable backward incompatible changes are the following:
 
    Tx requires an explicit local NAV choice in both transmitFrame() overloads.
    The NAV records a reservation of the medium. Custom C++ implementations and
-   callers must add updateLocalNav. Holder frames use true; recipient responses
-   use false. The migration guide supplies the signatures and completion rules.
+   callers must add updateLocalNav. DCF holder frames use true. HCF holder frames
+   and recipient responses use false. The migration guide supplies the signatures and completion rules.
 
    CTS, ACK, and Basic Block Ack responses retain their duration fields without
    extending the recipient's local NAV. Received reservations still control
@@ -378,6 +378,19 @@ Notable backward incompatible changes are the following:
    Custom IRx implementations must provide getTxnavRemaining(),
    successfulFrameTransmitted(), and setContentionBlocked(). The migration guide
    explains their contracts.
+
+24. IEEE 802.11 HCF reservations use shared TXNAV
+
+   HCF now publishes successful holder fields to Rx's shared TXNAV from actual
+   PPDU end. An accepted response confirms success. A response-free frame
+   succeeds at transmission completion. Failure creates no transmitted reservation.
+   HCF holder submissions no longer extend received NAV; DCF retains that choice.
+
+   TXNAV persists after TXOP end and blocks contention, but it does not itself
+   prevent an eligible CTS response. HCF also blocks contention through its
+   active sequence, including an initial ACK wait without successful TXNAV.
+   Normal AIFS and backoff follow channel release. Timer and contention changes
+   can change Wi-Fi results and fingerprints.
 
 Notable backward compatible changes are the following:
 
@@ -484,8 +497,8 @@ Notable backward compatible changes are the following:
    A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
 
    The user guide explains nominal timing, zero-limit estimates, unused
-   reservation time, and support limits. The feature does not implement full
-   shared TXNAV or admission of a complete exchange against the remaining budget.
+   reservation time, and support limits. Multiple protection uses shared TXNAV.
+   It does not check a complete exchange against the remaining budget.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

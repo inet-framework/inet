@@ -1,7 +1,8 @@
 %description:
 Check recipient CTS and ACK transmissions through production HCF, DCF, Tx, and Rx.
 Require a second CTS before the first CTS reservation expires.
-Retain received NAV refusal and local NAV updates for holder frames.
+Retain received NAV refusal and DCF local NAV updates for holder frames.
+Require zero HCF local NAV updates for holder frames.
 Check a Basic Block Ack response after an ADDBA exchange through production HCF.
 Require its positive Duration/ID field without a local NAV update.
 
@@ -204,7 +205,9 @@ class RecipientNavTest : public cSimpleModule {
         mac->injectHolder();
         wait(SimTime(1, SIMTIME_MS));
         ASSERT(mac->types.size() == 4);
-        ASSERT(rx->localUpdates == 1);
+        ASSERT(rx->localUpdates == (mac->par("qosStation").boolValue() ? 0 : 1));
+        if (mac->par("qosStation").boolValue())
+            ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
         std::cout << "Recipient NAV production checks passed.\n";
     }
 };

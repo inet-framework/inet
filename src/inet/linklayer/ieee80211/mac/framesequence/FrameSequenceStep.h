@@ -19,6 +19,7 @@ class INET_API TransmitStep : public ITransmitStep
     Completion completion = Completion::UNDEFINED;
     Packet *frameToTransmit = nullptr;
     simtime_t ifs = -1;
+    simtime_t ppduEnd = -1;
     bool owner = false;
 
   public:
@@ -34,6 +35,8 @@ class INET_API TransmitStep : public ITransmitStep
     virtual void setCompletion(Completion completion) override { this->completion = completion; }
     virtual Packet *getFrameToTransmit() override { return frameToTransmit; }
     virtual simtime_t getIfs() override { return ifs; }
+    simtime_t getPpduEnd() const { return ppduEnd; }
+    void setPpduEnd(simtime_t time) { ppduEnd = time; }
 };
 
 class INET_API RtsTransmitStep : public TransmitStep

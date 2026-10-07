@@ -62,6 +62,20 @@ class ProtectionRx : public Rx {
         Rx::frameTransmitted(duration);
     }
     simtime_t endpoint() const { return endNavTimer->isScheduled() ? endNavTimer->getArrivalTime() : SIMTIME_ZERO; }
+    simtime_t txnavEndpoint() const { return getTxnavRemaining() > 0 ? simTime() + getTxnavRemaining() : SIMTIME_ZERO; }
+    std::vector<simtime_t> successfulEndpoints;
+    void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t duration) override {
+        auto mac = check_and_cast<ProtectionMac *>(getParentModule());
+        bool matched = false;
+        for (auto transmission : mac->transmissions)
+            if (transmission.start + transmission.airtime == ppduEnd && transmission.duration == duration)
+                matched = true;
+        ASSERT(matched);
+        Rx::successfulFrameTransmitted(ppduEnd, duration);
+        auto expected = ppduEnd + duration;
+        ASSERT(txnavEndpoint() == (expected > simTime() ? expected : SIMTIME_ZERO));
+        successfulEndpoints.push_back(expected);
+    }
     void injectReceivedReservation(simtime_t duration) {
         Enter_Method("injectReceivedReservation");
         auto header = makeShared<Ieee80211RtsFrame>();
@@ -105,9 +119,12 @@ class ProtectionHcf : public Hcf {
     int cts = 0;
     std::vector<int> burstData;
     std::vector<simtime_t> burstEnds;
+    std::vector<simtime_t> burstFinishTimes;
     std::vector<simtime_t> completedEndpoints;
     int currentData = 0;
     bool injectedOtherAc = false;
+    int starts = 0;
+    int finishes = 0;
     int scenario() const { return par("scenario"); }
     bool sender() const { return getFullPath().find("sender") != std::string::npos; }
     TxopProcedure *txop(AccessCategory ac = AC_VI) { return edca->getEdcaf(ac)->getTxopProcedure(); }
@@ -135,6 +152,7 @@ class ProtectionHcf : public Hcf {
         processUpperFrame(packet, header);
     }
     void transmitFrame(Packet *packet, simtime_t ifs) override {
+        ASSERT(starts == finishes + 1);
         auto owner = edca->getChannelOwner()->getTxopProcedure();
         if (currentData == 0 && owner->getDuration() == 0)
             ASSERT(owner->getReservationEnd() == 0);
@@ -143,6 +161,13 @@ class ProtectionHcf : public Hcf {
             injectedOtherAc = true;
             inject(24, false, false, 0);
         }
+    }
+    void frameSequenceStarted() override {
+        ASSERT(starts == finishes);
+        ASSERT(frameSequenceHandler->isSequenceRunning());
+        ASSERT(frameSequenceHandler->getContext() != nullptr);
+        starts++;
+        Hcf::frameSequenceStarted();
     }
     void originatorProcessTransmittedFrame(Packet *packet) override {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
@@ -154,9 +179,12 @@ class ProtectionHcf : public Hcf {
         Hcf::originatorProcessTransmittedFrame(packet);
     }
     void frameSequenceFinished() override {
+        ASSERT(starts == finishes + 1);
+        finishes++;
         auto owner = edca->getChannelOwner()->getTxopProcedure();
         burstData.push_back(currentData);
         burstEnds.push_back(owner->getReservationEnd());
+        burstFinishTimes.push_back(simTime());
         currentData = 0;
         Hcf::frameSequenceFinished();
         ASSERT(owner->getReservationEnd() == 0);
@@ -168,10 +196,18 @@ class ProtectionHcf : public Hcf {
         Hcf::originatorProcessReceivedFrame(packet, request);
     }
     void originatorProcessFailedFrame(Packet *packet) override {
+        if (sender() && scenario() == 10 && failures == 0) {
+            ASSERT(check_and_cast<ProtectionRx *>(getParentModule()->getSubmodule("rx"))->successfulEndpoints.empty());
+            ASSERT(edca->getChannelOwner()->getTxopProcedure()->getReservationEnd() > simTime());
+        }
         failures++;
         Hcf::originatorProcessFailedFrame(packet);
     }
     void originatorProcessRtsProtectionFailed(Packet *packet) override {
+        if (sender() && scenario() == 9 && failures == 0) {
+            ASSERT(check_and_cast<ProtectionRx *>(getParentModule()->getSubmodule("rx"))->successfulEndpoints.empty());
+            ASSERT(edca->getChannelOwner()->getTxopProcedure()->getReservationEnd() > simTime());
+        }
         failures++;
         Hcf::originatorProcessRtsProtectionFailed(packet);
     }
@@ -262,8 +298,8 @@ class ProtectionTest : public cSimpleModule {
         wait(SimTime(350, SIMTIME_US));
         if (scenario == 1) {
             ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 2);
-            ASSERT(senderRx->endpoint() == sender->burstEnds[0]);
-            ASSERT(senderRx->endpoint() > simTime());
+            ASSERT(senderRx->txnavEndpoint() == sender->burstEnds[0]);
+            ASSERT(senderRx->txnavEndpoint() > simTime());
             ASSERT(sender->txop()->getReservationEnd() == 0);
         }
         if (scenario == 3 || scenario == 4) {
@@ -277,15 +313,17 @@ class ProtectionTest : public cSimpleModule {
             ASSERT(first.airtime == SimTime(200, SIMTIME_US));
             ASSERT(first.duration == SimTime(824, SIMTIME_US));
             ASSERT(sender->burstData[0] == 1);
-            ASSERT(senderRx->endpoint() == first.start + SimTime(1024, SIMTIME_US));
-            ASSERT(observerRx->endpoint() == senderRx->endpoint());
-            ASSERT(!senderRx->isMediumFree() && !observerRx->isMediumFree());
+            ASSERT(senderRx->txnavEndpoint() == first.start + SimTime(1024, SIMTIME_US));
+            ASSERT(observerRx->endpoint() == senderRx->txnavEndpoint());
+            ASSERT(senderRx->isMediumFree() && !observerRx->isMediumFree());
             ASSERT(sender->txop()->getReservationEnd() == 0);
         }
         wait(SimTime(6, SIMTIME_MS));
         ASSERT(!senderMac->transmissions.empty());
         ASSERT(receiverRx->localUpdates == 0);
-        ASSERT(senderRx->localUpdates == (int)senderMac->transmissions.size());
+        ASSERT(senderRx->localUpdates == 0);
+        if (scenario != 8)
+            ASSERT(!senderRx->successfulEndpoints.empty());
         if (scenario != 6 && scenario != 7 && scenario != 11 && scenario != 12) {
             ASSERT(sender->tracedSelection.modeQueries == (int)senderMac->transmissions.size());
         }
@@ -305,17 +343,23 @@ class ProtectionTest : public cSimpleModule {
         }
         if (scenario == 8) {
             ASSERT(sender->failures > 0);
-            ASSERT(sender->cts > 0);
+            ASSERT(sender->cts == 0);
             ASSERT(senderMac->transmissions[0].type == ST_RTS);
-            auto firstCts = receiverMac->transmissions[0];
-            ASSERT(firstCts.start >= SimTime(3, SIMTIME_MS));
+            ASSERT(receiverMac->transmissions.empty());
+            ASSERT(senderRx->successfulEndpoints.empty());
+            ASSERT(sender->acknowledgments == 0);
         }
         else if (scenario == 9 || scenario == 10) {
             ASSERT(receiverMac->suppressed);
             ASSERT(sender->failures == 1);
             ASSERT(sender->acknowledgments == 1);
             ASSERT(sender->burstData.size() >= 2);
-            ASSERT(senderMac->transmissions.back().start >= sender->burstEnds[0]);
+            // A failed field creates no TXNAV. A fresh grant follows contention after failure.
+            auto first = senderMac->transmissions[0];
+            ASSERT(senderMac->transmissions[1].start >= first.start + first.airtime + SimTime(34, SIMTIME_US));
+            ASSERT(senderMac->transmissions[1].start >= sender->burstFinishTimes[0]);
+            ASSERT(senderMac->transmissions[1].start >= sender->burstFinishTimes[0] + SimTime(34, SIMTIME_US));
+            ASSERT(senderMac->transmissions[1].start < sender->burstEnds[0]);
         }
         else {
             ASSERT(sender->failures == 0);
