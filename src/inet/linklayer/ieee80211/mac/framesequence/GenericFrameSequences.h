@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlanningContext.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -25,6 +26,7 @@ namespace ieee80211 {
 class INET_API SequentialFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
     int elementIndex = -1;
@@ -34,6 +36,8 @@ class INET_API SequentialFs : public IFrameSequence
     virtual ~SequentialFs();
     SequentialFs(std::vector<IFrameSequence *> elements);
 
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -44,6 +48,7 @@ class INET_API SequentialFs : public IFrameSequence
 class INET_API OptionalFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
     bool apply = false;
@@ -57,6 +62,8 @@ class INET_API OptionalFs : public IFrameSequence
     virtual int getStep() { return firstStep + step; }
     virtual bool isSequenceApply(FrameSequenceContext *context) { return predicate(this, context); }
 
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -68,6 +75,7 @@ class INET_API RepeatingFs : public IFrameSequence
 {
   protected:
     int count = 0;
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
     bool apply = false;
@@ -82,6 +90,8 @@ class INET_API RepeatingFs : public IFrameSequence
     virtual int getCount() { return count; }
     virtual int getStep() { return firstStep + step; }
     virtual bool isSequenceApply(FrameSequenceContext *context) { return predicate(this, context); }
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual void repeatSequence(FrameSequenceContext *context);
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
@@ -93,6 +103,7 @@ class INET_API RepeatingFs : public IFrameSequence
 class INET_API AlternativesFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
     int elementIndex = -1;
@@ -106,6 +117,8 @@ class INET_API AlternativesFs : public IFrameSequence
     virtual int getStep() { return firstStep + step; }
     virtual int selectSequence(FrameSequenceContext *context) { return selector(this, context); }
 
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -117,4 +130,3 @@ class INET_API AlternativesFs : public IFrameSequence
 } // namespace inet
 
 #endif
-

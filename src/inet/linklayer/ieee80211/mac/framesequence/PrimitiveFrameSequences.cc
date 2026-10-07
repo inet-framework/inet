@@ -12,14 +12,31 @@ namespace ieee80211 {
 
 // TODO remove isForUs checks it's already done in framesequencehandler
 
+FrameSequencePlanResult SelfCtsFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    return FrameSequencePlanResult::Status::UNSUPPORTED;
+}
+
+void SelfCtsFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *SelfCtsFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     // TODO Implement
     return nullptr;
 }
@@ -30,14 +47,37 @@ bool SelfCtsFs::completeStep(FrameSequenceContext *context)
     return false;
 }
 
+FrameSequencePlanResult RtsFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, true);
+    return plan;
+}
+
+void RtsFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void RtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *RtsFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
@@ -65,14 +105,37 @@ bool RtsFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult CtsFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addReceive(*plan, true);
+    return plan;
+}
+
+void CtsFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void CtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *CtsFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
@@ -101,14 +164,37 @@ bool CtsFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult DataFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, false);
+    return plan;
+}
+
+void DataFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void DataFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
@@ -132,14 +218,38 @@ bool DataFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult ManagementAckFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, false);
+    context.addReceive(*plan, false);
+    return plan;
+}
+
+void ManagementAckFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void ManagementAckFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
@@ -177,14 +287,37 @@ bool ManagementAckFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult ManagementFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, false);
+    return plan;
+}
+
+void ManagementFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void ManagementFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
@@ -208,14 +341,37 @@ bool ManagementFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult AckFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addReceive(*plan, false);
+    return plan;
+}
+
+void AckFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void AckFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *AckFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
@@ -245,14 +401,38 @@ bool AckFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult RtsCtsFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, true);
+    context.addReceive(*plan, true);
+    return plan;
+}
+
+void RtsCtsFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void RtsCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
@@ -294,14 +474,38 @@ bool RtsCtsFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult FragFrameAckFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, false);
+    context.addReceive(*plan, false);
+    return plan;
+}
+
+void FragFrameAckFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void FragFrameAckFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
@@ -338,14 +542,38 @@ bool FragFrameAckFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult LastFrameAckFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    if (!context.supportsPreparation())
+        return FrameSequencePlanResult::Status::UNSUPPORTED;
+    if (!context.hasFrameToTransmit())
+        return FrameSequencePlanResult::Status::EMPTY;
+    auto plan = context.makePlan(this);
+    context.addTransmit(*plan, false);
+    context.addReceive(*plan, false);
+    return plan;
+}
+
+void LastFrameAckFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void LastFrameAckFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
@@ -382,14 +610,31 @@ bool LastFrameAckFs::completeStep(FrameSequenceContext *context)
     }
 }
 
+FrameSequencePlanResult BlockAckReqBlockAckFs::planSequence(FrameSequencePlanningContext& context) const
+{
+    return FrameSequencePlanResult::Status::UNSUPPORTED;
+}
+
+void BlockAckReqBlockAckFs::startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan)
+{
+    if (plan.sequence != this)
+        throw cRuntimeError("Prepared sequence identity mismatch");
+    executionPlan = &plan;
+    this->firstStep = firstStep;
+    step = 0;
+}
+
 void BlockAckReqBlockAckFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
+    executionPlan = nullptr;
     this->firstStep = firstStep;
     step = 0;
 }
 
 IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *context)
 {
+    if (executionPlan)
+        return step < (int)executionPlan->steps.size() ? executionPlan->steps[step].get() : nullptr;
     switch (step) {
         case 0: {
             auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure);
@@ -434,4 +679,3 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
 
 } // namespace ieee80211
 } // namespace inet
-

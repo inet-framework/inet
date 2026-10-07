@@ -39,6 +39,8 @@ class INET_API AckHandler : public SimpleModule, public IAckHandler
   public:
     virtual ~AckHandler() {}
 
+    [[nodiscard]] AckFrameState snapshotFrameState(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const override;
+
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
 
     virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override; // TODO rename
@@ -48,7 +50,7 @@ class INET_API AckHandler : public SimpleModule, public IAckHandler
     virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
     virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
     virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
-    virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
 
     static std::string getStatusString(Status status);
 };
@@ -57,4 +59,3 @@ class INET_API AckHandler : public SimpleModule, public IAckHandler
 } /* namespace inet */
 
 #endif
-

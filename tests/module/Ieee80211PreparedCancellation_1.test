@@ -1,21 +1,24 @@
 %description:
-The hybrid coordination function (HCF) accepts an acknowledgment (ACK) frame
-with a short interframe space (SIFS) delay.
-The test submits a radio command during that delay.
-The test checks that the command remains pending, the ACK completes,
-and no command remains pending afterward.
-The test exercises HCF; it does not directly exercise the distributed coordination function (DCF).
+The hybrid coordination function (HCF) and Tx cancel invalid delayed requests before transmission. The tests cover interframe space (IFS), zero IFS, mode changes, refusal on air, and restart.
+
+The hybrid coordination function (HCF) accepts an acknowledgment (ACK) frame with a short interframe space (SIFS) delay. The test submits a radio command during that delay. The test checks that the command remains pending, the ACK completes, and no command remains pending afterward. The test exercises HCF; it does not directly exercise the distributed coordination function (DCF).
 
 %file: Cancellation.cc
-#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "TxopTestSupport.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
-#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
-namespace inet::ieee80211 {
-class CancellationMac : public Ieee80211Mac {
+namespace inet {
+namespace ieee80211 {
+
+class CancellationMac : public Ieee80211Mac
+{
   public:
-    void configureDuringResponse() {
+    void stopForTest() { Enter_Method("stopForTest"); handleStopOperation(nullptr); }
+    void restartForTest() { Enter_Method("restartForTest"); hcf->resumeAfterLifecycle(); }
+    void configureDuringResponse()
+    {
         Enter_Method("configureDuringResponse");
         auto command = new cMessage("response-config", physicallayer::RADIO_C_CONFIGURE);
         auto control = new physicallayer::Ieee80211ConfigureRadioCommand();
@@ -25,73 +28,253 @@ class CancellationMac : public Ieee80211Mac {
         ASSERT(pendingRadioConfigMsg == command);
     }
     bool hasPendingConfiguration() const { return pendingRadioConfigMsg != nullptr; }
+    void changeModeForTest(cIListener *listener, cObject *mode)
+    {
+        Enter_Method("changeModeForTest");
+        listener->receiveSignal(this, modesetChangedSignal, mode, nullptr);
+        ASSERT(getSimulation()->getContextModule() == this);
+    }
 };
 Define_Module(CancellationMac);
 
-class CancellationHcf : public Hcf {
+class CancellationHcf : public ExchangeHcf
+{
   public:
-    int acknowledgments = 0;
-    int responses = 0;
     bool triggered = false;
+    int cancellations = 0;
+    TxRequestId stale;
+    bool oldReferenceRejected = false;
+    int rtsFailures = 0;
+    cMessage *equalTimeCancel = nullptr;
+    ~CancellationHcf() { cancelAndDelete(equalTimeCancel); }
     int scenario() const { return par("scenario"); }
     bool sender() const { return getFullPath().find("sender") != std::string::npos; }
     bool hasPendingTransmission() const { return tx->hasTransmission(); }
-    void inject() {
-        Enter_Method("inject");
-        auto header = makeShared<Ieee80211DataHeader>();
-        header->setType(ST_DATA_WITH_QOS);
-        header->addChunkLength(QOSCONTROL_PART_LENGTH);
-        header->setTid(5);
-        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
-        header->setTransmitterAddress(mac->getAddress());
-        header->setAddress3(mac->getAddress());
-        auto packet = new Packet("request-data", header);
-        packet->insertAtBack(makeShared<ByteCountChunk>(B(200)));
-        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
-        processUpperFrame(packet, header);
-    }
+
   protected:
-    void sendUp(const std::vector<Packet *>& frames) override {
-        for (auto frame : frames) { take(frame); delete frame; }
-    }
-    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
-            Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override {
-        Hcf::transmitControlResponseFrame(packet, header, received, receivedHeader);
-        if (scenario() == 5) {
-            ASSERT(tx->hasTransmission());
-            check_and_cast<CancellationMac *>(mac)->configureDuringResponse();
-        }
-    }
-    void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
-        responses++;
-        Hcf::recipientProcessTransmittedControlResponseFrame(packet, header);
-    }
-    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
-        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) acknowledgments++;
-        Hcf::originatorProcessReceivedFrame(packet, request);
+    virtual void initialize(int stage) override
+    {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            equalTimeCancel = new cMessage("equal-time-cancel");
     }
 
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message != equalTimeCancel) {
+            Hcf::handleMessage(message);
+            return;
+        }
+        auto result = tx->cancelPendingTransmission(stale);
+        ASSERT(result == (scenario() == 6 ? ITx::Cancellation::CANCELED : ITx::Cancellation::TOO_LATE));
+        if (result == ITx::Cancellation::CANCELED)
+            transmissionCanceled(stale);
+    }
+
+    virtual void originatorProcessRtsProtectionFailed(Packet *packet) override
+    {
+        rtsFailures++;
+        Hcf::originatorProcessRtsProtectionFailed(packet);
+    }
+
+    virtual void transmissionStarted(TxRequestId id) override
+    {
+        ExchangeHcf::transmissionStarted(id);
+        if (sender() && scenario() == 14 && !triggered && preparedTransmit) {
+            triggered = true;
+            auto original = modeSet;
+            receiveSignal(this, modesetChangedSignal, const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("b")), nullptr);
+            ASSERT(tx->hasTransmission());
+            receiveSignal(this, modesetChangedSignal, original, nullptr);
+        }
+        if (sender() && scenario() == 12 && !triggered && preparedTransmit) {
+            triggered = true;
+            stale = id;
+            check_and_cast<CancellationMac *>(mac)->stopForTest();
+            ASSERT(!tx->hasTransmission());
+            ASSERT(tx->cancelPendingTransmission(stale) == ITx::Cancellation::NOT_FOUND);
+        }
+    }
+
+    virtual void transmitControlResponseFrame(Packet *response, const Ptr<const Ieee80211MacHeader>& responseHeader,
+            Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override
+    {
+        bool loseResponse = !sender() && !triggered &&
+            ((scenario() == 8 && responseHeader->getType() == ST_ACK) || (scenario() == 9 && responseHeader->getType() == ST_CTS));
+        if (loseResponse) {
+            triggered = true;
+            take(response);
+            delete response;
+            return;
+        }
+        Hcf::transmitControlResponseFrame(response, responseHeader, received, receivedHeader);
+        if (!sender() && scenario() == 5 && !triggered) {
+            triggered = true;
+            check_and_cast<CancellationMac *>(mac)->configureDuringResponse();
+            ASSERT(responseRequest && tx->hasTransmission());
+        }
+    }
+
+    virtual bool isTransmissionPermitted(TxRequestId id) override
+    {
+        if (sender() && !triggered && preparedTransmit &&
+            (scenario() == 11 || (scenario() == 13 && preparedTransmit->ifs > SIMTIME_ZERO))) {
+            triggered = true;
+            auto saved = preparedTransmit;
+            ASSERT(tx->cancelPendingTransmission(id) == ITx::Cancellation::CANCELED);
+            transmissionCanceled(id);
+            saved->frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            ASSERT(saved->frame->getDataLength() == saved->length);
+            return true; // Tx must detect the changed identity after this callback.
+        }
+        if (sender() && scenario() == 1 && !triggered && preparedTransmit) {
+            triggered = true;
+            stale = id;
+            return false;
+        }
+        return Hcf::isTransmissionPermitted(id);
+    }
+
+    virtual void transmissionCanceled(TxRequestId id) override
+    {
+        if (scenario() == 2)
+            ASSERT(getSimulation()->getContextModule() == this);
+        cancellations++;
+        Hcf::transmissionCanceled(id);
+    }
+
+    virtual void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override
+    {
+        bool equalTime = sender() && !triggered && prepared && ifs > SIMTIME_ZERO && (scenario() == 6 || scenario() == 7);
+        if (equalTime && scenario() == 6)
+            scheduleAfter(ifs, equalTimeCancel);
+        Hcf::transmitFrame(packet, ifs, prepared);
+        if (equalTime) {
+            triggered = true;
+            stale = activeRequest;
+            if (scenario() == 7)
+                scheduleAfter(ifs, equalTimeCancel);
+            return;
+        }
+        if (!sender() || triggered || !prepared)
+            return;
+        if (scenario() == 3 && ifs == SIMTIME_ZERO) {
+            triggered = true;
+            ASSERT(tx->cancelPendingTransmission(activeRequest) == ITx::Cancellation::TOO_LATE);
+        }
+        else if ((scenario() == 0 || scenario() == 2 || scenario() == 4 || scenario() == 10) && ifs > SIMTIME_ZERO) {
+            triggered = true;
+            auto saved = prepared;
+            auto context = frameSequenceHandler->getContext();
+            auto view = context->getActivePlan()->candidate;
+            ASSERT(view.ack.phase == AckFrameState::Phase::FRAME_NOT_YET_TRANSMITTED);
+            stale = activeRequest;
+            ASSERT(tx->cancelPendingTransmission({stale.epoch, stale.serial + 10}) == ITx::Cancellation::NOT_FOUND);
+            ASSERT(tx->cancelPendingTransmission({stale.epoch + 1, stale.serial}) == ITx::Cancellation::NOT_FOUND);
+            if (scenario() == 0) {
+                ASSERT(tx->cancelPendingTransmission(stale) == ITx::Cancellation::CANCELED);
+                transmissionCanceled(stale);
+                // The outer sequence callback still borrows this metadata after nested cancellation.
+                ASSERT(saved->frame == view.frame && saved->length == view.length);
+                ASSERT(view.owner->isRetained(view));
+                ASSERT(view.owner->inspectStagedFrames()[0].transmissions == 0);
+            }
+            else if (scenario() == 2) {
+                auto original = modeSet;
+                auto source = check_and_cast<CancellationMac *>(mac);
+                source->changeModeForTest(this, const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("b")));
+                ASSERT(!tx->hasTransmission());
+                source->changeModeForTest(this, original);
+                ASSERT(view.owner->isRetained(view));
+            }
+            else if (scenario() == 10) {
+                auto frames = context->getInProgressFrames();
+                frames->dropFrame(const_cast<Packet *>(view.frame));
+                ASSERT(!tx->hasTransmission());
+                ASSERT(!frames->isRetained(view));
+                frames->clearDroppedFrames();
+                ASSERT(saved->frame->getDataLength() == saved->length);
+            }
+            else {
+                check_and_cast<CancellationMac *>(mac)->stopForTest();
+                oldReferenceRejected = !view.owner->isRetained(view);
+                ASSERT(!tx->hasTransmission());
+                ASSERT(tx->cancelPendingTransmission(stale) == ITx::Cancellation::NOT_FOUND);
+            }
+        }
+    }
 };
 Define_Module(CancellationHcf);
 
-class CancellationTest : public cSimpleModule {
+class CancellationTest : public cSimpleModule
+{
   public:
     CancellationTest() : cSimpleModule(65536) {}
   protected:
-    void activity() override {
+    virtual void activity() override
+    {
         wait(SimTime(1, SIMTIME_MS));
         auto sender = check_and_cast<CancellationHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
         auto receiver = check_and_cast<CancellationHcf *>(getModuleByPath("^.receiver.wlan[0].mac.hcf"));
         sender->inject();
         wait(SimTime(4, SIMTIME_MS));
-        ASSERT(sender->acknowledgments == 1 && receiver->responses == 1);
-        ASSERT(!sender->hasPendingTransmission() && !receiver->hasPendingTransmission());
-        ASSERT(!check_and_cast<CancellationMac *>(getModuleByPath("^.receiver.wlan[0].mac"))->hasPendingConfiguration());
-        std::cout << "Radio response and Tx request checks passed.\n";
+        ASSERT(sender->triggered || receiver->triggered);
+        ASSERT(sender->failures == (sender->scenario() == 8 || sender->scenario() == 12 ? 1 : 0));
+        if (sender->scenario() == 4) {
+            ASSERT(sender->events.size() == 1);
+            ASSERT(sender->oldReferenceRejected);
+            auto mac = check_and_cast<CancellationMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+            mac->restartForTest();
+            sender->inject();
+            wait(SimTime(4, SIMTIME_MS));
+            ASSERT(sender->events.size() == 4);
+            ASSERT(sender->acknowledgments == 4);
+        }
+        else if (sender->scenario() == 12) {
+            ASSERT(sender->events.size() == 1);
+            ASSERT(sender->acknowledgments == 0);
+            auto mac = check_and_cast<CancellationMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+            mac->restartForTest();
+            sender->inject();
+            wait(SimTime(4, SIMTIME_MS));
+            // The unstaged third queue entry survives stop, together with the three new entries.
+            ASSERT(sender->events.size() == 5 && sender->acknowledgments == 4);
+            for (size_t i = 1; i < sender->events.size(); i++)
+                ASSERT(!sender->events[i].retry && sender->events[i].sequence != sender->events[0].sequence);
+        }
+        else if (sender->scenario() < 8 || sender->scenario() == 11 || sender->scenario() == 13 || sender->scenario() == 14) {
+            ASSERT(sender->events.size() == 3);
+            ASSERT(sender->acknowledgments == 3);
+            bool noCancellation = sender->scenario() == 3 || sender->scenario() == 5 || sender->scenario() == 7;
+            ASSERT(sender->grants == (noCancellation ? 1 : 2));
+            ASSERT(sender->cancellations == (noCancellation || sender->scenario() == 14 ? 0 : 1));
+            if (sender->scenario() == 5)
+                ASSERT(!check_and_cast<CancellationMac *>(getModuleByPath("^.receiver.wlan[0].mac"))->hasPendingConfiguration());
+        }
+        else if (sender->scenario() == 8) {
+            ASSERT(sender->events.size() == 4);
+            ASSERT(sender->grants == 2 && sender->acknowledgments == 3);
+            ASSERT(sender->events[0].sequence == sender->events[1].sequence);
+            ASSERT(!sender->events[0].retry && sender->events[1].retry);
+        }
+        else if (sender->scenario() == 10) {
+            ASSERT(sender->events.size() == 2 && sender->acknowledgments == 2);
+            ASSERT(sender->grants == 2 && sender->cancellations == 1);
+        }
+        else {
+            ASSERT(sender->rtsFailures == 1 && sender->acknowledgments == 3);
+            ASSERT(sender->events.size() == 7);
+            ASSERT(sender->events[0].type == ST_RTS && sender->events[1].type == ST_RTS);
+            ASSERT(sender->events[2].type == ST_DATA_WITH_QOS);
+        }
+        ASSERT(!sender->hasPendingTransmission());
+        std::cout << "Prepared cancellation, callback lifetime, and restart verified.\n";
     }
 };
 Define_Module(CancellationTest);
-} // namespace inet::ieee80211
+
+} // namespace ieee80211
+} // namespace inet
 
 %file: test.ned
 import inet.common.SimpleModule;
@@ -142,7 +325,7 @@ record-scalar-results = false
 **.wlan[*].mac.typename = "CancellationMac"
 **.wlan[*].mac.qosStation = true
 **.wlan[*].mac.hcf.typename = "CancellationHcf"
-**.wlan[*].mac.hcf.scenario = ${scenario=5}
+**.wlan[*].mac.hcf.scenario = ${scenario=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14}
 **.wlan[*].mac.hcf.isBlockAckSupported = false
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
@@ -170,4 +353,4 @@ record-scalar-results = false
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 
 %contains: stdout
-Radio response and Tx request checks passed.
+Prepared cancellation, callback lifetime, and restart verified.

@@ -1,0 +1,175 @@
+%description:
+The hybrid coordination function (HCF) checks complete exchange admission under IEEE 802.11-2024, 10.23.2.8 and 10.23.2.9. The tests use zero propagation delay and nominal short interframe space (SIFS). The three-frame acceptance case uses separate MAC protocol data units (MPDUs) with both aggregation policies disabled. A separate case checks an aggregate MAC service data unit (A-MSDU) within one MPDU. An aggregate MAC protocol data unit (A-MPDU) combines MPDUs within one PHY service data unit. The tests use no Block Ack or A-MPDU.
+
+Scenario 1 supplies three data frames under a 350 µs TXOP limit. HCF admits two data/ACK exchanges, refuses the third, and retains that frame for another channel grant. The test requires burst sizes {2, 1} and no retry progress.
+
+%file: TxopExchange.cc
+#include "TxopTestSupport.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TxopExchangeTest : public cSimpleModule
+{
+  public:
+    TxopExchangeTest() : cSimpleModule(65536) {}
+  protected:
+    virtual void activity() override
+    {
+        wait(SimTime(1, SIMTIME_MS));
+        auto sender = check_and_cast<ExchangeHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
+        auto receiver = check_and_cast<ExchangeHcf *>(getModuleByPath("^.receiver.wlan[0].mac.hcf"));
+        int scenario = par("scenario");
+        sender->inject(scenario == 7, scenario == 6);
+        wait(SimTime(10, SIMTIME_MS));
+        if (scenario == 8) {
+            ASSERT(sender->initialRefused && sender->events.empty() && sender->grants == 1);
+            ASSERT(sender->failures == 0 && receiver->responseCount == 0);
+            std::cout << "Initial model-limit refusal preserves untransmitted frames.\n";
+            return;
+        }
+        ASSERT(sender->failures == 0);
+        ASSERT(sender->acknowledgments == (scenario == 4 ? 9 : scenario == 5 ? 1 : scenario == 6 ? 0 : 3));
+        ASSERT(receiver->responseCount == (scenario == 2 ? 6 : scenario == 4 ? 9 : scenario == 5 ? 1 : scenario == 6 ? 0 : 3));
+        for (const auto& event : sender->events)
+            ASSERT(!event.retry);
+        auto mode = physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(24000000));
+        simtime_t sifs = mode->getSifsTime();
+        simtime_t ack = mode->getDuration(B(14));
+        simtime_t data = mode->getDuration(B(230));
+        if (scenario == 0) {
+            ASSERT(sender->grants == 1);
+            ASSERT(sender->burstSizes == std::vector<int>({3}));
+            ASSERT(sender->events.size() == 3);
+            ASSERT(sender->burstDurations[0] == 3 * data + 3 * ack + 5 * sifs);
+            for (int i = 0; i < 3; i++) {
+                ASSERT(sender->events[i].length == B(230));
+                ASSERT(sender->events[i].airtime == data);
+                ASSERT(sender->events[i].duration == (i == 2 ? sifs + ack : data + 2 * ack + 3 * sifs));
+                if (i)
+                    ASSERT(sender->events[i].start - sender->events[i - 1].start == data + ack + 2 * sifs);
+            }
+        }
+        else if (scenario == 1) {
+            ASSERT(sender->grants == 2);
+            ASSERT(sender->burstSizes == std::vector<int>({2, 1}));
+            ASSERT(sender->events[1].duration == sifs + ack);
+            ASSERT(sender->burstDurations[0] <= SimTime(350, SIMTIME_US));
+        }
+        else if (scenario < 4) {
+            ASSERT(sender->grants == 3);
+            ASSERT(sender->burstSizes == std::vector<int>({1, 1, 1}));
+            if (scenario == 2) {
+                ASSERT(sender->events.size() == 6);
+                simtime_t rts = mode->getDuration(B(20));
+                ASSERT(sender->burstDurations[0] == rts + data + 2 * ack + 3 * sifs);
+                ASSERT(sender->events[0].duration == data + 2 * ack + 3 * sifs);
+                // The next RTS reserves CTS, not the whole next DATA exchange.
+                ASSERT(sender->events[1].duration == rts + 2 * ack + 3 * sifs);
+            }
+        }
+        else if (scenario == 4) {
+            ASSERT(sender->grants == 3);
+            ASSERT(sender->burstSizes == std::vector<int>({3, 3, 3}));
+            for (int i = 0; i < 9; i++) {
+                ASSERT(sender->events[i].fragment == i % 3);
+                ASSERT(sender->events[i].sequence == i / 3);
+            }
+        }
+        else if (scenario == 5) {
+            ASSERT(sender->grants == 1 && sender->events.size() == 1);
+            ASSERT(sender->events[0].amsdu);
+            ASSERT(sender->burstDurations[0] == sender->events[0].airtime + sifs + ack);
+        }
+        else if (scenario == 6) {
+            ASSERT(sender->grants == 3);
+            for (const auto& event : sender->events)
+                ASSERT(event.duration == SIMTIME_ZERO);
+        }
+        else {
+            ASSERT(sender->grants == 1 && sender->events.size() == 3);
+            ASSERT(sender->burstDurations[0] == 3 * sender->events[0].airtime + 3 * ack + 5 * sifs);
+        }
+        std::cout << "Complete HCF exchange duration and TXOP membership verified.\n";
+    }
+};
+Define_Module(TxopExchangeTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module ExchangeHcf extends Hcf
+{
+    parameters:
+        bool expectInitialRefusal = default(false);
+        @class(::inet::ieee80211::ExchangeHcf);
+}
+simple TxopExchangeTest extends SimpleModule
+{
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::TxopExchangeTest);
+}
+network TxopExchangeNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: TxopExchangeTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TxopExchangeNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 12ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0,1,2,3,4,5,6,7,8}
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "ExchangeHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.expectInitialRefusal = ${scenario} == 8
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ${aggregation="","","","","","BasicMsduAggregationPolicy","","","" ! scenario}
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${scenario} == 4 ? 100B : 1500B
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 2 ? 0B : 4096B
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = ${scenario} == 8 ? 1us : (${scenario} == 1 ? 350us : ((${scenario} >= 3 && ${scenario} <= 5) ? 0s : 2ms))
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+Complete HCF exchange duration and TXOP membership verified.

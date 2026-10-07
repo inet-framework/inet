@@ -69,8 +69,10 @@ void Hcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue signal listeners after all child initialization has completed.
-        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
             check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+            edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->setRemovalCallback(this);
+        }
     }
 }
 
@@ -102,8 +104,7 @@ void Hcf::handleMessage(cMessage *msg)
     }
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
-            originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
-            recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            expireBlockAckAgreements();
         }
         else
             throw cRuntimeError("Unknown event");
@@ -157,8 +158,8 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
     if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast<Packet *>(obj);
         if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
             FrameTransmissionDetails transmissionDetails;
@@ -168,6 +169,36 @@ void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
     else
         ModeSetListener::receiveSignal(source, signalID, obj, details);
+    if (signalID == modesetChangedSignal && frameSequenceHandler && frameSequenceHandler->isSequenceRunning()) {
+        auto context = const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext());
+        if (context->usesPlanning() && context->getModeSet() != modeSet) {
+            context->invalidatePlans();
+            if (!responseRequest && tx->cancelPendingTransmission(activeRequest) == ITx::Cancellation::CANCELED)
+                transmissionCanceled(activeRequest);
+        }
+    }
+}
+
+void Hcf::frameWillBeRemoved(InProgressFrames *owner, const Packet *frame)
+{
+    Enter_Method("frameWillBeRemoved");
+    if (!frameSequenceHandler->isSequenceRunning())
+        return;
+    auto context = const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext());
+    if (!context->usesPlanning() || context->getInProgressFrames() != owner)
+        return;
+    auto active = context->getActivePlan();
+    auto next = context->getNextPlan();
+    auto last = context->getLastStep();
+    bool activeRemoved = active && active->candidate.frame == frame;
+    bool completed = active && last && last->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+        (last->getType() == IFrameSequenceStep::Type::RECEIVE || active->candidate.receiver.isMulticast());
+    if ((activeRemoved && !completed) || (next && next->candidate.frame == frame)) {
+        context->invalidatePlans();
+        auto id = activeRequest;
+        if (!responseRequest && tx->cancelPendingTransmission(id) == ITx::Cancellation::CANCELED)
+            transmissionCanceled(id);
+    }
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -176,10 +207,49 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
     scheduleAfter(timeout, startRxTimer);
 }
 
-void Hcf::scheduleInactivityTimer(simtime_t timeout)
+void Hcf::expireBlockAckAgreements()
+{
+    Enter_Method("expireBlockAckAgreements");
+    std::vector<Ptr<Ieee80211Delba>> delbas;
+    if (originatorBlockAckAgreementHandler)
+        delbas = originatorBlockAckAgreementHandler->blockAckAgreementExpired(this);
+    if (recipientBlockAckAgreementHandler) {
+        auto recipientDelbas = recipientBlockAckAgreementHandler->blockAckAgreementExpired(this);
+        delbas.insert(delbas.end(), recipientDelbas.begin(), recipientDelbas.end());
+    }
+    // Both maps and recipient buffers are consistent before DELBA can request channel access.
+    scheduleInactivityTimer();
+    for (const auto& delba : delbas)
+        processMgmtFrame(new Packet("Delba", delba), delba);
+}
+
+void Hcf::originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement)
+{
+    Enter_Method("originatorBlockAckAgreementDeleted");
+    emit(blockAckAgreementDeletedSignal, agreement);
+}
+
+void Hcf::recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement)
+{
+    Enter_Method("recipientBlockAckAgreementDeleted");
+    auto record = agreement->getBlockAckRecord();
+    recipientDataService->clearReorderBuffer(record->getOriginatorAddress(), record->getTid());
+    emit(blockAckAgreementDeletedSignal, agreement);
+}
+
+void Hcf::scheduleInactivityTimer()
 {
     Enter_Method("scheduleInactivityTimer");
-    rescheduleAfter(timeout, inactivityTimer);
+    cancelEvent(inactivityTimer);
+    if (lifecycleStopped)
+        return;
+    simtime_t expirationTime = SIMTIME_MAX;
+    if (originatorBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, originatorBlockAckAgreementHandler->getEarliestExpirationTime());
+    if (recipientBlockAckAgreementHandler)
+        expirationTime = std::min(expirationTime, recipientBlockAckAgreementHandler->getEarliestExpirationTime());
+    if (expirationTime != SIMTIME_MAX)
+        scheduleAt(std::max(simTime(), expirationTime), inactivityTimer);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -222,6 +292,10 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 void Hcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
+    if (lifecycleStopped) {
+        channelAccess->releaseChannel(this);
+        return;
+    }
     auto edcaf = check_and_cast<Edcaf *>(channelAccess);
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -243,13 +317,15 @@ FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
     auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure());
-    return new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
+    auto context = new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
+    if (!par("isBlockAckSupported").boolValue())
+        context->enablePlanning(rateSelection);
+    return context;
 }
 
 void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
-    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
 }
 
 void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
@@ -304,13 +380,18 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
 
+void Hcf::frameSequenceStarted()
+{
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
+}
+
 void Hcf::frameSequenceFinished()
 {
     Enter_Method("frameSequenceFinished");
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
-        bool startContention = hasFrameToTransmit(); // TODO outstanding frame
+        bool startContention = !lifecycleStopped && hasFrameToTransmit(); // TODO outstanding frame
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO review
         edcaf->getTxopProcedure()->endTxop();
@@ -333,8 +414,11 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
-            recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
+        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler &&
+            !recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this, this)) {
+            delete packet;
+            return;
+        }
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
@@ -377,14 +461,10 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
             if (delba->getInitiator()) {
-                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
-                emit(blockAckAgreementDeletedSignal, agreement);
-                recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy, this);
             }
             else {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid());
-                emit(blockAckAgreementDeletedSignal, agreement);
-                originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy);
+                originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy, this);
             }
         }
         else
@@ -394,19 +474,32 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
         ; // Optional modules
 }
 
-void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+void Hcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
+    if (id != activeRequest || !mac->isCurrentTxRequest(id))
+        return;
+    bool recipient = responseRequest;
+    activeRequest = {};
+    preparedTransmit = nullptr;
+    responseRequest = false;
+    requestOnAir = false;
+    if (recipient) {
+        recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+        return;
+    }
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        auto context = frameSequenceHandler->getContext();
+        if (context && context->usesPlanning())
+            edcaf->getTxopProcedure()->recordTransmittedReservation(simTime(), SimTime(header->getDurationField().inUnit(SIMTIME_US), SIMTIME_US));
         frameSequenceHandler->transmissionComplete();
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
-    else {
+    else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-        mac->sendDownPendingRadioConfigMsg();
-    }
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
@@ -459,7 +552,6 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
-        edcaf->emit(packetSentToPeerSignal, packet);
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader))
@@ -475,6 +567,7 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
             originatorProcessTransmittedManagementFrame(mgmtHeader, ac);
         else // TODO Ieee80211ControlFrame
             originatorProcessTransmittedControlFrame(transmittedHeader, ac);
+        edcaf->emit(packetSentToPeerSignal, packet);
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented");
@@ -505,9 +598,10 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211M
         recipientBlockAckAgreementHandler->processTransmittedAddbaResp(addbaResp, this);
     else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
         if (delba->getInitiator())
-            originatorBlockAckAgreementHandler->processTransmittedDelba(delba);
+            originatorBlockAckAgreementHandler->processTransmittedDelba(delba, this);
         else
-            recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+            recipientBlockAckAgreementHandler->processTransmittedDelba(delba, this);
+        scheduleInactivityTimer();
     }
     else ; // TODO other mgmt frames if needed
 }
@@ -710,13 +804,30 @@ void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
         mac->sendUpFrame(frame);
 }
 
-void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
+void Hcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared)
 {
     Enter_Method("transmitFrame");
     auto channelOwner = edca->getChannelOwner();
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto txop = channelOwner->getTxopProcedure();
+        if (prepared) {
+            if (prepared->frame != packet || prepared->length != packet->getDataLength() || prepared->ifs != ifs)
+                throw cRuntimeError("Prepared transmission identity, length, or IFS mismatch");
+            auto mutableHeader = packet->removeAtFront<Ieee80211MacHeader>();
+            if (auto dataHeader = dynamicPtrCast<Ieee80211DataHeader>(mutableHeader))
+                dataHeader->setAckPolicy(prepared->ackPolicy);
+            mutableHeader->setDurationField(prepared->duration);
+            packet->insertAtFront(mutableHeader);
+            setFrameMode(packet, mutableHeader, prepared->mode);
+            activeRequest = mac->allocateTxRequest();
+            responseRequest = false;
+            requestOnAir = false;
+            preparedTransmit = prepared;
+            frameSequenceHandler->setPendingTransmission(activeRequest);
+            tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+            return;
+        }
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             OriginatorBlockAckAgreement *agreement = nullptr;
             if (originatorBlockAckAgreementHandler)
@@ -743,7 +854,12 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             throw cRuntimeError("Multiple protection is unsupported");
         else
             throw cRuntimeError("Undefined protection mechanism");
-        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+        activeRequest = mac->allocateTxRequest();
+        responseRequest = false;
+        requestOnAir = false;
+        preparedTransmit = prepared;
+        frameSequenceHandler->setPendingTransmission(activeRequest);
+        tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
     }
     else
         throw cRuntimeError("Hcca is unimplemented");
@@ -765,7 +881,11 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = true;
+    requestOnAir = false;
+    preparedTransmit = nullptr;
+    tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
 
@@ -828,6 +948,14 @@ void Hcf::corruptedFrameReceived()
         EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
+void Hcf::preDelete(cComponent *root)
+{
+    // Contexts borrow child frame stores, which die before this module's destructor.
+    delete frameSequenceHandler;
+    frameSequenceHandler = nullptr;
+    ModeSetListener::preDelete(root);
+}
+
 Hcf::~Hcf()
 {
     cancelAndDelete(startRxTimer);
@@ -840,6 +968,84 @@ Hcf::~Hcf()
     delete originatorBlockAckProcedure;
     delete recipientBlockAckProcedure;
     delete frameSequenceHandler;
+}
+
+bool Hcf::isTransmissionPermitted(TxRequestId id)
+{
+    if (id != activeRequest || lifecycleStopped || !mac->isCurrentTxRequest(id))
+        return false;
+    if (responseRequest || !preparedTransmit)
+        return true;
+    auto context = frameSequenceHandler->getContext();
+    return frameSequenceHandler->isSequenceRunning() && context->getModeSet() == modeSet &&
+        context->isPreparedTransmissionPermitted(*preparedTransmit);
+}
+
+void Hcf::beginCallback()
+{
+    frameSequenceHandler->beginCallback();
+}
+
+void Hcf::endCallback()
+{
+    Enter_Method("endCallback");
+    frameSequenceHandler->endCallback();
+}
+
+void Hcf::transmissionStarted(TxRequestId id)
+{
+    if (id != activeRequest)
+        return;
+    requestOnAir = true;
+    if (preparedTransmit) {
+        auto context = frameSequenceHandler->getContext();
+        auto packet = preparedTransmit->frame;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+            const auto& candidate = context->getActivePlan()->candidate;
+            context->getInProgressFrames()->recordTransmission(candidate);
+            context->getQoSContext()->txopProcedure->recordDataOrMgmtTransmission(candidate);
+        }
+        RateSelection::emitDatarateSelected(this, header, preparedTransmit->mode);
+    }
+}
+
+void Hcf::transmissionCanceled(TxRequestId id)
+{
+    if (id != activeRequest)
+        return;
+    activeRequest = {};
+    preparedTransmit = nullptr;
+    requestOnAir = false;
+    frameSequenceHandler->pendingTransmissionCanceled(id);
+}
+
+void Hcf::resetForLifecycle()
+{
+    Enter_Method("resetForLifecycle");
+    if (lifecycleStopped)
+        return;
+    lifecycleStopped = true;
+    cancelEvent(startRxTimer);
+    cancelEvent(inactivityTimer);
+    frameSequenceHandler->resetForLifecycle(requestOnAir);
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames()->resetForLifecycle();
+    activeRequest = {};
+    preparedTransmit = nullptr;
+    responseRequest = false;
+    requestOnAir = false;
+}
+
+void Hcf::resumeAfterLifecycle()
+{
+    Enter_Method("resumeAfterLifecycle");
+    lifecycleStopped = false;
+    // IEEE Std 802.11-2024, 11.5.4: downtime counts toward the retained inactivity deadline. Retire overdue agreements within this event before traffic can renew them.
+    expireBlockAckAgreements();
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        if (hasFrameToTransmit(static_cast<AccessCategory>(ac)))
+            edca->requestChannelAccess(static_cast<AccessCategory>(ac), this);
 }
 
 } // namespace ieee80211

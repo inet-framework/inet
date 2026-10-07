@@ -42,6 +42,8 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
   protected:
     FcsMode fcsMode;
+    uint64_t txEpoch = 0;
+    uint64_t txSerial = 0;
 
     ModuleRefByPar<Ieee80211Mib> mib;
     opp_component_ptr<IIeee80211Llc> llc;
@@ -100,6 +102,8 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
 
+    TxRequestId allocateTxRequest() { return {txEpoch, ++txSerial}; }
+    [[nodiscard]] bool isCurrentTxRequest(TxRequestId id) const { return id.epoch == txEpoch && id.serial != 0; }
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;

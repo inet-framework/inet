@@ -78,10 +78,13 @@ void Dcf::handleMessage(cMessage *msg)
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
+    if (lifecycleStopped) {
+        channelAccess->releaseChannel(this);
+        return;
+    }
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
-        emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     }
 }
 
@@ -112,7 +115,11 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     RateSelection::setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = true;
+    requestOnAir = false;
+    preparedTransmit = nullptr;
+    tx->transmitFrame(activeRequest, responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
 
@@ -183,8 +190,10 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
 }
 
-void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
+void Dcf::transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared)
 {
+    if (prepared)
+        throw cRuntimeError("DCF does not execute prepared HCF exchanges");
     Enter_Method("transmitFrame");
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
     auto mode = rateSelection->computeMode(packet, header);
@@ -197,7 +206,12 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
-    tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+    activeRequest = mac->allocateTxRequest();
+    responseRequest = false;
+    requestOnAir = false;
+    preparedTransmit = prepared;
+    frameSequenceHandler->setPendingTransmission(activeRequest);
+    tx->transmitFrame(activeRequest, packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
 }
 
 /*
@@ -206,12 +220,17 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
 
+void Dcf::frameSequenceStarted()
+{
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
+}
+
 void Dcf::frameSequenceFinished()
 {
     Enter_Method("frameSequenceFinished");
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     channelAccess->releaseChannel(this);
-    if (hasFrameToTransmit())
+    if (!lifecycleStopped && hasFrameToTransmit())
         channelAccess->requestChannel(this);
     mac->sendDownPendingRadioConfigMsg(); // TODO review
 }
@@ -258,16 +277,26 @@ FrameSequenceContext *Dcf::buildContext()
     return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
 }
 
-void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+void Dcf::transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
+    if (id != activeRequest || !mac->isCurrentTxRequest(id))
+        return;
+    bool recipient = responseRequest;
+    activeRequest = {};
+    preparedTransmit = nullptr;
+    responseRequest = false;
+    requestOnAir = false;
+    if (recipient) {
+        recipientProcessTransmittedControlResponseFrame(packet, header);
+        mac->sendDownPendingRadioConfigMsg();
+        return;
+    }
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
     }
-    else {
+    else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-        mac->sendDownPendingRadioConfigMsg();
-    }
 }
 
 bool Dcf::hasFrameToTransmit()
@@ -419,6 +448,14 @@ void Dcf::corruptedFrameReceived()
         EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
+void Dcf::preDelete(cComponent *root)
+{
+    // Contexts borrow child frame stores, which die before this module's destructor.
+    delete frameSequenceHandler;
+    frameSequenceHandler = nullptr;
+    ModeSetListener::preDelete(root);
+}
+
 Dcf::~Dcf()
 {
     cancelAndDelete(startRxTimer);
@@ -427,6 +464,58 @@ Dcf::~Dcf()
     delete stationRetryCounters;
     delete ctsProcedure;
     delete frameSequenceHandler;
+}
+
+bool Dcf::isTransmissionPermitted(TxRequestId id)
+{
+    return id == activeRequest && !lifecycleStopped && mac->isCurrentTxRequest(id);
+}
+
+void Dcf::beginCallback()
+{
+    frameSequenceHandler->beginCallback();
+}
+
+void Dcf::endCallback()
+{
+    Enter_Method("endCallback");
+    frameSequenceHandler->endCallback();
+}
+
+void Dcf::transmissionStarted(TxRequestId id)
+{
+    if (id == activeRequest)
+        requestOnAir = true;
+}
+
+void Dcf::transmissionCanceled(TxRequestId id)
+{
+    if (id != activeRequest)
+        return;
+    activeRequest = {};
+    requestOnAir = false;
+    frameSequenceHandler->pendingTransmissionCanceled(id);
+}
+
+void Dcf::resetForLifecycle()
+{
+    Enter_Method("resetForLifecycle");
+    if (lifecycleStopped)
+        return;
+    lifecycleStopped = true;
+    cancelEvent(startRxTimer);
+    frameSequenceHandler->resetForLifecycle(requestOnAir);
+    channelAccess->getInProgressFrames()->resetForLifecycle();
+    activeRequest = {};
+    responseRequest = false;
+    requestOnAir = false;
+}
+
+void Dcf::resumeAfterLifecycle()
+{
+    lifecycleStopped = false;
+    if (hasFrameToTransmit())
+        channelAccess->requestChannel(this);
 }
 
 } // namespace ieee80211

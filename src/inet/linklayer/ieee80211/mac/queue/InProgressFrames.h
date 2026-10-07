@@ -11,7 +11,9 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
+#include "inet/linklayer/ieee80211/mac/common/StagedFrameView.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/contract/IInProgressFramesCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
@@ -28,14 +30,29 @@ class INET_API InProgressFrames : public SimpleModule
     queueing::IPacketQueue *pendingQueue = nullptr;
     IOriginatorMacDataService *dataService = nullptr;
     IAckHandler *ackHandler = nullptr;
+    IInProgressFramesCallback *removalCallback = nullptr;
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
+    struct UnitHistory {
+        int64_t identity;
+        std::vector<int> transmissions;
+    };
+    struct FrameHistory {
+        std::shared_ptr<UnitHistory> unit;
+        b originalLength;
+        int fragment;
+    };
+    std::map<int64_t, FrameHistory> frameHistories;
+    uint64_t lifecycleEpoch = 0;
+    int frameReferenceUsers = 0;
+    std::set<Packet *> removingFrames;
 
   protected:
     virtual void initialize(int stage) override;
 
     void ensureHasFrameToTransmit();
     bool hasEligibleFrameToTransmit();
+    bool extractAndRegisterFrames();
 
   public:
     virtual ~InProgressFrames();
@@ -46,6 +63,15 @@ class INET_API InProgressFrames : public SimpleModule
     virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
     virtual Packet *getFrameToTransmit();
     virtual Packet *getPendingFrameFor(Packet *frame);
+    void stageForPlanning();
+    [[nodiscard]] std::vector<StagedFrameView> inspectStagedFrames() const;
+    [[nodiscard]] bool isRetained(const StagedFrameView& view) const;
+    void setRemovalCallback(IInProgressFramesCallback *callback) { removalCallback = callback; }
+    void retainFrameReferences() { frameReferenceUsers++; }
+    void releaseFrameReferences() { ASSERT(frameReferenceUsers > 0); frameReferenceUsers--; }
+    void recordTransmission(const StagedFrameView& view);
+    void resetForLifecycle();
+    [[nodiscard]] std::string getFragmentationDescription() const;
     virtual void dropFrame(Packet *packet);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 

@@ -19,6 +19,8 @@
 #include "inet/linklayer/ieee80211/mac/originator/RtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlan.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
@@ -64,6 +66,12 @@ class INET_API FrameSequenceContext : public cObject
 
     NonQoSContext *nonQoSContext = nullptr;
     QoSContext *qosContext = nullptr;
+    IQosRateSelection *planningRateSelection = nullptr;
+    std::unique_ptr<FrameSequencePlan> activePlan;
+    std::unique_ptr<FrameSequencePlan> nextPlan;
+    std::vector<std::unique_ptr<FrameSequencePlan>> retiredPlans;
+    int activeFirstStep = 0;
+    bool planValid = true;
 
   public:
     FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
@@ -83,6 +91,28 @@ class INET_API FrameSequenceContext : public cObject
 
     virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
     virtual QoSContext *getQoSContext() const { return qosContext; }
+    [[nodiscard]] MacAddress getAddress() const { return address; }
+    [[nodiscard]] physicallayer::Ieee80211ModeSet *getModeSet() const { return modeSet; }
+    [[nodiscard]] virtual Packet *getFrameToTransmit() const { return inProgressFrames->getFrameToTransmit(); }
+    [[nodiscard]] virtual bool hasFrameToTransmit() const { return inProgressFrames->hasInProgressFrames(); }
+    [[nodiscard]] virtual bool isPlanning() const { return false; }
+    virtual AckPolicy getAckPolicy();
+    virtual bool isBlockAckReqNeeded();
+
+    void enablePlanning(IQosRateSelection *rateSelection) { planningRateSelection = rateSelection; }
+    [[nodiscard]] bool usesPlanning() const { return planningRateSelection != nullptr; }
+    [[nodiscard]] FrameSequencePlan *getActivePlan() const { return activePlan.get(); }
+    [[nodiscard]] FrameSequencePlan *getNextPlan() const { return nextPlan.get(); }
+    [[nodiscard]] bool isPlanValid() const { return planValid; }
+    void invalidatePlans() { planValid = false; }
+    bool prepareInitialExchange(IFrameSequence *sequence);
+    bool advanceExchange(IFrameSequence *sequence);
+    [[nodiscard]] bool isPreparedTransmissionPermitted(const PreparedTransmit& record) const;
+
+  protected:
+    void prepareNextExchange(IFrameSequence *sequence);
+
+  public:
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;

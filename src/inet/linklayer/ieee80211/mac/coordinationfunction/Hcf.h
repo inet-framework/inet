@@ -15,6 +15,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IInProgressFramesCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckProcedure.h"
@@ -45,7 +46,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IInProgressFramesCallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
@@ -96,6 +97,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
 
+    TxRequestId activeRequest;
+    const PreparedTransmit *preparedTransmit = nullptr;
+    bool responseRequest = false;
+    bool requestOnAir = false;
+    bool lifecycleStopped = false;
+
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
@@ -105,6 +112,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void preDelete(cComponent *root) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
@@ -145,26 +153,39 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
     virtual void originatorProcessFailedFrame(Packet *packet) override;
     virtual void frameSequenceFinished() override;
-    virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+    void frameSequenceStarted() override;
+    void frameWillBeRemoved(InProgressFrames *owner, const Packet *frame) override;
+    void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override;
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
     // IChannelAccess::ICallback
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // ITx::ICallback
-    virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    void beginCallback() override;
+    void endCallback() override;
+    bool isTransmissionPermitted(TxRequestId id) override;
+    void transmissionStarted(TxRequestId id) override;
+    void transmissionCanceled(TxRequestId id) override;
+    void transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
-    // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    // IBlockAckAgreementHandlerCallback
+    virtual void scheduleInactivityTimer() override;
+    void expireBlockAckAgreements() override;
+    void originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement) override;
+    void recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement) override;
 
     std::string getFrameSequenceInfo() const;
 
   public:
     virtual ~Hcf();
+
+    void resetForLifecycle();
+    void resumeAfterLifecycle();
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

@@ -138,5 +138,10 @@ simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<c
     return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getPhyRxStartDelay() : blockAckTimeout;
 }
 
+simtime_t OriginatorQosAckPolicy::getAckTimeoutForMode(const physicallayer::IIeee80211Mode *responseMode) const
+{
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + responseMode->getPhyRxStartDelay() : ackTimeout;
+}
+
 } /* namespace ieee80211 */
 } /* namespace inet */

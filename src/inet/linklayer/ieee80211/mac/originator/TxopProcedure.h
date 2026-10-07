@@ -10,6 +10,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/StagedFrameView.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -35,6 +36,9 @@ class INET_API TxopProcedure : public ModeSetListener
     simtime_t start = -1;
     simtime_t limit = -1;
     ProtectionMechanism protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
+    simtime_t txnavEnd;
+    int dataOrMgmtTransmissions = 0;
+    int64_t firstUnitIdentity = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -44,6 +48,15 @@ class INET_API TxopProcedure : public ModeSetListener
     virtual ProtectionMechanism selectProtectionMechanism(AccessCategory ac) const;
 
   public:
+    enum class Admission { FIT, ZERO_LIMIT_UNIT, OVERRUN_EXCEPTION, REFUSED };
+    [[nodiscard]] Admission admitExchange(simtime_t cost, const StagedFrameView& candidate, simtime_t at,
+            const StagedFrameView *precedingCandidate = nullptr) const;
+    [[nodiscard]] bool fitsTxnav(simtime_t costWithoutLeadingIfs, simtime_t at) const;
+    void recordDataOrMgmtTransmission(const StagedFrameView& candidate);
+    void recordTransmittedReservation(simtime_t ppduEnd, simtime_t serializedDuration);
+    void resetTransmissionHistory();
+    [[nodiscard]] simtime_t getTxnavEnd() const { return txnavEnd; }
+    [[nodiscard]] int getDataOrMgmtTransmissions() const { return dataOrMgmtTransmissions; }
     virtual void startTxop(AccessCategory ac);
     virtual void endTxop();
 

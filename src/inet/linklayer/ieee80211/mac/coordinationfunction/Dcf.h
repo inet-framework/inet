@@ -76,6 +76,12 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Protection mechanism
     OriginatorProtectionMechanism *originatorProtectionMechanism = nullptr;
 
+    TxRequestId activeRequest;
+    const PreparedTransmit *preparedTransmit = nullptr;
+    bool responseRequest = false;
+    bool requestOnAir = false;
+    bool lifecycleStopped = false;
+
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
@@ -85,6 +91,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void preDelete(cComponent *root) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
@@ -103,16 +110,22 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // IFrameSequenceHandler::ICallback
-    virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+    void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) override;
     virtual void originatorProcessRtsProtectionFailed(Packet *packet) override;
     virtual void originatorProcessTransmittedFrame(Packet *packet) override;
     virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
     virtual void originatorProcessFailedFrame(Packet *packet) override;
     virtual void frameSequenceFinished() override;
+    void frameSequenceStarted() override;
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
     // ITx::ICallback
-    virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    void beginCallback() override;
+    void endCallback() override;
+    bool isTransmissionPermitted(TxRequestId id) override;
+    void transmissionStarted(TxRequestId id) override;
+    void transmissionCanceled(TxRequestId id) override;
+    void transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
@@ -123,6 +136,9 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Dcf();
+
+    void resetForLifecycle();
+    void resumeAfterLifecycle();
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

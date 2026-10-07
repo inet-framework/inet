@@ -12,6 +12,26 @@ namespace ieee80211 {
 
 Define_Module(AckHandler);
 
+AckFrameState AckHandler::snapshotFrameState(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
+{
+    auto it = ackStatuses.find(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    if (it == ackStatuses.end())
+        throw cRuntimeError("Staged frame has no ACK registration");
+    AckFrameState result;
+    using Phase = AckFrameState::Phase;
+    switch (it->second) {
+        case Status::FRAME_NOT_YET_TRANSMITTED: result.phase = Phase::FRAME_NOT_YET_TRANSMITTED; break;
+        case Status::NO_ACK_REQUIRED: result.phase = Phase::NO_ACK_REQUIRED; break;
+        case Status::WAITING_FOR_ACK: result.phase = Phase::WAITING_FOR_NORMAL_ACK; break;
+        case Status::ACK_NOT_ARRIVED: result.phase = Phase::NORMAL_ACK_NOT_ARRIVED; break;
+        case Status::ACK_ARRIVED: result.phase = Phase::NORMAL_ACK_ARRIVED; break;
+        default: throw cRuntimeError("Unknown ACK phase");
+    }
+    result.eligible = it->second == Status::FRAME_NOT_YET_TRANSMITTED || it->second == Status::NO_ACK_REQUIRED || it->second == Status::ACK_NOT_ARRIVED;
+    result.transmitted = it->second != Status::FRAME_NOT_YET_TRANSMITTED;
+    return result;
+}
+
 std::ostream& operator<<(std::ostream& os, const AckHandler::Status& status) { return os << AckHandler::getStatusString(status); }
 
 void AckHandler::initialize(int stage)
@@ -116,4 +136,3 @@ void AckHandler::printAckStatuses()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

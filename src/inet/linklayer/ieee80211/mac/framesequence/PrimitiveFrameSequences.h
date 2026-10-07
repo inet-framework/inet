@@ -11,6 +11,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlanningContext.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -18,10 +19,13 @@ namespace ieee80211 {
 class INET_API SelfCtsFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -32,11 +36,14 @@ class INET_API SelfCtsFs : public IFrameSequence
 class INET_API DataFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
     int ackPolicy = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -47,10 +54,13 @@ class INET_API DataFs : public IFrameSequence
 class INET_API ManagementAckFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -61,10 +71,13 @@ class INET_API ManagementAckFs : public IFrameSequence
 class INET_API ManagementFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -75,10 +88,13 @@ class INET_API ManagementFs : public IFrameSequence
 class INET_API AckFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -89,10 +105,13 @@ class INET_API AckFs : public IFrameSequence
 class INET_API RtsCtsFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -103,10 +122,13 @@ class INET_API RtsCtsFs : public IFrameSequence
 class INET_API RtsFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -117,10 +139,13 @@ class INET_API RtsFs : public IFrameSequence
 class INET_API CtsFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -131,10 +156,13 @@ class INET_API CtsFs : public IFrameSequence
 class INET_API FragFrameAckFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -145,10 +173,13 @@ class INET_API FragFrameAckFs : public IFrameSequence
 class INET_API LastFrameAckFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -159,10 +190,13 @@ class INET_API LastFrameAckFs : public IFrameSequence
 class INET_API BlockAckReqBlockAckFs : public IFrameSequence
 {
   protected:
+    FrameSequencePlan *executionPlan = nullptr;
     int firstStep = -1;
     int step = -1;
 
   public:
+    [[nodiscard]] FrameSequencePlanResult planSequence(FrameSequencePlanningContext& context) const override;
+    void startPlannedSequence(FrameSequenceContext *context, int firstStep, FrameSequencePlan& plan) override;
     virtual void startSequence(FrameSequenceContext *context, int firstStep) override;
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
@@ -174,4 +208,3 @@ class INET_API BlockAckReqBlockAckFs : public IFrameSequence
 } // namespace inet
 
 #endif
-

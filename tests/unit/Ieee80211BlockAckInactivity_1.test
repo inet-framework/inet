@@ -1,0 +1,221 @@
+%description:
+Block Ack reports reception status for multiple frames under an agreement. Inactivity expiry retires agreements before callbacks. The handlers preserve replacement agreements on delayed delete block acknowledgment (DELBA) completion. The handlers preserve later deadlines and ignore agreements without an accepted add block acknowledgment (ADDBA) response.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestOriginatorAgreements : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::createAgreement;
+    using OriginatorBlockAckAgreementHandler::updateAgreement;
+};
+
+class TestRecipientAgreements : public RecipientBlockAckAgreementHandler
+{
+  public:
+    using RecipientBlockAckAgreementHandler::addAgreement;
+};
+
+class InactivityCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    TestOriginatorAgreements *originator = nullptr;
+    TestRecipientAgreements *recipient = nullptr;
+    Ptr<Ieee80211AddbaRequest> request;
+    Ptr<Ieee80211AddbaResponse> response;
+    Ptr<const Ieee80211Delba> timeout;
+    int frames = 0;
+    int timerUpdates = 0;
+    int deletions = 0;
+    int expectedReason = 39;
+    bool replaceAgreement = true;
+    void scheduleInactivityTimer() override { timerUpdates++; }
+    void expireBlockAckAgreements() override
+    {
+        auto delbas = originator ? originator->blockAckAgreementExpired(this) : recipient->blockAckAgreementExpired(this);
+        for (const auto& delba : delbas)
+            processMgmtFrame(new Packet("Delba", delba), delba);
+        scheduleInactivityTimer();
+    }
+    void originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement) override
+    {
+        ASSERT(originator && !originator->getAgreement(agreement->getReceiverAddr(), agreement->getTid()));
+        deletions++;
+    }
+    void recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement) override
+    {
+        auto record = agreement->getBlockAckRecord();
+        ASSERT(recipient && !recipient->getAgreement(record->getTid(), record->getOriginatorAddress()));
+        deletions++;
+    }
+    void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { ASSERT(false); }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override
+    {
+        timeout = dynamicPtrCast<const Ieee80211Delba>(header);
+        ASSERT(timeout && timeout->getTid() == request->getTid() && timeout->getReasonCode() == expectedReason);
+        frames++;
+        // Re-enter the real handler after expiry. No expired agreement can remain visible.
+        if (originator) {
+            ASSERT(!originator->getAgreement(request->getReceiverAddress(), request->getTid()));
+            if (replaceAgreement) {
+                originator->createAgreement(request);
+                originator->updateAgreement(originator->getAgreement(request->getReceiverAddress(), request->getTid()), response);
+            }
+        }
+        else {
+            ASSERT(!recipient->getAgreement(request->getTid(), request->getTransmitterAddress()));
+            if (replaceAgreement)
+                recipient->addAgreement(request);
+        }
+        delete packet;
+    }
+};
+
+%activity:
+wait(1);
+for (bool atRecipient : {false, true}) {
+    TestOriginatorAgreements originator;
+    TestRecipientAgreements recipient;
+    InactivityCallback callback;
+    callback.request = makeShared<Ieee80211AddbaRequest>();
+    callback.request->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    callback.request->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+    callback.request->setTid(5);
+    callback.request->setBufferSize(64);
+    callback.request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    callback.request->setBlockAckTimeoutValue(SimTime(1));
+    callback.response = makeShared<Ieee80211AddbaResponse>();
+    callback.response->setBlockAckTimeoutValue(SimTime(1));
+    callback.response->setBufferSize(64);
+    if (atRecipient) {
+        callback.recipient = &recipient;
+        recipient.addAgreement(callback.request);
+        ASSERT(recipient.getEarliestExpirationTime() == simTime() + 1);
+    }
+    else {
+        callback.originator = &originator;
+        originator.createAgreement(callback.request);
+        ASSERT(originator.getEarliestExpirationTime() == SIMTIME_MAX);
+        originator.updateAgreement(originator.getAgreement(callback.request->getReceiverAddress(), 5), callback.response);
+        ASSERT(originator.getEarliestExpirationTime() == simTime() + 1);
+    }
+    // A second TID expires later. The first timeout must preserve that agreement.
+    auto laterRequest = staticPtrCast<Ieee80211AddbaRequest>(callback.request->dupShared());
+    laterRequest->setTid(6);
+    laterRequest->setBlockAckTimeoutValue(SimTime(4));
+    auto laterResponse = staticPtrCast<Ieee80211AddbaResponse>(callback.response->dupShared());
+    laterResponse->setBlockAckTimeoutValue(SimTime(4));
+    if (atRecipient)
+        recipient.addAgreement(laterRequest);
+    else {
+        originator.createAgreement(laterRequest);
+        originator.updateAgreement(originator.getAgreement(laterRequest->getReceiverAddress(), 6), laterResponse);
+    }
+    wait(2); // Observe expiry after downtime, rather than only at exact deadline equality.
+    if (atRecipient) {
+        auto delbas = recipient.blockAckAgreementExpired(&callback);
+        ASSERT(delbas.size() == 1 && callback.deletions == 1);
+        callback.processMgmtFrame(new Packet("Delba", delbas.front()), delbas.front());
+        ASSERT(recipient.getAgreement(6, callback.request->getTransmitterAddress()));
+        recipient.processTransmittedDelba(callback.timeout, &callback);
+        ASSERT(recipient.getAgreement(5, callback.request->getTransmitterAddress()));
+        ASSERT(recipient.getEarliestExpirationTime() == simTime() + 1);
+    }
+    else {
+        auto delbas = originator.blockAckAgreementExpired(&callback);
+        ASSERT(delbas.size() == 1 && callback.deletions == 1);
+        callback.processMgmtFrame(new Packet("Delba", delbas.front()), delbas.front());
+        ASSERT(originator.getAgreement(callback.request->getReceiverAddress(), 6));
+        originator.processTransmittedDelba(callback.timeout, &callback);
+        ASSERT(originator.getAgreement(callback.request->getReceiverAddress(), 5));
+        ASSERT(originator.getEarliestExpirationTime() == simTime() + 1);
+    }
+    ASSERT(callback.frames == 1 && callback.deletions == 1 && callback.timerUpdates == 0);
+    auto localDelba = makeShared<Ieee80211Delba>();
+    localDelba->setReceiverAddress(atRecipient ? callback.request->getTransmitterAddress() : callback.request->getReceiverAddress());
+    localDelba->setTid(5);
+    localDelba->setReasonCode(37);
+    if (atRecipient) {
+        recipient.processTransmittedDelba(localDelba, &callback);
+        recipient.processTransmittedDelba(localDelba, &callback);
+    }
+    else {
+        originator.processTransmittedDelba(localDelba, &callback);
+        originator.processTransmittedDelba(localDelba, &callback);
+    }
+    ASSERT(callback.deletions == 2);
+}
+// The same guard applies before, at, and after an absolute deadline.
+for (bool atRecipient : {false, true}) {
+    for (simtime_t delay : {SimTime(0.5), SimTime(1), SimTime(2)}) {
+        TestOriginatorAgreements originator;
+        TestRecipientAgreements recipient;
+        InactivityCallback callback;
+        callback.replaceAgreement = false;
+        callback.request = makeShared<Ieee80211AddbaRequest>();
+        callback.request->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        callback.request->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        callback.request->setTid(5);
+        callback.request->setBufferSize(64);
+        callback.request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        callback.request->setBlockAckTimeoutValue(SimTime(1));
+        callback.response = makeShared<Ieee80211AddbaResponse>();
+        callback.response->setBlockAckTimeoutValue(SimTime(1));
+        callback.response->setBufferSize(64);
+        if (atRecipient) {
+            callback.recipient = &recipient;
+            recipient.addAgreement(callback.request);
+        }
+        else {
+            callback.originator = &originator;
+            originator.createAgreement(callback.request);
+            originator.updateAgreement(originator.getAgreement(callback.request->getReceiverAddress(), 5), callback.response);
+        }
+        wait(delay);
+        if (atRecipient) {
+            auto data = makeShared<Ieee80211DataHeader>();
+            data->setTransmitterAddress(callback.request->getTransmitterAddress());
+            data->setTid(5);
+            data->setAckPolicy(BLOCK_ACK);
+            ASSERT(recipient.qosFrameReceived(data, &callback, &callback) == (delay < SimTime(1)));
+            ASSERT((recipient.getAgreement(5, callback.request->getTransmitterAddress()) != nullptr) == (delay < SimTime(1)));
+        }
+        else {
+            auto blockAck = makeShared<Ieee80211BasicBlockAck>();
+            blockAck->setTransmitterAddress(callback.request->getReceiverAddress());
+            blockAck->setTidInfo(5);
+            blockAck->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            originator.processReceivedBlockAck(blockAck, &callback);
+            ASSERT((originator.getAgreement(callback.request->getReceiverAddress(), 5) != nullptr) == (delay < SimTime(1)));
+        }
+        ASSERT(callback.deletions == (delay < SimTime(1) ? 0 : 1));
+        ASSERT(callback.frames == callback.deletions && callback.timerUpdates == 1);
+        if (atRecipient && delay >= SimTime(1)) {
+            auto data = makeShared<Ieee80211DataHeader>();
+            data->setTransmitterAddress(callback.request->getTransmitterAddress());
+            data->setTid(5);
+            data->setAckPolicy(BLOCK_ACK);
+            callback.expectedReason = 38; // UNKNOWN_BA, IEEE Std 802.11-2024, Table 9-79.
+            ASSERT(!recipient.qosFrameReceived(data, &callback, &callback));
+            ASSERT(callback.frames == 2 && callback.deletions == 1 && callback.timerUpdates == 1);
+            ASSERT(callback.timeout->getReceiverAddress() == data->getTransmitterAddress() && !callback.timeout->getInitiator());
+            for (auto policy : {NORMAL_ACK, NO_ACK}) {
+                data->setAckPolicy(policy);
+                ASSERT(recipient.qosFrameReceived(data, &callback, &callback));
+            }
+            ASSERT(callback.frames == 2 && callback.deletions == 1);
+            recipient.addAgreement(callback.request);
+            recipient.processTransmittedDelba(callback.timeout, &callback);
+            ASSERT(recipient.getAgreement(5, data->getTransmitterAddress()) && callback.deletions == 1);
+        }
+    }
+}
+EV << "Block Ack inactivity retirement and replacement passed.\n";
+
+%contains: stdout
+Block Ack inactivity retirement and replacement passed.

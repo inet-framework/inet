@@ -21,6 +21,22 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     IFrameSequenceHandler::ICallback *callback = nullptr;
     IFrameSequence *frameSequence = nullptr;
     FrameSequenceContext *context = nullptr;
+    bool running = false;
+    bool terminating = false;
+    int callbackDepth = 0;
+    uint64_t generation = 0;
+    TxRequestId pendingRequest;
+    struct RetiredSequence {
+        FrameSequenceContext *context;
+        IFrameSequence *sequence;
+    };
+    std::vector<RetiredSequence> retired;
+    struct CallGuard {
+        FrameSequenceHandler& handler;
+        CallGuard(FrameSequenceHandler& handler) : handler(handler) { handler.beginCallback(); }
+        ~CallGuard() noexcept(false) { handler.endCallback(); }
+    };
+    void disposeRetired();
 
   protected:
     virtual void startFrameSequenceStep();
@@ -35,7 +51,12 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     virtual void processResponse(Packet *frame) override;
     virtual void transmissionComplete() override;
     virtual void handleStartRxTimeout() override;
-    virtual bool isSequenceRunning() override { return frameSequence != nullptr; }
+    bool isSequenceRunning() override { return running; }
+    void setPendingTransmission(TxRequestId id) override { pendingRequest = id; }
+    void pendingTransmissionCanceled(TxRequestId id) override;
+    void resetForLifecycle(bool onAir) override;
+    void beginCallback() override { callbackDepth++; }
+    void endCallback() override { ASSERT(callbackDepth > 0); if (--callbackDepth == 0) disposeRetired(); }
 
     virtual ~FrameSequenceHandler();
 };

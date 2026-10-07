@@ -9,6 +9,7 @@
 #define __INET_IFRAMESEQUENCEHANDLER_H
 
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
+#include "inet/linklayer/ieee80211/mac/common/TxRequestId.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -26,12 +27,13 @@ class INET_API IFrameSequenceHandler
       public:
         virtual ~ICallback() {}
 
-        virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
+        virtual void transmitFrame(Packet *packet, simtime_t ifs, const PreparedTransmit *prepared) = 0;
 
         virtual void originatorProcessRtsProtectionFailed(Packet *packet) = 0;
         virtual void originatorProcessTransmittedFrame(Packet *packet) = 0;
         virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedFrame) = 0;
         virtual void originatorProcessFailedFrame(Packet *packet) = 0;
+        virtual void frameSequenceStarted() = 0;
         virtual void frameSequenceFinished() = 0;
         virtual void scheduleStartRxTimer(simtime_t timeout) = 0;
     };
@@ -46,6 +48,11 @@ class INET_API IFrameSequenceHandler
     virtual void transmissionComplete() = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;
+    virtual void setPendingTransmission(TxRequestId id) = 0;
+    virtual void pendingTransmissionCanceled(TxRequestId id) = 0;
+    virtual void resetForLifecycle(bool onAir) = 0;
+    virtual void beginCallback() = 0;
+    virtual void endCallback() = 0;
 };
 
 } // namespace ieee80211

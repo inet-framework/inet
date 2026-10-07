@@ -53,5 +53,10 @@ simtime_t RtsPolicy::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsF
     return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(packet, rtsFrame)->getPhyRxStartDelay() : ctsTimeout;
 }
 
+simtime_t RtsPolicy::getCtsTimeoutForMode(const physicallayer::IIeee80211Mode *responseMode) const
+{
+    return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + responseMode->getPhyRxStartDelay() : ctsTimeout;
+}
+
 } /* namespace ieee80211 */
 } /* namespace inet */

@@ -1,0 +1,204 @@
+%description:
+The sequence tree records each choice once and sums complete exchange costs for transmission opportunity (TXOP) admission. Private projection preserves real protocol state. The protection mechanism calculates reservation fields from the prepared steps. The independent costs follow IEEE 802.11-2024 10.23.2.8, 10.23.2.9, and 9.2.5.2.
+
+%includes:
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequencePlanningContext.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class DurationStore : public InProgressFrames
+{
+  protected:
+    virtual void initialize(int) override {}
+  public:
+    void seed(Packet *packet, IAckHandler *ack)
+    {
+        Enter_Method("seed");
+        ackHandler = ack;
+        take(packet);
+        ack->frameGotInProgress(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        auto unit = std::make_shared<UnitHistory>();
+        unit->identity = packet->getId();
+        unit->transmissions.resize(1);
+        frameHistories.emplace(packet->getId(), FrameHistory{unit, packet->getDataLength(), 0});
+        inProgressFrames.push_back(packet);
+    }
+};
+Define_Module(DurationStore);
+
+class DurationTxop : public TxopProcedure
+{
+  protected:
+    virtual void initialize(int) override {}
+  public:
+    void configure(simtime_t value) { limit = value; start = simTime(); resetTransmissionHistory(); }
+};
+Define_Module(DurationTxop);
+
+class DurationAckPolicy : public OriginatorQosAckPolicy
+{
+  protected:
+    virtual void initialize(int) override { modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a")); }
+};
+Define_Module(DurationAckPolicy);
+
+class DurationRates : public IQosRateSelection
+{
+  public:
+    int originated = 0;
+    int responses = 0;
+    const IIeee80211Mode *first = Ieee80211ModeSet::getModeSet("a")->getMode(bps(24000000));
+    const IIeee80211Mode *second = Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000));
+    virtual const IIeee80211Mode *computeMode(Packet *, const Ptr<const Ieee80211MacHeader>&, TxopProcedure *) override { return originated++ == 0 ? first : second; }
+    virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) override { responses++; return first; }
+    virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *, const Ptr<const Ieee80211RtsFrame>&) override { responses++; return first; }
+    virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *, const Ptr<const Ieee80211BlockAckReq>&) override { throw cRuntimeError("Unexpected Block Ack"); }
+};
+
+class DurationRtsPolicy : public IRtsPolicy
+{
+  public:
+    bool protect = false;
+    mutable int queries = 0;
+    virtual bool isRtsNeeded(Packet *, const Ptr<const Ieee80211MacHeader>&) const override { queries++; return protect; }
+    virtual simtime_t getCtsTimeout(Packet *, const Ptr<const Ieee80211RtsFrame>&) const override { throw cRuntimeError("No second response selection"); }
+    virtual simtime_t getCtsTimeoutForMode(const IIeee80211Mode *mode) const override { return mode->getSifsTime() + mode->getSlotTime() + mode->getPhyRxStartDelay(); }
+    virtual int getRtsThreshold() const override { return protect ? 0 : 4096; }
+};
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
+simple DurationStore { parameters: @class(::DurationStore); }
+simple DurationTxop { parameters: @class(::DurationTxop); }
+simple DurationAckPolicy { parameters: @class(::DurationAckPolicy); }
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        store: DurationStore;
+        txop: DurationTxop;
+        policy: DurationAckPolicy;
+        ack: QosAckHandler;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+
+%activity:
+auto store = check_and_cast<DurationStore *>(getModuleByPath("^.store"));
+auto txop = check_and_cast<DurationTxop *>(getModuleByPath("^.txop"));
+auto policy = check_and_cast<DurationAckPolicy *>(getModuleByPath("^.policy"));
+auto ack = check_and_cast<QosAckHandler *>(getModuleByPath("^.ack"));
+auto modes = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+for (int i = 0; i < 2; i++) {
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->addChunkLength(QOSCONTROL_PART_LENGTH);
+    header->setSequenceNumber(SequenceNumberCyclic(i));
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    auto packet = new Packet("candidate", header);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(i ? 300 : 200)));
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    store->seed(packet, ack);
+}
+RtsProcedure rts;
+DurationRtsPolicy rtsPolicy;
+DurationRates rates;
+FrameSequenceContext real(MacAddress("02:00:00:00:00:01"), modes, store, &rts, &rtsPolicy, nullptr, new QoSContext(policy, nullptr, nullptr, txop));
+txop->configure(SimTime(2, SIMTIME_MS));
+FrameSequencePlanningContext planning(real, &rates, false);
+HcfFs tree;
+auto initial = tree.planSequence(planning);
+ASSERT(initial.status == FrameSequencePlanResult::Status::READY);
+simtime_t sifs = modes->getSifsTime();
+simtime_t data = rates.first->getDuration(B(230));
+simtime_t response = rates.first->getDuration(B(14));
+ASSERT(initial.plan->duration == data + sifs + response);
+ASSERT(initial.plan->stepCount == 2);
+ASSERT(rates.originated == 1 && rates.responses == 1 && rtsPolicy.queries == 1);
+auto views = store->inspectStagedFrames();
+planning.projectCompletion();
+auto next = tree.planSequence(planning);
+ASSERT(next.plan->candidate.identity == views[1].identity);
+ASSERT(next.plan->duration == rates.second->getDuration(B(330)) + response + 2 * sifs);
+ASSERT(rates.originated == 2 && rates.responses == 2 && rtsPolicy.queries == 2);
+ASSERT(store->inspectStagedFrames()[0].ack.phase == AckFrameState::Phase::FRAME_NOT_YET_TRANSMITTED);
+ASSERT(real.getNumSteps() == 0);
+auto firstStep = static_cast<ITransmitStep *>(initial.plan->flatten()[0]);
+ASSERT(firstStep->getPreparedTransmit()->mode == rates.first);
+tree.startPlannedSequence(&real, 0, *initial.plan);
+ASSERT(tree.prepareStep(&real) == firstStep);
+ASSERT(rates.originated == 2 && rtsPolicy.queries == 2);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*firstStep->getPreparedTransmit(), *initial.plan, nullptr) == sifs + response);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*firstStep->getPreparedTransmit(), *initial.plan, next.plan.get()) == sifs + response + next.plan->duration);
+
+auto candidate = initial.plan->candidate;
+auto cost = initial.plan->duration;
+auto tick = SimTime::fromRaw(1);
+using Admission = TxopProcedure::Admission;
+for (auto delta : {-tick, SIMTIME_ZERO, tick}) {
+    txop->configure(cost + delta);
+    ASSERT((txop->admitExchange(cost, candidate, simTime()) != Admission::REFUSED) == (delta >= SIMTIME_ZERO));
+    txop->configure(cost + sifs + delta);
+    txop->recordDataOrMgmtTransmission(candidate);
+    ASSERT((txop->admitExchange(cost + sifs, next.plan->candidate, simTime()) != Admission::REFUSED) == (delta >= SIMTIME_ZERO));
+    txop->recordTransmittedReservation(simTime(), cost + delta);
+    ASSERT(txop->fitsTxnav(cost, simTime()) == (delta > SIMTIME_ZERO));
+}
+txop->configure(SIMTIME_ZERO);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::ZERO_LIMIT_UNIT);
+txop->recordDataOrMgmtTransmission(candidate);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::ZERO_LIMIT_UNIT);
+ASSERT(txop->admitExchange(cost, next.plan->candidate, simTime()) == Admission::REFUSED);
+for (int exception = 0; exception < 4; exception++) {
+    auto input = candidate;
+    if (exception == 0) input.transmissions = 1;
+    if (exception == 1) input.earlierFragmentRetransmitted = true;
+    if (exception == 2) input.fragmentCount = 16;
+    if (exception == 3) input.receiver = MacAddress::BROADCAST_ADDRESS;
+    txop->configure(tick);
+    ASSERT(txop->admitExchange(cost, input, simTime()) == Admission::OVERRUN_EXCEPTION);
+    txop->recordDataOrMgmtTransmission(input);
+    ASSERT(txop->admitExchange(cost, input, simTime()) == Admission::REFUSED);
+}
+txop->configure(tick);
+candidate.transmissions = 1;
+candidate.length += B(1);
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::REFUSED);
+candidate = initial.plan->candidate;
+candidate.fragmentCount = 15;
+ASSERT(txop->admitExchange(cost, candidate, simTime()) == Admission::REFUSED);
+
+DurationRates protectedRates;
+rtsPolicy.protect = true;
+FrameSequencePlanningContext protectedPlanning(real, &protectedRates, false);
+auto protectedPlan = tree.planSequence(protectedPlanning);
+ASSERT(protectedPlan.plan->stepCount == 4);
+ASSERT(protectedPlan.plan->duration == protectedRates.first->getDuration(B(20)) + 2 * response + protectedRates.second->getDuration(B(230)) + 3 * sifs);
+auto rtsStep = static_cast<ITransmitStep *>(protectedPlan.plan->flatten()[0]);
+ASSERT(SingleProtectionMechanism::computePreparedDurationField(*rtsStep->getPreparedTransmit(), *protectedPlan.plan, next.plan.get()) == protectedPlan.plan->duration - protectedRates.first->getDuration(B(20)));
+AlternativesFs empty({}, [](AlternativesFs *, FrameSequenceContext *) { throw cRuntimeError("Selector must not run"); return 0; });
+ASSERT(empty.planSequence(protectedPlanning).status == FrameSequencePlanResult::Status::UNSUPPORTED);
+FrameSequencePlanningContext nestedPlanning(real, &rates, false);
+RepeatingFs nested(new RepeatingFs(new DataFs(), [](RepeatingFs *, FrameSequenceContext *) { return true; }),
+    [](RepeatingFs *, FrameSequenceContext *) { return true; });
+ASSERT(nested.planSequence(nestedPlanning).status == FrameSequencePlanResult::Status::UNSUPPORTED);
+FrameSequenceContext legacy(MacAddress(), modes, store, &rts, &rtsPolicy, nullptr, nullptr);
+FrameSequencePlanningContext unsupported(legacy, &rates, false);
+DataFs dataOnly;
+ASSERT(dataOnly.planSequence(unsupported).status == FrameSequencePlanResult::Status::UNSUPPORTED);
+EV << "Prepared sums, selections, projection, and admission boundaries verified.\n";
+
+%contains: stdout
+Prepared sums, selections, projection, and admission boundaries verified.
