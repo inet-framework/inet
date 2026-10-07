@@ -424,16 +424,26 @@ void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
         return; // do nothing when called from initialize()
 
     initializeRadioMode();
+    if (hcf)
+        hcf->resumeAfterLifecycle();
+    if (dcf)
+        dcf->resumeAfterLifecycle();
 }
 
 // FIXME
 void Ieee80211Mac::handleStopOperation(LifecycleOperation *operation)
 {
+    tx->resetForLifecycle(++txEpoch);
+    if (hcf)
+        hcf->resetForLifecycle();
+    if (dcf)
+        dcf->resetForLifecycle();
 }
 
 // FIXME
 void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
+    handleStopOperation(operation);
 }
 
 } // namespace ieee80211

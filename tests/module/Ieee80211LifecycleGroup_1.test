@@ -1,0 +1,223 @@
+%description:
+The distributed coordination function (DCF) and hybrid coordination function (HCF) stop during a group transmission without acknowledgment (ACK) failure processing. Normal request to send (RTS) and clear to send (CTS) exchanges release deferred frames in the coordination module context.
+
+%file: LifecycleGroup.cc
+#include "TxopTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class LifecycleGroupMac : public Ieee80211Mac
+{
+  public:
+    void stopForTest() { Enter_Method("stopForTest"); handleStopOperation(nullptr); }
+};
+Define_Module(LifecycleGroupMac);
+
+class LifecycleGroupDcf : public Dcf
+{
+  public:
+    int transmissions = 0;
+    int failures = 0;
+    int acknowledgments = 0;
+    bool stopped = false;
+    void inject(bool group)
+    {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(group ? MacAddress::BROADCAST_ADDRESS : MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("lifecycle-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(200)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    bool hasPendingTransmission() const { return tx->hasTransmission(); }
+
+  protected:
+    void transmissionStarted(TxRequestId id) override
+    {
+        Dcf::transmissionStarted(id);
+        transmissions++;
+        if (par("stopOnAir").boolValue() && !stopped) {
+            stopped = true;
+            check_and_cast<LifecycleGroupMac *>(mac)->stopForTest();
+        }
+    }
+    void originatorProcessFailedFrame(Packet *packet) override
+    {
+        failures++;
+        Dcf::originatorProcessFailedFrame(packet);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override
+    {
+        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK)
+            acknowledgments++;
+        Dcf::originatorProcessReceivedFrame(packet, request);
+    }
+    void sendUp(const std::vector<Packet *>& packets) override
+    {
+        for (auto packet : packets) {
+            take(packet);
+            delete packet;
+        }
+    }
+};
+Define_Module(LifecycleGroupDcf);
+
+class LifecycleGroupHcf : public ExchangeHcf
+{
+  public:
+    bool stopped = false;
+    bool hasPendingTransmission() const { return tx->hasTransmission(); }
+
+  protected:
+    void transmissionStarted(TxRequestId id) override
+    {
+        ExchangeHcf::transmissionStarted(id);
+        if (par("stopOnAir").boolValue() && !stopped) {
+            stopped = true;
+            check_and_cast<LifecycleGroupMac *>(mac)->stopForTest();
+        }
+    }
+};
+Define_Module(LifecycleGroupHcf);
+
+class LifecycleGroupTest : public cSimpleModule
+{
+  public:
+    LifecycleGroupTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override
+    {
+        wait(SimTime(1, SIMTIME_MS));
+        bool stop = par("stopOnAir");
+        auto dcf = dynamic_cast<LifecycleGroupDcf *>(findModuleByPath("^.sender.wlan[0].mac.dcf"));
+        auto hcf = dynamic_cast<LifecycleGroupHcf *>(findModuleByPath("^.sender.wlan[0].mac.hcf"));
+        if (hcf)
+            dcf = nullptr;
+        if (dcf)
+            dcf->inject(stop);
+        else
+            hcf->inject(false, stop);
+        wait(SimTime(5, SIMTIME_MS));
+        if (dcf) {
+            ASSERT(dcf->stopped == stop && dcf->failures == 0);
+            ASSERT(dcf->transmissions == (stop ? 1 : 2));
+            ASSERT(dcf->acknowledgments == (stop ? 0 : 1));
+            ASSERT(!dcf->hasPendingTransmission());
+        }
+        else {
+            ASSERT(hcf->stopped == stop && hcf->failures == 0);
+            ASSERT(hcf->acknowledgments == (stop ? 0 : 3));
+            // The legacy path sends five RTS frames and three data frames.
+            ASSERT(hcf->events.size() == (stop ? 1 : 8));
+            ASSERT(!hcf->hasPendingTransmission());
+        }
+        std::cout << "Group shutdown and deferred frame ownership verified.\n";
+    }
+};
+Define_Module(LifecycleGroupTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module LifecycleGroupMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::inet::ieee80211::LifecycleGroupMac);
+}
+module LifecycleGroupDcf extends Dcf
+{
+    parameters:
+        bool stopOnAir;
+        @class(::inet::ieee80211::LifecycleGroupDcf);
+}
+module LifecycleGroupHcf extends Hcf
+{
+    parameters:
+        bool stopOnAir;
+        @class(::inet::ieee80211::LifecycleGroupHcf);
+}
+simple LifecycleGroupTest extends SimpleModule
+{
+    parameters:
+        bool stopOnAir;
+        @class(::inet::ieee80211::LifecycleGroupTest);
+}
+network LifecycleGroupNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: LifecycleGroupTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifecycleGroupNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 8ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.stopOnAir = ${stop=false,true}
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].mac.typename = "LifecycleGroupMac"
+**.wlan[*].mac.qosStation = ${qos=false,true}
+**.wlan[*].mac.dcf.typename = "LifecycleGroupDcf"
+**.wlan[*].mac.hcf.typename = "LifecycleGroupHcf"
+*.sender.wlan[*].mac.*.stopOnAir = ${stop}
+*.receiver.wlan[*].mac.*.stopOnAir = false
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 24Mbps
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 2ms
+**.wlan[*].mac.*.rtsPolicy.rtsThreshold = 0B
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+Group shutdown and deferred frame ownership verified.
+
+%not-contains: stdout
+<!> Warning:
+
+%not-contains: stderr
+<!> Warning:

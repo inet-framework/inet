@@ -96,6 +96,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
 
+    TxRequestId activeRequest;
+    bool responseRequest = false;
+    bool requestOnAir = false;
+    bool lifecycleStopped = false;
+
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
@@ -127,7 +132,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     // Originator
-    virtual void originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
+    virtual void originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacHeader>& controlHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac);
     virtual void originatorProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
@@ -145,26 +150,38 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
     virtual void originatorProcessFailedFrame(Packet *packet) override;
     virtual void frameSequenceFinished() override;
-    virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+    void frameSequenceStarted() override;
+    void transmitFrame(Packet *packet, simtime_t ifs) override;
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
     // IChannelAccess::ICallback
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // ITx::ICallback
-    virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    void beginCallback() override;
+    void endCallback() override;
+    bool isTransmissionPermitted(TxRequestId id) override;
+    void transmissionStarted(TxRequestId id) override;
+    void transmissionCanceled(TxRequestId id) override;
+    void transmissionComplete(TxRequestId id, Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
-    // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    // IBlockAckAgreementHandlerCallback
+    void scheduleInactivityTimer() override;
+    void expireBlockAckAgreements() override;
+    void originatorBlockAckAgreementDeleted(OriginatorBlockAckAgreement *agreement) override;
+    void recipientBlockAckAgreementDeleted(RecipientBlockAckAgreement *agreement) override;
 
     std::string getFrameSequenceInfo() const;
 
   public:
     virtual ~Hcf();
+
+    void resetForLifecycle();
+    void resumeAfterLifecycle();
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

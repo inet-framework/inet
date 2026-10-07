@@ -16,6 +16,9 @@ namespace ieee80211 {
 
 void FrameSequenceHandler::handleStartRxTimeout()
 {
+    CallGuard guard(*this);
+    if (!running)
+        return;
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE:
@@ -30,6 +33,8 @@ void FrameSequenceHandler::handleStartRxTimeout()
 
 void FrameSequenceHandler::processResponse(Packet *frame)
 {
+    CallGuard guard(*this);
+    auto currentGeneration = generation;
     ASSERT(callback != nullptr);
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
@@ -38,7 +43,7 @@ void FrameSequenceHandler::processResponse(Packet *frame)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getLastStep());
             receiveStep->setFrameToReceive(frame);
             finishFrameSequenceStep();
-            if (isSequenceRunning())
+            if (isSequenceRunning() && generation == currentGeneration)
                 startFrameSequenceStep();
             break;
         }
@@ -51,22 +56,32 @@ void FrameSequenceHandler::processResponse(Packet *frame)
 
 void FrameSequenceHandler::transmissionComplete()
 {
+    CallGuard guard(*this);
+    auto currentGeneration = generation;
+    pendingRequest = {};
     if (isSequenceRunning()) {
         finishFrameSequenceStep();
-        if (isSequenceRunning())
+        if (isSequenceRunning() && generation == currentGeneration)
             startFrameSequenceStep();
     }
 }
 
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
 {
+    CallGuard guard(*this);
     EV_INFO << "Starting frame sequence.\n";
     this->callback = callback;
     if (!isSequenceRunning()) {
         this->frameSequence = frameSequence;
         this->context = context;
+        running = true;
+        terminating = false;
+        generation++;
         frameSequence->startSequence(context, 0);
-        startFrameSequenceStep();
+        auto currentGeneration = generation;
+        callback->frameSequenceStarted();
+        if (running && generation == currentGeneration)
+            startFrameSequenceStep();
     }
     else
         throw cRuntimeError("Channel access granted while a frame sequence is running");
@@ -75,7 +90,10 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
 void FrameSequenceHandler::startFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
+    auto currentGeneration = generation;
     auto nextStep = frameSequence->prepareStep(context);
+    if (!running || generation != currentGeneration)
+        return;
     EV_INFO << "Starting next frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (nextStep == nullptr)
         finishFrameSequence();
@@ -136,20 +154,27 @@ void FrameSequenceHandler::finishFrameSequenceStep()
 void FrameSequenceHandler::finishFrameSequence()
 {
     EV_INFO << "Frame sequence finished.\n";
-    auto inProgressFrames = context->getInProgressFrames();
+    auto oldContext = context;
+    auto oldSequence = frameSequence;
+    running = false;
+    generation++;
     callback->frameSequenceFinished();
-    delete context;
-    delete frameSequence;
-    context = nullptr;
-    frameSequence = nullptr;
-    callback = nullptr;
-    inProgressFrames->clearDroppedFrames();
+    retired.push_back({oldContext, oldSequence});
+    if (context == oldContext) {
+        context = nullptr;
+        frameSequence = nullptr;
+        callback = nullptr;
+        pendingRequest = {};
+    }
 }
 
 void FrameSequenceHandler::abortFrameSequence()
 {
+    if (terminating)
+        return;
+    terminating = true;
+    auto currentGeneration = generation;
     EV_INFO << "Frame sequence aborted.\n";
-    auto inProgressFrames = context->getInProgressFrames();
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep *>(dynamic_cast<IReceiveStep *>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
@@ -160,17 +185,70 @@ void FrameSequenceHandler::abortFrameSequence()
         callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));
     else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
-    callback->frameSequenceFinished();
-    delete context;
-    delete frameSequence;
-    context = nullptr;
-    frameSequence = nullptr;
-    callback = nullptr;
-    inProgressFrames->clearDroppedFrames();
+    if (running && generation == currentGeneration)
+        finishFrameSequence();
+}
+
+void FrameSequenceHandler::disposeRetired()
+{
+    auto disposing = std::move(retired);
+    retired.clear();
+    for (auto& item : disposing) {
+        auto frames = item.context->getInProgressFrames();
+        delete item.context;
+        delete item.sequence;
+        // A replacement sequence can still borrow frames from this owner.
+        if (!context || context->getInProgressFrames() != frames)
+            frames->clearDroppedFrames();
+    }
+}
+
+void FrameSequenceHandler::pendingTransmissionCanceled(TxRequestId id)
+{
+    CallGuard guard(*this);
+    if (!running || id != pendingRequest)
+        return;
+    pendingRequest = {};
+    finishFrameSequence();
+}
+
+void FrameSequenceHandler::resetForLifecycle(bool onAir)
+{
+    CallGuard guard(*this);
+    if (!running || terminating)
+        return;
+    auto last = context->getLastStep();
+    auto currentGeneration = generation;
+    if (onAir && last && last->getType() == IFrameSequenceStep::Type::TRANSMIT) {
+        // Reject recursive lifecycle cleanup until actual transmission state is committed.
+        terminating = true;
+        auto frame = static_cast<ITransmitStep *>(last)->getFrameToTransmit();
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
+        bool noImmediateResponse = header->getReceiverAddress().isMulticast();
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+            noImmediateResponse |= dataHeader->getAckPolicy() == BLOCK_ACK || dataHeader->getAckPolicy() == NO_ACK;
+        callback->originatorProcessTransmittedFrame(frame);
+        if (!running || generation != currentGeneration)
+            return;
+        terminating = false;
+        if (noImmediateResponse) {
+            // These transmissions do not enter a Normal Ack wait or its failure transition.
+            finishFrameSequence();
+            return;
+        }
+    }
+    if (last && (onAir || last->getType() == IFrameSequenceStep::Type::RECEIVE))
+        abortFrameSequence();
+    else
+        finishFrameSequence();
 }
 
 FrameSequenceHandler::~FrameSequenceHandler()
 {
+    for (auto& item : retired) {
+        delete item.context;
+        delete item.sequence;
+    }
     delete frameSequence;
     delete context;
 }
