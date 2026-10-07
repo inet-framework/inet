@@ -29,12 +29,14 @@ Rx::Rx()
 Rx::~Rx()
 {
     cancelAndDelete(endNavTimer);
+    cancelAndDelete(endTxnavTimer);
 }
 
 void Rx::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         endNavTimer = new cMessage("NAV");
+        endTxnavTimer = new cMessage("endTxnavTimer");
         WATCH(address);
         WATCH(receptionState);
         WATCH(transmissionState);
@@ -51,7 +53,7 @@ void Rx::initialize(int stage)
 
 std::string Rx::getRxStatusTxt() const
 {
-    if (mediumFree)
+    if (contentionFree)
         return "FREE";
     std::string s = "BUSY (";
     bool addSpace = false;
@@ -75,6 +77,10 @@ std::string Rx::getRxStatusTxt() const
     }
     if (endNavTimer->isScheduled())
         s += std::string(addSpace ? " " : "") + "NAV";
+    if (getTxnavRemaining() > 0)
+        s += " TXNAV";
+    if (contentionBlocked)
+        s += " HCF";
     s += ")";
     return s;
 }
@@ -84,6 +90,9 @@ void Rx::handleMessage(cMessage *msg)
     if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
         emit(navChangedSignal, SimTime::ZERO);
+        recomputeMediumFree();
+    }
+    else if (msg == endTxnavTimer) {
         recomputeMediumFree();
     }
     else
@@ -157,12 +166,14 @@ bool Rx::isFcsOk(Packet *packet) const
 
 void Rx::recomputeMediumFree()
 {
-    bool oldMediumFree = mediumFree;
+    bool oldContentionFree = contentionFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
     mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
-    if (mediumFree != oldMediumFree) {
+    // IEEE Std 802.11-2024, 10.23.2.2: active TXNAV excludes local contention.
+    contentionFree = mediumFree && getTxnavRemaining() == 0 && !contentionBlocked;
+    if (contentionFree != oldContentionFree) {
         for (auto contention : contentions)
-            contention->mediumStateChanged(mediumFree);
+            contention->mediumStateChanged(contentionFree);
     }
 }
 
@@ -210,10 +221,35 @@ void Rx::setOrExtendNav(simtime_t navInterval)
 
 void Rx::registerContention(IContention *contention)
 {
-    contention->mediumStateChanged(mediumFree);
+    contention->mediumStateChanged(contentionFree);
     contentions.push_back(contention);
+}
+
+simtime_t Rx::getTxnavRemaining() const
+{
+    return endTxnavTimer && endTxnavTimer->isScheduled() ?
+        std::max(SIMTIME_ZERO, endTxnavTimer->getArrivalTime() - simTime()) : SIMTIME_ZERO;
+}
+
+void Rx::successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField)
+{
+    Enter_Method("successfulFrameTransmitted");
+    ASSERT(durationField >= 0);
+    // IEEE Std 802.11-2024, 10.23.2.2: the latest successful holder field replaces TXNAV.
+    // The countdown starts at PPDU end, not at response reception.
+    cancelEvent(endTxnavTimer);
+    auto endpoint = ppduEnd + durationField;
+    if (durationField > 0 && endpoint > simTime())
+        scheduleAt(endpoint, endTxnavTimer);
+    recomputeMediumFree();
+}
+
+void Rx::setContentionBlocked(bool blocked)
+{
+    Enter_Method("setContentionBlocked");
+    contentionBlocked = blocked;
+    recomputeMediumFree();
 }
 
 } // namespace ieee80211
 } // namespace inet
-

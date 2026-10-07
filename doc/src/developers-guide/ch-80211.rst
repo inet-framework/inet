@@ -401,9 +401,10 @@ class is the frame codec and the dispatcher; the submodules do the protocol.
        no protocol state.
    * - ``rx``
      - ``IRx``
-     - Checks the FCS of every received frame. Owns the NAV. Derives
+     - Checks the FCS of every received frame. Owns received NAV and shared TXNAV. Derives
        *medium free* from the reception state, the transmission state and the
-       NAV, and tells every registered contention when it changes. Reports a
+       NAV. Contention also requires expired TXNAV and available contention permission.
+       Rx tells every registered contention when this state changes. Reports a
        corrupt frame so that contentions switch to EIFS.
    * - ``tx``
      - ``ITx``

@@ -11,11 +11,13 @@ import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
-// Responsible for checking frames received over the radio for errors,
-// for managing the NAV, and for notifying other processes about the channel
-// state (free or busy).
+// Rx checks received frames for errors and manages received NAV and shared TXNAV.
+// Successful HCF holder frames replace TXNAV from the PPDU end and encoded Duration/ID.
+// TXNAV blocks contention until expiry, including after TXOP end.
+// HCF also disables local contention through its active sequence and response waits.
+// The medium query for CTS responses uses radio state and received NAV only.
 //
-// This is the default implementation of thr ~IRx module interface.
+// This is the default implementation of the ~IRx module interface.
 //
 simple Rx extends SimpleModule like IRx
 {
@@ -27,4 +29,3 @@ simple Rx extends SimpleModule like IRx
         @signal[packetDropped](type=inet::Packet);
         @statistic[nav](title="network allocation vector"; source=navChanged; record=vector; interpolationmode=linear);
 }
-

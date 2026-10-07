@@ -33,10 +33,13 @@ class INET_API Rx : public SimpleModule, public IRx
 
     MacAddress address;
     cMessage *endNavTimer = nullptr;
+    cMessage *endTxnavTimer = nullptr;
     physicallayer::IRadio::ReceptionState receptionState = physicallayer::IRadio::RECEPTION_STATE_UNDEFINED;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
     physicallayer::IRadioSignal::SignalPart receivedPart = physicallayer::IRadioSignal::SIGNAL_PART_NONE;
     bool mediumFree = true; // cached state
+    bool contentionFree = true;
+    bool contentionBlocked = false;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -58,6 +61,9 @@ class INET_API Rx : public SimpleModule, public IRx
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;
     virtual void frameTransmitted(simtime_t durationField) override;
+    virtual simtime_t getTxnavRemaining() const override;
+    virtual void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) override;
+    virtual void setContentionBlocked(bool blocked) override;
     virtual void registerContention(IContention *contention) override;
 };
 
@@ -65,4 +71,3 @@ class INET_API Rx : public SimpleModule, public IRx
 } // namespace inet
 
 #endif
-
