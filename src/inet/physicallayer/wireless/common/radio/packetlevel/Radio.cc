@@ -39,6 +39,11 @@ Radio::~Radio()
 
 void Radio::initialize(int stage)
 {
+    // Register before the base class starts the lifecycle. Starting in a
+    // receiver mode already listens on the medium, and the medium must know
+    // the radio by then. Same ordering as #1220.
+    if (stage == INITSTAGE_PHYSICAL_LAYER)
+        medium->addRadio(this);
     PhysicalLayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         switchTimer = new cMessage("switchTimer");
@@ -69,10 +74,11 @@ void Radio::initialize(int stage)
         WATCH(allReceptionTimers);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        medium->addRadio(this);
         if (medium->getCommunicationCache()->getNumTransmissions() == 0 && isListeningPossible())
             throw cRuntimeError("Receiver is busy without any ongoing transmission, probably energy detection level is too low or background noise level is too high");
-        initializeRadioMode();
+        // initialRadioMode is applied only from handleStartOperation(), which
+        // runs when the node is up. A node that starts down skips that, so
+        // the radio stays in RADIO_MODE_OFF.
         parseRadioModeSwitchingTimes();
     }
     else if (stage == INITSTAGE_LAST) {
@@ -609,4 +615,3 @@ void Radio::updateTransceiverPart()
 
 } // namespace physicallayer
 } // namespace inet
-
