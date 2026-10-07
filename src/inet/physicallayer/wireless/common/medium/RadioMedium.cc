@@ -756,6 +756,9 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t
         Enter_Method("listeningChanged");
         auto radio = check_and_cast<Radio *>(source);
         communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
+            // addTransmission() caches no arrival and no listening at the transmitter itself
+            if (transmission->getTransmitterRadioId() == radio->getId())
+                return;
             const IArrival *arrival = getArrival(radio, transmission);
             const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             delete communicationCache->getCachedListening(radio, transmission);
