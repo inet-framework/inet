@@ -159,11 +159,17 @@ void RadioCanvasVisualizer::refreshRadioVisualization(const RadioVisualization *
             setImageIndex(radioCanvasVisualization->radioModeFigure, radio->getRadioMode());
         if (displayReceptionState) {
             setImageIndex(radioCanvasVisualization->receptionStateFigure, radio->getReceptionState());
-            radioCanvasVisualization->receptionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getReceptionInProgress())));
+            // linked only to the only reception in progress
+            auto receptionsInProgress = radio->getReceptionsInProgress();
+            auto receptionInProgress = receptionsInProgress.size() == 1 ? receptionsInProgress[0] : nullptr;
+            radioCanvasVisualization->receptionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(receptionInProgress)));
         }
         if (displayTransmissionState) {
             setImageIndex(radioCanvasVisualization->transmissionStateFigure, radio->getTransmissionState());
-            radioCanvasVisualization->transmissionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getTransmissionInProgress())));
+            // linked only to the only transmission in progress
+            auto transmissionsInProgress = radio->getTransmissionsInProgress();
+            auto transmissionInProgress = transmissionsInProgress.size() == 1 ? transmissionsInProgress[0] : nullptr;
+            radioCanvasVisualization->transmissionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(transmissionInProgress)));
         }
         if (displayAntennaLobes)
             refreshAntennaLobe(radio->getAntenna(), radioCanvasVisualization->antennaLobeFigure, radioCanvasVisualization->antennaLobeUnitGainFigure, radioCanvasVisualization->antennaLobeMaxGainFigure);

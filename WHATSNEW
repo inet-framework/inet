@@ -325,6 +325,79 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. Every transmission and reception in progress of a radio
+
+   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
+   which return every transmission the radio is transmitting and every
+   reception it is attempting, in no particular order. ReceiverBase and the
+   canvas visualizers use them instead of getTransmissionInProgress() and
+   getReceptionInProgress(), so that they also work for a radio that has
+   several signals in progress at once (see the next item). For Radio,
+   NoiseSource and ShortcutRadio, which have at most one in each direction,
+   the vectors hold at most one element, and nothing else changes.
+
+   This change requires the modification of C++ code that implements IRadio
+   without deriving from Radio: the two methods are pure virtual.
+
+20. Radio: concurrent transmissions and receptions
+
+   Radio can now transmit any number of signals at the same time, and attempt
+   any number of receptions at the same time, as a technology with
+   concurrent per-user transmissions (e.g. a cellular base station) needs.
+   Both are allowed by new Radio parameters, allowConcurrentTransmissions
+   and allowConcurrentReceptions, which default to false. With
+   allowConcurrentReceptions set, every reception the receiver's
+   computeIsReceptionAttempted() accepts is attempted alongside the ones in
+   progress; the receivers shipped with INET attempt one reception at a time
+   either way, so the switch only matters with a receiver that attempts more.
+
+   The behavior with the defaults is unchanged, but the C++ API of Radio
+   subclasses changed: the protected receptionTimer and transmissionTimer
+   members were replaced by the attemptedReceptionTimers and
+   transmissionTimers vectors, and continueTransmission(), endTransmission()
+   and abortTransmission() take the transmission timer as an argument. A
+   subclass that dropped the attempted reception on a reconfiguration by
+   resetting receptionTimer calls abandonAttemptedReceptions() instead.
+   getTransmissionInProgress(), getReceptionInProgress(),
+   getTransmittedSignalPart() and getReceivedSignalPart() answer as before
+   while at most one signal is in progress in their direction, and throw an
+   error while several are. A model that relies on them, such as the
+   StateBasedEpEnergyConsumer and StateBasedCcEnergyConsumer energy
+   consumers, therefore cannot be used with a radio that has several signals
+   in progress at once.
+
+   This change requires the modification of C++ code that derives from Radio
+   and accesses these members or overrides these methods.
+
+21. The arrival knows its receiver
+
+   IArrival gained getReceiverRadio(), the radio the arrival was computed for.
+   Together with the transmission's transmitter radio it identifies the
+   link, so a model can now keep per-link state (for example a path loss
+   whose shadowing is correlated over distance). To provide it,
+   IPropagation::computeArrival() takes the receiver radio instead of its
+   mobility, and the Arrival constructor takes the receiver radio as its
+   first argument.
+
+   This change requires the modification of C++ code that implements
+   IPropagation, calls computeArrival(), or constructs Arrival objects.
+
+22. Interference for a listening of the caller's making
+
+   IRadioMedium gained computeInterference(receiver, listening), formerly a
+   protected member of RadioMedium: the background noise plus the
+   receptions, at the receiver, of the transmissions on the medium that
+   overlap the listening, for a listening that need not belong to any
+   transmission. The result is not cached, but the receptions in it come
+   from the medium's reception cache: the ones not computed yet are computed
+   at the call, and draw their random numbers, if any, then. Together with
+   the propagation, the receiver's createListening() and the analog model,
+   it lets a radio compute a hypothetical SNIR (e.g. for link-quality
+   estimation) from public API.
+
+   This change requires the modification of C++ code that implements
+   IRadioMedium without deriving from RadioMedium.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -397,6 +470,38 @@ Notable backward compatible changes are the following:
    state from the callback; teardown does not remove that replacement.
    Direct HT or rate removal still emits its own notification if state changes.
    Empty teardown emits no signal. Existing configuration parameters stay unchanged.
+
+7. Correlated log-normal shadowing
+
+   LogNormalShadowing has a new correlationDistance parameter. By default
+   (NaN) every path loss computation draws a new shadowing value, as before.
+   With a distance, the value is kept per pair of radios, the same in both
+   directions, and drawn again only when either radio has moved farther than
+   that distance from where it was when the value was drawn, which is how
+   shadowing behaves physically. The values of a radio's links are dropped
+   when the radio is removed from the medium. The correlation needs a medium
+   analog model that computes the path loss per link, like
+   ScalarMediumAnalogModel; DimensionalMediumAnalogModel computes it per
+   frequency from the distance alone, so setting a correlation distance
+   there is an error.
+
+8. Radio medium purge without a timer
+
+   RadioMedium has a new transmissionPurgeMode parameter. The default,
+   "timer", removes transmissions that can no longer interfere with a
+   self-message scheduled at the interference end time of the oldest
+   transmission that can still interfere, as before.
+   "onTransmission" removes them whenever a new transmission is added
+   instead, so the medium schedules no events of its own; this keeps the
+   medium out of the event sequence entirely, which matters for a model
+   whose fingerprints must not depend on the medium's bookkeeping.
+   Interference is computed identically in both modes.
+
+   The protected removeNonInterferingTransmissions() of RadioMedium now only
+   removes; it no longer reschedules the timer, which the timer handler does
+   by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after
+   it. A subclass that calls or overrides removeNonInterferingTransmissions()
+   and relied on the rescheduling must call that method itself.
 
 
 INET-4.7 (July 2026) — feature release

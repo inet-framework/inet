@@ -1,0 +1,132 @@
+%description:
+
+IRadioMedium::computeInterference() for a listening that belongs to no
+transmission on the medium (the what-if query of a receiver that is not
+receiving). While host1's ping is on the air, the interference at host2 over
+a listening of its own making contains exactly host1's reception; at host1,
+the transmitter, it contains nothing, since a radio's own transmission is
+excluded; after the ping, it contains nothing at host2 either.
+
+%file: test.cc
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace RadioMedium_ComputeInterference {
+
+class Probe : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(0.5002, new cMessage("during"));
+        scheduleAt(0.7, new cMessage("after"));
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto medium = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"));
+        for (const char *path : {"^.host2.wlan[0].radio", "^.host1.wlan[0].radio"}) {
+            auto radio = check_and_cast<IRadio *>(getModuleByPath(path));
+            const Coord& position = radio->getAntenna()->getMobility()->getCurrentPosition();
+            auto listening = radio->getReceiver()->createListening(radio, simTime(), simTime() + SimTime(100, SIMTIME_US), position, position);
+            auto interference = medium->computeInterference(radio, listening);
+            std::cout << "probe " << msg->getName() << " at radio " << radio->getId() << ":";
+            for (auto reception : *interference->getInterferingReceptions())
+                std::cout << " reception from radio " << reception->getTransmission()->getTransmitterRadioId();
+            std::cout << " (" << interference->getInterferingReceptions()->size() << " in total)" << std::endl;
+            delete interference;
+            delete listening;
+        }
+        delete msg;
+    }
+};
+
+Define_Module(Probe);
+
+} // namespace RadioMedium_ComputeInterference
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+simple Probe
+{
+    @class(Probe);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 1s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host1.mobility.initialX = 400m
+*.host2.mobility.initialX = 500m
+
+*.radioMedium.backgroundNoise.power = -110dBm
+
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.transmitter.power = 100mW
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 4dB
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].count = 1
+*.host1.app[0].startTime = 0.5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+probe during at radio 1: reception from radio 0 (1 in total)
+%contains: stdout
+probe during at radio 0: (0 in total)
+%contains: stdout
+probe after at radio 1: (0 in total)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

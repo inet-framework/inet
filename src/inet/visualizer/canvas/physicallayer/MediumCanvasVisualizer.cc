@@ -690,8 +690,17 @@ std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobi
         if (wlan0 != nullptr)
             radio = dynamic_cast<IRadio *>(wlan0->getSubmodule("radio"));
     }
-    auto transmissionInProgress = radio != nullptr ? radio->getTransmissionInProgress() : nullptr;
-    auto receptionInProgress = radio != nullptr ? radio->getReceptionInProgress() : nullptr;
+    // a signal is shown only while the radio has at most one in progress in each direction; with several, the figures
+    // show the medium, as with none
+    std::vector<const ITransmission *> transmissionsInProgress;
+    std::vector<const ITransmission *> receptionsInProgress;
+    if (radio != nullptr) {
+        transmissionsInProgress = radio->getTransmissionsInProgress();
+        receptionsInProgress = radio->getReceptionsInProgress();
+    }
+    bool several = transmissionsInProgress.size() > 1 || receptionsInProgress.size() > 1;
+    auto transmissionInProgress = !several && transmissionsInProgress.size() == 1 ? transmissionsInProgress[0] : nullptr;
+    auto receptionInProgress = !several && receptionsInProgress.size() == 1 ? receptionsInProgress[0] : nullptr;
     const IAntenna *antenna = nullptr;
     if (radio != nullptr)
         antenna = radio->getAntenna();

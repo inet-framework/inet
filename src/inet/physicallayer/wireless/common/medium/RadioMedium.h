@@ -103,6 +103,11 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
      * Specifies what should happen if two transmissions start at the same moment
      */
     const char *sameTransmissionStartTimeCheck = nullptr;
+    /**
+     * When true, transmissions that can no longer interfere are removed from
+     * the cache whenever a new transmission is added, instead of by a timer.
+     */
+    bool purgeOnTransmission = false;
     //@}
 
     /** @name Timer */
@@ -289,12 +294,17 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
      * interference for another.
      */
     virtual void removeNonInterferingTransmissions();
+    /**
+     * Schedules the timer that removes non-interfering transmissions at the
+     * interference end time of the oldest cached transmission that can still
+     * interfere, unless the timer is already scheduled.
+     */
+    virtual void scheduleRemoveNonInterferingTransmissionsTimer();
 
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening) const;
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception) const;
 
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const;
     virtual const IReceptionResult *computeReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
@@ -334,6 +344,7 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
     virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const ISnir *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
