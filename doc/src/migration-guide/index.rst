@@ -4,6 +4,13 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Sequence Submission Result
+------------------------------------
+
+Custom sequence callbacks must provide ``bool transmitFrame(Packet *packet, simtime_t ifs)``. Return true after submission to Tx. Return false before submission to end the sequence normally. The handler destroys the refused step before finish observers inspect history. It does not advance the sequence or schedule the refused response timeout.
+
+For example, refusal after DATA and its ACK leaves that completed ACK as the last observed step. The handler destroys an owned RTS but retains borrowed unsent DATA. Immediate refusal leaves empty history with one ordered start and finish.
+
 IEEE 802.11 Shared TXNAV Operations
 ---------------------------------
 

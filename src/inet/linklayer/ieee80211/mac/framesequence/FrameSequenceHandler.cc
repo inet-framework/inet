@@ -86,7 +86,10 @@ void FrameSequenceHandler::startFrameSequenceStep()
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
-                callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
+                if (!callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs())) {
+                    context->removeLastStep();
+                    finishFrameSequence();
+                }
                 // TODO lifetime
 //                if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
 //                    transmitLifetimeHandler->frameTransmitted(dataFrame);

@@ -26,13 +26,14 @@ class INET_API IFrameSequenceHandler
       public:
         virtual ~ICallback() {}
 
-        virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
-        virtual void frameSequenceStarted() = 0;
+        // True means submission to Tx. False means normal completion without this step.
+        virtual bool transmitFrame(Packet *packet, simtime_t ifs) = 0;
 
         virtual void originatorProcessRtsProtectionFailed(Packet *packet) = 0;
         virtual void originatorProcessTransmittedFrame(Packet *packet) = 0;
         virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedFrame) = 0;
         virtual void originatorProcessFailedFrame(Packet *packet) = 0;
+        virtual void frameSequenceStarted() = 0;
         virtual void frameSequenceFinished() = 0;
         virtual void scheduleStartRxTimer(simtime_t timeout) = 0;
     };

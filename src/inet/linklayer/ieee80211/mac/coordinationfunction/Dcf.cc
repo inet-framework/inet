@@ -182,7 +182,13 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
 }
 
-void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
+void Dcf::frameSequenceStarted()
+{
+    Enter_Method("frameSequenceStarted");
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
+}
+
+bool Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
@@ -197,6 +203,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
     tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, true, this);
+    return true;
 }
 
 /*
@@ -272,12 +279,6 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 bool Dcf::hasFrameToTransmit()
 {
     return !channelAccess->getPendingQueue()->isEmpty() || channelAccess->getInProgressFrames()->hasInProgressFrames();
-}
-
-void Dcf::frameSequenceStarted()
-{
-    Enter_Method("frameSequenceStarted");
-    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
 }
 
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)

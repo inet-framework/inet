@@ -392,6 +392,14 @@ Notable backward incompatible changes are the following:
    Normal AIFS and backoff follow channel release. Timer and contention changes
    can change Wi-Fi results and fingerprints.
 
+25. IEEE 802.11 normal sequence refusal
+
+   Sequence callbacks now return a Boolean submission result. True means
+   submission to Tx. False ends the sequence normally before submission.
+   The handler destroys the refused last step before finish observers inspect
+   history. It preserves borrowed unsent DATA without a failed-frame callback,
+   sequence advance, or response timeout. Custom callbacks must adopt this result.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
