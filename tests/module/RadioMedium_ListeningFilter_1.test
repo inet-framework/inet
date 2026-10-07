@@ -1,0 +1,103 @@
+%description:
+
+With listeningFilter = true, a radio that changes its listening while one of
+its own transmissions is still in the radio medium's communication cache must
+not crash the medium. The medium caches no arrival for a transmission at its
+own transmitter, so the listening update must skip that transmission.
+
+Host1 pings host2 once at 0.5s. At 0.502s, while the ping exchange is still
+cached, both radios switch channel, which emits listeningChangedSignal.
+
+%file: test.cc
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace RadioMedium_ListeningFilter_1 {
+
+class Probe : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(0.502, new cMessage("switch")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto medium = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"));
+        for (const char *path : {"^.host1.wlan[0].radio", "^.host2.wlan[0].radio"}) {
+            auto radio = check_and_cast<Ieee80211Radio *>(getModuleByPath(path));
+            int ownTransmissionCount = 0;
+            medium->getCommunicationCache()->mapTransmissions([&] (const ITransmission *transmission) {
+                if (transmission->getTransmitterRadioId() == radio->getId())
+                    ownTransmissionCount++;
+            });
+            if (ownTransmissionCount == 0)
+                throw cRuntimeError("Test setup: no transmission of %s is cached at the channel switch", path);
+            radio->setChannelNumber(5);
+            std::cout << "probe: switched " << path << " with " << ownTransmissionCount << " own transmission(s) cached" << std::endl;
+        }
+        delete msg;
+    }
+};
+
+Define_Module(Probe);
+
+} // namespace RadioMedium_ListeningFilter_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Probe
+{
+    @class(Probe);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: AdhocHost;
+        host2: AdhocHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 1s
+ned-path = .;../../../../src
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host1.mobility.initialX = 400m
+*.host2.mobility.initialX = 450m
+
+*.radioMedium.listeningFilter = true
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].count = 1
+*.host1.app[0].startTime = 0.5s
+
+%contains-regex: stdout
+probe: switched \^\.host1\.wlan\[0\]\.radio with [1-9][0-9]* own transmission\(s\) cached
+
+%contains-regex: stdout
+probe: switched \^\.host2\.wlan\[0\]\.radio with [1-9][0-9]* own transmission\(s\) cached
