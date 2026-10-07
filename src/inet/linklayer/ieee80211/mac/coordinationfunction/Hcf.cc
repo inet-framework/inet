@@ -710,6 +710,21 @@ void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
         mac->sendUpFrame(frame);
 }
 
+namespace {
+
+simtime_t encodeDuration(simtime_t duration, bool holder)
+{
+    // IEEE Std 802.11-2024, 9.2.5.1 and Table 9-9: clamp, then ceiling to whole microseconds.
+    auto microsecond = SimTime(1, SIMTIME_US).raw();
+    auto raw = std::max(SIMTIME_ZERO, duration).raw();
+    auto microseconds = raw / microsecond + (raw % microsecond != 0);
+    if (holder && microseconds > 32767)
+        throw cRuntimeError("Multiple protection duration exceeds 32767 microseconds");
+    return SimTime(microseconds, SIMTIME_US);
+}
+
+} // namespace
+
 void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
@@ -765,7 +780,10 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), false, this);
+    auto updated = responsePacket->removeAtFront<Ieee80211MacHeader>();
+    updated->setDurationField(encodeDuration(updated->getDurationField(), false));
+    responsePacket->insertAtFront(updated);
+    tx->transmitFrame(responsePacket, responsePacket->peekAtFront<Ieee80211MacHeader>(), modeSet->getSifsTime(), false, this);
     delete responsePacket;
 }
 
