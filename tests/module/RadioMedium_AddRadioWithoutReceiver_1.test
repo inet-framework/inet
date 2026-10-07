@@ -1,0 +1,101 @@
+%description:
+
+A radio without a receiver, such as a NoiseSource, that is added to the radio
+medium while transmissions are in its communication cache must not crash the
+medium. The medium caches no arrival and no listening for such a radio, the
+same as when a transmission starts after the radio was added.
+
+Host1 pings host2 once at 0.5s. At 0.502s, while the ping exchange is still
+cached, the probe creates a NoiseSource at runtime, the same way the
+ScenarioManager create-module command does.
+
+%file: test.cc
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace RadioMedium_AddRadioWithoutReceiver_1 {
+
+class Probe : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(0.502, new cMessage("create")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto medium = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"));
+        int transmissionCount = medium->getCommunicationCache()->getNumTransmissions();
+        if (transmissionCount == 0)
+            throw cRuntimeError("Test setup: no transmission is cached when the noise source is created");
+        cModule *network = getParentModule();
+        cModule *noiseSource = cModuleType::get("inet.physicallayer.wireless.noise.NoiseSource")->create("noiseSource", network);
+        noiseSource->finalizeParameters();
+        noiseSource->buildInside();
+        noiseSource->callInitialize();
+        std::cout << "probe: created a noise source with " << transmissionCount << " transmission(s) cached" << std::endl;
+        delete msg;
+    }
+};
+
+Define_Module(Probe);
+
+} // namespace RadioMedium_AddRadioWithoutReceiver_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Probe
+{
+    @class(Probe);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: AdhocHost;
+        host2: AdhocHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 1s
+ned-path = .;../../../../src
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host1.mobility.initialX = 400m
+*.host2.mobility.initialX = 450m
+*.noiseSource.mobility.initialX = 425m
+
+# the noise source does not transmit within the simulation time limit
+*.noiseSource.sleepInterval = 1000s
+*.noiseSource.transmitter.duration = 1ms
+*.noiseSource.transmitter.power = 1mW
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].count = 1
+*.host1.app[0].startTime = 0.5s
+
+%contains-regex: stdout
+probe: created a noise source with [1-9][0-9]* transmission\(s\) cached

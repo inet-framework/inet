@@ -439,12 +439,15 @@ void RadioMedium::addRadio(const IRadio *radio)
     if (neighborCache)
         neighborCache->addRadio(radio);
     mediumLimitCache->addRadio(radio);
-    communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
-        const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-        communicationCache->setCachedArrival(radio, transmission, arrival);
-        communicationCache->setCachedListening(radio, transmission, listening);
-    });
+    // like addTransmission(), cache no arrival and no listening at a radio without a receiver
+    if (radio->getReceiver() != nullptr) {
+        communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
+            const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+            const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+            communicationCache->setCachedArrival(radio, transmission, arrival);
+            communicationCache->setCachedListening(radio, transmission, listening);
+        });
+    }
     cModule *radioModule = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     if (radioModeFilter)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
