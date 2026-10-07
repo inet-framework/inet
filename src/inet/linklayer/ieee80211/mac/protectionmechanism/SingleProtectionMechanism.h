@@ -41,6 +41,9 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
 
   public:
     virtual ~SingleProtectionMechanism() {}
+    // Costs omit the IFS before the response and before the next holder frame.
+    simtime_t computeDurationField(const Ptr<const Ieee80211MacHeader>& header,
+            simtime_t responseDuration, simtime_t nextFrameDuration, bool finalFrame);
 
     // TODO QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
     virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
