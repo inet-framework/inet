@@ -172,7 +172,7 @@ class INET_API TcpSackRexmitQueue
     /**
      * Emulates SACK for a connection without it, as Linux tcp_add_reno_sack()
      * does: called on a duplicate ACK, it marks the first segment after the
-     * head that is not yet SACKed as SACKed.
+     * head that is neither SACKed nor lost as SACKed.
      */
     virtual void addInferredSack();
 

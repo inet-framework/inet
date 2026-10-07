@@ -75,9 +75,10 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         auto& head = rexmitQueue.front();
         if (head.sacked) {
             // The first unacknowledged segment cannot be SACKed, otherwise the
-            // cumulative ACK would cover it: an inferred SACK guessed wrong. The
-            // head is lost, and the mark moves to the next segment.
-            head.lost = true;
+            // cumulative ACK would cover it: the duplicate ACK stands for a later
+            // segment, so the mark moves to the next segment. The number of
+            // inferred SACKs then falls by the acknowledged segments but one, as in
+            // Linux tcp_remove_reno_sacks(). The head is not lost for that reason.
             head.sacked = false;
             addInferredSack();
         }
@@ -447,14 +448,17 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
 
 void TcpSackRexmitQueue::addInferredSack()
 {
-    // skip the head, which is assumed to be lost
+    if (rexmitQueue.empty())
+        return;
+    // Skip the head, which is assumed to be lost, and the lost segments: the
+    // inferred SACKs and the lost segments together cannot exceed the outstanding
+    // segments (Linux tcp_limit_reno_sacked()). After a timeout, when all
+    // outstanding data is lost, a duplicate ACK adds no inferred SACK.
     auto i = ++rexmitQueue.begin();
-    while (i != rexmitQueue.end() && i->sacked)
+    while (i != rexmitQueue.end() && (i->sacked || i->lost))
         i++;
-    if (i != rexmitQueue.end()) {
-        i->lost = false;
+    if (i != rexmitQueue.end())
         i->sacked = true;
-    }
 }
 
 uint32_t TcpSackRexmitQueue::getLost() const

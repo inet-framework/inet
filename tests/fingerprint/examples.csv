@@ -87,7 +87,7 @@
 # /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0, ERROR,    # pcap devices not supported
 
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            2126-ae6e/tplx;a2d4-cbef/~tNl;fea3-ef64/~tND;26ac-bc27/tyf, PASS, EthernetMac Ipv4
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            4f93-57e4/tplx;102f-aef7/~tNl;3b85-24d3/~tND;0d87-579d/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            04a9-b1bb/tplx;f3af-9d4c/~tNl;9704-015c/~tND;0d87-579d/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
 
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            1b3d-7b41/tplx;46eb-2c9e/~tNl;59e8-47d5/tyf, PASS, EthernetCsmaMac
@@ -142,8 +142,8 @@
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             d8cb-f43f/tplx;ddee-635f/~tNl;9893-9bd8/~tND;d892-7043/tyf, PASS, EthernetMac Ipv4
 
 # /examples/inet/bulktransfer/,        -f .qtenv.ini -c General -r 0
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             f3a8-c8b8/tplx;808c-5552/~tNl;53c2-a4c5/~tND;1df2-ba17/tyf, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             03fa-0d6e/tplx;ebad-032a/~tNl;267e-aac3/~tND;41ae-4548/tyf, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             5025-c4dd/tplx;07a5-7d20/~tNl;7a16-43bd/~tND;1df2-ba17/tyf, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             eda1-75c3/tplx;855c-5089/~tNl;ceae-b401/~tND;41ae-4548/tyf, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             00d4-6a9e/tplx;a9ab-7546/~tNl;4f01-478c/~tND;2798-249c/tyf, PASS, Ipv4
 
 /examples/inet/configurator/,        -f omnetpp.ini -c Default -r 0,                        10s,     145e-a1db/tplx;5ea9-e407/~tNl;57e3-efce/~tND;4161-eaff/tyf, PASS, EthernetMac Ipv4
@@ -239,7 +239,7 @@
 /examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudEnabled -r 0,            300s,        bb43-6893/tplx;e270-d65c/~tNl;d28d-cff7/~tND;3aaf-a690/tyf, PASS, Ipv4
 /examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudProbe -r 0,              300s,        4532-552a/tplx;b3e6-9f72/~tNl;5626-f442/~tND;6c75-00c7/tyf, PASS, Ipv4
 
-/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        add0-ba81/tplx;cbc1-bdd7/~tNl;f108-3b7f/~tND;32ba-9e70/tyf, PASS, Ipv4
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        54d3-d7d1/tplx;cc08-f17c/~tNl;dc8e-7a6c/~tND;32ba-9e70/tyf, PASS, Ipv4
 
 /examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         a8dd-b6be/tplx;14d3-8271/~tNl;550a-4121/~tND;c076-5b46/tyf, PASS, Ipv4
 /examples/inet/tcpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         0998-3367/tplx;1339-6aa8/~tNl;7e4e-fb68/~tND;93af-dacb/tyf, PASS, Ipv4

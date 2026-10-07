@@ -1,0 +1,46 @@
+%description:
+A partial ACK in the fast recovery of NewReno without SACK, after lost
+duplicate ACKs. The tester drops segments a27 and a37 of one flight, and
+also the duplicate ACKs b18 to b25, so only three duplicate ACKs arrive.
+The partial ACK B026 acknowledges ten segments. NewReno retransmits
+34817:35841 and sends new data in the room that cwnd minus the bytes in
+flight gives. A window inflated by only three segments and deflated by
+the ten acknowledged segments has no room left (RFC 6582 step 3).
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=65536B # 64 1024-byte segments
+
+*.tcptester.script="a27 delete; a37 delete; b18 delete; b19 delete; b20 delete; b21 delete; b22 delete; b23 delete; b24 delete; b25 delete"  # two holes, and most duplicate ACKs
+
+*.*_tcp.tcpAlgorithmClass = "TcpNewReno"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.231 B026] A.1000 < B.2000: A ack 34817 win 13312
+[1.233 A042] A.1000 > B.2000: A 34817:35841(1024) ack 501 win 16384
+[1.233 A043] A.1000 > B.2000: A 38913:39937(1024) ack 501 win 16384
+[1.233 A044] A.1000 > B.2000: A 39937:40961(1024) ack 501 win 16384
+[1.233 A045] A.1000 > B.2000: A 40961:41985(1024) ack 501 win 16384
+[1.235 B027] A.1000 < B.2000: A ack 38913 win 16384
+
+%contains: stdout
+[1.256] tcpdump finished, A:68 B:40 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

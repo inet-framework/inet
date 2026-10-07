@@ -8,6 +8,7 @@
 #include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -122,6 +123,11 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     ackProcessed(inFastRecovery);
 
+    // Outside a fast recovery, an ACK of new data ends the guesses that the
+    // duplicate ACKs before it made (Linux tcp_reset_reno_sack()).
+    if (!state->sack_enabled && !state->lossRecovery)
+        conn->getRexmitQueueForUpdate()->resetSackedBit();
+
     sendData(false);
     ensureRexmitTimerArmed();
 }
@@ -183,14 +189,41 @@ bool TcpClassicAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_
     return recovery->isDuplicateAck(tcpHeader, payloadLength);
 }
 
+void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    TcpAlgorithmBase::receivedAckForAlreadyAckedData(tcpHeader, payloadLength);
+
+    // Outside a fast recovery, an old ACK that is no duplicate (for example data
+    // of the peer) resets the duplicate-ACK counter. The inferred SACKs of the
+    // duplicate ACKs before it go with it, so that before the fast retransmit
+    // they give the room of at most two segments, as Limited Transmit does
+    // (RFC 3042).
+    if (!state->sack_enabled && !state->lossRecovery && state->dupacks == 0)
+        conn->getRexmitQueueForUpdate()->resetSackedBit();
+}
+
 void TcpClassicAlgorithmBase::receivedDuplicateAck()
 {
     // Without SACK, TcpAlgorithmBase sends the Limited Transmit data; with SACK,
     // the recovery sends it itself, by NextSeg()
-    if (!state->sack_enabled)
+    if (!state->sack_enabled) {
+        // the duplicate ACK tells that one more segment has left the network
+        // (Linux tcp_add_reno_sack())
+        conn->getRexmitQueueForUpdate()->addInferredSack();
         TcpAlgorithmBase::receivedDuplicateAck();
+    }
 
     recovery->receivedDuplicateAck();
+}
+
+uint32_t TcpClassicAlgorithmBase::getBytesInFlight() const
+{
+    if (state->sack_enabled)
+        return TcpAlgorithmBase::getBytesInFlight();
+    // Linux tcp_packets_in_flight(): packets_out - (sacked_out + lost_out) + retrans_out
+    auto rexmitQueue = conn->getRexmitQueue();
+    int64_t inFlight = (int64_t)(state->snd_max - state->snd_una) - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
+    return inFlight < 0 ? 0 : inFlight;
 }
 
 } // namespace tcp

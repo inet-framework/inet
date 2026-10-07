@@ -19,10 +19,24 @@ later segments must get through, because they are what makes host B answer with 
 acknowledgments. `nth` removes exactly one; `fromNth` would remove the rest with it and the
 timer would be the only thing left to detect the loss.
 
+**The window is judged by what host A sends.** RFC 5681 describes the window as a variable
+that is inflated: the threshold plus three segments at the third duplicate, and one segment
+more for each further duplicate. The model keeps the window of Linux instead. Without SACK,
+each duplicate acknowledgment takes one segment out of the data the model counts in flight
+(an inferred SACK), and the published `cwnd` stays at the threshold. The two forms give the
+same sending room, but the published value is not the RFC's variable. So the check reads the
+rule where it acts: a guard forbids any segment of new data that host A sends in recovery and
+that takes FlightSize past the threshold plus 3 + k segments, with k the further duplicates.
+Two observers keep FlightSize and k from the segments and the acknowledgments.
+
+**The scenario runs the RFC 5681 algorithm.** With SACK, the recovery of RFC 6675 replaces
+steps 3 to 5. The ini selects Reno without SACK, and says why.
+
 **The model conforms.** The relay removes exactly one frame, host B repeats its
-acknowledgment, and host A repairs the loss on the third duplicate: the threshold falls, the
-window becomes the threshold plus three segments, and the repair leaves well inside one
-second, where the timer would have waited three.
+acknowledgment, and host A repairs the loss on the third duplicate. The threshold falls, the
+new data that host A sends in recovery stays within the inflated window, and the repair
+leaves well inside one second. The guard was verified to judge real sends: with a bound one
+segment lower it fires at t=0.2017, where host A sends new data at the bound.
 
 Observation 4 of the check, that the window returns to the threshold when the repair is
 acknowledged, is not asserted here. The model publishes the window again at that point, but
@@ -35,6 +49,7 @@ timer would have fired, or a slow timer and fast retransmit look the same. The t
 seconds here, and the step allows one.
 
 %includes:
+#include <algorithm>
 #include "ProtocolTest.h"
 #include "PacketField.h"
 
@@ -43,9 +58,16 @@ seconds here, and the step allows one.
 using namespace inet;
 using namespace inet::protocoltest;
 
-static long segmentSize = 0;
-static long previousAck = -1;
-static int duplicateCount = 0;
+// What host A has sent and what host B has acknowledged, kept by two observers that run
+// beside the ordered steps. The engine offers every event to the running guards first and
+// to the ordered step after them, so a step reads values that already include its own event.
+static long smss = 0;             // the largest data length of host A's segments: SMSS
+static long highestSent = -1;     // one past the highest octet host A has sent
+static bool lastSendWasNew = false; // the last data segment took highestSent further: new data
+static long cumulativeAck = -1;   // the highest acknowledgment host A has received
+static int duplicates = 0;        // consecutive duplicates of cumulativeAck
+static bool inRecovery = false;   // from the third duplicate to the next acknowledgment of new data
+static int furtherDuplicates = 0; // duplicates after the third, in recovery
 
 static long fieldOf(const Packet *packet, const char *path)
 {
@@ -57,47 +79,83 @@ static long fieldOf(const Packet *packet, const char *path)
     }
 }
 
+// At host A's TCP a segment starts with its TCP header, so the data is what follows it.
+static long dataLengthOf(const Packet *packet)
+{
+    return (long)(packet->getByteLength() - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B"));
+}
+
 static bool dataSegment(const MatchContext& context)
 {
-    if (context.event.packet == nullptr || context.event.packet->getByteLength() <= 100)
-        return false;
-    if (context.event.packet->getByteLength() > segmentSize)
-        segmentSize = context.event.packet->getByteLength();
-    return true;
+    return context.event.packet != nullptr && dataLengthOf(context.event.packet) > 0;
 }
 
-// True on the third acknowledgment in a row that carries the same acknowledgment number.
-// RFC 5681 section 3.2 counts those, and the third one is the trigger.
-static bool thirdDuplicateAcknowledgment(const MatchContext& context)
+// Observer: every data segment host A sends. Never a match.
+static bool recordSent(const MatchContext& context)
 {
     const Packet *packet = context.event.packet;
-    if (packet == nullptr)
+    if (packet == nullptr || fieldOf(packet, "tcp.destPort") != 1000)
         return false;
-    long acknowledgment = fieldOf(packet, "tcp.ackNo");
-    if (acknowledgment < 0)
+    long length = dataLengthOf(packet);
+    if (length <= 0)
         return false;
-    if (acknowledgment == previousAck)
-        duplicateCount++;
-    else {
-        previousAck = acknowledgment;
-        duplicateCount = 0;
-    }
-    return duplicateCount == 3;
+    smss = std::max(smss, length);
+    long end = fieldOf(packet, "tcp.sequenceNo") + length;
+    lastSendWasNew = end > highestSent;
+    highestSent = std::max(highestSent, end);
+    return false;
 }
 
-// RFC 5681 section 3.2: the window becomes the threshold plus three segments. One segment of
-// slack absorbs the header bytes the wire measurement carries.
-static bool thresholdPlusThreeSegments(const MatchContext& context)
+// Observer: every acknowledgment host A receives. RFC 5681 section 2 counts an
+// acknowledgment as a duplicate when it carries no data and repeats the highest
+// acknowledgment number; the third one starts fast retransmit, and the next acknowledgment
+// of new data ends the recovery. Never a match.
+static bool recordAck(const MatchContext& context)
 {
-    if (!context.event.hasValue)
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.srcPort") != 1000)
         return false;
-    double window = context.event.value;
-    double threshold = context.get("threshold").doubleValue();
-    double expected = threshold + 3.0 * (double)segmentSize;
-    return window >= expected - (double)segmentSize && window <= expected + (double)segmentSize;
+    long ack = fieldOf(packet, "tcp.ackNo");
+    if (ack < 0)
+        return false;
+    if (ack > cumulativeAck) {
+        cumulativeAck = ack;
+        duplicates = 0;
+        inRecovery = false;
+    }
+    else if (ack == cumulativeAck && dataLengthOf(packet) == 0) {
+        duplicates++;
+        if (duplicates == 3) {
+            inRecovery = true;
+            furtherDuplicates = 0;
+        }
+        else if (inRecovery)
+            furtherDuplicates++;
+    }
+    return false;
 }
 
-// The repair must come well before the retransmission timer, which is three seconds here.
+// True on the third duplicate acknowledgment, which RFC 5681 section 3.2 names as the trigger.
+static bool thirdDuplicateAcknowledgment(const MatchContext&)
+{
+    return inRecovery && duplicates == 3;
+}
+
+// RFC 5681 section 3.2, steps 3 to 5: in recovery the window is the threshold plus three
+// segments, plus one more segment for each further duplicate, and host A sends previously
+// unsent data only while FlightSize stays within it. True when a segment of new data that
+// host A sends in recovery takes FlightSize past that bound: the violation the guard forbids.
+// The retransmission of step 3 is not new data, and the RFC requires it at once.
+static bool beyondTheInflatedWindow(const MatchContext& context)
+{
+    if (!inRecovery || !dataSegment(context) || !lastSendWasNew)
+        return false;
+    double threshold = context.get("threshold").doubleValue();
+    double flightSize = (double)(highestSent - cumulativeAck);
+    return flightSize > threshold + (3 + furtherDuplicates) * (double)smss;
+}
+
+// The repair must come well before the retransmission timer.
 static bool wellBeforeTheTimer(const MatchContext& context)
 {
     double lostAt = context.get("lostAt").doubleValue();
@@ -116,6 +174,14 @@ Define_ProtocolTestProgram()
                        .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
                        .minBytes(100).nth(20)
                        .drop().describe("one data segment in the middle of a window"))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(recordSent)
+                             .describe("every data segment host A sends")
+                             .within(20.0)))
+        .meanwhile(never(on("host1.tcp").signal("packetReceivedFromLower")
+                             .filterEvent(recordAck)
+                             .describe("every acknowledgment host A receives")
+                             .within(20.0)))
         // The segment that is removed. Remember where it starts and when it left.
         .once(on("host1.tcp").signal("packetSentToLower")
                   .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
@@ -135,11 +201,13 @@ Define_ProtocolTestProgram()
                   .capture("threshold", eventValue)
                   .describe("the threshold after the third duplicate")
                   .within(1.0))
-        // And the window becomes the threshold plus three segments.
-        .once(on("host1.tcp").signal("cwnd").first()
-                  .assertEvent(thresholdPlusThreeSegments)
-                  .describe("the window, the threshold plus three segments")
-                  .within(1.0))
+        // And the window becomes the threshold plus three segments, and grows by one segment
+        // for each further duplicate. The window is what host A may have in flight, so the
+        // guard judges every segment host A sends in recovery against it.
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(beyondTheInflatedWindow)
+                             .describe("a segment in recovery that takes FlightSize past the threshold plus 3 + k segments")
+                             .within(1.0)))
         // The missing segment is sent again at once, well before the timer would fire.
         .once(on("host1.tcp").signal("packetSentToLower")
                   .filterPacket("tcp.sequenceNo == {lostSeq} && tcp.synBit == false")
@@ -181,6 +249,11 @@ sim-time-limit = 30s
 seed-set = 0
 
 **.ipv4.arp.typename = "GlobalArp"
+# RFC 5681's fast retransmit and fast recovery are the algorithm of a TCP without SACK. With
+# SACK, the recovery of RFC 6675 replaces steps 3 to 5. The check reads RFC 5681, so it runs
+# Reno without SACK.
+**.tcp.tcpAlgorithmClass = "TcpReno"
+**.tcp.sackSupport = false
 **.tcp.advertisedWindow = 65535
 
 *.host1.numApps = 1
