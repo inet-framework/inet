@@ -560,8 +560,17 @@ Unused reservation time remains busy because this implementation sends no CF-End
 current group sequence sends one group frame per grant, even with a positive limit. For the 200 us
 group example above, all 824 us of advertised reservation remains unused. The holder's other access
 categories and other stations remain blocked until reservation expiry. An early end clears the
-category's holder endpoint but retains Rx's NAV. Recipient responses do not extend their own local
-NAV; unrelated received reservations still suppress CTS.
+category's maximum advertised endpoint but retains Rx's shared TXNAV. Each successful holder frame
+replaces TXNAV with its PPDU end plus its encoded Duration/ID. A shorter successful field can reduce
+TXNAV below the maximum advertised endpoint. A failed holder frame does not update TXNAV.
+
+Received NAV remains separate. Active TXNAV blocks contention but does not itself prevent CTS to an
+addressed RTS when no access category owns the channel. Recipient responses do not update TXNAV or
+extend local NAV. An unrelated received reservation still suppresses CTS. For example, a hypothetical
+TXOP ends at 300 us with TXNAV due at 500 us. Local contention waits for expiry and normal AIFS and
+backoff, but an eligible addressed RTS at 350 us can receive CTS.
+
+HCF also blocks local contention through its active sequence. For example, an initial DATA transmission receives no ACK and creates no successful TXNAV. Other access categories still wait for HCF to release the channel after failure. Normal AIFS and backoff follow that release. This exclusion does not create a transmitted reservation or change the CTS medium query.
 
 The supported EDCA path requires an effective AIFSN of at least 1 for the response ownership rule.
 AIFSN specifies the slot count that supplements SIFS to determine the arbitration interframe space.
@@ -569,8 +578,8 @@ The standard separately requires AIFSN of at least 1 for APs and at least 2 for 
 example, a non-AP station with AIFSN 1 meets the ownership condition but violates the standard's
 minimum.
 
-This feature does not implement full shared TXNAV or admission of a complete exchange against the
-remaining budget. For example, the existing admission policy can start a 120 us exchange with only
+Multiple protection does not check a complete exchange against the remaining budget.
+For example, its admission policy can start a 120 us exchange with only
 100 us left. The reference scope assumes whole-microsecond positive limits, integral initial PPDU
 airtime, and integral legacy RTS airtime. It adds no A-MPDU, Compressed Block Ack, new
 fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. It also adds no reverse

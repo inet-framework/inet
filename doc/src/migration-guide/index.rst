@@ -17,7 +17,7 @@ Custom ``IRx`` implementations must provide these operations:
 
 Keep TXNAV separate from received NAV. Replace its endpoint with ``ppduEnd + durationField`` after successful holder transmission. Cancel TXNAV for zero or expired fields. Preserve TXNAV after TXOP end. Exclude contention while TXNAV remains active. Keep ``isMediumFree()`` independent of TXNAV for the CTS policy and radio configuration.
 
-Honor the separate contention permission through ``setContentionBlocked()``. A true argument excludes contention without a NAV or TXNAV reservation. For example, an initial response wait can need channel-owner exclusion before successful TXNAV exists. Preserve the CTS medium query.
+Honor HCF's separate contention permission through ``setContentionBlocked()``. HCF blocks contention after internal-collision handling and restores it after channel release and TXOP end. This permission prevents a second grant during an initial response wait, when successful TXNAV does not yet exist. Preserve the CTS medium query.
 
 IEEE 802.11 Sequence Start Notification
 -------------------------------------
@@ -45,8 +45,7 @@ reservation of the medium. Both ``ITx::transmitFrame()`` overloads require an ex
    void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
            simtime_t ifs, bool updateLocalNav, ITx::ICallback *callback) override;
 
-Pass ``true`` for holder frames. Pass ``false`` for recipient responses. For example, HCF passes
-``true`` for RTS and DATA, but ``false`` for a response CTS or ACK. The transmitted duration field
+Pass ``true`` for DCF holder frames. Pass ``false`` for HCF holder frames and recipient responses. For example, HCF publishes successful RTS and DATA fields through shared TXNAV. DCF retains the local NAV update. The transmitted duration field
 remains in each response. The response no longer extends the recipient's local NAV. Received
 reservations still prevent a recipient CTS when the medium is busy.
 
