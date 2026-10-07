@@ -448,8 +448,10 @@ void RadioMedium::addRadio(const IRadio *radio)
     mediumLimitCache->addRadio(radio);
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+        const IntervalTree::Interval *interval = new IntervalTree::Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
         const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
         communicationCache->setCachedArrival(radio, transmission, arrival);
+        communicationCache->setCachedInterval(radio, transmission, interval);
         communicationCache->setCachedListening(radio, transmission, listening);
     });
     cModule *radioModule = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
