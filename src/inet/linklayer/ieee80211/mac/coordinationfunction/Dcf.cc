@@ -112,7 +112,7 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     RateSelection::setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), false, this);
     delete responsePacket;
 }
 
@@ -197,7 +197,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
-    tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+    tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, true, this);
 }
 
 /*

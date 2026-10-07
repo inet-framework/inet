@@ -743,7 +743,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             throw cRuntimeError("Multiple protection is unsupported");
         else
             throw cRuntimeError("Undefined protection mechanism");
-        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, true, this);
     }
     else
         throw cRuntimeError("Hcca is unimplemented");
@@ -765,7 +765,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     setFrameMode(responsePacket, responseHeader, responseMode);
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
-    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
+    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), false, this);
     delete responsePacket;
 }
 

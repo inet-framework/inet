@@ -325,6 +325,18 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. IEEE 802.11 recipient responses do not extend their local NAV
+
+   Tx requires an explicit local NAV choice in both transmitFrame() overloads.
+   The NAV records a reservation of the medium. Custom C++ implementations and
+   callers must add updateLocalNav. Holder frames use true; recipient responses
+   use false. The migration guide supplies the signatures and completion rules.
+
+   CTS, ACK, and Basic Block Ack responses retain their duration fields without
+   extending the recipient's local NAV. Received reservations still control
+   channel access. For example, a recipient can answer another RTS from the same
+   holder when its own previous CTS would otherwise leave the medium busy.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
