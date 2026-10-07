@@ -2,14 +2,18 @@
 
 Checkout: INET repository root, branch `feat/ieee80211-txop-single-protection`.
 Source revision: `1b31d3dfcd252cd35e78a5f9d8398a3bf02a0434`.
-Plan revision: 2026-10-07, revision 12.
+Plan revision: 2026-10-08, revision 13.
 Document authorization: the user approved the assessed plan and summary changes on 2026-10-07.
 Local changes at review: this untracked plan and its untracked summary.
 Implementation authorization: the user requested execution of revision 12 on 2026-10-07.
-Implementation status: local commit series in progress. Publication and baseline changes require separate authorization.
+Admission revision authorization: the user approved the strict TXNAV comparison at the decision before SIFS on 2026-10-08.
+Admission revision source: `3bb1b2e52c73d20f06b583f18eba862df3f8e8cf`.
+Implementation status: PR #1309 contains the implementation and approved fingerprint baselines. The topic remains a draft.
+Local series: the topic separates the independent repairs, Rx TXNAV, HCF publication, normal refusal, admission, and evidence.
 Execution supplement: shared contention permission prevents a second grant while an active HCF sequence awaits a response.
-Design evidence: source revision above and IEEE Std 802.11-2024. The sections below retain the approved design and acceptance criteria.
-Examples are hypothetical. They describe the approved behavior and acceptance criteria.
+Execution evidence: [implementation and verification report](ieee80211-txop-single-protection-verification.md).
+Design evidence: source revision above and IEEE Std 802.11-2024. The sections below include the approved admission revision and its acceptance criteria.
+Examples are hypothetical unless the verification report supplies an executed result.
 
 ## 1. Problem, intended behavior, and standards assessment
 
@@ -57,7 +61,7 @@ Clause 10.23.2.9 also requires fragmentation for applicable individually address
 
 ## 2. Current behavior and confirmed defects
 
-The source path is `channelGranted()` → `HcfFs` → `TxOpFs` → `FrameSequenceHandler` → `Hcf::transmitFrame()` → Tx. These findings describe source inspection before implementation.
+The source path is `channelGranted()` → `HcfFs` → `TxOpFs` → `FrameSequenceHandler` → `Hcf::transmitFrame()` → Tx. These findings describe source inspection before implementation. The verification report supplies subsequent simulation results.
 
 | Owner and evidence | Confirmed behavior and effect |
 | --- | --- |
@@ -92,7 +96,7 @@ A3 corrects group-address classification in every single protection path, with B
 
 Both protection classes share TXNAV, the header repair, and the handler callbacks. Those changes can affect execution and observations in Block Ack-enabled HCF too. They must not select single protection equations for multiple protection. The first repair adds no ACK-policy interface method or anticipated-frame argument.
 
-A refused continuation remains available for a fresh TXOP. The first-exchange fallback permits that frame to proceed without a new size, mode, or limit. Thus, a continuation refusal cannot become permanent refusal solely because the same exchange also exceeds a fresh positive limit. This condition preserves admission progress; it does not guarantee successful reception under losses or interference.
+A refused continuation remains available for a fresh TXOP. HCF restores its original mode tag when admission refuses it. The first-exchange fallback permits that frame to proceed without a new size, mode, or limit. Thus, a continuation refusal cannot become permanent refusal solely because the same exchange also exceeds a fresh positive limit. This condition preserves admission progress; it does not guarantee successful reception under losses or interference.
 
 Acceptance requires all of these results:
 
@@ -213,19 +217,19 @@ The deferred Basic Block Ack repair also needs two costs. Response-free protecte
 
 Each `P` uses the relevant mode object's duration for the complete frame length, with FCS and PHY overhead. Response modes use the current rate-selection rules. An ACK timeout is a failure-detection interval, not an ACK airtime estimate.
 
-For a supported additional exchange, HCF requires `I + C <= TXNAVremaining(t0)`. HCF also requires `I + C <= TXOPremaining(t0)` for a positive limit. These are separate reservation and TXOP checks. The first repair grants no additional-exchange overrun exception.
+For a supported additional exchange, HCF requires `C < TXNAVremaining(t0)`. HCF also requires `I + C <= TXOPremaining(t0)` for a positive limit. These are separate reservation and TXOP checks. The first repair grants no additional-exchange overrun exception.
 
 The first exchange has no previous TXNAV reservation to pass. HCF permits the initial exchange without refusal from the positive TXOP cost check. This rule also applies to an initial RTS/CTS/DATA exchange. It preserves progress but does not establish an IEEE overrun permission. Section 7.1 explains the fragmentation gap.
 
 A zero limit permits the current initial exchange, including its existing protection and immediate response. It permits no additional exchange in this first repair. Section 4.7 records the broader zero-limit content that a separate repair can support.
 
-Clause 10.23.2.8 requires `C < TXNAVremaining`, but it does not explicitly define the timer sample instant. This plan interprets that instant as `t0`. Every supported additional exchange has `I = SIFS > 0`. Therefore, `I + C <= TXNAVremaining(t0)` also proves the strict sequence comparison. HCF needs only the containment test at runtime. A future zero-wait continuation would require a separate assessment of this implication.
+Clause 10.23.2.8 requires `C < TXNAVremaining`, but it does not explicitly define the timer sample instant. This plan interprets that instant as `t0`, before the subsequent SIFS transmission. Clause 10.23.4.2.3 defines DATA/ACK exchange duration as DATA airtime, expected ACK airtime, and one internal SIFS. Its admission-accounting definition supports exclusion of the initial SIFS from `C`. It does not independently define the TXNAV sample instant.
 
-The containment test is an explicit design condition that ensures the known wait and expected exchange fit the reservation. It is not a separate IEEE requirement. It prevents the known wait and changed selection from consuming more time than TXNAV permits under the declared reference.
+HCF applies the strict exchange comparison to TXNAV without another initial-wait containment condition. Positive TXOP containment includes the initial wait because the TXOP limit bounds the complete expected interval. The field equations and TXNAV origin remain unchanged. This revision does not add a propagation allowance to Duration/ID.
 
-Hypothetical example: DATA A reserves time for an estimated DATA B/ACK exchange of 180 µs. After A's ACK, `I = 16us` and TXNAV is 196 µs. If B's current exchange cost remains 180 µs, its complete 196 µs cost passes the containment test. The expected completion coincides with the reservation endpoint. If rate control increases B's cost to 190 µs, HCF refuses the complete 206 µs cost and retains B for later access. Sufficient TXOP time does not override that refusal.
+Hypothetical example: DATA A reserves time for an estimated DATA B/ACK exchange of 180 µs. After A's ACK, `I = 16us` and TXNAV is 195.6 µs because round-trip propagation consumes 0.4 µs. If B's cost remains 180 µs, its TXNAV comparison passes. Its complete 196 µs interval must also fit the positive TXOP remainder. If rate control increases B's cost to 200 µs, HCF refuses B and retains it for later access. Sufficient TXOP time does not override that refusal.
 
-A strict comparison at PPDU start would instead require `I + C < TXNAVremaining(t0)`. That choice would refuse the first example. It is a different interpretation, not a hidden extra test in this plan. Preserve the declared reference in code, tests, and documentation. Do not extend Duration/ID beyond its applicable equation to force continuation.
+A strict comparison at PPDU start would instead require `I + C < TXNAVremaining(t0)`. That choice would refuse the first example. It is a different interpretation, not another test in this plan. Preserve the declared reference in code, tests, and documentation. Do not extend Duration/ID beyond its applicable equation to force continuation.
 
 The boundary tests verify this declared implementation choice. They do not prove that the standard selects `t0` rather than PPDU start. The interpretation relies on Clause 10.23.2.8's conditional permission before the subsequent SIFS transmission. Its timer sample instant remains an inference. Review and implementation approval must cover this stated interpretation.
 
@@ -357,7 +361,7 @@ Apply [minimal design](../../doc/project/rule/quality.md#qr-design-minimal), [st
 
 ## 6. Verification and expected results
 
-The criteria below retain the approved verification design. Reuse [Ieee80211HcfMultipleProtection_1.test](../../tests/module/Ieee80211HcfMultipleProtection_1.test) for production HCF, Tx, Rx, and radios. Its hooks observe emitted mode, airtime, field, and retry state. They must observe the actual production decisions, not copy the admission algorithm.
+The criteria below retain the approved verification design. The [verification report](ieee80211-txop-single-protection-verification.md) records executed results and remaining publication checks. Reuse [Ieee80211HcfMultipleProtection_1.test](../../tests/module/Ieee80211HcfMultipleProtection_1.test) for production HCF, Tx, Rx, and radios. Its hooks observe emitted mode, airtime, field, and retry state. They must observe the actual production decisions, not copy the admission algorithm.
 
 Create `Ieee80211HcfHeader_1.test` for A1 and `Ieee80211FrameSequenceObservations_1.test` for A2 under `tests/module/`. A3 adds `Ieee80211SingleProtectionGroup_1.test` in the same directory. B adds `Ieee80211Txnav_1.test` and revises the multiple protection and recipient NAV fixtures. C adds `Ieee80211HcfSingleProtection_1.test` and extends the observation fixture for refused history. Add `tests/unit/Ieee80211SingleProtection_1.test` only for numeric boundaries that the production cases do not cover.
 
@@ -383,7 +387,7 @@ Use Cmdenv, `seed-set = 0`, fixed response modes, and explicit scenario numbers.
 | C: Change rate-control state during B's RTS/CTS. | DATA executes its selected mode. The next exchange can select the updated mode. |
 | C: Observe ACK estimates before RTS and after CTS with unchanged response-policy inputs. | Both estimates use the retained DATA mode and give the same ACK airtime. |
 | C: Supply sufficient TXOP but insufficient TXNAV, then reverse the budgets. | The appropriate test refuses the additional exchange before its first PPDU. |
-| C: Test `I + C` below, equal to, and above TXNAV at `t0`, with positive SIFS. | Equality proceeds under the declared interpretation. The fixture records `t0`; success also proves `C < TXNAVremaining(t0)`. |
+| C: Test `C` below, equal to, and above TXNAV at `t0`, with positive SIFS. | Only the strictly smaller cost proceeds. The fixture records `t0`, the initial SIFS, and the sampled budget. |
 | C: Test `C >= TXNAVremaining(t0)` and both mode choices from section 4.3. | Excess causes refusal. The unchanged example proceeds; the increased cost does not. |
 | C: Test `I + C` below, equal to, and above the positive-limit remainder. | Equality proceeds; excess refuses the additional exchange without an optional overrun exception. |
 | C: Give an initial DATA exchange too little time, with and without RTS. | The compatibility fallback permits transmission; it does not establish an IEEE overrun exemption. |
@@ -404,7 +408,7 @@ Use Cmdenv, `seed-set = 0`, fixed response modes, and explicit scenario numbers.
 
 The deferred follow-ups need their own direct tests before implementation. Those tests must cover BAR threshold forecasts and BAR-only availability, same-unit zero-limit companions, anticipated content, and all supported exception conditions. They must also refuse BAR after two DATA transmissions where the common one-frame restriction applies. No first-repair result establishes those deferred guarantees.
 
-Use zero propagation for exact nominal boundaries. Add fixed 0.2 µs propagation cases for elapsed-budget and field-conversion effects. Do not require an inexact estimate to guarantee a peer's completion time. One fixed seed is sufficient for these deterministic conditions. Finite budget, mode, and AC variations supply the relevant boundaries.
+Use zero propagation for exact nominal boundaries. Add fixed 0.2 µs propagation cases for continuation without a field allowance and for contention exclusion through the active sequence. Preserve positive TXOP exhaustion with fixed propagation independently of TXNAV. Do not require an inexact estimate to guarantee a peer's completion time. One fixed seed is sufficient for these deterministic conditions. Finite budget, mode, and AC variations supply the relevant boundaries.
 
 Run these proposed commands from the checkout root after the selected test files exist:
 
@@ -471,7 +475,7 @@ The fragmentation requirement in section 1.4 needs a separate data-service chang
 
 ### 7.2 Other limits and decisions
 
-Section 4.3 defines the chosen timer reference and containment test. A change to that interpretation requires corresponding changes to its boundary tests before implementation.
+Section 4.3 defines the chosen timer reference, strict TXNAV comparison, and separate positive TXOP containment. A change to that interpretation requires corresponding changes to its boundary tests before implementation.
 
 Current Block Ack lifecycle and peer response-rate limitations remain separate. The active originator expiry handler queues DELBA and retains the agreement until its current removal path runs. Deferred Block Ack overrun permission requires an accepted agreement with `getExpirationTime() > simTime()`; a zero timeout supplies `SIMTIME_MAX`. That permission check does not repair agreement retirement. A follow-up selection contract must not claim general agreement validity across new, unsupported lifecycle behavior.
 
@@ -492,6 +496,7 @@ All normative citations refer to IEEE Std 802.11-2024, document ID `ieee80211-20
 | `ieee80211-2024:clause:10.23.2.2` | 1999–2001 | `ieee80211-2024@8315619:8323576` | Successful transmission, shared TXNAV, and its countdown origin. |
 | `ieee80211-2024:clause:10.23.2.8` | 2010–2012 | `ieee80211-2024@8360326:8369678` | Strict continuation permission. |
 | `ieee80211-2024:clause:10.23.2.9` | 2012–2014 | `ieee80211-2024@8369678:8378128` | Limits, content, overrun restrictions, and fragmentation. |
+| `ieee80211-2024:clause:10.23.4.2.3` | 2028–2029 | `ieee80211-2024@8440046:8444111` | DATA/ACK exchange duration excludes the initial SIFS. |
 
 The clauses and table are normative; their notes are informative. The corpus is fresh. Its lint reports unrelated ambiguities and extraction warnings, so it is not globally clean. The six selected clauses have 9, 9, 14, 5, 15, and 10 extracted outgoing references, respectively; those references resolve. Clause 10.3.2.9 includes a resolved reference to 10.23.2.4 for the NAV holder condition. No source PDF inspection was necessary for the retrieved passages.
 

@@ -729,20 +729,16 @@ void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
         mac->sendUpFrame(frame);
 }
 
-namespace {
-
-simtime_t encodeDuration(simtime_t duration, bool holder)
+simtime_t Hcf::encodeDuration(simtime_t duration, bool holder)
 {
     // IEEE Std 802.11-2024, 9.2.5.1 and Table 9-9: clamp, then ceiling to whole microseconds.
     auto microsecond = SimTime(1, SIMTIME_US).raw();
     auto raw = std::max(SIMTIME_ZERO, duration).raw();
     auto microseconds = raw / microsecond + (raw % microsecond != 0);
     if (holder && microseconds > 32767)
-        throw cRuntimeError("Multiple protection duration exceeds 32767 microseconds");
+        throw cRuntimeError("Protection duration exceeds 32767 microseconds");
     return SimTime(microseconds, SIMTIME_US);
 }
-
-} // namespace
 
 simtime_t Hcf::computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
         simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished)
@@ -768,7 +764,7 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
     auto sifs = modeSet->getSifsTime();
     if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
         auto step = check_and_cast<RtsTransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
-        // The step owns the selected protected frame. Prediction must not extract another queued unit.
+        // The step refers to the selected protected frame. Prediction must not extract another queued unit.
         std::unique_ptr<Packet> predicted(step->getProtectedFrame()->dup());
         auto protectedHeader = predicted->peekAtFront<Ieee80211DataOrMgmtHeader>();
         if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(protectedHeader)) {
@@ -799,6 +795,53 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
     throw cRuntimeError("Unsupported zero-limit multiple protection frame");
 }
 
+simtime_t Hcf::computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    return recipientAckPolicy->isAckNeeded(header) ?
+        rateSelection->computeResponseAckFrameMode(packet, header)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
+}
+
+simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
+        TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime)
+{
+    // The current group sequence cannot continue. A zero limit permits only the initial exchange.
+    if (header->getReceiverAddress().isMulticast() || txop->getLimit() == 0)
+        return SIMTIME_ZERO;
+    auto candidate = frames->getPendingFrameFor(packet);
+    if (!candidate || candidate->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast())
+        return SIMTIME_ZERO;
+    std::unique_ptr<Packet> forecast(candidate->dup());
+    auto nextHeader = forecast->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(nextHeader)) {
+        auto policy = originatorAckPolicy->computeAckPolicy(forecast.get(), data, nullptr);
+        auto updated = forecast->removeAtFront<Ieee80211DataHeader>();
+        updated->setAckPolicy(policy);
+        forecast->insertAtFront(updated);
+        nextHeader = forecast->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    }
+    auto dataMode = rateSelection->computeMode(forecast.get(), nextHeader, txop);
+    setFrameMode(forecast.get(), nextHeader, dataMode);
+    auto sifs = modeSet->getSifsTime();
+    auto responseDuration = computeImmediateResponseDuration(forecast.get(), nextHeader);
+    auto completeCost = dataMode->getDuration(forecast->getDataLength());
+    if (recipientAckPolicy->isAckNeeded(nextHeader))
+        completeCost += sifs + responseDuration;
+    auto protectionCost = completeCost;
+    if (rtsPolicy->isRtsNeeded(forecast.get(), nextHeader)) {
+        Packet rts("forecast-RTS", rtsProcedure->buildRtsFrame(nextHeader));
+        rts.insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto rtsHeader = rts.peekAtFront<Ieee80211RtsFrame>();
+        auto rtsMode = rateSelection->computeMode(&rts, rtsHeader, txop);
+        setFrameMode(&rts, rtsHeader, rtsMode);
+        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(&rts, rtsHeader)->getDuration(LENGTH_CTS);
+        // The field estimates the next holder frame and its response, not its whole protected exchange.
+        protectionCost = rtsMode->getDuration(rts.getDataLength()) + sifs + ctsDuration;
+        completeCost += protectionCost + sifs;
+    }
+    return completionTime + sifs + completeCost <= txop->getStart() + txop->getLimit() ?
+        protectionCost : SIMTIME_ZERO;
+}
+
 bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
@@ -806,11 +849,73 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto txop = channelOwner->getTxopProcedure();
-        auto mode = rateSelection->computeMode(packet, header, txop);
+        auto context = frameSequenceHandler->getContext();
+        bool scopedSingle = txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && !par("isBlockAckSupported").boolValue();
+        Packet *retainedPacket = packet;
+        auto retainedModeTag = scopedSingle ? retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
+        auto retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
+        bool dataAfterCts = false;
+        if (scopedSingle && context->getNumSteps() >= 3) {
+            auto rtsStep = dynamic_cast<RtsTransmitStep *>(context->getStep(context->getNumSteps() - 3));
+            auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStepBeforeLast());
+            dataAfterCts = rtsStep && rtsStep->getProtectedFrame() == packet && receiveStep &&
+                receiveStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+                receiveStep->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_CTS;
+        }
+        auto mode = dataAfterCts ? packet->getTag<Ieee80211ModeReq>()->getMode() : rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
-        RateSelection::emitDatarateSelected(this, header, mode);
-        EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
-        if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
+        if (scopedSingle) {
+            auto sifs = modeSet->getSifsTime();
+            auto cost = mode->getDuration(packet->getDataLength());
+            simtime_t responseDuration = SIMTIME_ZERO;
+            simtime_t nextFrameDuration = SIMTIME_ZERO;
+            bool finalFrame = true;
+            if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+                auto step = check_and_cast<RtsTransmitStep *>(context->getLastStep());
+                auto protectedPacket = const_cast<Packet *>(step->getProtectedFrame());
+                retainedPacket = protectedPacket;
+                retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
+                retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
+                auto protectedHeader = protectedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                auto dataMode = rateSelection->computeMode(protectedPacket, protectedHeader, txop);
+                setFrameMode(protectedPacket, protectedHeader, dataMode);
+                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts)->getDuration(LENGTH_CTS);
+                nextFrameDuration = dataMode->getDuration(protectedPacket->getDataLength());
+                auto ackDuration = computeImmediateResponseDuration(protectedPacket, protectedHeader);
+                if (recipientAckPolicy->isAckNeeded(protectedHeader))
+                    nextFrameDuration += sifs + ackDuration;
+                cost += sifs + responseDuration + sifs + nextFrameDuration;
+            }
+            else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+                responseDuration = computeImmediateResponseDuration(packet, dataOrMgmt);
+                if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
+                    cost += sifs + responseDuration;
+            }
+            else
+                throw cRuntimeError("Unsupported single protection holder frame");
+            // IEEE Std 802.11-2024, 10.23.2.8: compare the exchange duration strictly against TXNAV.
+            // INET samples at the preceding exchange's completion, before the initial SIFS wait.
+            // The separate TXOP limit includes that wait (10.23.2.9).
+            if (!dataAfterCts && context->getNumSteps() > 1 &&
+                (txop->getLimit() == 0 || cost >= rx->getTxnavRemaining() || ifs + cost > txop->getRemaining())) {
+                // The response estimate needs the selected mode; refusal must retain the frame's prior tag.
+                if (retainedModeTag)
+                    retainedPacket->addTagIfAbsent<Ieee80211ModeReq>()->setMode(retainedMode);
+                else
+                    retainedPacket->removeTagIfPresent<Ieee80211ModeReq>();
+                return false;
+            }
+            if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+                nextFrameDuration = forecastSingleProtectionSuccessor(packet, dataOrMgmt, txop,
+                    channelOwner->getInProgressFrames(), simTime() + ifs + cost);
+                finalFrame = nextFrameDuration == 0;
+            }
+            auto duration = singleProtectionMechanism->computeDurationField(header, responseDuration, nextFrameDuration, finalFrame);
+            auto updated = packet->removeAtFront<Ieee80211MacHeader>();
+            updated->setDurationField(encodeDuration(duration, true));
+            packet->insertAtFront(updated);
+        }
+        else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
             auto pendingPacket = channelOwner->getInProgressFrames()->getPendingFrameFor(packet);
             const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
             auto duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
@@ -835,6 +940,8 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         else
             throw cRuntimeError("Undefined protection mechanism");
+        RateSelection::emitDatarateSelected(this, header, mode);
+        EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
         return true;
     }
