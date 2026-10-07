@@ -325,6 +325,21 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. The IPv6 network configurator keeps each IPv6 tunnel interface on a link of its own
+
+   Ipv6TunnelInterface did not declare the isWireless parameter, so every tunnel
+   interface counted as a wireless interface. Ipv6NetworkConfigurator then joined
+   all tunnel interfaces of the network into one wireless local area network
+   (LAN), linked each of them with every other, and computed routes over those
+   links. A tunnel entry point could get a route to its own exit point through
+   the tunnel, and then encapsulated each packet again and again without
+   advancing simulation time.
+   Explicit addresses on two tunnel interfaces also had to share one prefix.
+   Each tunnel interface is now a link of its own, as a TunInterface already was,
+   also for Ipv4NetworkConfigurator and NextHopNetworkConfigurator, which share
+   the topology extraction. The results of simulations that use one of these
+   configurators with more than one Ipv6TunnelInterface change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
