@@ -799,7 +799,7 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
     throw cRuntimeError("Unsupported zero-limit multiple protection frame");
 }
 
-void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
+bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
     auto channelOwner = edca->getChannelOwner();
@@ -836,6 +836,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         else
             throw cRuntimeError("Undefined protection mechanism");
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
+        return true;
     }
     else
         throw cRuntimeError("Hcca is unimplemented");

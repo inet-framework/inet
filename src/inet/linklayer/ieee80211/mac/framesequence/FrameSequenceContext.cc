@@ -23,6 +23,14 @@ FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet 
 {
 }
 
+void FrameSequenceContext::removeLastStep()
+{
+    ASSERT(!steps.empty());
+    auto step = steps.back();
+    steps.pop_back();
+    delete step;
+}
+
 simtime_t FrameSequenceContext::getIfs() const
 {
     return getNumSteps() == 0 ? 0 : modeSet->getSifsTime(); // TODO pifs
