@@ -37,7 +37,8 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
-    if (state->dupacks >= state->dupthresh) {
+    // without SACK, Rfc5681Recovery marks the fast recovery with lossRecovery
+    if (state->sack_enabled ? state->dupacks >= state->dupthresh : state->lossRecovery) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -45,6 +46,10 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
         state->snd_cwnd = state->ssthresh;
 
         conn->emit(cwndSignal, state->snd_cwnd);
+
+        // without SACK, this ACK of new data ends the fast recovery
+        if (!state->sack_enabled)
+            state->lossRecovery = false;
     }
     else {
         bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"

@@ -39,7 +39,6 @@ class INET_API TcpReno : public TcpClassicAlgorithmBase
      * With SACK, Reno is in loss recovery while lossRecovery is set (RFC 6675). Without
      * it, Reno is in fast recovery from the third duplicate ACK to the next ACK of new data.
      */
-    virtual bool isInFastRecovery() const override { return state->sack_enabled ? state->lossRecovery : state->dupacks >= state->dupthresh; }
 
   public:
     /** Ctor */

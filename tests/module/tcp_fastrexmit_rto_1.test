@@ -1,0 +1,44 @@
+%description:
+A timeout ends the fast recovery of Reno without SACK: the tester drops
+segment a12 and its fast retransmission a18. The retransmission timer
+then sends 9217:10241 again, and cwnd restarts at one segment. The ACK of
+that retransmission is an ACK of new data after the timeout, so Reno
+grows cwnd in slow start; it does not set cwnd to ssthresh, as at the
+end of a fast recovery.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=32768B # 32 1024-byte segments
+
+*.tcptester.script="a12 delete; a18 delete"  # drop a segment and its fast retransmission
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.239 B021] A.1000 < B.2000: A ack 9217 win 16384
+[2.217 A029] A.1000 > B.2000: A 9217:10241(1024) ack 501 win 16384
+[2.219 B022] A.1000 < B.2000: A ack 25601 win 16384
+[2.221 A030] A.1000 > B.2000: A 25601:26625(1024) ack 501 win 16384
+[2.221 A031] A.1000 > B.2000: A 26625:27649(1024) ack 501 win 16384
+[2.223 B023] A.1000 < B.2000: A ack 27649 win 16384
+
+%contains: stdout
+[2.432] tcpdump finished, A:36 B:26 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

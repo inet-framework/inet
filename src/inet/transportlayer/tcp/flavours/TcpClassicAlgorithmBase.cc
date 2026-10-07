@@ -73,6 +73,9 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     if (recovery != nullptr)
         recovery->onRexmitTimeout();
 
+    // a timeout ends the fast recovery
+    state->lossRecovery = false;
+
     // RFC 5681, page 8:
     // "Furthermore, upon a timeout cwnd MUST be set to no more than the loss
     // window, LW, which equals 1 full-sized segment (regardless of the

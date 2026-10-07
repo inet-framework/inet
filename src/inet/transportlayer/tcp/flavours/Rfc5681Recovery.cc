@@ -59,6 +59,7 @@ void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
     EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
     state->snd_cwnd = state->ssthresh;
     conn->emit(cwndSignal, state->snd_cwnd);
+    state->lossRecovery = false;
 }
 
 void Rfc5681Recovery::receivedDuplicateAck()
@@ -69,7 +70,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
     //    to no more than the value given in equation (4).
     //"
-    if (state->dupacks == state->dupthresh) {
+    if (state->dupacks == state->dupthresh && !state->lossRecovery) {
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         //"
@@ -94,6 +95,9 @@ void Rfc5681Recovery::receivedDuplicateAck()
 
         conn->retransmitOneSegment(false);
 
+        // the fast recovery lasts until an ACK of new data (step 6) or a timeout
+        state->lossRecovery = true;
+
         // try to transmit new segments (RFC 2581)
         algorithm->sendData(false);
     }
@@ -103,7 +107,9 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    congestion window in order to reflect the additional segment that
     //    has left the network.
     //"
-    else if (state->dupacks > state->dupthresh) {
+    // In fast recovery every duplicate ACK is an additional one, also when an old ACK
+    // that is no duplicate (for example data of the peer) has reset the counter.
+    else if (state->lossRecovery) {
         state->snd_cwnd += state->snd_mss;
         EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
         conn->emit(cwndSignal, state->snd_cwnd);

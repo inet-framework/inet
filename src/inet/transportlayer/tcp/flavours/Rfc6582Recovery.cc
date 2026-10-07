@@ -114,72 +114,41 @@ void Rfc6582Recovery::receivedDuplicateAck()
 {
     TcpAlgorithmBase *algorithm = check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate());
 
-    if (state->dupacks == state->dupthresh) {
-        if (!state->lossRecovery) {
+    if (state->dupacks == state->dupthresh && !state->lossRecovery) {
+        // RFC 3782, page 4:
+        // "1) Three duplicate ACKs:
+        // When the third duplicate ACK is received and the sender is not
+        // already in the Fast Recovery procedure, check to see if the
+        // Cumulative Acknowledgement field covers more than "recover".  If
+        // so, go to Step 1A.  Otherwise, go to Step 1B."
+        if (state->snd_una - 1 > state->recover) {
+            EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
+
             // RFC 3782, page 4:
-            // "1) Three duplicate ACKs:
-            // When the third duplicate ACK is received and the sender is not
-            // already in the Fast Recovery procedure, check to see if the
-            // Cumulative Acknowledgement field covers more than "recover".  If
-            // so, go to Step 1A.  Otherwise, go to Step 1B."
-            if (state->snd_una - 1 > state->recover) {
-                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
+            // "1A) Invoking Fast Retransmit:
+            // If so, then set ssthresh to no more than the value given in
+            // equation 3 of [RFC2581], and record the highest sequence number
+            // transmitted in the variable "recover", and go to Step 2."
+            // RFC 5681 equation (4): ssthresh = max(FlightSize / 2, 2*SMSS), without
+            // the data that Limited Transmit sent.
+            state->ssthresh = algorithm->calculateSsthresh(conn->getFlightSize());
+            conn->emit(ssthreshSignal, state->ssthresh);
+            state->recover = (state->snd_max - 1);
+            state->firstPartialACK = false;
+            state->lossRecovery = true;
+            EV_INFO << " set recover=" << state->recover;
 
-                // RFC 3782, page 4:
-                // "1A) Invoking Fast Retransmit:
-                // If so, then set ssthresh to no more than the value given in
-                // equation 3 of [RFC2581], and record the highest sequence number
-                // transmitted in the variable "recover", and go to Step 2."
-                // RFC 5681 equation (4): ssthresh = max(FlightSize / 2, 2*SMSS), without
-                // the data that Limited Transmit sent.
-                state->ssthresh = algorithm->calculateSsthresh(conn->getFlightSize());
-                conn->emit(ssthreshSignal, state->ssthresh);
-                state->recover = (state->snd_max - 1);
-                state->firstPartialACK = false;
-                state->lossRecovery = true;
-                EV_INFO << " set recover=" << state->recover;
-
-                // RFC 3782, page 4:
-                // "2) Entering Fast Retransmit:
-                // Retransmit the lost segment and set cwnd to ssthresh plus 3 * SMSS.
-                // This artificially "inflates" the congestion window by the number
-                // of segments (three) that have left the network and the receiver
-                // has buffered."
-                state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
-                conn->emit(cwndSignal, state->snd_cwnd);
-
-                EV_DETAIL << " , cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
-                conn->retransmitOneSegment(false);
-
-                // RFC 3782, page 5:
-                // "4) Fast Recovery, continued:
-                // Transmit a segment, if allowed by the new value of cwnd and the
-                // receiver's advertised window."
-                algorithm->sendData(false);
-            }
-            else {
-                // RFC 3782, page 4:
-                // "1B) Not invoking Fast Retransmit:
-                // Do not enter the Fast Retransmit and Fast Recovery procedure.  In
-                // particular, do not change ssthresh, do not go to Step 2 to
-                // retransmit the "lost" segment, and do not execute Step 3 upon
-                // subsequent duplicate ACKs."
-                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": not invoking Fast Retransmit and Fast Recovery\n";
-            }
-        }
-        EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": TCP is already in Fast Recovery procedure\n";
-    }
-    else if (state->dupacks > state->dupthresh) {
-        if (state->lossRecovery) {
             // RFC 3782, page 4:
-            // "3) Fast Recovery:
-            // In Fast Recovery, increment cwnd by SMSS for each additional
-            // duplicate ACK received while in Fast Recovery.  This artificially
-            // inflates the congestion window in order to reflect the additional
-            // segment that has left the network."
-            state->snd_cwnd += state->snd_mss;
+            // "2) Entering Fast Retransmit:
+            // Retransmit the lost segment and set cwnd to ssthresh plus 3 * SMSS.
+            // This artificially "inflates" the congestion window by the number
+            // of segments (three) that have left the network and the receiver
+            // has buffered."
+            state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
             conn->emit(cwndSignal, state->snd_cwnd);
-            EV_DETAIL << "NewReno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+
+            EV_DETAIL << " , cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
+            conn->retransmitOneSegment(false);
 
             // RFC 3782, page 5:
             // "4) Fast Recovery, continued:
@@ -187,6 +156,34 @@ void Rfc6582Recovery::receivedDuplicateAck()
             // receiver's advertised window."
             algorithm->sendData(false);
         }
+        else {
+            // RFC 3782, page 4:
+            // "1B) Not invoking Fast Retransmit:
+            // Do not enter the Fast Retransmit and Fast Recovery procedure.  In
+            // particular, do not change ssthresh, do not go to Step 2 to
+            // retransmit the "lost" segment, and do not execute Step 3 upon
+            // subsequent duplicate ACKs."
+            EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": not invoking Fast Retransmit and Fast Recovery\n";
+        }
+    }
+    // In Fast Recovery every duplicate ACK is an additional one, also when the
+    // counter has started again after a partial ACK or after data of the peer.
+    else if (state->lossRecovery) {
+        // RFC 3782, page 4:
+        // "3) Fast Recovery:
+        // In Fast Recovery, increment cwnd by SMSS for each additional
+        // duplicate ACK received while in Fast Recovery.  This artificially
+        // inflates the congestion window in order to reflect the additional
+        // segment that has left the network."
+        state->snd_cwnd += state->snd_mss;
+        conn->emit(cwndSignal, state->snd_cwnd);
+        EV_DETAIL << "NewReno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+
+        // RFC 3782, page 5:
+        // "4) Fast Recovery, continued:
+        // Transmit a segment, if allowed by the new value of cwnd and the
+        // receiver's advertised window."
+        algorithm->sendData(false);
     }
 }
 
