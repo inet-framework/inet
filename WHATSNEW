@@ -325,6 +325,33 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. The path loss knows its receiver, and is a function of frequency
+
+   IPathLoss::computePathLoss(transmission, arrival) was replaced by
+   computeReceptionPathLoss(receiverRadio, transmission, arrival), which
+   returns the loss factor as a function of frequency. Together with the
+   transmission's transmitter radio, the receiver radio identifies the link,
+   so a path loss can now keep per-link state (for example a shadowing that is
+   correlated over distance). Both medium analog models call it once per
+   reception: ScalarMediumAnalogModel evaluates the function at the center
+   frequency, DimensionalMediumAnalogModel across the band, in place of the
+   computePathLoss(propagationSpeed, frequency, distance) it called before. A
+   path loss with per-link state resolves that state in the call, so the value
+   of a reception does not depend on when or how often the dimensional model
+   evaluates the function. The PathLossBase default evaluates
+   computePathLoss(propagationSpeed, frequency, distance) for the link's
+   distance, so the results of models that only implement that form are
+   unchanged. The FrequencyDependentAttenuationFunction constructor takes the
+   path loss function as its second argument.
+
+   TwoRayGroundReflection and TwoRayInterference now take the geometry of the
+   link into account under DimensionalMediumAnalogModel too: before, the
+   former acted as FreeSpacePathLoss there, and the latter returned NaN.
+
+   This change requires the modification of C++ code that implements or calls
+   computePathLoss(transmission, arrival), or constructs
+   FrequencyDependentAttenuationFunction objects.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -398,6 +425,18 @@ Notable backward compatible changes are the following:
    Direct HT or rate removal still emits its own notification if state changes.
    Empty teardown emits no signal. Existing configuration parameters stay unchanged.
 
+7. Correlated log-normal shadowing
+
+   LogNormalShadowing has a new correlationDistance parameter. By default
+   (NaN) every path loss computation draws a new shadowing value, as before.
+   With a distance, the value is kept per pair of radios, the same in both
+   directions, and drawn again only when either radio has moved farther than
+   that distance from where it was when the value was drawn, which is how
+   shadowing behaves physically. The value is resolved once per reception,
+   so with DimensionalMediumAnalogModel the whole band of a reception has
+   the same shadowing. The values of a radio's links are dropped when the
+   radio is removed from the medium.
+
 8. Radio medium purge without a timer
 
    RadioMedium has a new transmissionPurgeMode parameter. The default,
@@ -415,6 +454,15 @@ Notable backward compatible changes are the following:
    by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after
    it. A subclass that calls or overrides removeNonInterferingTransmissions()
    and relied on the rescheduling must call that method itself.
+
+9. Log-normal shadowing once per reception
+
+   Without a correlation distance, LogNormalShadowing draws one shadowing
+   value per reception. With DimensionalMediumAnalogModel it drew one per
+   evaluation of the attenuation, so the frequencies of one reception had
+   independent values, and an evaluation repeated later gave a different
+   one. With ScalarMediumAnalogModel, or with the dimensional model
+   attenuating with the center frequency (the default), nothing changes.
 
 
 INET-4.7 (July 2026) — feature release

@@ -52,7 +52,7 @@ W ScalarMediumAnalogModel::computeReceptionPower(const IRadio *receiverRadio, co
     // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
-    double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
+    double pathLoss = radioMedium->getPathLoss()->computeReceptionPathLoss(receiverRadio, transmission, arrival)->getValue(math::Point<Hz>(analogModel->getCenterFrequency()));
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(analogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = analogModel->getPower();
     ASSERT(!std::isnan(transmissionPower.get()));

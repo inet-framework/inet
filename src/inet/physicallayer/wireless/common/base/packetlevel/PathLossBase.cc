@@ -8,22 +8,17 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/PathLossBase.h"
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
-
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/common/signal/PowerFunctions.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-double PathLossBase::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
+Ptr<const IFunction<double, Domain<Hz>>> PathLossBase::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto radioMedium = transmission->getMedium();
-    auto analogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
-    mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = Hz(analogModel->getCenterFrequency());
+    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));
-    return computePathLoss(propagationSpeed, centerFrequency, distance);
+    return makeShared<DistancePathLossFunction>(this, propagationSpeed, distance);
 }
 
 } // namespace physicallayer

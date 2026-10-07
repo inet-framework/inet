@@ -50,7 +50,8 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalMediumAnalogMode
     EV_TRACE << "Transmission power end" << endl;
     Point<simsec, Hz> propagationShift(simsec(arrival->getStartTime() - transmission->getStartTime()), Hz(0));
     const auto& propagatedTransmissionPowerFunction = makeShared<DomainShiftedFunction<WpHz, Domain<simsec, Hz>>>(transmissionPowerFunction, propagationShift);
-    Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyDependentAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
+    const auto& pathLossFunction = radioMedium->getPathLoss()->computeReceptionPathLoss(receiverRadio, transmission, arrival);
+    Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyDependentAttenuationFunction>(radioMedium, pathLossFunction, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> receptionPower;
     if (attenuateWithCenterFrequency) {
         const auto& constantAttenuationFunction = makeShared<ConstantFunction<double, Domain<simsec, Hz>>>(attenuationFunction->getValue(Point<simsec, Hz>(simsec(0), analogModel->getCenterFrequency())));
