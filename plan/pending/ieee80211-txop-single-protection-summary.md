@@ -2,7 +2,7 @@
 
 > **Kind:** reference · **Status:** snapshot 2026-10-07 · **Seal:** none · **Owns:** — · **Stands on:** [ieee80211-txop-single-protection.md](ieee80211-txop-single-protection.md)
 
-This summary describes revision 12 of the [full plan](ieee80211-txop-single-protection.md), dated 2026-10-07. The user requested execution on 2026-10-07. Local implementation and focused verification are complete. The [verification report](ieee80211-txop-single-protection-verification.md) records results and remaining publication checks. The full plan owns the detailed conditions, tests, and standards evidence. All examples below are hypothetical.
+This summary describes revision 12 of the [full plan](ieee80211-txop-single-protection.md), dated 2026-10-07. It records source `a224e4677b` before the strict TXNAV admission revision. The [verification report](ieee80211-txop-single-protection-verification.md#approved-strict-txnav-baselines) records the later approval and results. The full plan owns the detailed conditions, tests, and standards evidence. All examples below are hypothetical.
 
 ## Intended result and scope
 
@@ -65,6 +65,8 @@ The plan samples both budgets after the previous exchange completes, before the 
 
 ## Verification and evidence limits
 
+This section records the earlier source `a224e4677b`. The [later verification](ieee80211-txop-single-protection-verification.md#approved-strict-txnav-baselines) supersedes its pending baseline and publication statements.
+
 The [verification matrix](ieee80211-txop-single-protection.md#6-verification-and-expected-results) specifies production observations for budgets, retained modes, refusal, shared contention, and compatibility paths. It also requires these direct checks:
 
 - A1 checks the emitted RTS Duration/ID as well as the subsequent DATA header and field after selection of Block Ack.
@@ -76,6 +78,4 @@ The [verification matrix](ieee80211-txop-single-protection.md#6-verification-and
 
 The last case can reduce continuation within a TXOP. The field equation must not reserve extra time merely to force admission. Separate progress tests cover oversized voice frames and later service for another access category.
 
-The verification report records a fresh debug build, four successful unit fixtures, and twelve successful module fixtures. Five legacy control rows verify their fingerprints. Five QoS rows complete with mismatches; the report identifies their first field and timer divergence. No baseline changed.
-
-The local series contains seven commits with intermediate debug builds and direct tests. Publication requires the remaining release build, broader fingerprint campaign, separate pull requests, and publication gates. Baseline changes need exact affected rows, causal evidence, and separate approval. The [standards record](ieee80211-txop-single-protection.md#8-standards-and-review-evidence) identifies the IEEE clauses, corpus limitations, and source locations.
+The [verification report](ieee80211-txop-single-protection-verification.md#approved-strict-txnav-baselines) records the approved baseline changes, builds, focused tests, and CI evidence. The [fingerprint report](ieee80211-txop-single-protection-fingerprints.md) records the causes across the affected configurations. The [standards record](ieee80211-txop-single-protection.md#8-standards-and-review-evidence) identifies the IEEE clauses, corpus limits, and source locations.
