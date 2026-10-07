@@ -23,8 +23,16 @@ void TxopProcedure::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         limit = par("txopLimit");
+        const char *protection = par("protectionMechanism");
+        if (!strcmp(protection, "single"))
+            configuredProtectionMechanism = SINGLE_PROTECTION;
+        else if (!strcmp(protection, "multiple"))
+            configuredProtectionMechanism = MULTIPLE_PROTECTION;
+        else
+            throw cRuntimeError("Invalid protectionMechanism: %s", protection);
         WATCH(start);
         WATCH(protectionMechanism);
+        WATCH(reservationEnd);
     }
 }
 
@@ -60,7 +68,7 @@ s TxopProcedure::getTxopLimit(PhyType phyType, AccessCategory ac)
 
 TxopProcedure::ProtectionMechanism TxopProcedure::selectProtectionMechanism(AccessCategory ac) const
 {
-    return ProtectionMechanism::SINGLE_PROTECTION;
+    return configuredProtectionMechanism;
 }
 
 simtime_t TxopProcedure::getStart() const
@@ -84,6 +92,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     // The STA selects between single and multiple protection when it transmits the first frame of a TXOP.
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
     protectionMechanism = selectProtectionMechanism(ac);
+    reservationEnd = SIMTIME_ZERO;
     start = simTime();
     emit(txopStartedSignal, this);
     EV_INFO << "Txop started: limit = " << limit << ".\n";
@@ -94,6 +103,7 @@ void TxopProcedure::endTxop()
     Enter_Method("endTxop");
     emit(txopEndedSignal, this);
     start = -1;
+    reservationEnd = SIMTIME_ZERO;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
     EV_INFO << "Txop ended.\n";
 }
@@ -111,6 +121,12 @@ simtime_t TxopProcedure::getDuration() const
     if (start == -1)
         throw cRuntimeError("Txop has not started yet");
     return simTime() - start;
+}
+
+void TxopProcedure::recordTransmittedDuration(simtime_t duration)
+{
+    Enter_Method("recordTransmittedDuration");
+    reservationEnd = std::max(reservationEnd, simTime() + duration);
 }
 
 // FIXME implement!

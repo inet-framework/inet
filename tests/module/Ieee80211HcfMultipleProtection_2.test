@@ -1,7 +1,9 @@
 %description:
-Check negative and fractional Basic Block Ack response fields at the HCF Tx boundary.
+Exercise the existing immediate Basic Block Ack exchange through HCF.
+Check zero-limit RTS estimates with an absent agreement, a Block Ack agreement,
+AARF query effects, and a deterministic rate decrease. Check response conversion at Tx.
 
-%extraargs: -r 5
+%extraargs: -r 0..6
 
 %file: ProtectionRates.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -356,6 +358,7 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
 **.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 0 ? 1024us : 0s
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "multiple"
 *.sender.wlan[0].address = "02:00:00:00:00:01"
 *.receiver.wlan[0].address = "02:00:00:00:00:02"
 **.mobility.initFromDisplayString = false

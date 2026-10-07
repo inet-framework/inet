@@ -432,6 +432,18 @@ Notable backward compatible changes are the following:
    and relied on the rescheduling must call that method itself.
 
 
+7. IEEE 802.11 selectable multiple protection in EDCA TXOPs
+
+   EDCA TXOPs support selectable multiple protection. Single protection remains
+   the default. Multiple protection uses nominal SIFS and normal stops when
+   another exchange cannot use a legal duration field. For example, a
+   200 us PPDU within a 1024 us TXOP advertises 824 us of reservation.
+   A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
+
+   The user guide explains nominal timing, zero-limit estimates, unused
+   reservation time, and support limits. The feature does not implement full
+   shared TXNAV or admission of a complete exchange against the remaining budget.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 

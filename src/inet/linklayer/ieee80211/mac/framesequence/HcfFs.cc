@@ -61,7 +61,31 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     if (hasFrameToTransmit) {
         auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
         const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
-        return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
+        if (frameSequence->getCount() == 0)
+            return true;
+        auto qos = context->getQoSContext();
+        auto txop = qos->txopProcedure;
+        if (nextHeader->getReceiverAddress().isMulticast() || txop->getRemaining() <= 0)
+            return false;
+        if (txop->getProtectionMechanism() == TxopProcedure::MULTIPLE_PROTECTION) {
+            auto deadline = txop->getStart() + txop->getLimit();
+            // IEEE Std 802.11-2024, 9.2.5.2(b)(4): decline a later exchange with an empty raw interval.
+            if (txop->getReservationEnd() > deadline)
+                return false;
+            auto projectedStart = simTime() + context->getIfs();
+            // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: decline starts at or after the deadline.
+            if (projectedStart >= deadline)
+                return false;
+            // BAR precedes DATA in TxOpFs and does not use RTS.
+            if (!qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), txop) &&
+                context->getRtsPolicy()->isRtsNeeded(nextFrameToTransmit, nextHeader))
+            {
+                // Integer legacy RTS airtime requires its start on the deadline's microsecond grid.
+                if ((projectedStart - deadline).raw() % SimTime(1, SIMTIME_US).raw() != 0)
+                    return false;
+            }
+        }
+        return true;
     }
     return false;
 }

@@ -1,0 +1,23 @@
+%description:
+Reject an invalid protection selector before any transmission.
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+network SelectorNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = SelectorNetwork
+ned-path = .;../../../../src;../../lib
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.protectionMechanism = "invalid"
+
+%exitcode: 1
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+Value "invalid" is not allowed, must be one of: "single","multiple"

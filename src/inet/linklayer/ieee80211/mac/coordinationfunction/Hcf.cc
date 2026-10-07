@@ -399,6 +399,7 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     Enter_Method("transmissionComplete");
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        edcaf->getTxopProcedure()->recordTransmittedDuration(header->getDurationField());
         frameSequenceHandler->transmissionComplete();
     }
     else if (hcca->isOwning())
@@ -743,6 +744,43 @@ simtime_t Hcf::computeMultipleProtectionDuration(simtime_t limit, simtime_t rema
     return encodeDuration(duration, true);
 }
 
+simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+        TxopProcedure *txop, simtime_t ppduDuration)
+{
+    auto sifs = modeSet->getSifsTime();
+    if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+        auto step = check_and_cast<RtsTransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        // The step owns the selected protected frame. Prediction must not extract another queued unit.
+        std::unique_ptr<Packet> predicted(step->getProtectedFrame()->dup());
+        auto protectedHeader = predicted->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(protectedHeader)) {
+            OriginatorBlockAckAgreement *agreement = nullptr;
+            if (originatorBlockAckAgreementHandler)
+                agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
+            auto policy = originatorAckPolicy->computeAckPolicy(predicted.get(), data, agreement);
+            auto updated = predicted->removeAtFront<Ieee80211DataHeader>();
+            updated->setAckPolicy(policy);
+            predicted->insertAtFront(updated);
+            protectedHeader = predicted->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        }
+        // Rate queries retain their existing effects. The local copy isolates only frame changes.
+        auto mode = rateSelection->computeMode(predicted.get(), protectedHeader, txop);
+        setFrameMode(predicted.get(), protectedHeader, mode);
+        auto protectedDuration = mode->getDuration(predicted->getDataLength());
+        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(packet, rts)->getDuration(LENGTH_CTS);
+        return ppduDuration + sifs + ctsDuration + sifs +
+            estimateZeroLimitExchange(predicted.get(), protectedHeader, txop, protectedDuration);
+    }
+    if (auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header))
+        return ppduDuration + sifs + rateSelection->computeResponseBlockAckFrameMode(packet, bar)->getDuration(LENGTH_BASIC_BLOCKACK);
+    if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+        if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
+            return ppduDuration + sifs + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmt)->getDuration(LENGTH_ACK);
+        return ppduDuration;
+    }
+    throw cRuntimeError("Unsupported zero-limit multiple protection frame");
+}
+
 void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     Enter_Method("transmitFrame");
@@ -772,8 +810,20 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
             packet->insertAtFront(header);
         }
-        else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION)
-            throw cRuntimeError("Multiple protection is unsupported");
+        else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION) {
+            header = packet->peekAtFront<Ieee80211MacHeader>();
+            auto ppduDuration = mode->getDuration(packet->getDataLength());
+            auto projectedStart = simTime() + ifs;
+            auto reservation = std::max(SIMTIME_ZERO, txop->getReservationEnd() - projectedStart);
+            auto remaining = std::max(SIMTIME_ZERO, txop->getStart() + txop->getLimit() - projectedStart);
+            auto exchangeDuration = txop->getLimit() == 0 && reservation == 0 ?
+                estimateZeroLimitExchange(packet, header, txop, ppduDuration) : SIMTIME_ZERO;
+            auto duration = computeMultipleProtectionDuration(txop->getLimit(), remaining, reservation,
+                ppduDuration, exchangeDuration, txop->getReservationEnd() != 0);
+            auto updated = packet->removeAtFront<Ieee80211MacHeader>();
+            updated->setDurationField(duration);
+            packet->insertAtFront(updated);
+        }
         else
             throw cRuntimeError("Undefined protection mechanism");
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, true, this);
