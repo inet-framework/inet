@@ -36,6 +36,13 @@ class INET_API IRx
     // from Contention
     virtual bool isMediumFree() const = 0;
     virtual void frameTransmitted(simtime_t durationField) = 0;
+    // TXNAV is shared by the EDCAFs and is separate from received NAV.
+    virtual simtime_t getTxnavRemaining() const = 0;
+    // Replace TXNAV from the successful holder PPDU end and its encoded field.
+    virtual void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) = 0;
+    // HCF disables local contention through its active sequence, including response waits.
+    // This permission does not change the medium query for CTS.
+    virtual void setContentionBlocked(bool blocked) = 0;
 
     // from Coordination functions
     virtual void registerContention(IContention *contention) = 0;
@@ -51,4 +58,3 @@ class INET_API IRx
 } // namespace inet
 
 #endif
-

@@ -4,6 +4,21 @@ Migrating Code from INET 3.x
 ============================
 Release: |release|
 
+IEEE 802.11 Shared TXNAV Operations
+---------------------------------
+
+Custom ``IRx`` implementations must provide these operations:
+
+.. code-block:: c++
+
+   simtime_t getTxnavRemaining() const override;
+   void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) override;
+   void setContentionBlocked(bool blocked) override;
+
+Keep TXNAV separate from received NAV. Replace its endpoint with ``ppduEnd + durationField`` after successful holder transmission. Cancel TXNAV for zero or expired fields. Preserve TXNAV after TXOP end. Exclude contention while TXNAV remains active. Keep ``isMediumFree()`` independent of TXNAV for the CTS policy and radio configuration.
+
+Honor the separate contention permission through ``setContentionBlocked()``. A true argument excludes contention without a NAV or TXNAV reservation. For example, an initial response wait can need channel-owner exclusion before successful TXNAV exists. Preserve the CTS medium query.
+
 IEEE 802.11 Sequence Start Notification
 -------------------------------------
 

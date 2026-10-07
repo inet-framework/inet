@@ -367,6 +367,18 @@ Notable backward incompatible changes are the following:
    successor term, so the legacy forecast can still reserve an ineligible group
    successor. This field correction can change Wi-Fi results and fingerprints.
 
+23. IEEE 802.11 shared TXNAV operations
+
+   Rx now provides shared success-only TXNAV separately from received NAV.
+   Its expiry uses actual holder PPDU end plus encoded Duration/ID. A shorter
+   successful field replaces the endpoint; zero or expired fields clear it.
+   Contention requires expired TXNAV and available contention permission.
+   The CTS medium query remains independent of these two inputs.
+
+   Custom IRx implementations must provide getTxnavRemaining(),
+   successfulFrameTransmitted(), and setContentionBlocked(). The migration guide
+   explains their contracts.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
