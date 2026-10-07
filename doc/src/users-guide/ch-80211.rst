@@ -504,6 +504,75 @@ helps against hidden nodes at the cost of overhead. The CTS timeout,
 
    **.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 500B
 
+Multiple protection in an EDCA TXOP
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A transmission opportunity (TXOP) lets one access category send frame exchanges after one channel
+access. To reserve time for several frames, select multiple
+protection on that category's ``txopProcedure``. The holder retains the selection until the TXOP
+ends. Other stations use each transmitted Duration/ID field to set their network allocation vector
+(NAV). The NAV records a reservation of the medium.
+
+.. code-block:: ini
+
+   *.host.wlan[0].mac.qosStation = true
+   *.host.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 1024us
+   *.host.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.protectionMechanism = "multiple"
+
+Index 2 selects video traffic by default. Use your network's host and interface paths. See
+:ned:`TxopProcedure` for the protection selector contract. An invalid value causes an initialization
+error. Nominal timing uses the mode set's short interframe space (SIFS) unchanged after the first
+transmission step. The first step adds no interframe space.
+
+For a positive limit, the holder reserves the upper bound from IEEE Std 802.11-2024, 9.2.5.2. For
+example, a hypothetical 200 us PPDU within a 1024 us TXOP advertises 824 us. A PPDU is one PHY
+transmission, with its PHY overhead. Later fields subtract the actual holder gap and the current
+PPDU airtime from the time left. HCF applies ceiling to whole microseconds and rejects a holder
+field above 32767 us. Recipient CTS, ACK, and immediate Basic Block Ack fields use response
+subtraction, zero clamp, and ceiling.
+
+Fractional elapsed time can make ceiling extend the advertised endpoint beyond the TXOP deadline. The
+holder then ends the sequence normally before another exchange starts. Pending DATA remains available for
+another grant; retry counters do not change. A later RTS also needs a start on the deadline's
+microsecond grid, because its legacy airtime is integral. The holder declines that whole exchange
+before RTS when the start fails this check.
+
+For example, a hypothetical burst uses a 1024 us limit, 100 us DATA, 44 us ACK, and 0.2 us propagation
+each way. The first DATA starts at zero and advertises 924 us. After ACK, the next nominal 16 us SIFS
+places DATA at 176.4 us. Its raw field is 747.6 us, which HCF converts to 748 us. The reservation now
+ends at 1024.4 us. HCF stops before the third exchange without a transmission failure or retry increment.
+
+For a zero limit, the initial field estimates the selected exchange, with its required response and
+optional RTS/CTS. For example, a hypothetical 96-byte MPDU uses 9 Mbps during the RTS estimate but 6
+Mbps when DATA transmits. With 6 Mbps control responses, the reservation ends at 296 us, while the
+actual ACK ends at 340 us. Later mode queries can change the airtime, so the estimate does not
+guarantee protection through the actual response.
+
+Rate queries retain the adaptive rate controller's existing effects. A failed CTS does not undo a
+rate increase from the estimate. One conventional fragment under a zero limit reserves only its
+selected exchange.
+
+Unused reservation time remains busy because this implementation sends no CF-End to release it. The
+current group sequence sends one group frame per grant, even with a positive limit. For the 200 us
+group example above, all 824 us of advertised reservation remains unused. The holder's other access
+categories and other stations remain blocked until reservation expiry. An early end clears the
+category's holder endpoint but retains Rx's NAV. Recipient responses do not extend their own local
+NAV; unrelated received reservations still suppress CTS.
+
+The supported EDCA path requires an effective AIFSN of at least 1 for the response ownership rule.
+AIFSN specifies the slot count that supplements SIFS to determine the arbitration interframe space.
+The standard separately requires AIFSN of at least 1 for APs and at least 2 for non-AP stations. For
+example, a non-AP station with AIFSN 1 meets the ownership condition but violates the standard's
+minimum.
+
+This feature does not implement full shared TXNAV or admission of a complete exchange against the
+remaining budget. For example, the existing admission policy can start a 120 us exchange with only
+100 us left. The reference scope assumes whole-microsecond positive limits, integral initial PPDU
+airtime, and integral legacy RTS airtime. It adds no A-MPDU, Compressed Block Ack, new
+fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. It also adds no reverse
+direction, beamforming, S1G, multi-user, or general MAC lifecycle support. It does not repair
+general rate selection, recipient response timing, or TXOP overruns.
+
 .. _ug:sec:80211:fragmentation:
 
 .. _ug:sec:80211:aggregation:

@@ -1,14 +1,15 @@
 # Implementation plan: multiple protection in an EDCA TXOP
 
 Implementation base: recipient NAV prerequisite `cc17ef62f4`, based on `e04a0113b383d55e5b6dbbd4dde75d825a6f2756`.
-Plan revision: 2026-10-07, revision 18.
+Plan revision: 2026-10-07, revision 19.
+Timing: Nominal timing uses the mode set's short interframe space (SIFS) unchanged after the first transmission step. The first step adds no interframe space.
 Status: nominal timing implementation is complete. Section 8 records verification for this revision.
 Authorization: on 2026-10-07, the user requested removal of aligned timing from the current branch and PR #1301. The request includes simpler source, documentation, this plan, and its summary. The request authorizes publication of the revised branch and PR description. It does not authorize new fingerprint baseline values.
 Contract check: source inspection confirms the owners, callers, frame sequence, and completion paths. The source paths are unsealed. The change removes the timing selector, timing state, IFS helper, and policy branches in tests. HCF uses the frame sequence's nominal IFS directly. Endpoint arithmetic, RTS phase refusal, deadline checks, and expired-reservation behavior retain their nominal results.
 
 Dependencies: the independent [recipient NAV fix](ieee80211-recipient-nav.md). Its commit owns the Tx contract, caller choices, migration instructions, and all 24 causal fingerprint rows.
 Evidence: source inspection and local IEEE Std 802.11-2024 retrieval.
-Verification: section 8 records executed checks and exact fingerprint differences.
+Verification: section 8 records executed checks and exact fingerprint differences. Revision 19 changes explanatory text only; runtime source and tests retain revision 18 content.
 
 The design uses the current transmission path and the vocabulary in [CONTEXT.md](../../CONTEXT.md).
 
@@ -41,13 +42,13 @@ The current admission policy can start a 120 µs exchange when only 100 µs rema
 
 A queue that becomes empty before the advertised endpoint leaves unused reservation time. For example, a hypothetical burst ends at 400 µs within a 1,024 µs reservation. Other stations retain the reservation until its endpoint because this change adds no CF-End. Each positive-limit group transmission leaves its entire `L - P` reservation unused under the current one-frame sequence. The group example above therefore leaves 824 µs unused after every transmission. That reservation blocks other stations and the holder's other EDCAFs until expiry; user documentation must state this cost.
 
-## 2. Current behavior and responsible components
+## 2. Initial behavior and responsible components
 
-These facts come from source inspection at the recorded revision. They do not establish simulated outcomes.
+The table describes behavior before the recipient NAV prerequisite and this feature. Source inspection establishes the call paths. Section 8 records the production assertions and their results.
 
 IFS means interframe space: a required interval between specified frame transmissions. SIFS means short interframe space. This interval separates specified immediate responses and frames within an exchange.
 
-| Component | Current behavior | Proposed responsibility |
+| Component | Initial behavior | Required responsibility |
 | --- | --- | --- |
 | [TxopProcedure](../../src/inet/linklayer/ieee80211/mac/originator/TxopProcedure.cc) | The enum contains both classes, but the selector returns single protection. The owner retains that class for the active TXOP. | Retain the selected protection class and one endpoint. |
 | [Hcf](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) | It selects ACK policy and mode before transmission. It rejects multiple protection. | Calculate the field with the frame sequence's nominal IFS after mode selection. Record the endpoint in its completion callback. |
@@ -107,7 +108,7 @@ The hypothetical example uses the existing propagation formula. The production r
 
 ### 3.1 Nominal timing and normal stop
 
-The nominal policy keeps the IFS supplied by the sequence. After an exchange completes, the continuation predicate compares `reservationEnd` with `txopStart + L`. If the endpoint exceeds that deadline, it declines the next exchange. This check applies to positive limits. A later RTS needs the additional check below, before its exchange starts.
+The frame sequence supplies the mode set's SIFS after the first transmission step. After an exchange completes, the continuation predicate compares `reservationEnd` with `txopStart + L`. If the endpoint exceeds that deadline, it declines the next exchange. This check applies to positive limits. A later RTS needs the additional check below, before its exchange starts.
 
 The predicate also calculates `projectedStart = simTime() + context->getIfs()`. It rejects a later start at or beyond the deadline. For example, an ACK at 160 µs leaves 4 µs in a 164 µs TXOP. Nominal SIFS places the next DATA at 176 µs, so HCF stops normally before that exchange.
 
@@ -262,8 +263,9 @@ The independent recipient NAV fix precedes the feature. It supplies the Tx contr
 | Step and purpose | Responsible component | Change and expected result | Direct verification |
 | --- | --- | --- | --- |
 | 1. Normalize response fields. | HCF and the response regression. | Clamp negative subtraction to zero. Apply ceiling before Tx calculates FCS. | Negative and fractional Basic Block Ack fields under single protection. |
-| 2. Add nominal multiple protection. | TxopProcedure, HCF, HcfFs, and focused tests. | Add the protection selector, one endpoint, four duration cases, zero-limit estimates, and normal continuation checks. Include deadline and expired-reservation boundaries in this source commit. | Arithmetic, field bytes, nominal propagation, repeated RTS, group reservations, failures, and deadline boundaries. |
-| 3. Explain use and limits. | User guide, WHATSNEW, plan, and plan summary. | Explain nominal timing, estimate limits, unused reservations, and support conditions. | Compare selectors, examples, and limits with source and direct test results. |
+| 2. Prepare duration arithmetic. | HCF and the unit fixture. | Add the four duration cases as a helper without a production caller. HCF retains its preceding behavior. | Arithmetic, zero clamp, ceiling, range errors, and field bytes. |
+| 3. Add nominal multiple protection. | TxopProcedure, HCF, HcfFs, and focused tests. | Add the protection selector, one endpoint, zero-limit estimates, and normal continuation checks. HCF calls the prepared arithmetic. Include deadline and expired-reservation boundaries in this source commit. | Nominal propagation, repeated RTS, group reservations, failures, endpoint reset, and deadline boundaries. |
+| 4. Explain use and limits. | User guide, WHATSNEW, plan, and plan summary. | Explain nominal timing, estimate limits, unused reservations, and support conditions. | Compare selectors, examples, and limits with source and direct test results. |
 
 ### 5.1 Commit sequence
 
@@ -272,10 +274,13 @@ Each source commit includes its direct tests. The recipient NAV prerequisite own
 | Feature commit | Decision and dependency | Files and direct verification |
 | --- | --- | --- |
 | 1. Normalize HCF response fields. | HCF clamps subtraction and applies ceiling before Tx. This source prerequisite follows the recipient NAV fix. | HCF, release note, and the response case under single protection. |
-| 2. Add nominal multiple protection. | HCF calculates holder fields. HcfFs rejects illegal continuation starts and duration intervals. This commit includes the expired-reservation calculation and depends on response conversion. | TxopProcedure, HCF, HcfFs, arithmetic and production regressions, protection selector checks, and release note. |
-| 3. Document use and limits. | Documentation describes the complete nominal feature. | User guide, full plan, and plan summary. |
+| 2. Prepare duration arithmetic. | The isolated helper uses the preceding response encoder. Direct tests establish its equations before production use. | HCF helper declaration and implementation, plus arithmetic and field encoding assertions. |
+| 3. Add nominal multiple protection. | HCF calls the prepared arithmetic for holder fields. HcfFs rejects illegal continuation starts and duration intervals. This commit includes the expired-reservation calculation and depends on arithmetic preparation. | TxopProcedure, HCF, HcfFs, production regressions, endpoint and predicate assertions, protection selector checks, and release note. |
+| 4. Document use and limits. | Documentation describes the complete nominal feature. | User guide, full plan, and plan summary. |
 
-The Tx contract unit fixture belongs to the independent prerequisite. The response fixture compiles before the nominal feature exists. The nominal commit adds its production scenarios and predicate boundaries together. No feature commit changes received NAV rules.
+The Tx contract unit fixture belongs to the independent prerequisite. The response fixture compiles before the nominal feature exists. No feature commit changes received NAV rules.
+
+The arithmetic fixture initially checks only the isolated helper and field bytes. For example, a 1,024 µs limit and 200 µs PPDU produce an 824 µs field before HCF uses that helper. The nominal commit extends the fixture with endpoint and predicate assertions. It also adds the production scenarios.
 
 ### 5.2 Focused cases
 
@@ -287,7 +292,7 @@ The following cases define direct verification. The existing [TxopProcedure unit
 | `Ieee80211TxNavChoice_1.test`, migration signatures | Implement the changed `ITx` interface in a local test class. Call both overloads with true and false through interface and concrete pointers. | The implementation and calls compile with required explicit arguments. The migration snippets match these compiled versions. |
 | Same unit case, time origin | Use a 1,024 µs endpoint, a 176.4 µs projected start, and a 100 µs PPDU. | `E` is 847.6 µs before the PPDU. One subtraction of `P` gives 747.6 µs. |
 | Same unit case, propagation history | Use the 176.4 µs and 352.8 µs nominal starts from section 3. | The second raw value is legal before ceiling. Its encoded endpoint makes the continuation predicate decline the third exchange. |
-| Same unit case, fractional initial DATA | Supply synthetic 100.2 µs initial DATA airtime with a 1,024 µs limit with nominal timing. | Its 923.8 µs raw field becomes 924 µs, with an endpoint at 1,024.2 µs. Both policies decline another exchange. |
+| Same unit case, fractional initial DATA | Supply synthetic 100.2 µs initial DATA airtime with a 1,024 µs limit and nominal timing. | Its 923.8 µs raw field becomes 924 µs, with an endpoint at 1,024.2 µs. HcfFs declines another exchange. |
 | `Ieee80211HcfMultipleProtection_1.test`, module | Queue several same-AC units with a positive limit and fixed modes. | Real HCF selects multiple protection and uses its current transmission path. |
 | Same module case, positive-limit group frame | Queue two group frames with a 1,024 µs limit. Select 200 µs airtime for the first frame. Queue another holder AC and a nonparticipating station during that transmission. | One group frame advertises 824 µs and receives no ACK. The owner endpoint is 1,024 µs before TXOP cleanup and empty afterward. All 824 µs remains unused. Other stations and holder EDCAFs stay blocked until expiry. The second group frame needs another grant. |
 | Same module case, repeated RTS | Use zero propagation delay. Force RTS/CTS for at least two DATA/ACK exchanges to the same recipient. | Both CTS responses occur within one TXOP. The recipient's own responses do not create a blocking NAV. |
@@ -400,7 +405,9 @@ TxopProcedure retains the selected protection class and holder endpoint until TX
 
 For example, scenario 17 uses a 384 µs limit. Its second RTS starts at 304 µs and reserves the deadline. Protected DATA starts at 432 µs and advertises zero. The exchange completes without another full-limit reservation.
 
-Fresh debug and release library builds exit 0. Three debug unit fixtures pass. Seven debug module fixtures pass across the initial selection and the corrected feature rerun, with 54 runs. The feature fixtures supply 18 holder runs and seven Basic Block Ack/rate runs. Management recovery supplies 24 runs with seeds 0, 1, and 2. Recipient NAV supplies two HCF/DCF runs; cancellation and default selection supply one run each. The invalid protection selector supplies one expected initialization error.
+Fresh debug and release library builds exit 0. Three debug unit fixtures pass. Seven debug module fixtures pass across the initial selection and the corrected feature rerun, with 54 runs. The feature fixtures supply 18 holder runs and seven Basic Block Ack/rate runs.
+
+Management recovery supplies 24 runs with seeds 0, 1, and 2. Recipient NAV supplies two HCF/DCF runs; cancellation and default selection supply one run each. The invalid protection selector supplies one expected initialization error.
 
 The first module invocation reports two setup failures because the feature run ranges still include the removed timing dimension. The corrected ranges are `0..17` and `0..6`. The focused rerun below exits 0. The five other fixtures pass the initial invocation. This revision changes no recorded fingerprint value.
 
@@ -417,6 +424,15 @@ The corrected feature rerun uses:
 
 ```sh
 ./bin/inet_run_module_tests -m debug --no-concurrent -f 'Ieee80211HcfMultipleProtection_[12]\.test$'
+```
+
+The response-conversion commit `88667a6964` also passes a fresh debug build and one production response case. That checkpoint uses single protection and scenario 5. Its source and test files match the original response commit. The nominal source commit has the same runtime source and tests as the tested final tree. The last commit adds documentation only.
+
+At the response-conversion checkpoint, run:
+
+```sh
+make MODE=debug -j4
+./bin/inet_run_module_tests -m debug --no-concurrent -f 'Ieee80211HcfMultipleProtection_2\.test$'
 ```
 
 The scoped architecture and source seal checks exit 0. Global architecture, naming, and interface gates exit 1. Comparison with the pinned base retains 36 architecture findings, 23 naming findings, and 15 interface findings. The local naming gate also reports six old, ignored generated headers whose MSG sources are absent. Those files are outside the committed diff. The committed change adds no finding.
@@ -470,6 +486,6 @@ These fingerprint configurations retain single protection or DCF. Their results 
 
 Section 8.1 records prior fingerprint verification for the independent recipient NAV fix. Those configurations use single protection or DCF. They supply prerequisite compatibility evidence, not direct proof of multiple protection. The nominal production assertions supply that direct evidence.
 
-This revision removes the timing selector, timing state, IFS helper, and tests for the removed policy. It retains the existing nominal checks without additional state, rate queries, timers, or events. The feature series contains response conversion, nominal multiple protection with its boundary checks, and documentation.
+This revision removes the timing selector, timing state, IFS helper, and tests for the removed policy. It retains the existing nominal checks without additional state, rate queries, timers, or events. The feature series contains response conversion, isolated arithmetic, nominal multiple protection with its boundary checks, and documentation.
 
 The implementation retains the admission, TXNAV, initial-airtime, RTS-airtime, and lifecycle limits in sections 1 and 6. The full wireless suite, additional feature seeds, other production PHY profiles, feature-off builds, cross-platform results, and full TXOP compliance remain unverified.
