@@ -1,0 +1,501 @@
+%description:
+Exercise production HCF, Tx, Rx, channel access, and frame sequences with fixed modes.
+Check nominal bursts, repeated RTS, normal stops, group reservations,
+zero-limit DATA and management, received NAV refusal, failure cleanup, and single protection.
+Reject later DATA starts at or beyond the TXOP deadline.
+Require zero duration for protected DATA after the reservation expires inside an exchange.
+
+%extraargs: -r 0..17
+
+%file: MultipleProtection.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+struct Transmission {
+    simtime_t start;
+    simtime_t airtime;
+    simtime_t duration;
+    int type;
+    bool retry;
+};
+
+class ProtectionMac : public Ieee80211Mac {
+  public:
+    std::vector<Transmission> transmissions;
+    int scenario() const { return par("scenario"); }
+    bool sender() const { return getFullPath().find("sender") != std::string::npos; }
+    bool suppressed = false;
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        transmissions.push_back({simTime(), mode->getDuration(packet->getDataLength()), header->getDurationField(),
+            header->getType(), header->getRetry()});
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+  protected:
+    void handleLowerPacket(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!sender() && !suppressed &&
+            ((scenario() == 9 && header->getType() == ST_RTS) ||
+             (scenario() == 10 && header->getType() == ST_DATA_WITH_QOS)))
+        {
+            suppressed = true;
+            delete packet;
+            return;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(ProtectionMac);
+
+class ProtectionRx : public Rx {
+  public:
+    int localUpdates = 0;
+    void frameTransmitted(simtime_t duration) override {
+        localUpdates++;
+        Rx::frameTransmitted(duration);
+    }
+    simtime_t endpoint() const { return endNavTimer->isScheduled() ? endNavTimer->getArrivalTime() : SIMTIME_ZERO; }
+    void injectReceivedReservation(simtime_t duration) {
+        Enter_Method("injectReceivedReservation");
+        auto header = makeShared<Ieee80211RtsFrame>();
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:07"));
+        header->setDurationField(duration);
+        auto packet = new Packet("unrelated-reservation", header);
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(trailer);
+        ASSERT(lowerFrameReceived(packet));
+        delete packet;
+    }
+};
+Define_Module(ProtectionRx);
+
+class ProtectionRateSelection : public IQosRateSelection {
+  public:
+    IQosRateSelection *delegate = nullptr;
+    int modeQueries = 0;
+    const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
+            const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txop) override {
+        modeQueries++;
+        return delegate->computeMode(packet, header, txop);
+    }
+    const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header) override {
+        return delegate->computeResponseCtsFrameMode(packet, header);
+    }
+    const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+        return delegate->computeResponseAckFrameMode(packet, header);
+    }
+    const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header) override {
+        return delegate->computeResponseBlockAckFrameMode(packet, header);
+    }
+};
+
+class ProtectionHcf : public Hcf {
+  public:
+    ProtectionRateSelection tracedSelection;
+    int failures = 0;
+    int acknowledgments = 0;
+    int cts = 0;
+    std::vector<int> burstData;
+    std::vector<simtime_t> burstEnds;
+    std::vector<simtime_t> completedEndpoints;
+    int currentData = 0;
+    bool injectedOtherAc = false;
+    int scenario() const { return par("scenario"); }
+    bool sender() const { return getFullPath().find("sender") != std::string::npos; }
+    TxopProcedure *txop(AccessCategory ac = AC_VI) { return edca->getEdcaf(ac)->getTxopProcedure(); }
+    void inject(int payload, bool group = false, bool management = false, int tid = 5) {
+        Enter_Method("inject");
+        Ptr<Ieee80211DataOrMgmtHeader> header;
+        if (management) {
+            auto mgmt = makeShared<Ieee80211MgmtHeader>();
+            mgmt->setType(ST_AUTHENTICATION);
+            header = mgmt;
+        }
+        else {
+            auto data = makeShared<Ieee80211DataHeader>();
+            data->setType(ST_DATA_WITH_QOS);
+            data->addChunkLength(QOSCONTROL_PART_LENGTH);
+            data->setTid(tid);
+            header = data;
+        }
+        header->setReceiverAddress(group ? MacAddress::BROADCAST_ADDRESS : MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("test-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payload)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto owner = edca->getChannelOwner()->getTxopProcedure();
+        if (currentData == 0 && owner->getDuration() == 0)
+            ASSERT(owner->getReservationEnd() == 0);
+        Hcf::transmitFrame(packet, ifs);
+        if (sender() && scenario() == 5 && !injectedOtherAc) {
+            injectedOtherAc = true;
+            inject(24, false, false, 0);
+        }
+    }
+    void originatorProcessTransmittedFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto owner = edca->getChannelOwner()->getTxopProcedure();
+        ASSERT(owner->getReservationEnd() >= simTime() + header->getDurationField());
+        completedEndpoints.push_back(owner->getReservationEnd());
+        if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
+            currentData++;
+        Hcf::originatorProcessTransmittedFrame(packet);
+    }
+    void frameSequenceFinished() override {
+        auto owner = edca->getChannelOwner()->getTxopProcedure();
+        burstData.push_back(currentData);
+        burstEnds.push_back(owner->getReservationEnd());
+        currentData = 0;
+        Hcf::frameSequenceFinished();
+        ASSERT(owner->getReservationEnd() == 0);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        auto type = packet->peekAtFront<Ieee80211MacHeader>()->getType();
+        if (type == ST_ACK) acknowledgments++;
+        if (type == ST_CTS) cts++;
+        Hcf::originatorProcessReceivedFrame(packet, request);
+    }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        failures++;
+        Hcf::originatorProcessFailedFrame(packet);
+    }
+    void originatorProcessRtsProtectionFailed(Packet *packet) override {
+        failures++;
+        Hcf::originatorProcessRtsProtectionFailed(packet);
+    }
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            tracedSelection.delegate = rateSelection;
+            rateSelection = &tracedSelection;
+        }
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) { take(frame); delete frame; }
+    }
+};
+Define_Module(ProtectionHcf);
+
+class ProtectionDcf : public Dcf {
+  public:
+    int acknowledgments = 0;
+    void inject() {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("dcf-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(28)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) acknowledgments++;
+        Dcf::originatorProcessReceivedFrame(packet, request);
+    }
+  protected:
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) { take(frame); delete frame; }
+    }
+};
+Define_Module(ProtectionDcf);
+
+class ProtectionTest : public cSimpleModule {
+  public:
+    ProtectionTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        if (getModuleByPath("^.sender.wlan[0].mac")->par("scenario").intValue() == 13) {
+            auto sender = check_and_cast<ProtectionDcf *>(getModuleByPath("^.sender.wlan[0].mac.dcf"));
+            auto receiverRx = check_and_cast<ProtectionRx *>(getModuleByPath("^.receiver.wlan[0].mac.rx"));
+            auto senderMac = check_and_cast<ProtectionMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+            auto receiverMac = check_and_cast<ProtectionMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+            sender->inject();
+            wait(SimTime(2, SIMTIME_MS));
+            ASSERT(sender->acknowledgments == 1);
+            ASSERT(senderMac->transmissions.size() == 2);
+            ASSERT(receiverMac->transmissions.size() == 2);
+            ASSERT(senderMac->transmissions[0].type == ST_RTS);
+            ASSERT(receiverMac->transmissions[0].type == ST_CTS);
+            ASSERT(receiverMac->transmissions[1].type == ST_ACK);
+            ASSERT(receiverRx->localUpdates == 0);
+            ASSERT(receiverMac->transmissions[0].start - senderMac->transmissions[0].start - senderMac->transmissions[0].airtime == SimTime(16, SIMTIME_US));
+            std::cout << "HCF multiple protection exchange assertions passed.\n";
+            return;
+        }
+        auto sender = check_and_cast<ProtectionHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
+        auto receiver = check_and_cast<ProtectionHcf *>(getModuleByPath("^.receiver.wlan[0].mac.hcf"));
+        auto senderMac = check_and_cast<ProtectionMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+        auto receiverMac = check_and_cast<ProtectionMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+        auto observerMac = check_and_cast<ProtectionMac *>(getModuleByPath("^.observer.wlan[0].mac"));
+        auto senderRx = check_and_cast<ProtectionRx *>(getModuleByPath("^.sender.wlan[0].mac.rx"));
+        auto receiverRx = check_and_cast<ProtectionRx *>(getModuleByPath("^.receiver.wlan[0].mac.rx"));
+        auto observerRx = check_and_cast<ProtectionRx *>(getModuleByPath("^.observer.wlan[0].mac.rx"));
+        int scenario = sender->scenario();
+        if (scenario == 8)
+            receiverRx->injectReceivedReservation(SimTime(2, SIMTIME_MS));
+        int count = scenario == 2 || scenario == 5 || scenario >= 14 ? 2 :
+            scenario <= 4 || scenario == 11 || scenario == 12 ? 3 : 1;
+        for (int i = 0; i < count; i++)
+            sender->inject(scenario == 5 ? 100 : ((scenario == 3 || scenario == 4) && i > 0 ? 66 : 26),
+                scenario == 5, scenario == 7);
+        if (scenario == 5) {
+            wait(SimTime(100, SIMTIME_US));
+            auto observer = check_and_cast<ProtectionHcf *>(getModuleByPath("^.observer.wlan[0].mac.hcf"));
+            observer->inject(26, false, false, 0);
+        }
+        wait(SimTime(350, SIMTIME_US));
+        if (scenario == 1) {
+            ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 2);
+            ASSERT(senderRx->endpoint() == sender->burstEnds[0]);
+            ASSERT(senderRx->endpoint() > simTime());
+            ASSERT(sender->txop()->getReservationEnd() == 0);
+        }
+        if (scenario == 3 || scenario == 4) {
+            ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 1);
+            ASSERT(senderMac->transmissions.size() == 1);
+            ASSERT(sender->failures == 0);
+        }
+        if (scenario == 5) {
+            ASSERT(senderMac->transmissions.size() == 1);
+            auto first = senderMac->transmissions[0];
+            ASSERT(first.airtime == SimTime(200, SIMTIME_US));
+            ASSERT(first.duration == SimTime(824, SIMTIME_US));
+            ASSERT(sender->burstData[0] == 1);
+            ASSERT(senderRx->endpoint() == first.start + SimTime(1024, SIMTIME_US));
+            ASSERT(observerRx->endpoint() == senderRx->endpoint());
+            ASSERT(!senderRx->isMediumFree() && !observerRx->isMediumFree());
+            ASSERT(sender->txop()->getReservationEnd() == 0);
+        }
+        wait(SimTime(6, SIMTIME_MS));
+        ASSERT(!senderMac->transmissions.empty());
+        ASSERT(receiverRx->localUpdates == 0);
+        ASSERT(senderRx->localUpdates == (int)senderMac->transmissions.size());
+        if (scenario != 6 && scenario != 7 && scenario != 11 && scenario != 12) {
+            ASSERT(sender->tracedSelection.modeQueries == (int)senderMac->transmissions.size());
+        }
+        auto propagation = scenario == 1 || scenario == 3 || scenario == 16 ? SimTime(0.2e-6) :
+            scenario == 4 ? SimTime(0.48e-6) : SIMTIME_ZERO;
+        for (auto response : receiverMac->transmissions) {
+            simtime_t requestEnd = -1;
+            for (auto originator : {senderMac, observerMac}) {
+                for (auto request : originator->transmissions) {
+                    auto end = request.start + request.airtime;
+                    if (end <= response.start)
+                        requestEnd = std::max(requestEnd, end);
+                }
+            }
+            ASSERT(requestEnd >= 0);
+            ASSERT(response.start == requestEnd + propagation + SimTime(16, SIMTIME_US));
+        }
+        if (scenario == 8) {
+            ASSERT(sender->failures > 0);
+            ASSERT(sender->cts > 0);
+            ASSERT(senderMac->transmissions[0].type == ST_RTS);
+            auto firstCts = receiverMac->transmissions[0];
+            ASSERT(firstCts.start >= SimTime(3, SIMTIME_MS));
+        }
+        else if (scenario == 9 || scenario == 10) {
+            ASSERT(receiverMac->suppressed);
+            ASSERT(sender->failures == 1);
+            ASSERT(sender->acknowledgments == 1);
+            ASSERT(sender->burstData.size() >= 2);
+            ASSERT(senderMac->transmissions.back().start >= sender->burstEnds[0]);
+        }
+        else {
+            ASSERT(sender->failures == 0);
+            if (scenario != 5)
+                ASSERT(sender->acknowledgments == count);
+        }
+        if (scenario <= 4) {
+            for (auto frame : senderMac->transmissions)
+                ASSERT(!frame.retry);
+            int expected = scenario == 1 || scenario == 2 ? 2 :
+                scenario == 3 || scenario == 4 ? 1 : 3;
+            ASSERT(sender->burstData[0] == expected);
+            auto first = senderMac->transmissions[0];
+            ASSERT(first.duration == SimTime(1024, SIMTIME_US) - first.airtime);
+            for (int i = 1; i < expected; i++) {
+                if (scenario == 2 || scenario == 3) break;
+                auto frame = senderMac->transmissions[i];
+                ASSERT(frame.start - first.start == SimTime(i * (scenario == 0 ? 176 : 176.4) * 1e-6));
+                ASSERT(frame.start + frame.airtime + frame.duration == first.start +
+                    SimTime((scenario == 0 ? 1024 : 1024.4) * 1e-6));
+            }
+            if (scenario == 2) ASSERT(sender->cts == 2);
+        }
+        if (scenario == 5) {
+            auto endpoint = sender->burstEnds[0];
+            for (size_t i = 1; i < senderMac->transmissions.size(); i++)
+                ASSERT(senderMac->transmissions[i].start >= endpoint);
+            ASSERT(observerMac->transmissions.size() == 1);
+            ASSERT(observerMac->transmissions[0].start >= endpoint);
+            ASSERT(receiverMac->transmissions.size() == 2); // ACKs for the other AC and the observer.
+        }
+        if (scenario == 6 || scenario == 7) {
+            ASSERT(senderMac->transmissions[0].duration == SimTime(60, SIMTIME_US));
+            ASSERT(sender->burstData[0] == 1);
+        }
+        if (scenario == 11 || scenario == 12) {
+            ASSERT(sender->burstData[0] == 3);
+            ASSERT(senderMac->transmissions[1].start - senderMac->transmissions[0].start == SimTime(176, SIMTIME_US));
+        }
+        if (scenario >= 14 && scenario <= 16) {
+            ASSERT(sender->burstData.size() == 2);
+            ASSERT(sender->burstData[0] == 1 && sender->burstData[1] == 1);
+            ASSERT(senderMac->transmissions.size() == 2);
+            auto limit = scenario == 14 ? SimTime(164, SIMTIME_US) : SimTime(176, SIMTIME_US);
+            auto first = senderMac->transmissions[0];
+            ASSERT(first.airtime == SimTime(100, SIMTIME_US));
+            ASSERT(first.start + first.airtime + first.duration == sender->burstEnds[0]);
+            ASSERT(sender->burstEnds[0] == first.start + limit);
+            // The queued DATA must acquire another TXOP after AIFS, rather than continue after SIFS.
+            auto ackEnd = receiverMac->transmissions[0].start + receiverMac->transmissions[0].airtime + propagation;
+            ASSERT(senderMac->transmissions[1].start > ackEnd + SimTime(16, SIMTIME_US));
+        }
+        if (scenario == 17) {
+            ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 2);
+            ASSERT(senderMac->transmissions.size() == 4);
+            ASSERT(receiverMac->transmissions.size() == 4);
+            auto first = senderMac->transmissions[0];
+            auto rts = senderMac->transmissions[2];
+            auto data = senderMac->transmissions[3];
+            auto deadline = first.start + SimTime(384, SIMTIME_US);
+            ASSERT(first.type == ST_RTS && rts.type == ST_RTS);
+            ASSERT(rts.start - first.start == SimTime(304, SIMTIME_US));
+            ASSERT(rts.start + rts.airtime + rts.duration == deadline);
+            ASSERT(receiverMac->transmissions[2].type == ST_CTS);
+            ASSERT(receiverMac->transmissions[2].duration == 0);
+            ASSERT(data.type == ST_DATA_WITH_QOS);
+            ASSERT(data.start - first.start == SimTime(432, SIMTIME_US));
+            ASSERT(data.start > deadline);
+            ASSERT(data.duration == 0);
+            ASSERT(sender->completedEndpoints.back() == data.start + data.airtime);
+            ASSERT(receiverMac->transmissions[3].duration == 0);
+        }
+        ASSERT(receiver->failures == 0);
+        std::cout << "HCF multiple protection exchange assertions passed.\n";
+    }
+};
+Define_Module(ProtectionTest);
+}
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module ProtectionMac extends Ieee80211Mac {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::ProtectionMac);
+}
+module ProtectionHcf extends Hcf {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::ProtectionHcf);
+}
+module ProtectionDcf extends Dcf {
+    parameters:
+        @class(::inet::ieee80211::ProtectionDcf);
+}
+simple ProtectionRx extends Rx {
+    parameters:
+        @class(::inet::ieee80211::ProtectionRx);
+}
+simple ProtectionTest extends SimpleModule {
+    parameters:
+        @class(::inet::ieee80211::ProtectionTest);
+}
+network ProtectionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        observer: WirelessHost;
+        test: ProtectionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ProtectionNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = ${scenario} == 1 || ${scenario} == 3 || ${scenario} == 16 ? 0.2us : (${scenario} == 4 ? 0.48us : 0s)
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.typename = "ProtectionMac"
+**.wlan[*].mac.scenario = ${scenario=0..17}
+**.wlan[*].mac.qosStation = ${scenario} != 13
+**.wlan[*].mac.dcf.typename = "ProtectionDcf"
+**.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
+**.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.rx.typename = "ProtectionRx"
+**.wlan[*].mac.hcf.typename = "ProtectionHcf"
+**.wlan[*].mac.hcf.scenario = ${scenario}
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 2 || ${scenario} == 17 || ${scenario} >= 8 && ${scenario} <= 9 ? 0B : (${scenario} == 3 || ${scenario} == 4 ? 75B : 4096B)
+*.observer.wlan[0].mac.hcf.edca.edcaf[*].cwMin = 31
+*.observer.wlan[0].mac.hcf.edca.edcaf[*].cwMax = 31
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+*.observer.wlan[0].mac.hcf.edca.edcaf[0].aifsn = 10
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 6 || ${scenario} == 7 ? 0s : (${scenario} == 17 ? 384us : (${scenario} == 14 ? 164us : (${scenario} >= 15 ? 176us : 1024us)))
+*.sender.wlan[0].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = ${scenario} == 11 || ${scenario} == 12 ? "single" : "multiple"
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+*.observer.wlan[0].address = "02:00:00:00:00:03"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+*.observer.mobility.initialX = 2m
+*.observer.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+HCF multiple protection exchange assertions passed.

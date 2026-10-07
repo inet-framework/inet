@@ -35,6 +35,8 @@ class INET_API TxopProcedure : public ModeSetListener
     simtime_t start = -1;
     simtime_t limit = -1;
     ProtectionMechanism protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
+    ProtectionMechanism configuredProtectionMechanism = ProtectionMechanism::SINGLE_PROTECTION;
+    simtime_t reservationEnd = 0; // Absolute holder reservation endpoint, in seconds; zero means no reservation.
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -57,6 +59,8 @@ class INET_API TxopProcedure : public ModeSetListener
     virtual bool isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const;
 
     virtual ProtectionMechanism getProtectionMechanism() const { return protectionMechanism; }
+    simtime_t getReservationEnd() const { return reservationEnd; }
+    void recordTransmittedDuration(simtime_t duration);
 };
 
 class INET_API TxopDurationFilter : public cObjectResultFilter

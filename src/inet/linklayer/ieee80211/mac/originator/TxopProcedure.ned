@@ -20,6 +20,7 @@ simple TxopProcedure extends SimpleModule
     parameters:
         @class(TxopProcedure);
         double txopLimit @unit(s) = default(-1s);
+        string protectionMechanism @enum("single", "multiple") = default("single");
         @display("i=block/timer");
         @signal[txopStarted](inet::ieee80211::TxopProcedure);
         @signal[txopEnded](inet::ieee80211::TxopProcedure);

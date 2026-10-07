@@ -118,6 +118,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     FrameSequenceContext *buildContext(AccessCategory ac);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
+    simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            TxopProcedure *txop, simtime_t ppduDuration);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual bool isReceptionInProgress();

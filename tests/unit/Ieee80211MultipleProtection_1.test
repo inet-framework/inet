@@ -1,8 +1,12 @@
 %description:
-Verify the four multiple protection equations and field encoding before production use.
+Verify the four multiple protection equations, field encoding, nominal continuation checks, and TXOP reset.
 
 %includes:
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -13,12 +17,58 @@ class ArithmeticHcf : public Hcf {
   public:
     using Hcf::computeMultipleProtectionDuration;
 };
+
+class TestTxop : public TxopProcedure {
+  public:
+    void configure(const char *profile, simtime_t value, bool multiple) {
+        modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(profile));
+        limit = value;
+        configuredProtectionMechanism = multiple ? MULTIPLE_PROTECTION : SINGLE_PROTECTION;
+    }
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL)
+            limit = par("txopLimit");
+    }
+};
+Define_Module(TestTxop);
+
+class PredicateFrames : public InProgressFrames {
+  public:
+    Packet *selected = nullptr;
+    int reads = 0;
+    bool hasInProgressFrames() override { return true; }
+    Packet *getFrameToTransmit() override { reads++; return selected; }
+};
+class PredicateAckPolicy : public OriginatorQosAckPolicy {
+  public:
+    bool bar = false;
+    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *) const override { return bar; }
+};
+class PredicateRtsPolicy : public IRtsPolicy {
+  public:
+    bool needed = true;
+    bool isRtsNeeded(Packet *, const Ptr<const Ieee80211MacHeader>&) const override { return needed; }
+    int getRtsThreshold() const override { return 0; }
+    simtime_t getCtsTimeout(Packet *, const Ptr<const Ieee80211RtsFrame>&) const override { return 0; }
+};
+class LaterExchange : public RepeatingFs {
+  public:
+    LaterExchange() : RepeatingFs(new DataFs()) { count = 1; }
+};
 }
 
 %file: TestNetwork.ned
+import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
+import inet.common.SimpleModule;
+simple TestTxop extends TxopProcedure {
+    parameters:
+        @class(TestTxop);
+}
 network TestNetwork {
     submodules:
         test: Test;
+        txop: TestTxop;
 }
 
 %inifile: omnetpp.ini
@@ -60,7 +110,72 @@ for (int encoded : {0, 1, 748, 32767}) {
     ASSERT(bytes[3] == (encoded >> 8));
 }
 
-EV << "Multiple protection arithmetic and encoding passed.\n";
+auto txop = check_and_cast<TestTxop *>(cSimulation::getActiveSimulation()->getModuleByPath("txop"));
+for (bool multiple : {false, true}) {
+    txop->configure("a", us(1024), multiple);
+    txop->startTxop(AC_VI);
+    ASSERT(txop->getProtectionMechanism() == (multiple ? TxopProcedure::MULTIPLE_PROTECTION : TxopProcedure::SINGLE_PROTECTION));
+    ASSERT(txop->getReservationEnd() == 0);
+    wait(us(176.4));
+    txop->recordTransmittedDuration(us(848));
+    ASSERT(txop->getReservationEnd() == txop->getStart() + us(1024.4));
+    txop->recordTransmittedDuration(us(1));
+    ASSERT(txop->getReservationEnd() == txop->getStart() + us(1024.4));
+    txop->endTxop();
+    ASSERT(txop->getReservationEnd() == 0);
+}
+
+auto selectedHeader = makeShared<Ieee80211DataHeader>();
+selectedHeader->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+Packet selected("selected-data", selectedHeader);
+PredicateFrames frames;
+frames.selected = &selected;
+PredicateAckPolicy ackPolicy;
+PredicateRtsPolicy rtsPolicy;
+LaterExchange later;
+HcfFs sequence;
+txop->configure("a", us(1024), true);
+txop->startTxop(AC_VI);
+FrameSequenceContext context(MacAddress("02:00:00:00:00:01"),
+    const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("a")),
+    &frames, nullptr, &rtsPolicy, nullptr, new QoSContext(&ackPolicy, nullptr, nullptr, txop));
+context.addStep(new TransmitStep(&selected, SIMTIME_ZERO));
+wait(us(100.2));
+ASSERT(field(1024, 1024, 0, 100.2, 0, false) == us(924));
+txop->recordTransmittedDuration(us(924));
+ASSERT(txop->getReservationEnd() == txop->getStart() + us(1024.2));
+ASSERT(!sequence.hasMoreTxOps(&later, &context));
+txop->endTxop();
+
+txop->configure("a", us(1024), true);
+txop->startTxop(AC_VI);
+wait(us(176.96));
+ackPolicy.bar = true;
+ASSERT(sequence.hasMoreTxOps(&later, &context));
+ackPolicy.bar = false;
+ASSERT(!sequence.hasMoreTxOps(&later, &context));
+txop->endTxop();
+
+// The preceding DATA reserves the 164 us deadline. Test later DATA, RTS, and BAR starts.
+for (int selection : {0, 1, 2}) {
+    ackPolicy.bar = selection == 2;
+    rtsPolicy.needed = selection != 0;
+    for (double elapsed : {147.0, 148.0, 148.5, 160.0}) {
+        txop->configure("a", us(164), true);
+        txop->startTxop(AC_VI);
+        FrameSequenceContext context(MacAddress("02:00:00:00:00:01"),
+            const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("a")),
+            &frames, nullptr, &rtsPolicy, nullptr, new QoSContext(&ackPolicy, nullptr, nullptr, txop));
+        context.addStep(new TransmitStep(&selected, SIMTIME_ZERO));
+        wait(us(100));
+        txop->recordTransmittedDuration(us(64));
+        wait(us(elapsed - 100));
+        ASSERT(sequence.hasMoreTxOps(&later, &context) == (elapsed < 148));
+        txop->endTxop();
+    }
+}
+
+EV << "Multiple protection arithmetic, nominal continuation, and encoding passed.\n";
 
 %contains: stdout
-Multiple protection arithmetic and encoding passed.
+Multiple protection arithmetic, nominal continuation, and encoding passed.
