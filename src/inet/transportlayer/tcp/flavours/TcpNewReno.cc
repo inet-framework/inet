@@ -40,8 +40,11 @@ ITcpRecovery *TcpNewReno::createRecovery()
 
 void TcpNewReno::ackProcessed(bool inFastRecovery)
 {
-    // outside fast recovery, "recover" trails snd_una
-    if (!inFastRecovery)
+    // Outside fast recovery, "recover" follows snd_una once the cumulative ACK
+    // covers more than "recover". Before that, "recover" keeps the value of the
+    // last fast retransmit or timeout, as RFC 6582 says; after that, the check
+    // of step 2 holds either way, and "recover" cannot fall 2^31 behind snd_una.
+    if (!inFastRecovery && seqGreater(state->snd_una - 1, state->recover))
         state->recover = (state->snd_una - 2);
 }
 

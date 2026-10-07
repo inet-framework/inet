@@ -1,0 +1,53 @@
+%description:
+After a timeout, NewReno does not enter fast retransmit for duplicate ACKs
+that the go-back-N causes (RFC 6582 step 4). The tester drops four
+segments of one flight (a27, a28, a30, a33) and the fast retransmission
+a41, so the retransmission timer expires. In slow start, the sender sends
+each hole again together with segments that the receiver already has. At
+t=2.243 s, B acknowledges the last hole (B031) and sends three duplicate
+ACKs for those copies (B032 to B034). "recover" still holds the highest
+sequence number sent before the timeout, so the sender sends new data
+and does not retransmit 39937:40961.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=65536B # 64 1024-byte segments
+
+*.tcptester.script="a27 delete; a28 delete; a30 delete; a33 delete; a41 delete"  # four holes, and the fast retransmission
+
+*.*_tcp.tcpAlgorithmClass = "TcpNewReno"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[2.243 B031] A.1000 < B.2000: A ack 39937 win 16384
+[2.243 B032] A.1000 < B.2000: A ack 39937 win 16384
+[2.243 B033] A.1000 < B.2000: A ack 39937 win 16384
+[2.243 B034] A.1000 < B.2000: A ack 39937 win 16384
+[2.245 A053] A.1000 > B.2000: A 39937:40961(1024) ack 501 win 16384
+[2.245 A054] A.1000 > B.2000: A 40961:41985(1024) ack 501 win 16384
+[2.245 A055] A.1000 > B.2000: A 41985:43009(1024) ack 501 win 16384
+[2.245 A056] A.1000 > B.2000: A 43009:44033(1024) ack 501 win 16384
+[2.245 A057] A.1000 > B.2000: A 44033:45057(1024) ack 501 win 16384
+[2.247 B035] A.1000 < B.2000: A ack 41985 win 16384
+
+%contains: stdout
+[2.460] tcpdump finished, A:77 B:47 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

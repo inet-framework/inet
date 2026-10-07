@@ -14,6 +14,18 @@
 namespace inet {
 namespace tcp {
 
+Rfc6582Recovery::Rfc6582Recovery(TcpStateVariables *state, TcpConnection *conn) :
+    state(check_and_cast<TcpClassicAlgorithmBaseStateVariables *>(state)), conn(conn)
+{
+    // RFC 6582, page 5:
+    // "1)  Initialization of TCP protocol control block:
+    //      When the TCP protocol control block is initialized, recover is
+    //      set to the initial send sequence number."
+    // The connection creates the recovery when it is established, after it
+    // has chosen the initial send sequence number.
+    this->state->recover = this->state->iss;
+}
+
 bool Rfc6582Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     Rfc5681Recovery rfc5681Recovery(state, conn);
@@ -121,7 +133,7 @@ void Rfc6582Recovery::receivedDuplicateAck()
         // already in the Fast Recovery procedure, check to see if the
         // Cumulative Acknowledgement field covers more than "recover".  If
         // so, go to Step 1A.  Otherwise, go to Step 1B."
-        if (state->snd_una - 1 > state->recover) {
+        if (seqGreater(state->snd_una - 1, state->recover)) {
             EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
             // RFC 3782, page 4:
