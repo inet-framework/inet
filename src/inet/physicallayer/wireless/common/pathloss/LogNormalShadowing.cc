@@ -99,13 +99,16 @@ class LogNormalShadowing::ShadowedPathLossFunction : public math::FunctionBase<d
 
 Ptr<const math::IFunction<double, math::Domain<Hz>>> LogNormalShadowing::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
+    const Coord& transmitterPosition = transmission->getStartPosition();
+    const Coord& receiverPosition = arrival->getStartPosition();
+    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
+    m distance = m(receiverPosition.distance(transmitterPosition));
+    // without a correlation distance: one new value per reception, however often the function is evaluated
     if (std::isnan(correlationDistance.get()))
-        return PathLossBase::computeReceptionPathLoss(receiverRadio, transmission, arrival);
+        return makeShared<ShadowedPathLossFunction>(this, propagationSpeed, distance, normal(0.0, sigma));
     // shadowing is reciprocal: one value per pair of radios, the smaller id first
     int transmitterId = transmission->getTransmitterRadioId();
     int receiverId = receiverRadio->getId();
-    const Coord& transmitterPosition = transmission->getStartPosition();
-    const Coord& receiverPosition = arrival->getStartPosition();
     bool transmitterFirst = transmitterId < receiverId;
     auto key = transmitterFirst ? std::make_pair(transmitterId, receiverId) : std::make_pair(receiverId, transmitterId);
     const Coord& position1 = transmitterFirst ? transmitterPosition : receiverPosition;
@@ -115,8 +118,6 @@ Ptr<const math::IFunction<double, math::Domain<Hz>>> LogNormalShadowing::compute
         || m(it->second.position1.distance(position1)) > correlationDistance
         || m(it->second.position2.distance(position2)) > correlationDistance)
         it = linkShadowings.insert_or_assign(key, LinkShadowing{position1, position2, normal(0.0, sigma)}).first;
-    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
-    m distance = m(receiverPosition.distance(transmitterPosition));
     return makeShared<ShadowedPathLossFunction>(this, propagationSpeed, distance, it->second.shadowing);
 }
 
