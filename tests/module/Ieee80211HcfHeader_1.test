@@ -1,0 +1,185 @@
+%description:
+Select Block Ack from an initial Normal Ack DATA header through production HCF.
+Check the emitted DATA field and optional RTS field with fixed 6 Mbit/s modes.
+Require one ACK-policy selection for the selected exchange.
+
+%extraargs: -r 0..3
+%file: Header.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+namespace inet::ieee80211 {
+class HeaderAckPolicy : public OriginatorQosAckPolicy {
+  public:
+    mutable int selections = 0;
+    AckPolicy computeAckPolicy(Packet *, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *) const override {
+        ASSERT(header->getAckPolicy() == NORMAL_ACK);
+        selections++;
+        return BLOCK_ACK;
+    }
+    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *) const override { return false; }
+};
+Define_Module(HeaderAckPolicy);
+class HeaderAgreementHandler : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept() {
+        auto address = MacAddress("02:00:00:00:00:02");
+        auto agreement = new OriginatorBlockAckAgreement(address, 5, SequenceNumberCyclic(0), 64, false, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{address, 5}] = agreement;
+    }
+};
+class HeaderMac : public Ieee80211Mac {
+  public:
+    int rts = 0;
+    int data = 0;
+    int responses = 0;
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (getFullPath().find("sender") != std::string::npos) {
+            if (header->getType() == ST_RTS) {
+                rts++;
+                // CTS (44 us), DATA (100 us), and two SIFS intervals (32 us).
+                ASSERT(header->getDurationField() == SimTime(176, SIMTIME_US));
+            }
+            else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+                data++;
+                ASSERT(dataHeader->getAckPolicy() == BLOCK_ACK);
+                ASSERT(header->getDurationField() == SIMTIME_ZERO);
+                if (!par("builtin").boolValue()) {
+                    auto policy = check_and_cast<HeaderAckPolicy *>(getSubmodule("hcf")->getSubmodule("originatorAckPolicy"));
+                    ASSERT(policy->selections == 1);
+                }
+            }
+        }
+        else {
+            responses++;
+            ASSERT(header->getType() == ST_CTS);
+        }
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+};
+Define_Module(HeaderMac);
+class HeaderHcf : public Hcf {
+  public:
+    OriginatorBlockAckAgreement *accepted = nullptr;
+    void inject() {
+        Enter_Method("inject");
+        if (mac->par("builtin").boolValue()) {
+            auto handler = new HeaderAgreementHandler();
+            handler->accept();
+            delete originatorBlockAckAgreementHandler;
+            originatorBlockAckAgreementHandler = handler;
+            accepted = handler->getAgreement(MacAddress("02:00:00:00:00:02"), 5);
+            ASSERT(accepted->getIsAddbaResponseReceived());
+            ASSERT(accepted->getNumSentBaPolicyFrames() == 0);
+        }
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setAckPolicy(NORMAL_ACK);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("policy-selection", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(26)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+};
+Define_Module(HeaderHcf);
+class HeaderTest : public cSimpleModule {
+  public:
+    HeaderTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto sender = check_and_cast<HeaderMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+        auto receiver = check_and_cast<HeaderMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+        check_and_cast<HeaderHcf *>(sender->getSubmodule("hcf"))->inject();
+        for (int i = 0; i < 100 && sender->data == 0; i++)
+            wait(SimTime(5, SIMTIME_US));
+        ASSERT(sender->data == 1);
+        if (sender->par("builtin").boolValue()) {
+            auto accepted = check_and_cast<HeaderHcf *>(sender->getSubmodule("hcf"))->accepted;
+            ASSERT(accepted != nullptr && accepted->getNumSentBaPolicyFrames() == 0);
+        }
+        ASSERT(sender->rts == par("rts").boolValue());
+        ASSERT(receiver->responses == sender->rts);
+        std::cout << "HCF header assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(HeaderTest);
+}
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module HeaderMac extends Ieee80211Mac { parameters: bool builtin; @class(::inet::ieee80211::HeaderMac); }
+module HeaderHcf extends Hcf { parameters: @class(::inet::ieee80211::HeaderHcf); }
+simple HeaderAckPolicy extends OriginatorQosAckPolicy { parameters: @class(::inet::ieee80211::HeaderAckPolicy); }
+simple HeaderTest { parameters: bool rts; @class(::inet::ieee80211::HeaderTest); }
+network HeaderNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: HeaderTest;
+}
+%inifile: omnetpp.ini
+[General]
+network = HeaderNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.rts = ${rts=false,true}
+**.wlan[*].mac.builtin = ${policy="HeaderAckPolicy","OriginatorQosAckPolicy"} == "OriginatorQosAckPolicy"
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.typename = "HeaderMac"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "HeaderHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sender.wlan[0].mac.hcf.originatorAckPolicy.typename = ${policy}
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${rts} ? 0B : 4096B
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+%contains: stdout
+HCF header assertions passed.
