@@ -81,7 +81,6 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
-        emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     }
 }
 
@@ -273,6 +272,12 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 bool Dcf::hasFrameToTransmit()
 {
     return !channelAccess->getPendingQueue()->isEmpty() || channelAccess->getInProgressFrames()->hasInProgressFrames();
+}
+
+void Dcf::frameSequenceStarted()
+{
+    Enter_Method("frameSequenceStarted");
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
 }
 
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
