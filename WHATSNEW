@@ -351,6 +351,14 @@ Notable backward incompatible changes are the following:
    This field correction can change Wi-Fi results and fingerprints.
    The migration guide explains the policy contract.
 
+21. IEEE 802.11 sequence start observations
+
+   The sequence handler now notifies start after context installation and
+   sequence initialization, before the first step. HCF and DCF emit their
+   existing start signals from that callback. Empty preparation and synchronous
+   completion therefore preserve one start before one finish with valid contexts.
+   Custom sequence callbacks must implement frameSequenceStarted().
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

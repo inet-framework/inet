@@ -66,6 +66,7 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
         this->frameSequence = frameSequence;
         this->context = context;
         frameSequence->startSequence(context, 0);
+        callback->frameSequenceStarted();
         startFrameSequenceStep();
     }
     else

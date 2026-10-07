@@ -104,6 +104,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // IFrameSequenceHandler::ICallback
     virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+    virtual void frameSequenceStarted() override;
     virtual void originatorProcessRtsProtectionFailed(Packet *packet) override;
     virtual void originatorProcessTransmittedFrame(Packet *packet) override;
     virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
