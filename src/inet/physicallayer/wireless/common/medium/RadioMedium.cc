@@ -439,12 +439,15 @@ void RadioMedium::addRadio(const IRadio *radio)
     if (neighborCache)
         neighborCache->addRadio(radio);
     mediumLimitCache->addRadio(radio);
-    communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
-        const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-        communicationCache->setCachedArrival(radio, transmission, arrival);
-        communicationCache->setCachedListening(radio, transmission, listening);
-    });
+    // like addTransmission(), cache no arrival and no listening at a radio without a receiver
+    if (radio->getReceiver() != nullptr) {
+        communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
+            const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+            const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+            communicationCache->setCachedArrival(radio, transmission, arrival);
+            communicationCache->setCachedListening(radio, transmission, listening);
+        });
+    }
     cModule *radioModule = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     if (radioModeFilter)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
@@ -756,6 +759,9 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t
         Enter_Method("listeningChanged");
         auto radio = check_and_cast<Radio *>(source);
         communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
+            // addTransmission() caches no arrival and no listening at the transmitter itself
+            if (transmission->getTransmitterRadioId() == radio->getId())
+                return;
             const IArrival *arrival = getArrival(radio, transmission);
             const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             delete communicationCache->getCachedListening(radio, transmission);
