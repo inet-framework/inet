@@ -1171,6 +1171,31 @@ bool TcpConnection::sendProbe()
     return true;
 }
 
+void TcpConnection::markOutstandingLostOnRto()
+{
+    if (rexmitQueue == nullptr || rexmitQueue->getQueueLength() == 0)
+        return;
+    // With SACK, TcpAlgorithmBase::processRexmitTimer() has already reset the SACKed
+    // and retransmitted bits. Without SACK, the SACKed bits are inferred SACKs
+    // (Linux tcp_reset_reno_sack()), and the retransmissions after the timeout are
+    // the only data in flight.
+    if (!state->sack_enabled) {
+        rexmitQueue->resetSackedBit();
+        rexmitQueue->resetRexmittedBit();
+    }
+    // Clamp to the scoreboard's range: snd_una may sit below the queue start (already
+    // discarded) and snd_max may sit above the queue end (e.g. an outstanding FIN,
+    // which carries no data byte in the rexmit queue).
+    uint32_t from = state->snd_una;
+    uint32_t to = state->snd_max;
+    if (seqLess(from, rexmitQueue->getBufferStartSeq()))
+        from = rexmitQueue->getBufferStartSeq();
+    if (seqGreater(to, rexmitQueue->getBufferEndSeq()))
+        to = rexmitQueue->getBufferEndSeq();
+    if (seqLess(from, to))
+        rexmitQueue->markLost(from, to);
+}
+
 void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
     // rfc-3168, page 20:

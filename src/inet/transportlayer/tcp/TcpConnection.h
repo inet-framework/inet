@@ -259,6 +259,13 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 
+    /**
+     * Called at a retransmission timeout: marks the outstanding data lost in the
+     * retransmission queue, as Linux tcp_timeout_mark_lost() does. Without SACK,
+     * it also removes the inferred SACKs and the retransmitted marks.
+     */
+    virtual void markOutstandingLostOnRto();
+
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
 

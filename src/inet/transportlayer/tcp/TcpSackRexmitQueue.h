@@ -131,6 +131,12 @@ class INET_API TcpSackRexmitQueue
     virtual void markHeadLost();
 
     /**
+     * Marks the byte range [fromSeqNum, toSeqNum) as lost, except the SACKed
+     * bytes, and splits regions at the boundaries as needed.
+     */
+    virtual void markLost(uint32_t fromSeqNum, uint32_t toSeqNum);
+
+    /**
      * Called when REXMIT timer expired.
      * Resets sacked bit of all segments in rexmit queue.
      */

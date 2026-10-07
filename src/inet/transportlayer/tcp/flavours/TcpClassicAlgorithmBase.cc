@@ -102,6 +102,7 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
     state->afterRto = true;
 
+    conn->markOutstandingLostOnRto();
     conn->retransmitOneSegment(true);
 }
 

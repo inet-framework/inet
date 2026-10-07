@@ -309,6 +309,53 @@ void TcpSackRexmitQueue::markHeadLost()
     rexmitQueue.begin()->lost = true;
 }
 
+void TcpSackRexmitQueue::markLost(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    if (seqLess(fromSeqNum, begin))
+        fromSeqNum = begin;
+
+    if (seqLE(toSeqNum, fromSeqNum))
+        return;
+
+    ASSERT(seqLess(fromSeqNum, end));
+    ASSERT(seqLE(toSeqNum, end));
+
+    if (!rexmitQueue.empty()) {
+        auto i = rexmitQueue.begin();
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
+            i++;
+
+        ASSERT(i != rexmitQueue.end() && seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        if (i->beginSeqNum != fromSeqNum) { // split off the tail so lost applies exactly from fromSeqNum
+            Region region = *i;
+
+            region.endSeqNum = fromSeqNum;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = fromSeqNum;
+        }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
+            if (seqGE(i->beginSeqNum, fromSeqNum) && !i->sacked)
+                i->lost = true;
+
+            i++;
+        }
+
+        if (i != rexmitQueue.end() && seqLess(i->beginSeqNum, toSeqNum) && seqLess(toSeqNum, i->endSeqNum)) {
+            Region region = *i;
+
+            region.endSeqNum = toSeqNum;
+            region.lost = !region.sacked;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = toSeqNum;
+        }
+    }
+
+    ASSERT(checkQueue());
+}
+
 void TcpSackRexmitQueue::resetSackedBit()
 {
     for (auto& elem : rexmitQueue)
