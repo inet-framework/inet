@@ -1,0 +1,377 @@
+%description:
+Check negative and fractional Basic Block Ack response fields at the HCF Tx boundary.
+
+%extraargs: -r 5
+
+%file: ProtectionRates.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/RateControlBase.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class RateProtectionRx : public Rx {
+  public:
+    std::vector<simtime_t> localDurations;
+    void frameTransmitted(simtime_t duration) override {
+        localDurations.push_back(duration);
+        Rx::frameTransmitted(duration);
+    }
+};
+Define_Module(RateProtectionRx);
+
+class SeededOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void seed(const MacAddress& peer) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, 5, SequenceNumberCyclic(0), 64, true, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(0);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, 5}] = agreement;
+    }
+};
+class SeededRecipient : public RecipientBlockAckAgreementHandler {
+  public:
+    void seed(const MacAddress& peer) {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(peer);
+        request->setTid(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setBufferSize(64);
+        request->setBlockAckTimeoutValue(0);
+        addAgreement(request)->addbaResposneSent();
+    }
+};
+
+class TraceAarf : public AarfRateControl {
+  public:
+    std::vector<bps> rates;
+    std::vector<simtime_t> queries;
+    void seedPeer() {
+        Enter_Method("seedPeer");
+        auto& state = getState(MacAddress("02:00:00:00:00:02"));
+        state.timer = simTime() - SimTime(100, SIMTIME_US);
+    }
+    const physicallayer::IIeee80211Mode *getRate(const MacAddress& peer) override {
+        auto mode = AarfRateControl::getRate(peer);
+        rates.push_back(mode->getDataMode()->getNetBitrate());
+        queries.push_back(simTime());
+        return mode;
+    }
+};
+Define_Module(TraceAarf);
+
+class DecreaseRateControl : public RateControlBase {
+  public:
+    int queries = 0;
+    const physicallayer::IIeee80211Mode *getRate(const MacAddress&) override {
+        return modeSet->getMode(bps(++queries == 1 ? 9000000 : 6000000));
+    }
+    void frameTransmitted(Packet *, int, bool, bool) override {}
+    void frameReceived(Packet *) override {}
+};
+Define_Module(DecreaseRateControl);
+
+class RateProtectionMac : public Ieee80211Mac {
+  public:
+    std::vector<int> types;
+    std::vector<simtime_t> starts;
+    std::vector<simtime_t> ends;
+    std::vector<simtime_t> durations;
+    std::vector<bps> rates;
+    bool suppressed = false;
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        types.push_back(header->getType());
+        starts.push_back(simTime());
+        ends.push_back(simTime() + mode->getDuration(packet->getDataLength()));
+        durations.push_back(header->getDurationField());
+        rates.push_back(mode->getDataMode()->getNetBitrate());
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+  protected:
+    void handleLowerPacket(Packet *packet) override {
+        if (par("scenario").intValue() == 3 && getFullPath().find("receiver") != std::string::npos &&
+            !suppressed && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_RTS)
+        {
+            suppressed = true;
+            delete packet;
+            return;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(RateProtectionMac);
+
+class RateProtectionHcf : public Hcf {
+  public:
+    int acknowledgments = 0;
+    int blockAcks = 0;
+    int failures = 0;
+    void seedOriginator() {
+        Enter_Method("seedOriginator");
+        delete originatorBlockAckAgreementHandler;
+        auto handler = new SeededOriginator();
+        handler->seed(MacAddress("02:00:00:00:00:02"));
+        originatorBlockAckAgreementHandler = handler;
+    }
+    void seedRecipient() {
+        Enter_Method("seedRecipient");
+        delete recipientBlockAckAgreementHandler;
+        auto handler = new SeededRecipient();
+        handler->seed(MacAddress("02:00:00:00:00:01"));
+        recipientBlockAckAgreementHandler = handler;
+    }
+    void inject(int payload = 66, bool fragment = false) {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setMoreFragments(fragment);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("rate-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payload)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void sendSyntheticBlockAck(simtime_t calculatedField) {
+        Enter_Method("sendSyntheticBlockAck");
+        auto request = makeShared<Ieee80211BasicBlockAckReq>();
+        request->setTransmitterAddress(MacAddress("02:00:00:00:00:07"));
+        request->setReceiverAddress(mac->getAddress());
+        auto received = new Packet("synthetic-bar", request);
+        auto mode = modeSet->getMode(bps(6000000));
+        setFrameMode(received, request, mode);
+        auto updatedRequest = received->removeAtFront<Ieee80211BasicBlockAckReq>();
+        updatedRequest->setDurationField(calculatedField + modeSet->getSifsTime() + mode->getDuration(LENGTH_BASIC_BLOCKACK));
+        received->insertAtFront(updatedRequest);
+        request = updatedRequest;
+        auto response = makeShared<Ieee80211BasicBlockAck>();
+        response->setReceiverAddress(request->getTransmitterAddress());
+        response->setDurationField(recipientAckPolicy->computeBasicBlockAckDurationField(received, request));
+        auto packet = new Packet("synthetic-block-ack", response);
+        Hcf::transmitControlResponseFrame(packet, response, received, request);
+        delete received;
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        auto type = packet->peekAtFront<Ieee80211MacHeader>()->getType();
+        if (type == ST_ACK) acknowledgments++;
+        if (type == ST_BLOCKACK) blockAcks++;
+        Hcf::originatorProcessReceivedFrame(packet, request);
+    }
+    void originatorProcessRtsProtectionFailed(Packet *packet) override {
+        failures++;
+        Hcf::originatorProcessRtsProtectionFailed(packet);
+    }
+  protected:
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) { take(frame); delete frame; }
+    }
+};
+Define_Module(RateProtectionHcf);
+
+class RateProtectionTest : public cSimpleModule {
+  public:
+    RateProtectionTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto sender = check_and_cast<RateProtectionHcf *>(getModuleByPath("^.sender.wlan[0].mac.hcf"));
+        auto receiver = check_and_cast<RateProtectionHcf *>(getModuleByPath("^.receiver.wlan[0].mac.hcf"));
+        auto senderMac = check_and_cast<RateProtectionMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+        auto receiverMac = check_and_cast<RateProtectionMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+        int scenario = senderMac->par("scenario");
+        if (scenario == 0 || scenario == 1) {
+            sender->seedOriginator();
+            receiver->seedRecipient();
+        }
+        if (scenario == 2 || scenario == 3)
+            check_and_cast<TraceAarf *>(getModuleByPath("^.sender.wlan[0].mac.hcf.rateControl"))->seedPeer();
+        if (scenario == 5) {
+            receiver->sendSyntheticBlockAck(SimTime(-10, SIMTIME_US));
+            wait(SimTime(300, SIMTIME_US));
+            receiver->sendSyntheticBlockAck(SimTime(31.2e-6));
+        }
+        else {
+            sender->inject(66, scenario == 6);
+            if (scenario == 0 || scenario == 1)
+                sender->inject(); // The existing BAR branch needs a next selected frame.
+        }
+        wait(SimTime(5, SIMTIME_MS));
+        if (scenario == 0 || scenario == 1) {
+            ASSERT(sender->blockAcks >= 1);
+            ASSERT(sender->acknowledgments == 0);
+            ASSERT(std::find(senderMac->types.begin(), senderMac->types.end(), ST_BLOCKACK_REQ) != senderMac->types.end());
+            ASSERT(receiverMac->types[0] == ST_CTS);
+            auto firstRtsEndpoint = senderMac->ends[0] + senderMac->durations[0];
+            if (scenario == 1) {
+                ASSERT(firstRtsEndpoint - senderMac->starts[0] == SimTime(280, SIMTIME_US));
+                ASSERT(senderMac->durations[1] == 0); // Predicted Block Ack policy DATA needs no immediate ACK.
+            }
+            else {
+                ASSERT(firstRtsEndpoint - senderMac->starts[0] == SimTime(1024, SIMTIME_US));
+                for (size_t i = 0; i < receiverMac->types.size(); i++) {
+                    if (receiverMac->types[i] == ST_BLOCKACK)
+                        ASSERT(receiverMac->durations[i] >= 0);
+                }
+            }
+        }
+        if (scenario == 2) {
+            auto rate = check_and_cast<TraceAarf *>(getModuleByPath("^.sender.wlan[0].mac.hcf.rateControl"));
+            ASSERT(rate->rates.size() == 2);
+            ASSERT(rate->rates[0] == bps(9000000) && rate->rates[1] == bps(12000000));
+            ASSERT(rate->queries[1] - rate->queries[0] == SimTime(112, SIMTIME_US));
+            ASSERT(senderMac->starts[1] - senderMac->starts[0] == SimTime(128, SIMTIME_US));
+            ASSERT(senderMac->ends[0] + senderMac->durations[0] - senderMac->starts[0] == SimTime(296, SIMTIME_US));
+            ASSERT(sender->acknowledgments == 1);
+        }
+        if (scenario == 3) {
+            auto rate = check_and_cast<TraceAarf *>(getModuleByPath("^.sender.wlan[0].mac.hcf.rateControl"));
+            ASSERT(receiverMac->suppressed);
+            ASSERT(sender->failures == 1);
+            ASSERT(rate->rates[0] == bps(9000000));
+            ASSERT(rate->queries.size() >= 3);
+            ASSERT(senderMac->types[0] == ST_RTS && senderMac->types[1] == ST_RTS);
+            ASSERT(sender->acknowledgments == 1);
+            for (size_t i = 0; i < rate->rates.size(); i++)
+                std::cout << "AARF query " << i << ": rate=" << rate->rates[i]
+                    << " elapsed=" << rate->queries[i] - rate->queries[0] << "\n";
+            auto receiverRx = check_and_cast<RateProtectionRx *>(getModuleByPath("^.receiver.wlan[0].mac.rx"));
+            std::cout << "Recipient local NAV updates: " << receiverRx->localDurations.size() << "\n";
+            for (auto duration : receiverRx->localDurations)
+                std::cout << "Recipient transmitted NAV duration: " << duration << "\n";
+        }
+        if (scenario == 4) {
+            ASSERT(senderMac->rates[1] == bps(6000000));
+            ASSERT(senderMac->ends[0] + senderMac->durations[0] - senderMac->starts[0] == SimTime(296, SIMTIME_US));
+            ASSERT(senderMac->durations[1] == SimTime(16, SIMTIME_US));
+            ASSERT(receiverMac->ends[1] - senderMac->starts[0] == SimTime(340, SIMTIME_US));
+            ASSERT(sender->acknowledgments == 1);
+        }
+        if (scenario == 5) {
+            ASSERT(receiverMac->types.size() == 2);
+            ASSERT(receiverMac->durations[0] == 0);
+            ASSERT(receiverMac->durations[1] == SimTime(32, SIMTIME_US));
+        }
+        if (scenario == 6) {
+            ASSERT(senderMac->types.size() == 2);
+            ASSERT(senderMac->types[0] == ST_RTS && senderMac->types[1] == ST_DATA_WITH_QOS);
+            ASSERT(senderMac->ends[0] + senderMac->durations[0] - senderMac->starts[0] == SimTime(340, SIMTIME_US));
+            ASSERT(sender->acknowledgments == 1);
+        }
+        std::cout << "Basic Block Ack, response conversion, and rate estimates passed.\n";
+    }
+};
+Define_Module(RateProtectionTest);
+}
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl;
+import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module RateProtectionMac extends Ieee80211Mac {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::RateProtectionMac);
+}
+module RateProtectionHcf extends Hcf {
+    parameters:
+        @class(::inet::ieee80211::RateProtectionHcf);
+}
+simple RateProtectionRx extends Rx {
+    parameters:
+        @class(::inet::ieee80211::RateProtectionRx);
+}
+simple TraceAarf extends AarfRateControl {
+    parameters:
+        @class(::inet::ieee80211::TraceAarf);
+}
+simple DecreaseRateControl extends SimpleModule like IRateControl {
+    parameters:
+        double initialRate @unit(bps) = default(6Mbps);
+        @class(::inet::ieee80211::DecreaseRateControl);
+}
+simple RateProtectionTest extends SimpleModule {
+    parameters:
+        @class(::inet::ieee80211::RateProtectionTest);
+}
+network RateProtectionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: RateProtectionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RateProtectionNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.typename = "RateProtectionMac"
+**.wlan[*].mac.scenario = ${scenario=0..6}
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.rx.typename = "RateProtectionRx"
+**.wlan[*].mac.hcf.typename = "RateProtectionHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == 0 || ${scenario} == 1 || ${scenario} == 5
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 4096B
+*.sender.wlan[0].mac.hcf.rateControl.typename = ${rateControl="","","TraceAarf","TraceAarf","DecreaseRateControl","","" ! scenario}
+*.sender.wlan[0].mac.hcf.rateControl.initialRate = 6Mbps
+*.sender.wlan[0].mac.hcf.rateControl.interval = 100us
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} >= 2 && ${scenario} <= 4 ? -1bps : 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseBlockAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 0B
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 0 ? 1024us : 0s
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+Basic Block Ack, response conversion, and rate estimates passed.

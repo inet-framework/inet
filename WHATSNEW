@@ -337,6 +337,9 @@ Notable backward incompatible changes are the following:
    channel access. For example, a recipient can answer another RTS from the same
    holder when its own previous CTS would otherwise leave the medium busy.
 
+   HCF clamps response durations to zero and applies ceiling to whole microseconds
+   before transmission. These shared changes can change Wi-Fi simulation results.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
