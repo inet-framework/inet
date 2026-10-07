@@ -435,9 +435,13 @@ Notable backward compatible changes are the following:
 7. IEEE 802.11 selectable multiple protection in EDCA TXOPs
 
    EDCA TXOPs support selectable multiple protection. Single protection remains
-   the default. Multiple protection uses nominal SIFS and normal stops when
-   another exchange cannot use a legal duration field. For example, a
-   200 us PPDU within a 1024 us TXOP advertises 824 us of reservation.
+   the default. Nominal timing uses the mode set's short interframe space (SIFS)
+   unchanged after the first transmission step. The first step adds no
+   interframe space. Multiple protection stops normally when another exchange
+   cannot use a legal duration field.
+
+   For example, a 200 us PPDU within a 1024 us TXOP advertises 824 us
+   of reservation.
    A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
 
    The user guide explains nominal timing, zero-limit estimates, unused
