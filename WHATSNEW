@@ -359,6 +359,14 @@ Notable backward incompatible changes are the following:
    completion therefore preserve one start before one finish with valid contexts.
    Custom sequence callbacks must implement frameSequenceStarted().
 
+22. IEEE 802.11 group fields under single protection
+
+   Single protection now excludes the current ACK estimate for group management
+   and non-QoS DATA, with Block Ack support enabled or disabled. A final group
+   frame without a successor advertises zero. The group equation retains its
+   successor term, so the legacy forecast can still reserve an ineligible group
+   successor. This field correction can change Wi-Fi results and fingerprints.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

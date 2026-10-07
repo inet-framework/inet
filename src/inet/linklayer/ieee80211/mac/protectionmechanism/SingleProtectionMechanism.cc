@@ -121,7 +121,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
         individuallyAddressedDataWithNormalAck = !groupAddressed && dataHeader->getAckPolicy() == AckPolicy::NORMAL_ACK;
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataHeader->getAckPolicy() == AckPolicy::NO_ACK || dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
-    if (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck) {
+    if (!groupAddressed && (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck)) {
         simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
         if (txop->isFinalFragment(dataOrMgmtHeader)) {
             return ackFrameDuration + modeSet->getSifsTime();
@@ -181,4 +181,3 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

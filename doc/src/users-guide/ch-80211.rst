@@ -507,6 +507,8 @@ helps against hidden nodes at the cost of overhead. The CTS timeout,
 Multiple protection in an EDCA TXOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+All single protection paths exclude group frames from the current-frame ACK equation. For example, a final group management frame without a successor advertises zero. The legacy forecast can still reserve a queued successor that the one-frame group sequence cannot transmit. This limit applies to group management and non-QoS DATA, with Block Ack support enabled or disabled.
+
 TxOpFs publishes the selected DATA ACK policy before execution. HCF uses that policy through the exchange. For example, DATA that selects Block Ack before RTS retains Block Ack after CTS. Single protection's RTS field therefore omits the unnecessary immediate ACK and its SIFS.
 
 A transmission opportunity (TXOP) lets one access category send frame exchanges after one channel

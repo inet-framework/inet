@@ -314,7 +314,7 @@
 /showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            498f-b665/tplx;6f50-5caf/~tNl;1403-6fb2/~tND, PASS,    wireless Ipv4
 
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            5734-43a3/tplx;9c39-00a3/~tNl;03a9-2f02/~tND;093e-1ca4/tyf, PASS,    wireless Ipv4
-/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            a47c-a683/tplx;0f33-126a/~tNl;1e2d-bf7a/~tND;bda9-15d1/tyf, PASS,    wireless Ipv4
+/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            6e4e-b4a5/tplx;f648-b40f/~tNl;455c-38bb/~tND;bda9-15d1/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoRateControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;ec30-e32d/~tND;dad3-7f89/tyf, PASS,    wireless Ipv4
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c AarfRateControl -r 0,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;de90-6575/~tND;7539-d32d/tyf, PASS,    wireless Ipv4
