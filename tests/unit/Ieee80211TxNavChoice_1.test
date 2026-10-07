@@ -1,0 +1,114 @@
+%description:
+Verify both explicit Tx overloads and the completed NAV choice across a callback.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+namespace Ieee80211TxNavChoice_1 {
+class NavRx : public IRx {
+  public:
+    int updates = 0;
+    simtime_t lastDuration;
+    bool isReceptionInProgress() const override { return false; }
+    bool isMediumFree() const override { return true; }
+    void frameTransmitted(simtime_t duration) override { updates++; lastDuration = duration; }
+    void registerContention(IContention *) override {}
+    void receptionStateChanged(physicallayer::IRadio::ReceptionState) override {}
+    void transmissionStateChanged(physicallayer::IRadio::TransmissionState) override {}
+    void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
+    bool lowerFrameReceived(Packet *) override { return false; }
+};
+
+class ForwardingTx : public Tx {
+  public:
+    using Tx::transmitFrame;
+    bool choice = false;
+    simtime_t delay = -1;
+    void transmitFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, simtime_t ifs,
+            bool updateLocalNav, ITx::ICallback *) override {
+        choice = updateLocalNav;
+        delay = ifs;
+    }
+};
+
+class CompletionTx : public Tx {
+  public:
+    NavRx receiver;
+    void prepare(bool choice, ITx::ICallback *callback) {
+        auto header = makeShared<Ieee80211AckFrame>();
+        header->setDurationField(SimTime(100, SIMTIME_US));
+        frame = new Packet("completed-frame", header);
+        txCallback = callback;
+        transmitting = true;
+        updateLocalNav = choice;
+        rx = &receiver;
+    }
+    void replaceChoice(bool choice) { updateLocalNav = choice; }
+  protected:
+    void initialize(int) override {}
+};
+Define_Module(CompletionTx);
+
+class CompletionCallback : public ITx::ICallback {
+  public:
+    CompletionTx *tx;
+    bool replacementChoice;
+    CompletionCallback(CompletionTx *tx, bool choice) : tx(tx), replacementChoice(choice) {}
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        ASSERT(!tx->hasTransmission());
+        tx->replaceChoice(replacementChoice);
+    }
+};
+}
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+simple CompletionTx extends SimpleModule {
+    parameters:
+        @class(CompletionTx);
+}
+network TestNetwork {
+    submodules:
+        test: Test;
+        tx: CompletionTx;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+seed-set = 0
+
+%activity:
+auto us = [](double value) { return SimTime(value * 1e-6); };
+ForwardingTx forwarding;
+ITx *interface = &forwarding;
+auto header = makeShared<Ieee80211AckFrame>();
+Packet packet("overloads", header);
+for (bool choice : {false, true}) {
+    interface->transmitFrame(&packet, header, choice, nullptr);
+    ASSERT(forwarding.choice == choice && forwarding.delay == 0);
+    forwarding.transmitFrame(&packet, header, choice, nullptr);
+    ASSERT(forwarding.choice == choice && forwarding.delay == 0);
+    interface->transmitFrame(&packet, header, us(16), choice, nullptr);
+    ASSERT(forwarding.choice == choice && forwarding.delay == us(16));
+    forwarding.transmitFrame(&packet, header, us(16), choice, nullptr);
+    ASSERT(forwarding.choice == choice && forwarding.delay == us(16));
+}
+auto tx = check_and_cast<CompletionTx *>(cSimulation::getActiveSimulation()->getModuleByPath("tx"));
+CompletionCallback callback(tx, true);
+tx->prepare(false, &callback);
+tx->radioTransmissionFinished();
+ASSERT(tx->receiver.updates == 0);
+callback.replacementChoice = false;
+tx->prepare(true, &callback);
+tx->radioTransmissionFinished();
+ASSERT(tx->receiver.updates == 1);
+ASSERT(tx->receiver.lastDuration == us(100));
+EV << "Explicit Tx overloads and completed NAV choice passed.\n";
+
+%contains: stdout
+Explicit Tx overloads and completed NAV choice passed.

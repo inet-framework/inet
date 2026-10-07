@@ -10,6 +10,8 @@ developer's guide chapter `doc/src/developers-guide/ch-80211.rst` states the des
 and it replaces this document when that chapter is complete; until then the two are read together,
 this one for the exact calls and stages, the chapter for the intended shape.
 
+The transmission contract and local NAV descriptions follow the current [ITx contract](../../../src/inet/linklayer/ieee80211/mac/contract/ITx.h) and [Tx implementation](../../../src/inet/linklayer/ieee80211/mac/Tx.cc).
+
 The scope is the two subtrees `src/inet/linklayer/ieee80211/` and
 `src/inet/physicallayer/wireless/ieee80211/`, plus the generic wireless parts that the 802.11 radio
 stands on. Two guide chapters exist for the model. The user's guide chapter
@@ -108,7 +110,7 @@ code, and says where the 802.11 model uses it. The sections below refer to them 
 | **Command message on a gate** | a `Request` message with kind `RADIO_C_CONFIGURE` and a `ConfigureRadioCommand` control info | mgmt → MAC → radio (channel change), MAC → radio (radio mode) |
 | **Primitive message on a gate** | a bare `cMessage` with an `Ieee80211PrimRequest` or `Ieee80211PrimConfirm` control info (`mgmt/Ieee80211Primitives.msg`) | agent ↔ mgmt |
 | **Direct call through a contract interface** | `rx->lowerFrameReceived(packet)`; the pointer comes from a submodule, from a parameter path such as `par("rxModule")`, from the gate neighbour, or from the interface module that contains the caller ([D-DIRECT](decisions.md#d-direct)) | everywhere inside the MAC and the radio |
-| **Callback interface** | the caller passes `this` and gets a call later, for example `requestChannel(this)` or `transmitFrame(packet, header, ifs, this)` | channel grant, transmission complete, frame sequence events, control responses |
+| **Callback interface** | the caller passes `this` and gets a call later, for example `requestChannel(this)` or `transmitFrame(packet, header, ifs, updateLocalNav, this)` | channel grant, transmission complete, frame sequence events, control responses |
 | **Signal** | `emit` and `subscribe` ([D-NOTIFY](decisions.md#d-notify), [D-OBSERVE](decisions.md#d-observe)) | radio state to the MAC, mode set to the MAC parts, channel change to the AP management, association events to the node, statistics |
 | **Shared object** | a pointer to a module or object that several parts read and write | the MIB, the mode set, the pending queue and the in-progress frames of a coordination function |
 | **Self-message timer** | `scheduleAt` on a `cMessage` owned by the module | every wait: backoff, IFS, ACK timeout, NAV, beacon, scan, block ack inactivity |
@@ -174,7 +176,7 @@ the C++ class dispatches, and the submodules do the work.
 | --- | --- | --- |
 | `Ieee80211Mac` | `mac/Ieee80211Mac.*` | Splits messages into upper, lower, management and command. Encapsulates a data packet into a MAC frame with addresses from the MIB. Decapsulates a received frame into a packet with indication tags. Builds the MAC header for a management body. Routes every frame to `dcf` or `hcf` by `mib->qos`. Relays the radio state signals to `rx` and `tx`. Controls the radio mode. Forwards radio commands from management, with a delay while the medium is busy. Registers the interface entry (address, MTU). Publishes the mode set. |
 | `Rx` | `mac/Rx.*` | Checks the FCS of each received frame. Keeps the NAV timer. Computes *medium free* from the reception state, the transmission state and the NAV, and tells every registered contention when it changes. Reports a corrupt frame to the contentions. |
-| `Tx` | `mac/Tx.*` | Transmits one frame after an inter-frame space: fills the transmitter address and the FCS, waits the IFS on a timer, hands the frame to the MAC. When the radio reports the end of the transmission, calls back the requester and extends the NAV in `Rx` by the duration field. |
+| `Tx` | `mac/Tx.*` | `Tx` fills the transmitter address and FCS, waits the IFS, and passes the frame to the MAC. When the radio reports completion, `Tx` calls the requester. `Tx` then extends the local NAV in `Rx` only if the completed frame's saved `updateLocalNav` choice is `true`. |
 | `Ds` | `mac/Ds.*` | The distribution service. A station passes a received data frame up when associated and when the frame came from its BSSID. An access point passes the frame up, forwards it to another station through the MAC, or does both for a group address, as the station table dictates. |
 | `Dcf` | `mac/coordinationfunction/Dcf.*` | The distributed coordination function, for a non-QoS station. See §3.4. |
 | `Hcf` | `mac/coordinationfunction/Hcf.*` | The hybrid coordination function, for a QoS station. Only EDCA exists in the code. See §3.5. |
@@ -183,6 +185,8 @@ the C++ class dispatches, and the submodules do the work.
 The five submodules exist as `dcf`, `hcf` (only when `qosStation`), `ds`, `rx` and `tx`. The MAC
 sets `*.rxModule = "^.rx"` and `*.txModule = "^.tx"` so that every part below can find `Rx` and
 `Tx` by path.
+
+`Dcf` and `Hcf` pass `true` for holder frames and `false` for recipient CTS and ACK responses. `Hcf` also passes `false` for recipient Basic Block Ack responses. `Tx` saves the completed frame's choice before the completion callback. For example, a recipient CTS retains `false` if the callback accepts a holder frame with `true`. The CTS retains its Duration/ID field but does not extend the recipient's local NAV. Received reservations still affect channel access through `Rx`.
 
 Both coordination functions share one skeleton. Each one:
 
@@ -384,11 +388,11 @@ The call chains, in the order of a transmission:
 | frame sequences | `InProgressFrames` | shared object, through the context | `getFrameToTransmit`, `hasInProgressFrames` |
 | `InProgressFrames` | data service, `AckHandler` | direct, by parameter path | `extractFramesToTransmit(pendingQueue)`, `frameGotInProgress`, `isEligibleToTransmit` |
 | `Dcf`/`Hcf` | `RateSelection` | direct, `IRateSelection` | `computeMode`, `computeResponse...Mode` |
-| `Dcf`/`Hcf` | `Tx` | direct, `ITx` | `transmitFrame(packet, header, ifs, this)` |
+| `Dcf`/`Hcf` | `Tx` | direct, `ITx` | `transmitFrame(packet, header, ifs, updateLocalNav, this)` |
 | `Tx` | `Ieee80211Mac` | direct | `sendDownFrame`, `getAddress`, `getFcsMode` |
 | `Ieee80211Mac` | `Tx` | direct | `radioTransmissionFinished` (from the radio signal) |
 | `Tx` | `Dcf`/`Hcf` | callback, `ITx::ICallback` | `transmissionComplete(packet, header)` |
-| `Tx` | `Rx` | direct, `IRx` | `frameTransmitted(duration)` sets or extends the NAV |
+| `Tx` | `Rx` | direct, `IRx` | `Tx` calls `frameTransmitted(duration)` only when the completed frame's saved `updateLocalNav` choice is `true`. `Rx` sets or extends the local NAV. |
 | `Dcf`/`Hcf` | recovery, rate control, ack handler | direct | on ACK: reset counters and CW, report success, mark acknowledged, drop the frame; on failure: count the retry, double the CW, report failure, set the retry bit or drop |
 | `RecipientAckProcedure`, `CtsProcedure`, block ack procedures | `Dcf`/`Hcf` | callback, `IProcedureCallback` | `transmitControlResponseFrame(response, received)` |
 | block ack handlers | `Hcf` | callbacks | `processMgmtFrame` (ADDBA, DELBA), `scheduleInactivityTimer` |
@@ -565,7 +569,7 @@ The operations `InterfaceUpOperation` and `InterfaceDownOperation` exist in
    and fragments the packet when needed, and registers the frame with `AckHandler`.
 7. The handler calls `Dcf::transmitFrame`. `RateSelection` picks the mode and sets
    `Ieee80211ModeReq`. `OriginatorProtectionMechanism` computes the duration field. `Dcf` calls
-   `tx->transmitFrame(packet, header, ifs, this)`.
+   `tx->transmitFrame(packet, header, ifs, true, this)`. The holder frame requires a local NAV update.
 8. `Tx` fills the transmitter address and the FCS, waits the IFS, and calls `mac->sendDownFrame`.
    The MAC switches the radio to transmitter mode with a command and sends the frame down.
 9. The radio prepends the PHY header and hands the packet to the medium. At the end of the
@@ -599,6 +603,7 @@ and `linkBroken`. Either way the sequence finishes and a new contention starts.
    builds an ACK (or `CtsProcedure` a CTS in reply to an RTS), which `Dcf` sends through `Tx`
    after SIFS; `RecipientMacDataService` removes duplicates and reassembles fragments and returns
    the complete frames.
+   `Dcf` passes `false` for `updateLocalNav` when it sends the response. The response retains its Duration/ID field without a local NAV update.
 4. `Dcf::sendUp` calls `mac->sendUpFrame`. The MAC decapsulates the frame. A management frame goes
    out on `mgmtOut`. A data frame goes to `Ds`, which passes it up (or, on an AP, forwards it into
    the BSS through `mac->processUpperFrame`). The LLC pops its header and the packet leaves on

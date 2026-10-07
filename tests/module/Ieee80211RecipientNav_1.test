@@ -1,0 +1,285 @@
+%description:
+Check recipient CTS and ACK transmissions through production HCF, DCF, Tx, and Rx.
+Require a second CTS before the first CTS reservation expires.
+Retain received NAV refusal and local NAV updates for holder frames.
+Check a Basic Block Ack response after an ADDBA exchange through production HCF.
+Require its positive Duration/ID field without a local NAV update.
+
+%extraargs: -r 0..2
+
+%file: RecipientNav.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class RecipientNavRx : public Rx {
+  public:
+    int localUpdates = 0;
+    void frameTransmitted(simtime_t duration) override {
+        localUpdates++;
+        Rx::frameTransmitted(duration);
+    }
+};
+Define_Module(RecipientNavRx);
+
+class RecipientNavMac : public Ieee80211Mac {
+  public:
+    std::vector<int> types;
+    std::vector<simtime_t> durations;
+    simtime_t addbaResponseEnd = -1;
+    Ptr<const Ieee80211BasicBlockAck> basicBlockAck;
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        types.push_back(header->getType());
+        durations.push_back(header->getDurationField());
+        if (auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+            ASSERT(response->getBlockAckPolicy());
+            auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            addbaResponseEnd = simTime() + mode->getDuration(packet->getDataLength());
+        }
+        if (auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(header))
+            basicBlockAck = response;
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+    void injectBlockAckSetup() {
+        Enter_Method("injectBlockAckSetup");
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        request->setAddress3(request->getTransmitterAddress());
+        request->setSequenceNumber(SequenceNumberCyclic(1));
+        request->setTid(5);
+        request->setBlockAckPolicy(true);
+        request->setBufferSize(64);
+        request->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        injectBlockAckFrame(request);
+    }
+    void injectBlockAckRequest() {
+        Enter_Method("injectBlockAckRequest");
+        auto request = makeShared<Ieee80211BasicBlockAckReq>();
+        request->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        request->setTidInfo(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setDurationField(SimTime(500, SIMTIME_US));
+        injectBlockAckFrame(request);
+    }
+    void injectSetupAck() {
+        Enter_Method("injectSetupAck");
+        injectBlockAckFrame(makeShared<Ieee80211AckFrame>());
+    }
+    void injectBlockAckFrame(const Ptr<Ieee80211MacHeader>& header) {
+        auto rx = check_and_cast<RecipientNavRx *>(getSubmodule("rx"));
+        rx->receptionStateChanged(physicallayer::IRadio::RECEPTION_STATE_RECEIVING);
+        header->setReceiverAddress(getAddress());
+        auto packet = new Packet("received-block-ack-exchange", header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
+            physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(trailer);
+        Ieee80211Mac::handleLowerPacket(packet);
+        rx->receptionStateChanged(physicallayer::IRadio::RECEPTION_STATE_IDLE);
+    }
+    void inject(bool data, bool addressedToUs = true) {
+        Enter_Method("inject");
+        Ptr<Ieee80211MacHeader> header;
+        if (data) {
+            auto frame = makeShared<Ieee80211DataHeader>();
+            if (mib->qos) {
+                frame->setType(ST_DATA_WITH_QOS);
+                frame->addChunkLength(QOSCONTROL_PART_LENGTH);
+                frame->setTid(5);
+            }
+            frame->setMoreFragments(true);
+            frame->setSequenceNumber(SequenceNumberCyclic(0));
+            frame->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+            frame->setAddress3(frame->getTransmitterAddress());
+            header = frame;
+        }
+        else {
+            auto frame = makeShared<Ieee80211RtsFrame>();
+            frame->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+            header = frame;
+        }
+        header->setReceiverAddress(addressedToUs ? getAddress() : MacAddress("02:00:00:00:00:03"));
+        header->setDurationField(SimTime(500, SIMTIME_US));
+        auto packet = new Packet("received-request", header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
+            physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+        if (data)
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(26)));
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(trailer);
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+    void injectHolder() {
+        Enter_Method("injectHolder");
+        auto header = makeShared<Ieee80211DataHeader>();
+        if (mib->qos) {
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setTid(5);
+        }
+        header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setTransmitterAddress(getAddress());
+        header->setAddress3(getAddress());
+        auto packet = new Packet("holder-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(26)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+};
+Define_Module(RecipientNavMac);
+
+class RecipientNavTest : public cSimpleModule {
+  public:
+    RecipientNavTest() : cSimpleModule(65536) {}
+  protected:
+    void checkBasicBlockAck(RecipientNavMac *mac, RecipientNavRx *rx) {
+        auto mode = physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000));
+        mac->injectBlockAckSetup();
+        for (int i = 0; i < 100 && mac->addbaResponseEnd < SIMTIME_ZERO; i++)
+            wait(SimTime(10, SIMTIME_US));
+        ASSERT(mac->addbaResponseEnd >= simTime());
+        wait(mac->addbaResponseEnd - simTime() + mode->getSifsTime());
+        mac->injectSetupAck();
+        wait(SimTime(150, SIMTIME_US));
+        ASSERT(mac->types.size() == 2);
+        ASSERT(mac->types[0] == ST_ACK);
+        ASSERT(rx->isMediumFree());
+        auto updatesBeforeResponse = rx->localUpdates;
+        auto framesBeforeResponse = mac->types.size();
+        mac->injectBlockAckRequest();
+        wait(SimTime(350, SIMTIME_US));
+        ASSERT(mac->types.size() == framesBeforeResponse + 1);
+        ASSERT(mac->basicBlockAck != nullptr);
+        ASSERT(mac->basicBlockAck->getReceiverAddress() == MacAddress("02:00:00:00:00:02"));
+        ASSERT(mac->basicBlockAck->getTidInfo() == 5);
+        ASSERT(mac->basicBlockAck->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+        // IEEE Std 802.11-2024, 9.2.5.6: subtract SIFS and response airtime from the request duration.
+        auto expectedDuration = SimTime(500, SIMTIME_US) - mode->getSifsTime() - mode->getDuration(LENGTH_BASIC_BLOCKACK);
+        ASSERT(expectedDuration > SIMTIME_ZERO);
+        ASSERT(mac->basicBlockAck->getDurationField() == expectedDuration);
+        ASSERT(rx->localUpdates == updatesBeforeResponse);
+        ASSERT(rx->isMediumFree());
+        std::cout << "Basic Block Ack recipient NAV checks passed.\n";
+    }
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto mac = check_and_cast<RecipientNavMac *>(getModuleByPath("^.host.wlan[0].mac"));
+        auto rx = check_and_cast<RecipientNavRx *>(mac->getSubmodule("rx"));
+        if (par("basicBlockAckOnly").boolValue()) {
+            checkBasicBlockAck(mac, rx);
+            std::cout << "Recipient NAV production checks passed.\n";
+            return;
+        }
+        mac->inject(false);
+        wait(SimTime(150, SIMTIME_US));
+        mac->inject(false);
+        wait(SimTime(150, SIMTIME_US));
+        ASSERT(mac->types.size() == 2);
+        ASSERT(mac->types[0] == ST_CTS && mac->types[1] == ST_CTS);
+        ASSERT(mac->durations[0] == SimTime(440, SIMTIME_US));
+        ASSERT(mac->durations[1] == SimTime(440, SIMTIME_US));
+        ASSERT(rx->localUpdates == 0);
+        ASSERT(rx->isMediumFree());
+        mac->inject(true);
+        wait(SimTime(150, SIMTIME_US));
+        ASSERT(mac->types.size() == 3 && mac->types[2] == ST_ACK);
+        ASSERT(mac->durations[2] == SimTime(440, SIMTIME_US));
+        ASSERT(rx->localUpdates == 0);
+        ASSERT(rx->isMediumFree());
+        mac->inject(false, false);
+        ASSERT(!rx->isMediumFree());
+        mac->inject(false);
+        wait(SimTime(150, SIMTIME_US));
+        ASSERT(mac->types.size() == 3);
+        ASSERT(rx->localUpdates == 0);
+        wait(SimTime(500, SIMTIME_US));
+        ASSERT(rx->isMediumFree());
+        mac->injectHolder();
+        wait(SimTime(1, SIMTIME_MS));
+        ASSERT(mac->types.size() == 4);
+        ASSERT(rx->localUpdates == 1);
+        std::cout << "Recipient NAV production checks passed.\n";
+    }
+};
+Define_Module(RecipientNavTest);
+}
+
+%file: RecipientNavNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module RecipientNavMac extends Ieee80211Mac {
+    parameters:
+        @class(::inet::ieee80211::RecipientNavMac);
+}
+simple RecipientNavRx extends Rx {
+    parameters:
+        @class(::inet::ieee80211::RecipientNavRx);
+}
+simple RecipientNavTest extends SimpleModule {
+    parameters:
+        bool basicBlockAckOnly = default(false);
+        @class(::inet::ieee80211::RecipientNavTest);
+}
+network RecipientNavNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: RecipientNavTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RecipientNavNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 5ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.typename = "RecipientNavMac"
+**.wlan[*].mac.qosStation = ${scenario="hcf","dcf","blockAck"} != "dcf"
+**.wlan[*].mac.rx.typename = "RecipientNavRx"
+**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == "blockAck"
+*.test.basicBlockAckOnly = ${scenario} == "blockAck"
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseBlockAckFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+*.host.wlan[0].address = "02:00:00:00:00:01"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host.mobility.initialX = 0m
+*.host.mobility.initialY = 0m
+
+%contains: stdout
+Recipient NAV production checks passed.
+
+%contains: stdout
+Basic Block Ack recipient NAV checks passed.

@@ -31,8 +31,23 @@ class INET_API ITx
   public:
     virtual ~ITx() {}
 
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    /**
+     * The caller retains the frame. Tx sets its addresses and FCS, then retains a copy until completion.
+     * Pass updateLocalNav=true for holder frames. Pass updateLocalNav=false for recipient responses.
+     *
+     * Tx retains this choice through IFS and transmission, independently of the transmitted frame type.
+     * Tx saves the completed choice before the callback, which can accept another transmission.
+     * For example, a recipient CTS carries its duration without a local NAV update.
+     *
+     * IEEE Std 802.11-2024, 10.3.2.4 defines NAV updates from received frames.
+     * A received frame addressed to the station does not update its NAV.
+     * Clause 10.23.2.2 defines TXNAV, the transmitted reservation timer, from holder transmissions, except PS-Poll frames.
+     * Clause 10.3.2.9 defines CTS responses when NAV indicates idle, with holder and PHY conditions.
+     * Model simplification: INET uses the local NAV timer for holder reservations.
+     * The CTS policy does not apply the exception for received reservations from the same TXOP holder.
+     */
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback) = 0;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ICallback *callback) = 0;
     /**
      * The query returns true while Tx retains an accepted frame,
      * including any wait before transmission and the transmission itself.

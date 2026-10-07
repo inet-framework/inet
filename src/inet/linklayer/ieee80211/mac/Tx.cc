@@ -39,16 +39,17 @@ void Tx::initialize(int stage)
     }
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback)
 {
-    transmitFrame(packet, header, SIMTIME_ZERO, txCallback);
+    transmitFrame(packet, header, SIMTIME_ZERO, updateLocalNav, txCallback);
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback)
 {
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
+    this->updateLocalNav = updateLocalNav;
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
@@ -93,11 +94,14 @@ void Tx::radioTransmissionFinished()
         auto duration = header->getDurationField();
         auto tmpFrame = frame;
         auto tmpTxCallback = txCallback;
+        auto completedUpdateLocalNav = updateLocalNav;
         frame = nullptr;
         txCallback = nullptr;
+        updateLocalNav = false;
         tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
         delete tmpFrame;
-        rx->frameTransmitted(duration);
+        if (completedUpdateLocalNav)
+            rx->frameTransmitted(duration);
     }
 }
 
