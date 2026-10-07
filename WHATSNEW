@@ -325,6 +325,22 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. Interference for a listening of the caller's making
+
+   IRadioMedium gained computeInterference(receiver, listening), formerly a
+   protected member of RadioMedium: the background noise plus the
+   receptions, at the receiver, of the transmissions on the medium that
+   overlap the listening, for a listening that need not belong to any
+   transmission. The result is not cached, but the receptions in it come
+   from the medium's reception cache: the ones not computed yet are computed
+   at the call, and draw their random numbers, if any, then. Together with
+   the propagation, the receiver's createListening() and the analog model,
+   it lets a radio compute a hypothetical SNIR (e.g. for link-quality
+   estimation) from public API.
+
+   This change requires the modification of C++ code that implements
+   IRadioMedium without deriving from RadioMedium.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
