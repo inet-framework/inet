@@ -32,8 +32,17 @@ class INET_API ITx
     virtual ~ITx() {}
 
     /**
-     * The caller retains the frame. Tx sets its addresses and FCS, then retains a copy until completion.
-     * Pass updateLocalNav=true for holder frames. Pass updateLocalNav=false for recipient responses.
+     * The caller retains the frame. Tx sets its addresses and FCS. Tx retains a copy until completion.
+     * With updateLocalNav=true, Tx extends local NAV from the encoded duration after the completion callback.
+     * With updateLocalNav=false, Tx does not update local NAV.
+     * Custom callers select this flag by the required local NAV effect, independently of whether the frame is a holder frame.
+     *
+     * Model simplification: DCF (distributed coordination function) holders pass true to use local NAV for their reservations.
+     * HCF (hybrid coordination function) holders pass false because HCF publishes successful reservations through separate TXNAV.
+     * HCF calls IRx::successfulFrameTransmitted() with the holder PPDU end and encoded duration when the exchange establishes success.
+     * Recipient responses pass false in both coordination functions.
+     * For example, HCF DATA does not update local NAV at transmission completion.
+     * When HCF accepts its ACK, HCF publishes TXNAV from the DATA transmission end and encoded duration.
      *
      * Tx retains this choice through IFS and transmission, independently of the transmitted frame type.
      * Tx saves the completed choice before the callback, which can accept another transmission.
@@ -43,7 +52,6 @@ class INET_API ITx
      * A received frame addressed to the station does not update its NAV.
      * Clause 10.23.2.2 defines TXNAV, the transmitted reservation timer, from holder transmissions, except PS-Poll frames.
      * Clause 10.3.2.9 defines CTS responses when NAV indicates idle, with holder and PHY conditions.
-     * Model simplification: INET uses the local NAV timer for holder reservations.
      * The CTS policy does not apply the exception for received reservations from the same TXOP holder.
      */
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback) = 0;
