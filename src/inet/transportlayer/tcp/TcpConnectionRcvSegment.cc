@@ -175,9 +175,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             if (tcpHeader->getSynBit()) {
                 EV_DETAIL << "SYN with unacceptable seqNum in " << stateName(fsm.getState()) << " state received (SYN duplicat?)\n";
             }
-            else if (payloadLength > 0 && state->sack_enabled && seqLess((tcpHeader->getSequenceNo() + payloadLength), state->rcv_nxt)) {
+            else if (payloadLength + tcpHeader->getSynFinLen() > 0 && state->sack_enabled
+                     && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
+                // Linux tcp_send_dupack: ANY old data (seq before rcv_nxt) earns a
+                // D-SACK, including a duplicate ending exactly at rcv_nxt -- the
+                // range's right edge is capped at rcv_nxt by addSacks. SEG.LEN
+                // counts SYN and FIN (Linux end_seq).
                 state->start_seqno = tcpHeader->getSequenceNo();
-                state->end_seqno = tcpHeader->getSequenceNo() + payloadLength;
+                state->end_seqno = tcpHeader->getSequenceNo() + payloadLength + tcpHeader->getSynFinLen();
                 state->snd_dsack = true;
                 EV_DETAIL << "SND_D-SACK SET (dupseg rcvd)\n";
             }
