@@ -25,6 +25,7 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvWnd];    // Rcv_wnd
         @signal[rcvAdv];    // Current advertised window (=rcv_adv)
         @signal[sndNxt];    // Sent seqNo
+        @signal[sndMax];    // Snd_max
         @signal[sndAck];    // Sent ackNo
         @signal[rcvSeq];    // Received seqNo
         @signal[rcvAck];    // Received ackNo (=snd_una)
@@ -36,6 +37,7 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvOooSeg];    // Number of received out-of-order segments
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
+        @signal[delivered];    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
         @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
