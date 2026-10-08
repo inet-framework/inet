@@ -26,6 +26,7 @@ simple TcpTestClient like IApp
         int sendBytes @unit(B);
         string sendScript;
         double tClose @unit(s);
+        string statusRequestScript = default(""); // comma-separated list of times ("1.5,3.0") at which to issue a TCP_C_STATUS query on the socket; the reply is logged as a "STATUS:" line
         @display("i=block/app");
     gates:
         input socketIn;

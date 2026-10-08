@@ -1,0 +1,37 @@
+%description:
+The application asks for the STATUS of its connection at t=1.5, and the
+reply reaches the application through its TcpSocket. The reply carries the
+SocketInd tag with the socket ID, as every other indication does; without it,
+TcpSocket::processMessage() stops on the assertion belongsToSocket(msg).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_app.cmdenv-log-level=INFO
+**.cmdenv-log-level=OFF
+
+# script format: "time numbytes; time numbytes; ..."
+*.cli_app.sendScript="1.0 1024"
+*.cli_app.statusRequestScript="1.5"
+
+include ../../lib/defaults.ini
+
+%contains-regex: stdout
+STATUS: caState=[^\n]*
+
+%contains: stdout
+[1.203 B002] A.1000 < B.2000: A ack 1025 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
