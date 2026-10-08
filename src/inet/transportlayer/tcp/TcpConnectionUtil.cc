@@ -1002,6 +1002,17 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // After a retransmission timeout, the forward above can move snd_nxt to the end
+    // of the send queue, when the receiver has SACKed or the sender has retransmitted
+    // all data above it. A segment of zero bytes cannot be made. Send nothing and
+    // return 0; the callers stop their send loops at a zero return. The go-back-N
+    // after the timeout is then complete.
+    if (bytes == 0) {
+        if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
+            state->afterRto = false;
+        return 0;
+    }
+
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
@@ -1219,6 +1230,10 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // send whole segments
     while (bytesToSend >= effectiveMss) {
         uint32_t sentBytes = sendSegment(effectiveMss);
+        if (sentBytes == 0) { // no data left after the forward of snd_nxt
+            bytesToSend = 0;
+            break;
+        }
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
     }
@@ -1340,8 +1355,8 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     else {
         ASSERT(bytes != 0);
 
-        sendSegment(bytes);
-        tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
+        if (sendSegment(bytes) > 0) // 0: no data left after the forward of snd_nxt
+            tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 
         if (!called_at_rto) {
             if (seqGreater(old_snd_nxt, state->snd_nxt))
@@ -1396,6 +1411,8 @@ void TcpConnection::retransmitData()
         uint32_t bytes = std::min(bytesToSend, state->snd_effmss);
         bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         uint32_t sentBytes = sendSegment(bytes);
+        if (sentBytes == 0) // no data left after the forward of snd_nxt
+            break;
 
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744

@@ -130,6 +130,8 @@ void Rfc6675Recovery::stepC()
         if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
             state->snd_nxt = seqNum;
             uint32_t sentBytes = conn->sendSegment(state->snd_mss);
+            if (sentBytes == 0) // no data left after the forward of snd_nxt
+                break;
 
             // RFC 6937 accounting: sendSegment() is called here DIRECTLY (not via
             // sendData()/retransmitOneSegment()), so the dataSent()/segmentRetransmitted()
@@ -339,6 +341,8 @@ void Rfc6675Recovery::receivedDuplicateAck()
                         state->snd_nxt = seqNum;
                         uint32_t oldSndMax = state->snd_max;
                         uint32_t sentBytes = conn->sendSegment(state->snd_mss);
+                        if (sentBytes == 0) // no data left after the forward of snd_nxt
+                            break;
                         state->pipe += sentBytes;
                         state->limitedTransmitBytes += state->snd_max - oldSndMax;
                     }
@@ -1091,6 +1095,8 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
             break;
 
         uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
+        if (sentBytes == 0) // no data left after the forward of snd_nxt
+            break;
         // RFC 6675, page 9:
         //"
         // (C.4) The estimate of the amount of data outstanding in the
@@ -1113,6 +1119,8 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     // no need to check cwnd and rwnd - has already be done before
     // no need to check nagle - sending mss bytes
     uint32_t sentBytes = conn->sendSegment(state->snd_mss);
+    if (sentBytes == 0)
+        return 0;
 
     uint32_t sentSeqNum = seqNum + sentBytes;
 

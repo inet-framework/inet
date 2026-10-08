@@ -256,6 +256,8 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
             break;
 
         uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
+        if (sentBytes == 0) // no data left after the forward of snd_nxt
+            break;
         // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
         // octets transmitted in (C.1)."
@@ -275,6 +277,8 @@ uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     // no need to check cwnd and rwnd - has already be done before
     // no need to check nagle - sending mss bytes
     uint32_t sentBytes = sendSegment(state->snd_mss);
+    if (sentBytes == 0)
+        return 0;
 
     uint32_t sentSeqNum = seqNum + sentBytes;
 
