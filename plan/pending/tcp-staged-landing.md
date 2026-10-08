@@ -331,6 +331,14 @@ plan gives a reason for.
   test that S6 removes, which also grew cwnd there. S6 keeps the count of the source. The repair
   needs a hook of the shared path at each ACK in a recovery. The owner chose S13, where the AccECN
   branch changes the same count (2026-10-08).
+- **D-24 — The S8 features land off; S19 turns them on.** The source turns RACK, the learning of
+  the reordering degree and the handshake RTT seed on in their own commits. RACK and the learning
+  then changed only connections with SACK, which the source turns on in commit 40 with the other
+  modern defaults. S8 lands them with defaults that keep master's behavior:
+  `lossDetectionMode = "dupthresh"`, `adaptiveReorderingEnabled = false`, and
+  `seedRttFromHandshake = false` (D-19). The tests of S8 select each feature. S19 sets the source
+  defaults, one commit for each, with its moved rows. A behavior that has no parameter, such as
+  the count of the bytes in flight with SACK (B8), changes in S8.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -817,3 +825,24 @@ symbol, and the TCP module tests pass at each commit (373 at the first code comm
 head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
 packetdrill tests skip without inet-gpl); unit 116 and serializer 4 pass at the head. The CI
 fingerprint job passes at each code commit, after the commit's own new values.
+
+### S8 — `topic/tcp-rack`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: keep the lost mark when a retransmission splits a queue region | — | 49, 17 (part) |
+| 2 | add: the send times, the transmission counts and the original segment starts in the retransmission queue, and the minimum RTT | B17 | 17 (part), 13 (part) |
+| 3 | change: a retransmission stays inside the sent data and inside one original segment | — | 17 (part) |
+| 4 | change: count the bytes in flight with SACK as Linux does, with the DupThresh loss marks | B8 | 16 (part), 17 (part) |
+| 5 | add: RACK loss detection (RFC 8985), selected by `lossDetectionMode` | — | 17, 64 (part) |
+| 6 | add: the algorithm hears which segments an ACK acknowledges, before the queue discards them | — | 18 (part) |
+| 7 | add: learn the reordering degree of the path | — | 19 |
+| 8 | add: the STATUS counters | B17 | 18 (part), 16 (part) |
+| 9 | add: seed the RTT estimator from the handshake | — | 16 (part) |
+
+Master has the defect of step 1 since S5e, which brought the loss marks, so by rule 4 the fix
+stays its own commit. Steps 5, 7 and 9 add features that stay off (D-24). The tests come from
+commit 41 (`tcp_rack_1`, `tcp_info_fields_1` to `_3`, and the STATUS query of `TcpTestClient`),
+without the parameters of later stages (`initialWindow`, `tcp-legacy.ini`) and without the
+STATUS fields of later features (AccECN, Fast Open, the send buffer). The order can change when a
+step shows that it depends on a later one.
