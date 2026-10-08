@@ -194,6 +194,10 @@ void Rfc6675Recovery::step4()
     // (4) Invoke fast retransmit and enter loss recovery as follows:
     //"
     state->lossRecovery = true;
+    // RFC 8985 section 7.1: "Reset TLP.is_retrans and TLP.end_seq when initiating a
+    // connection, fast recovery, or RTO recovery."
+    state->tlpHighSeq = 0;
+    state->tlpRetrans = false;
 
     //"
     // (4.1) RecoveryPoint = HighData
@@ -878,6 +882,7 @@ void Rfc6675Recovery::noteDsack(uint32_t fromSeq, uint32_t toSeq)
 {
     state->dsackSeen = true;
     state->dsackBytes = toSeq - fromSeq;
+    state->dsackEndSeq = toSeq;
     // Linux tcp_check_dsack()/tcp_sacktag_one(): each D-SACK of data above the undo
     // marker confirms that many retransmitted segments as spurious, on whatever ACK
     // it arrives -- usually a duplicate ACK, because the original arrived first.

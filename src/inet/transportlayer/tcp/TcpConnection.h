@@ -283,6 +283,13 @@ class INET_API TcpConnection : public SimpleModule
     virtual void retransmitOneSegment(bool called_at_rto);
 
     /**
+     * RFC 8985 section 7.3 loss probe: send one segment of new data if the data
+     * and the receive window allow it, else the FIN again, else the last segment
+     * again. Returns true if a segment was sent.
+     */
+    virtual bool sendTlpProbe();
+
+    /**
      * Called at a retransmission timeout: marks the outstanding data lost in the
      * retransmission queue, as Linux tcp_timeout_mark_lost() does. Without SACK,
      * it also removes the inferred SACKs and the retransmitted marks.

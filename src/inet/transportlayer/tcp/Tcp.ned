@@ -227,6 +227,7 @@ simple Tcp extends SimpleModule like ITcp
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.
         bool seedRttFromHandshake = default(false); // Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK exchange, as Linux does. The first-flight RTO becomes RTT-scaled instead of the initial RTO.
+        bool tlpEnabled = default(false); // Tail Loss Probe (RFC 8985 section 7): about two SRTTs after the last transmission or ACK of new data, send one probe, so that its ACK starts the repair of a lost tail before the RTO. Requires sackSupport.
         double rackReoTimerGranularity @unit(s) = default(0s); // model the kernel's jiffy-quantized REO timeout arming (Linux usecs_to_jiffies(timeout)+1: delay rounded UP to this granularity plus one extra tick, e.g. 4ms for an HZ=250 kernel); a sub-tick RACK deadline then fires whole ticks later, letting a dupthresh-timed SACK enter recovery first, as real kernels do. 0 = exact (default INET behavior)
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];

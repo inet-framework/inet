@@ -94,6 +94,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     // reset the per-segment D-SACK detection (RFC 2883 loss undo)
     state->dsackSeen = false;
     state->dsackBytes = 0;
+    state->dsackEndSeq = 0;
     //
     // Note: this code is organized exactly as
     // RFC 9293, section "3.10 Event Processing", subsection "3.10.7. SEGMENT ARRIVES".
@@ -1244,6 +1245,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     //"
     // Note: should use SND.MAX instead of SND.NXT in above checks
     //
+    // RFC 8985 section 7.4.2: each ACK can end the episode of a tail loss probe
+    if (seqLE(tcpHeader->getAckNo(), state->snd_max))
+        tcpAlgorithm->processTlpAck(tcpHeader.get(), payloadLength);
+
     if (seqGE(state->snd_una, tcpHeader->getAckNo())) {
         //
         // duplicate ACK? A received TCP segment is a duplicate ACK if all of

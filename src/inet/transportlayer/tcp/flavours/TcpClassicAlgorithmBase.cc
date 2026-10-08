@@ -110,6 +110,18 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
+void TcpClassicAlgorithmBase::tlpLossResponse()
+{
+    // RFC 8985 section 7.4.2: "invoke a congestion control response equivalent to a
+    // fast recovery". Linux runs tcp_init_cwnd_reduction() and
+    // tcp_end_cwnd_reduction() at once: the ssthresh of the flavour, and cwnd = ssthresh.
+    state->ssthresh = calculateSsthreshForFastRecovery();
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(ssthreshSignal, state->ssthresh);
+    conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "TLP: the probe repaired a lost tail, cwnd reduced to ssthresh=" << state->ssthresh << "\n";
+}
+
 void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);

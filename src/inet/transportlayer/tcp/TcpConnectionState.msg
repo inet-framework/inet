@@ -275,12 +275,18 @@ struct TcpStateVariables
     uint32_t retransStampTS = 0;   // TSval echoed on the first retransmit of the episode (Eifel); 0 = none
     bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
     uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
+    uint32_t dsackEndSeq = 0;      // end of the D-SACK block seen on the current segment
 
     // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2)
     bool frtoEnabled = false;      // set from the frtoEnabled parameter
     bool frtoActive = false;       // an F-RTO episode is open (since the last RTO)
     uint32_t rtoRecoveryPoint = 0; // snd_max at the last RTO (RFC 5682 RecoveryPoint); 0 = the recovery of the RTO is complete
     bool frtoOrigAcked = false;    // never-retransmitted data was acked/SACKed during the episode
+
+    // Tail Loss Probe (RFC 8985 section 7, Linux tcp_send_loss_probe())
+    bool tlpEnabled = false;       // set from the tlpEnabled parameter
+    uint32_t tlpHighSeq = 0;       // snd_max after the probe (RFC 8985 TLP.end_seq); 0 = no probe outstanding
+    bool tlpRetrans = false;       // the outstanding probe retransmitted data (RFC 8985 TLP.is_retrans)
 
     // TCP_INFO time counters (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
     // with respect to every send/receive decision -- consulted only by TcpStatusInfo.

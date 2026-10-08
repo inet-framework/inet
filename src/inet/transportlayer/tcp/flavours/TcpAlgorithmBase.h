@@ -48,6 +48,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
+    cMessage *tlpTimer; // probe timeout of the Tail Loss Probe (RFC 8985 section 7.2)
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -56,7 +57,15 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void processPersistTimer(TcpEventCode& event);
     virtual void processDelayedAckTimer(TcpEventCode& event);
     virtual void processKeepAliveTimer(TcpEventCode& event);
+    /** Probe timeout of the Tail Loss Probe (RFC 8985 section 7.3): send a probe. */
+    virtual void processPtoTimer(TcpEventCode& event);
     //@}
+
+    /** RFC 8985 section 7.2, Linux tcp_schedule_loss_probe(): arm the probe timeout if the connection can probe. */
+    virtual void schedulePto();
+
+    /** The congestion response to a loss that a tail loss probe repaired (RFC 8985 section 7.4.2). */
+    virtual void tlpLossResponse() {}
 
     /**
      * Start REXMIT timer and initialize retransmission variables
@@ -142,6 +151,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
 
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+
+    virtual void processTlpAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
     virtual void receivedAckForUnsentData(uint32_t seq) override;
 

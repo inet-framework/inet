@@ -37,6 +37,8 @@ namespace tcp {
 #define MAX_REXMIT_TIMEOUT     240   // 2 * MSL (RFC 1122)
 #define MIN_PERSIST_TIMEOUT    5   // 5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
+#define TLP_MAX_ACK_DELAY      0.2   // 200ms: RFC 8985 TLP.max_ack_delay, as Linux (TCP_RTO_MIN)
+#define TLP_MIN_TIMEOUT        0.002 // 2ms: Linux TCP_TIMEOUT_MIN, the PTO margin when more than one segment is in flight
 
 std::string TcpAlgorithmBaseStateVariables::str() const
 {
@@ -61,7 +63,7 @@ std::string TcpAlgorithmBaseStateVariables::detailedInfo() const
 TcpAlgorithmBase::TcpAlgorithmBase() : TcpAlgorithm(),
     state((TcpAlgorithmBaseStateVariables *&)TcpAlgorithm::state)
 {
-    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = nullptr;
+    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = nullptr;
 }
 
 TcpAlgorithmBase::~TcpAlgorithmBase()
@@ -77,6 +79,8 @@ TcpAlgorithmBase::~TcpAlgorithmBase()
         delete cancelEvent(delayedAckTimer);
     if (keepAliveTimer)
         delete cancelEvent(keepAliveTimer);
+    if (tlpTimer)
+        delete cancelEvent(tlpTimer);
 }
 
 void TcpAlgorithmBase::initialize()
@@ -87,11 +91,18 @@ void TcpAlgorithmBase::initialize()
     persistTimer = new cMessage("PERSIST");
     delayedAckTimer = new cMessage("DELAYEDACK");
     keepAliveTimer = new cMessage("KEEPALIVE");
+    tlpTimer = new cMessage("TLP-PTO");
+    // schedulePto() limits the probe timeout to the time of the RTO, so both
+    // timers can expire at the same instant. RFC 8985 section 8 gives them one
+    // timer, where the probe takes the place of the RTO: the probe goes first,
+    // and processPtoTimer() then restarts the RTO.
+    tlpTimer->setSchedulingPriority(-1);
 
     rexmitTimer->setContextPointer(conn);
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
+    tlpTimer->setContextPointer(conn);
 }
 
 void TcpAlgorithmBase::established(bool active)
@@ -155,6 +166,7 @@ void TcpAlgorithmBase::connectionClosed()
     cancelEvent(persistTimer);
     cancelEvent(delayedAckTimer);
     cancelEvent(keepAliveTimer);
+    cancelEvent(tlpTimer);
 }
 
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
@@ -167,8 +179,89 @@ void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
         processDelayedAckTimer(event);
     else if (timer == keepAliveTimer)
         processKeepAliveTimer(event);
+    else if (timer == tlpTimer)
+        processPtoTimer(event);
     else
         throw cRuntimeError(timer, "unrecognized timer");
+}
+
+void TcpAlgorithmBase::schedulePto()
+{
+    // RFC 8985 section 7.2: not in a fast recovery or in an RTO recovery, not with
+    // SACKed data, and not with a probe outstanding (Linux sends no second probe).
+    if (!state->tlpEnabled || !state->sack_enabled || state->lossRecovery
+            || (state->rtoRecoveryPoint != 0 && seqLess(state->snd_una, state->rtoRecoveryPoint))
+            || state->sackedBytes != 0 || state->tlpHighSeq != 0
+            || state->snd_una == state->snd_max)
+        return;
+
+    // TLP_calc_PTO(): 2*SRTT, plus the delayed ACK of the peer when one segment is
+    // in flight; without an RTT sample, the RTO. Never later than the RTO.
+    simtime_t pto;
+    if (state->srtt > 0) {
+        pto = state->srtt * 2;
+        if (state->snd_max - state->snd_una <= state->snd_mss)
+            pto += TLP_MAX_ACK_DELAY;
+        else
+            pto += TLP_MIN_TIMEOUT; // the probe must not come between the ACKs of one flight
+    }
+    else
+        pto = state->rexmit_timeout;
+    if (rexmitTimer->isScheduled()) {
+        simtime_t rtoRemaining = rexmitTimer->getArrivalTime() - simTime();
+        if (rtoRemaining < pto)
+            pto = rtoRemaining;
+    }
+    if (pto <= SIMTIME_ZERO)
+        return;
+
+    cancelEvent(tlpTimer);
+    conn->scheduleAfter(pto, tlpTimer);
+    EV_DETAIL << "TLP: probe timeout armed for " << pto << "s\n";
+}
+
+void TcpAlgorithmBase::processPtoTimer(TcpEventCode& event)
+{
+    // RFC 8985 section 7.3, Linux tcp_send_loss_probe(): no ACK came for the tail
+    // of the flight in the probe timeout. Send one probe, so that its ACK, or the
+    // SACK hole that it shows, starts a fast recovery instead of an RTO. Not during
+    // a fast recovery: RACK can start one without a new ACK, so the timer can stay.
+    if (!state->tlpEnabled || state->tlpHighSeq != 0 || state->lossRecovery
+            || state->snd_una == state->snd_max)
+        return;
+    if (conn->sendTlpProbe()) {
+        state->tlpHighSeq = state->snd_max;
+        // the probe takes the place of the RTO: restart the RTO from now
+        cancelEvent(rexmitTimer);
+        conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
+    }
+}
+
+void TcpAlgorithmBase::processTlpAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    // RFC 8985 section 7.4.2 TLP_process_ack(), Linux tcp_process_tlp_ack()
+    uint32_t ack = tcpHeader->getAckNo();
+    if (state->tlpHighSeq == 0 || seqLess(ack, state->tlpHighSeq))
+        return;
+    if (!state->tlpRetrans)
+        state->tlpHighSeq = 0; // the probe of new data arrived
+    else if (state->dsackSeen && state->dsackEndSeq == state->tlpHighSeq)
+        state->tlpHighSeq = 0; // a D-SACK of the probe: the original and the probe arrived
+    else if (seqGreater(ack, state->tlpHighSeq)) {
+        // The ACK covers data after the probe, and no report showed that both the
+        // original and the probe arrived: the probe repaired a loss.
+        state->tlpHighSeq = 0;
+        tlpLossResponse();
+    }
+    else if (ack == state->snd_una && payloadLength == 0) {
+        bool sackOption = false;
+        for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
+            if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPTION_SACK)
+                sackOption = true;
+        if (!sackOption)
+            state->tlpHighSeq = 0; // a duplicate ACK without SACK: the original and the probe arrived
+    }
+    // else: the ACK reaches the probe without a D-SACK; wait for a later ACK
 }
 
 void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
@@ -208,6 +301,13 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
 
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
+
+    // RFC 8985 section 8: the RTO and the probe timeout are one timer. Section 7.1:
+    // "Reset TLP.is_retrans and TLP.end_seq when initiating a connection, fast
+    // recovery, or RTO recovery": an earlier probe is not the repair of this loss.
+    cancelEvent(tlpTimer);
+    state->tlpHighSeq = 0;
+    state->tlpRetrans = false;
 
     EV_INFO << " to " << state->rexmit_timeout << "s, and cancelling RTT measurement\n";
 
@@ -305,6 +405,9 @@ void TcpAlgorithmBase::startRexmitTimer()
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
     state->rexmit_count = 0;
+
+    // the RTO and the probe timeout are one timer (RFC 8985 section 8)
+    cancelEvent(tlpTimer);
 
     // schedule timer
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
@@ -489,6 +592,8 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         }
         else
             EV_INFO << "There were no outstanding segments, nothing new in this ACK.\n";
+        // no data is outstanding, so there is nothing to probe (RFC 8985 section 8)
+        cancelEvent(tlpTimer);
     }
     else {
         EV_INFO << "ACK acks some but not all outstanding segments ("
@@ -496,6 +601,8 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 << "restarting REXMIT timer\n";
         cancelEvent(rexmitTimer);
         startRexmitTimer();
+        // RFC 8985 section 7.2: an ACK of new data also arms the probe timeout
+        schedulePto();
     }
 
     //
@@ -628,6 +735,9 @@ void TcpAlgorithmBase::dataSent(uint32_t fromseq)
         EV_INFO << "Starting REXMIT timer\n";
         startRexmitTimer();
     }
+
+    // RFC 8985 section 7.2: arm the probe timeout for the new tail of the flight
+    schedulePto();
 
     if (!state->ts_enabled) {
         // start round-trip time measurement (if not already running)

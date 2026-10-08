@@ -178,6 +178,13 @@ class INET_API TcpAlgorithm : public cObject
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
 
     /**
+     * Called for each ACK at or below snd_max, after the SACK option and before
+     * the other ACK processing: the ACK can end the episode of a tail loss probe
+     * (RFC 8985 section 7.4.2). Default-empty.
+     */
+    virtual void processTlpAck(const TcpHeader *tcpHeader, uint32_t payloadLength) {}
+
+    /**
      * Restart REXMIT timer.
      */
     virtual void restartRexmitTimer() = 0;

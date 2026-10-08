@@ -64,6 +64,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    /** The congestion response of a fast recovery, without the recovery (Linux tcp_process_tlp_ack()). */
+    virtual void tlpLossResponse() override;
+
     /** Called by the base class for each duplicate ACK; the recovery strategy reacts */
     virtual void receivedDuplicateAck() override;
 
