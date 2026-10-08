@@ -313,6 +313,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // against the option space, it is the negotiated MSS
         state->snd_effmss = calculateEffectiveMss();
 
+        // Seed the RTT estimator from the handshake RTT (Linux measures the
+        // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+        // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO -- already
+        // RTT-scaled instead of the initial default). Karn: skipped if our handshake
+        // segment was retransmitted.
+        if (state->seedRttFromHandshake && state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+            tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -1033,6 +1041,14 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             state->snd_effmss = calculateEffectiveMss();
+            // Seed the RTT estimator from the handshake RTT (Linux measures the
+            // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+            // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO -- already
+            // RTT-scaled instead of the initial default). Karn: skipped if our handshake
+            // segment was retransmitted.
+            if (state->seedRttFromHandshake && state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+                tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();

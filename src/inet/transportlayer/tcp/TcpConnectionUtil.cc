@@ -665,6 +665,7 @@ void TcpConnection::configureStateVariables()
                 << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
         state->sack_support = false;
     }
+    state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
@@ -796,6 +797,8 @@ void TcpConnection::sendSyn()
     writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("SYN");
 
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
+
     // send it
     sendToIP(fp, tcpHeader);
 }
@@ -843,6 +846,8 @@ void TcpConnection::sendSynAck()
     writeHeaderOptions(tcpHeader);
 
     Packet *fp = new Packet("SYN+ACK");
+
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
 
     // send it
     sendToIP(fp, tcpHeader);
