@@ -6,8 +6,6 @@
 
 #include "inet/transportlayer/tcp/flavours/DcTcp.h"
 
-#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
-
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -38,20 +36,11 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
-    // without SACK, Rfc5681Recovery marks the fast recovery with lossRecovery
-    if (state->sack_enabled ? state->dupacks >= state->dupthresh : state->lossRecovery) {
-        //
-        // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
-        //
-        EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
-        state->snd_cwnd = state->ssthresh;
-
-        conn->emit(cwndSignal, state->snd_cwnd);
-
-        // without SACK, this ACK of new data ends the fast recovery
-        if (!state->sack_enabled)
-            state->lossRecovery = false;
-    }
+    // In a fast recovery, the recovery takes the ACK: without SACK, Rfc5681Recovery
+    // deflates cwnd and ends the recovery; with SACK, Rfc6675Recovery runs the
+    // steps (A) to (C) of RFC 6675.
+    if (state->lossRecovery)
+        recovery->receivedAckForUnackedData(state->snd_una - firstSeqAcked);
     else {
         bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect) {
@@ -128,51 +117,8 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
     if (!state->sack_enabled && !state->lossRecovery)
         conn->getRexmitQueueForUpdate()->resetSackedBit();
 
-    if (state->sack_enabled && state->lossRecovery) {
-        // RFC 3517, page 7: "Once a TCP is in the loss recovery phase the following procedure MUST
-        // be used for each arriving ACK:
-        //
-        // (A) An incoming cumulative ACK for a sequence number greater than
-        // RecoveryPoint signals the end of loss recovery and the loss
-        // recovery phase MUST be terminated.  Any information contained in
-        // the scoreboard for sequence numbers greater than the new value of
-        // HighACK SHOULD NOT be cleared when leaving the loss recovery
-        // phase."
-        if (seqGE(state->snd_una, state->recoveryPoint)) {
-            EV_INFO << "Loss Recovery terminated.\n";
-            state->lossRecovery = false;
-        }
-        // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
-        // following actions MUST be taken:
-        //
-        // (B.1) Use Update () to record the new SACK information conveyed
-        // by the incoming ACK.
-        //
-        // (B.2) Use SetPipe () to re-calculate the number of octets still
-        // in the network."
-        else {
-            // update of scoreboard (B.1) has already be done in readHeaderOptions()
-            check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
-
-            // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
-            // segments as follows:"
-            if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
-        }
-    }
-
-    // RFC 3517, pages 7 and 8: "5.1 Retransmission Timeouts
-    // (...)
-    // If there are segments missing from the receiver's buffer following
-    // processing of the retransmitted segment, the corresponding ACK will
-    // contain SACK information.  In this case, a TCP sender SHOULD use this
-    // SACK information when determining what data should be sent in each
-    // segment of the slow start.  The exact algorithm for this selection is
-    // not specified in this document (specifically NextSeg () is
-    // inappropriate during slow start after an RTO).  A relatively
-    // straightforward approach to "filling in" the sequence space reported
-    // as missing should be a reasonable approach."
     sendData(false);
+    ensureRexmitTimerArmed();
 }
 
 bool DcTcp::shouldMarkAck()
