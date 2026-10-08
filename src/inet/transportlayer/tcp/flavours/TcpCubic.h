@@ -15,7 +15,7 @@ namespace tcp {
 
 /**
  * Implements CUBIC congestion control (RFC 9438), modelled on Linux's
- * tcp_cubic.c.
+ * tcp_cubic.c, including the HyStart hybrid slow-start exit.
  *
  * CUBIC replaces Reno's linear congestion-avoidance growth with a cubic
  * function of the time elapsed since the last window reduction. The window
@@ -30,6 +30,13 @@ namespace tcp {
  */
 class INET_API TcpCubic : public TcpClassicAlgorithmBase
 {
+  public:
+    /** HyStart exit detectors; the hystartDetect parameter is a bitmask of these. */
+    enum HystartDetect {
+        HYSTART_ACK_TRAIN = 1, ///< ACKs arriving in a train longer than the min RTT
+        HYSTART_DELAY = 2, ///< the round's minimum RTT rising above the connection minimum
+    };
+
   protected:
     TcpCubicStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
@@ -50,6 +57,9 @@ class INET_API TcpCubic : public TcpClassicAlgorithmBase
     /** Forgets the epoch and the W_max memory (Linux bictcp_reset). */
     virtual void cubicReset();
 
+    /** Starts a fresh HyStart round (Linux bictcp_hystart_reset). */
+    virtual void hystartReset();
+
     /** Grows cwnd by the segments this ACK acknowledged, while cwnd-limited. */
     virtual void slowStart(uint32_t segmentsAcked);
 
@@ -64,14 +74,20 @@ class INET_API TcpCubic : public TcpClassicAlgorithmBase
 
     /**
      * Times the first newly acknowledged byte against now and feeds that raw
-     * per-ACK sample to the min-RTT tracker, the way Linux fills
+     * per-ACK sample to the min-RTT tracker and to HyStart, the way Linux fills
      * ack_sample::rtt_us for the flavour's pkts_acked hook. Silent when the sample
      * would be ambiguous (a retransmitted segment).
      */
     virtual void processAckRttSample(uint32_t firstSeqAcked);
 
-    /** Feeds an RTT sample to the min-RTT tracker. */
+    /** Feeds an RTT sample to the min-RTT tracker and to HyStart. */
     virtual void processRttSample(const simtime_t& rtt);
+
+    /** Looks for the slow-start exit point (Linux hystart_update). */
+    virtual void hystartUpdate(const simtime_t& delay);
+
+    /** Clamps the delay-increase threshold into the configured range. */
+    virtual simtime_t hystartDelayThresh(const simtime_t& t) const;
 
   public:
     TcpCubic();

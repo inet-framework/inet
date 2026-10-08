@@ -19,6 +19,9 @@ namespace tcp {
 
 Register_Class(TcpCubic);
 
+// RTT samples needed before the delay-increase detector may fire.
+static const uint32_t HYSTART_MIN_SAMPLES = 8;
+
 // While the window is unchanged, Linux recomputes ca->cnt at most once per
 // HZ/32; in between it reuses the cached value. Keeping that rate limit
 // matters: with a fast ACK clock the recomputation would otherwise happen many
@@ -46,6 +49,12 @@ void TcpCubic::initialize()
     state->cubic_tcp_friendliness = conn->getTcpMain()->par("cubicTcpFriendliness");
     state->cubic_delta = conn->getTcpMain()->par("cubicDelta");
     state->cubic_cnt_clamp = conn->getTcpMain()->par("cubicCntClamp");
+    state->hystart_enabled = conn->getTcpMain()->par("hystartEnabled");
+    state->hystart_detect = conn->getTcpMain()->par("hystartDetect");
+    state->hystart_low_window = conn->getTcpMain()->par("hystartLowWindow");
+    state->hystart_ack_delta = conn->getTcpMain()->par("hystartAckDelta");
+    state->hystart_delay_min = conn->getTcpMain()->par("hystartDelayMin");
+    state->hystart_delay_max = conn->getTcpMain()->par("hystartDelayMax");
 
     cubicReset();
 }
@@ -72,6 +81,15 @@ void TcpCubic::cubicReset()
     state->cubic_last_time = -1;
     state->cubic_ack_cnt = 0;
     state->cubic_tcp_cwnd = 0;
+    state->hystart_found = false;
+}
+
+void TcpCubic::hystartReset()
+{
+    state->hystart_round_start = state->hystart_last_ack = simTime();
+    state->hystart_end_seq = state->snd_max;
+    state->hystart_curr_rtt = -1;
+    state->hystart_sample_cnt = 0;
 }
 
 void TcpCubic::processRexmitTimer(TcpEventCode& event)
@@ -82,8 +100,9 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
         return;
 
     // Linux cubictcp_state(TCP_CA_Loss): a timeout invalidates the curve and the
-    // W_max memory, and slow start begins again.
+    // W_max memory, and slow start begins again, so HyStart starts a new round.
     cubicReset();
+    hystartReset();
 }
 
 void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
@@ -235,10 +254,12 @@ void TcpCubic::processAckRttSample(uint32_t firstSeqAcked)
     // Linux drives cubictcp_acked() from pkts_acked(), which gets the RTT of the
     // ACK being processed: tcp_clean_rtx_queue times the first newly acknowledged
     // segment against now (ack_sample::rtt_us), so EVERY ACK that advances snd_una
-    // yields a sample, and the minimum of these samples is the delay that the
-    // cubic curve adds to the time since the epoch started. Deliberately kept
-    // separate from the srtt/RTO estimator, which stays on its own once-per-RTT
-    // schedule.
+    // yields a sample. That per-ACK raw value is what HyStart needs -- both its
+    // detectors count and compare individual samples, and the smoothed estimate
+    // (which moves only an eighth of the way per ACK) can neither be counted
+    // per-ACK nor rise fast enough to cross a threshold set 12.5% above the
+    // connection minimum. Deliberately kept separate from the srtt/RTO estimator,
+    // which stays on its own once-per-RTT schedule.
     const TcpSegmentTransmitInfoList::Item *sent = state->sentInfo.get(firstSeqAcked);
     if (sent == nullptr)
         return;
@@ -260,6 +281,71 @@ void TcpCubic::processRttSample(const simtime_t& rtt)
 
     if (state->cubic_delay_min == -1 || state->cubic_delay_min > rtt)
         state->cubic_delay_min = rtt;
+
+    // HyStart only acts in slow start, and only once the window is large enough
+    // for the detectors to be meaningful.
+    if (state->hystart_enabled && state->snd_cwnd <= state->ssthresh
+        && state->snd_cwnd >= state->hystart_low_window * state->snd_effmss)
+        hystartUpdate(rtt);
+}
+
+void TcpCubic::hystartUpdate(const simtime_t& delay)
+{
+    if (state->hystart_found)
+        return;
+
+    // A round ends when everything that was in flight when it began has been
+    // acknowledged. Linux opens the new round here, at the TOP of hystart_update,
+    // and the placement is load-bearing: the very ACK that closes a round also
+    // provides the new round's first RTT sample, so resetting afterwards (from the
+    // slow-start path, which runs later in the ACK's processing) would throw that
+    // sample away and delay every delay check by one ACK.
+    if (seqGreater(state->snd_una, state->hystart_end_seq))
+        hystartReset();
+
+    simtime_t now = simTime();
+
+    // ACK-train detector: while ACKs keep arriving back to back, the train's
+    // length measures how much of the path is already filled; once it spans the
+    // minimum RTT, the pipe is full.
+    if (now - state->hystart_last_ack <= state->hystart_ack_delta) {
+        state->hystart_last_ack = now;
+        if (now - state->hystart_round_start > state->cubic_delay_min
+            && (state->hystart_detect & HYSTART_ACK_TRAIN))
+            state->hystart_found = true;
+    }
+
+    // Delay-increase detector: once enough samples are in, a round whose
+    // minimum RTT sits clearly above the connection minimum means a queue is
+    // building up ahead. The round minimum tracks EVERY sample, including the
+    // ones after the count is full -- Linux commit b344579ca847 ("tcp_cubic: fix
+    // spurious HYSTART_DELAY exit upon drop in min RTT") moved this out of the
+    // counting branch precisely so that a late sample which lowers the minimum is
+    // still taken into account, instead of comparing a stale round minimum
+    // against a delay_min the same ACK just pushed down.
+    if (state->hystart_curr_rtt == -1 || state->hystart_curr_rtt > delay)
+        state->hystart_curr_rtt = delay;
+
+    if (state->hystart_sample_cnt < HYSTART_MIN_SAMPLES)
+        ++state->hystart_sample_cnt;
+    else if (state->hystart_curr_rtt > state->cubic_delay_min + hystartDelayThresh(state->cubic_delay_min / 8)
+             && (state->hystart_detect & HYSTART_DELAY))
+        state->hystart_found = true;
+
+    if (state->hystart_found) {
+        // Leave slow start at the current window instead of overshooting into loss.
+        EV_INFO << "HyStart: exiting slow start, ssthresh=" << state->snd_cwnd << "\n";
+        state->ssthresh = state->snd_cwnd;
+    }
+}
+
+simtime_t TcpCubic::hystartDelayThresh(const simtime_t& t) const
+{
+    if (t > state->hystart_delay_max)
+        return state->hystart_delay_max;
+    if (t < state->hystart_delay_min)
+        return state->hystart_delay_min;
+    return t;
 }
 
 uint32_t TcpCubic::calculateSsthresh(uint32_t bytesInFlight)

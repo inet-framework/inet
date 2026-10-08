@@ -10,8 +10,9 @@ import inet.transportlayer.tcp.flavours.TcpClassicAlgorithmBaseState;
 namespace inet::tcp;
 
 ///
-/// State variables for TcpCubic (RFC 9438). The field names follow Linux's
-/// struct bictcp so the implementation can be read next to tcp_cubic.c.
+/// State variables for TcpCubic (RFC 9438), including the HyStart hybrid
+/// slow-start exit. The field names follow Linux's struct bictcp so the
+/// implementation can be read next to tcp_cubic.c.
 ///
 /// Window quantities are kept in SEGMENTS (not bytes): CUBIC's curve, its
 /// Reno-emulation estimate and the resulting ACK counter are all defined in
@@ -45,6 +46,16 @@ struct TcpCubicStateVariables extends TcpClassicAlgorithmBaseStateVariables
     uint32_t cubic_tcp_cwnd = 0; ///< W_est (segments)
     //@}
 
+    /// HyStart (hybrid slow start)
+    //@{
+    simtime_t hystart_round_start = -1; ///< start of the current RTT round; -1 = unset
+    simtime_t hystart_last_ack = -1; ///< arrival of the last ACK, for the ACK-train detector; -1 = unset
+    simtime_t hystart_curr_rtt = -1; ///< smallest RTT sampled in this round; -1 = no sample yet
+    uint32_t hystart_end_seq = 0; ///< snd_max snapshot that closes the current round
+    uint32_t hystart_sample_cnt = 0; ///< RTT samples taken in this round
+    bool hystart_found = false; ///< the slow-start exit point has been detected
+    //@}
+
     /// configuration, read from the NED parameters in TcpCubic::initialize()
     //@{
     double cubic_beta = 0.7; ///< multiplicative decrease factor
@@ -53,5 +64,11 @@ struct TcpCubicStateVariables extends TcpClassicAlgorithmBaseStateVariables
     bool cubic_tcp_friendliness = true; ///< never grow slower than Reno would
     simtime_t cubic_delta = 0.01; ///< settling time after a window reduction, during which RTT samples are ignored
     uint32_t cubic_cnt_clamp = 20; ///< cap on cubic_cnt while W_max is still unknown
+    bool hystart_enabled = true; ///< look for a slow-start exit point
+    int hystart_detect = 3; ///< bitmask of HystartDetect: 1 = ACK train, 2 = delay increase
+    uint32_t hystart_low_window = 16; ///< smallest window (segments) at which HyStart acts
+    simtime_t hystart_ack_delta = 0.002; ///< largest ACK spacing still counted as a train
+    simtime_t hystart_delay_min = 0.004; ///< lower clamp on the delay-increase threshold
+    simtime_t hystart_delay_max = 1; ///< upper clamp on the delay-increase threshold
     //@}
 };
