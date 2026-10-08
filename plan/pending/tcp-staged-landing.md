@@ -312,6 +312,11 @@ plan gives a reason for.
   counts the segments with the effective MSS. In `tcp_cwnd_limited_2`, with the peak of the whole
   connection, a burst after an idle time and single segments starts with seven segments; per
   window it starts with two.
+- **D-21 — The ACK that ends a fast recovery does not grow cwnd.** On the source branch,
+  `TcpClassicAlgorithmBase` gives this ACK first to the recovery and then, because the recovery has
+  ended, also to the window growth, as Linux does. RFC 5681 step 6 says that this ACK MUST set cwnd
+  to ssthresh, and RFC 6582 step 3 sets cwnd at the full ACK in the same way. Master's routing
+  does that, and S6 keeps it.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -743,4 +748,18 @@ symbol, and the TCP module tests pass at each commit (362 at the first commit, 3
 the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill
 tests skip without inet-gpl); unit 114 and serializer 4 pass at the head. The CI fingerprint job
 passes at each code commit, after the commit's own new values.
+
+### S6 — `topic/tcp-cubic`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: `TcpCubic` (RFC 9438) with HyStart, in its final form | — | 14, 45, 55 (part), 57, 60 |
+| 2 | refactor: DCTCP on the shared ACK path of the classic flavours | B16 | 62, 65 |
+
+Commits 45, 55, 57 and 60 repair `TcpCubic` before any of it landed, so by rule D-1 step 1 brings
+the final form. It has two temporary forms: it does not call `processTlpAck()` until S10 brings
+the Tail Loss Probe, and it calls `processEce()` without the acknowledged bytes until step 2.
+Commit 62 only adds a comment that commit 65 removes. Commit 65 calls itself a refactor; the CI job
+checks that claim on this tree. The source change of the ACK that ends a recovery does not land
+(D-21).
 
