@@ -60,6 +60,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;
+    cMessage *radioConfigRetry = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -79,6 +80,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
+    void clearPendingRadioConfig();
 
     /** @brief Handle packets from management */
     virtual void handleMgmtPacket(Packet *packet);
@@ -106,6 +108,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+    virtual void scheduleRadioConfigRetry();
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);

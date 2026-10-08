@@ -44,6 +44,7 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback) override;
     [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
     virtual void radioTransmissionFinished() override;
+    virtual bool isTransmissionPending() const override { return frame != nullptr; }
 };
 
 } // namespace ieee80211
