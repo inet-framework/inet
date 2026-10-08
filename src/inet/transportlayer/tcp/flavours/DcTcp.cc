@@ -11,6 +11,7 @@
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
@@ -121,6 +122,11 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
             congestionControl->receivedAckForUnackedData(state->snd_una - firstSeqAcked);
         }
     }
+
+    // Outside a fast recovery, an ACK of new data ends the guesses that the
+    // duplicate ACKs before it made (Linux tcp_reset_reno_sack()).
+    if (!state->sack_enabled && !state->lossRecovery)
+        conn->getRexmitQueueForUpdate()->resetSackedBit();
 
     if (state->sack_enabled && state->lossRecovery) {
         // RFC 3517, page 7: "Once a TCP is in the loss recovery phase the following procedure MUST
