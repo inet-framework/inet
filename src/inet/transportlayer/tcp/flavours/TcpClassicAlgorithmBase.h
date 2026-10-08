@@ -87,6 +87,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
+    /** Forwarded to the recovery strategy (pre-discard scoreboard inspection). */
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
+
     /**
      * The bytes in flight as Linux counts them: the outstanding data, minus the
      * SACKed and the lost bytes, plus the retransmitted bytes. Without SACK, each

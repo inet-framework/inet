@@ -1234,6 +1234,12 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             discardUpToSeq--; // the FIN sequence number is not real data
         }
 
+        // Notify the algorithm while the scoreboard for the acked range is still
+        // valid (i.e. before it is discarded below): transmit counts and SACK state
+        // for [old_snd_una, discardUpToSeq) are what lets a recovery algorithm tell
+        // reordering apart from loss.
+        tcpAlgorithm->segmentsAcked(old_snd_una, discardUpToSeq);
+
         // acked data no longer needed in send queue
         sendQueue->discardUpTo(discardUpToSeq);
 

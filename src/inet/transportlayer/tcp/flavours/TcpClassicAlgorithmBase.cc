@@ -132,6 +132,12 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     ensureRexmitTimerArmed();
 }
 
+void TcpClassicAlgorithmBase::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
+{
+    if (recovery != nullptr)
+        recovery->segmentsAcked(fromSeq, toSeq);
+}
+
 bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
 {
     if (state->ect && state->gotEce) {

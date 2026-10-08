@@ -256,6 +256,9 @@ struct TcpStateVariables
     uint32_t rackEndSeq = 0;      // end sequence number of that segment
     simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
     bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
+    bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
+    uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
+    uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
 };

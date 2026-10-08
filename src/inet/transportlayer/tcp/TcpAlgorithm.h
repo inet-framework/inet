@@ -169,6 +169,15 @@ class INET_API TcpAlgorithm : public cObject
     virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) = 0;
 
     /**
+     * Called when snd_una is about to advance, BEFORE the acked range
+     * [fromSeq, toSeq) is discarded from the send/rexmit queues. At this point
+     * the scoreboard data for [fromSeq, toSeq) (transmit counts, SACK state) is
+     * still valid, so an algorithm can inspect it (e.g. to distinguish reordering
+     * from loss). Default-empty; overridden by flavours that need it.
+     */
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
+
+    /**
      * Restart REXMIT timer.
      */
     virtual void restartRexmitTimer() = 0;

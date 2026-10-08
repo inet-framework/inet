@@ -665,6 +665,9 @@ void TcpConnection::configureStateVariables()
                 << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
         state->sack_support = false;
     }
+    state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
+    state->maxReordering = tcpMain->par("maxReordering");
+    state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     if (state->lossDetectionMode == 1 && !state->sack_support) {
         // RACK needs the SACK scoreboard. Rather than make the connection
