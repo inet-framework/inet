@@ -113,7 +113,7 @@ struct TcpStateVariables
     bool fork = false;              // if passive and in LISTEN: whether to fork on an incoming connection
     bool forked = false;            // this connection was forked off a listener (it stays set after ACCEPT, unlike listeningSocketId): an RST or a timeout in SYN_RCVD closes it, because the listener still exists
 
-    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
+    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 5681.
                                     // This will be set to the minimum of the local smss parameter and the value specified in the
                                     // MSS option received during connection setup.
     uint32_t advertisedMss = 0;     // the MSS that this side announces in its SYN or SYN-ACK: its own receive limit
@@ -171,25 +171,25 @@ struct TcpStateVariables
     bool afterRto = false;                      // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
 
     // WINDOW_SCALE related variables
-    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 1323)
+    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 7323)
     bool ws_enabled = false;                    // set if the connection uses Window Scale (header option)
     int  ws_manual_scale = -1;                  // the value of scale parameter if it was set manually (-1 otherwise)
     bool snd_ws = false;                        // set if initial WINDOW_SCALE has been sent
     bool rcv_ws = false;                        // set if initial WINDOW_SCALE has been received
-    unsigned int rcv_wnd_scale = 0;             // RFC 1323, page 31: "Receive window scale power"
-    unsigned int snd_wnd_scale = 0;             // RFC 1323, page 31: "Send window scale power"
+    unsigned int rcv_wnd_scale = 0;             // RFC 7323: Rcv.Wind.Shift, the receive window scale exponent
+    unsigned int snd_wnd_scale = 0;             // RFC 7323: Snd.Wind.Shift, the send window scale exponent
 
     // TIMESTAMP related variables
-    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1322)
+    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 7323)
     bool ts_enabled = false;        // set if the connection uses Window Scale (header option)
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
-    uint32_t ts_recent = 0;         // RFC 1323, page 31: "Latest received Timestamp"
-    uint32_t last_ack_sent = 0;     // RFC 1323, page 31: "Last ACK field sent"
+    uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
+    uint32_t last_ack_sent = 0;     // RFC 7323: Last.ACK.sent, the last ACK field sent
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
-    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
+    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 6675)
     bool sack_enabled = false;      // set if the connection uses selective acknowledgment (header option)
     bool snd_sack_perm = false;     // set if SACK_PERMITTED has been sent
     bool rcv_sack_perm = false;     // set if SACK_PERMITTED has been received
@@ -228,15 +228,15 @@ struct TcpStateVariables
     bool sndCwr = false; // set if ECE was handled
     bool gotEce = false; // set if packet with ECE arrived
     bool gotCeIndication = false; // set if CE was set in controlInfo from IP
-    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport - rfc-3168)
+    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport, RFC 3168)
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
     bool ecnWillingness = false; // set if current host is willing to use ECN
     bool sndAck = false; // set if sending Ack packet, used to set relevant info in controlInfo.
-    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
+    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
-    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
+    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
 
     // Path MTU Discovery (RFC 1191, RFC 1981)
     bool pmtudEnabled = false;              // set if Path MTU Discovery is enabled

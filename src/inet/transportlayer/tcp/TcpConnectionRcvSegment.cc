@@ -499,7 +499,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: seventh, process the segment text,
+    // RFC 9293: Seventh, process the segment text
     //
     uint32_t old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
 
@@ -529,22 +529,28 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
     {
         //"
-        // Once in the ESTABLISHED state, it is possible to deliver segment
-        // text to user RECEIVE buffers.  Text from segments can be moved
-        // into buffers until either the buffer is full or the segment is
-        // empty.  If the segment empties and carries an PUSH flag, then
-        // the user is informed, when the buffer is returned, that a PUSH
-        // has been received.
+        // Once in the ESTABLISHED state, it is possible to deliver
+        // segment data to user RECEIVE buffers.  Data from segments
+        // can be moved into buffers until either the buffer is full or
+        // the segment is empty.  If the segment empties and carries a
+        // PUSH flag, then the user is informed, when the buffer is
+        // returned, that a PUSH has been received.
         //
-        // When the TCP takes responsibility for delivering the data to the
-        // user it must also acknowledge the receipt of the data.
+        // When the TCP endpoint takes responsibility for delivering
+        // the data to the user, it must also acknowledge the receipt
+        // of the data.
         //
-        // Once the TCP takes responsibility for the data it advances
-        // RCV.NXT over the data accepted, and adjusts RCV.WND as
-        // appropriate to the current buffer availability.  The total of
-        // RCV.NXT and RCV.WND should not be reduced.
+        // Once the TCP endpoint takes responsibility for the data, it
+        // advances RCV.NXT over the data accepted, and adjusts RCV.WND
+        // as appropriate to the current buffer availability.  The
+        // total of RCV.NXT and RCV.WND should not be reduced.
         //
-        // Please note the window management suggestions in section 3.7.
+        // A TCP implementation MAY send an ACK segment acknowledging
+        // RCV.NXT when a valid segment arrives that is in the window
+        // but not at the left window edge (MAY-13).
+        //
+        // Please note the window management suggestions in
+        // Section 3.8.
         //
         // Send an acknowledgment of the form:
         //
