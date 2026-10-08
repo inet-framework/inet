@@ -55,7 +55,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5d ✅ | `topic/tcp-sack-recovery` | 10 (part), 13 (part) | +91 −77 | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6; SACK only for a flavour that can recover with it |
 | S5e ✅ | `topic/tcp-pipe-recovery` | 13 (part), 34 (part), 39 (part), 56, 71, 72, 80 (part) | +248 −161 | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
-| S7 | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
+| S7 ✅ | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
 | S8 | `topic/tcp-rack` | 16 (part), 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
@@ -305,6 +305,13 @@ plan gives a reason for.
   and source commit 53). For `mss = -1`, the source leaves `snd_mss` unresolved when the SYN of
   the peer arrives, so a passive side sends segments as large as the peer announces; S19 must
   resolve the default first.
+- **D-20 — The cwnd-limited gate of slow start uses the peak of each window of data.** The source
+  keeps `maxPacketsOut` as the peak of the whole connection, so after one busy phase the gate stays
+  open: a flow that is application-limited later grows cwnd in slow start without using it. Linux
+  `tcp_cwnd_validate()` keeps `max_packets_out` per window of data. S7 keeps it per window and
+  counts the segments with the effective MSS. In `tcp_cwnd_limited_2`, with the peak of the whole
+  connection, a burst after an idle time and single segments starts with seven segments; per
+  window it starts with two.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -702,4 +709,38 @@ S7, CUBIC would not grow in slow start at all (the trap of D-6).
 The `sendSegment()` of master already cuts each segment so that the data and the options fit in
 `snd_mss`, so step 4 changes no segment. Decision D-19 lists where the other parts of commits 15
 and 16 go. The order can change when a step shows that it depends on a later one.
+
+### S7 — `topic/tcp-segment-sizing` — landed 2026-10-08
+
+The owner reviewed and approved S7 on 2026-10-08.
+
+S7 brings the parts of source commits 15 and 16 that size segments and slow start, before S6,
+because `TcpCubic` needs them. Decision D-19 gives where the other parts of the two commits go.
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: record the peak segments in flight in each window of data` | — | 16 (part) | — |
+| `tcp: change: grow cwnd in slow start by the acknowledged bytes` | B9 | 13 | 4 |
+| `tcp: change: grow cwnd in slow start only while the sender uses it` | B9 | 13, 16 (part) | 3 |
+| `tcp: change: count with the effective MSS in congestion control` | — | 15 (part) | — |
+| `tcp: refactor: cut retransmissions to the effective MSS` | — | 15 (part) | — |
+| `tcp: change: announce this side's own receive limit in the MSS option` | — | 15 (part) | — |
+
+The commit messages explain each moved row and trace. Slow start now grows cwnd by the bytes that
+an ACK acknowledges (RFC 5681 equation (2)), and only while the sender fills cwnd, with the peak
+of each window of data (D-20). Congestion control counts with the MSS less the timestamp option,
+and the MSS option announces this side's own receive limit. The steps moved out of S7 after a
+check showed a dependency or no test (D-19): the default MSS of `mss = -1` (S19), `TCP_MAXSEG`
+(S16), the silly-window hold (S16), and the parameters `initialWindow` and
+`initialSendSequenceNumber` (S19).
+
+New tests, each checked to fail on the commit before: `tcp_cwnd_limited_1` and
+`tcp_cwnd_limited_2` (the second also fails with the peak of the whole connection),
+`tcp_effective_mss_1` and `tcp_mss_option_1`. `tcp_nagle_2` and `tcp_timestamp_2` have new traces.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (362 at the first commit, 366 at the head);
+the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill
+tests skip without inet-gpl); unit 114 and serializer 4 pass at the head. The CI fingerprint job
+passes at each code commit, after the commit's own new values.
 
