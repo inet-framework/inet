@@ -130,8 +130,8 @@ void addFillers_phy(std::vector<ChunkFiller>& fillers)
     fillers.push_back({"inet::physicallayer::Ieee80211FhssPhyHeader", "", [](Chunk *c) {
         auto p = check_and_cast<physicallayer::Ieee80211FhssPhyHeader *>(c);
         FillValues v;
-        p->setLengthField(B(v.u16())); // not on the wire for this subtype; see above
         p->setPlw(v.uint(12));
+        p->setLengthField(B(p->getPlw()));
         p->setPsf(v.uint(4));
         p->setFcs(v.u16());
         // fcsMode: left as set by commonSetup (FCS_COMPUTED)
@@ -155,18 +155,20 @@ void addFillers_phy(std::vector<ChunkFiller>& fillers)
     fillers.push_back({"inet::physicallayer::Ieee80211DsssPhyHeader", "", [](Chunk *c) {
         auto p = check_and_cast<physicallayer::Ieee80211DsssPhyHeader *>(c);
         FillValues v;
-        p->setSignal(v.u8());
+        p->setSignal(10);
         p->setService(v.u8());
-        p->setLengthField(B(v.u16()));
+        p->setPlcpLength(v.u16());
+        p->setLengthField(B(int(p->getPlcpLength()) * 10 / 80));
         p->setFcs(v.u16());
         // fcsMode: left as set by commonSetup (FCS_COMPUTED)
     }});
     fillers.push_back({"inet::physicallayer::Ieee80211HrDsssPhyHeader", "", [](Chunk *c) {
         auto p = check_and_cast<physicallayer::Ieee80211HrDsssPhyHeader *>(c);
         FillValues v;
-        p->setSignal(v.u8());
+        p->setSignal(110);
         p->setService(v.u8());
-        p->setLengthField(B(v.u16()));
+        p->setPlcpLength(v.u16());
+        p->setLengthField(B(int(p->getPlcpLength()) * 110 / 80 - ((p->getService() & 0x80) ? 1 : 0)));
         p->setFcs(v.u16());
         // fcsMode: left as set by commonSetup (FCS_COMPUTED, via the DsssPhyHeader cast)
     }});
