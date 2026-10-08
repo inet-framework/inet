@@ -58,14 +58,14 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S7 ✅ | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
 | S8 ✅ | `topic/tcp-rack` | 13 (part), 16 (part), 17, 18, 19, 26 (part), 49, 51 (part), 64 (part) | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
-| S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
+| S10 | `topic/tcp-undo-frto-tlp` | 14 (part), 22, 24, 25, 76, 85, 86 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
 | S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
 | S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
-| S17 | `topic/tcp-connection-leftovers` | 39, 61, 74, 86 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
+| S17 | `topic/tcp-connection-leftovers` | 39, 61, 74 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
@@ -993,3 +993,22 @@ symbol, and the TCP module tests pass at each commit (391 at the first code comm
 head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
 packetdrill tests skip without inet-gpl); unit 118 and serializer 4 pass at the head. The CI
 fingerprint job passes at each code commit, and no row moves.
+
+### S10 — `topic/tcp-undo-frto-tlp`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: report every duplicate segment by D-SACK, also one that ends at `rcv_nxt` | — | 22 (part) |
+| 2 | change: report the duplicated part of a gap-filling segment by D-SACK, with `dsackEnabled` | — | 22 (part) |
+| 3 | add: undo a needless reduction (RFC 2883 D-SACK, RFC 3522 Eifel), selected by `lossUndoEnabled` | — | 22 (part) |
+| 4 | add: F-RTO (RFC 5682), selected by `frtoEnabled` | — | 24, 86 |
+| 5 | add: the tail loss probe (RFC 8985 section 7), selected by `tlpEnabled` | — | 25, 76, 85, 14 (part) |
+
+Master sends a D-SACK for a duplicate segment only when it ends below `rcv_nxt`, so the most common
+duplicate, a needless retransmission of the last received segment, gets none; by rule 4 the repair
+is its own commit. The new features stay off (D-24) until S19: `lossUndoEnabled`, `frtoEnabled`
+and `tlpEnabled` are false; `dsackEnabled` defaults to `sackSupport`, which keeps master's reports.
+Commits 76, 85 and 86 repair the probe and F-RTO before they landed, so by rule D-1 they fold into
+their steps; the plan's table had put 86 in S17. `TcpCubic` calls `processTlpAck()` from step 5
+on (S6). The D-SACK of a duplicate SYN-ACK in a simultaneous open goes to S11. The order can
+change when a step shows that it depends on a later one.
