@@ -111,6 +111,7 @@ struct TcpStateVariables
 
     bool active = false;            // set if the connection was initiated by an active open
     bool fork = false;              // if passive and in LISTEN: whether to fork on an incoming connection
+    bool forked = false;            // this connection was forked off a listener (it stays set after ACCEPT, unlike listeningSocketId): an RST or a timeout in SYN_RCVD closes it, because the listener still exists
 
     uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
                                     // This will be set to the minimum of the local smss parameter and the value specified in the

@@ -1,0 +1,33 @@
+%description:
+Test connection setup with a forking listener (B): the timeout of the
+connection setup in SYN_RCVD closes the forked connection. The tester
+deletes all of B's SYN-ACKs. At t=75 s both connections time out; the forked
+connection closes, and B keeps one connection, its listener. Before, the
+forked connection returned to LISTEN, and B had two listeners.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.srv_app.fork=true
+*.tcptester.script="b1 delete;b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete;b9 delete;b10 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^\[testing\]\|finishing with" test.out > test_1.out || true
+%contains: test_1.out
+[testing]: srv_tcp: SYN_RCVD --> CLOSED  (on TIMEOUT_CONN_ESTAB)
+[]: TcpTestNet1.cli_tcp: finishing with 0 connections open.
+[]: TcpTestNet1.srv_tcp: finishing with 1 connections open.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

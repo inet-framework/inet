@@ -18,6 +18,7 @@ simple TcpTestClient like IApp
         string localAddress;
         int localPort;
         bool active;
+        bool fork = default(false); // passive open: true = listen() (a new connection for each SYN), false = listenOnce()
         string connectAddress;
         int connectPort;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");

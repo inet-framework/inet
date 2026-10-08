@@ -1237,8 +1237,9 @@ TcpEventCode TcpConnection::processRstInSynReceived(const Ptr<const TcpHeader>& 
         sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
     }
 
-    // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
-    // FIXME if this was a forked connection, it should rather close than go back to listening (otherwise we'd now have two listening connections with the original one!)
+    // on RCV_RST the FSM goes to CLOSED for an active open and for a forked
+    // connection, whose listener still exists; only a passive open that did not
+    // fork returns to LISTEN
     return TCP_E_RCV_RST;
 }
 

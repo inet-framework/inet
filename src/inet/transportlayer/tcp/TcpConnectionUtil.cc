@@ -238,6 +238,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     // put it into LISTEN, with our localAddr/localPort
     state->active = false;
     state->fork = true;
+    state->forked = true;
     localAddr = listenerConn->localAddr;
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;

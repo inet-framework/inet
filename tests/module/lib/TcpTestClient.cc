@@ -204,6 +204,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
 
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort);
+            else if (par("fork"))
+                socket.listen();
             else
                 socket.listenOnce();
             scheduleNextSend();

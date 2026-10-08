@@ -1,0 +1,34 @@
+%description:
+Test connection setup with a forking listener (B): an RST in SYN_RCVD closes
+the forked connection. A sends its SYN and closes at once, so its TCP answers
+B's SYN-ACK with an RST. The forked connection closes, and B keeps one
+connection, its listener. The app does not know the forked connection (no
+ACCEPT yet), so it gets no indication. Before, the forked connection returned
+to LISTEN, and B had two listeners.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.srv_app.fork=true
+*.cli_app.tClose=0.0015s
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^\[testing\]\|finishing with" test.out > test_1.out || true
+%contains: test_1.out
+[testing]: srv_tcp: SYN_RCVD --> CLOSED  (on RCV_RST)
+[]: TcpTestNet1.cli_tcp: finishing with 0 connections open.
+[]: TcpTestNet1.srv_tcp: finishing with 1 connections open.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

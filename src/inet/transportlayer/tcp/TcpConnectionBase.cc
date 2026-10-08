@@ -421,11 +421,11 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
                     break;
 
                 case TCP_E_TIMEOUT_CONN_ESTAB:
-                    FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN);
-                    break;
-
                 case TCP_E_RCV_RST:
-                    FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN);
+                    // RFC 9293 returns a passive open to LISTEN. A forked connection
+                    // is the child of a listener that still exists (a Linux child
+                    // socket): it closes, else there would be two listeners.
+                    FSM_Goto(fsm, (state->active || state->forked) ? TCP_S_CLOSED : TCP_S_LISTEN);
                     break;
 
                 case TCP_E_RCV_ACK:
@@ -708,7 +708,10 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             break;
 
         case TCP_S_CLOSED:
-            if (oldState != TCP_S_TIME_WAIT && event != TCP_E_ABORT)
+            // A forked connection that the app has not accepted is unknown to the
+            // app, so it gets no indication with its own socket id. RFC 9293 section
+            // 3.10.7.3: "The user need not be informed."
+            if (oldState != TCP_S_TIME_WAIT && event != TCP_E_ABORT && !isToBeAccepted())
                 sendIndicationToApp(TCP_I_CLOSED);
             // all timers need to be cancelled
             if (the2MSLTimer)
