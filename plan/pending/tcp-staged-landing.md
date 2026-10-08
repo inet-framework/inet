@@ -59,7 +59,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S8 ✅ | `topic/tcp-rack` | 13 (part), 16 (part), 17, 18, 19, 26 (part), 49, 51 (part), 64 (part) | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 ✅ | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 37, 76, 85, 86, new | +1807 −25 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe (D-29 to D-35) |
-| S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
+| S11 ✅ | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +198 −36 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
 | S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
@@ -425,6 +425,36 @@ plan gives a reason for.
   RTO recovery (section 7.2); the recovery point of the timeout, which F-RTO keeps, shows it. The
   processing runs in `TcpAlgorithmBase` for each ACK, so `TcpCubic` needs no call of its own
   (source commit 14, part).
+- **D-36 — An explicit read stops at a received FIN in both read paths.** A FIN occupies a
+  sequence number but puts no byte in the receive queue. Source commit 30 stops the delivery of
+  waiting data at the FIN, but it reads `rcv_fin_seq`, which only a FIN that came out of order
+  set; and a READ command after the FIN took the other path, which had no stop. So the stop never
+  worked for the usual close. S11 records the FIN position also for an in-order FIN and stops
+  both paths there; `tcp_read_fin_1` fails with the source form.
+- **D-37 — A forked connection closes also on the timeout of the connection setup.** The source
+  (commit 26) closes a forked connection in SYN_RCVD on an RST, but the timeout still sent it
+  back to LISTEN, which gives the same second listener. S11 closes it on both; `tcp_syn_12` fails
+  with the source form.
+- **D-38 — The reset after a full close gives the application CLOSED.** The source ends the
+  connection with `TCP_E_ABORT`, which sends no indication. The application asked for the close,
+  and its socket waits in LOCALLY_CLOSED for CLOSED, for example to start its next session or to
+  end the stop of its node. S11 sends CLOSED.
+- **D-39 — The TSecr check of a SYN-ACK comes before the SYN-ACK changes any state.** The source
+  checks after the SYN-ACK has set `rcv_nxt`, `irs` and `snd_una`, discarded the queues and queued
+  its data, so a rejected SYN-ACK left the connection in SYN_SENT with that changed state. Linux
+  checks first. S11 reads the TSecr from the option and checks before the SYN processing.
+- **D-40 — Only a passive open re-sends its SYN-ACK for a repeated SYN.** Linux re-sends it in
+  `tcp_check_req()`, which handles a request socket, that is, a passive open; after a
+  simultaneous open, the socket in SYN_RECV answers a repeated SYN with a duplicate ACK. The
+  source (commit 23) re-sends it in any SYN_RCVD. `tcp_syn_15` fails with the source rule.
+- **D-41 — The reset on data after a close is a parameter, off by default.** The CLOSE of RFC
+  9293, which `TcpSocket::close()` sends, means "no more to send", and the application may still
+  receive; RFC 1122 section 4.2.2.13 asks for the RST only from a host that implements a
+  "half-duplex" close, which is a MAY. Linux `close()` is such a close. The source resets after
+  every CLOSE without `halfClose`, so INET's applications that read after their close lost their
+  data: the clients of `ethernet/arptest` and `arptest2` reset the echo of their server, and two
+  CI rows moved. S11 adds `abortOnDataAfterClose` (default false), which the packetdrill
+  configuration of inet-gpl can select, as the owner's rule for the Linux behaviors says.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1132,14 +1162,14 @@ fingerprint job passes at each code commit; only `bulktransfer inet_inet_2b` mov
 | --- | --- | --- | --- |
 | 1 | fix: clamp an explicit read at a received FIN | — | 30 |
 | 2 | change: answer STATUS on a connection that never opened | — | 38 |
-| 3 | fix: send the handshake options in the crossing SYN-ACK of a simultaneous open | — | 16 (part) |
+| 3 | fix: read and send the handshake options in a simultaneous open | — | 16 (part), 26 (part) |
 | 4 | change: re-send the SYN-ACK for a retransmitted SYN | — | 23 (part) |
 | 5 | change: report the duplicate SYN of a simultaneous open by D-SACK | — | 22 (part), 23 (part) |
-| 6 | fix: close a forked connection on an RST in SYN_RCVD | — | 16 (part), 26 (part), 39 (part), 73 |
-| 7 | change: reset the connection on new data after a full close | — | 23 (part), 39 (part) |
-| 8 | change: reset a SYN-ACK whose TSecr the connection could not have sent | — | 16 (part), 74 |
-| 9 | add: quantize the peer MSS as Linux SYN cookies do, selected by `syncookiesAlways` | — | 15 (part) |
-| 10 | comment: cite RFC 9293, RFC 7323 and RFC 6675 in the receive path and the state | — | 23 (part) |
+| 6 | fix: close a forked connection on an RST or a timeout in SYN_RCVD | — | 16 (part), 26 (part), 39 (part), 73 |
+| 7 | add: reset on data after a close, selected by `abortOnDataAfterClose` | — | 23 (part), 39 (part) |
+| 8 | change: reset a SYN-ACK whose TSecr the connection did not send | — | 16 (part), 74 |
+| 9 | add: the SYN cookie MSS of Linux, selected by `syncookiesAlways` | — | 15 (part) |
+| 10 | comment: cite the current RFCs in the receive path and the state | — | 23 (part) |
 
 S11 gathers the parts of seven source commits that change the life of a connection: its setup,
 its close and the commands around them. D-19 sends here the `forked` flag, the options of the
@@ -1156,3 +1186,59 @@ recovery's copy of `addSacks()` (S17, D-5), and the end of the reset of the dupl
 in the data path (B1 of D-6, S17). Its AccECN comments go to S13. The reset of the full-sized
 segment counter at the SYN (commit 18) and at the SYN-ACK (commit 39) has no effect: the counter
 is 0 when the SYN goes out, and `ackSent()` resets it at the SYN-ACK. S11 leaves both lines out.
+
+Three more items came up during the work. Step 3 also reads the options of the crossing SYN,
+which the source does in the Fast Open commit (26): without that, a simultaneous open used no
+option of the peer. The tests need three additions to the test library: `readScript` (timed READ
+commands) and `fork` (a listener that forks) in `TcpTestClient`, and the command `tsecr` of the
+scripted tester. Master's SYN-ACK echoes TSecr 0, because the connection takes `ts_recent` only
+from data (commit 39 repairs this in S17); so the TSecr check of step 8 never fires on master's
+own SYN-ACKs, and its tests set the TSecr with the tester.
+
+### S11 — `topic/tcp-connection-lifecycle` — landed 2026-10-09
+
+The owner reviewed and approved S11 on 2026-10-09.
+
+S11 brings ten changes to the setup and the close of a connection: three repairs of master, four
+changes, two features that are off by default, and a comment. Where the source is wrong, S11
+deviates from it, and a test fails with each source form (D-36 to D-41).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: clamp an explicit read at a received FIN` | — | 30 | — |
+| `tcp: change: answer STATUS on a connection that never opened` | — | 38 | — |
+| `tcp: fix: read and send the handshake options in a simultaneous open` | — | 16 (part), 26 (part) | — |
+| `tcp: change: re-send the SYN-ACK for a retransmitted SYN` | — | 23 (part) | 2 |
+| `tcp: change: report the duplicate SYN of a simultaneous open by D-SACK` | — | 22 (part), 23 (part) | — |
+| `tcp: fix: close a forked connection on an RST or a timeout in SYN_RCVD` | — | 16 (part), 26 (part), 39 (part), 73 | — |
+| `tcp: add: reset on data after a close, selected by abortOnDataAfterClose` | — | 23 (part), 39 (part) | — |
+| `tcp: change: reset a SYN-ACK whose TSecr the connection did not send` | — | 16 (part), 74 | — |
+| `tcp: add: the SYN cookie MSS of Linux, selected by syncookiesAlways` | — | 15 (part) | — |
+| `tcp: comment: cite the current RFCs in the receive path and the state` | — | 23 (part) | — |
+
+The commit messages explain each trace. In short: only the SYN-ACK resend moves CI rows. In
+`bgpv4/BgpAndOspfv3` (t=11 s) and `manetrouting/multiradio` (t=4 s), a passive open in SYN_RCVD
+gets a repeated SYN and re-sends its SYN-ACK at once, where it sent an ACK. The source form of
+step 7 moved two more rows, `ethernet/arptest` and `arptest2` (D-41).
+
+New tests: `tcp_read_fin_1`, `tcp_status_2`, `tcp_syn_10` to `tcp_syn_15`, `tcp_close_data_1` and
+`_2`, and `tcp_syncookies_1`. Step 3 changes the expectations of `tcp_syn_2`, and step 4 those of
+`tcp_syn_5`, `tcp_syn_6` and `tcp_syn_9`, from the source test commit 41 without its
+`synLinearTimeouts` lines (S15).
+
+Items for later stages: S12 takes from commit 23 the alignment and the padding of the options
+(`alignOptions`), and from commit 26 the rest of the rules of a forked or a Fast Open connection
+(`fastopenAccelerated`, the data on a crossing SYN); S13 the AccECN comments of commit 23; S17 the
+SACK option from the recovery's `addSacks()`, the end of the reset of the duplicate-ACK counter in
+the data path, and `ts_recent` from the handshake segment (commit 39).
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (411 at the first code commit, 421 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 118 and serializer 4 pass at the head. The tests of
+steps 2 to 5, 7 and 9 fail one commit earlier; the tests that need the test library additions of
+their own commit (steps 1, 6 and 8) were checked by hand against the code of the commit before,
+and the tests of D-36 to D-41 against the source forms. The CI fingerprint job passes at each code
+commit with the two rows of step 4. The TCP fingerprint rows run in debug at the head with no
+runtime error (the `tyf` ingredient differs, as on master; the lwIP rows need a build with lwIP).
+The six gates pass.
