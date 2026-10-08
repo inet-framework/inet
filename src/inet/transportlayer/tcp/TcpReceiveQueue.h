@@ -83,6 +83,14 @@ class INET_API TcpReceiveQueue : public cObject
     virtual uint32_t insertBytesFromSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
     /**
+     * Returns true and sets [dupStart, dupEnd) to the lowest-sequence part of
+     * [fromSeqNum, toSeqNum) that duplicates already-buffered data (RFC 2883:
+     * the first duplicate contiguous sequence, reported as a D-SACK block).
+     * Must be queried BEFORE the segment is inserted into the queue.
+     */
+    virtual bool findFirstDuplicateRange(uint32_t fromSeqNum, uint32_t toSeqNum, uint32_t& dupStart, uint32_t& dupEnd) const;
+
+    /**
      * Should create a packet to be passed up to the app, up to (but NOT
      * including) the given sequence no (usually rcv_nxt).
      * It should return nullptr if there's no more data to be passed up --

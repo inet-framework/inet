@@ -1,0 +1,40 @@
+%description:
+A retransmission that starts below rcv_nxt and ends above it gets a D-SACK
+for its part below rcv_nxt (RFC 2883, Linux tcp_data_queue()). The client
+sends two segments of 300 bytes; the tester drops the ACK of the first and the
+second segment. At the timeout, one retransmission carries both segments;
+the receiver has the first 300 bytes, so the ACK reports SACK[1,301). Before,
+the receiver accepted the new part without a D-SACK.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.sendScript="1.0 300; 1.0 300"
+*.tcptester.script="b2 delete; a4 delete"  # the ACK of the first segment, and the second segment
+
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = false
+*.*_tcp.increasedIWEnabled = true
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[4.001 A005] A.1000 > B.2000: A 1:601(600) ack 501 win 16384
+[4.003 B003] A.1000 < B.2000: A ack 601 win 16384   Option(s): NOP NOP SACK[1,301)
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

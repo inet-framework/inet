@@ -668,6 +668,7 @@ void TcpConnection::configureStateVariables()
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->prrEnabled = tcpMain->par("prrEnabled");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
+    state->dsack_enabled = tcpMain->par("dsackEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;

@@ -1,0 +1,40 @@
+%description:
+A retransmission that fills a gap and also covers data that the receiver
+holds out of order gets a D-SACK for that data (RFC 2883, Linux
+tcp_dsack_extend()). The client sends three segments of 300 bytes, and the
+tester drops the first. At the timeout, one retransmission carries all
+three; the receiver holds the last two, so the ACK reports SACK[301,901).
+Before, the ACK carried no SACK option.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.sendScript="1.0 300; 1.0 300; 1.0 300"
+*.tcptester.script="a3 delete"  # the first segment
+
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = false
+*.*_tcp.increasedIWEnabled = true
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[4.001 A006] A.1000 > B.2000: A 1:901(900) ack 501 win 16384
+[4.003 B004] A.1000 < B.2000: A ack 901 win 16384   Option(s): NOP NOP SACK[301,901)
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -220,6 +220,7 @@ simple Tcp extends SimpleModule like ITcp
         bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
         bool adaptiveReorderingEnabled = default(false); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
+        bool dsackEnabled = default(this.sackSupport); // report duplicate segments by D-SACK blocks (RFC 2883), when SACK is in use
         string lossDetectionMode @enum("dupthresh","rack") = default("dupthresh"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.

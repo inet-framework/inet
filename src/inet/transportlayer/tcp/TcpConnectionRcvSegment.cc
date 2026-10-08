@@ -469,6 +469,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     //
     uint32_t old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
 
+    // D-SACK bookkeeping (RFC 2883): first duplicated range of this segment,
+    // captured just before the insert merges the regions.
+    bool dupRangeFound = false;
+    uint32_t dupStart = 0, dupEnd = 0;
+
     if (fsm.getState() == TCP_S_SYN_RCVD || fsm.getState() == TCP_S_ESTABLISHED ||
         fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
     {
@@ -519,6 +524,22 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // section 2.5).
 
                 uint32_t old_usedRcvBuffer = state->usedRcvBuffer;
+                // D-SACK (RFC 2883): the part of the segment below rcv_nxt is a
+                // duplicate (Linux tcp_data_queue: D-SACK [seq, rcv_nxt)); otherwise
+                // find the first already-buffered range this segment duplicates
+                // BEFORE the insert merges the regions (Linux reports it via
+                // tcp_dsack_set/tcp_dsack_extend as tcp_ofo_queue drains the
+                // out-of-order queue over a gap-filling segment).
+                if (state->sack_enabled && state->dsack_enabled && payloadLength > 0) {
+                    if (seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
+                        dupStart = tcpHeader->getSequenceNo();
+                        dupEnd = state->rcv_nxt;
+                        dupRangeFound = true;
+                    }
+                    else
+                        dupRangeFound = receiveQueue->findFirstDuplicateRange(tcpHeader->getSequenceNo(),
+                                tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
+                }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
 
                 // RFC 5681, page 8:
@@ -714,7 +735,19 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // received a FIN that needs to be acked (or both), we need to send or
         // schedule an ACK.
         if (state->sack_enabled) {
-            if (receiveQueue->getQueueLength() != 0) {
+            if (dupRangeFound) {
+                // RFC 2883: a gap-filling (or partially duplicate) segment covered
+                // data that was already received -- report the first duplicated
+                // range as a D-SACK block; addSacks() appends the still-missing
+                // out-of-order blocks (if any) after it (Linux tcp_ofo_queue ->
+                // tcp_dsack_extend).
+                state->start_seqno = dupStart;
+                state->end_seqno = dupEnd;
+                state->snd_dsack = true;
+                EV_DETAIL << "SND_D-SACK SET (segment duplicates received range [" << dupStart << ".." << dupEnd << "))\n";
+                state->ack_now = true;
+            }
+            else if (receiveQueue->getQueueLength() != 0) {
                 // RFC 2018, page 4:
                 // "If sent at all, SACK options SHOULD be included in all ACKs which do
                 // not ACK the highest sequence number in the data receiver's queue."
