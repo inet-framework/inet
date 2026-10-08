@@ -1,0 +1,37 @@
+%description:
+Tests the reset on new data after a full close (RFC 1122 section 4.2.2.13,
+abortOnDataAfterClose=true). The server application closes at t=1 and will
+not read again. The client still sends 500 bytes at t=1.5, which reach the
+server in FIN_WAIT_2. The server answers with an RST, because the data would
+be lost while the client thinks that it was delivered, and it gives its
+application the CLOSED indication. The client resets. Without the parameter,
+the server takes the data, as RFC 9293 allows after a CLOSE.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.srv_app.tClose=1s
+*.srv_tcp.abortOnDataAfterClose = true
+*.cli_app.sendScript="1.5 500"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^\[testing\]\|finishing with\|received .* bytes\|Notifying app: CLOSED" test.out > test_1.out || true
+%contains: test_1.out
+[testing]: [1.501 A004] A.1000 > B.2000: A 1:501(500) ack 502 win 16384
+[]: Notifying app: CLOSED
+[testing]: srv_tcp: FIN_WAIT_2 --> CLOSED  (on ABORT)
+[testing]: [1.503 B003] A.1000 < B.2000: R win 0
+[testing]: cli_tcp: CLOSE_WAIT --> CLOSED  (on RCV_RST)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

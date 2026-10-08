@@ -503,6 +503,23 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     //
     uint32_t old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
 
+    // RFC 1122 section 4.2.2.13: after a "half-duplex" close (abortOnDataAfterClose,
+    // the full close of Linux), the application will not read again, so new data in
+    // FIN_WAIT_1/2 would be dropped while the peer thinks that it was delivered: "its
+    // TCP SHOULD send a RST to show that data was lost" (Linux TCPABORTONDATA). The
+    // RST takes its sequence number from the ACK of the segment, as Linux
+    // tcp_v4_send_reset() does. The application asked for the close, so it gets
+    // the CLOSED indication that its socket waits for.
+    if ((fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
+            && state->rcvShutdown && payloadLength > 0
+            && seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_nxt))
+    {
+        EV_INFO << "New data after a full close: resetting the connection (RFC 1122 4.2.2.13)\n";
+        sendRst(tcpHeader->getAckNo());
+        sendIndicationToApp(TCP_I_CLOSED);
+        return TCP_E_ABORT;
+    }
+
     // D-SACK bookkeeping (RFC 2883): first duplicated range of this segment,
     // captured just before the insert merges the regions.
     bool dupRangeFound = false;

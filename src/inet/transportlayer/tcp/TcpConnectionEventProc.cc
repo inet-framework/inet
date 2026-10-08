@@ -219,6 +219,14 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
 
 void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
+    // RFC 9293: a CLOSE means "I have no more to send", and the application may still
+    // receive. With abortOnDataAfterClose, a CLOSE without halfClose is the full close
+    // of Linux close(), which also shuts the receive side down (RFC 1122 section
+    // 4.2.2.13 lets a host implement such a "half-duplex" close). state is still null
+    // for a CLOSE that reaches a new connection in INIT.
+    if (state != nullptr && tcpMain->par("abortOnDataAfterClose").boolValue()
+            && (tcpCommand == nullptr || !tcpCommand->getHalfClose()))
+        state->rcvShutdown = true;
     delete tcpCommand;
     delete msg;
 

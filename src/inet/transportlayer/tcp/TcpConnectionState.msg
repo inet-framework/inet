@@ -149,6 +149,7 @@ struct TcpStateVariables
     bool send_fin = false;          // true if a user CLOSE command has been "queued"
     uint32_t snd_fin_seq = 0;       // if send_fin == true: FIN should be sent just before this sequence number
 
+    bool rcvShutdown = false;       // set by a CLOSE without halfClose when abortOnDataAfterClose is on (the full close of Linux): the application will not read again, so new data in FIN_WAIT_1/2 resets the connection (RFC 1122 section 4.2.2.13)
     bool fin_rcvd = false;          // whether FIN received or not
     uint32_t rcv_fin_seq = 0;       // if fin_rcvd: sequence number of received FIN
 
