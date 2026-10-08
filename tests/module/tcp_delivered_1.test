@@ -1,0 +1,45 @@
+%description:
+The STATUS field deliveredBytes counts each delivered byte once (RFC 6937
+DeliveredData: the change of snd_una plus the signed change of the SACKed
+bytes). Reno with SACK sends 65536 bytes; the tester delays one segment and
+drops the next, so SACKs report data above the hole before the retransmission
+fills it. After the transfer, deliveredBytes is 65536. Before, the cumulative
+ACKs added nothing and only the SACKed bytes counted; a count that adds the
+whole cumulative ACK counts the bytes that a SACK reported before a second
+time.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_app.cmdenv-log-level=INFO
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=65536B # 64 1024-byte segments
+*.cli_app.statusRequestScript="2"
+
+*.tcptester.script="a14 delay 0.0005; a15 delete"  # two SACKs, then an ACK of new data
+
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.advertisedWindow = 65535
+
+include ../../lib/defaults.ini
+
+%contains-regex: stdout
+STATUS: [^\n]* deliveredBytes=65536\n
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

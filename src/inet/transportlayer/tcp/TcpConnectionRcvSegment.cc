@@ -1271,6 +1271,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         }
 
         // acked data no longer needed in rexmit queue
+        uint32_t sackedBeforeDiscard = state->sack_enabled ? rexmitQueue->getTotalAmountOfSackedBytes() : 0;
         rexmitQueue->discardUpTo(discardUpToSeq);
 
         // A plain cumulative ACK carries no SACK option, so processSACKOption()
@@ -1281,6 +1282,17 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // pre-ACK count.
         if (state->sack_enabled)
             state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
+
+        // Delivered-bytes accounting (RFC 6937 DeliveredData, RFC 8985): the change of
+        // snd_una plus the signed change of the SACKed bytes. processSACKOption() counts
+        // the newly SACKed bytes; here count the newly acknowledged bytes, less those
+        // that a SACK reported before, so that each byte counts once (Linux counts a
+        // segment once, at its first SACK or ACK).
+        if (seqGreater(discardUpToSeq, old_snd_una)) {
+            uint32_t sackedCovered = state->sack_enabled ? sackedBeforeDiscard - state->sackedBytes : 0;
+            state->deliveredBytes += (discardUpToSeq - old_snd_una) - sackedCovered;
+            emit(deliveredSignal, (unsigned long)state->deliveredBytes);
+        }
 
         updateWndInfo(tcpHeader);
 
