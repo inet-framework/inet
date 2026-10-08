@@ -55,19 +55,19 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5d ✅ | `topic/tcp-sack-recovery` | 10 (part), 13 (part) | +91 −77 | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6; SACK only for a flavour that can recover with it |
 | S5e ✅ | `topic/tcp-pipe-recovery` | 13 (part), 34 (part), 39 (part), 56, 71, 72, 80 (part) | +248 −161 | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
-| S7 | `topic/tcp-segment-sizing` | 15, 16, 53 | +420 −54 | segment sizing against the option space, bytes in flight |
-| S8 | `topic/tcp-rack` | 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
+| S7 | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
+| S8 | `topic/tcp-rack` | 16 (part), 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
-| S11 | `topic/tcp-connection-lifecycle` | 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
-| S12 | `topic/tcp-fast-open` | 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
+| S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
+| S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
-| S16 | `topic/tcp-write-boundaries` | 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
+| S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61, 74, 86 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
-| S19 | `topic/tcp-modern-defaults` | 40, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
+| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -286,6 +286,25 @@ plan gives a reason for.
   and the pipe gave more room than the two segments of RFC 3042 (`bulktransfer` `inet__inet`: five
   marks at the third duplicate ACK at t=1.2825 s). S5e removes the marks outside a recovery both at
   an ACK of new data and when the counter resets; in a recovery the marks stay.
+- **D-19 — S7 holds the sizing parts of source commits 15 and 16; their other parts go to the
+  stages of their features.** Both commits are what remained of one commit that carried many
+  features (their messages say so). S7 takes the effective MSS, the announced MSS, and the peak segments in
+  flight with the cwnd-limited slow start. The other parts go to
+  S8 (`seedRttFromHandshake`, the TCP_INFO time counters, the `sndMax` signal, the STATUS fields
+  `sndEffMss` and `advmss`, with the tests of STATUS), S11 (the RST
+  for a SYN-ACK with an invalid TSecr, the options of the crossing SYN-ACK of a simultaneous open,
+  the `forked` flag, `syncookiesAlways`), S12 (the Nagle exemption of the SYN-ACK slot, the data
+  retransmission in SYN_RCVD, `peerAdvertisedMss`, `alignOptions`, `sendMssOption`, the place of
+  the timestamp option in the SYN, and the default send MSS when the SYN has no MSS option, RFC
+  9293 MUST-15, which the source claims but handles only for an option value of 0), S16
+  (`TCP_MAXSEG`, with the other socket options, whose tests are packetdrill tests; the
+  silly-window hold of the sender, which needs `max_window` from source commit 69: without it, a
+  peer whose window never reaches one MSS receives nothing) and S19
+  (`mss = -1` with the default of the address family, the parameters `initialWindow` and
+  `initialSendSequenceNumber` with the defaults of `initialWindow` and `seedRttFromHandshake`,
+  and source commit 53). For `mss = -1`, the source leaves `snd_mss` unresolved when the SYN of
+  the peer arrives, so a passive side sends segments as large as the peer announces; S19 must
+  resolve the default first.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -664,4 +683,23 @@ and 359 at the head; on `e04a0113b3` 361 at the head);
 the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill
 tests skip without inet-gpl); unit 114 and serializer 4 pass at the head. The CI fingerprint job
 passes at each code commit, after the commit's own new values.
+
+### S7 — `topic/tcp-segment-sizing`: the steps
+
+S7 comes before S6. `TcpCubic` counts with the effective MSS, and in slow start it grows only
+while cwnd is below twice the peak segments in flight, which source commit 16 records. Without
+S7, CUBIC would not grow in slow start at all (the trap of D-6).
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: record the peak segments in flight in each window of data | — | 16 (part) |
+| 2 | change: slow start grows by the acknowledged bytes (RFC 5681 equation (2)) | B9 | 13 |
+| 3 | change: slow start grows only while cwnd is used | B9 | 13, 16 (part) |
+| 4 | change: congestion control counts with the effective MSS | — | 15 (part) |
+| 5 | refactor: retransmissions are cut to the effective MSS | — | 15 (part) |
+| 6 | change: the MSS option announces this side's own receive limit | — | 15 (part) |
+
+The `sendSegment()` of master already cuts each segment so that the data and the options fit in
+`snd_mss`, so step 4 changes no segment. Decision D-19 lists where the other parts of commits 15
+and 16 go. The order can change when a step shows that it depends on a later one.
 
