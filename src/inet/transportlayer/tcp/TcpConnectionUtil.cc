@@ -1055,6 +1055,18 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (seqGreater(state->snd_nxt, state->snd_max))
         state->snd_max = state->snd_nxt;
 
+    // The peak segments in flight in the current window of data, as Linux
+    // tcp_cwnd_validate() keeps it: a new window starts when snd_una has passed
+    // the snd_nxt of the last start. A partial segment counts as a whole one,
+    // as Linux counts packets.
+    if (state->snd_effmss > 0) {
+        uint32_t packetsOut = (state->snd_max - state->snd_una + state->snd_effmss - 1) / state->snd_effmss;
+        if (!seqLess(state->snd_una, state->cwndUsageSeq) || packetsOut > state->maxPacketsOut) {
+            state->maxPacketsOut = packetsOut;
+            state->cwndUsageSeq = state->snd_nxt;
+        }
+    }
+
     return sentBytes;
 }
 

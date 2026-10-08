@@ -240,7 +240,8 @@ struct TcpStateVariables
     simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
     // declared here for the code above that already uses it:
-    uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
+    uint32_t maxPacketsOut = 0;    // peak segments in flight in the current window of data (Linux max_packets_out); drives the cwnd-limited slow-start gate
+    uint32_t cwndUsageSeq = 0;     // snd_nxt when the current window of data started (Linux cwnd_usage_seq)
     uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
     bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
     uint8_t accEcnOptMinFields = 0;
