@@ -258,11 +258,13 @@ plan gives a reason for.
 - **D-15 — The duplicate-ACK counter keeps counting in a recovery.** The source stops the counter
   while `lossRecovery` is set. In S5e the recovery strategies decide by `lossRecovery`, so the
   counter needs no stop, and the `dupAcks` statistic keeps master's meaning.
-- **D-16 — NewReno's full ACK keeps option (1) of RFC 6582 until S9.** The source sets cwnd to
+- **D-16 — NewReno's full ACK keeps option (1) of RFC 6582.** The source sets cwnd to
   ssthresh (option (2)). Without Proportional Rate Reduction, the bytes in flight at the end of a
   recovery can be far below ssthresh, and option (2) then sends a burst; RFC 6582 asks for a measure
-  against it. Master's option (1), `min(ssthresh, FlightSize + SMSS)`, has none. PRR (S9) keeps the
-  bytes in flight near ssthresh during the recovery, so S9 can take option (2).
+  against it. Master's option (1), `min(ssthresh, FlightSize + SMSS)`, has none. The plan expected
+  PRR (S9) to keep the bytes in flight near ssthresh, but the source runs PRR only in the SACK
+  recovery (`Rfc6675Recovery`), not in NewReno's recovery without SACK. So NewReno without SACK
+  keeps option (1) after S9 too, and the final tree differs from the source here.
 - **D-17 — The inferred SACKs follow Linux's counts.** Two parts of the emulation of S5c (from
   source commit 39) counted the pipe wrong once 2c reads it. First, when an ACK
   leaves the mark of a duplicate ACK on the first unacknowledged segment, `discardUpTo()` (S5c,
@@ -359,6 +361,13 @@ plan gives a reason for.
   `tcp-legacy.ini`, sees a first RTO of 1 s and expects `backoff=2` at t=4.2 s. S8 seeds both
   sides only with the parameter, and the test expects `backoff=1`, the one timeout at t=4 s. S12
   must keep the check of the parameter on the active side.
+- **D-28 — The delivered bytes count each byte once (RFC 6937 DeliveredData).** PRR sizes cwnd
+  by the bytes that each ACK delivers: the change of `snd_una` plus the signed change of the
+  SACKed bytes. Master (S8) counted only the newly SACKed bytes, so a cumulative ACK delivered
+  nothing, and the STATUS field `deliveredBytes` was too small. Source commit 39 adds the change of
+  `snd_una`, but it counts again the bytes that a SACK reported before, so the ACK that fills a
+  hole delivers the whole SACKed range a second time, and PRR sends too much on it. S9 subtracts
+  the SACKed bytes that the cumulative ACK covers, as Linux counts each segment once.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -923,3 +932,18 @@ symbol, and the TCP module tests pass at each commit (377 at the first code comm
 head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
 packetdrill tests skip without inet-gpl); unit 118 and serializer 4 pass at the head. The CI
 fingerprint job passes at each code commit, after the commit's own new values.
+
+### S9 — `topic/tcp-prr`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: count the delivered bytes of a cumulative ACK once | — | 39 (part) |
+| 2 | add: Proportional Rate Reduction (RFC 6937), selected by `prrEnabled` | — | 20, 59 (part) |
+| 3 | comment: drop a test name from a comment of the SACK recovery | — | 64 (part) |
+
+Step 1 repairs the STATUS field `deliveredBytes` of S8, which PRR reads as DeliveredData (D-28).
+PRR lands off, as the features of S8 do (D-24): `prrEnabled = false` until S19. Source commit 59
+only removes `prrInitCwndReduction()`, which has no caller, so S9 never adds it; its comment in
+`Rfc6582Recovery` refers to a line that S5e already removed. NewReno without SACK keeps option (1)
+of RFC 6582 (D-16). Step 3 is the last part of commit 64 for code on master: a comment of
+`Rfc6675Recovery::stepC()` from S5d.
