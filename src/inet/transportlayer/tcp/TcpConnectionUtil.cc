@@ -36,6 +36,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
@@ -1367,9 +1368,19 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processSACKPermittedOption(tcpHeader, *check_and_cast<const TcpOptionSackPermitted *>(option));
                 break;
 
-            case TCPOPTION_SACK: // SACK=5
-                ok = processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
+            case TCPOPTION_SACK: { // SACK=5
+                // A SACK block from a peer we never negotiated SACK with, or one that
+                // arrives before the algorithm has a SACK-capable recovery object, is
+                // malformed input -- drop the option, never abort the simulation.
+                auto *recovery = state->sack_enabled ? dynamic_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery()) : nullptr;
+                if (recovery == nullptr) {
+                    EV_ERROR << "ERROR: " << (state->sack_enabled ? "no SACK-capable recovery in use" : "SACK received but sack_enabled is false") << ", dropping SACK option\n";
+                    ok = false;
+                }
+                else
+                    ok = recovery->processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
                 break;
+            }
 
             case TCPOPTION_TIMESTAMP: // TS=8
                 ok = processTSOption(tcpHeader, *check_and_cast<const TcpOptionTimestamp *>(option));
