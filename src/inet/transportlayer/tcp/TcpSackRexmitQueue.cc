@@ -142,7 +142,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.beginSeqNum = fromSeqNum;
             region.endSeqNum = toSeqNum;
-            region.lost = false;
+            region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
             rexmitQueue.insert(i, region);

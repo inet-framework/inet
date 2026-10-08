@@ -1,0 +1,42 @@
+%description:
+Tests TcpSackRexmitQueue: a retransmission that covers only the first part
+of a lost region splits the region, and both parts stay lost. The lost mark
+stays until the data is acknowledged (Linux keeps TCPCB_LOST together with
+TCPCB_SACKED_RETRANS), so the retransmitted part counts once in the bytes in
+flight: as retransmitted, not as lost.
+
+%includes:
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static void dump(const char *label, TcpSackRexmitQueue& q)
+{
+    EV << label << " " << q.str() << "\n";
+    for (const auto& r : q.rexmitQueue)
+        EV << "  [" << r.beginSeqNum << ".." << r.endSeqNum << ") sacked=" << r.sacked
+           << " rexmitted=" << r.rexmitted << " lost=" << r.lost << "\n";
+}
+
+%activity:
+
+TcpSackRexmitQueue q;
+q.init(1000);
+
+q.enqueueSentData(1000, 2000);   // one segment of 1000 bytes
+q.markLost(1000, 2000);          // a timeout marks it lost
+q.enqueueSentData(1000, 1500);   // the retransmission covers its first half
+dump("after retransmit [1000,1500):", q);
+EV << "lost=" << q.getLost() << " retrans=" << q.getRetrans() << "\n";
+
+EV << ".\n";
+
+%subst: /rexmitQ: [^\n]*\n//
+%contains: stdout
+after retransmit [1000,1500): [1000..2000)
+  [1000..1500) sacked=0 rexmitted=1 lost=1
+  [1500..2000) sacked=0 rexmitted=0 lost=1
+lost=1000 retrans=500
