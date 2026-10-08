@@ -303,6 +303,7 @@ struct TcpStateVariables
 
     bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
     simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)
+    simtime_t firstSynSentTime = -1; // when the first SYN was sent (Linux tp->retrans_stamp); a retransmitted SYN does not change it
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
 };

@@ -28,6 +28,9 @@ package inet.test.moduletest.lib;
 //    - <tt>copy</tt> <i><delay1>,<delay2>,<delay3>,...</i>:
 //      forwards copies of the segment after the given delays
 //      (<tt>copy 0.5</tt> is the same as <tt>delay 0.5</tt>)
+//    - <tt>ce</tt>: forwards the segment marked CE
+//    - <tt>tsecr</tt> <i><value></i>: forwards the segment with this TSecr in its
+//      timestamp option
 //
 simple TCPScriptableTester
 {

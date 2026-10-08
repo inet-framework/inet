@@ -99,6 +99,12 @@ void TCPScriptableTester::parseScript(const char *script)
             cmd.command = CMD_COPY; s+=4;
         } else if (!strncmp(s,"ce",2)) {
             cmd.command = CMD_CE; s+=2;
+        } else if (!strncmp(s,"tsecr",5)) {
+            cmd.command = CMD_TSECR; s+=5;
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: TSecr value expected");
+            cmd.tsecr = strtoul(s, &const_cast<char *&>(s), 10);
         } else
             throw cRuntimeError("syntax error in script: wrong command");
 
@@ -222,6 +228,17 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         bubble("marking CE");
         pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(IP_ECN_CE);
         dump(seg, pk->getByteLength(), fromA, "marking CE");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_TSECR)
+    {
+        bubble("changing TSecr");
+        auto header = pk->removeAtFront<TcpHeader>();
+        for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+            if (auto ts = dynamic_cast<TcpOptionTimestamp *>(header->getHeaderOptionForUpdate(i)))
+                ts->setEchoedTimestamp(cmd->tsecr);
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing TSecr");
         send(pk, fromA ? "out2" : "out1");
     }
     else

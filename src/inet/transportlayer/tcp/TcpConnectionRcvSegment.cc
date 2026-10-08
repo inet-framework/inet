@@ -1060,6 +1060,30 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
     //   are acceptable then,
     //"
     if (tcpHeader->getSynBit()) {
+        // RFC 7323, Linux tcp_rcv_synsent_state_process() (PAWSACTIVEREJECTED): a
+        // SYN-ACK whose TSecr does not echo a timestamp that this connection sent,
+        // between the first SYN and now on its timestamp clock, gets an RST
+        // <SEQ=SEG.ACK><CTL=RST>, and the connection stays in SYN_SENT. The lower
+        // bound is the first SYN (Linux tp->retrans_stamp): a SYN-ACK to an earlier
+        // copy of the SYN is valid. The check comes before the SYN-ACK changes any
+        // state, as in Linux.
+        if (tcpHeader->getAckBit() && state->ts_support && state->firstSynSentTime >= SIMTIME_ZERO) {
+            for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                auto ts = dynamic_cast<const TcpOptionTimestamp *>(tcpHeader->getHeaderOption(i));
+                if (ts == nullptr || ts->getEchoedTimestamp() == 0)
+                    continue;
+                uint32_t tsecr = ts->getEchoedTimestamp();
+                uint32_t tsLow = convertSimtimeToTS(state->firstSynSentTime);
+                uint32_t tsHigh = convertSimtimeToTS(simTime());
+                if (seqLess(tsecr, tsLow) || seqGreater(tsecr, tsHigh)) {
+                    EV_WARN << "SYN-ACK TSecr " << tsecr << " outside [" << tsLow << ", " << tsHigh
+                            << "]: sending RST (PAWSACTIVEREJECTED)\n";
+                    sendRst(tcpHeader->getAckNo());
+                    return TCP_E_IGNORE;
+                }
+            }
+        }
+
         //
         //   RCV.NXT is set to SEG.SEQ+1, IRS is set to
         //   SEG.SEQ.  SND.UNA should be advanced to equal SEG.ACK (if there

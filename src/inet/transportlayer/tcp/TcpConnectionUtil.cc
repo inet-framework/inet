@@ -809,6 +809,8 @@ void TcpConnection::sendSyn()
     Packet *fp = new Packet("SYN");
 
     state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
+    if (state->syn_rexmit_count == 0)
+        state->firstSynSentTime = simTime(); // for the TSecr check of the SYN-ACK
 
     // send it
     sendToIP(fp, tcpHeader);
