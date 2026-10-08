@@ -1,0 +1,78 @@
+%description:
+Tests Proportional Rate Reduction (RFC 6937, prrEnabled=true) in the fast
+recovery of TcpReno with SACK. The tester drops segment a30 of a flight of 32
+segments, delays the fast retransmission by 20 ms, and spaces the 31 duplicate
+ACKs 1 ms apart, so that the recovery lasts long enough to show the pacing. At
+the third duplicate ACK, cwnd is 16000 and ssthresh 8000. PRR then sends about
+one new segment for every two delivered segments (ssthresh/priorCwnd): the
+first ones leave at t=0.027 and t=0.029, while the pipe is still above
+ssthresh. Without PRR, RFC 6675 sends nothing until the pipe falls below
+ssthresh, at t=0.038. When the recovery ends, cwnd is ssthresh.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A30 delete; A62 delay 0.02; b30 delay 0.001; b31 delay 0.002; b32 delay 0.003; b33 delay 0.004; b34 delay 0.005; b35 delay 0.006; b36 delay 0.007; b37 delay 0.008; b38 delay 0.009; b39 delay 0.010; b40 delay 0.011; b41 delay 0.012; b42 delay 0.013; b43 delay 0.014; b44 delay 0.015; b45 delay 0.016; b46 delay 0.017; b47 delay 0.018; b48 delay 0.019; b49 delay 0.020; b50 delay 0.021; b51 delay 0.022; b52 delay 0.023; b53 delay 0.024; b54 delay 0.025; b55 delay 0.026; b56 delay 0.027; b57 delay 0.028; b58 delay 0.029; b59 delay 0.030; b60 delay 0.031"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes=40000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 40000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.prrEnabled = true
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%# PRR entered fast recovery
+%contains: stdout
+PRR fast recovery: entering, priorCwnd=16000 ssthresh=8000
+
+%# the fast retransmission, delayed by the tester
+%contains-regex: stdout
+\[0\.024 A062\] A\.1000 > B\.2000: A 14001:14501\(500\)
+
+%# PRR sends new data while the pipe is still above ssthresh, one segment for two ACKs
+%contains-regex: stdout
+\[0\.027 A063\] A\.1000 > B\.2000: A 30001:30501\(500\)
+%contains-regex: stdout
+\[0\.029 A064\] A\.1000 > B\.2000: A 30501:31001\(500\)
+
+%# on leaving recovery cwnd is set to ssthresh (RFC 6937 tcp_end_cwnd_reduction)
+%contains: stdout
+PRR: leaving fast recovery, cwnd=ssthresh=8000
+
+%# the transfer completed despite the loss
+%contains: stdout
+received 40000 bytes

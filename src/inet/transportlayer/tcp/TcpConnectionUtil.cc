@@ -666,6 +666,7 @@ void TcpConnection::configureStateVariables()
         state->sack_support = false;
     }
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
+    state->prrEnabled = tcpMain->par("prrEnabled");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value

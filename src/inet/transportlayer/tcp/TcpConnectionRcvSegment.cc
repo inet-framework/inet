@@ -86,6 +86,10 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
     emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>()));
+
+    // snapshot delivered-bytes so consumers can read this segment's newly
+    // acked+sacked bytes as deliveredBytes - prrDeliveredMark (RFC 6937 PRR input)
+    state->prrDeliveredMark = state->deliveredBytes;
     //
     // Note: this code is organized exactly as
     // RFC 9293, section "3.10 Event Processing", subsection "3.10.7. SEGMENT ARRIVES".

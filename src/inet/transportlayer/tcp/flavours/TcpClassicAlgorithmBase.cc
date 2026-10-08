@@ -132,6 +132,20 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     ensureRexmitTimerArmed();
 }
 
+void TcpClassicAlgorithmBase::dataSent(uint32_t fromseq)
+{
+    TcpAlgorithmBase::dataSent(fromseq);
+    if (recovery != nullptr)
+        recovery->dataSent(fromseq);
+}
+
+void TcpClassicAlgorithmBase::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
+{
+    TcpAlgorithmBase::segmentRetransmitted(fromseq, toseq);
+    if (recovery != nullptr)
+        recovery->segmentRetransmitted(fromseq, toseq);
+}
+
 void TcpClassicAlgorithmBase::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 {
     if (recovery != nullptr)

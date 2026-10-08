@@ -87,6 +87,12 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
+    /** Forwarded to the recovery strategy too (RFC 6937 accounting of the sent bytes). */
+    virtual void dataSent(uint32_t fromseq) override;
+
+    /** Forwarded to the recovery strategy too (RFC 6937 accounting of the sent bytes). */
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
+
     /** Forwarded to the recovery strategy (pre-discard scoreboard inspection). */
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
 

@@ -260,6 +260,12 @@ struct TcpStateVariables
     uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
     uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
 
+    // PRR - Proportional Rate Reduction (RFC 6937)
+    bool prrEnabled = false;       // use PRR during fast recovery (set from the prrEnabled parameter)
+    uint32_t prrDelivered = 0;     // bytes delivered during the current recovery episode
+    uint32_t prrOut = 0;           // bytes transmitted during the current recovery episode
+    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy)
+
     // TCP_INFO time counters (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
     // with respect to every send/receive decision -- consulted only by TcpStatusInfo.
     // INET-native definitions (not a port of Linux's tcp_chrono_* state machine); see
