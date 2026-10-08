@@ -27,10 +27,16 @@ class INET_API TcpSackRexmitQueue
         bool lost; // indicates whether region has been lost
         bool sacked; // indicates whether region has already been sacked by data receiver
         bool rexmitted; // indicates whether region has already been retransmitted by data sender
+        simtime_t firstSentTime = 0; // time this region was first transmitted (RACK/Vegas: original send time)
+        simtime_t lastSentTime = 0; // time this region was most recently (re)transmitted (RACK: xmit time)
+        uint16_t transmitCount = 0; // number of times this region has been transmitted (1 = never retransmitted)
     };
 
     typedef std::list<Region> RexmitQueue;
     RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
+    std::set<uint32_t> xmitSegmentStarts; // begin seqnums of ORIGINAL transmissions (skb boundaries): lets RACK tell a whole small segment (advances the reference, Linux tags the skb) from a sub-MSS fragment split off a bigger segment by a byte-range SACK (never tagged, tcp_match_skb_to_sack fragments only at MSS boundaries)
+
+    bool isTransmissionStart(uint32_t seqNum) const { return xmitSegmentStarts.find(seqNum) != xmitSegmentStarts.end(); }
 
     uint32_t begin; // 1st sequence number stored
     uint32_t end; // last sequence number stored + 1
@@ -190,6 +196,12 @@ class INET_API TcpSackRexmitQueue
      * Returns the total number of retransmitted bytes in the queue.
      */
     virtual uint32_t getRetrans() const;
+
+    /**
+     * Returns the region containing seqNum. seqNum must be within [begin, end).
+     * Used by RACK to read a segment's transmit time and count.
+     */
+    virtual const Region& getRegion(uint32_t seqNum) const;
 
   protected:
     /*

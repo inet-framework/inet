@@ -63,6 +63,10 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
             i = rexmitQueue.erase(i);
 
+        // prune recorded transmission boundaries the same way
+        for (auto s = xmitSegmentStarts.begin(); s != xmitSegmentStarts.end(); )
+            s = seqLess(*s, seqNum) ? xmitSegmentStarts.erase(s) : std::next(s);
+
         if (i != rexmitQueue.end()) {
             ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
             i->beginSeqNum = seqNum;
@@ -102,11 +106,14 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
     ASSERT(seqLess(fromSeqNum, toSeqNum));
 
     if (rexmitQueue.empty() || (end == fromSeqNum)) {
+        xmitSegmentStarts.insert(fromSeqNum); // original transmission boundary (skb start)
         region.beginSeqNum = fromSeqNum;
         region.endSeqNum = toSeqNum;
         region.lost = false;
         region.sacked = false;
         region.rexmitted = false;
+        region.firstSentTime = region.lastSentTime = simTime();
+        region.transmitCount = 1;
         rexmitQueue.push_back(region);
         found = true;
         fromSeqNum = toSeqNum;
@@ -130,6 +137,8 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             i->rexmitted = true;
+            i->lastSentTime = simTime();
+            i->transmitCount++;
             fromSeqNum = i->endSeqNum;
             found = true;
             i++;
@@ -145,6 +154,12 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
             region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
+            // a fragment split off *i is a retransmission of *i, so it inherits its
+            // transmit history; firstSentTime must stay the ORIGINAL send time for
+            // RACK's Karn check and Vegas' RTT sampling
+            region.firstSentTime = beforeEnd ? i->firstSentTime : simTime();
+            region.lastSentTime = simTime();
+            region.transmitCount = beforeEnd ? i->transmitCount + 1 : 1;
             rexmitQueue.insert(i, region);
             found = true;
             fromSeqNum = toSeqNum;
@@ -486,6 +501,21 @@ uint32_t TcpSackRexmitQueue::getRetrans() const
         if (region.rexmitted)
             retrans += region.endSeqNum - region.beginSeqNum;
     return retrans;
+}
+
+const TcpSackRexmitQueue::Region& TcpSackRexmitQueue::getRegion(uint32_t seqNum) const
+{
+    ASSERT(seqLE(begin, seqNum) && seqLess(seqNum, end));
+
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, seqNum)) // search for seqNum
+        i++;
+
+    ASSERT(i != rexmitQueue.end());
+    ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
+
+    return *i;
 }
 
 } // namespace tcp
