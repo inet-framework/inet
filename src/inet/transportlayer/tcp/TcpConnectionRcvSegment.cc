@@ -1136,6 +1136,11 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //   has been reached, return.
         //"
         EV_INFO << "SYN bit set: sending SYN+ACK\n";
+        // simultaneous open: read the options of the crossing SYN before the
+        // SYN-ACK is built, as processSynInListen() does; else the MSS of the
+        // peer stays unknown, and SACK, window scale and timestamps stay off
+        if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH)
+            readHeaderOptions(tcpHeader);
         state->snd_max = state->snd_nxt = state->iss;
         sendSynAck();
         startSynRexmitTimer();

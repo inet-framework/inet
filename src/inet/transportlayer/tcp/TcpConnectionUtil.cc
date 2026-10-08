@@ -1710,7 +1710,11 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
-                                    && state->syn_rexmit_count > 0)))
+                                    && (state->syn_rexmit_count > 0
+                                        // simultaneous open: the SYN-ACK that answers the
+                                        // crossing SYN goes out in SYN_SENT, and it carries the
+                                        // handshake options as any other SYN segment
+                                        || tcpHeader->getAckBit()))))
     {
         // MSS header option
         // RFC 9293, section 3.7.1: the MSS option announces the maximum segment
