@@ -56,7 +56,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5e ✅ | `topic/tcp-pipe-recovery` | 13 (part), 34 (part), 39 (part), 56, 71, 72, 80 (part) | +248 −161 | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
 | S6 ✅ | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 ✅ | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
-| S8 | `topic/tcp-rack` | 16 (part), 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
+| S8 ✅ | `topic/tcp-rack` | 13 (part), 16 (part), 17, 18, 19, 26 (part), 49, 51 (part), 64 (part) | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
 | S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
@@ -339,6 +339,26 @@ plan gives a reason for.
   `seedRttFromHandshake = false` (D-19). The tests of S8 select each feature. S19 sets the source
   defaults, one commit for each, with its moved rows. A behavior that has no parameter, such as
   the count of the bytes in flight with SACK (B8), changes in S8.
+- **D-25 — A retransmission that ends at `snd_max` keeps its last whole segment.** Source commit 17
+  cuts a retransmission at the last original segment start inside one SMSS. When the
+  retransmission ends at `snd_max`, it ends with a whole segment, but the source cut it there too:
+  three dropped segments of 300 bytes came back as 600 and then 300 bytes. Linux joins whole
+  segments that fit into one SMSS (`tcp_retrans_try_collapse()`) and sends 900 bytes. S8 cuts
+  only when the retransmission ends before `snd_max`; `tcp_rexmit_boundaries_2` fails with the
+  source form.
+- **D-26 — In RACK mode, the duplicate-ACK count does not start a recovery.** RFC 8985 (step 4 of
+  the detection) enters the fast recovery by RACK's own marks: when DupThresh segments are SACKed
+  and no reordering was seen, the reordering window is 0, and once reordering was seen, "RACK does
+  not trigger fast recovery based on DupThresh". Linux `tcp_time_to_recover()` skips the
+  duplicate-ACK heuristic with RACK. The source kept step (1) of RFC 6675 (`DupAcks >= DupThresh`)
+  in RACK mode, so a reordered segment was retransmitted although RACK waited for it. S8 skips
+  that step in RACK mode; `tcp_reordering_1` fails without this.
+- **D-27 — The handshake RTT seed reads its parameter on both sides.** Source commit 16 seeds the
+  passive side when `seedRttFromHandshake` is set; source commit 26 (S12) seeds the active side
+  always. So the source test `tcp_info_fields_1`, which sets the parameter false through
+  `tcp-legacy.ini`, sees a first RTO of 1 s and expects `backoff=2` at t=4.2 s. S8 seeds both
+  sides only with the parameter, and the test expects `backoff=1`, the one timeout at t=4 s. S12
+  must keep the check of the parameter on the active side.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -846,3 +866,60 @@ commit 41 (`tcp_rack_1`, `tcp_info_fields_1` to `_3`, and the STATUS query of `T
 without the parameters of later stages (`initialWindow`, `tcp-legacy.ini`) and without the
 STATUS fields of later features (AccECN, Fast Open, the send buffer). The order can change when a
 step shows that it depends on a later one.
+
+### S8 — `topic/tcp-rack` — landed 2026-10-08
+
+The owner reviewed and approved S8 on 2026-10-08.
+
+S8 brings RACK loss detection (RFC 8985), the learning of the reordering degree, the STATUS counters
+and the handshake RTT seed, which all stay off (D-24), and the count of the bytes in flight with
+SACK (B8). The steps above changed in three places. The connection still read the SACK option in
+its own copy (D-5), and RACK and the loss marks run in the recovery's copy, so a refactor routes
+the option to `Rfc6675Recovery` first (from source commits 26 and 51). Step 6 joined step 7, its
+only user. Step 8 became two commits, because master's STATUS reply had no `SocketInd` tag, so an
+application that asked for STATUS stopped on an assertion.
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: keep the lost mark when a retransmission splits a queue region` | — | 49, 17 (part) | — |
+| `tcp: add: send times and segment starts in the retransmission queue` | B17 | 17 (part), 13 (part) | — |
+| `tcp: change: retransmit inside the sent data and the original segments` | — | 17 (part) | 2 |
+| `tcp: refactor: let the SACK recovery read the SACK option` | — | 26 (part), 51 (part) | — |
+| `tcp: change: count the bytes in flight with SACK as Linux does` | B8 | 16 (part), 17 (part) | 1 |
+| `tcp: add: RACK loss detection (RFC 8985), selected by lossDetectionMode` | — | 17, 64 (part) | — |
+| `tcp: add: learn the reordering degree of the path` | — | 19, 18 (part) | — |
+| `tcp: fix: tag the STATUS reply with the socket ID` | — | 18 (part) | — |
+| `tcp: add: the STATUS counters of TCP_INFO` | B17 | 18 (part), 16 (part), 19 (part) | — |
+| `tcp: add: seed the RTT estimator from the handshake` | — | 16 (part), 26 (part) | — |
+
+The commit messages explain each moved row and trace. In short: a retransmission keeps the
+original segments, as Linux does (the two `tcp_pmtud` rows, after PMTUD cut a segment); with
+SACK, the SACKed and lost bytes leave the count of the bytes in flight (`bulktransfer`
+`inet_inet_2b`). RACK, the learning and the seed change nothing until a test selects them.
+Decisions D-25 to D-27 give the differences from the source tree: a retransmission that ends at
+`snd_max` keeps its last whole segment, RACK does not enter a recovery by the duplicate-ACK
+count, and the parameter of the handshake seed controls both sides.
+
+New tests, each checked to fail on the commit before: the unit tests `TcpSackRexmitQueue_2` and
+`TcpSackRexmitQueue_1`, and the module tests `tcp_rexmit_boundaries_1`, `tcp_sack_inflight_1`,
+`tcp_rack_1` to `_3`, `tcp_reordering_1`, `tcp_status_1`, `tcp_info_fields_1` to `_3`, and
+`tcp_seed_rtt_1` and `_2`. `tcp_rexmit_boundaries_2` fails with the source form of D-25. The
+source tests come without `initialWindow` and `tcp-legacy.ini` (S19); `tcp_rack_1` and
+`tcp_info_fields_1` use `increasedIWEnabled` for the larger initial window, and
+`tcp_info_fields_2` asks for STATUS after this tree's probes, at t=6.5 and t=9.
+
+Items for later stages: S11 resets the full-segment counter at the SYN (commit 18) and answers
+STATUS before the open; S12 keeps the check of `seedRttFromHandshake` on the active side (D-27)
+and fills `synDataAccepted`; S13 fills the AccECN fields; S14 fills `skRcvbuf` and
+`sndbufLimited`; S15 fills `lastDataRecvTime`, and its persist timing re-times
+`tcp_info_fields_2`; S17 moves the reset of the duplicate-ACK counter from the connection to the
+algorithm (commit 18, B1 of D-6); S19 sets the source defaults of D-24 and brings the pins of
+`Rfc5681FastRetransmit`. In DupThresh mode, the learned reordering degree reaches only IsLost();
+the DupAcks trigger keeps DupThresh, as on the source branch, while Linux compares the count
+with the learned degree.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (377 at the first code commit, 390 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 118 and serializer 4 pass at the head. The CI
+fingerprint job passes at each code commit, after the commit's own new values.
