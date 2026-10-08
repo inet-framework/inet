@@ -8,6 +8,8 @@
 #ifndef __INET_IRADIO_H
 #define __INET_IRADIO_H
 
+#include <vector>
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IPhysicalLayer.h"
@@ -247,20 +249,35 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
 
     /**
      * Returns the ongoing transmission that the transmitter is currently
-     * transmitting or nullptr.
+     * transmitting or nullptr. Throws an error if several transmissions are
+     * in progress, see getTransmissionsInProgress().
      */
     virtual const ITransmission *getTransmissionInProgress() const = 0;
 
     /**
+     * Returns the ongoing transmissions that the transmitter is currently
+     * transmitting, in no particular order, or an empty vector.
+     */
+    virtual std::vector<const ITransmission *> getTransmissionsInProgress() const = 0;
+
+    /**
      * Returns the ongoing reception that the receiver is currently receiving
-     * or nullptr.
+     * (attempting) or nullptr. Throws an error if several receptions are in
+     * progress, see getReceptionsInProgress().
      */
     virtual const ITransmission *getReceptionInProgress() const = 0;
+
+    /**
+     * Returns the ongoing receptions that the receiver is currently receiving
+     * (attempting), in no particular order, or an empty vector.
+     */
+    virtual std::vector<const ITransmission *> getReceptionsInProgress() const = 0;
 
     /**
      * Returns the signal part of the ongoing transmission that the transmitter
      * is currently transmitting or -1 if no transmission is in progress. This
      * is the same part as the one emitted with the last transmittedPartChangedSignal.
+     * Throws an error if several transmissions are in progress.
      */
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const = 0;
 
@@ -268,6 +285,7 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
      * Returns the signal part of the ongoing reception that the receiver is
      * currently receiving or -1 if no reception is in progress. This is the
      * same part as the one emitted with the last receivedPartChangedSignal.
+     * Throws an error if several receptions are in progress.
      */
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const = 0;
 

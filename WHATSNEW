@@ -325,6 +325,50 @@ Notable backward incompatible changes are the following:
    The method identifies both the wait before transmission and the transmission itself.
    The migration guide explains the return values and the order of the completion callback.
 
+19. Every transmission and reception in progress of a radio
+
+   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
+   which return every transmission the radio is transmitting and every
+   reception it is attempting, in no particular order. ReceiverBase and the
+   canvas visualizers use them instead of getTransmissionInProgress() and
+   getReceptionInProgress(), so that they also work for a radio that has
+   several signals in progress at once (see the next item). For Radio,
+   NoiseSource and ShortcutRadio, which have at most one in each direction,
+   the vectors hold at most one element, and nothing else changes.
+
+   This change requires the modification of C++ code that implements IRadio
+   without deriving from Radio: the two methods are pure virtual.
+
+20. Radio: concurrent transmissions and receptions
+
+   Radio can now transmit any number of signals at the same time, and attempt
+   any number of receptions at the same time, as a technology with
+   concurrent per-user transmissions (e.g. a cellular base station) needs.
+   Both are allowed by new Radio parameters, allowConcurrentTransmissions
+   and allowConcurrentReceptions, which default to false. With
+   allowConcurrentReceptions set, every reception the receiver's
+   computeIsReceptionAttempted() accepts is attempted alongside the ones in
+   progress; the receivers shipped with INET attempt one reception at a time
+   either way, so the switch only matters with a receiver that attempts more.
+
+   The behavior with the defaults is unchanged, but the C++ API of Radio
+   subclasses changed: the protected receptionTimer and transmissionTimer
+   members were replaced by the attemptedReceptionTimers and
+   transmissionTimers vectors, and continueTransmission(), endTransmission()
+   and abortTransmission() take the transmission timer as an argument. A
+   subclass that dropped the attempted reception on a reconfiguration by
+   resetting receptionTimer calls abandonAttemptedReceptions() instead.
+   getTransmissionInProgress(), getReceptionInProgress(),
+   getTransmittedSignalPart() and getReceivedSignalPart() answer as before
+   while at most one signal is in progress in their direction, and throw an
+   error while several are. A model that relies on them, such as the
+   StateBasedEpEnergyConsumer and StateBasedCcEnergyConsumer energy
+   consumers, therefore cannot be used with a radio that has several signals
+   in progress at once.
+
+   This change requires the modification of C++ code that derives from Radio
+   and accesses these members or overrides these methods.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
