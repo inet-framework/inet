@@ -118,41 +118,7 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
         if (performSsCa) {
             // If ECN is not enabled or if ECN is enabled and received multiple ECE-Acks in
             // less than RTT, then perform slow start and congestion avoidance.
-
-            if (state->snd_cwnd < state->ssthresh) {
-                EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
-
-                // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
-                // by at most SMSS bytes for each ACK received that acknowledges new data."
-                state->snd_cwnd += state->snd_mss;
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-
-                EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
-            }
-            else {
-                // perform Congestion Avoidance (RFC 2581)
-                uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
-
-                if (incr == 0)
-                    incr = 1;
-
-                state->snd_cwnd += incr;
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-
-                //
-                // Note: some implementations use extra additive constant mss / 8 here
-                // which is known to be incorrect (RFC 2581 p5)
-                //
-                // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
-                // would require maintaining a bytes_acked variable here which we don't do
-                //
-
-                EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
-            }
+            congestionControl->receivedAckForUnackedData(state->snd_una - firstSeqAcked);
         }
     }
 
