@@ -222,6 +222,7 @@ simple Tcp extends SimpleModule like ITcp
         bool adaptiveReorderingEnabled = default(false); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
         bool dsackEnabled = default(this.sackSupport); // report duplicate segments by D-SACK blocks (RFC 2883), when SACK is in use
         string lossDetectionMode @enum("dupthresh","rack") = default("dupthresh"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
+        bool frtoEnabled = default(false); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2). Requires sackSupport.
         bool lossUndoEnabled = default(false); // Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary.
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.

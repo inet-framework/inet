@@ -493,6 +493,10 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                 // the network delivered it out of order -- data above it arrived first.
                 // A re-reported or merely grown block returns newlySackedLow at/above
                 // fackBefore and is ignored, as are SACKs of retransmissions.
+                // F-RTO (SACK side): newly SACKed data that was never retransmitted
+                // likewise proves the original flight arrived.
+                if (state->frtoActive && newlySackedLow != 0)
+                    state->frtoOrigAcked = true;
                 if (state->adaptiveReorderingEnabled && newlySackedLow != 0
                         && fackBefore != 0 && seqLess(newlySackedLow, fackBefore))
                     checkSackReordering(newlySackedLow);
@@ -771,8 +775,58 @@ void Rfc6675Recovery::prrEndCwndReduction()
 void Rfc6675Recovery::onRexmitTimeout()
 {
     // capture the undo context BEFORE the RTO's ssthresh/cwnd reduction
-    if (state->lossUndoEnabled && isNewLossEpisode())
+    bool frto = state->frtoEnabled && state->sack_enabled;
+    if ((state->lossUndoEnabled || frto) && isNewLossEpisode())
         undoInit();
+
+    // F-RTO (RFC 5682 section 3, SACK-enhanced): the timeout opens a detection
+    // episode, but not during a fast recovery or during the recovery of an earlier
+    // timeout (step 1: "If RecoveryPoint is larger than or equal to SND.UNA, do not
+    // enter step 2"). A repeated timeout with no new ACK since the last one keeps
+    // the episode open (step 2: "If the retransmission timeout expires again, go to
+    // step 1").
+    if (frto) {
+        bool recoveryOpen = state->lossRecovery
+                || (state->rtoRecoveryPoint != 0 && seqLess(state->snd_una, state->rtoRecoveryPoint));
+        state->frtoActive = state->frtoActive || !recoveryOpen;
+        if (!state->frtoActive)
+            EV_DETAIL << "F-RTO: no detection, the timeout comes during a loss recovery\n";
+        state->frtoOrigAcked = false;
+    }
+
+    // the recovery of this timeout ends when the ACK reaches the data sent before it
+    state->rtoRecoveryPoint = state->snd_max != 0 ? state->snd_max : 1; // nonzero marker
+}
+
+void Rfc6675Recovery::processFrtoEpisode()
+{
+    // called at each ACK of new data; the first one after the timeout decides
+    if (state->rtoRecoveryPoint != 0 && seqGE(state->snd_una, state->rtoRecoveryPoint))
+        state->rtoRecoveryPoint = 0; // the recovery of the timeout is complete
+    if (!state->frtoActive)
+        return;
+    state->frtoActive = false;
+    if (state->frtoOrigAcked) {
+        // RFC 5682 step 3.b, Linux FLAG_ORIG_SACK_ACKED: data that was sent only once
+        // was (s)acked, so the original flight arrived and the timeout was spurious.
+        // Restore the cwnd and ssthresh of before the timeout (Linux
+        // tcp_try_undo_loss(frto_undo=true)) and forget the loss marks.
+        EV_INFO << "F-RTO: spurious retransmission timeout detected, undoing the RTO response\n";
+        undoCwndReduction();
+        conn->getRexmitQueueForUpdate()->resetLostBit();
+        state->afterRto = false;
+        state->rexmit_count = 0; // Linux clears icsk_retransmits on the undo
+        state->frtoOrigAcked = false;
+    }
+    else {
+        // RFC 5682 step 2.b: the sender does not send new data here, so the episode
+        // ends at the first ACK of new data, as RFC 5682 and Linux tcp_process_loss()
+        // end it when no new data can go. The loss was real. The undo context stays
+        // only for the D-SACK and Eifel undo.
+        EV_DETAIL << "F-RTO: the first new ACK after the timeout acknowledges no data that was sent once, the loss is real\n";
+        if (!state->lossUndoEnabled)
+            state->undoMarker = 0;
+    }
 }
 
 bool Rfc6675Recovery::isNewLossEpisode() const
@@ -901,6 +955,30 @@ void Rfc6675Recovery::reoTimeout()
 
 void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 {
+    // F-RTO (RFC 5682 sec 3.1 step 3.b, cumulative side): the scoreboard for
+    // [fromSeq, toSeq) is still intact here. If any part of the newly
+    // cumulatively-acked range was transmitted exactly once -- i.e. is NOT one of
+    // the post-RTO retransmissions -- and was not SACKed before, then the original
+    // flight (or part of it) reached the receiver after the RTO, so the timeout was
+    // spurious. Data SACKed before the RTO is no new evidence (Linux
+    // FLAG_ORIG_SACK_ACKED skips TCPCB_SACKED_ACKED segments).
+    if (state->frtoActive && state->sack_enabled) {
+        auto frq = conn->getRexmitQueue();
+        if (frq != nullptr && frq->getQueueLength() > 0) {
+            for (uint32_t seq = std::max(fromSeq, frq->getBufferStartSeq());
+                 seqLess(seq, std::min(toSeq, frq->getBufferEndSeq())); )
+            {
+                const auto& region = frq->getRegion(seq);
+                if (region.transmitCount <= 1 && !region.everSacked) {
+                    state->frtoOrigAcked = true;
+                    break;
+                }
+                seq = region.endSeqNum;
+            }
+        }
+    }
+    processFrtoEpisode();
+
     // Adaptive reordering: if this cumulatively-acked segment was never retransmitted
     // yet sits below already-SACKed data, it was merely reordered (not lost) -- grow the
     // learned reordering degree so it stops causing spurious fast retransmits.

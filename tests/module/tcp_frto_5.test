@@ -1,0 +1,73 @@
+%description:
+Tests an F-RTO undo (RFC 5682, frtoEnabled=true) at an ACK that does not
+cover the whole flight. The tester delays the ACKs of the first flight:
+the ACK of 1001 arrives at the time of the timeout, and the others 0.5 s
+later. The timeout at t=4 retransmits 1:501. The ACK of 1001 covers
+501:1001, which the sender sent once, so the sender restores cwnd 2000.
+The undo also ends the go-back-N after the timeout: the write of t=4.0003
+goes out as new data 2001:2501, and the sender does not retransmit
+1001:2001.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="b2 delay 3.5; b3 delay 2.9965; b4 delay 3.5; b5 delay 3.5"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000;4.0003 500"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.frtoEnabled = true
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%contains: stdout
+F-RTO: spurious retransmission timeout detected, undoing the RTO response
+
+%contains: stdout
+Undoing spurious cwnd reduction (D-SACK): cwnd=2000, ssthresh=4294967295
+
+%# after the undo, the next write goes out as new data
+%contains: stdout
+[4.001 A007] A.1000 > B.2000: A 1:501(500) ack 501 win 5000
+
+%contains: stdout
+[4.002 A008] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

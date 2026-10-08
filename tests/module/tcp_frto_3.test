@@ -1,0 +1,74 @@
+%description:
+Tests that F-RTO (RFC 5682, frtoEnabled=true) decides at the first new
+ACK after the timeout. The tester deletes the first two of four segments
+and delays the other two by 3.0005 s. The timeout at t=4 retransmits
+1:501, and its ACK at t=4.003 acknowledges only the retransmission. The
+sender has no new data to send, so the episode ends there and the loss is
+real (RFC 5682 step 2.b, Linux tcp_process_loss()). The delayed segments
+then arrive, and the receiver SACKs them, but this does not undo the
+reduction.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="a3 delete; a4 delete; a5 delay 3.0005; a6 delay 3.0005"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000;6 500"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.frtoEnabled = true
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%# the first new ACK acknowledges only the retransmission...
+%contains: stdout
+[4.003 B002] A.1000 < B.2000: A ack 501 win 5000
+
+%contains: stdout
+[4.003 B003] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP SACK[1001,1501)
+
+%contains: stdout
+F-RTO: the first new ACK after the timeout acknowledges no data that was sent once, the loss is real
+
+%# ...so the SACK of the late segments does not undo the reduction
+%not-contains: stdout
+F-RTO: spurious
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

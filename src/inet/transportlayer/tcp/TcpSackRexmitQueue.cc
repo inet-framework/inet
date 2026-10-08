@@ -153,6 +153,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
             region.endSeqNum = toSeqNum;
             region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
+            region.everSacked = beforeEnd ? i->everSacked : false;
             region.rexmitted = beforeEnd;
             // a fragment split off *i is a retransmission of *i, so it inherits its
             // transmit history; firstSentTime must stay the ORIGINAL send time for
@@ -212,7 +213,10 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
     // were ever retransmitted (a SACK for a retransmission is ambiguous, Linux's
     // !TCPCB_RETRANS rule); 0 = nothing new. Regions are kept in sequence order, so
     // the first hit is the lowest. Consumed by the caller's reordering detection
-    // (a new SACK below the prior FACK proves reordering).
+    // (a new SACK below the prior FACK proves reordering) and by F-RTO (the original
+    // flight arrived). "Newly" and "ever retransmitted" hold across an RTO: the RTO
+    // clears 'sacked' and 'rexmitted', but a block that the receiver reported before
+    // the RTO and reports again is no new evidence (Linux FLAG_ORIG_SACK_ACKED).
     uint32_t newlySackedLow = 0;
     if (seqLess(fromSeqNum, begin))
         fromSeqNum = begin;
@@ -242,10 +246,11 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
-                if (!i->sacked && i->transmitCount <= 1 && newlySackedLow == 0)
+                if (!i->sacked && !i->everSacked && i->transmitCount <= 1 && newlySackedLow == 0)
                     newlySackedLow = i->beginSeqNum;
                 i->lost = false;
                 i->sacked = true; // set sacked bit
+                i->everSacked = true;
             }
 
             i++;
@@ -257,6 +262,7 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
             region.endSeqNum = toSeqNum;
             region.lost = false;
             region.sacked = true;
+            region.everSacked = true;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
         }
@@ -334,6 +340,12 @@ void TcpSackRexmitQueue::markHeadLost()
 {
     ASSERT(!rexmitQueue.empty());
     rexmitQueue.begin()->lost = true;
+}
+
+void TcpSackRexmitQueue::resetLostBit()
+{
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
 }
 
 void TcpSackRexmitQueue::markLost(uint32_t fromSeqNum, uint32_t toSeqNum)

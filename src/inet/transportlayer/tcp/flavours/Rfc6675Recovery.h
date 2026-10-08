@@ -79,6 +79,8 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     virtual bool mayUndo() const;
     /** Restore cwnd/ssthresh reduced by a now-known-spurious recovery. */
     virtual void undoCwndReduction();
+    /** RFC 5682 F-RTO: decide/close a spurious-RTO episode. */
+    virtual void processFrtoEpisode();
     //@}
 
     /** @name Proportional Rate Reduction (RFC 6937), Linux tcp_cwnd_reduction() */

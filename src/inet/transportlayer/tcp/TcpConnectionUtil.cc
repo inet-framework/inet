@@ -668,6 +668,7 @@ void TcpConnection::configureStateVariables()
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->prrEnabled = tcpMain->par("prrEnabled");
     state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
+    state->frtoEnabled = tcpMain->par("frtoEnabled");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->dsack_enabled = tcpMain->par("dsackEnabled");
     state->maxReordering = tcpMain->par("maxReordering");

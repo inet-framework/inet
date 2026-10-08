@@ -276,6 +276,12 @@ struct TcpStateVariables
     bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
     uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
 
+    // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2)
+    bool frtoEnabled = false;      // set from the frtoEnabled parameter
+    bool frtoActive = false;       // an F-RTO episode is open (since the last RTO)
+    uint32_t rtoRecoveryPoint = 0; // snd_max at the last RTO (RFC 5682 RecoveryPoint); 0 = the recovery of the RTO is complete
+    bool frtoOrigAcked = false;    // never-retransmitted data was acked/SACKed during the episode
+
     // TCP_INFO time counters (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
     // with respect to every send/receive decision -- consulted only by TcpStatusInfo.
     // INET-native definitions (not a port of Linux's tcp_chrono_* state machine); see
