@@ -32,7 +32,7 @@ cmdenv-express-mode=false
 include ../../lib/defaults.ini
 
 %contains: stdout
-[1.016 B015] A.1000 < B.2000: A ack 12289 win 64511   Option(s): NOP NOP SACK[11265,12289)[13313,15361)
+[1.016 B015] A.1000 < B.2000: A ack 12289 win 64511   Option(s): NOP NOP SACK[13313,15361)
 
 %contains: stdout
 [1.018 A026] A.1000 > B.2000: A 23553:24577(1024) ack 501 win 65535

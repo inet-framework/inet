@@ -386,7 +386,10 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
             state->sacks_array.push_front(nSack);
             EV_DETAIL << "inserted DSACK entry: " << nSack.str() << "\n";
         }
-        else {
+        // RFC 2018 section 4: the first block names the segment that triggered
+        // this ACK "unless that segment advanced the Acknowledgment Number
+        // field". A block below rcv_nxt would read as a D-SACK at the sender.
+        else if (seqGreater(end, state->rcv_nxt)) {
             uint32_t contStart = receiveQueue->getLE(start);
             uint32_t contEnd = receiveQueue->getRE(end);
 
