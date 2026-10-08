@@ -147,6 +147,11 @@ behavior goes.
    the Python runner reads the JSON store, which has fewer than half of the CSV rows (753 `tplx`
    rows; for example no `examples/inet/tcp_pmtud` row), and many stored values do not match in
    this environment even on master. They compare the calculated values of two commits.
+
+   Run the TCP fingerprint rows in debug at the stage head (`inet_fingerprinttest -d -m tcp`).
+   Only a debug run checks the `@signal` declarations of NED: the CI job runs release, and the
+   module tests give `--check-signals=false`. S8 and S9 emitted `sndMax` and `delivered`
+   without a declaration, and every TCP simulation in debug stopped at the first emit.
 6. Stop. Give the owner the branch, the list of commits, and the evidence.
 7. After the owner approves: fast-forward `master` to the stage. Push only when the owner says so.
 8. Mark the stage done in this plan, with its results, in a last commit of the stage. Remove the
