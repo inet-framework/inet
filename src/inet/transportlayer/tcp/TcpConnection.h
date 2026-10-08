@@ -348,6 +348,12 @@ class INET_API TcpConnection : public SimpleModule
 
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
+    /**
+     * The MSS that congestion control counts with: snd_mss less the space of the
+     * TCP options that every segment of the established connection carries.
+     */
+    virtual uint32_t calculateEffectiveMss();
+
   public:
     TcpConnection() {}
     TcpConnection(const TcpConnection& other) {} // FIXME kludge

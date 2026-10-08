@@ -311,7 +311,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
         // the algorithms count with the effective MSS; until segments are sized
         // against the option space, it is the negotiated MSS
-        state->snd_effmss = state->snd_mss;
+        state->snd_effmss = calculateEffectiveMss();
 
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
@@ -1032,7 +1032,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
-            state->snd_effmss = state->snd_mss;
+            state->snd_effmss = calculateEffectiveMss();
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();

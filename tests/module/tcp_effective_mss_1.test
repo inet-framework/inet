@@ -1,0 +1,40 @@
+%description:
+Congestion control counts with the effective MSS: the MSS less the 12
+bytes of the timestamp option, which every segment carries (RFC 5681
+defines SMSS without the TCP options). With an MSS of 1024 and
+timestamps, a segment carries 1012 bytes. The receiver acknowledges every
+second segment, so the second ACK covers 2024 bytes, and slow start grows cwnd by
+min(2024, SMSS) = 1012 bytes, not by 1024 (RFC 5681 equation (2)).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_tcp.**.cmdenv-log-level=INFO
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=8096B # 8 segments of 1012 bytes
+
+*.*_tcp.timestampSupport = true
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+Slow Start: increasing cwnd by 1012 bytes to cwnd=3048
+
+%not-contains: stdout
+Slow Start: increasing cwnd by 1024 bytes
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

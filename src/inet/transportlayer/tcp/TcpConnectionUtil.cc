@@ -406,7 +406,7 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
                 state->snd_mss = newMss;
-                state->snd_effmss = state->snd_mss;
+                state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
                 retransmitOneSegment(true);
             }
@@ -471,7 +471,7 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
                 state->snd_mss = newMss;
-                state->snd_effmss = state->snd_mss;
+                state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
                 retransmitOneSegment(true);
             }
@@ -952,7 +952,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         EV_INFO << "PMTUD: probe timeout elapsed, restoring snd_mss from " << state->snd_mss
                 << " to original " << state->pmtudOriginalMss << "\n";
         state->snd_mss = state->pmtudOriginalMss;
-        state->snd_effmss = state->snd_mss;
+        state->snd_effmss = calculateEffectiveMss();
         state->pmtudLastMssReduction = -1;
     }
 
@@ -1489,6 +1489,16 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
     state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
     EV_INFO << "Tcp Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
     return true;
+}
+
+uint32_t TcpConnection::calculateEffectiveMss()
+{
+    // RFC 5681 defines SMSS as the size of the largest segment that the sender
+    // can transmit, without the TCP/IP headers and options. Of the options of an
+    // established connection, only the timestamp option is on every segment:
+    // 10 bytes and 2 bytes of padding. The SACK option is not counted: its length
+    // varies, and it is on few segments of a data sender.
+    return state->snd_mss - (state->ts_enabled ? 10 + 2 : 0);
 }
 
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
