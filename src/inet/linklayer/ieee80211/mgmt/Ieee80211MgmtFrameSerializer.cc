@@ -636,7 +636,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
     if (auto authenticationFrame = dynamicPtrCast<const Ieee80211AuthenticationFrame>(chunk)) {
 //        type = ST_AUTHENTICATION;
         // 1    Authentication algorithm number
-        stream.writeUint16Le(0);
+        stream.writeUint16Le(authenticationFrame->getAlgorithmNumber());
         // 2    Authentication transaction sequence number
         stream.writeUint16Le(authenticationFrame->getSequenceNumber());
         // 3    Status code                                 The status code information is reserved in certain Authentication frames as defined in Table 7-17.
@@ -838,7 +838,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
 {
     if (typeInfo == typeid(Ieee80211AuthenticationFrame)) {
         auto frame = makeShared<Ieee80211AuthenticationFrame>();
-        stream.readUint16Le();
+        frame->setAlgorithmNumber(stream.readUint16Le());
         frame->setSequenceNumber(stream.readUint16Le());
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
         readHtElements(stream, frame, HT_ELEMENT_NONE, 0);

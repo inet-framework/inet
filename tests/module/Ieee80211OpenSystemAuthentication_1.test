@@ -1,0 +1,117 @@
+%description:
+Open System rejects unsupported algorithm/transaction inputs without authenticating
+peers. STA completes using wire fields, independent of deprecated isLast metadata.
+
+%file: TestAuthentication.cc
+#include <iostream>
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+namespace inet { namespace ieee80211 {
+class TestAuthenticationAp : public Ieee80211MgmtAp {
+  protected:
+    Ptr<const Ieee80211AuthenticationFrame> response;
+    virtual void sendManagementFrame(const char *, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress&, uint64_t = 0) override {
+        if (subtype == ST_AUTHENTICATION) response = dynamicPtrCast<const Ieee80211AuthenticationFrame>(body);
+    }
+    virtual void initialize(int stage) override {
+        Ieee80211MgmtAp::initialize(stage);
+        if (stage != INITSTAGE_LAST) return;
+        const MacAddress peer("02:00:00:00:00:99");
+        for (auto input : {std::pair<int,int>(1,1), {0,3}, {0,1}}) {
+            auto packet = new Packet("auth");
+            auto body = makeShared<Ieee80211AuthenticationFrame>();
+            body->setAlgorithmNumber(input.first);
+            body->setSequenceNumber(input.second);
+            packet->insertAtBack(body);
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(ST_AUTHENTICATION);
+            header->setTransmitterAddress(peer);
+            header->setReceiverAddress(mib->address);
+            handleAuthenticationFrame(packet, header);
+            ASSERT(response && response->getAlgorithmNumber() == input.first && response->getSequenceNumber() == 2);
+            auto status = input.first != 0 ? SC_AUTH_ALG0_UNSUP : input.second != 1 ? SC_AUTH_OUT_OF_SEQ : SC_SUCCESSFUL;
+            ASSERT(response->getStatusCode() == status);
+            if (status != SC_SUCCESSFUL)
+                ASSERT(mib->bssAccessPointData.stations.count(peer) == 0);
+            else
+                ASSERT(mib->bssAccessPointData.stations.at(peer) == Ieee80211Mib::AUTHENTICATED);
+        }
+        std::cout << "AP accepts only Open System transaction1 and responds with transaction2.\n";
+    }
+};
+Define_Module(TestAuthenticationAp);
+class TestAuthenticationSta : public Ieee80211MgmtSta {
+  protected:
+    Ieee80211PrimResultCode result = PRC_SUCCESS;
+    virtual void sendAuthenticationConfirm(ApInfo *, Ieee80211PrimResultCode code) override { result = code; }
+    virtual void initialize(int stage) override {
+        Ieee80211MgmtSta::initialize(stage);
+        if (stage != INITSTAGE_LAST) return;
+        const MacAddress peer("02:00:00:00:00:98");
+        apList.emplace_back();
+        auto& ap = apList.back();
+        ap.address = peer;
+        for (int variant = 0; variant < 4; variant++) {
+            ap.isAuthenticated = false;
+            ap.authSeqExpected = 2;
+            ap.authTimeoutMsg = new cMessage("authTimeout");
+            scheduleAfter(1, ap.authTimeoutMsg);
+            auto packet = new Packet("auth-response");
+            auto body = makeShared<Ieee80211AuthenticationFrame>();
+            body->setAlgorithmNumber(variant == 0 ? 1 : 0);
+            body->setSequenceNumber(variant == 1 ? 4 : 2);
+            body->setStatusCode(variant == 2 ? SC_UNSPECIFIED : SC_SUCCESSFUL);
+            body->setIsLast(false); // Must not trigger a third frame.
+            packet->insertAtBack(body);
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(ST_AUTHENTICATION);
+            header->setTransmitterAddress(peer);
+            handleAuthenticationFrame(packet, header);
+            ASSERT(ap.isAuthenticated == (variant == 3));
+            ASSERT(ap.authTimeoutMsg == nullptr);
+            ASSERT((result == PRC_SUCCESS) == (variant == 3));
+        }
+        std::cout << "STA completion requires successful algorithm0 transaction2, without isLast.\n";
+    }
+};
+Define_Module(TestAuthenticationSta);
+}}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.wireless.AccessPoint;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple TestAuthenticationAp extends Ieee80211MgmtAp { parameters: @class(::inet::ieee80211::TestAuthenticationAp); }
+simple TestAuthenticationSta extends Ieee80211MgmtSta { parameters: @class(::inet::ieee80211::TestAuthenticationSta); }
+network AuthenticationNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AuthenticationNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].mgmt.typename = "TestAuthenticationAp"
+*.sta.wlan[0].mgmt.typename = "TestAuthenticationSta"
+*.sta.wlan[0].agent.startingTime = 2s
+**.opMode = "g(erp)"
+**.bitrate = 6Mbps
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AP accepts only Open System transaction1 and responds with transaction2.
+
+%contains: stdout
+STA completion requires successful algorithm0 transaction2, without isLast.

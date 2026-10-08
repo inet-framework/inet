@@ -50,8 +50,8 @@ void Ieee80211MgmtAp::initialize(int stage)
         ssid = par("ssid").stdstringValue();
         beaconInterval = normalizeIeee80211BeaconInterval(par("beaconInterval"));
         numAuthSteps = par("numAuthSteps");
-        if (numAuthSteps != 2 && numAuthSteps != 4)
-            throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
+        if (numAuthSteps != 2)
+            throw cRuntimeError("Open System authentication requires numAuthSteps=2; unsupported value %d", numAuthSteps);
         WATCH(ssid);
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
@@ -226,7 +226,17 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
-    EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
+    // IEEE Std 802.11-2024, 12.3.3.2: Open System is exactly two messages.
+    // Reject unsupported inputs before creating or downgrading peer state.
+    if (requestBody->getAlgorithmNumber() != 0 || frameAuthSeq != 1) {
+        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setAlgorithmNumber(requestBody->getAlgorithmNumber());
+        body->setSequenceNumber(2);
+        body->setStatusCode(requestBody->getAlgorithmNumber() != 0 ? SC_AUTH_ALG0_UNSUP : SC_AUTH_OUT_OF_SEQ);
+        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
+        delete packet;
+        return;
+    }
 
     // create STA entry if needed
     StaInfo *sta = lookupSenderSTA(header);
@@ -260,48 +270,15 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
             sendDisAssocNotification(sta->address);
     }
 
-    // check authentication sequence number is OK
-    if (frameAuthSeq != sta->authSeqExpected) {
-        // wrong sequence number: send error and return
-        EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
-        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
-        body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
-        delete packet;
-        sta->authSeqExpected = 1; // go back to start square
-        return;
-    }
-
-    // station is authenticated if it made it through the required number of steps
-    bool isLast = (frameAuthSeq + 1 == numAuthSteps);
-
-    // send OK response (we don't model the cryptography part, just assume
-    // successful authentication every time)
-    EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
     const auto& body = makeShared<Ieee80211AuthenticationFrame>();
-    body->setSequenceNumber(frameAuthSeq + 1);
+    body->setAlgorithmNumber(0);
+    body->setSequenceNumber(2);
     body->setStatusCode(SC_SUCCESSFUL);
-    body->setIsLast(isLast);
-    // TODO frame length could be increased to account for challenge text length etc.
-    sendManagementFrame(isLast ? "Auth-OK" : "Auth", body, ST_AUTHENTICATION, header->getTransmitterAddress());
-
+    sendManagementFrame("Auth-OK", body, ST_AUTHENTICATION, header->getTransmitterAddress());
     delete packet;
-
-    // update status
-    if (isLast) {
-        bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
-        if (wasAssociated)
-            mib->releaseAssociationId(sta->address);
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
-        mib->removePeerHtCapabilities(sta->address);
-        if (wasAssociated)
-            sendDisAssocNotification(sta->address);
-        EV << "STA authenticated\n";
-    }
-    else {
-        sta->authSeqExpected += 2;
-        EV << "Expecting Authentication frame " << sta->authSeqExpected << "\n";
-    }
+    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO commit when response ACK arrives
+    mib->removePeerHtCapabilities(sta->address);
+    sta->authSeqExpected = 1;
 }
 
 void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
