@@ -1,0 +1,51 @@
+%description:
+With SACK, the count of the bytes in flight leaves out the SACKed bytes and
+the lost bytes, as Linux tcp_packets_in_flight() does. The tester delays
+segment a14 and drops a15. The ACK B015 of the delayed segment acknowledges
+new data at t=1.016 s, and two segments above the hole stay SACKed. Of the 11
+outstanding segments, 9 are in flight, so cwnd 13312 allows four new
+segments, A026 to A029. Before, the count was snd_nxt - snd_una with SACK,
+and only two segments left.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=65536B # 64 1024-byte segments
+
+*.tcptester.script="a14 delay 0.0005; a15 delete"  # two SACKs, then an ACK of new data
+
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.advertisedWindow = 65535
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.016 B015] A.1000 < B.2000: A ack 12289 win 64511   Option(s): NOP NOP SACK[11265,12289)[13313,15361)
+
+%contains: stdout
+[1.018 A026] A.1000 > B.2000: A 23553:24577(1024) ack 501 win 65535
+[1.018 A027] A.1000 > B.2000: A 24577:25601(1024) ack 501 win 65535
+[1.018 A028] A.1000 > B.2000: A 25601:26625(1024) ack 501 win 65535
+[1.018 A029] A.1000 > B.2000: A 26625:27649(1024) ack 501 win 65535
+[1.019 B016] A.1000 < B.2000: A ack 12289 win 64511   Option(s): NOP NOP SACK[13313,16385)
+
+%contains: stdout
+[1.040] tcpdump finished, A:67 B:65 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

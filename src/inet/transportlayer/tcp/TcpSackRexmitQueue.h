@@ -183,6 +183,12 @@ class INET_API TcpSackRexmitQueue
     virtual void addInferredSack();
 
     /**
+     * Marks lost each region that is not SACKed and has at least DupThresh SACKed
+     * regions above it (the loss rule of RFC 6675, by segments).
+     */
+    virtual void updateLost();
+
+    /**
      * Returns the total number of lost bytes in the queue.
      */
     virtual uint32_t getLost() const;

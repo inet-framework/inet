@@ -144,7 +144,7 @@
 # /examples/inet/bulktransfer/,        -f .qtenv.ini -c General -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             5025-c4dd/tplx;07a5-7d20/~tNl;7a16-43bd/~tND;1df2-ba17/tyf, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             eda1-75c3/tplx;855c-5089/~tNl;ceae-b401/~tND;41ae-4548/tyf, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             f808-0e47/tplx;3fa1-21dc/~tNl;4a26-0dec/~tND;2798-249c/tyf, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             2f79-b9e4/tplx;b7ea-9867/~tNl;081f-1dde/~tND;2798-249c/tyf, PASS, Ipv4
 
 /examples/inet/configurator/,        -f omnetpp.ini -c Default -r 0,                        10s,     145e-a1db/tplx;5ea9-e407/~tNl;57e3-efce/~tND;4161-eaff/tyf, PASS, EthernetMac Ipv4
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableNode -r 0,                    10s,     9711-e49e/tplx;38cf-8261/~tNl;4586-4744/~tND;e1d8-c33a/tyf, PASS, EthernetMac Ipv4

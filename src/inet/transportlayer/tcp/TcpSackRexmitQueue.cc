@@ -236,6 +236,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
+                i->lost = false;
                 i->sacked = true; // set sacked bit
             }
 
@@ -246,6 +247,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
             Region region = *i;
 
             region.endSeqNum = toSeqNum;
+            region.lost = false;
             region.sacked = true;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
@@ -474,6 +476,17 @@ void TcpSackRexmitQueue::addInferredSack()
         i++;
     if (i != rexmitQueue.end())
         i->sacked = true;
+}
+
+void TcpSackRexmitQueue::updateLost()
+{
+    int numSacked = 0;
+    for (auto it = rexmitQueue.rbegin(); it != rexmitQueue.rend(); it++) {
+        if (it->sacked)
+            numSacked++;
+        if (numSacked >= conn->getState()->dupthresh && !it->sacked)
+            it->lost = true;
+    }
 }
 
 uint32_t TcpSackRexmitQueue::getLost() const

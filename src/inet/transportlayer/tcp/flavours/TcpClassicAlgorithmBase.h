@@ -88,9 +88,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
     /**
-     * Without SACK, the bytes in flight as Linux counts them: the outstanding
-     * data, minus the SACKed and the lost bytes, plus the retransmitted bytes.
-     * Each duplicate ACK counts as the SACK of one segment.
+     * The bytes in flight as Linux counts them: the outstanding data, minus the
+     * SACKed and the lost bytes, plus the retransmitted bytes. Without SACK, each
+     * duplicate ACK counts as the SACK of one segment.
      */
     virtual uint32_t getBytesInFlight() const override;
 };

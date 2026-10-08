@@ -218,9 +218,8 @@ void TcpClassicAlgorithmBase::receivedDuplicateAck()
 
 uint32_t TcpClassicAlgorithmBase::getBytesInFlight() const
 {
-    if (state->sack_enabled)
-        return TcpAlgorithmBase::getBytesInFlight();
-    // Linux tcp_packets_in_flight(): packets_out - (sacked_out + lost_out) + retrans_out
+    // Linux tcp_packets_in_flight(): packets_out - (sacked_out + lost_out) + retrans_out.
+    // Without SACK, the duplicate ACKs set the SACKed marks (addInferredSack()).
     auto rexmitQueue = conn->getRexmitQueue();
     int64_t inFlight = (int64_t)(state->snd_max - state->snd_una) - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
     return inFlight < 0 ? 0 : inFlight;

@@ -400,6 +400,9 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
         }
+        // the loss marks that the count of the bytes in flight reads: the DupThresh
+        // rule of RFC 6675, by segments
+        conn->getRexmitQueueForUpdate()->updateLost();
 
         state->rcv_sacks += n; // total counter, no current number
 
