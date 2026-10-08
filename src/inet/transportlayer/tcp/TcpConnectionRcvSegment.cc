@@ -179,6 +179,21 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         else {
             if (tcpHeader->getSynBit()) {
                 EV_DETAIL << "SYN with unacceptable seqNum in " << stateName(fsm.getState()) << " state received (SYN duplicat?)\n";
+                // A retransmitted SYN in SYN_RCVD shows that our SYN-ACK was lost:
+                // Linux re-sends the SYN-ACK (tcp_check_req()), not a plain ACK. Only
+                // for a passive open, which is a request socket in Linux: in a
+                // simultaneous open, Linux answers with the plain ACK below, and so
+                // it does for a SYN-ACK, which completes a simultaneous open.
+                if (fsm.getState() == TCP_S_SYN_RCVD && !state->active && !tcpHeader->getAckBit()) {
+                    EV_DETAIL << "Re-sending SYN-ACK for the retransmitted SYN\n";
+                    // it counts as a SYN-ACK retransmission (Linux increments
+                    // num_retrans in inet_rtx_syn_ack())
+                    state->syn_rexmit_count++;
+                    sendSynAck();
+                    state->rcv_naseg++;
+                    emit(rcvNASegSignal, state->rcv_naseg);
+                    return TCP_E_IGNORE;
+                }
             }
             else if (payloadLength + tcpHeader->getSynFinLen() > 0 && state->sack_enabled
                      && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
