@@ -54,14 +54,14 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S5c ✅ | `topic/tcp-classic-recovery` | 13 (part), 16 (part), 39 (part), 41 (part), 54, 70 | +320 −40 (about) | the behavior changes B4, B6, B10, B11 of D-6, and the preparation of the pipe accounting |
 | S5d ✅ | `topic/tcp-sack-recovery` | 10 (part), 13 (part) | +91 −77 | SACK loss recovery in `Rfc6675Recovery`, and DCTCP on it: B12, B13, B16 of D-6; SACK only for a flavour that can recover with it |
 | S5e ✅ | `topic/tcp-pipe-recovery` | 13 (part), 34 (part), 39 (part), 56, 71, 72, 80 (part) | +248 −161 | Reno and NewReno without SACK recover by pipe accounting: B5, B7, B8 of D-6 |
-| S6 | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
+| S6 ✅ | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 ✅ | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
 | S8 | `topic/tcp-rack` | 16 (part), 17, 18, 19, 49 | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
 | S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
 | S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
-| S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN |
+| S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 37, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
@@ -317,6 +317,20 @@ plan gives a reason for.
   ended, also to the window growth, as Linux does. RFC 5681 step 6 says that this ACK MUST set cwnd
   to ssthresh, and RFC 6582 step 3 sets cwnd at the full ACK in the same way. Master's routing
   does that, and S6 keeps it.
+- **D-22 — DCTCP joins the shared ACK path in three behavior changes and a refactor.** Source
+  commit 65 calls the move a refactor. On this tree, `DcTcp`'s own copy of the ACK path did not get
+  the slow start of S7 or the reset of the inferred SACKs of S5e, and with SACK it ran the steps of
+  RFC 3517 on top of a test of the duplicate-ACK counter, so cwnd grew in the recovery. S6 makes
+  each difference one commit with its own test, in the copy, and then removes the copy, which
+  changes no behavior.
+- **D-23 — DCTCP counts the acknowledged bytes only outside a fast recovery until S13.** RFC 8257
+  section 3.3 counts the acknowledged and the marked bytes at each ACK, and Linux updates alpha at
+  each ACK (`dctcp_update_alpha()` as `in_ack_event`); only the cut of cwnd waits until no
+  recovery runs. Master without SACK and the source branch count only outside a recovery. Master
+  with SACK also counted the ACKs in a recovery after the first partial ACK, because of the counter
+  test that S6 removes, which also grew cwnd there. S6 keeps the count of the source. The repair
+  needs a hook of the shared path at each ACK in a recovery. The owner chose S13, where the AccECN
+  branch changes the same count (2026-10-08).
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -763,3 +777,43 @@ Commit 62 only adds a comment that commit 65 removes. Commit 65 calls itself a r
 checks that claim on this tree. The source change of the ACK that ends a recovery does not land
 (D-21).
 
+### S6 — `topic/tcp-cubic` — landed 2026-10-08
+
+The owner reviewed and approved S6 on 2026-10-08.
+
+S6 adds `TcpCubic` (RFC 9438) with HyStart, in the final form of the source branch, and moves
+DCTCP onto the shared ACK path of the classic flavours. Step 1 of the steps above became two
+commits, because HyStart works alone and one commit with both had more than 400 lines. Step 2
+became four commits (D-22): the CI job showed that the move of source commit 65 is no refactor on
+this tree.
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: TcpCubic (RFC 9438)` | — | 14, 45, 55 (part), 57, 60 | — |
+| `tcp: add: HyStart for TcpCubic` | — | 14, 45, 57 | — |
+| `tcp: change: grow DCTCP's cwnd with the shared congestion control` | B9 | 65 | 1 |
+| `tcp: change: end DCTCP's inferred SACKs at an ACK of new data` | B8 | 65 | — |
+| `tcp: change: let DCTCP with SACK recover as Reno does` | B16 | 65 | — |
+| `tcp: refactor: run DCTCP on the shared ACK path` | B16 | 62, 65 | — |
+
+The commit messages explain the moved row and each trace. In short: DCTCP's own copy of the ACK
+path grew cwnd by one SMSS at each ACK, kept the inferred SACKs of old duplicate ACKs and so sent
+beyond cwnd, and with SACK grew cwnd in the recovery. After the three changes, DCTCP without ECN
+gives the same traces as Reno, and the copy goes. Its ECN-Echo reaction is now the hook
+`processEce()` of the shared path, which gets the acknowledged bytes. The ACK that ends a recovery
+does not grow cwnd (D-21). DCTCP counts no bytes in a fast recovery until S13 (D-23).
+
+New tests, each checked to fail on the commit before: `tcp_algorithm_cubic`, `tcp_cubic_beta_1`,
+`tcp_cubic_hystart_1`, `tcp_dctcp_cwnd_limited_1`, `tcp_dctcp_inferred_sack_1` and
+`tcp_dctcp_sack_recovery_1`.
+
+Items for later stages: `TcpCubic` calls `processTlpAck()` from S10 on. After S6, nothing calls
+`Rfc6675Recovery::sendDataDuringLossRecoveryPhase()` and `sendSegmentDuringLossRecoveryPhase()`;
+the source branch keeps them too, and S17, which removes the connection's copy (D-5), can remove
+them.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (373 at the first code commit, 377 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 116 and serializer 4 pass at the head. The CI
+fingerprint job passes at each code commit, after the commit's own new values.
