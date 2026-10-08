@@ -59,13 +59,13 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S8 ✅ | `topic/tcp-rack` | 13 (part), 16 (part), 17, 18, 19, 26 (part), 49, 51 (part), 64 (part) | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
 | S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 ✅ | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 37, 76, 85, 86, new | +1807 −25 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe (D-29 to D-35) |
-| S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
+| S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
 | S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
-| S17 | `topic/tcp-connection-leftovers` | 39, 61, 74 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
+| S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
@@ -1125,3 +1125,34 @@ fails one commit earlier: `tcp_dsack_1` before step 1, `tcp_dsack_2` and `tcp_ds
 step 2, the new expectation of `tcp_sack_3` before step 2b, `tcp_sack_8` before step 2c. The CI
 fingerprint job passes at each code commit; only `bulktransfer inet_inet_2b` moves, at steps 1 and
 2b. The six gates pass.
+
+### S11 — `topic/tcp-connection-lifecycle`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: clamp an explicit read at a received FIN | — | 30 |
+| 2 | change: answer STATUS on a connection that never opened | — | 38 |
+| 3 | fix: send the handshake options in the crossing SYN-ACK of a simultaneous open | — | 16 (part) |
+| 4 | change: re-send the SYN-ACK for a retransmitted SYN | — | 23 (part) |
+| 5 | change: report the duplicate SYN of a simultaneous open by D-SACK | — | 22 (part), 23 (part) |
+| 6 | fix: close a forked connection on an RST in SYN_RCVD | — | 16 (part), 26 (part), 39 (part), 73 |
+| 7 | change: reset the connection on new data after a full close | — | 23 (part), 39 (part) |
+| 8 | change: reset a SYN-ACK whose TSecr the connection could not have sent | — | 16 (part), 74 |
+| 9 | add: quantize the peer MSS as Linux SYN cookies do, selected by `syncookiesAlways` | — | 15 (part) |
+| 10 | comment: cite RFC 9293, RFC 7323 and RFC 6675 in the receive path and the state | — | 23 (part) |
+
+S11 gathers the parts of seven source commits that change the life of a connection: its setup,
+its close and the commands around them. D-19 sends here the `forked` flag, the options of the
+crossing SYN-ACK, the TSecr check of the SYN-ACK and `syncookiesAlways`; S10 sends the D-SACK of
+the duplicate SYN of a simultaneous open. Step 6 takes from the Fast Open commit (26) only the
+rule for a forked connection, without `fastopenAccelerated` (S12), and commit 73, which repairs
+that rule before it landed (D-1). Step 7 takes from commit 39 the line that sets `rcvShutdown` at
+a full close. Commit 74 repairs the TSecr check of step 8 before it landed, so it moves from S17
+to S11 (D-1).
+
+Commit 23 also holds parts of other stages: the alignment of the options with NOPs only when
+configured and the padding of the option area (`alignOptions`, S12), the SACK option from the
+recovery's copy of `addSacks()` (S17, D-5), and the end of the reset of the duplicate-ACK counter
+in the data path (B1 of D-6, S17). Its AccECN comments go to S13. The reset of the full-sized
+segment counter at the SYN (commit 18) and at the SYN-ACK (commit 39) has no effect: the counter
+is 0 when the SYN goes out, and `ackSent()` resets it at the SYN-ACK. S11 leaves both lines out.
