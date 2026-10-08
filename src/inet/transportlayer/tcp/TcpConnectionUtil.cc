@@ -988,6 +988,29 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
+    // A retransmission never extends past the previously sent high-water mark
+    // in the same segment: Linux retransmits skbs from the rtx queue (possibly
+    // collapsed together, but only from already-SENT data); unsent data goes
+    // out in its own segments behind it.
+    if (seqLess(state->snd_nxt, state->snd_max) && bytes > state->snd_max - state->snd_nxt)
+        bytes = state->snd_max - state->snd_nxt;
+
+    // ... and it honors the ORIGINAL segment boundaries: Linux's rtx queue
+    // holds whole skbs, and tcp_retrans_try_collapse merges only ENTIRE
+    // adjacent sent skbs that fit cur_mss together -- it never splits the
+    // next skb to top a retransmit up to the MSS. Cap at the largest recorded
+    // transmission boundary inside the budget. A budget that ends at snd_max
+    // ends with a whole segment, so it needs no cap.
+    if (seqLess(state->snd_nxt + bytes, state->snd_max) && bytes > 0 && rexmitQueue != nullptr) {
+        const auto& starts = rexmitQueue->xmitSegmentStarts;
+        auto it = starts.upper_bound(state->snd_nxt + bytes);
+        if (it != starts.begin()) {
+            uint32_t b = *std::prev(it);
+            if (seqGreater(b, state->snd_nxt) && seqLess(b, state->snd_nxt + bytes))
+                bytes = b - state->snd_nxt;
+        }
+    }
+
     uint32_t sentBytes = bytes;
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt

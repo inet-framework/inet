@@ -1,0 +1,41 @@
+%description:
+A retransmission that reaches the end of the sent data keeps its last whole
+segment. The client sends three segments of 300 bytes, and the tester drops
+all three. At the timeout, one retransmission of 900 bytes carries all
+three, as Linux collapses them (tcp_retrans_try_collapse()); the cap at the
+original segment starts does not apply, because the retransmission ends at
+snd_max, at the end of a whole segment (decision D-25 of the staged landing).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+# script format: "time numbytes; time numbytes; ..."
+*.cli_app.sendScript="1.0 300; 1.0 300; 1.0 300"
+*.tcptester.script="a3 delete; a4 delete; a5 delete"
+
+*.*_tcp.nagleEnabled = false
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.increasedIWEnabled = true
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 A005] A.1000 > B.2000: A 601:901(300) ack 501 win 16384 # deleting
+[4.001 A006] A.1000 > B.2000: A 1:901(900) ack 501 win 16384
+[4.003 B002] A.1000 < B.2000: A ack 901 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

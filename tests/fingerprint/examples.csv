@@ -236,8 +236,8 @@
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 10s,        55ba-e08c/tplx;4dcc-dc57/~tNl;5574-5786/~tND;8ed6-a146/tyf, PASS, EthernetCsmaMac Ipv4
 
 /examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudDisabled -r 0,           300s,        d213-8968/tplx;a1f2-3f81/~tNl;1b83-afb2/~tND;0819-dcab/tyf, PASS, Ipv4
-/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudEnabled -r 0,            300s,        bb43-6893/tplx;e270-d65c/~tNl;d28d-cff7/~tND;3aaf-a690/tyf, PASS, Ipv4
-/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudProbe -r 0,              300s,        3364-9537/tplx;e617-7810/~tNl;f5fa-f4ee/~tND;6c75-00c7/tyf, PASS, Ipv4
+/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudEnabled -r 0,            300s,        bc2c-53c8/tplx;5c9c-a763/~tNl;3c08-4341/~tND;3aaf-a690/tyf, PASS, Ipv4
+/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudProbe -r 0,              300s,        df1d-c827/tplx;bace-0f8e/~tNl;72f2-9221/~tND;6c75-00c7/tyf, PASS, Ipv4
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        54d3-d7d1/tplx;cc08-f17c/~tNl;dc8e-7a6c/~tND;32ba-9e70/tyf, PASS, Ipv4
 
