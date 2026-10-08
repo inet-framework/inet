@@ -1,0 +1,42 @@
+%description:
+Tests an explicit read after a received FIN. The server application reads
+only by READ commands (autoRead=false). The client sends 500 bytes and then
+closes. The READ at t=1.2 takes 300 bytes. The FIN arrives at t=1.502 and
+advances rcv_nxt to 502, but a FIN puts no byte into the receive queue. The
+READ at t=2 asks for 300 bytes, and it must stop at the FIN: the application
+gets the last 200 bytes. Before the repair, the read asked the queue for one
+sequence number more than it held, and the simulation stopped at an
+assertion.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.srv_app.cmdenv-log-level=INFO
+**.cmdenv-log-level=OFF
+
+*.cli_app.sendScript="1.0 500"
+*.cli_app.tClose=1.5s
+*.srv_app.autoRead=false
+*.srv_app.readScript="1.2 300; 2.0 300"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.501 A004] A.1000 > B.2000: A F ack 501 win 16384
+
+%# the READ after the FIN gets the rest of the data
+%contains: stdout
+TcpTestNet1.srv_app: received 500 bytes in 2 packets
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

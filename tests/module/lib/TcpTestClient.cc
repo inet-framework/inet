@@ -30,8 +30,9 @@ class INET_API TcpTestClient : public cSimpleModule
     };
     typedef std::list<Command> Commands;
     Commands commands;
+    Commands readCommands; // with autoRead=false: when to READ, and how many bytes
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ };
 
     int ctr;
 
@@ -42,7 +43,7 @@ class INET_API TcpTestClient : public cSimpleModule
     int rcvdPackets;
 
   protected:
-    void parseScript(const char *script);
+    void parseScript(const char *script, Commands& commands);
     void parseStatusRequestScript(const char *script);
     void printStatus(TcpStatusInfo *status);
     std::string makeMsgName();
@@ -58,7 +59,7 @@ class INET_API TcpTestClient : public cSimpleModule
 Define_Module(TcpTestClient);
 
 
-void TcpTestClient::parseScript(const char *script)
+void TcpTestClient::parseScript(const char *script, Commands& commands)
 {
     const char *s = script;
     while (*s)
@@ -148,7 +149,7 @@ void TcpTestClient::initialize()
     if (cmd.numBytes > 0)
         commands.push_back(cmd);
 
-    parseScript(script);
+    parseScript(script, commands);
     if (cmd.numBytes > 0 && commands.size() > 1)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
@@ -158,6 +159,9 @@ void TcpTestClient::initialize()
 
     scheduleAt(tOpen, new cMessage("Open", TEST_OPEN));
     parseStatusRequestScript(par("statusRequestScript"));
+    parseScript(par("readScript"), readCommands);
+    for (const auto& read : readCommands)
+        scheduleAt(read.tSend, new cMessage("Read", TEST_READ));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
 }
@@ -216,6 +220,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         case TEST_STATUS:
             socket.requestStatus();
+            delete msg;
+            break;
+        case TEST_READ:
+            socket.read(readCommands.front().numBytes);
+            readCommands.pop_front();
             delete msg;
             break;
         default:

@@ -687,8 +687,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         uint32_t fin_seq = (uint32_t)tcpHeader->getSequenceNo() + (uint32_t)payloadLength;
 
         if (state->rcv_nxt == fin_seq) {
-            // advance rcv_nxt over FIN now
+            // advance rcv_nxt over FIN now; remember where the FIN is, because the
+            // data that the application can still read ends there
             EV_INFO << "FIN arrived, advancing rcv_nxt over the FIN\n";
+            state->fin_rcvd = true;
+            state->rcv_fin_seq = fin_seq;
             state->rcv_nxt++;
             // state transitions will be done in the state machine, here we just set
             // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)

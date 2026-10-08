@@ -178,6 +178,10 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
 
     if (receiveQueue->getQueueLength() > 0) {
         uint32_t endSeqNo = state->rcv_nxt;
+        // as in sendAvailableDataToApp(): a received FIN occupies a sequence
+        // number but puts no byte in the queue, so the read stops at the FIN
+        if (state->fin_rcvd && seqLess(state->rcv_fin_seq, endSeqNo))
+            endSeqNo = state->rcv_fin_seq;
         uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + maxByteCountRequested;
         if (seqLess(requestedEndPos, endSeqNo))
             endSeqNo = requestedEndPos;
