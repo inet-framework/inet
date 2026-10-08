@@ -209,6 +209,9 @@ class INET_API TcpSackRexmitQueue
      */
     virtual const Region& getRegion(uint32_t seqNum) const;
 
+    /** RACK re-marked a lost RETRANSMISSION: clear the rexmitted flag on unsacked regions in the range (Linux tcp_mark_skb_lost clearing TCPCB_SACKED_RETRANS) so the recovery picker sends them again; the lost mark stays. */
+    virtual void clearRexmitted(uint32_t fromSeqNum, uint32_t toSeqNum);
+
   protected:
     /*
      * Returns if TcpSackRexmitQueue is valid or not.

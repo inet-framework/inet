@@ -1,0 +1,68 @@
+%description:
+Tests that RACK finds a lost retransmission (RFC 8985 section 6.2, Linux
+tcp_mark_skb_lost()). The tester drops the second segment of a burst at t=2
+and also its retransmission. RACK marks the segment lost by its reordering
+timer and retransmits it at t=2.0045. The segment 3501:4001 leaves at
+t=2.008, after the retransmission. When its SACK arrives at t=2.012, the
+retransmission is older than RACK.rtt plus the reordering window, so RACK
+marks it lost again, and the data goes out a third time at once. Classic
+DupThresh detection retransmits a segment only once in a recovery, and it
+waits for the retransmission timeout.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A5 delete; A10 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;2 5000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossDetectionMode = "rack"
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%# the first retransmission is dropped...
+%contains-regex: stdout
+\[2\.006 [^\n]*A 1001:1501\(500\)[^\n]*# deleting
+
+%# ...RACK finds that it was lost...
+%contains: stdout
+RACK: retransmission of [1001, 1501) presumed lost, will re-send
+
+%# ...and sends the data again, not at the retransmission timeout
+%contains-regex: stdout
+\[2\.013 [^\n]*A 1001:1501\(500\)

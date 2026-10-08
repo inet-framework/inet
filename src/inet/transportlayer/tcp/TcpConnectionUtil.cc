@@ -665,6 +665,16 @@ void TcpConnection::configureStateVariables()
                 << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
         state->sack_support = false;
     }
+    state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
+    if (state->lossDetectionMode == 1 && !state->sack_support) {
+        // RACK needs the SACK scoreboard. Rather than make the connection
+        // unusable, fall back to classic DupThresh -- the same "willingness"
+        // treatment sackSupport itself gets just above, so that turning RACK on
+        // by default cannot break a flavour or peer that ends up without SACK.
+        EV_WARN << "lossDetectionMode=\"rack\" requires SACK, which is not enabled for this "
+                   "connection; falling back to DupThresh loss detection\n";
+        state->lossDetectionMode = 0;
+    }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet

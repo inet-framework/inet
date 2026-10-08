@@ -1,0 +1,67 @@
+%description:
+Tests the RACK reordering timer (RFC 8985 section 6.3, Linux
+tcp_rack_reo_timeout()). The client sends one segment at t=1, which gives an
+RTT sample of 4 ms, and a burst of three segments at t=2; the tester drops
+the second of them. The three segments left at the same time, so when the
+SACK of the third arrives at t=2.004, the lost segment is not yet older than
+RACK.rtt plus the reordering window. Only one segment is SACKed, fewer than
+DupThresh, so the reordering window is min(min_rtt/4, srtt/8) = 0.5 ms. RACK
+arms the timer, which fires at t=2.0045 and marks the segment lost, and the
+segment goes out again at once. Classic DupThresh detection has only one
+duplicate ACK here, and it waits for the retransmission timeout.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A5 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;2 1500"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossDetectionMode = "rack"
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%# the reordering timer fires and RACK marks the dropped segment lost by time...
+%contains: stdout
+RACK-REO timer expired
+%contains: stdout
+RACK: marked 500 bytes lost by time (RACK.rtt=0.004)
+
+%# ...and the segment goes out again at once, not at the retransmission timeout
+%contains-regex: stdout
+\[2\.006 [^\n]*A 1001:1501\(500\)

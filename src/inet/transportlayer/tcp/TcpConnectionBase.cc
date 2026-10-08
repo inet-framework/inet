@@ -14,6 +14,7 @@
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
@@ -103,11 +104,13 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     connEstabTimer = new cMessage("CONN-ESTAB");
     finWait2Timer = new cMessage("FIN-WAIT-2");
     synRexmitTimer = new cMessage("SYN-REXMIT");
+    rackReoTimer = new cMessage("RACK-REO");
 
     the2MSLTimer->setContextPointer(this);
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
+    rackReoTimer->setContextPointer(this);
 
     WATCH(socketId);
     WATCH(listeningSocketId);
@@ -153,6 +156,8 @@ TcpConnection::~TcpConnection()
         delete cancelEvent(finWait2Timer);
     if (synRexmitTimer)
         delete cancelEvent(synRexmitTimer);
+    if (rackReoTimer)
+        delete cancelEvent(rackReoTimer);
 }
 
 void TcpConnection::handleMessage(cMessage *msg)
@@ -184,6 +189,10 @@ bool TcpConnection::processTimer(cMessage *msg)
     else if (msg == finWait2Timer) {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
         process_TIMEOUT_FIN_WAIT_2();
+    }
+    else if (msg == rackReoTimer) {
+        event = TCP_E_IGNORE;
+        processRackReoTimeout();
     }
     else if (msg == synRexmitTimer) {
         event = TCP_E_IGNORE;
@@ -609,6 +618,45 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
     }
 
     return fsm.getState() != TCP_S_CLOSED;
+}
+
+void TcpConnection::rescheduleRackReoTimer(simtime_t delay)
+{
+    if (rackReoTimer == nullptr)
+        return;
+    if (rackReoTimer->isScheduled())
+        cancelEvent(rackReoTimer);
+    // Jiffy quantization (Linux tcp_rack_mark_lost: usecs_to_jiffies(timeout)+1):
+    // a positive sub-tick deadline fires whole ticks later on a real kernel --
+    // which is what lets a dupthresh-worth of further SACKs enter recovery
+    // inline before the timer, instead of the timer marking a burst's holes a
+    // fraction of a millisecond after the first SACK. The zero-delay act-now
+    // defer (ACK-path marks) is left untouched.
+    if (delay > SIMTIME_ZERO) {
+        simtime_t granularity = tcpMain->par("rackReoTimerGranularity");
+        if (granularity > SIMTIME_ZERO)
+            delay = (std::ceil(delay / granularity) + 1) * granularity;
+    }
+    if (delay >= SIMTIME_ZERO)
+        scheduleAfter(delay, rackReoTimer);
+}
+
+void TcpConnection::processRackReoTimeout()
+{
+    // The reordering-window deadline of some still-unacked segment matured with no
+    // ACK arriving to re-run detection -- re-run it now and let the recovery
+    // strategy act on any newly lost marks (enter recovery / retransmit). Guarded:
+    // the timer can be stale if the connection moved on (recovery completed and the
+    // queue drained, algorithm torn down mid-close).
+    if (!state || !state->sack_enabled || state->lossDetectionMode != 1
+            || rexmitQueue == nullptr || tcpAlgorithm == nullptr)
+        return;
+    auto recovery = dynamic_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery());
+    if (recovery == nullptr)
+        return;
+    recovery->rackDetectAndMarkLost(/*fromReoTimer=*/true);
+    if (rexmitQueue->getLost() > 0)
+        recovery->reoTimeout();
 }
 
 void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)

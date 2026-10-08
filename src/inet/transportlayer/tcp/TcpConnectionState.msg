@@ -251,6 +251,11 @@ struct TcpStateVariables
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
+    int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 6675), 1 = RACK time-based
+    simtime_t rackXmitTime = 0;   // send time of the most recently delivered (SACKed/ACKed) segment
+    uint32_t rackEndSeq = 0;      // end sequence number of that segment
+    simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
+    bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
 };

@@ -531,6 +531,20 @@ const TcpSackRexmitQueue::Region& TcpSackRexmitQueue::getRegion(uint32_t seqNum)
     return *i;
 }
 
+void TcpSackRexmitQueue::clearRexmitted(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    // RACK decided a RETRANSMISSION itself was lost (its send time matured
+    // against the reordering window): Linux tcp_mark_skb_lost clears
+    // TCPCB_SACKED_RETRANS (retrans_out--), which is what re-arms
+    // tcp_xmit_retransmit_queue to send the range again. The lost mark stays.
+    for (auto& region : rexmitQueue) {
+        if (seqGE(region.beginSeqNum, toSeqNum))
+            break;
+        if (seqGE(region.beginSeqNum, fromSeqNum) && region.rexmitted && !region.sacked)
+            region.rexmitted = false;
+    }
+}
+
 } // namespace tcp
 
 } // namespace inet

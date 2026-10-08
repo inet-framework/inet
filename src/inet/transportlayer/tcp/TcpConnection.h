@@ -133,6 +133,7 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *connEstabTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
+    cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs
 
     // statistics
     long rcvdSegments = 0;
@@ -200,7 +201,23 @@ class INET_API TcpConnection : public SimpleModule
     virtual void process_TIMEOUT_CONN_ESTAB();
     virtual void process_TIMEOUT_FIN_WAIT_2();
     virtual void process_TIMEOUT_SYN_REXMIT(TcpEventCode& event);
+
+    /**
+     * rackReoTimer expired: re-run RACK loss detection (time has advanced, so
+     * pending deadlines may have matured) and let the recovery strategy react
+     * (enter fast recovery / retransmit) via ITcpRecovery::reoTimeout().
+     */
+    virtual void processRackReoTimeout();
     //@}
+
+  public:
+    /**
+     * (Re)arms the RACK reordering timer for the given delay, or cancels it when
+     * delay is negative. Called by the recovery strategy from RACK loss detection.
+     */
+    virtual void rescheduleRackReoTimer(simtime_t delay);
+
+  protected:
 
     /** Utility: clone a listening connection. Used for forking. */
     virtual TcpConnection *cloneListeningConnection();
