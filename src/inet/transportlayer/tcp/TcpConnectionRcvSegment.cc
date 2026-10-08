@@ -947,6 +947,24 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
         readHeaderOptions(tcpHeader);
 
+    // Linux tcp_syncookies=2 (syncookiesAlways): the connection is built again from
+    // the cookie at the handshake ACK, and the 2-bit MSS field of the cookie
+    // quantizes the MSS of the peer down to the IPv4 msstab of
+    // net/ipv4/syncookies.c: the largest entry not above it. Window scale, SACK and
+    // timestamps come through the timestamp encoding and stay exact.
+    if (tcpMain->par("syncookiesAlways").boolValue() && state->snd_mss > 536) {
+        static const uint32_t msstab[] = { 536, 1300, 1440, 1460 };
+        uint32_t clamped = msstab[0];
+        for (uint32_t entry : msstab)
+            if (entry <= state->snd_mss)
+                clamped = entry;
+        if (clamped < state->snd_mss) {
+            EV_DETAIL << "syncookiesAlways: peer MSS " << state->snd_mss << " quantized to " << clamped << "\n";
+            state->snd_mss = clamped;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+
     state->ack_now = true;
 
     // ECN
