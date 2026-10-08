@@ -1,0 +1,38 @@
+%description:
+Tests a STATUS request on a connection that never opened. The client asks
+for STATUS at t=0.5 and opens only at t=1. The reply shows a closed
+connection: each counter that has no value yet holds its "unknown" value,
+4294967295. The connection then opens and sends its data as usual. Before,
+the STATUS request stopped the simulation with "connection not open".
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_app.cmdenv-log-level=INFO
+**.cmdenv-log-level=OFF
+
+*.cli_app.tOpen=1s
+*.cli_app.statusRequestScript="0.5"
+*.cli_app.sendScript="1.5 100"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+STATUS: caState=0 backoff=4294967295 lost=4294967295 probes=4294967295 bytesReceived=0 busyTime=0 rwndLimited=0 deliveredBytes=0
+
+%# the connection opens afterwards
+%contains: stdout
+[1.703 B002] A.1000 < B.2000: A ack 250101 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
