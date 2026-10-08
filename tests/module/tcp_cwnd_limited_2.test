@@ -1,0 +1,43 @@
+%description:
+The cwnd-limited gate of slow start uses the peak segments in flight of
+the current window of data, not of the whole connection (Linux
+tcp_cwnd_validate()). The application sends 20 segments at t=1 s, is idle
+for longer than the RTO, so cwnd restarts at the initial window in slow
+start, then sends one segment every 0.5 s, and 20 segments at t=6 s. The
+single segments make a peak of one segment per window, so cwnd does not
+grow, and the second burst starts with two segments. With the peak of the
+whole connection, the first burst keeps the gate open, cwnd grows with each
+single segment, and the second burst starts with seven segments.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+# script format: "time numbytes; time numbytes; ..."
+*.cli_app.sendScript="1.0 20480; 3.0 1024; 3.5 1024; 4.0 1024; 4.5 1024; 5.0 1024; 5.5 1024; 6.0 20480;"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[5.703 B018] A.1000 < B.2000: A ack 26625 win 16384
+[6.001 A029] A.1000 > B.2000: A 26625:27649(1024) ack 501 win 16384
+[6.001 A030] A.1000 > B.2000: A 27649:28673(1024) ack 501 win 16384
+[6.003 B019] A.1000 < B.2000: A ack 28673 win 16384
+
+%contains: stdout
+[6.020] tcpdump finished, A:48 B:28 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

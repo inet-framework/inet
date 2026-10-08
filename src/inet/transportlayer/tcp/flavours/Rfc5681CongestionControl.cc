@@ -51,6 +51,13 @@ void Rfc5681CongestionControl::slowStart(uint32_t numBytesAcked)
     // TCP that increments cwnd by SMSS for each such ACK will
     // inappropriately inflate the amount of data injected into the network.
     //"
+    // Linux tcp_is_cwnd_limited(): in slow start, cwnd grows only while it is
+    // below twice the peak segments in flight of the current window of data. An
+    // application-limited flow that does not fill cwnd does not grow it.
+    if (state->snd_effmss > 0 && state->snd_cwnd / state->snd_effmss >= 2 * state->maxPacketsOut) {
+        EV_DETAIL << "Not growing cwnd in slow start: not cwnd-limited\n";
+        return;
+    }
     // Equation (2): an ACK that acknowledges less than SMSS grows cwnd by less.
     uint32_t increment = std::min(numBytesAcked, state->snd_effmss);
     EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by " << increment << " bytes to ";
