@@ -57,7 +57,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S6 ✅ | `topic/tcp-cubic` | 14, 45, 55 (`TcpCubic` part), 57, 60, 62, 65 | +840 −326 | `TcpCubic` with HyStart, and `DcTcp` on the shared ACK path |
 | S7 ✅ | `topic/tcp-segment-sizing` | 13 (part), 15 (part), 16 (part) | — | segment sizing against the option space, the peak segments in flight and slow start (B9); before S6 |
 | S8 ✅ | `topic/tcp-rack` | 13 (part), 16 (part), 17, 18, 19, 26 (part), 49, 51 (part), 64 (part) | +768 −47 | RACK loss detection (RFC 8985), STATUS counters, the reordering window; the Linux count of the bytes in flight with SACK (B8) |
-| S9 | `topic/tcp-prr` | 20, 59 | +143 −14 | Proportional Rate Reduction (RFC 6937) |
+| S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 76, 85 | +505 −7 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe |
 | S11 | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 23, 30, 38, 73 | +179 −45 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open |
 | S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
@@ -947,3 +947,44 @@ only removes `prrInitCwndReduction()`, which has no caller, so S9 never adds it;
 `Rfc6582Recovery` refers to a line that S5e already removed. NewReno without SACK keeps option (1)
 of RFC 6582 (D-16). Step 3 is the last part of commit 64 for code on master: a comment of
 `Rfc6675Recovery::stepC()` from S5d.
+
+### S9 — `topic/tcp-prr` — landed 2026-10-08
+
+The owner reviewed and approved S9 on 2026-10-08.
+
+S9 brings Proportional Rate Reduction (RFC 6937) to the SACK recovery, off by default (D-24), after
+a repair of the count of the delivered bytes, which PRR reads as DeliveredData (D-28).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: count the delivered bytes of a cumulative ACK once` | — | 39 (part) | — |
+| `tcp: add: Proportional Rate Reduction (RFC 6937), selected by prrEnabled` | — | 20, 59 (part), 13 (part) | — |
+| `tcp: comment: drop a test name from a comment of the SACK recovery` | — | 64 (part) | — |
+
+The commit messages explain each trace. In short: a cumulative ACK now adds its bytes to the
+delivered count, but not the bytes that a SACK reported before (the source form counts them twice,
+79872 bytes for a transfer of 65536); PRR then paces the sending over the recovery. PRR needs the
+sent bytes of the recovery, so `TcpClassicAlgorithmBase` gives `dataSent()` and
+`segmentRetransmitted()` to the recovery too, as source commit 13 does. The source runs PRR only
+with SACK, so NewReno without SACK keeps option (1) of RFC 6582 (D-16).
+
+In the module test network, all ACKs of a flight arrive at the same time, so PRR and RFC 6675 send
+the same segments: PRR spreads the sending inside one instant. `tcp_prr_1` therefore spaces the
+duplicate ACKs 1 ms apart with the tester and delays the fast retransmission, and it checks the
+first segments of the recovery. Later in that run, the ACKs of the new segments overtake the
+delayed duplicate ACKs and SACK the whole flight at once, so both runs send a burst; the test does
+not check that part.
+
+New tests, each checked to fail on the commit before: `tcp_delivered_1` and `tcp_prr_1`. The
+source's `tcp_prr_1` uses `initialWindow` (S19); here `increasedIWEnabled` gives the larger
+initial window.
+
+Items for later stages: S10 adds to `step4()` and `segmentRetransmitted()` the parts of the tail
+loss probe and of the undo; S19 sets `prrEnabled` to true and brings the pins of
+`Rfc5681FastRetransmit`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (391 at the first code commit, 392 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 118 and serializer 4 pass at the head. The CI
+fingerprint job passes at each code commit, and no row moves.
