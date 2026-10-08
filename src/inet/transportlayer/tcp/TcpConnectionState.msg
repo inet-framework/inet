@@ -259,6 +259,17 @@ struct TcpStateVariables
     bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
     uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
     uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
+
+    // TCP_INFO time counters (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
+    // with respect to every send/receive decision -- consulted only by TcpStatusInfo.
+    // INET-native definitions (not a port of Linux's tcp_chrono_* state machine); see
+    // enqueueSendCommandData()/processAckInEstabEtc() (busy) and sendData() (rwnd).
+    // A *StartTime of -1 means "not currently in that state"; *Accumulated is the
+    // running total up to the last state exit.
+    simtime_t busyStartTime;          // set to -1 in configureStateVariables()
+    simtime_t busyTimeAccumulated = 0;
+    simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
+    simtime_t rwndLimitedAccumulated = 0;
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
 };

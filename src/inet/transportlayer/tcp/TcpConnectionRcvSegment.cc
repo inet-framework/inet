@@ -1243,8 +1243,28 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // acked data no longer needed in send queue
         sendQueue->discardUpTo(discardUpToSeq);
 
+        // TCP_INFO time counters (busy_time): read-only bookkeeping -- if this ACK just
+        // caught snd_una up to snd_max with nothing left queued either, the
+        // connection has gone fully idle. See enqueueSendCommandData() for the
+        // matching "became busy" entry.
+        if (state->busyStartTime >= SIMTIME_ZERO && state->snd_una == state->snd_max
+            && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+        {
+            state->busyTimeAccumulated += simTime() - state->busyStartTime;
+            state->busyStartTime = -1;
+        }
+
         // acked data no longer needed in rexmit queue
         rexmitQueue->discardUpTo(discardUpToSeq);
+
+        // A plain cumulative ACK carries no SACK option, so processSACKOption()
+        // does not run to recompute the SACK scoreboard byte count. Refresh it
+        // after the discard so the STATUS sackedBytes and caState reflect only what
+        // is still SACKed above snd_una (Linux tp->sacked_out drops as snd_una
+        // catches up); a full ACK that ends recovery must report 0, not the stale
+        // pre-ACK count.
+        if (state->sack_enabled)
+            state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
 
         updateWndInfo(tcpHeader);
 

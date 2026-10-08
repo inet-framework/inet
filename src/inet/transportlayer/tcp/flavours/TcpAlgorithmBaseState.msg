@@ -53,6 +53,7 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     /// number of RTOs
     //@{
     uint32_t numRtos = 0; ///< total number of RTOs
+    uint32_t zeroWindowProbesSent = 0; ///< cumulative zero-window (persist) probes
     //@}
 
     /// RFC 3782 variables

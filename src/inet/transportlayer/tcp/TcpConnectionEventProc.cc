@@ -13,9 +13,12 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -128,20 +131,20 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             sendSyn();
             startSynRexmitTimer();
             scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
-            sendQueue->enqueueAppData(packet); // queue up for later
+            enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
             EV_DETAIL << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(packet); // queue up for later
+            enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_ESTABLISHED:
         case TCP_S_CLOSE_WAIT:
-            sendQueue->enqueueAppData(packet);
+            enqueueSendCommandData(packet);
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
                       << (state->snd_max - state->snd_una) << " bytes unacknowledged\n";
             tcpAlgorithm->sendCommandInvoked();
@@ -322,6 +325,8 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setAutoRead(autoRead);
 
     statusInfo->setSnd_mss(state->snd_mss);
+    statusInfo->setSndEffMss(state->snd_effmss);
+    statusInfo->setAdvmss(state->advertisedMss);
     statusInfo->setSnd_una(state->snd_una);
     statusInfo->setSnd_nxt(state->snd_nxt);
     statusInfo->setSnd_max(state->snd_max);
@@ -335,6 +340,79 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setRcv_up(state->rcv_up);
     statusInfo->setIrs(state->irs);
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
+
+    // Adaptive reordering: state->reordering grows past the static dupthresh as
+    // checkSackReordering() observes SACKs arriving below the FACK (Linux
+    // tp->reordering). Report the live degree, not the static dupthresh.
+    statusInfo->setReordering(state->reordering);
+    statusInfo->setMinRtt(state->minRtt.dbl());
+    statusInfo->setFlightSize(tcpAlgorithm->getBytesInFlight());
+    statusInfo->setSackedBytes(state->sackedBytes);
+    statusInfo->setDeliveredBytes(state->deliveredBytes);
+    statusInfo->setTsEnabled(state->ts_enabled);
+    statusInfo->setSackEnabled(state->sack_enabled);
+    statusInfo->setWsEnabled(state->ws_enabled);
+    statusInfo->setEctEnabled(state->ect);
+    statusInfo->setSndWndScale(state->snd_wnd_scale);
+
+    // Congestion-window/RTO/RTT fields live on flavour-specific state variable
+    // subclasses, one or two levels below the base TcpStateVariables* held as
+    // `state` -- not every flavour (e.g. DumbTcp) has them, so guard with a
+    // dynamic_cast and fall back to the UINT_MAX sentinel documented on
+    // TcpStatusInfo.
+    if (auto *baseAlgState = dynamic_cast<TcpAlgorithmBaseStateVariables *>(state)) {
+        statusInfo->setCwnd(baseAlgState->snd_cwnd);
+        statusInfo->setSrtt(baseAlgState->srtt.dbl());
+        statusInfo->setRexmitCount(baseAlgState->rexmit_count);
+        statusInfo->setNumRtos(baseAlgState->numRtos);
+    }
+    else {
+        statusInfo->setCwnd(UINT_MAX);
+        statusInfo->setSrtt(-1);
+        statusInfo->setRexmitCount(UINT_MAX);
+        statusInfo->setNumRtos(UINT_MAX);
+    }
+
+    if (auto *classicState = dynamic_cast<TcpClassicAlgorithmBaseStateVariables *>(state))
+        statusInfo->setSsthresh(classicState->ssthresh);
+    else
+        statusInfo->setSsthresh(UINT_MAX);
+
+    statusInfo->setCaState(deriveLinuxCaState());
+    // rcv_nxt/irs are only meaningful once the 3WHS has fixed irs (peer's ISN); before
+    // that (e.g. a STATUS query in SYN_SENT) both are still 0 and the subtraction
+    // would underflow.
+    statusInfo->setBytesReceived(seqGreater(state->rcv_nxt, state->irs) ? state->rcv_nxt - state->irs - 1 : 0);
+
+    // TCP_INFO time counters: report the accumulated total plus, if a period is
+    // still open right now, the elapsed time since it started -- so a live query
+    // reflects the up-to-the-moment total rather than only the last closed period.
+    statusInfo->setBusyTime((state->busyTimeAccumulated
+        + (state->busyStartTime >= SIMTIME_ZERO ? simTime() - state->busyStartTime : SIMTIME_ZERO)).dbl());
+    statusInfo->setRwndLimited((state->rwndLimitedAccumulated
+        + (state->rwndLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->rwndLimitedStartTime : SIMTIME_ZERO)).dbl());
+
+    // Segment counts are approximated from byte totals by rounding UP: Linux
+    // counts skbs, and a single retransmitted/lost sub-MSS segment must report 1,
+    // not 0.
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+        statusInfo->setLost((rexmitQueue->getLost() + state->snd_mss - 1) / state->snd_mss);
+    else
+        statusInfo->setLost(UINT_MAX);
+
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+        statusInfo->setRetrans((rexmitQueue->getRetrans() + state->snd_mss - 1) / state->snd_mss);
+    else
+        statusInfo->setRetrans(UINT_MAX);
+
+    if (auto *baseAlgState = dynamic_cast<TcpAlgorithmBaseStateVariables *>(state)) {
+        statusInfo->setBackoff(baseAlgState->rexmit_count);
+        statusInfo->setProbes(baseAlgState->zeroWindowProbesSent);
+    }
+    else {
+        statusInfo->setBackoff(UINT_MAX);
+        statusInfo->setProbes(UINT_MAX);
+    }
 
     msg->setControlInfo(statusInfo);
     msg->setKind(TCP_I_STATUS);

@@ -1,0 +1,74 @@
+%description:
+STATUS field `probes` (cumulative zero-window persist probes).
+tcp_info_fields_1.test's RTO scenario never exercises this counter (it stays
+0 there). The client sends more than the receiver's advertised window, and
+the server never reads, so the window closes and the persist timer sends
+probes, at t=6.013, 7.513 and 10.513 here. The application asks for STATUS
+after the first two probes, at t=6.5 and t=9, so the counter must read 1 and
+then 2: it counts the probes that leave, not the timer restarts.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 20s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=20000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+# Just after the 1st (t=2.017) and 2nd (t=4.025) persist probes pinned by
+# tcp_persist_1.test's own trace (Linux probe0 cadence: first probe one RTO
+# after the window closed, then doubling).
+*.cli_app.statusRequestScript="6.5,9"
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+*.srv_app.autoRead=false
+
+*.*_tcp.advertisedWindow = 3000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = true
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+STATUS: caState=0 backoff=0 lost=4294967295 probes=1 bytesReceived=0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+STATUS: caState=0 backoff=0 lost=4294967295 probes=2 bytesReceived=0
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

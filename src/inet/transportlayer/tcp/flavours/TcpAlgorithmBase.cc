@@ -274,6 +274,7 @@ void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
 
     // sending persist probe
     conn->sendProbe();
+    state->zeroWindowProbesSent++;
 }
 
 void TcpAlgorithmBase::processDelayedAckTimer(TcpEventCode& event)

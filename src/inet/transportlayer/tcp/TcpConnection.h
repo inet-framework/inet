@@ -217,6 +217,13 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual void rescheduleRackReoTimer(simtime_t delay);
 
+    /**
+     * Maps INET's independent loss-recovery bools onto Linux's tcp_ca_state
+     * ordinals (TCP_CA_Open=0, Disorder=1, CWR=2, Recovery=3, Loss=4), for
+     * TcpStatusInfo::caState.
+     */
+    virtual int deriveLinuxCaState() const;
+
   protected:
 
     /** Utility: clone a listening connection. Used for forking. */
@@ -301,6 +308,9 @@ class INET_API TcpConnection : public SimpleModule
      * Returns the number of bytes sent.
      */
     virtual uint32_t sendSegment(uint32_t bytes);
+
+    /** Puts the data of a SEND command into the send queue, and starts the busy time of TCP_INFO. */
+    virtual void enqueueSendCommandData(Packet *packet);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);

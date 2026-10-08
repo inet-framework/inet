@@ -682,6 +682,11 @@ void TcpConnection::configureStateVariables()
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
+    // TCP_INFO time counters: idle and not limited until the first SEND or
+    // sendData() call says otherwise (enqueueSendCommandData(), sendData()).
+    state->busyStartTime = -1;
+    state->rwndLimitedStartTime = -1;
+
     WATCH_EXPR("snd_nxt", state->snd_nxt);
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
     WATCH_EXPR("snd_una", state->snd_una);
@@ -767,6 +772,7 @@ void TcpConnection::sendSyn()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
+    emit(sndMaxSignal, state->snd_max);
 
     // ECN
     if (state->ecnWillingness) {
@@ -1090,8 +1096,10 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    if (seqGreater(state->snd_nxt, state->snd_max))
+    if (seqGreater(state->snd_nxt, state->snd_max)) {
         state->snd_max = state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
+    }
 
     // The peak segments in flight in the current window of data, as Linux
     // tcp_cwnd_validate() keeps it: a new window starts when snd_una has passed
@@ -1106,6 +1114,38 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     }
 
     return sentBytes;
+}
+
+void TcpConnection::enqueueSendCommandData(Packet *packet)
+{
+    // TCP_INFO time counters (busy_time): read-only bookkeeping -- if the connection
+    // was fully idle (nothing outstanding, nothing queued) before this SEND, it
+    // becomes busy now. See processAckInEstabEtc() for the matching "back to idle" exit.
+    if (state->busyStartTime < SIMTIME_ZERO && state->snd_una == state->snd_max
+        && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+    {
+        state->busyStartTime = simTime();
+    }
+
+    sendQueue->enqueueAppData(packet);
+}
+
+int TcpConnection::deriveLinuxCaState() const
+{
+    if (state->afterRto)
+        return 4; // TCP_CA_Loss
+    if (state->lossRecovery)
+        return 3; // TCP_CA_Recovery
+    if (state->sndCwr)
+        return 2; // TCP_CA_CWR
+    // TCP_CA_Disorder: SACK/dup information has arrived (segments sit above
+    // snd_una) but not enough to enter recovery yet -- Linux tcp_fastretrans_alert
+    // holds ca_state at Disorder while sacked_out > 0 without a confirmed loss.
+    // sackedBytes is kept current on both the SACK and the cumulative-ACK path, so
+    // this reverts to Open as soon as snd_una catches up to the SACKed data.
+    if (state->sack_enabled && state->sackedBytes > 0)
+        return 1; // TCP_CA_Disorder
+    return 0; // TCP_CA_Open
 }
 
 bool TcpConnection::sendData(uint32_t congestionWindow)
@@ -1131,6 +1171,22 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     uint32_t unackedInWindow = state->snd_nxt - state->snd_una;
     uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
     int64_t effectiveWin = std::min((int64_t)state->snd_wnd - unackedInWindow, (int64_t)congestionWindow - bytesInFlight);
+
+    // TCP_INFO time counters (rwnd_limited): read-only bookkeeping, consulted only
+    // by TcpStatusInfo -- never influences the send decision below. "rwnd-limited"
+    // here means: there is more buffered data than can be sent right now, and the
+    // peer's advertised window (not the congestion window) is the binding
+    // constraint.
+    bool rwndBinding = (state->snd_wnd < congestionWindow)
+        && ((int64_t)buffered > std::max<int64_t>(effectiveWin, 0));
+    if (rwndBinding) {
+        if (state->rwndLimitedStartTime < SIMTIME_ZERO)
+            state->rwndLimitedStartTime = simTime();
+    }
+    else if (state->rwndLimitedStartTime >= SIMTIME_ZERO) {
+        state->rwndLimitedAccumulated += simTime() - state->rwndLimitedStartTime;
+        state->rwndLimitedStartTime = -1;
+    }
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
