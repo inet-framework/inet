@@ -649,6 +649,7 @@ void TcpConnection::configureStateVariables()
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
@@ -1509,11 +1510,14 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                                     && state->syn_rexmit_count > 0)))
     {
         // MSS header option
-        if (state->snd_mss > 0) {
+        // RFC 9293, section 3.7.1: the MSS option announces the maximum segment
+        // size that this side can receive. By the time of the SYN-ACK, snd_mss is
+        // already the minimum with the MSS of the peer, so it is not announced.
+        if (state->advertisedMss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
-            option->setMaxSegmentSize(state->snd_mss);
+            option->setMaxSegmentSize(state->advertisedMss);
             tcpHeader->appendHeaderOption(option);
-            EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
+            EV_INFO << "Tcp Header Option MSS(=" << state->advertisedMss << ") sent\n";
         }
 
         // WS header option
