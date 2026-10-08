@@ -1,0 +1,38 @@
+%description:
+TcpCubic reduces the window by beta = 0.7 at a fast retransmit (RFC 9438
+section 4.6), where Reno halves it. The tester drops segment a12. At the
+third duplicate ACK, cwnd is 10 segments, and CUBIC sets ssthresh and
+cwnd to 7 segments (7168 bytes); Reno would set 5.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_tcp.**.cmdenv-log-level=DETAIL
+**.cmdenv-log-level=OFF
+
+*.*_tcp.tcpAlgorithmClass = "TcpCubic"
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=32768B # 32 1024-byte segments
+
+*.tcptester.script="a12 delete"  # drop a segment to force fast retransmit
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+Loss at cwnd=10 segments, in flight=10 segments
+ set cwnd=7168, ssthresh=7168
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

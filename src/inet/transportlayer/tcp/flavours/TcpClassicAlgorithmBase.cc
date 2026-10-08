@@ -98,7 +98,7 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     state->ssthresh = calculateSsthreshForRto();
     conn->emit(ssthreshSignal, state->ssthresh);
 
-    state->snd_cwnd = state->snd_mss;
+    state->snd_cwnd = calculateCwndForRto();
     conn->emit(cwndSignal, state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
