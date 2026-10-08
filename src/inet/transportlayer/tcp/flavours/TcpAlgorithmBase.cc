@@ -230,10 +230,11 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         // recovery phase (as described in section 5) MUST NOT be initiated
         // until HighACK is greater than or equal to the new value of
         // RecoveryPoint."
+        // TcpClassicAlgorithmBase, which alone sets lossRecovery, clears it after the
+        // timeout hook of the recovery, so that the hook can see the fast recovery.
         if (state->lossRecovery) {
             state->recoveryPoint = state->snd_max; // HighData = snd_max
             EV_DETAIL << "Loss Recovery terminated.\n";
-            state->lossRecovery = false;
         }
     }
 

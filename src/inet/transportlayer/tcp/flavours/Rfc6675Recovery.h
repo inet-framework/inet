@@ -63,6 +63,24 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      */
     virtual void checkSackReordering(uint32_t lowSeq);
 
+    /** @name Loss undo (RFC 2883 D-SACK, RFC 3522 Eifel), Linux tcp_undo_cwnd_reduction() */
+    //@{
+    /** Capture the undo context (marker, priorCwnd/priorSsthresh) at recovery entry. */
+    virtual void undoInit();
+    /** At a retransmission timeout: true if the timeout starts a new loss episode (Linux tcp_enter_loss()). */
+    virtual bool isNewLossEpisode() const;
+    /** A retransmission of [fromSeq, toSeq) went out: stamp the first one (Eifel) and count it. */
+    virtual void countUndoRetransmission(uint32_t fromSeq, uint32_t toSeq);
+    /** A D-SACK for [fromSeq, toSeq) arrived: confirm that many retransmissions as spurious. */
+    virtual void noteDsack(uint32_t fromSeq, uint32_t toSeq);
+    /** Eifel (RFC 3522): the last ACK's TSecr predates our first retransmission. */
+    virtual bool packetDelayed() const;
+    /** True if the cwnd reduction of the current episode may be undone. */
+    virtual bool mayUndo() const;
+    /** Restore cwnd/ssthresh reduced by a now-known-spurious recovery. */
+    virtual void undoCwndReduction();
+    //@}
+
     /** @name Proportional Rate Reduction (RFC 6937), Linux tcp_cwnd_reduction() */
     //@{
     /** Newly acked+sacked bytes carried by the ACK currently being processed. */

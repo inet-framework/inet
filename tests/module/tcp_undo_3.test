@@ -1,0 +1,71 @@
+%description:
+Tests that each retransmission timeout starts a new undo context (Linux
+tcp_enter_loss(), lossUndoEnabled=true). The tester deletes the first data
+segment, and the timeout at t=4 retransmits it. This loss is real, so no
+D-SACK comes. At t=10 the sender sends two segments, and the tester delays
+their ACKs by 6.5 s. The timeout at t=16 retransmits 501:1001, and the
+receiver reports it by a D-SACK. The D-SACK proves that the only
+retransmission of the second episode was not necessary, so the sender
+restores cwnd 1000 and ssthresh 1000, the values before the second timeout.
+If the second timeout kept the context of the first, the retransmission of
+t=4, which no D-SACK confirms, would stop the undo.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="a3 delete; b3 delay 6.5; b4 delay 6.5"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;10 2000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossUndoEnabled = true
+*.*_tcp.increasedIWEnabled = true
+
+
+
+%# the D-SACK of the second timeout's retransmission...
+%contains: stdout
+[16.003 B005] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP SACK[501,1001)
+
+%# ...undoes the reduction of the second timeout only
+%contains: stdout
+Undoing spurious cwnd reduction (D-SACK): cwnd=1000, ssthresh=1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

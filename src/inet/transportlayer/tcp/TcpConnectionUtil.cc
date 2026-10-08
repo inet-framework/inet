@@ -667,6 +667,7 @@ void TcpConnection::configureStateVariables()
     }
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->prrEnabled = tcpMain->par("prrEnabled");
+    state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->dsack_enabled = tcpMain->par("dsackEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
@@ -1555,6 +1556,11 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
 bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option)
 {
+    // Eifel input (RFC 3522 / Linux rx_opt.rcv_tsecr): remember the echo so the
+    // undo logic can compare it against the first retransmission's timestamp.
+    if (tcpHeader->getAckBit() && option.getEchoedTimestamp() != 0)
+        state->lastRcvdTSecr = option.getEchoedTimestamp();
+
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
         return false;

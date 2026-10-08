@@ -90,6 +90,10 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     // snapshot delivered-bytes so consumers can read this segment's newly
     // acked+sacked bytes as deliveredBytes - prrDeliveredMark (RFC 6937 PRR input)
     state->prrDeliveredMark = state->deliveredBytes;
+
+    // reset the per-segment D-SACK detection (RFC 2883 loss undo)
+    state->dsackSeen = false;
+    state->dsackBytes = 0;
     //
     // Note: this code is organized exactly as
     // RFC 9293, section "3.10 Event Processing", subsection "3.10.7. SEGMENT ARRIVES".

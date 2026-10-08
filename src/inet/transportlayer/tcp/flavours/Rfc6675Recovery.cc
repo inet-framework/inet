@@ -114,7 +114,8 @@ void Rfc6675Recovery::stepC()
         //       retransmitted segment unless NextSeg () rule (4) was
         //       invoked for this retransmission.
         //"
-        if (seqLess(seqNum, state->snd_max))
+        bool retransmission = seqLess(seqNum, state->snd_max);
+        if (retransmission)
             state->highRxt = seqNum + state->snd_mss;
 
         //"
@@ -139,6 +140,12 @@ void Rfc6675Recovery::stepC()
             // prrOut stays 0 and PRR's sndcnt = prrDelivered - prrOut over-sends.
             if (state->prrEnabled && state->lossRecovery)
                 state->prrOut += sentBytes;
+
+            // the loss undo counts every retransmission of the episode, also those
+            // of step (C), which do not pass segmentRetransmitted() (Linux counts
+            // each retransmitted skb in undo_retrans)
+            if (retransmission && sentBytes > 0)
+                countUndoRetransmission(seqNum, seqNum + sentBytes);
 
             //"
             // (C.4) The estimate of the amount of data outstanding in the
@@ -211,6 +218,10 @@ void Rfc6675Recovery::step4()
     // beta (cwnd*0.7) -- hardcoding FlightSize/2 here gave CUBIC connections the wrong
     // post-recovery ssthresh (the fast_recovery/PRR scripts are all CUBIC). Capture the
     // pre-reduction cwnd first for PRR's priorCwnd (Linux tp->prior_cwnd = tp->snd_cwnd).
+    // RFC 2883/3522: capture the undo context BEFORE the reduction below, so a
+    // later D-SACK proving the retransmission spurious can restore cwnd/ssthresh.
+    if (state->lossUndoEnabled)
+        undoInit();
     uint32_t priorCwnd = state->snd_cwnd;
     state->ssthresh = state->snd_cwnd = conn->getTcpAlgorithmForUpdate()->calculateSsthreshForFastRecovery();
     conn->emit(cwndSignal, state->snd_cwnd);
@@ -420,6 +431,10 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                 //"
                 EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpHeader->getAckNo()
                           << " D-SACK: " << tmp.str() << endl;
+                // RFC 2883: the segment identified by this block was received more
+                // than once. Record it for the loss undo (the RFC deliberately leaves
+                // the action unspecified).
+                noteDsack(tmp.getStart(), tmp.getEnd());
                 // a D-SACK also reveals reordering of the (spuriously retransmitted)
                 // segment: grow the reordering degree so it stops recurring.
                 if (state->adaptiveReorderingEnabled)
@@ -449,6 +464,10 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                     EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpHeader->getAckNo()
                               << " D-SACK: " << tmp.str()
                               << ", SACK: " << tmp2.str() << endl;
+                    // RFC 2883: the segment identified by this block was received more
+                    // than once. Record it for the loss undo (the RFC deliberately leaves
+                    // the action unspecified).
+                    noteDsack(tmp.getStart(), tmp.getEnd());
                     // a D-SACK also reveals reordering of the (spuriously retransmitted)
                     // segment: grow the reordering degree so it stops recurring.
                     if (state->adaptiveReorderingEnabled)
@@ -751,6 +770,103 @@ void Rfc6675Recovery::prrEndCwndReduction()
 
 void Rfc6675Recovery::onRexmitTimeout()
 {
+    // capture the undo context BEFORE the RTO's ssthresh/cwnd reduction
+    if (state->lossUndoEnabled && isNewLossEpisode())
+        undoInit();
+}
+
+bool Rfc6675Recovery::isNewLossEpisode() const
+{
+    // Linux tcp_enter_loss(): a timeout starts a new undo context, except during a
+    // fast recovery and at a repeated timeout with no new ACK since the last one
+    // (TcpAlgorithmBase increments rexmit_count before this call, and an ACK of new
+    // data resets it). These keep the context of the episode in progress. An older
+    // context that no undo ended must not stay: its counts and its cwnd are stale.
+    if (state->undoMarker == 0)
+        return true;
+    return !state->lossRecovery && state->rexmit_count == 1;
+}
+
+void Rfc6675Recovery::undoInit()
+{
+    // Linux tcp_init_undo(): remember the pre-reduction cwnd/ssthresh so a later
+    // D-SACK (or Eifel timestamp) can restore them. Must be called BEFORE the
+    // ssthresh/cwnd reduction. undoRetrans starts at -1 ("no retransmit yet"),
+    // becomes >0 as retransmissions go out, and returns to 0 once every one of
+    // them is confirmed spurious by a D-SACK.
+    state->undoMarker = state->snd_una ? state->snd_una : 1; // nonzero marker
+    state->priorSsthresh = state->ssthresh;
+    state->priorCwnd = state->snd_cwnd;
+    state->undoRetrans = -1;
+    state->retransStampTS = 0;
+}
+
+void Rfc6675Recovery::countUndoRetransmission(uint32_t fromSeq, uint32_t toSeq)
+{
+    // Eifel (RFC 3522 / Linux retrans_stamp): stamp the FIRST retransmission of the
+    // episode with our TS clock. An ACK later echoing a TSecr OLDER than this was
+    // generated by the ORIGINAL transmission, proving the retransmission spurious.
+    if (state->ts_enabled && state->retransStampTS == 0)
+        state->retransStampTS = TcpConnection::convertSimtimeToTS(simTime());
+
+    // Loss undo: count the retransmissions of this episode that still have to be
+    // proven spurious (Linux increments undo_retrans per retransmitted skb).
+    if (state->lossUndoEnabled && state->undoMarker != 0) {
+        if (state->undoRetrans < 0)
+            state->undoRetrans = 0;
+        uint32_t segs = seqGreater(toSeq, fromSeq)
+            ? (toSeq - fromSeq + state->snd_mss - 1) / state->snd_mss : 1;
+        state->undoRetrans += (int32_t)segs;
+    }
+}
+
+void Rfc6675Recovery::noteDsack(uint32_t fromSeq, uint32_t toSeq)
+{
+    state->dsackSeen = true;
+    state->dsackBytes = toSeq - fromSeq;
+    // Linux tcp_check_dsack()/tcp_sacktag_one(): each D-SACK of data above the undo
+    // marker confirms that many retransmitted segments as spurious, on whatever ACK
+    // it arrives -- usually a duplicate ACK, because the original arrived first.
+    if (state->lossUndoEnabled && state->undoMarker != 0 && state->undoRetrans > 0
+            && seqGreater(toSeq, state->undoMarker))
+    {
+        uint32_t segs = (state->dsackBytes + state->snd_mss - 1) / state->snd_mss;
+        state->undoRetrans -= (int32_t)segs;
+        if (state->undoRetrans < 0)
+            state->undoRetrans = 0;
+    }
+}
+
+bool Rfc6675Recovery::packetDelayed() const
+{
+    // Eifel (RFC 3522 / Linux tcp_packet_delayed): the most recent ACK echoed a
+    // timestamp OLDER than our first retransmission's send time, so the receiver
+    // generated it from the ORIGINAL transmission -- the retransmission (and the
+    // congestion response that came with it) was spurious.
+    return state->ts_enabled && state->retransStampTS != 0
+        && state->lastRcvdTSecr != 0
+        && seqLess(state->lastRcvdTSecr, state->retransStampTS);
+}
+
+bool Rfc6675Recovery::mayUndo() const
+{
+    // Linux tcp_may_undo(): undo when every retransmission of the episode has been
+    // D-SACKed (undoRetrans == 0), or when the Eifel timestamp test proves the
+    // retransmission was answered from the original transmission.
+    return state->undoMarker != 0 && (state->undoRetrans == 0 || packetDelayed());
+}
+
+void Rfc6675Recovery::undoCwndReduction()
+{
+    // Linux tcp_undo_cwnd_reduction(): restore cwnd and ssthresh.
+    state->snd_cwnd = std::max(state->snd_cwnd, state->priorCwnd); // tcp_reno_undo_cwnd
+    if (state->priorSsthresh > state->ssthresh)
+        state->ssthresh = state->priorSsthresh;
+    state->undoMarker = 0;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    conn->emit(ssthreshSignal, state->ssthresh);
+    EV_INFO << "Undoing spurious cwnd reduction (D-SACK): cwnd=" << state->snd_cwnd
+            << ", ssthresh=" << state->ssthresh << "\n";
 }
 
 void Rfc6675Recovery::checkSackReordering(uint32_t lowSeq)
@@ -797,6 +913,21 @@ void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
             checkSackReordering(fromSeq);
         }
     }
+
+    if (!state->lossUndoEnabled)
+        return;
+
+    // RFC 2883 loss undo. This runs on every ACK that advances snd_una, in or out of
+    // loss recovery -- deliberately not only while recovering, because the D-SACK that
+    // proves a retransmission spurious usually arrives only after the delayed original
+    // has been delivered, by which time the recovery episode has already ended. Linux
+    // likewise checks undo from the ACK path independently of the congestion state.
+    if (mayUndo()) {
+        // every retransmission of this episode was D-SACKed: the reduction was
+        // needless, so restore cwnd/ssthresh (and leave recovery if still in it).
+        undoCwndReduction();
+        state->lossRecovery = false;
+    }
 }
 
 void Rfc6675Recovery::dataSent(uint32_t fromSeq)
@@ -810,6 +941,8 @@ void Rfc6675Recovery::segmentRetransmitted(uint32_t fromSeq, uint32_t toSeq)
 {
     if (state->prrEnabled && state->lossRecovery && seqGreater(toSeq, fromSeq))
         state->prrOut += toSeq - fromSeq;
+
+    countUndoRetransmission(fromSeq, toSeq);
 }
 
 void Rfc6675Recovery::setPipe()
