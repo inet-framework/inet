@@ -43,8 +43,10 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /**
      * The ECN-Echo reaction on an ACK of new data (RFC 3168): halve cwnd once per
      * round trip. Returns true if it took the place of the window growth.
+     * numBytesAcked is for a flavour that weighs its reaction by the acknowledged
+     * bytes (DCTCP); RFC 3168 does not use it.
      */
-    virtual bool processEce();
+    virtual bool processEce(uint32_t numBytesAcked);
 
     /**
      * Called after the window update of an ACK of new data, before the sending:

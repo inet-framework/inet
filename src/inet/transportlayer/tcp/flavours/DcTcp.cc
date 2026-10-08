@@ -9,7 +9,6 @@
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
-#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
@@ -32,93 +31,64 @@ void DcTcp::initialize()
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
 }
 
-void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
+bool DcTcp::processEce(uint32_t numBytesAcked)
 {
-    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+    // DCTCP replaces the halving of RFC 3168 with a reduction in proportion to the
+    // fraction of marked bytes (RFC 8257 section 3.3). A return value of true tells
+    // the shared ACK path that cwnd changed, so this ACK does not also grow it.
+    if (!state || !state->ect)
+        return false;
 
-    // In a fast recovery, the recovery takes the ACK: without SACK, Rfc5681Recovery
-    // deflates cwnd and ends the recovery; with SACK, Rfc6675Recovery runs the
-    // steps (A) to (C) of RFC 6675.
-    if (state->lossRecovery)
-        recovery->receivedAckForUnackedData(state->snd_una - firstSeqAcked);
+    // RFC 8257 3.3.2
+    state->dctcp_bytesAcked += numBytesAcked;
+
+    // RFC 8257 3.3.3
+    if (state->gotEce) {
+        state->dctcp_bytesMarked += numBytesAcked;
+        conn->emit(markingProbSignal, 1);
+    }
     else {
-        bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
-        if (state && state->ect) {
-            // RFC 8257 3.3.1
-            uint32_t bytes_acked = state->snd_una - firstSeqAcked;
-
-            // bool cut = false; TODO unused?
-
-            // RFC 8257 3.3.2
-            state->dctcp_bytesAcked += bytes_acked;
-
-            // RFC 8257 3.3.3
-            if (state->gotEce) {
-                state->dctcp_bytesMarked += bytes_acked;
-                conn->emit(markingProbSignal, 1);
-            }
-            else {
-                conn->emit(markingProbSignal, 0);
-            }
-
-            // RFC 8257 3.3.4
-            if (state->snd_una > state->dctcp_windEnd) {
-
-                if (state->dctcp_bytesMarked) {
-                    // cut = true;  TODO unused?
-                }
-
-                // RFC 8257 3.3.5
-                double ratio;
-
-                ratio = ((double)state->dctcp_bytesMarked / state->dctcp_bytesAcked);
-                conn->emit(loadSignal, ratio);
-
-                // RFC 8257 3.3.6
-                // DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
-                state->dctcp_alpha = state->dctcp_alpha * (1 - state->dctcp_gamma) + state->dctcp_gamma * ratio;
-                conn->emit(calcLoadSignal, state->dctcp_alpha);
-
-                // RFC 8257 3.3.7
-                state->dctcp_windEnd = state->snd_nxt;
-
-                // RFC 8257 3.3.8
-                state->dctcp_bytesAcked = state->dctcp_bytesMarked = 0;
-                state->sndCwr = false;
-            }
-
-            // Applying DcTcp style cwnd update only if there was congestion and the window has not yet been reduced during current interval
-            if ((state->dctcp_bytesMarked && !state->sndCwr)) {
-
-                performSsCa = false;
-                state->sndCwr = true;
-
-                // RFC 8257 3.3.9
-                state->snd_cwnd = state->snd_cwnd * (1 - state->dctcp_alpha / 2);
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-
-                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
-                state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
-
-                conn->emit(ssthreshSignal, state->ssthresh);
-            }
-        }
-
-        if (performSsCa) {
-            // If ECN is not enabled or if ECN is enabled and received multiple ECE-Acks in
-            // less than RTT, then perform slow start and congestion avoidance.
-            congestionControl->receivedAckForUnackedData(state->snd_una - firstSeqAcked);
-        }
+        conn->emit(markingProbSignal, 0);
     }
 
-    // Outside a fast recovery, an ACK of new data ends the guesses that the
-    // duplicate ACKs before it made (Linux tcp_reset_reno_sack()).
-    if (!state->sack_enabled && !state->lossRecovery)
-        conn->getRexmitQueueForUpdate()->resetSackedBit();
+    // RFC 8257 3.3.4
+    if (state->snd_una > state->dctcp_windEnd) {
+        // RFC 8257 3.3.5
+        double ratio;
 
-    sendData(false);
-    ensureRexmitTimerArmed();
+        ratio = ((double)state->dctcp_bytesMarked / state->dctcp_bytesAcked);
+        conn->emit(loadSignal, ratio);
+
+        // RFC 8257 3.3.6
+        // DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+        state->dctcp_alpha = state->dctcp_alpha * (1 - state->dctcp_gamma) + state->dctcp_gamma * ratio;
+        conn->emit(calcLoadSignal, state->dctcp_alpha);
+
+        // RFC 8257 3.3.7
+        state->dctcp_windEnd = state->snd_nxt;
+
+        // RFC 8257 3.3.8
+        state->dctcp_bytesAcked = state->dctcp_bytesMarked = 0;
+        state->sndCwr = false;
+    }
+
+    // Applying DcTcp style cwnd update only if there was congestion and the window has not yet been reduced during current interval
+    if (state->dctcp_bytesMarked && !state->sndCwr) {
+        state->sndCwr = true;
+
+        // RFC 8257 3.3.9
+        state->snd_cwnd = state->snd_cwnd * (1 - state->dctcp_alpha / 2);
+
+        conn->emit(cwndSignal, state->snd_cwnd);
+
+        uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
+        state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
+
+        conn->emit(ssthreshSignal, state->ssthresh);
+        return true;
+    }
+
+    return false;
 }
 
 bool DcTcp::shouldMarkAck()

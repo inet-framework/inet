@@ -118,7 +118,7 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     bool inFastRecovery = isInFastRecovery();
     if (inFastRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
-    else if (!processEce())
+    else if (!processEce(numBytesAcked))
         congestionControl->receivedAckForUnackedData(numBytesAcked);
 
     ackProcessed(inFastRecovery);
@@ -132,7 +132,7 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     ensureRexmitTimerArmed();
 }
 
-bool TcpClassicAlgorithmBase::processEce()
+bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
 {
     if (state->ect && state->gotEce) {
         // RFC 3168, page 18
