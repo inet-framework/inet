@@ -358,6 +358,20 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         else
             sendEstabIndicationToApp();
 
+        // A SYN-ACK that completes a simultaneous open repeats the SYN that this
+        // side already received: report its one sequence number by a D-SACK, with
+        // an immediate ACK, as Linux tcp_data_queue() does for a segment below
+        // rcv_nxt (RFC 2883)
+        if (tcpHeader->getSynBit() && state->sack_enabled && state->dsack_enabled
+                && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt))
+        {
+            state->start_seqno = tcpHeader->getSequenceNo();
+            state->end_seqno = tcpHeader->getSequenceNo() + 1;
+            state->snd_dsack = true;
+            state->ack_now = true;
+            sendAck();
+        }
+
         // This will trigger transition to ESTABLISHED. Timers and notifying
         // app will be taken care of in stateEntered().
         event = TCP_E_RCV_ACK;
