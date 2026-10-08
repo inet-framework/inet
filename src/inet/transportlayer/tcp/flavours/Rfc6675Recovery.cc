@@ -94,8 +94,7 @@ void Rfc6675Recovery::stepC()
     // options-adjusted effective MSS): Linux's equivalent gate is in PACKETS
     // (tcp_packets_in_flight < snd_cwnd), so a PRR budget of exactly one
     // 1000-byte segment must not be swallowed by the 12-byte timestamp
-    // overhead (client-ack-dropped-then-recovery pins the second lost
-    // segment going out in the same recovery-entry burst).
+    // overhead, or the second lost segment misses the recovery-entry burst.
     while ((int32_t)state->snd_cwnd - (int32_t)state->pipe
            >= (int32_t)(state->snd_effmss > 0 ? state->snd_effmss : state->snd_mss)) {
         //"
