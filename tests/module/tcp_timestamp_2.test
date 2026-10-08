@@ -119,19 +119,17 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [1.004 A004] A.1000 > B.2000: A 501:513(12) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)# introducing copy
 [1.005 A005] A.1000 > B.2000: A 513:1013(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
 [1.005 A006] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
-[1.005 A007] A.1000 > B.2000: A 1513:1525(12) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
 [1.006 B003] A.1000 < B.2000: A ack 513 win 5000   Option(s): NOP NOP TS(1005,1000)
 [1.007 B004] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
-[1.007 B005] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
-[1.008 A007] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
-[1.008 A008] A.1000 > B.2000: A 1525:2025(500) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
-[1.008 A009] A.1000 > B.2000: A 2025:2049(24) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
-[1.009 A010] A.1000 > B.2000: A 2049:2501(452) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)
-[1.010 B006] A.1000 < B.2000: A ack 1525 win 5000   Option(s): NOP NOP TS(1009,1004)
-[1.010 B007] A.1000 < B.2000: A ack 2025 win 5000   Option(s): NOP NOP TS(1009,1007)
-[1.010 B008] A.1000 < B.2000: A ack 2049 win 5000   Option(s): NOP NOP TS(1009,1007)
-[1.011 B009] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1010,1008)
-[1.012] tcpdump finished, A:10 B:9 segments
+[1.008 A006] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
+[1.008 A007] A.1000 > B.2000: A 1513:1537(24) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
+[1.009 A008] A.1000 > B.2000: A 1537:2037(500) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)
+[1.009 A009] A.1000 > B.2000: A 2037:2501(464) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)
+[1.010 B005] A.1000 < B.2000: A ack 1513 win 5000   Option(s): NOP NOP TS(1009,1004)
+[1.010 B006] A.1000 < B.2000: A ack 1537 win 5000   Option(s): NOP NOP TS(1009,1007)
+[1.011 B007] A.1000 < B.2000: A ack 2037 win 5000   Option(s): NOP NOP TS(1010,1008)
+[1.011 B008] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1010,1008)
+[1.012] tcpdump finished, A:9 B:8 segments
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

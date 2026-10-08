@@ -5,6 +5,8 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
+
+#include <algorithm>
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
@@ -49,9 +51,10 @@ void Rfc5681CongestionControl::slowStart(uint32_t numBytesAcked)
     // TCP that increments cwnd by SMSS for each such ACK will
     // inappropriately inflate the amount of data injected into the network.
     //"
-    // The traditional increase: precisely SMSS bytes per ACK of new data.
-    EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
-    state->snd_cwnd += state->snd_effmss;
+    // Equation (2): an ACK that acknowledges less than SMSS grows cwnd by less.
+    uint32_t increment = std::min(numBytesAcked, state->snd_effmss);
+    EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by " << increment << " bytes to ";
+    state->snd_cwnd += increment;
     conn->emit(cwndSignal, state->snd_cwnd);
     EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
 }
