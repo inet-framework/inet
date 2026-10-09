@@ -36,6 +36,11 @@ class TcpAlgorithm;
 //@}
 
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+
+// the values of state->ecnMode, from the tcpEcnMode parameter
+#define TCP_ECN_MODE_OFF              0
+#define TCP_ECN_MODE_PASSIVE          1
+#define TCP_ECN_MODE_RFC3168          2
 #define TFO_BLACKHOLE_REXMIT_COUNT    2   // TCP Fast Open: the retransmission of a Fast Open SYN that suggests a blackhole (the third transmission, as Linux)
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size

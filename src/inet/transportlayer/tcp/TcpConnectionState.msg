@@ -250,7 +250,8 @@ struct TcpStateVariables
     bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport, RFC 3168)
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
-    bool ecnWillingness = false; // set if current host is willing to use ECN
+    int ecnMode = 0; // TCP_ECN_MODE_*, from the tcpEcnMode parameter (or the deprecated ecnWillingness)
+    bool ecnWillingness = false; // set if current host is willing to use ECN: it answers an ECN-setup SYN (each mode but "off")
     bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 

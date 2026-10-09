@@ -672,7 +672,19 @@ void TcpConnection::configureStateVariables()
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
     state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
-    state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
+    const char *tcpEcnMode = tcpMain->par("tcpEcnMode");
+    if (tcpMain->par("ecnWillingness").boolValue()) {
+        if (strcmp(tcpEcnMode, "off") != 0)
+            throw cRuntimeError("Set the deprecated ecnWillingness or tcpEcnMode, not both");
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
+    }
+    else if (!strcmp(tcpEcnMode, "passive"))
+        state->ecnMode = TCP_ECN_MODE_PASSIVE;
+    else if (!strcmp(tcpEcnMode, "rfc3168"))
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
+    else
+        state->ecnMode = TCP_ECN_MODE_OFF;
+    state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
@@ -818,8 +830,8 @@ void TcpConnection::sendSyn()
     if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1)
         rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
 
-    // ECN
-    if (state->ecnWillingness) {
+    // ECN: only the "rfc3168" mode requests ECN in an active open
+    if (state->ecnMode == TCP_ECN_MODE_RFC3168) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(true);
         state->ecnSynSent = true;
