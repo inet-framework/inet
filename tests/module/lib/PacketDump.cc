@@ -498,7 +498,7 @@ void PacketDump::dumpIpv6(bool l2r, const char *label, const Ptr<const Ipv6Heade
 
 #ifdef INET_WITH_TCP_COMMON
 void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength,
-        const std::string& srcAddr, const std::string& destAddr, const char *comment)
+        const std::string& srcAddr, const std::string& destAddr, const char *comment, int ecn)
 {
     using namespace tcp;
 
@@ -547,6 +547,18 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         flags = true;
         out << "F ";
     }
+    if (tcpHeader->getEceBit()) {
+        flags = true;
+        out << "E "; // ECN-Echo (RFC 3168), a bit of the ACE field of AccECN (RFC 9768)
+    }
+    if (tcpHeader->getCwrBit()) {
+        flags = true;
+        out << "W "; // Congestion Window Reduced (RFC 3168), a bit of the ACE field of AccECN
+    }
+    if (tcpHeader->getAeBit()) {
+        flags = true;
+        out << "N "; // AE, the third bit of the ACE field of AccECN ("N", because "A" is the ACK)
+    }
     if (!flags) {
         out << ". ";
     }
@@ -563,6 +575,14 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
 
     // window
     out << "win " << tcpHeader->getWindow() << " ";
+
+    // the ECN codepoint of the IP header (IP_ECN_ECT_1 = 1, IP_ECN_ECT_0 = 2, IP_ECN_CE = 3)
+    if (ecn == 1)
+        out << "ECT(1) ";
+    else if (ecn == 2)
+        out << "ECT(0) ";
+    else if (ecn == 3)
+        out << "CE ";
 
     // urgent
     if (tcpHeader->getUrgBit())

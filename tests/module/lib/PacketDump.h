@@ -107,8 +107,9 @@ class INET_API PacketDump
     /**
      * Dumps info about the given TCP segment.
      */
+    // ecn: the IP ECN codepoint of the segment, shown after the window if it is ECT or CE; -1: unknown
     void tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength, const std::string& srcAddr,
-            const std::string& destAddr, const char *comment = nullptr);
+            const std::string& destAddr, const char *comment = nullptr, int ecn = -1);
 #endif // ifdef INET_WITH_TCP_COMMON
 
 #ifdef INET_WITH_UDP

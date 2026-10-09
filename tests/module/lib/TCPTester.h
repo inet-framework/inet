@@ -30,9 +30,12 @@ class INET_API TCPTesterBase : public cSimpleModule
     int fromBSeq;
 
     PacketDump tcpdump;
+    int segmentEcn = -1; // the IP ECN codepoint of the segment that dump() shows
 
   protected:
     void dump(const Ptr<const inet::tcp::TcpHeader>& seg, int payloadLength, bool fromA, const char *comment=NULL);
+    // the tester has no IP layer: it delivers the ECN codepoint that the sender requested, as the network does, and returns it
+    int deliverEcn(Packet *pk);
 
   public:
     TCPTesterBase();

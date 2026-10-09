@@ -37,9 +37,20 @@ void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, int tcpLeng
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
     std::ostringstream out;
     tcpdump.setOutStream(out);
-    tcpdump.tcpDump(fromA, lbl, seg, tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
+    tcpdump.tcpDump(fromA, lbl, seg, tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment, segmentEcn);
     EV_DEBUG_C("testing") << out.str();
     tcpdump.setOutStream(EVSTREAM);
+}
+
+int TCPTesterBase::deliverEcn(Packet *pk)
+{
+    if (auto ecnReq = pk->findTag<EcnReq>()) {
+        int ecn = ecnReq->getExplicitCongestionNotification();
+        pk->removeTag<EcnReq>();
+        pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ecn);
+    }
+    auto ecnInd = pk->findTag<EcnInd>();
+    return ecnInd ? ecnInd->getExplicitCongestionNotification() : -1;
 }
 
 void TCPTesterBase::finish()
@@ -186,6 +197,7 @@ void TCPScriptableTester::dispatchSegment(Packet *pk)
     Command *cmd = (Command *)pk->getContextPointer();
     bool fromA = cmd->fromA;
     bubble("introducing copy");
+    segmentEcn = deliverEcn(pk);
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
     send(pk, fromA ? "out2" : "out1");
 }
@@ -203,6 +215,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
     pk->removeTag<L3AddressReq>();
+    segmentEcn = deliverEcn(pk);
 
     // find entry in script
     Command *cmd = NULL;
@@ -249,6 +262,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         bubble("marking CE");
         pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(IP_ECN_CE);
+        segmentEcn = IP_ECN_CE;
         dump(seg, pk->getByteLength(), fromA, "marking CE");
         send(pk, fromA ? "out2" : "out1");
     }
@@ -342,6 +356,7 @@ void TCPRandomTester::dispatchSegment(Packet *pk)
         throw cRuntimeError("Unknown message");
     bool fromA = (bool)pk->getContextPointer();
     bubble("introducing copy");
+    segmentEcn = deliverEcn(pk);
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
     send(pk, fromA ? "out2" : "out1");
 }
@@ -360,6 +375,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
     pk->removeTag<L3AddressReq>();
+    segmentEcn = deliverEcn(pk);
 
     // decide what to do
     double x = dblrand();
