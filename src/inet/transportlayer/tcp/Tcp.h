@@ -170,6 +170,11 @@ class INET_API Tcp : public TransportProtocolBase
     struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; };
     std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache;
     int fastOpenCookieCacheSize = 0; // from the fastopenCookieCacheSize parameter
+    // TCP Fast Open, client: blackhole detection (RFC 7413 section 4.1.3.1). After a
+    // suspected blackhole, no connection of the module uses Fast Open for a time
+    // (as in Linux).
+    int fastOpenBlackholeCount = 0;
+    simtime_t fastOpenDisabledUntil = SIMTIME_ZERO;
 
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
@@ -238,6 +243,19 @@ class INET_API Tcp : public TransportProtocolBase
 
     /** TCP Fast Open, client: removes all cached cookies, as `ip tcp_metrics flush` does on Linux. */
     virtual void clearFastOpenCookieCache();
+
+    /** TCP Fast Open, client: true while blackhole detection stops Fast Open. */
+    virtual bool isActiveFastOpenDisabled() const;
+
+    /**
+     * TCP Fast Open, client: a suspected blackhole stops Fast Open for the time of
+     * fastopenBlackholeTimeout, which doubles at each further blackhole, up to 64
+     * times (Linux tcp_fastopen_active_should_disable()).
+     */
+    virtual void recordFastOpenBlackhole();
+
+    /** TCP Fast Open, client: a Fast Open SYN got through, so the next blackhole stops Fast Open for the first time again. */
+    virtual void resetFastOpenBlackhole();
 
     virtual void removeConnection(TcpConnection *conn);
     virtual void sendToIp(Packet *segment);

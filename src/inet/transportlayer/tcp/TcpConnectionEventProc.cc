@@ -59,8 +59,12 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
 
             // TCP Fast Open (RFC 7413 section 4.2): with a cached cookie for the
             // server, the SYN waits for the first SEND, and carries its data
-            // (process_SEND()); without a cookie, the SYN goes out now and requests one
-            if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
+            // (process_SEND()); without a cookie, the SYN goes out now and requests
+            // one. After a suspected blackhole, the connection does not use Fast Open
+            // (RFC 7413 section 4.1.3.1; Linux sends no Fast Open option then).
+            if (openCmd->getFastOpen() && state->fastopenClientEnabled && tcpMain->isActiveFastOpenDisabled())
+                EV_DETAIL << "Fast Open: stopped after a suspected blackhole\n";
+            else if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
                 state->fastopenRequested = true;
                 std::vector<uint8_t> cookie;
                 if (tcpMain->getFastOpenCookie(remoteAddr, cookie)) {

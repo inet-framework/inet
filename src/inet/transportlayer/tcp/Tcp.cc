@@ -538,6 +538,26 @@ void Tcp::clearFastOpenCookieCache()
     fastOpenCookieCache.clear();
 }
 
+bool Tcp::isActiveFastOpenDisabled() const
+{
+    return simTime() < fastOpenDisabledUntil;
+}
+
+void Tcp::recordFastOpenBlackhole()
+{
+    simtime_t timeout = par("fastopenBlackholeTimeout");
+    if (timeout == SIMTIME_ZERO)
+        return;
+    fastOpenBlackholeCount++;
+    fastOpenDisabledUntil = simTime() + timeout * (1 << std::min(fastOpenBlackholeCount - 1, 6));
+    EV_INFO << "Fast Open: suspected blackhole " << fastOpenBlackholeCount << ", no Fast Open until t=" << fastOpenDisabledUntil << "\n";
+}
+
+void Tcp::resetFastOpenBlackhole()
+{
+    fastOpenBlackholeCount = 0;
+}
+
 void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // update addresses/ports in TcpConnection

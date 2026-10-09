@@ -1,0 +1,62 @@
+%description:
+Tests TCP Fast Open without blackhole detection (fastopenBlackholeTimeout =
+0s, the Linux default since 5.14), in the scenario of tcp_fastopen_blackhole_1:
+after the third transmission of the SYN of connection 2, connection 3 still
+sends its data on a SYN with the cookie.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=1s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=1s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.cli_app.tOpen3=20s
+*.cli_app.active3=true
+*.cli_app.localPort3=1002
+*.cli_app.tSend3=20s
+*.cli_app.sendBytes3=200B
+*.cli_app.fastOpen3=true
+*.srv_app.tOpen2=1s
+*.srv_app.localPort2=2000
+*.srv_app.tOpen3=20s
+*.srv_app.localPort3=2000
+
+*.tcptester.script="a3 delete; a4 delete"
+*.cli_tcp.fastopenClientEnabled = true
+*.cli_tcp.fastopenBlackholeTimeout = 0s
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[20.001 A007] A.1002 > B.2000: S 5000000:5000200(200) win 16384   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

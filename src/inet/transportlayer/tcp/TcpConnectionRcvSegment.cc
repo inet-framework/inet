@@ -1193,9 +1193,12 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (seqGreater(state->snd_una, state->iss)) {
             EV_INFO << "SYN+ACK bits set, connection established.\n";
 
-            // TCP Fast Open, client: the SYN-ACK acknowledged all the data of the SYN
-            if (state->fastopenSynDataLen > 0 && seqGE(state->snd_una, state->iss + 1 + state->fastopenSynDataLen))
+            // TCP Fast Open, client: the SYN-ACK acknowledged all the data of the SYN,
+            // so the path has no blackhole
+            if (state->fastopenSynDataLen > 0 && seqGE(state->snd_una, state->iss + 1 + state->fastopenSynDataLen)) {
                 state->fastopenSynDataAccepted = true;
+                tcpMain->resetFastOpenBlackhole();
+            }
 
             // RFC 9293, section 3.10.7.3: "If there are other controls or text in
             // the segment, then continue processing at the sixth step under Section
@@ -1645,6 +1648,13 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
         event = TCP_E_ABORT;
         return;
     }
+
+    // TCP Fast Open: the third transmission of a SYN with a Fast Open option or
+    // data suggests a path that drops them (RFC 7413 section 4.1.3.1; Linux
+    // tcp_fastopen_active_detect_blackhole())
+    if (fsm.getState() == TCP_S_SYN_SENT && (state->fastopenSynCarriedOption || state->fastopenSynDataLen > 0)
+        && state->syn_rexmit_count == TFO_BLACKHOLE_REXMIT_COUNT)
+        tcpMain->recordFastOpenBlackhole();
 
     EV_INFO << "Performing retransmission #" << state->syn_rexmit_count << "\n";
 
