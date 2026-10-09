@@ -1,0 +1,140 @@
+%description:
+Verify that the QoS single-protection Duration/ID calculation treats an Action
+No Ack frame as a frame without a response: a final frame reserves zero, an
+ongoing TXOP reserves only the following frame and its response, and an RTS
+does not reserve an ACK for a pending Action No Ack frame.
+
+%includes:
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+
+class FixedQosRateSelection : public IQosRateSelection
+{
+  public:
+    const IIeee80211Mode *mode = Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(24));
+
+    virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *, const Ptr<const Ieee80211RtsFrame>&) override { return mode; }
+    virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) override { return mode; }
+    virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *, const Ptr<const Ieee80211BlockAckReq>&) override { return mode; }
+    virtual const IIeee80211Mode *computeMode(Packet *, const Ptr<const Ieee80211MacHeader>&, TxopProcedure *) override { return mode; }
+};
+
+class ActionNoAckRecipientPolicy : public IRecipientQosAckPolicy
+{
+  public:
+    virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const override
+    {
+        if (header->getReceiverAddress().isMulticast())
+            return false;
+        if (header->getType() == ST_NOACKACTION)
+            return false;
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+            return dataHeader->getAckPolicy() == AckPolicy::NORMAL_ACK;
+        return true;
+    }
+
+    virtual bool isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>&, RecipientBlockAckAgreement *) const override { return false; }
+    virtual simtime_t computeAckDurationField(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { throw cRuntimeError("unexpected ACK duration lookup"); }
+    virtual simtime_t computeBasicBlockAckDurationField(Packet *, const Ptr<const Ieee80211BasicBlockAckReq>&) const override { throw cRuntimeError("unexpected BlockAck duration lookup"); }
+};
+
+class TestSingleProtectionMechanism : public SingleProtectionMechanism
+{
+  public:
+    void configure(IQosRateSelection *selection, Ieee80211ModeSet *set)
+    {
+        rateSelection = selection;
+        modeSet = set;
+    }
+};
+
+class TestTxopProcedure : public TxopProcedure
+{
+  protected:
+    bool finalFragment = false;
+
+  public:
+    void setFinalFragment(bool value) { finalFragment = value; }
+    virtual bool isFinalFragment(const Ptr<const Ieee80211MacHeader>&) const override { return finalFragment; }
+};
+
+static Packet makePacket(const char *name, const Ptr<const Chunk>& header, size_t payloadBytes = 0)
+{
+    Packet packet(name, header);
+    if (payloadBytes != 0)
+        packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(payloadBytes)));
+    return packet;
+}
+
+static Ptr<Ieee80211MgmtHeader> makeActionNoAckHeader()
+{
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setType(ST_NOACKACTION);
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    return header;
+}
+
+static Ptr<Ieee80211DataHeader> makeNormalQosHeader()
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setAckPolicy(AckPolicy::NORMAL_ACK);
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    return header;
+}
+
+%activity:
+
+auto *modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+FixedQosRateSelection rateSelection;
+ActionNoAckRecipientPolicy ackPolicy;
+TestSingleProtectionMechanism protection;
+protection.configure(&rateSelection, modeSet);
+TestTxopProcedure txop;
+
+auto finalActionHeader = makeActionNoAckHeader();
+Packet finalAction = makePacket("final-action-no-ack", finalActionHeader, 8);
+txop.setFinalFragment(true);
+const Ptr<const Ieee80211MacHeader> finalActionMacHeader = finalActionHeader;
+ASSERT(protection.computeDurationField(&finalAction, finalActionMacHeader, nullptr, nullptr, &txop, &ackPolicy) == SIMTIME_ZERO);
+
+auto ongoingActionHeader = makeActionNoAckHeader();
+Packet ongoingAction = makePacket("ongoing-action-no-ack", ongoingActionHeader, 8);
+auto pendingNormalHeader = makeNormalQosHeader();
+Packet pendingNormal = makePacket("pending-normal-qos", pendingNormalHeader, 100);
+const Ptr<const Ieee80211MacHeader> ongoingActionMacHeader = ongoingActionHeader;
+const Ptr<const Ieee80211DataOrMgmtHeader> pendingNormalDataOrMgmtHeader = pendingNormalHeader;
+txop.setFinalFragment(false);
+auto pendingDuration = rateSelection.mode->getDuration(pendingNormal.getDataLength());
+auto ackDuration = rateSelection.mode->getDuration(LENGTH_ACK);
+auto expectedOngoingAction = pendingDuration + modeSet->getSifsTime() + ackDuration + modeSet->getSifsTime();
+ASSERT(protection.computeDurationField(&ongoingAction, ongoingActionMacHeader, &pendingNormal, pendingNormalDataOrMgmtHeader, &txop, &ackPolicy) == expectedOngoingAction);
+
+auto pendingActionHeader = makeActionNoAckHeader();
+Packet pendingAction = makePacket("pending-action-no-ack", pendingActionHeader, 100);
+const Ptr<const Ieee80211DataOrMgmtHeader> pendingActionDataOrMgmtHeader = pendingActionHeader;
+auto rtsHeader = makeShared<Ieee80211RtsFrame>();
+rtsHeader->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+Packet rts = makePacket("rts-for-action-no-ack", rtsHeader);
+const Ptr<const Ieee80211MacHeader> rtsMacHeader = rtsHeader;
+auto expectedRts = rateSelection.mode->getDuration(LENGTH_CTS) + modeSet->getSifsTime()
+        + rateSelection.mode->getDuration(pendingAction.getDataLength()) + modeSet->getSifsTime();
+ASSERT(protection.computeDurationField(&rts, rtsMacHeader, &pendingAction, pendingActionDataOrMgmtHeader, &txop, &ackPolicy) == expectedRts);
+
+EV << "Action No Ack Duration/ID calculations omit current and pending Action ACK airtime.\n";
+
+%contains: stdout
+Action No Ack Duration/ID calculations omit current and pending Action ACK airtime.

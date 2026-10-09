@@ -315,6 +315,14 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
             recoveryProcedure->multicastFrameTransmitted(stationRetryCounters);
             channelAccess->getInProgressFrames()->dropFrame(packet);
         }
+        else {
+            // IEEE Std 802.11-2024, 10.3.2.11: a no-ACK MPDU is implicitly acknowledged.
+            if (dataAndMgmtRateControl)
+                dataAndMgmtRateControl->frameTransmitted(packet, recoveryProcedure->getRetryCount(packet, dataOrMgmtHeader), true, false);
+            recoveryProcedure->ackFrameReceived(packet, dataOrMgmtHeader, stationRetryCounters);
+            channelAccess->getInProgressFrames()->dropFrame(packet);
+            ackHandler->dropFrame(dataOrMgmtHeader);
+        }
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
         auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE

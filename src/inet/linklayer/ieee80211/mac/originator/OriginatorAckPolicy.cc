@@ -24,7 +24,8 @@ void OriginatorAckPolicy::initialize(int stage)
 bool OriginatorAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
-        return !dataOrMgmtHeader->getReceiverAddress().isMulticast(); // TODO + mgmt with NoAck check
+        // IEEE Std 802.11-2024, 10.3.2.11: Action No Ack elicits no ACK.
+        return dataOrMgmtHeader->getType() != ST_NOACKACTION && !dataOrMgmtHeader->getReceiverAddress().isMulticast();
     }
     return false;
 }
