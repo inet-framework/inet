@@ -1,0 +1,98 @@
+%description:
+Verify single-protection field equations and Duration/ID clamp, ceiling, range, and wire encoding.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211SingleProtection_1 {
+class ArithmeticHcf : public Hcf {
+  public:
+    using Hcf::encodeDuration;
+};
+class ArithmeticProtection : public SingleProtectionMechanism {
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL)
+            modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet("a"));
+    }
+};
+Define_Module(ArithmeticProtection);
+}
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
+simple ArithmeticProtection extends SingleProtectionMechanism {
+    parameters:
+        rateSelectionModule = "";
+        @class(ArithmeticProtection);
+}
+network TestNetwork {
+    submodules:
+        test: Test;
+        protection: ArithmeticProtection;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+seed-set = 0
+
+%activity:
+using namespace Ieee80211SingleProtection_1;
+auto us = [](double value) { return SimTime(value * 1e-6); };
+auto protection = check_and_cast<ArithmeticProtection *>(cSimulation::getActiveSimulation()->getModuleByPath("protection"));
+auto data = makeShared<Ieee80211DataHeader>();
+data->setType(ST_DATA_WITH_QOS);
+data->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+data->setAckPolicy(AckPolicy::NORMAL_ACK);
+ASSERT(protection->computeDurationField(data, us(44), us(160), true) == us(60));
+ASSERT(protection->computeDurationField(data, us(44), us(160), false) == us(236));
+// A successor RTS reserves RTS/CTS only in the DATA field, not its later DATA/ACK.
+ASSERT(protection->computeDurationField(data, us(44), us(112), false) == us(188));
+auto rts = makeShared<Ieee80211RtsFrame>();
+ASSERT(protection->computeDurationField(rts, us(44), us(160), true) == us(236));
+data->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+ASSERT(protection->computeDurationField(data, us(44), us(160), true) == 0);
+ASSERT(protection->computeDurationField(data, us(44), us(160), false) == us(176));
+data->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+for (auto policy : {AckPolicy::NO_ACK, AckPolicy::BLOCK_ACK}) {
+    data->setAckPolicy(policy);
+    ASSERT(protection->computeDurationField(data, us(44), us(160), true) == 0);
+    ASSERT(protection->computeDurationField(data, us(44), us(160), false) == us(176));
+}
+auto mgmt = makeShared<Ieee80211MgmtHeader>();
+mgmt->setType(ST_AUTHENTICATION);
+mgmt->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+ASSERT(protection->computeDurationField(mgmt, us(44), us(160), true) == us(60));
+ASSERT(protection->computeDurationField(mgmt, us(44), us(160), false) == us(236));
+for (bool holder : {false, true}) {
+    ASSERT(ArithmeticHcf::encodeDuration(us(-0.2), holder) == 0);
+    ASSERT(ArithmeticHcf::encodeDuration(us(0), holder) == 0);
+    ASSERT(ArithmeticHcf::encodeDuration(us(0.2), holder) == us(1));
+    ASSERT(ArithmeticHcf::encodeDuration(us(60), holder) == us(60));
+    ASSERT(ArithmeticHcf::encodeDuration(us(60.2), holder) == us(61));
+    ASSERT(ArithmeticHcf::encodeDuration(us(32767), holder) == us(32767));
+}
+bool threw = false;
+try { ArithmeticHcf::encodeDuration(us(32767.1), true); }
+catch (const cRuntimeError&) { threw = true; }
+ASSERT(threw);
+for (int encoded : {0, 1, 61, 32767}) {
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setSequenceNumber(SequenceNumberCyclic(0));
+    header->setDurationField(us(encoded));
+    Packet packet("wire-field", header);
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    ASSERT(bytes[2] == (encoded & 255));
+    ASSERT(bytes[3] == (encoded >> 8));
+}
+EV << "Single-protection equations and field encoding passed.\n";
+
+%contains: stdout
+Single-protection equations and field encoding passed.

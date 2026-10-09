@@ -121,7 +121,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
         individuallyAddressedDataWithNormalAck = !groupAddressed && dataHeader->getAckPolicy() == AckPolicy::NORMAL_ACK;
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataHeader->getAckPolicy() == AckPolicy::NO_ACK || dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
-    if (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck) {
+    if (!groupAddressed && (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck)) {
         simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
         if (txop->isFinalFragment(dataOrMgmtHeader)) {
             return ackFrameDuration + modeSet->getSifsTime();
@@ -163,6 +163,27 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
     throw cRuntimeError("Unknown frame");
 }
 
+simtime_t SingleProtectionMechanism::computeDurationField(const Ptr<const Ieee80211MacHeader>& header,
+        simtime_t responseDuration, simtime_t nextFrameDuration, bool finalFrame)
+{
+    // IEEE Std 802.11-2024, 9.2.5.2(a)(1), (5), (8), and (9).
+    auto sifs = modeSet->getSifsTime();
+    if (dynamicPtrCast<const Ieee80211RtsFrame>(header))
+        return sifs + responseDuration + sifs + nextFrameDuration;
+    if (dynamicPtrCast<const Ieee80211BlockAckReq>(header))
+        return sifs + responseDuration;
+    if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+        simtime_t duration = finalFrame ? SIMTIME_ZERO : sifs + nextFrameDuration;
+        if (!dataOrMgmt->getReceiverAddress().isMulticast()) {
+            auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+            if (!data || data->getType() == ST_DATA || data->getAckPolicy() == AckPolicy::NORMAL_ACK)
+                duration += sifs + responseDuration;
+        }
+        return duration;
+    }
+    throw cRuntimeError("Unsupported single protection holder frame");
+}
+
 simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy)
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
@@ -181,4 +202,3 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

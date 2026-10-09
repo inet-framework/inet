@@ -1,0 +1,357 @@
+%description:
+Check successful-holder TXNAV and CTS responses through HCF, Tx, and Rx.
+Check single protection after a slower successor fails admission.
+Check multiple protection after a successful group frame.
+Check shorter, zero, expired, and PPDU-end countdown updates independently of received NAV.
+Check another AC after an initial DATA failure with a 200 us ACK timeout.
+
+%extraargs: -r 0..4
+%file: Txnav.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+namespace inet::ieee80211 {
+class TxnavValue : public cNumericResultFilter {
+  public:
+    double value = -1;
+    bool process(simtime_t&, double& value, cObject *) override { this->value = value; return false; }
+};
+class TxnavSelection : public IQosRateSelection {
+  public:
+    IQosRateSelection *delegate = nullptr;
+    bool slow = false;
+    const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txop) override {
+        if (header->getType() == ST_DATA_WITH_QOS && !header->getReceiverAddress().isMulticast())
+            return physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(slow ? 6000000 : 54000000));
+        return delegate->computeMode(packet, header, txop);
+    }
+    const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header) override { return delegate->computeResponseCtsFrameMode(packet, header); }
+    const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override { return delegate->computeResponseAckFrameMode(packet, header); }
+    const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header) override { return delegate->computeResponseBlockAckFrameMode(packet, header); }
+};
+class TxnavRx : public Rx {
+  public:
+    int successes = 0;
+    simtime_t lastEndpoint = 0;
+    void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t duration) override {
+        successes++;
+        lastEndpoint = ppduEnd + duration;
+        Rx::successfulFrameTransmitted(ppduEnd, duration);
+        ASSERT(getTxnavRemaining() == std::max(SIMTIME_ZERO, lastEndpoint - simTime()));
+    }
+    void receivedNav(simtime_t duration) {
+        Enter_Method("receivedNav");
+        setOrExtendNav(duration);
+    }
+};
+Define_Module(TxnavRx);
+class TxnavHcf : public Hcf {
+  public:
+    int finishes = 0;
+    int failures = 0;
+    int starts = 0;
+    bool refused = false;
+    TxnavSelection tracedSelection;
+    simtime_t failedSequenceFinish = -1;
+    simtime_t nextGrant = -1;
+    int bestEffortAcks = 0;
+    int voiceAcks = 0;
+    void frameSequenceStarted() override {
+        ASSERT(edca->getChannelOwner() != nullptr);
+        ASSERT(frameSequenceHandler->isSequenceRunning());
+        ASSERT(frameSequenceHandler->getContext()->getNumSteps() == 0);
+        ASSERT(starts == finishes);
+        starts++;
+        Hcf::frameSequenceStarted();
+        if (par("failureProbe").boolValue()) {
+            if (starts == 1) {
+                ASSERT(edca->getChannelOwner()->getAccessCategory() == AC_BE);
+                auto txop = edca->getChannelOwner()->getTxopProcedure();
+                ASSERT(txop->getLimit() == (txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION ? SIMTIME_ZERO : SimTime(1024, SIMTIME_US)));
+                inject(26, false, 6);
+            }
+            else if (starts == 2) {
+                ASSERT(failedSequenceFinish >= SIMTIME_ZERO);
+                nextGrant = simTime();
+                ASSERT(nextGrant >= failedSequenceFinish + SimTime(34, SIMTIME_US));
+            }
+        }
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        if (par("firstRefusal").boolValue() && !refused) {
+            ASSERT(edca->getChannelOwner() != nullptr);
+            ASSERT(starts == finishes + 1);
+            refused = true;
+            return false;
+        }
+        return Hcf::transmitFrame(packet, ifs);
+    }
+    void inject(int payload, bool group = false, int tid = 5) {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(tid);
+        header->setReceiverAddress(group ? MacAddress::BROADCAST_ADDRESS : MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("TXNAV-holder", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payload)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        if (par("failureProbe").boolValue() && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) {
+            auto tid = request->peekAtFront<Ieee80211DataHeader>()->getTid();
+            if (tid == 0) bestEffortAcks++;
+            if (tid == 6) voiceAcks++;
+        }
+        Hcf::originatorProcessReceivedFrame(packet, request);
+        tracedSelection.slow = true;
+    }
+    void frameSequenceFinished() override {
+        ASSERT(starts == finishes + 1);
+        if (par("failureProbe").boolValue() && finishes == 0) {
+            ASSERT(starts == 1 && failures == 1);
+            ASSERT(check_and_cast<TxnavRx *>(getParentModule()->getSubmodule("rx"))->successes == 0);
+            ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+            failedSequenceFinish = simTime();
+        }
+        if (par("firstRefusal").boolValue() && finishes == 0) {
+            auto context = frameSequenceHandler->getContext();
+            ASSERT(refused && context->getDuration() == SIMTIME_ZERO);
+            ASSERT(context->getNumSteps() == 0 && context->getLastStep() == nullptr);
+            FrameSequenceDurationFilter duration;
+            FrameSequenceNumPacketsFilter count;
+            auto durationValue = new TxnavValue();
+            auto countValue = new TxnavValue();
+            duration.addDelegate(durationValue);
+            count.addDelegate(countValue);
+            duration.receiveSignal(nullptr, simTime(), const_cast<FrameSequenceContext *>(context), nullptr);
+            count.receiveSignal(nullptr, simTime(), const_cast<FrameSequenceContext *>(context), nullptr);
+            ASSERT(durationValue->value == 0 && countValue->value == 0);
+        }
+        finishes++;
+        Hcf::frameSequenceFinished();
+    }
+    void originatorProcessFailedFrame(Packet *packet) override { failures++; Hcf::originatorProcessFailedFrame(packet); }
+    bool hasOwner() const { return edca->getChannelOwner() != nullptr; }
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) { tracedSelection.delegate = rateSelection; rateSelection = &tracedSelection; }
+    }
+    void sendUp(const std::vector<Packet *>& frames) override { for (auto frame : frames) { take(frame); delete frame; } }
+};
+Define_Module(TxnavHcf);
+class TxnavMac : public Ieee80211Mac {
+  public:
+    int cts = 0;
+    int holderFrames = 0;
+    simtime_t ctsStart = 0;
+    bool dropped = false;
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() == ST_CTS) { cts++; ctsStart = simTime(); }
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header)) holderFrames++;
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+    void addressedRts() {
+        Enter_Method("addressedRts");
+        auto header = makeShared<Ieee80211RtsFrame>();
+        header->setReceiverAddress(getAddress());
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        header->setDurationField(SimTime(500, SIMTIME_US));
+        auto packet = new Packet("addressed-RTS", header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(trailer);
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+  protected:
+    void handleLowerPacket(Packet *packet) override {
+        if (par("failureProbe").boolValue() && !dropped && getFullPath().find("receiver") != std::string::npos &&
+            packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_DATA_WITH_QOS)
+        {
+            dropped = true;
+            delete packet;
+            return;
+        }
+        // The synthetic RTS has no peer-side RTS step. The fixture consumes its CTS at the peer.
+        if (getFullPath().find("receiver") != std::string::npos && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_CTS) {
+            delete packet;
+            return;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(TxnavMac);
+class TxnavTest : public cSimpleModule {
+  public:
+    TxnavTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto mac = check_and_cast<TxnavMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+        auto hcf = check_and_cast<TxnavHcf *>(mac->getSubmodule("hcf"));
+        auto rx = check_and_cast<TxnavRx *>(mac->getSubmodule("rx"));
+        bool multiple = par("multiple").boolValue();
+        if (par("failureProbe").boolValue()) {
+            hcf->inject(26, false, 0);
+            wait(SimTime(3, SIMTIME_MS));
+            auto receiver = check_and_cast<TxnavMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+            ASSERT(receiver->dropped);
+            ASSERT(hcf->failures == 1);
+            ASSERT(hcf->starts == 3 && hcf->finishes == 3);
+            ASSERT(hcf->bestEffortAcks == 1 && hcf->voiceAcks == 1);
+            ASSERT(hcf->nextGrant >= hcf->failedSequenceFinish + SimTime(34, SIMTIME_US));
+            ASSERT(mac->holderFrames == 3 && rx->successes == 2);
+            std::cout << "Initial DATA failure and AC progress assertions passed.\n";
+            std::cout << "TXNAV state and CTS assertions passed.\n";
+            endSimulation();
+            return;
+        }
+        if (par("firstRefusal").boolValue()) {
+            hcf->inject(26);
+            for (int i = 0; i < 100 && !hcf->refused; i++)
+                wait(SimTime(1, SIMTIME_US));
+            ASSERT(hcf->refused && hcf->starts == 1 && hcf->finishes == 1);
+            ASSERT(!hcf->hasOwner());
+            ASSERT(mac->holderFrames == 0 && hcf->failures == 0);
+            std::cout << "Immediate HCF refusal assertions passed.\n";
+            std::cout << "TXNAV state and CTS assertions passed.\n";
+            endSimulation();
+            return;
+        }
+        hcf->inject(26, multiple);
+        if (!multiple)
+            hcf->inject(1470);
+        wait(SimTime(200, SIMTIME_US));
+        ASSERT(hcf->finishes == 1 && hcf->failures == 0);
+        ASSERT(!hcf->hasOwner());
+        ASSERT(rx->successes == 1 && rx->getTxnavRemaining() > SimTime(100, SIMTIME_US));
+        ASSERT(rx->isMediumFree());
+        auto endpoint = simTime() + rx->getTxnavRemaining();
+        hcf->inject(26, true, 0);
+        auto requestTime = simTime();
+        mac->addressedRts();
+        wait(SimTime(70, SIMTIME_US));
+        ASSERT(mac->cts == 1);
+        ASSERT(mac->ctsStart == requestTime + SimTime(16, SIMTIME_US));
+        ASSERT(mac->holderFrames == 1);
+        ASSERT(simTime() + rx->getTxnavRemaining() == endpoint);
+        ASSERT(rx->successes == 1);
+        rx->receivedNav(SimTime(100, SIMTIME_US));
+        mac->addressedRts();
+        wait(SimTime(70, SIMTIME_US));
+        ASSERT(mac->cts == 1);
+        ASSERT(mac->holderFrames == 1);
+        ASSERT(simTime() + rx->getTxnavRemaining() == endpoint);
+        wait(endpoint - simTime() - SimTime(1, SIMTIME_US));
+        ASSERT(mac->holderFrames == 1);
+        wait(SimTime(4, SIMTIME_MS));
+        ASSERT(mac->holderFrames == (multiple ? 2 : 3));
+        ASSERT(hcf->failures == 0);
+        // The response confirms success after PPDU end; it does not start the countdown.
+        auto oldEnd = simTime() - SimTime(20, SIMTIME_US);
+        rx->successfulFrameTransmitted(oldEnd, SimTime(120, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SimTime(100, SIMTIME_US));
+        rx->receivedNav(SimTime(300, SIMTIME_US));
+        rx->successfulFrameTransmitted(simTime(), SimTime(40, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SimTime(40, SIMTIME_US));
+        ASSERT(!rx->isMediumFree());
+        rx->successfulFrameTransmitted(simTime(), SIMTIME_ZERO);
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        ASSERT(!rx->isMediumFree());
+        rx->successfulFrameTransmitted(oldEnd, SimTime(10, SIMTIME_US));
+        ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+        wait(SimTime(301, SIMTIME_US));
+        ASSERT(rx->isMediumFree());
+        std::cout << "TXNAV state and CTS assertions passed.\n";
+    }
+};
+Define_Module(TxnavTest);
+}
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module TxnavMac extends Ieee80211Mac { parameters: bool failureProbe; @class(::inet::ieee80211::TxnavMac); }
+module TxnavHcf extends Hcf {
+    parameters:
+        bool firstRefusal = default(false);
+        bool failureProbe = default(false);
+        @class(::inet::ieee80211::TxnavHcf);
+        @statistic[refusalDuration](source=frameSequenceDuration(frameSequenceFinished); record=vector);
+        @statistic[refusalSteps](source=frameSequenceNumPackets(frameSequenceFinished); record=vector);
+}
+simple TxnavRx extends Rx { parameters: @class(::inet::ieee80211::TxnavRx); }
+simple TxnavTest { parameters: bool multiple; bool firstRefusal; bool failureProbe; @class(::inet::ieee80211::TxnavTest); }
+network TxnavNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: TxnavTest;
+}
+%inifile: omnetpp.ini
+[General]
+network = TxnavNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 8ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = true
+record-scalar-results = false
+*.test.multiple = ${scenario=0..4} == 1 || ${scenario} == 4
+*.test.firstRefusal = ${scenario} == 2
+*.test.failureProbe = ${scenario} >= 3
+**.wlan[*].mac.failureProbe = ${scenario} >= 3
+*.sender.wlan[0].mac.hcf.firstRefusal = ${scenario} == 2
+*.sender.wlan[0].mac.hcf.failureProbe = ${scenario} >= 3
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.typename = "TxnavMac"
+**.wlan[*].mac.rx.typename = "TxnavRx"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "TxnavHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = ${scenario} >= 3 ? 200us : -1s
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 4096B
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+*.sender.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = ${scenario} == 3 ? 0s : 1024us
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = 1024us
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = ${scenario} == 1 || ${scenario} == 4 ? "multiple" : "single"
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+%contains: stdout
+TXNAV state and CTS assertions passed.

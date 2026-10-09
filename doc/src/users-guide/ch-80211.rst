@@ -504,6 +504,31 @@ helps against hidden nodes at the cost of overhead. The CTS timeout,
 
    **.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 500B
 
+Single protection and continuation admission
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Single protection estimates the next reservation without a commitment to that future selection. With Block Ack support disabled, HCF selects the current exchange after feedback from the previous exchange. It retains the selected DATA mode through RTS/CTS. A later exchange selects its mode again.
+
+With Block Ack support disabled, HCF checks the complete expected exchange cost before each additional exchange. This cost includes holder PPDUs, expected responses, and internal SIFS intervals. It excludes the SIFS before the first transmission. The exchange cost must be strictly less than remaining TXNAV. The initial SIFS plus exchange cost must fit the remaining positive TXOP limit. TXNAV is the holder's transmitted reservation timer, which Rx shares among access categories.
+
+HCF checks both budgets after the previous exchange completes, before the next SIFS. Equality refuses the TXNAV check but passes the positive TXOP check. This decision time is INET's interpretation of IEEE Std 802.11-2024, Clause 10.23.2.8. The clause does not explicitly name the timer sample instant. HCF retains its contention block through the active sequence, even if TXNAV expires before ACK reception.
+
+For example, a hypothetical next DATA/ACK exchange needs 180 us, plus 16 us SIFS. The preceding ACK's round-trip propagation consumes 0.4 us, which leaves 195.6 us of TXNAV from the nominal estimate. The exchange proceeds because 180 us is less than 195.6 us, with at least 196 us of positive TXOP time. If a new mode increases the exchange cost to 200 us, HCF ends the TXOP before DATA. The unsent frame remains available for a fresh grant. Refusal does not cause a retry increment, failed-rate feedback, or response timeout.
+
+When the next exchange needs RTS/CTS, the preceding frame's successor term contains RTS airtime, one SIFS, and CTS airtime. It does not contain the protected DATA or its response. HCF checks the complete RTS/CTS/DATA/response cost before it sends the RTS. With unchanged estimates, that cost exceeds the remaining TXNAV, so single protection does not burst into the RTS/CTS exchange.
+
+For example, after DATA A and its ACK, queued DATA B needs RTS/CTS. HCF refuses B before RTS and retains B for a fresh grant after TXNAV expires. An initial exchange can still use RTS/CTS.
+
+The TXNAV check does not require the initial SIFS plus exchange cost to fit the previous reservation. This permits continuation with positive propagation when the selected exchange retains its forecast cost. If airtime estimates are exact and field conversion adds no margin, unchanged DATA/ACK forecasts require round-trip propagation shorter than SIFS. The positive TXOP limit remains a separate constraint. Response airtime remains estimated; admission does not guarantee the peer's exact completion time.
+
+The first exchange proceeds even when its cost exceeds a positive TXOP limit. This compatibility fallback preserves queue progress. It does not implement the standard's required fragmentation from the TXOP budget. For example, a hypothetical 1500-byte frame at 6 Mbit/s needs 2084 us with ACK. The initial exchange proceeds under the default 1504 us voice limit. An additional exchange with that cost must pass the separate budgets.
+
+A zero limit permits the initial exchange and its existing RTS/CTS and immediate response. Each later fragment or unrelated unit needs a fresh TXOP. Prepared fragments and A-MSDUs use the same complete-cost check under positive limits.
+
+``isBlockAckSupported = true`` disables complete-cost continuation admission, even without a Block Ack agreement. Multiple protection also retains its separate admission policy. Both paths use shared TXNAV. Basic Block Ack admission, BAR forecasts, zero-limit companion rules, and optional overrun exceptions remain outside this repair.
+
+All single protection paths classify group frames before the current-frame ACK equation. With Block Ack support disabled, the current one-frame group sequence advertises zero. With support enabled, its legacy forecast can reserve a queued successor that the sequence cannot transmit. This limit applies to group management and non-QoS DATA too.
+
 Multiple protection in an EDCA TXOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -556,8 +581,17 @@ Unused reservation time remains busy because this implementation sends no CF-End
 current group sequence sends one group frame per grant, even with a positive limit. For the 200 us
 group example above, all 824 us of advertised reservation remains unused. The holder's other access
 categories and other stations remain blocked until reservation expiry. An early end clears the
-category's holder endpoint but retains Rx's NAV. Recipient responses do not extend their own local
-NAV; unrelated received reservations still suppress CTS.
+category's maximum advertised endpoint but retains Rx's shared TXNAV. Each successful holder frame
+replaces TXNAV with its PPDU end plus its encoded Duration/ID. A shorter successful field can reduce
+TXNAV below the maximum advertised endpoint. A failed holder frame does not update TXNAV.
+
+Received NAV remains separate. Active TXNAV blocks contention but does not itself prevent CTS to an
+addressed RTS when no access category owns the channel. Recipient responses do not update TXNAV or
+extend local NAV. An unrelated received reservation still suppresses CTS. For example, a hypothetical
+TXOP ends at 300 us with TXNAV due at 500 us. Local contention waits for expiry and normal AIFS and
+backoff, but an eligible addressed RTS at 350 us can receive CTS.
+
+HCF also blocks local contention through its active sequence. For example, an initial DATA transmission receives no ACK and creates no successful TXNAV. Other access categories still wait for HCF to release the channel after failure. Normal AIFS and backoff follow that release. This exclusion does not create a transmitted reservation or change the CTS medium query.
 
 The supported EDCA path requires an effective AIFSN of at least 1 for the response ownership rule.
 AIFSN specifies the slot count that supplements SIFS to determine the arbitration interframe space.
@@ -565,8 +599,8 @@ The standard separately requires AIFSN of at least 1 for APs and at least 2 for 
 example, a non-AP station with AIFSN 1 meets the ownership condition but violates the standard's
 minimum.
 
-This feature does not implement full shared TXNAV or admission of a complete exchange against the
-remaining budget. For example, the existing admission policy can start a 120 us exchange with only
+Multiple protection does not check a complete exchange against the remaining budget.
+For example, its admission policy can start a 120 us exchange with only
 100 us left. The reference scope assumes whole-microsecond positive limits, integral initial PPDU
 airtime, and integral legacy RTS airtime. It adds no A-MPDU, Compressed Block Ack, new
 fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. It also adds no reverse

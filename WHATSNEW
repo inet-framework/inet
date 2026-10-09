@@ -329,8 +329,8 @@ Notable backward incompatible changes are the following:
 
    Tx requires an explicit local NAV choice in both transmitFrame() overloads.
    The NAV records a reservation of the medium. Custom C++ implementations and
-   callers must add updateLocalNav. Holder frames use true; recipient responses
-   use false. The migration guide supplies the signatures and completion rules.
+   callers must add updateLocalNav. DCF holder frames use true. HCF holder frames
+   and recipient responses use false. The migration guide supplies the signatures and completion rules.
 
    CTS, ACK, and Basic Block Ack responses retain their duration fields without
    extending the recipient's local NAV. Received reservations still control
@@ -339,6 +339,59 @@ Notable backward incompatible changes are the following:
 
    HCF clamps response durations to zero and applies ceiling to whole microseconds
    before transmission. These shared changes can change Wi-Fi simulation results.
+
+20. IEEE 802.11 single protection and shared TXNAV
+
+   HCF now checks complete continuation costs under single protection with
+   Block Ack support disabled. Before the next SIFS, the exchange cost must
+   be strictly less than remaining TXNAV. The initial SIFS plus exchange
+   cost must fit the positive TXOP limit. This separation permits bursts
+   whose preceding ACK's propagation delay consumes part of the initial SIFS
+   budget. For example, a 238 us exchange proceeds with 246.67 us TXNAV and
+   sufficient TXOP time, after 10 us SIFS.
+
+   A refused frame remains available for a fresh grant without a retry
+   increment or failed-rate feedback. HCF retains the admitted DATA mode
+   through RTS/CTS. Forecasts preserve the retained successor's mode and ACK policy.
+
+   When the next exchange needs RTS/CTS, the preceding field's successor term
+   contains RTS airtime, one SIFS, and CTS airtime. It excludes the protected
+   DATA and its response. The complete RTS/CTS/DATA/response cost exceeds the
+   remaining TXNAV with unchanged estimates. Single protection therefore
+   refuses that continuation before RTS.
+
+   For example, after DATA A and its ACK, queued DATA B needs RTS/CTS.
+   B waits for a fresh grant after TXNAV expires. An initial exchange can
+   still use RTS/CTS.
+
+   The first exchange retains a compatibility fallback, including under an
+   insufficient positive limit. TXOP-based fragmentation remains unsupported.
+   A zero limit permits no additional exchange. Block Ack support disables
+   the new admission check even without an agreement. Multiple protection
+   retains its separate admission policy.
+
+   Rx now owns shared TXNAV separately from received NAV. Successful holder
+   frames replace TXNAV from their PPDU end and encoded Duration/ID. TXNAV
+   persists after TXOP end and blocks contention, but it does not itself
+   prevent an eligible CTS response. DCF retains its local NAV behavior.
+
+   HCF also blocks local contention through its active sequence. This prevents
+   a second grant during an initial ACK wait before successful TXNAV exists.
+   Normal AIFS and backoff follow channel release.
+
+   Single protection now excludes the current ACK estimate for group management
+   and non-QoS DATA, with Block Ack support enabled or disabled. With support
+   enabled, the legacy forecast can still reserve an ineligible group successor.
+
+   TxOpFs publishes the ACK policy before RTS. If Block Ack replaces a stale
+   Normal Ack policy, the single protection RTS field omits the unnecessary
+   ACK and its SIFS. These field and contention changes can change Wi-Fi
+   simulation results and fingerprints. The separate expiry event and corrected
+   sequence observations can also change fingerprints.
+
+   Custom IRx implementations need the TXNAV operations. Sequence callbacks
+   need the start notification and Boolean submission result. Custom ACK policies
+   must not depend on HCF's removed second policy query. See the migration guide.
 
 Notable backward compatible changes are the following:
 
@@ -445,8 +498,8 @@ Notable backward compatible changes are the following:
    A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
 
    The user guide explains nominal timing, zero-limit estimates, unused
-   reservation time, and support limits. The feature does not implement full
-   shared TXNAV or admission of a complete exchange against the remaining budget.
+   reservation time, and support limits. Multiple protection uses shared TXNAV.
+   It does not check a complete exchange against the remaining budget.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

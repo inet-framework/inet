@@ -175,7 +175,7 @@ the C++ class dispatches, and the submodules do the work.
 | Part | Files | Responsibility |
 | --- | --- | --- |
 | `Ieee80211Mac` | `mac/Ieee80211Mac.*` | Splits messages into upper, lower, management and command. Encapsulates a data packet into a MAC frame with addresses from the MIB. Decapsulates a received frame into a packet with indication tags. Builds the MAC header for a management body. Routes every frame to `dcf` or `hcf` by `mib->qos`. Relays the radio state signals to `rx` and `tx`. Controls the radio mode. Forwards radio commands from management, with a delay while the medium is busy. Registers the interface entry (address, MTU). Publishes the mode set. |
-| `Rx` | `mac/Rx.*` | Checks the FCS of each received frame. Keeps the NAV timer. Computes *medium free* from the reception state, the transmission state and the NAV, and tells every registered contention when it changes. Reports a corrupt frame to the contentions. |
+| `Rx` | `mac/Rx.*` | Checks the FCS of each received frame. Owns received NAV and shared TXNAV. Its medium query uses radio state and received NAV. Contention also requires expired TXNAV and HCF permission. Rx notifies registered contentions when their permitted medium state changes. Reports a corrupt frame to the contentions. |
 | `Tx` | `mac/Tx.*` | `Tx` fills the transmitter address and FCS, waits the IFS, and passes the frame to the MAC. When the radio reports completion, `Tx` calls the requester. `Tx` then extends the local NAV in `Rx` only if the completed frame's saved `updateLocalNav` choice is `true`. |
 | `Ds` | `mac/Ds.*` | The distribution service. A station passes a received data frame up when associated and when the frame came from its BSSID. An access point passes the frame up, forwards it to another station through the MAC, or does both for a group address, as the station table dictates. |
 | `Dcf` | `mac/coordinationfunction/Dcf.*` | The distributed coordination function, for a non-QoS station. See §3.4. |
@@ -186,7 +186,9 @@ The five submodules exist as `dcf`, `hcf` (only when `qosStation`), `ds`, `rx` a
 sets `*.rxModule = "^.rx"` and `*.txModule = "^.tx"` so that every part below can find `Rx` and
 `Tx` by path.
 
-`Dcf` and `Hcf` pass `true` for holder frames and `false` for recipient CTS and ACK responses. `Hcf` also passes `false` for recipient Basic Block Ack responses. `Tx` saves the completed frame's choice before the completion callback. For example, a recipient CTS retains `false` if the callback accepts a holder frame with `true`. The CTS retains its Duration/ID field but does not extend the recipient's local NAV. Received reservations still affect channel access through `Rx`.
+`Dcf` passes `true` for holder frames. `Hcf` passes `false` for holder frames because HCF publishes successful reservations through separate TXNAV. Both coordination functions pass `false` for recipient CTS and ACK responses. `Hcf` also passes `false` for recipient Basic Block Ack responses. For example, HCF DATA leaves local NAV unchanged at transmission completion. After a valid ACK, HCF replaces TXNAV from the DATA PPDU end and encoded Duration/ID.
+
+`Tx` saves the completed frame's choice before the completion callback. A new accepted transmission cannot change that saved choice. Recipient responses retain their Duration/ID fields without a local NAV update. Received reservations still affect channel access through `Rx`.
 
 Both coordination functions share one skeleton. Each one:
 
