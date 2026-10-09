@@ -242,8 +242,8 @@ void TcpTestClient::scheduleNextSend()
     Command cmd = commands.front();
     commands.pop_front();
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
-    const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
-    msg->insertAtBack(bytes);
+    if (cmd.numBytes > 0) // a SEND of 0 bytes is a packet without content
+        msg->insertAtBack(makeShared<ByteCountChunk>(B(cmd.numBytes)));
     scheduleAt(cmd.tSend, msg);
 }
 

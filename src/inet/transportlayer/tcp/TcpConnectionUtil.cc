@@ -1147,6 +1147,16 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
 void TcpConnection::enqueueSendCommandData(Packet *packet)
 {
+    // A SEND of zero bytes has nothing to queue, and TcpSendQueue::enqueueAppData()
+    // cannot take it: its peekDataAt(B(0), 0) throws "Returning an empty chunk is not
+    // allowed". It is not a malformed command: send(fd, x, 0) is a legal no-op, and
+    // sendto(fd, x, 0, MSG_FASTOPEN) asks for nothing but a Fast Open cookie.
+    if (packet->getByteLength() == 0) {
+        EV_DETAIL << "SEND of zero bytes: nothing to queue\n";
+        delete packet;
+        return;
+    }
+
     // TCP_INFO time counters (busy_time): read-only bookkeeping -- if the connection
     // was fully idle (nothing outstanding, nothing queued) before this SEND, it
     // becomes busy now. See processAckInEstabEtc() for the matching "back to idle" exit.
