@@ -48,6 +48,12 @@ class INET_API DcTcp : public TcpReno
     /** RFC 8257's proportional reduction, in place of RFC 3168's halving. */
     virtual bool processEce(uint32_t numBytesAcked) override;
 
+    /** RFC 8257 section 3.3: the count of the acknowledged and marked bytes, also in a fast recovery. */
+    virtual void ackedInFastRecovery(uint32_t numBytesAcked) override;
+
+    /** The count of RFC 8257 section 3.3 (steps 2 to 8) for one ACK, without the cut of cwnd. */
+    virtual void countBytes(uint32_t numBytesAcked);
+
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;

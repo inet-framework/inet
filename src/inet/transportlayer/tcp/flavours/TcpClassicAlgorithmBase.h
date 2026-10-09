@@ -49,6 +49,13 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     virtual bool processEce(uint32_t numBytesAcked);
 
     /**
+     * Called for an ACK of new data in a fast recovery, after the recovery. A
+     * flavour that counts the acknowledged bytes at each ACK (DCTCP) counts them
+     * here; the window stays with the recovery.
+     */
+    virtual void ackedInFastRecovery(uint32_t numBytesAcked) {}
+
+    /**
      * Called after the window update of an ACK of new data, before the sending:
      * TcpReno continues its SACK-based loss recovery here, TcpNewReno moves the
      * recover point.

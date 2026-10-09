@@ -128,8 +128,10 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
     bool inFastRecovery = isInFastRecovery();
-    if (inFastRecovery)
+    if (inFastRecovery) {
         recovery->receivedAckForUnackedData(numBytesAcked);
+        ackedInFastRecovery(numBytesAcked);
+    }
     else if (!processEce(numBytesAcked))
         congestionControl->receivedAckForUnackedData(numBytesAcked);
 
