@@ -1,0 +1,40 @@
+%description:
+Tests the padding of the TCP option area to a multiple of 4 bytes (RFC 9293
+section 3.1). Both sides support SACK, and only the server supports
+timestamps. The server's SYN-ACK carries MSS and SACK-Permitted without NOPs,
+because the server expects a timestamp option next, but the client offered
+none: 6 bytes of options. The server now adds two End of Option List bytes,
+which the client reads. Before, the header was 26 bytes long, which the TCP
+header serializer refuses ("must be dividable by 4 bytes").
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_tcp.**.cmdenv-log-level=DETAIL
+**.cmdenv-log-level=OFF
+
+*.cli_app.sendScript="1.0 100"
+*.*_tcp.sackSupport = true
+*.cli_tcp.timestampSupport = false
+*.srv_tcp.timestampSupport = true
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize SackPermitted
+
+%contains: stdout
+Option type 0 (EOL), length 1
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -1872,6 +1872,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     }
 
     if (tcpHeader->getHeaderOptionArraySize() != 0) {
+        // RFC 9293 section 3.1: the header ends on a 32-bit boundary, and the padding
+        // is zeros, that is, End of Option List bytes. An option area that the options
+        // do not fill (for example MSS and SACK-Permitted without NOPs) gets them.
+        while (tcpHeader->getHeaderOptionArrayLength().get() % 4 != 0)
+            tcpHeader->appendHeaderOption(new TcpOptionEnd());
+
         B options_len = tcpHeader->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes
