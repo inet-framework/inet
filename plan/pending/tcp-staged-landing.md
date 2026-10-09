@@ -61,7 +61,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S10 ✅ | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 37, 76, 85, 86, new | +1807 −25 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe (D-29 to D-35) |
 | S11 ✅ | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +198 −36 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
 | S12 ✅ | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 27 (part), 39 (part), 43, 44, new | +868 −72 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs (D-42 to D-50) |
-| S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
+| S13 ✅ | `topic/tcp-accecn` | 13 (part), 23 (part), 27, 48 (part), 64 (part), 65 (part), new | +877 −122 | Accurate ECN (RFC 9768), the ECN repairs that it needs, `ecnMarkAll`; DCTCP counts its bytes also in a fast recovery (D-51 to D-60) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
@@ -514,6 +514,79 @@ plan gives a reason for.
   source has no limit. S12 adds `fastopenMaxPendingRequests` for each local port; its default of
   16 is an assumption, because Linux takes the limit from the TCP_FASTOPEN socket option, which
   INET's socket API does not have.
+- **D-51 — ECT(0), and ECT only on new data unless `ecnMarkAll`.** RFC 8311 section 3: "A
+  network node MUST NOT originate traffic marked with ECT(1) unless ... participating in a
+  Congestion Marking Differences experiment"; master used ECT(1). RFC 3168 sections 6.1.1 to
+  6.1.6 forbid ECT on a SYN, a SYN-ACK, a pure ACK, a retransmission and a window probe, and RFC
+  9768 section 4 keeps that; master marked a SYN-ACK, a FIN without data and a window probe. S13
+  follows the RFCs by default. `ecnMarkAll` (default false) sets ECT on the control segments of an
+  AccECN or DCTCP connection, as Linux does (`tcp_ecn_send()`), and RFC 8257 section 4.1
+  recommends such a knob for DCTCP. DCTCP sets ECT on its SYN, SYN-ACK and RST by default (RFC 8257
+  section 3.6: SHOULD; Linux), through `needsEcn()` of the flavour (Linux TCP_CONG_NEEDS_ECN). The
+  source set ECT on each segment of AccECN without a knob, and on each DCTCP segment, also on the
+  SYN of each mode.
+- **D-52 — A retransmission timeout with nothing in flight sends new data.** An ECN-Echo at a cwnd
+  of one segment restarts the retransmission timer (RFC 3168 section 6.1.2). With nothing in
+  flight, master then retransmitted nothing and failed an assertion. S13 sends new data at such a
+  timeout. RFC 3168 section 6.1.2 also says that the sender "will then be able to send a new packet
+  only when the retransmit timer expires"; master, the source and Linux send at once, and S13
+  keeps that.
+- **D-53 — `tcpEcnMode` replaces `ecnWillingness`.** Linux has five modes (`tcp_ecn`), and a
+  passive one is its default. `tcpEcnMode` is "off", "passive", "rfc3168", "accecn" or
+  "accecn-passive"; it is @mutable, as a harness can change the sysctl between connections.
+  `ecnWillingness` stays, deprecated, and a run that sets both stops with an error.
+- **D-54 — Each flavour responds to the AccECN feedback.** RFC 9768 section 3.1.5 obliges a host in
+  AccECN mode "to respond appropriately to AccECN feedback", and section 4 maps the response to an
+  increase of s.cep, without CWR. In the source only DCTCP read the counts. S13 decodes the ACE
+  field before the algorithm processes the ACK, and an increase acts as an ECN-Echo in each
+  flavour. CE feedback in the handshake also gets a response (section 3.2.2.2); Linux only counts
+  it, and no Linux script sees the difference, so S13 has no parameter for it.
+- **D-55 — The AccECN handshake and counters follow RFC 9768 where the source did not.** An unknown
+  combination of the SYN flags negotiates AccECN (section 3.1.3; the source: no ECN). A passive
+  or classic server answers an AccECN SYN with classic ECN (Table 2, as Linux; the source needed
+  AE=0 for a passive server). The handshake encoding of the ACE field goes only on a pure ACK
+  without SACK blocks (section 3.2.2.1; the source: also on data). Only acceptable packets count
+  (section 4; the source counted at the input of the module). `accEcnBareTimeWaitAck` selects the
+  Linux ACK of TIME_WAIT without the ACE field (section 3.2.2.2 asks for it; the source always
+  left it out).
+- **D-56 — The AccECN option of the receiver has two policies.** `accEcnOptionEnabled` (default
+  true; RFC 9768 section 3.2.3: RECOMMENDED). `accEcnOptionPolicy="rfc"` (default) follows the
+  recommended scheme of section 3.2.3.3: the option after a byte count changed, with the fields
+  that ever changed, in the order that needs fewer fields, and with each field on the first
+  SYN-ACK and the first segments of the client (section 3.2.3.2.1). "linux" follows
+  `tcp_ecn_option=2`: each segment, kind 174, each field that fits in the Linux layout of the
+  options, only after the peer sent an option (section 3.2.3.2.3 asks to send it also then), and
+  the counts of a duplicate that ends at RCV.NXT (Linux `tcp_sequence()`). Both policies cut the
+  option to the fields that changed and give up SACK blocks down to two (section 3.2.3.3). The
+  source sent the option on each fourth ACK and alternated the kinds, which neither the RFC nor
+  Linux does. inet-gpl needs "linux".
+- **D-57 — The AccECN option of the sender follows Linux.** A stretch ACK is decoded as
+  `__tcp_accecn_process()` does, which holds the rule of Appendix A.2.2; the first option is
+  checked for zeroed fields (section 3.2.3.2.4, a MAY); the option stops after an ACK with the
+  option and a D-SACK block got lost (section 3.2.3.2.2, a MAY). DCTCP counts the CE bytes of the
+  option. The source chose the marks of a large ACK by the nearest byte estimate. S13 does not
+  detect CE bytes without CE marks (section 3.2.3.2.5 asks for the reaction only after a
+  detection, and Linux has none), and it does not estimate the bytes of an ACK without the option
+  (Linux `est_ecnfield`).
+- **D-58 — The AccECN fallback of a retransmitted SYN and SYN-ACK.** An AccECN SYN sets (1,1,1)
+  on its first retransmission and (0,0,0) on the later ones (RFC 9768 section 3.1.4.1). A
+  retransmitted AccECN SYN-ACK has no option, from the second retransmission (0,0,0), and after
+  that the server sets no ECT (sections 3.2.3.2.2 and 3.1.5). As Linux. Classic ECN keeps its
+  flags: RFC 3168 section 6.1.1.1 lets a client clear them on a retransmitted SYN (a MAY), and
+  Linux does, but a SYN lost to congestion then costs the connection its ECN; with it, the DCTCP
+  incast example ran some connections without ECN, and both of its CI rows moved. The source
+  cleared the flags of a classic SYN and SYN-ACK too, and it kept ECT after its own (0,0,0)
+  SYN-ACK.
+- **D-59 — The ECN state before the first segment after the SYN-ACK.** Master set the classic ECN
+  state of the client after `established()`, which already sends the ACK of the SYN-ACK or waiting
+  data, so that data went out Not-ECT. S13 sets it before, as the source does since commit 27.
+- **D-60 — What S13 does not do.** RFC 9768 section 3.1.5: a server MUST reset a connection whose
+  handshake has both a classic ECN-setup SYN and an AccECN SYN. Section 3.2.2.1: the client SHOULD
+  send a pure ACK before data on the ACK of the SYN-ACK. Section 3.2.2.5.1: an ACK at once when a
+  CE mark follows a packet without one (SHOULD), and an ACK of ACKs after n CE marks on pure ACKs
+  (MUST; only ECT pure ACKs can carry them, which needs `ecnMarkAll`). Section 3.1.4.1: a cache of
+  failed AccECN attempts (SHOULD). DCTCP requests ECN only by `tcpEcnMode`, while Linux requests it
+  for DCTCP by itself.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1403,47 +1476,95 @@ differs, as on master; the lwIP rows need a build with lwIP). The six gates pass
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
 | 1 | fix: originate ECT(0), not ECT(1) | — | 27 (part) |
-| 2 | fix: no ECT on a segment without data | — | 27 (part) |
-| 3 | fix: an ECN-setup SYN-ACK only for an ECN-setup SYN | — | 27 (part) |
-| 4 | add: `tcpEcnMode`, which replaces `ecnWillingness` | — | 27 (part) |
-| 5 | add: AccECN negotiation and the ACE field (RFC 9768), selected by `tcpEcnMode` | B16 (part) | 27 (part), 65 (part) |
-| 6 | add: the AccECN option, selected by `accEcnOptionEnabled` | — | 27 (part) |
-| 7 | add: the ECN fallback of a retransmitted SYN and SYN-ACK | — | 27 (part) |
-| 8 | add: ECT on the control segments, selected by `ecnMarkAll` | B16 (part) | 13 (part), 27 (part) |
-| 9 | change: DCTCP counts the acknowledged and the marked bytes also in a fast recovery (D-23) | — | new |
-| 10 | comment: the AccECN comments | — | 23 (part), 48 (part), 64 (part) |
+| 2 | fix: no retransmission at a timeout with nothing in flight | — | new (D-52) |
+| 3 | fix: no ECT on a SYN-ACK, a segment without data or a window probe | — | 27 (part) |
+| 4 | fix: an ECN-setup SYN-ACK only for an ECN-setup SYN | — | 27 (part) |
+| 5 | add: `tcpEcnMode`, which replaces `ecnWillingness` | — | 27 (part) |
+| 6 | add: AccECN negotiation and the ACE field (RFC 9768) | B16 (part) | 27 (part), 65 (part) |
+| 7 | add: `accEcnBareTimeWaitAck`, the Linux ACK in TIME_WAIT | — | 27 (part) |
+| 8 | fix: read an AccECN option of any length | — | new |
+| 9 | add: the AccECN option of the data receiver (RFC 9768) | — | 27 (part) |
+| 10 | add: the AccECN option of the data sender (RFC 9768) | — | 27 (part) |
+| 11 | add: no AccECN option after its ACKs got lost twice | — | 27 (part) |
+| 12 | add: the Linux counts of a duplicate for `accEcnOptionPolicy` | — | 27 (part) |
+| 13 | add: the AccECN fallback of a retransmitted SYN and SYN-ACK | — | 27 (part) |
+| 14 | fix: ECN in force before the first segment after the SYN-ACK | — | 27 (part) |
+| 15 | add: `ecnMarkAll`, and ECT on the SYN, SYN-ACK and RST of DCTCP | B16 (part) | 13 (part), 27 (part) |
+| 16 | change: DCTCP counts its bytes also in a fast recovery (D-23) | — | new |
+| 17 | comment: Accurate ECN in the module and header comments | — | 23, 48, 64 (parts) |
 
-Commit 27 is the AccECN feature, but it also repairs classic ECN: RFC 8311 section 3
-("A network node MUST NOT originate traffic marked with ECT(1) unless ... participating in a
-Congestion Marking Differences experiment"), RFC 3168 section 6.1.4 (a pure ACK, and so a FIN
-without data, is Not-ECT) and RFC 3168 section 6.1.1 (an ECN-setup SYN-ACK answers an ECN-setup
-SYN). Each repair is its own step, before the feature. The checks of S13 against RFC 9768 found
-these differences of the source, which S13 records as decisions:
+Commit 27 is the AccECN feature, but it also repairs classic ECN (D-51, D-59). Each repair is its
+own step before the feature; step 2 (D-52) repairs a crash that the test of step 3 found. The
+feature divides into the negotiation with the ACE field (step 6), the Linux ACK of TIME_WAIT
+(step 7), the option of the receiver and of the sender (steps 9 and 10), the end of the option
+after lost ACKs (step 11), the Linux counts of a duplicate (step 12) and the fallback (step 13).
+Step 8 repairs the option parser of master for the lengths of RFC 9768 before the option uses it.
+Step 15 adds `ecnMarkAll` of B16 and the ECT of DCTCP, and step 16 repairs D-23. The checks of
+S13 against RFC 9768, RFC 8311, RFC 3168 and RFC 8257 found the differences of the source that
+D-51 to D-60 record.
 
-- RFC 9768 section 3.1.5 obliges a host in AccECN mode "to respond appropriately to AccECN
-  feedback" as RFC 3168 section 6.1 defines, and section 4 maps the response to an increase of
-  s.cep. In the source only DCTCP reads the AccECN counts, so Reno, NewReno and CUBIC ignore the
-  marks. Step 5 decodes the ACE field before the algorithm processes the ACK, and an increase acts
-  as an ECE of classic ECN, without CWR (RFC 9768 section 3.1.5).
-- RFC 9768 section 4 keeps the prohibition of ECT on pure ACKs, retransmissions and window probes
-  of RFC 3168. The source, as Linux, sets ECT on each segment of an AccECN connection and of DCTCP.
-  S13 follows the RFC by default, and step 8 adds the parameter `ecnMarkAll` for the Linux
-  behavior, which is also the knob that RFC 8257 section 4.1 recommends for DCTCP.
-- RFC 9768 section 3.1.5: a server MUST NOT set ECT after it sent or received a SYN or SYN-ACK with
-  (AE,CWR,ECE) = (0,0,0) in the handshake. The source stops ECT after a received one, but not
-  after its own fallback SYN-ACK (step 7).
-- RFC 9768 section 3.2.2.1: the handshake encoding of the ACE field goes on a pure ACK of the
-  SYN-ACK without SACK blocks; the source puts it on the first ACK, also with data.
-- RFC 9768 section 3.1.3: a server treats an unknown combination of the flags of a SYN as an
-  AccECN request; the source treats it as no ECN.
-- The option policy: RFC 9768 section 3.2.3.3 recommends the option on each scheduled ACK after a
-  byte counter changed, with each field that ever changed. The source sends it on every fourth
-  ACK and alternates its two kinds, which neither the RFC nor Linux does (step 6).
-- DCTCP: `ecnMarkAll` of the plan's B16 (S5d) never landed; RFC 8257 section 3.6 asks for ECT on
-  the SYN, the SYN-ACK and the RST of a DCTCP connection (SHOULD), section 4.1 for a knob for the
-  other control segments (step 8).
-
-Step 5 takes the AccECN branch of DCTCP (commit 65, B16), and step 9 repairs D-23 with a count of
-the bytes at each ACK, also in a fast recovery, before the cut, which stays outside a recovery.
 The non-AccECN parts of commit 27 that belong to other stages: the counts of `sendData()`
 (`allowedToSend`, S16), and the second TS block of a SYN, which master never had (D-43).
+
+Items for later stages: (S15, S16) the zero window probe of master sends new bytes beyond a zero
+window, so `snd_max` grows, and the probes continue after the window opens. (S17) The option
+writer skips CLOSING, LAST_ACK and TIME_WAIT, and `sendFin()` writes no options, so these
+segments carry no TS option. (S17) Of the two `addSacks()` of master, only that of
+`TcpConnection` runs; that of `Rfc6675Recovery` has no caller. (inet-gpl) Its packetdrill
+configuration follows S13 with `accEcnOptionPolicy = "linux"` in place of `accEcnOptionBeaconAcks`
+and `accEcnOptionKindAlternates`, `accEcnBareTimeWaitAck = true` and `ecnMarkAll = true`; a run
+can check it only after S18.
+
+### S13 — `topic/tcp-accecn` — landed 2026-10-12
+
+The owner reviewed and approved S13 on 2026-10-12.
+
+S13 brings Accurate ECN (RFC 9768) and the ECN repairs that it needs: six repairs of master,
+nine additions, a change of DCTCP and a comment. The additions change nothing until a run selects
+AccECN or a new parameter, except the ECT on the SYN, SYN-ACK and RST of DCTCP. Where the source
+is wrong or incomplete, S13 deviates from it (D-51 to D-60).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: originate ECT(0), not ECT(1)` | — | 27 (part) | `dctcp` DcTcpIncast, TcpRenoIncast; `redmarker` TcpSender1 (~tND) |
+| `tcp: fix: no retransmission at a timeout with nothing in flight` | — | new (D-52) | — |
+| `tcp: fix: no ECT on a SYN-ACK, a segment without data or a window probe` | — | 27 (part) | the same three rows (~tND) |
+| `tcp: fix: an ECN-setup SYN-ACK only for an ECN-setup SYN` | — | 27 (part) | — |
+| `tcp: add: tcpEcnMode, which replaces ecnWillingness` | — | 27 (part) | — |
+| `tcp: add: AccECN negotiation and the ACE field (RFC 9768)` | B16 (part) | 27 (part), 65 (part) | — |
+| `tcp: add: accEcnBareTimeWaitAck, the Linux ACK in TIME_WAIT` | — | 27 (part) | — |
+| `tcp_common: fix: read an AccECN option of any length` | — | new | — |
+| `tcp: add: the AccECN option of the data receiver (RFC 9768)` | — | 27 (part) | — |
+| `tcp: add: the AccECN option of the data sender (RFC 9768)` | — | 27 (part) | — |
+| `tcp: add: no AccECN option after its ACKs got lost twice` | — | 27 (part) | — |
+| `tcp: add: the Linux counts of a duplicate for accEcnOptionPolicy` | — | 27 (part) | — |
+| `tcp: add: the AccECN fallback of a retransmitted SYN and SYN-ACK` | — | 27 (part) | — |
+| `tcp: fix: ECN in force before the first segment after the SYN-ACK` | — | 27 (part) | — |
+| `tcp: add: ecnMarkAll, and ECT on the SYN, SYN-ACK and RST of DCTCP` | B16 (part) | 13 (part), 27 (part) | `dctcp` DcTcpIncast (tplx, ~tNl, ~tND) |
+| `tcp: change: DCTCP counts its bytes also in a fast recovery (D-23)` | — | new | — |
+| `tcp: comment: Accurate ECN in the module and header comments` | — | 23, 48, 64 (parts) | — |
+
+Three commits move CI rows. ECT(0) in place of ECT(1), and no ECT on the control segments,
+change only the packet data (~tND) of the two DCTCP incast rows and the RED marker row: the same
+packets go out with another ECN field. ECT on the DCTCP SYN and SYN-ACK changes the DCTCP incast
+row in each ingredient: the congested switch marks these segments where it dropped them before
+(RFC 8257 section 3.6). A first version of the fallback also cleared the flags of a classic ECN
+SYN, and both incast rows moved; S13 keeps classic ECN as master (D-58).
+
+New tests: `tcp_ecn_ect_1` to `_3`, `tcp_ecn_cwnd_1`, `tcp_ecn_synack_1`, `tcp_ecnmode_1` and
+`_2`, 14 tests `tcp_accecn_*` (the negotiation, the ACE field, the time-wait ACK), 14 tests
+`tcp_accecn_option_*`, 4 tests `tcp_accecn_fallback_*`, `tcp_ecn_estab_1`, 5 tests
+`tcp_ecn_markall_*` and `tcp_dctcp_recovery_count_1`; the unit test
+`tcp_accecn_option_wire_2`. The scripted tester gets the commands `ace`, `ect1`, `ect0` and
+`zeroaccecn`, and it delivers the ECN codepoint of a segment; the packet dump shows the ECN
+codepoint, the AE, CWR and ECE flags, and the AccECN options.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (446 at the first code commit, 490 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new
+tests of each code commit fail with the source of the commit before (`tcp_ecnmode_2`, the control
+of a passive client, passes there too). The CI fingerprint job runs at each code commit, and only
+the rows above move. The TCP fingerprint rows run in debug at the head with no runtime error (the
+`tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six
+gates pass.
