@@ -1351,7 +1351,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             // AccECN (RFC 9768 Table 2): the flags of the SYN-ACK decide the mode, before
             // established() sends the ACK of the SYN-ACK. (0,0,0) and (1,1,1): no ECN;
-            // (0,0,1): classic ECN, which the ECN part below completes; each other value:
+            // (0,0,1): classic ECN, which the ECN part after it completes; each other value:
             // AccECN, and it feeds back the IP ECN codepoint of our SYN. The ACK of the
             // SYN-ACK feeds back the codepoint of the SYN-ACK (Table 3), and a CE-marked
             // SYN-ACK counts as the first CE mark (section 3.2.2.2: r.cep becomes 6).
@@ -1378,6 +1378,25 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 state->aeSynSent = false;
             }
 
+            // ECN, also before established(), which can send data at once: a segment
+            // after the SYN-ACK carries the ECN state of the connection
+            if (state->ecnSynSent) {
+                if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit()) {
+                    state->ect = true;
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
+                }
+                else {
+                    state->ect = false;
+                    EV << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+                }
+                state->ecnSynSent = false;
+            }
+            else if (!state->accEcnNegotiated) {
+                state->ect = false;
+                if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+            }
+
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             state->snd_effmss = calculateEffectiveMss();
@@ -1402,24 +1421,6 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             // the text of the SYN-ACK: the data transfer states deliver the text of
             // a segment, but this segment reaches ESTABLISHED only on return
             sendAvailableDataToApp();
-
-            // ECN
-            if (state->ecnSynSent) {
-                if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit()) {
-                    state->ect = true;
-                    EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
-                }
-                else {
-                    state->ect = false;
-                    EV << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
-                }
-                state->ecnSynSent = false;
-            }
-            else if (!state->accEcnNegotiated) {
-                state->ect = false;
-                if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
-                    EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
-            }
 
             if (synAckFin) {
                 // ESTABLISHED now, and the FIN takes the connection on to CLOSE-WAIT
