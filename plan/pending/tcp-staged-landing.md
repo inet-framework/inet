@@ -1397,3 +1397,53 @@ of their own commit (steps 1, 6, 7 and 9) fail with the source of the commit bef
 the unit tests of steps 7 and 10. The CI fingerprint job passes at each code commit with no moved
 row. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf` ingredient
 differs, as on master; the lwIP rows need a build with lwIP). The six gates pass.
+
+### S13 — `topic/tcp-accecn`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: originate ECT(0), not ECT(1) | — | 27 (part) |
+| 2 | fix: no ECT on a segment without data | — | 27 (part) |
+| 3 | fix: an ECN-setup SYN-ACK only for an ECN-setup SYN | — | 27 (part) |
+| 4 | add: `tcpEcnMode`, which replaces `ecnWillingness` | — | 27 (part) |
+| 5 | add: AccECN negotiation and the ACE field (RFC 9768), selected by `tcpEcnMode` | B16 (part) | 27 (part), 65 (part) |
+| 6 | add: the AccECN option, selected by `accEcnOptionEnabled` | — | 27 (part) |
+| 7 | add: the ECN fallback of a retransmitted SYN and SYN-ACK | — | 27 (part) |
+| 8 | add: ECT on the control segments, selected by `ecnMarkAll` | B16 (part) | 13 (part), 27 (part) |
+| 9 | change: DCTCP counts the acknowledged and the marked bytes also in a fast recovery (D-23) | — | new |
+| 10 | comment: the AccECN comments | — | 23 (part), 48 (part), 64 (part) |
+
+Commit 27 is the AccECN feature, but it also repairs classic ECN: RFC 8311 section 3
+("A network node MUST NOT originate traffic marked with ECT(1) unless ... participating in a
+Congestion Marking Differences experiment"), RFC 3168 section 6.1.4 (a pure ACK, and so a FIN
+without data, is Not-ECT) and RFC 3168 section 6.1.1 (an ECN-setup SYN-ACK answers an ECN-setup
+SYN). Each repair is its own step, before the feature. The checks of S13 against RFC 9768 found
+these differences of the source, which S13 records as decisions:
+
+- RFC 9768 section 3.1.5 obliges a host in AccECN mode "to respond appropriately to AccECN
+  feedback" as RFC 3168 section 6.1 defines, and section 4 maps the response to an increase of
+  s.cep. In the source only DCTCP reads the AccECN counts, so Reno, NewReno and CUBIC ignore the
+  marks. Step 5 decodes the ACE field before the algorithm processes the ACK, and an increase acts
+  as an ECE of classic ECN, without CWR (RFC 9768 section 3.1.5).
+- RFC 9768 section 4 keeps the prohibition of ECT on pure ACKs, retransmissions and window probes
+  of RFC 3168. The source, as Linux, sets ECT on each segment of an AccECN connection and of DCTCP.
+  S13 follows the RFC by default, and step 8 adds the parameter `ecnMarkAll` for the Linux
+  behavior, which is also the knob that RFC 8257 section 4.1 recommends for DCTCP.
+- RFC 9768 section 3.1.5: a server MUST NOT set ECT after it sent or received a SYN or SYN-ACK with
+  (AE,CWR,ECE) = (0,0,0) in the handshake. The source stops ECT after a received one, but not
+  after its own fallback SYN-ACK (step 7).
+- RFC 9768 section 3.2.2.1: the handshake encoding of the ACE field goes on a pure ACK of the
+  SYN-ACK without SACK blocks; the source puts it on the first ACK, also with data.
+- RFC 9768 section 3.1.3: a server treats an unknown combination of the flags of a SYN as an
+  AccECN request; the source treats it as no ECN.
+- The option policy: RFC 9768 section 3.2.3.3 recommends the option on each scheduled ACK after a
+  byte counter changed, with each field that ever changed. The source sends it on every fourth
+  ACK and alternates its two kinds, which neither the RFC nor Linux does (step 6).
+- DCTCP: `ecnMarkAll` of the plan's B16 (S5d) never landed; RFC 8257 section 3.6 asks for ECT on
+  the SYN, the SYN-ACK and the RST of a DCTCP connection (SHOULD), section 4.1 for a knob for the
+  other control segments (step 8).
+
+Step 5 takes the AccECN branch of DCTCP (commit 65, B16), and step 9 repairs D-23 with a count of
+the bytes at each ACK, also in a fast recovery, before the cut, which stays outside a recovery.
+The non-AccECN parts of commit 27 that belong to other stages: the counts of `sendData()`
+(`allowedToSend`, S16), and the second TS block of a SYN, which master never had (D-43).
