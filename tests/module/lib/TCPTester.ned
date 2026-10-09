@@ -37,6 +37,9 @@ package inet.test.moduletest.lib;
 //      a peer that sends data or a FIN where INET does not (on a SYN-ACK).
 //    - <tt>strip</tt> <i><kind></i>: forwards the segment without its options of
 //      this kind; it makes a peer that does not answer an option
+//    - <tt>ace</tt> <i><value></i>: forwards the segment with its AE, CWR and ECE
+//      bits set to the bits of the value (AE = 4, CWR = 2, ECE = 1); it makes a peer
+//      or a path that changes them
 //
 simple TCPScriptableTester
 {

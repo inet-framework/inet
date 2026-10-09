@@ -1,0 +1,57 @@
+%description:
+Tests DCTCP with the AccECN feedback. The ACE field of B003 counts one CE mark,
+and DCTCP counts the bytes of the marked segment (RFC 8257 section 3.3 with an
+accurate count).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 3000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.tcpAlgorithmClass = "DcTcp"
+*.tcptester.script="a4 ce"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 16384   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A W ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A E N 1:1025(1024) ack 501 win 16384 ECT(0) 
+[1.203 B002] A.1000 < B.2000: A E N ack 1025 win 16384 
+[1.205 A004] A.1000 > B.2000: A E N 1025:2049(1024) ack 501 win 16384 CE # marking CE
+[1.207 B003] A.1000 < B.2000: A W N ack 2049 win 16384 
+[1.209 A005] A.1000 > B.2000: A E N 2049:3001(952) ack 501 win 16384 ECT(0) 
+[1.211 B004] A.1000 < B.2000: A W N ack 3001 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+DCTCP: 1 new CE marks (AccECN), 1024 bytes marked in this window
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

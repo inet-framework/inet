@@ -261,6 +261,23 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     return conn;
 }
 
+int TcpConnection::receivedEcnCodepoint(Packet *tcpSegment)
+{
+    auto ecnInd = tcpSegment->findTag<EcnInd>();
+    return ecnInd != nullptr ? ecnInd->getExplicitCongestionNotification() : IP_ECN_NOT_ECT;
+}
+
+uint8_t TcpConnection::accEcnReflectedAce(int ipEcnCodepoint)
+{
+    // RFC 9768 Tables 2 and 3: Not-ECT -> 0b010, ECT(1) -> 0b011, ECT(0) -> 0b100, CE -> 0b110
+    switch (ipEcnCodepoint) {
+        case IP_ECN_ECT_1: return 3;
+        case IP_ECN_ECT_0: return 4;
+        case IP_ECN_CE: return 6;
+        default: return 2;
+    }
+}
+
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
     sentSegments++;
@@ -303,6 +320,30 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     auto addresses = tcpSegment->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
+
+    // AccECN (RFC 9768 section 3.2.2): after the handshake, AE, CWR and ECE of each
+    // segment with an ACK form the ACE field, the number of CE-marked packets
+    // received (r.cep, which starts at 5), mod 8. The pure ACK of the SYN-ACK feeds
+    // back the IP ECN codepoint of the SYN-ACK instead (section 3.2.2.1, Table 3):
+    // "If the TCP Client (A) in AccECN mode uses a pure ACK with no SACK blocks to
+    // acknowledge the SYN/ACK, it MUST use the binary encoding in Table 3".
+    if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
+        bool pureAck = tcpSegment->getByteLength() == 0;
+        bool sackBlocks = false;
+        for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
+            if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPTION_SACK)
+                sackBlocks = true;
+        uint8_t ace;
+        if (state->accEcnReflectAce && pureAck && !sackBlocks) {
+            ace = accEcnReflectedAce(state->accEcnReflectCodepoint);
+            state->accEcnReflectAce = false;
+        }
+        else
+            ace = (state->rcvCePkts + 5) & 7;
+        tcpHeader->setAeBit((ace & 4) != 0);
+        tcpHeader->setCwrBit((ace & 2) != 0);
+        tcpHeader->setEceBit((ace & 1) != 0);
+    }
 
     // ECN: the ECN capable transport codepoint is ECT(0).
     //
@@ -682,6 +723,10 @@ void TcpConnection::configureStateVariables()
         state->ecnMode = TCP_ECN_MODE_PASSIVE;
     else if (!strcmp(tcpEcnMode, "rfc3168"))
         state->ecnMode = TCP_ECN_MODE_RFC3168;
+    else if (!strcmp(tcpEcnMode, "accecn"))
+        state->ecnMode = TCP_ECN_MODE_ACCECN;
+    else if (!strcmp(tcpEcnMode, "accecn-passive"))
+        state->ecnMode = TCP_ECN_MODE_ACCECN_PASSIVE;
     else
         state->ecnMode = TCP_ECN_MODE_OFF;
     state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
@@ -830,8 +875,17 @@ void TcpConnection::sendSyn()
     if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1)
         rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
 
-    // ECN: only the "rfc3168" mode requests ECN in an active open
-    if (state->ecnMode == TCP_ECN_MODE_RFC3168) {
+    // ECN: the "accecn" mode requests Accurate ECN with (AE,CWR,ECE) = (1,1,1) (RFC 9768
+    // section 3.1.1), and the "rfc3168" mode requests ECN (RFC 3168)
+    if (state->ecnMode == TCP_ECN_MODE_ACCECN) {
+        tcpHeader->setAeBit(true);
+        tcpHeader->setCwrBit(true);
+        tcpHeader->setEceBit(true);
+        state->aeSynSent = true;
+        state->ecnSynSent = false;
+        EV << "AccECN-setup SYN packet sent\n";
+    }
+    else if (state->ecnMode == TCP_ECN_MODE_RFC3168) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(true);
         state->ecnSynSent = true;
@@ -883,7 +937,16 @@ void TcpConnection::sendSynAck()
     // ECN. RFC 3168, section 6.1.1: "If a host has received an ECN-setup SYN packet,
     // then it MAY send an ECN-setup SYN-ACK packet.  Otherwise, it MUST NOT send an
     // ECN-setup SYN-ACK packet."
-    if (state->ecnWillingness && state->endPointIsWillingECN) {
+    if (state->accEcnNegotiated) {
+        // RFC 9768 section 3.1.1: the flags of the SYN-ACK feed back the IP ECN
+        // codepoint of the SYN (Table 2)
+        uint8_t ace = accEcnReflectedAce(state->accEcnReflectCodepoint);
+        tcpHeader->setAeBit((ace & 4) != 0);
+        tcpHeader->setCwrBit((ace & 2) != 0);
+        tcpHeader->setEceBit((ace & 1) != 0);
+        EV << "AccECN-setup SYN-ACK packet sent (ACE=" << (int)ace << ")\n";
+    }
+    else if (state->ecnWillingness && state->endPointIsWillingECN) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(false);
         EV << "ECN-setup SYN-ACK packet sent\n";
@@ -894,7 +957,9 @@ void TcpConnection::sendSynAck()
         if (state->endPointIsWillingECN)
             EV << "non-ECN-setup SYN-ACK packet sent\n";
     }
-    if (state->ecnWillingness && state->endPointIsWillingECN) {
+    if (state->accEcnNegotiated)
+        state->ect = !state->accEcnNoEct;
+    else if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
     }
@@ -990,8 +1055,9 @@ void TcpConnection::sendAck()
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
 
+    // (an AccECN connection uses the ECE bit for the ACE field, see sendToIP())
     TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect) {
+    if (state && state->ect && !state->accEcnNegotiated) {
         if (tcpAlgorithm->shouldMarkAck()) {
             tcpHeader->setEceBit(true);
             EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
@@ -1124,7 +1190,9 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     tcpHeader->setWindow(updateRcvWnd());
 
     // ECN
-    if (state->ect && state->sndCwr && !sendingWindowProbe) {
+    // (RFC 9768 section 3.1.5: an AccECN connection "MUST NOT set CWR to indicate
+    // that it has received and responded to indications of congestion")
+    if (state->ect && state->sndCwr && !sendingWindowProbe && !state->accEcnNegotiated) {
         tcpHeader->setCwrBit(true);
         EV_INFO << "set CWR bit\n";
         state->sndCwr = false;
@@ -1788,6 +1856,9 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
             }
         }
         else if (seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
+            // a newer timestamp lets the AccECN decode read this ACK (Linux FLAG_TS_PROGRESS)
+            if (seqGreater(option.getSenderTimestamp(), state->ts_recent))
+                state->accEcnTsProgress = true;
             state->ts_recent = option.getSenderTimestamp();
             EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
         }

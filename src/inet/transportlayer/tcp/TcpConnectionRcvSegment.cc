@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -90,6 +91,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     // snapshot delivered-bytes so consumers can read this segment's newly
     // acked+sacked bytes as deliveredBytes - prrDeliveredMark (RFC 6937 PRR input)
     state->prrDeliveredMark = state->deliveredBytes;
+    state->accEcnTsProgress = false;
 
     // reset the per-segment D-SACK detection (RFC 2883 loss undo)
     state->dsackSeen = false;
@@ -184,8 +186,23 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // for a passive open, which is a request socket in Linux: in a
                 // simultaneous open, Linux answers with the plain ACK below, and so
                 // it does for a SYN-ACK, which completes a simultaneous open.
+                // AccECN client (RFC 9768 section 3.2.2.1): "The TCP Client MUST also use
+                // the handshake encoding for the pure ACK of any retransmitted SYN/ACK"
+                if (state->accEcnNegotiated && tcpHeader->getAckBit()) {
+                    state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+                    state->accEcnReflectAce = true;
+                }
                 if (fsm.getState() == TCP_S_SYN_RCVD && !state->active && !tcpHeader->getAckBit()) {
                     EV_DETAIL << "Re-sending SYN-ACK for the retransmitted SYN\n";
+                    // AccECN server (RFC 9768 section 3.1.5): the SYN-ACK feeds back the IP
+                    // ECN codepoint of the latest SYN, and after a SYN with (AE,CWR,ECE) =
+                    // (0,0,0), the server "MUST NOT set ECT on any packet for the rest of the
+                    // connection"
+                    if (state->accEcnNegotiated) {
+                        state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+                        if (!tcpHeader->getAeBit() && !tcpHeader->getCwrBit() && !tcpHeader->getEceBit())
+                            state->accEcnNoEct = true;
+                    }
                     // it counts as a SYN-ACK retransmission (Linux increments
                     // num_retrans in inet_rtx_syn_ack())
                     state->syn_rexmit_count++;
@@ -224,8 +241,13 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         return TCP_E_IGNORE;
     }
 
-    // ECN
-    if (tcpHeader->getCwrBit() == true) {
+    // AccECN (RFC 9768 section 3.2): count each CE-marked acceptable packet (section
+    // 4: "only 'Acceptable' packets contribute to the ECN counters")
+    if (state->accEcnNegotiated && receivedEcnCodepoint(tcpSegment) == IP_ECN_CE)
+        state->rcvCePkts++;
+
+    // ECN (an AccECN connection uses the CWR bit for the ACE field)
+    if (tcpHeader->getCwrBit() == true && !state->accEcnNegotiated) {
         EV_INFO << "Received CWR... Leaving ecnEcho State\n";
         state->ecnEchoState = false;
     }
@@ -976,8 +998,22 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     state->ack_now = true;
 
-    // ECN
-    if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
+    // ECN. A server with AccECN (RFC 9768 section 3.1.1) negotiates AccECN for a SYN
+    // with (AE,CWR,ECE) = (1,1,1), and also for each combination other than (0,0,0)
+    // and the classic (0,1,1) (section 3.1.3: "the Server MUST negotiate the use of
+    // AccECN as if the three flags had been set to (1,1,1)"; Linux
+    // tcp_accecn_syn_requested()). The SYN-ACK feeds back the IP ECN codepoint of the
+    // SYN. A server without AccECN reads a SYN with ECE and CWR, also the (1,1,1) of
+    // AccECN, as an ECN-setup SYN (Table 2: the SYN-ACK of an ECN server is (0,0,1)).
+    uint8_t synAce = (tcpHeader->getAeBit() ? 4 : 0) | (tcpHeader->getCwrBit() ? 2 : 0) | (tcpHeader->getEceBit() ? 1 : 0);
+    bool accEcnServer = state->ecnMode == TCP_ECN_MODE_ACCECN || state->ecnMode == TCP_ECN_MODE_ACCECN_PASSIVE;
+    if (accEcnServer && synAce != 0 && synAce != 3) {
+        state->endPointIsWillingECN = true;
+        state->accEcnNegotiated = true;
+        state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+        EV << "AccECN-setup SYN packet received (ACE=" << (int)synAce << ", IP ECN " << state->accEcnReflectCodepoint << ")\n";
+    }
+    else if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
         state->endPointIsWillingECN = true;
         EV << "ECN-setup SYN packet received\n";
     }
@@ -1294,6 +1330,35 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 rexmitQueue->markLost(state->snd_una, state->snd_max);
             }
 
+            // AccECN (RFC 9768 Table 2): the flags of the SYN-ACK decide the mode, before
+            // established() sends the ACK of the SYN-ACK. (0,0,0) and (1,1,1): no ECN;
+            // (0,0,1): classic ECN, which the ECN part below completes; each other value:
+            // AccECN, and it feeds back the IP ECN codepoint of our SYN. The ACK of the
+            // SYN-ACK feeds back the codepoint of the SYN-ACK (Table 3), and a CE-marked
+            // SYN-ACK counts as the first CE mark (section 3.2.2.2: r.cep becomes 6).
+            if (state->aeSynSent) {
+                uint8_t synAckAce = (tcpHeader->getAeBit() ? 4 : 0) | (tcpHeader->getCwrBit() ? 2 : 0) | (tcpHeader->getEceBit() ? 1 : 0);
+                if (synAckAce == 1)
+                    state->ecnSynSent = true;
+                else if (synAckAce != 0 && synAckAce != 7) {
+                    state->accEcnNegotiated = true;
+                    state->ect = true;
+                    state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+                    state->accEcnReflectAce = true;
+                    if (state->accEcnReflectCodepoint == IP_ECN_CE)
+                        state->rcvCePkts = 1;
+                    // (1,1,0) reports a CE-marked SYN: s.cep stays 5, but "the TCP
+                    // Client still triggers the congestion control actions necessary
+                    // to respond to the CE feedback" (section 3.2.2.2); the algorithm
+                    // does it at the first ACK of data
+                    if (synAckAce == 6)
+                        state->gotEce = true;
+                    EV << "AccECN-setup SYN-ACK packet received (ACE=" << (int)synAckAce << ", IP ECN "
+                       << state->accEcnReflectCodepoint << ")... AccECN is enabled.\n";
+                }
+                state->aeSynSent = false;
+            }
+
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             state->snd_effmss = calculateEffectiveMss();
@@ -1331,7 +1396,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 }
                 state->ecnSynSent = false;
             }
-            else {
+            else if (!state->accEcnNegotiated) {
                 state->ect = false;
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
@@ -1444,8 +1509,9 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
 
     // ECN
+    // (an AccECN connection uses the ECE bit for the ACE field, see processAccEcnAce())
     TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect) {
+    if (state && state->ect && !state->accEcnNegotiated) {
         if (tcpHeader->getEceBit() == true)
             EV_INFO << "Received packet with ECE\n";
 
@@ -1498,6 +1564,9 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             // could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
             updateWndInfo(tcpHeader);
         }
+
+        if (state->accEcnNegotiated)
+            processAccEcnAce(tcpHeader);
 
         tcpAlgorithm->receivedAckForAlreadyAckedData(tcpHeader.get(), payloadLength);
     }
@@ -1577,6 +1646,40 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             emit(deliveredSignal, (unsigned long)state->deliveredBytes);
         }
 
+        // AccECN, before the algorithm processes the ACK, so that a CE mark acts as an
+        // ECN-Echo of this ACK. RFC 9768 section 3.2.2.1: "When an AccECN Server in
+        // SYN-RCVD state receives a pure ACK with SYN=0 and no SACK blocks, it MUST
+        // infer the meaning of each possible value of the ACE field from Table 4": 0b110
+        // reports a CE-marked SYN-ACK (s.cep = 6), and 0b000 a bleached handshake, after
+        // which the server "MUST NOT set ECT on outgoing packets and MUST NOT respond to
+        // AccECN feedback". Each later ACK carries the CE count.
+        if (state->accEcnNegotiated) {
+            if (fsm.getState() == TCP_S_SYN_RCVD) {
+                bool sackBlocks = false;
+                for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
+                    if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPTION_SACK)
+                        sackBlocks = true;
+                uint8_t ace = (tcpHeader->getAeBit() ? 4 : 0) | (tcpHeader->getCwrBit() ? 2 : 0) | (tcpHeader->getEceBit() ? 1 : 0);
+                if (payloadLength == 0 && !sackBlocks && ace == 6) {
+                    // section 3.2.2.2: the server "then triggers the congestion control
+                    // actions necessary to respond to the CE feedback" (Linux only counts
+                    // it); the algorithm does it at the first ACK of data
+                    state->deliveredCePkts = 1;
+                    emit(deliveredCeSignal, (unsigned long)state->deliveredCePkts);
+                    state->gotEce = true;
+                    EV_INFO << "AccECN: the ACK of the SYN-ACK reports a CE-marked SYN-ACK\n";
+                }
+                else if (payloadLength == 0 && !sackBlocks && ace == 0) {
+                    state->accEcnNoEct = true;
+                    state->accEcnIgnoreFeedback = true;
+                    state->ect = false;
+                    EV_INFO << "AccECN: the ACK of the SYN-ACK has ACE 0, no ECT and no response to the feedback\n";
+                }
+            }
+            else
+                processAccEcnAce(tcpHeader);
+        }
+
         updateWndInfo(tcpHeader);
 
         // if segment contains data, wait until data has been forwarded to app before sending ACK,
@@ -1611,6 +1714,51 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     }
 
     return true;
+}
+
+void TcpConnection::processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader)
+{
+    // Like Linux (__tcp_accecn_process()), only an ACK that makes progress (newly
+    // acknowledged or SACKed data, or a newer timestamp) counts; the counter of a later
+    // one covers the CE marks of a duplicate ACK before it.
+    if (state->deliveredBytes == state->prrDeliveredMark && !state->accEcnTsProgress)
+        return;
+
+    uint8_t ace = (tcpHeader->getAeBit() ? 4 : 0) | (tcpHeader->getCwrBit() ? 2 : 0) | (tcpHeader->getEceBit() ? 1 : 0);
+    uint64_t deliveredBytesThisAck = state->deliveredBytes - state->prrDeliveredMark;
+    uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 1;
+    uint32_t deliveredPkts = (uint32_t)((deliveredBytesThisAck + mss - 1) / mss);
+
+    // RFC 9768 section 3.2.2.5.2 and Appendix A.2.1: the ACE field counts mod 8 (s.cep
+    // starts at 5). An ACK of more than 7 packets could hide a full cycle of the counter,
+    // and the sender "SHOULD deem whether it cycled by taking the safest likely case
+    // under the prevailing conditions": the most CE marks that the packets allow,
+    // unless large ACKs are usual for the connection (an average of more than 4 packets,
+    // as Linux tests with pkts_acked_ewma), which shows ACK compression, not a cycle.
+    int delta = ((int)ace - 5 - (int)(state->deliveredCePkts & 7)) & 7;
+    if (deliveredPkts > 0) {
+        if (state->pktsAckedEwma == 0)
+            state->pktsAckedEwma = deliveredPkts << 6;
+        else
+            state->pktsAckedEwma = std::min<uint32_t>((((state->pktsAckedEwma << 6) - state->pktsAckedEwma) + (deliveredPkts << 6)) >> 6, 0xFFFF);
+    }
+    int resolvedDelta = delta;
+    if (deliveredPkts > 7 && state->pktsAckedEwma <= (4u << 6))
+        resolvedDelta = (int)deliveredPkts - (((int)deliveredPkts - delta) & 7);
+
+    EV_INFO << "AccECN: ACE=" << (int)ace << ", packets acknowledged=" << deliveredPkts << ", new CE marks="
+            << resolvedDelta << " (mod 8: " << delta << ")\n";
+    if (resolvedDelta > 0) {
+        state->deliveredCePkts += resolvedDelta;
+        emit(deliveredCeSignal, (unsigned long)state->deliveredCePkts);
+        // RFC 9768 section 3.1.5: a host in AccECN mode "is obliged to respond
+        // appropriately to AccECN feedback", as RFC 3168 section 6.1 defines for an
+        // ECN-Echo (section 4: the response follows an increase of s.cep)
+        if (!state->accEcnIgnoreFeedback)
+            state->gotEce = true;
+        else
+            EV_INFO << "AccECN: no response to the feedback, because the ACK of the SYN-ACK had ACE 0\n";
+    }
 }
 
 // ----

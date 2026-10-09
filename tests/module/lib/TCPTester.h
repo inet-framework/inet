@@ -53,7 +53,7 @@ class INET_API TCPTesterBase : public cSimpleModule
 class INET_API TCPScriptableTester : public TCPTesterBase
 {
   protected:
-    enum {CMD_DELETE,CMD_COPY,CMD_CE,CMD_TSECR,CMD_DATA,CMD_STRIP}; // CMD_TSECR sets the TSecr of the timestamp option, for tests of the TSecr checks; CMD_DATA adds bytes and the FIN bit to a segment, for tests of a peer that sends them where INET does not (on a SYN-ACK); CMD_STRIP removes the options of a kind, for a peer that does not answer an option; // "delay" is same as "copy"; CMD_CE marks the segment CE (IP_ECN_CE) instead of forwarding it unmarked -- for AccECN/ECN module tests that need a CE-marked inbound segment
+    enum {CMD_DELETE,CMD_COPY,CMD_CE,CMD_TSECR,CMD_DATA,CMD_STRIP,CMD_ACE}; // CMD_TSECR sets the TSecr of the timestamp option, for tests of the TSecr checks; CMD_DATA adds bytes and the FIN bit to a segment, for tests of a peer that sends them where INET does not (on a SYN-ACK); CMD_STRIP removes the options of a kind, for a peer that does not answer an option; CMD_ACE sets the AE, CWR and ECE bits, for a peer or a path that changes them; // "delay" is same as "copy"; CMD_CE marks the segment CE (IP_ECN_CE) instead of forwarding it unmarked -- for AccECN/ECN module tests that need a CE-marked inbound segment
     typedef std::vector<simtime_t> DelayVector;
     struct Command
     {
@@ -65,6 +65,7 @@ class INET_API TCPScriptableTester : public TCPTesterBase
         int bytes = 0;       // CMD_DATA: the number of bytes to add after the payload
         bool fin = false;    // CMD_DATA: set the FIN bit
         int kind = -1;       // CMD_STRIP: the kind of the options to remove
+        int ace = 0;         // CMD_ACE: the new (AE,CWR,ECE) bits, as a number from 0 to 7
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;

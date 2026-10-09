@@ -1,0 +1,62 @@
+%description:
+Tests a CE-marked SYN-ACK in AccECN. The client feeds back the CE mark with
+ACE 0b110 on the ACK of the SYN-ACK (RFC 9768 Table 3), and its counter starts
+at 6 (section 3.2.2.2), so its data carries ACE 6. The server reads ACE 0b110
+as a CE-marked SYN-ACK (Table 4) and sets its counter to 6, so ACE 6 on A004 is
+no new mark. The server responds to the congestion (section 3.2.2.2) at the
+first ACK of its data: ssthresh becomes 1024.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.srv_app.sendScript="2.0 1000"
+*.tcptester.script="b1 ce"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384 CE   Option(s): MaxSegSize# marking CE
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A W N ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A W N 1:1001(1000) ack 501 win 16384 ECT(0) 
+[1.203 B002] A.1000 < B.2000: A E N ack 1001 win 16384 
+[2.001 B003] A.1000 < B.2000: A E N 501:1501(1000) ack 1001 win 16384 ECT(0) 
+[2.203 A004] A.1000 > B.2000: A W N ack 1501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN: the ACK of the SYN-ACK reports a CE-marked SYN-ACK
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN: ACE=6, packets acknowledged=1, new CE marks=0 (mod 8: 0)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+ssthresh = cwnd: received ECN-Echo ACK... new ssthresh = 1024
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

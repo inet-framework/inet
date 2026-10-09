@@ -267,6 +267,15 @@ struct TcpStateVariables
     uint32_t cwndUsageSeq = 0;     // snd_nxt when the current window of data started (Linux cwnd_usage_seq)
     uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
     bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
+    bool aeSynSent = false; // client: the SYN requested Accurate ECN (AE, CWR and ECE)
+    uint32_t rcvCePkts = 0; // AccECN receiver: the CE-marked acceptable packets received (r.cep less its initial value 5)
+    uint32_t deliveredCePkts = 0; // AccECN sender: the CE marks that the ACE field reported (s.cep less its initial value 5)
+    int accEcnReflectCodepoint = -1; // AccECN: the IP ECN codepoint of the received SYN (server) or SYN-ACK (client), which the handshake encoding of the ACE field feeds back (RFC 9768 Tables 2 and 3)
+    bool accEcnReflectAce = false; // AccECN client: the next pure ACK feeds back the codepoint of the SYN-ACK instead of the counter
+    bool accEcnNoEct = false; // AccECN server: it received or sent a SYN or SYN-ACK with (AE,CWR,ECE) = (0,0,0), so no ECT for the rest of the connection (RFC 9768 section 3.1.5)
+    bool accEcnIgnoreFeedback = false; // AccECN server: the ACK of the SYN-ACK had the ACE value 0 (RFC 9768 Table 4), so no ECT and no response to the feedback
+    bool accEcnTsProgress = false; // AccECN: the TS option of this segment advanced ts_recent (Linux FLAG_TS_PROGRESS), so the ACE decode runs on it
+    uint32_t pktsAckedEwma = 0; // AccECN: moving average of the packets that an ACK acknowledges, <<6 (Linux pkts_acked_ewma), for the ACE decode
     uint8_t accEcnOptMinFields = 0;
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes

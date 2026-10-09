@@ -25,6 +25,7 @@ simsignal_t rtoSignal = cComponent::registerSignal("rto"); // will record retran
 simsignal_t rttSignal = cComponent::registerSignal("rtt"); // will record measured RTT
 simsignal_t rttvarSignal = cComponent::registerSignal("rttvar"); // will record RTT variance (rttvar)
 simsignal_t sackedBytesSignal = cComponent::registerSignal("sackedBytes"); // current number of received sacked bytes
+simsignal_t deliveredCeSignal = cComponent::registerSignal("deliveredCe"); // AccECN: the CE marks that the ACE field of the peer reported
 simsignal_t deliveredSignal = cComponent::registerSignal("delivered"); // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
 simsignal_t sndAckSignal = cComponent::registerSignal("sndAck"); // sent ackNo
 simsignal_t sndMaxSignal = cComponent::registerSignal("sndMax"); // snd_max

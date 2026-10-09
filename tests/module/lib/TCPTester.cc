@@ -131,6 +131,13 @@ void TCPScriptableTester::parseScript(const char *script)
         } else if (!strncmp(s,"fin",3)) {
             cmd.command = CMD_DATA; s+=3;
             cmd.fin = true;
+        } else if (!strncmp(s,"ace",3)) {
+            // "ace <value>": set AE, CWR and ECE to the bits of the value (AE = 4, CWR = 2, ECE = 1)
+            cmd.command = CMD_ACE; s+=3;
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: ACE value expected");
+            cmd.ace = strtol(s, &const_cast<char *&>(s), 10);
         } else if (!strncmp(s,"strip",5)) {
             // "strip <kind>": remove the options of this kind
             cmd.command = CMD_STRIP; s+=5;
@@ -288,6 +295,17 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         if (cmd->bytes > 0)
             pk->insertAtBack(makeShared<ByteCountChunk>(B(cmd->bytes)));
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "adding data");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_ACE)
+    {
+        bubble("changing ACE bits");
+        auto header = pk->removeAtFront<TcpHeader>();
+        header->setAeBit((cmd->ace & 4) != 0);
+        header->setCwrBit((cmd->ace & 2) != 0);
+        header->setEceBit((cmd->ace & 1) != 0);
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing ACE bits");
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_STRIP)

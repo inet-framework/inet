@@ -41,6 +41,8 @@ class TcpAlgorithm;
 #define TCP_ECN_MODE_OFF              0
 #define TCP_ECN_MODE_PASSIVE          1
 #define TCP_ECN_MODE_RFC3168          2
+#define TCP_ECN_MODE_ACCECN           3
+#define TCP_ECN_MODE_ACCECN_PASSIVE   4
 #define TFO_BLACKHOLE_REXMIT_COUNT    2   // TCP Fast Open: the retransmission of a Fast Open SYN that suggests a blackhole (the third transmission, as Linux)
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size
@@ -345,6 +347,15 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
+
+    /** AccECN: the ACE value that feeds back an IP ECN codepoint in the handshake (RFC 9768 Tables 2 and 3) */
+    static uint8_t accEcnReflectedAce(int ipEcnCodepoint);
+
+    /** Utility: the IP ECN codepoint of a received segment, IP_ECN_NOT_ECT without one */
+    static int receivedEcnCodepoint(Packet *tcpSegment);
+
+    /** AccECN: reads the ACE field of an ACK that makes progress, and counts the CE marks that it reports (RFC 9768 section 3.2.2.5) */
+    virtual void processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();

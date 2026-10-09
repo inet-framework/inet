@@ -37,6 +37,7 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvOooSeg];    // Number of received out-of-order segments
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
+        @signal[deliveredCe];    // AccECN: the CE marks that the ACE field of the peer reported (RFC 9768)
         @signal[delivered];    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue

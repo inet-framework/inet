@@ -34,6 +34,7 @@ extern INET_API simsignal_t rttSignal; // will record measured RTT
 extern INET_API simsignal_t rttvarSignal; // will record RTT variance (rttvar)
 extern INET_API simsignal_t rttvarSignal; // will record RTT variance (rttvar)
 extern INET_API simsignal_t sackedBytesSignal; // current number of received sacked bytes
+extern INET_API simsignal_t deliveredCeSignal; // AccECN: the CE marks that the ACE field of the peer reported
 extern INET_API simsignal_t deliveredSignal; // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
 extern INET_API simsignal_t sndAckSignal; // sent ackNo
 extern INET_API simsignal_t sndMaxSignal; // snd_max

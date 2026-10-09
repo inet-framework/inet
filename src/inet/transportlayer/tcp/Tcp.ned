@@ -72,7 +72,9 @@ import inet.transportlayer.contract.ITcp;
 //   -# The `tcpEcnMode` parameter enables Explicit Congestion Notification
 //      (RFC 3168). ECN is negotiated during the three-way handshake and is
 //      only active if one endpoint requests it ("rfc3168") and the other one
-//      answers ("rfc3168" or "passive").  When using the `DcTcp`
+//      answers ("rfc3168" or "passive"). The modes "accecn" and
+//      "accecn-passive" add Accurate ECN (RFC 9768), which feeds back the
+//      number of CE marks instead of one bit for each round trip.  When using the `DcTcp`
 //      algorithm, the `dctcpGamma` parameter controls the EWMA gain for
 //      estimating the congestion level (RFC 8257).
 //
@@ -204,7 +206,7 @@ simple Tcp extends SimpleModule like ITcp
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
-        string tcpEcnMode @mutable @enum("off","passive","rfc3168") = default("off"); // ECN (RFC 3168): "off": no ECN; "passive": answer an ECN-setup SYN, but request no ECN in an active open (Linux tcp_ecn=2, its default); "rfc3168": request and answer ECN. Each connection reads it at its open
+        string tcpEcnMode @mutable @enum("off","passive","rfc3168","accecn","accecn-passive") = default("off"); // ECN: "off": no ECN; "passive": answer an ECN-setup SYN (RFC 3168), but request no ECN in an active open (Linux tcp_ecn=2, its default); "rfc3168": request and answer ECN; "accecn": request Accurate ECN (RFC 9768), and answer it and ECN; "accecn-passive": answer Accurate ECN and ECN, but request nothing. Each connection reads it at its open
         bool ecnWillingness = default(false); // deprecated: true is tcpEcnMode="rfc3168"
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
