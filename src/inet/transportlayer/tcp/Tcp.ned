@@ -74,7 +74,10 @@ import inet.transportlayer.contract.ITcp;
 //      only active if one endpoint requests it ("rfc3168") and the other one
 //      answers ("rfc3168" or "passive"). The modes "accecn" and
 //      "accecn-passive" add Accurate ECN (RFC 9768), which feeds back the
-//      number of CE marks instead of one bit for each round trip.  When using the `DcTcp`
+//      number of CE marks instead of one bit for each round trip. The AccECN
+//      option (`accEcnOptionEnabled`, `accEcnOptionPolicy`) gives the bytes of
+//      each ECN codepoint. `ecnMarkAll` sets ECT also on the control segments
+//      of an AccECN or DCTCP connection, as Linux does. When using the `DcTcp`
 //      algorithm, the `dctcpGamma` parameter controls the EWMA gain for
 //      estimating the congestion level (RFC 8257).
 //
@@ -110,6 +113,10 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 1981 - Path MTU Discovery for IP version 6
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
+//   - RFC 8311 - Relaxing Restrictions on Explicit Congestion Notification (ECN)
+//                Experimentation
+//   - RFC 9768 - More Accurate Explicit Congestion Notification (AccECN) Feedback
+//                in TCP
 //
 // Implemented features include the following:
 //  - all RFC 793 TCP states and state transitions
@@ -137,6 +144,7 @@ import inet.transportlayer.contract.ITcp;
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 3517.
 //      - TS: Timestamps option, based on RFC 1323.
+//      - AccECN0, AccECN1: the AccECN option, based on RFC 9768.
 //  - flow control: finite receive buffer size (initiated by the parameter
 //    `advertisedWindow`). If the receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a newly received segment
@@ -149,6 +157,9 @@ import inet.transportlayer.contract.ITcp;
 //    the original MSS is restored to probe for an increased path MTU.
 //  - Explicit Congestion Notification (RFC 3168): ECN-setup during the
 //    three-way handshake, ECE/CWR flag handling, and CE codepoint processing.
+//  - Accurate ECN (RFC 9768): the AccECN handshake, the ACE field, which counts
+//    the CE-marked packets, and the AccECN option, which counts the bytes of
+//    each codepoint; with the fallback of a retransmitted SYN and SYN-ACK.
 //  - Data Center TCP (RFC 8257): DCTCP congestion control based on ECN
 //    feedback, implemented in the `DcTcp` algorithm class.
 //

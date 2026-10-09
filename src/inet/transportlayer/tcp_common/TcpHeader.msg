@@ -71,9 +71,9 @@ enum TcpOptionNumbers
 //    TCPOPTION kinds 30-33 Unassigned
     TCPOPTION_TCP_FASTOPEN = 34;                        // RFC 7413, LENGTH: 2 + cookie length (0 or 4-16 Bytes)
 //    TCPOPTION kinds 35-171 Unassigned
-    TCPOPTION_ACCECN0 = 172;                            // draft-ietf-tcpm-accurate-ecn, LENGTH: 11 (E0B,CEB,E1B, 24-bit fields)
+    TCPOPTION_ACCECN0 = 172;                            // RFC 9768, LENGTH: 2, 5, 8 or 11 (EE0B, ECEB, EE1B; 24-bit fields)
 //    TCPOPTION kind 173 Unassigned
-    TCPOPTION_ACCECN1 = 174;                            // draft-ietf-tcpm-accurate-ecn, LENGTH: 11 (E1B,CEB,E0B, 24-bit fields)
+    TCPOPTION_ACCECN1 = 174;                            // RFC 9768, LENGTH: 2, 5, 8 or 11 (EE1B, ECEB, EE0B; 24-bit fields)
 //    TCPOPTION kinds 175-252 Unassigned
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_1 = 253;         // RFC 4727, LENGTH: N
     TCPOPTION_RFC3692_STYLE_EXPERIMENT_2 = 254;         // RFC 4727, LENGTH: N; also carries the pre-standardization TCP Fast Open experimental option (RFC 7413 Appendix A), identified by the 0xF989 magic sub-type
@@ -178,21 +178,19 @@ class TcpOptionTcpFastOpenExp extends TcpOption
     uint8_t cookie[];
 }
 
-// AccECN TCP option (draft-ietf-tcpm-accurate-ecn): three 24-bit (wire-encoded) byte
-// counters, always all 3 present (INET's own simplified beaconing; Linux's space-saving
-// partial-field packing is deliberately not ported). The
-// option's wire *order* of these 3 fields is kind-dependent (172: E0B,CEB,E1B; 174:
-// E1B,CEB,E0B) -- the serializer, not this class, encodes that; the fields below are
-// named semantically, not by wire position. kind defaults to 172 but callers building
-// an outbound option set it explicitly (setKind()) since either kind 172 or 174 is a
-// valid choice per emission (the alternation is beaconing policy, not a wire constraint).
+// The AccECN TCP option (RFC 9768 section 3.2.3): up to three 24-bit fields with the
+// byte counters of the data receiver for ECT(0), CE and ECT(1). The kind gives the
+// order of the fields (172, Order 0: EE0B, ECEB, EE1B; 174, Order 1: EE1B, ECEB, EE0B),
+// and the length tells how many fields are present (Table 5: 2, 5, 8 or 11; of another
+// length, the whole fields count). The serializer writes the order; the fields below
+// are named by their counter, not by their position.
 class TcpOptionAccEcn extends TcpOption
 {
     kind = TCPOPTION_ACCECN0;
-    length = 11;                 // 2 (kind+length) + 3 * 3 (24-bit fields)
-    uint32_t ect0Bytes;          // E0B: cumulative ECT(0)-marked bytes received, wire offset +1
-    uint32_t ect1Bytes;          // E1B: cumulative ECT(1)-marked bytes received, wire offset +1
-    uint32_t ceBytes;            // CEB: cumulative CE-marked bytes received, wire offset +0
+    length = 11;                 // 2 (kind and length) + 3 fields of 3 bytes
+    uint32_t ect0Bytes;          // EE0B: the 24 least significant bits of r.e0b, the payload bytes received ECT(0), which starts at 1
+    uint32_t ect1Bytes;          // EE1B: the same of r.e1b, for ECT(1), which starts at 1
+    uint32_t ceBytes;            // ECEB: the same of r.ceb, for CE, which starts at 0
 }
 
 class TcpOptionUnknown extends TcpOption
@@ -241,7 +239,7 @@ class TcpHeader extends TransportHeaderBase
 
     bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
     bool eceBit; // ECE: ECN-echo bit (RFC 3168)
-    bool aeBit; // AE: AccECN Echo (repurposed NS/RFC3540 bit); handshake codepoint bit during 3WHS, ACE-counter MSB afterward (draft-ietf-tcpm-accurate-ecn)
+    bool aeBit; // AE: Accurate ECN (RFC 9768), the old NS bit (RFC 3540, Historic since RFC 8311): a flag of the AccECN handshake, then the most significant bit of the ACE field
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
     bool pshBit; // PSH: push function
