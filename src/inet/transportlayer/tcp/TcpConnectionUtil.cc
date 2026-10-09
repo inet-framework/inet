@@ -868,8 +868,10 @@ void TcpConnection::sendSynAck()
     if (seqLess(state->snd_max, state->iss + 1))
         state->snd_max = state->iss + 1;
 
-    // ECN
-    if (state->ecnWillingness) {
+    // ECN. RFC 3168, section 6.1.1: "If a host has received an ECN-setup SYN packet,
+    // then it MAY send an ECN-setup SYN-ACK packet.  Otherwise, it MUST NOT send an
+    // ECN-setup SYN-ACK packet."
+    if (state->ecnWillingness && state->endPointIsWillingECN) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(false);
         EV << "ECN-setup SYN-ACK packet sent\n";
