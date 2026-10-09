@@ -157,23 +157,20 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             break;
         }
 
-        case TCPOPTION_ACCECN0: { // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+        case TCPOPTION_ACCECN0: // RFC 9768 section 3.2.3: Order 0 is EE0B, ECEB, EE1B
+        case TCPOPTION_ACCECN1: { // Order 1 is EE1B, ECEB, EE0B
             auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
-            // Variable length (2/5/8/11): trailing counter fields may be dropped
-            // to fit the remaining option space; write only those length covers.
-            ASSERT(length == 2 || length == 5 || length == 8 || length == 11);
-            if (length >= 5) stream.writeUint24Be(opt->getEct0Bytes());
-            if (length >= 8) stream.writeUint24Be(opt->getCeBytes());
-            if (length >= 11) stream.writeUint24Be(opt->getEct1Bytes());
-            break;
-        }
-
-        case TCPOPTION_ACCECN1: { // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
-            auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
-            ASSERT(length == 2 || length == 5 || length == 8 || length == 11);
-            if (length >= 5) stream.writeUint24Be(opt->getEct1Bytes());
-            if (length >= 8) stream.writeUint24Be(opt->getCeBytes());
-            if (length >= 11) stream.writeUint24Be(opt->getEct0Bytes());
+            // the length tells which fields are present (Table 5); the bytes after
+            // the last whole field are padding
+            ASSERT(length >= 2);
+            bool order0 = kind == TCPOPTION_ACCECN0;
+            uint32_t fields[3] = { order0 ? opt->getEct0Bytes() : opt->getEct1Bytes(), opt->getCeBytes(),
+                                   order0 ? opt->getEct1Bytes() : opt->getEct0Bytes() };
+            unsigned int numFields = std::min(3u, (length - 2u) / 3u);
+            for (unsigned int i = 0; i < numFields; i++)
+                stream.writeUint24Be(fields[i]);
+            for (unsigned int i = 2 + 3 * numFields; i < length; i++)
+                stream.writeByte(0);
             break;
         }
 
@@ -322,28 +319,27 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
             }
             break;
 
-        case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+        case TCPOPTION_ACCECN0: // RFC 9768 section 3.2.3: Order 0 is EE0B, ECEB, EE1B
+        case TCPOPTION_ACCECN1: // Order 1 is EE1B, ECEB, EE0B
             length = stream.readByte();
-            if (length == 2 || length == 5 || length == 8 || length == 11) {
+            if (length >= 2) {
+                // RFC 9768 section 3.2.3: "if the AccECN Option is of any other length
+                // [than 2, 5, 8 or 11], implementations MUST use those whole 3-octet
+                // fields that fit within the length and ignore the remainder of the
+                // option, treating it as padding"
                 auto *option = new TcpOptionAccEcn();
-                option->setKind(TCPOPTION_ACCECN0);
+                option->setKind(kind);
                 option->setLength(length);
-                if (length >= 5) option->setEct0Bytes(stream.readUint24Be());
-                if (length >= 8) option->setCeBytes(stream.readUint24Be());
-                if (length >= 11) option->setEct1Bytes(stream.readUint24Be());
-                return option;
-            }
-            break;
-
-        case TCPOPTION_ACCECN1: // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
-            length = stream.readByte();
-            if (length == 2 || length == 5 || length == 8 || length == 11) {
-                auto *option = new TcpOptionAccEcn();
-                option->setKind(TCPOPTION_ACCECN1);
-                option->setLength(length);
-                if (length >= 5) option->setEct1Bytes(stream.readUint24Be());
-                if (length >= 8) option->setCeBytes(stream.readUint24Be());
-                if (length >= 11) option->setEct0Bytes(stream.readUint24Be());
+                uint32_t fields[3] = { 0, 0, 0 };
+                unsigned int numFields = std::min(3u, (length - 2u) / 3u);
+                for (unsigned int i = 0; i < numFields; i++)
+                    fields[i] = stream.readUint24Be();
+                for (unsigned int i = 2 + 3 * numFields; i < length; i++)
+                    stream.readByte();
+                bool order0 = kind == TCPOPTION_ACCECN0;
+                option->setEct0Bytes(order0 ? fields[0] : fields[2]);
+                option->setCeBytes(fields[1]);
+                option->setEct1Bytes(order0 ? fields[2] : fields[0]);
                 return option;
             }
             break;

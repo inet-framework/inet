@@ -1,0 +1,71 @@
+%description:
+Tests the AccECN option of a length that RFC 9768 Table 5 does not list.
+Section 3.2.3: "implementations MUST use those whole 3-octet fields that fit
+within the length and ignore the remainder of the option, treating it as
+padding". The header has a kind-174 option of length 7 (one field and 2
+bytes of padding), a kind-172 option of length 14 (three fields and 3 bytes
+of padding), and NOPs. The parser reads the fields and continues with the
+NOPs. The writer writes the same lengths, with zero bytes as padding.
+
+%includes:
+#include <iomanip>
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+class TestTcpHeaderSerializer : public TcpHeaderSerializer
+{
+  public:
+    using TcpHeaderSerializer::serializeFields;
+    using TcpHeaderSerializer::deserializeFields;
+};
+
+static void printHex(const std::vector<uint8_t>& bytes, size_t from, size_t to)
+{
+    for (size_t i = from; i < to && i < bytes.size(); i++)
+        EV << (i == from ? "" : " ") << std::hex << std::setw(2) << std::setfill('0') << (int)bytes[i] << std::dec;
+    EV << "\n";
+}
+
+%activity:
+
+std::vector<uint8_t> bytes = {
+    0x03, 0xe8, 0x07, 0xd0,                         // ports 1000, 2000
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sequence and acknowledgment numbers
+    0xb0, 0x10, 0x03, 0xe8,                         // data offset 11, ACK, window 1000
+    0x00, 0x00, 0x00, 0x00,                         // checksum, urgent pointer
+    0xae, 0x07, 0x00, 0x03, 0xe9, 0xff, 0xff,       // kind 174, length 7: EE1B=1001, 2 bytes of padding
+    0xac, 0x0e, 0x00, 0x00, 0x05, 0x00, 0x00, 0x03, 0x00, 0x00, 0x07, 0xaa, 0xbb, 0xcc, // kind 172, length 14
+    0x01, 0x01, 0x01                                // NOPs
+};
+
+TestTcpHeaderSerializer ser;
+MemoryInputStream in(bytes);
+auto hdr = staticPtrCast<TcpHeader>(ser.deserializeFields(in, typeid(TcpHeader)));
+for (size_t i = 0; i < hdr->getHeaderOptionArraySize(); i++) {
+    const TcpOption *option = hdr->getHeaderOption(i);
+    EV << "option " << i << ": kind=" << option->getKind() << " length=" << (int)option->getLength();
+    if (auto accEcn = dynamic_cast<const TcpOptionAccEcn *>(option))
+        EV << " E0B=" << accEcn->getEct0Bytes() << " CEB=" << accEcn->getCeBytes() << " E1B=" << accEcn->getEct1Bytes();
+    EV << "\n";
+}
+
+MemoryOutputStream out;
+ser.serializeFields(out, hdr);
+EV << "options written: ";
+printHex(out.getData(), 20, 44);
+
+EV << ".\n";
+
+%contains: stdout
+option 0: kind=174 length=7 E0B=0 CEB=0 E1B=1001
+option 1: kind=172 length=14 E0B=5 CEB=3 E1B=7
+option 2: kind=1 length=1
+option 3: kind=1 length=1
+option 4: kind=1 length=1
+options written: ae 07 00 03 e9 00 00 ac 0e 00 00 05 00 00 03 00 00 07 00 00 00 01 01 01
+.
