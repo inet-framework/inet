@@ -1067,6 +1067,20 @@ void TcpConnection::sendSyn()
 //        EV << "non-ECN-setup SYN packet sent\n";
     }
 
+    // AccECN fallback. RFC 9768 section 3.1.4.1: the client "SHOULD attempt to negotiate
+    // the use of AccECN at least one more time by continuing to set all three TCP-ECN
+    // flags (AE,CWR,ECE) = (1,1,1) on the first retransmitted SYN", and it "SHOULD send
+    // subsequent retransmissions of the SYN with the three TCP-ECN flags cleared". A
+    // SYN-ACK that answers an earlier SYN still sets the mode, so the request stays
+    // recorded. An ECN-setup SYN keeps its flags: RFC 3168 section 6.1.1.1 lets it clear
+    // them ("MAY"), but a SYN lost to congestion would then cost the connection its ECN.
+    if (state->syn_rexmit_count >= 2 && state->ecnMode == TCP_ECN_MODE_ACCECN) {
+        tcpHeader->setAeBit(false);
+        tcpHeader->setCwrBit(false);
+        tcpHeader->setEceBit(false);
+        EV << "SYN retransmission " << state->syn_rexmit_count << ": no ECN flags (AccECN fallback)\n";
+    }
+
     // write header options
     writeHeaderOptions(tcpHeader);
     bool attachSynData = synDataLen > 0 && state->syn_rexmit_count == 0;
@@ -1110,6 +1124,18 @@ void TcpConnection::sendSynAck()
         tcpHeader->setCwrBit((ace & 2) != 0);
         tcpHeader->setEceBit((ace & 1) != 0);
         EV << "AccECN-setup SYN-ACK packet sent (ACE=" << (int)ace << ")\n";
+        // RFC 9768 section 3.2.3.2.2: if the first retransmission of the SYN-ACK "times
+        // out, to expedite connection setup, the TCP Server SHOULD retransmit the SYN/ACK
+        // with (AE,CWR,ECE) = (0,0,0) and no AccECN Option, but it remains in AccECN
+        // feedback mode"; after it, the server "MUST NOT set ECT on any packet for the
+        // rest of the connection" (section 3.1.5)
+        if (state->syn_rexmit_count >= 2) {
+            tcpHeader->setAeBit(false);
+            tcpHeader->setCwrBit(false);
+            tcpHeader->setEceBit(false);
+            state->accEcnNoEct = true;
+            EV << "SYN-ACK retransmission " << state->syn_rexmit_count << ": no AccECN flags (AccECN fallback), and no ECT\n";
+        }
     }
     else if (state->ecnWillingness && state->endPointIsWillingECN) {
         tcpHeader->setEceBit(true);

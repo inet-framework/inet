@@ -1,0 +1,60 @@
+%description:
+Tests the AccECN fallback of a retransmitted SYN-ACK (RFC 9768 section
+3.2.3.2.2). The tester removes the SYN-ACK with the AccECN option, its first
+retransmission (B002, AccECN flags without the option) and the next ones, so
+the client gets B004 with (AE,CWR,ECE) = (0,0,0) and uses no ECN. The server
+"remains in AccECN feedback mode", so its segments carry the ACE field, but
+after the (0,0,0) SYN-ACK it "MUST NOT set ECT on any packet for the rest of
+the connection" (section 3.1.5): B007 is Not-ECT.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="12.0 1000"
+*.srv_app.sendScript="13.0 1000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.tcptester.script="b1 delete; b2 delete; b3 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384   Option(s): MaxSegSize NOP AccECN0(e0b=1,ceb=0,e1b=1)# deleting
+[3.001 A002] A.1000 > B.2000: S E W N 0:0(0) win 16384   Option(s): MaxSegSize
+[3.003 B002] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# deleting
+[3.003 B003] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# deleting
+[9.001 A003] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
+[9.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+[9.003 B005] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[9.005 A004] A.1000 > B.2000: A ack 501 win 16384 
+[9.005 A005] A.1000 > B.2000: A ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[12.001 A006] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[12.203 B006] A.1000 < B.2000: A E N ack 1001 win 16384 
+[13.001 B007] A.1000 < B.2000: A E N 501:1501(1000) ack 1001 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
