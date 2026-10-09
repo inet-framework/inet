@@ -19,6 +19,7 @@ class INET_API MsduDeaggregation : public IMsduDeaggregation, public cObject
     virtual void setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& header, const Ptr<const Ieee80211MsduSubframeHeader>& subframe, const Ptr<const Ieee80211DataHeader>& aMsduHeader);
 
   public:
+    virtual bool isValidAggregate(const Packet *frame) const override;
     virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) override;
 };
 
