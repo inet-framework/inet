@@ -60,7 +60,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 ✅ | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 37, 76, 85, 86, new | +1807 −25 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe (D-29 to D-35) |
 | S11 ✅ | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +198 −36 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
-| S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 26, 43, 44, 51 | +1187 −104 | TCP Fast Open (RFC 7413) |
+| S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 43, 44 | +1187 −104 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
@@ -1242,3 +1242,34 @@ and the tests of D-36 to D-41 against the source forms. The CI fingerprint job p
 commit with the two rows of step 4. The TCP fingerprint rows run in debug at the head with no
 runtime error (the `tyf` ingredient differs, as on master; the lwIP rows need a build with lwIP).
 The six gates pass.
+
+### S12 — `topic/tcp-fast-open`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: send nothing for a SEND of zero bytes | — | 43 (part) |
+| 2 | add: options without NOP alignment, selected by `alignOptions` | — | 15, 16, 23 (parts) |
+| 3 | add: a SYN without the MSS option, selected by `sendMssOption` | — | 15 (part) |
+| 4 | fix: the default send MSS when the SYN has no MSS option (RFC 9293 MUST-15) | — | 15 (part) |
+| 5 | change: the timestamp option before the window scale option in a SYN | — | 16 (part) |
+| 6 | add: TCP Fast Open (RFC 7413), selected by `fastopenClientEnabled` and `fastopenServerEnabled` | — | 26 (part), 43, 44, 15, 16 (parts) |
+| 7 | comment: describe the connection states in the words of RFC 9293 | — | 26 (part) |
+
+Commit 26 is the Fast Open feature, but it also holds changes that do not belong to Fast Open.
+S12 takes into step 6 the parts that only Fast Open reaches: the data and the FIN on a SYN-ACK
+(only a Fast Open server, or a packetdrill peer, sends them), the data on a crossing SYN, the
+STATUS field `synDataAccepted` (S8), the rule for a Fast Open connection in SYN_RCVD (S11 took
+the rule for a forked connection), and from commits 15 and 16 `peerAdvertisedMss`, the Nagle
+exemption of the SYN-ACK slot and the data retransmission in SYN_RCVD (D-19). Commits 43 and 44
+repair Fast Open before it landed, so by D-1 they fold into step 6, except the zero-length SEND of
+commit 43, which master also has (step 1). Step 6 keeps the check of `seedRttFromHandshake` on the
+active side (D-27).
+
+The other parts of commit 26 go to the stages of their topics: the FIN of a close that arms the
+retransmission timer only when it does not run and arms the loss probe (S15, timers); the check
+of the sequence number that an ICMP error quotes (RFC 5927) and the hard ICMP errors in SYN_RCVD
+(S17); the immediate SYN retransmission after an ICMP fragmentation-needed error in SYN_SENT (S18,
+path MTU); the `ts_recent` update only from a segment that acknowledges no unsent data, and the
+discard of the retransmission queue in SYN_RCVD also without SACK (S17, with commit 39). Commit 51
+needs nothing here: master already drops an unusable SACK option on receive (S8), and its guard
+of the send path goes with S17, which moves the SACK option to the recovery's `addSacks()`.
