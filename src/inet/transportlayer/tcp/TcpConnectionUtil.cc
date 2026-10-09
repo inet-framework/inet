@@ -151,6 +151,9 @@ const char *TcpConnection::optionName(int option)
         case TCPOPTION_TIMESTAMP:
             return "TS";
 
+        case TCPOPTION_TCP_FASTOPEN:
+            return "FAST_OPEN";
+
         default:
             return "unknown";
     }
@@ -672,6 +675,12 @@ void TcpConnection::configureStateVariables()
         state->sack_support = false;
     }
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
+    state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled");
+    state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
+    state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
+    state->fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");
+    if (state->fastopenCookieBytes < 4 || state->fastopenCookieBytes > 16 || state->fastopenCookieBytes % 2 != 0)
+        throw cRuntimeError("fastopenCookieBytes must be an even number from 4 to 16 (RFC 7413 section 4.1.1), but it is %d", state->fastopenCookieBytes);
     state->prrEnabled = tcpMain->par("prrEnabled");
     state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
     state->frtoEnabled = tcpMain->par("frtoEnabled");
@@ -783,8 +792,17 @@ void TcpConnection::sendSyn()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // TCP Fast Open (RFC 7413 section 4.2.2): the data that process_SEND() gave
+    // the SYN takes the sequence numbers after the SYN
+    uint32_t synDataLen = state->fastopenSynDataLen;
+    state->snd_max = state->snd_nxt = state->iss + 1 + synDataLen;
     emit(sndMaxSignal, state->snd_max);
+
+    // The rexmit queue records the data of the SYN once, at the first SYN. A
+    // retransmitted SYN leaves the data out (RFC 7413 section 4.2.2), and the
+    // data stays in flight until the SYN-ACK shows what the server acknowledged.
+    if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1)
+        rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
 
     // ECN
     if (state->ecnWillingness) {
@@ -806,7 +824,8 @@ void TcpConnection::sendSyn()
 
     // write header options
     writeHeaderOptions(tcpHeader);
-    Packet *fp = new Packet("SYN");
+    bool attachSynData = synDataLen > 0 && state->syn_rexmit_count == 0;
+    Packet *fp = attachSynData ? sendQueue->createSegmentWithBytes(state->iss + 1, synDataLen) : new Packet("SYN");
 
     state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
     if (state->syn_rexmit_count == 0)
@@ -827,7 +846,13 @@ void TcpConnection::sendSynAck()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // The SYN-ACK takes the ISS: snd_nxt and snd_max are at least ISS+1. A
+    // retransmitted SYN-ACK of a TCP Fast Open server that sent data in SYN_RCVD
+    // does not move them back over the data.
+    if (seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+    if (seqLess(state->snd_max, state->iss + 1))
+        state->snd_max = state->iss + 1;
 
     // ECN
     if (state->ecnWillingness) {
@@ -1187,6 +1212,14 @@ int TcpConnection::deriveLinuxCaState() const
     return 0; // TCP_CA_Open
 }
 
+uint32_t TcpConnection::getDataSndUna() const
+{
+    // only a TCP Fast Open server sends data while snd_una is at the ISS
+    if (fsm.getState() == TCP_S_SYN_RCVD && state->snd_una == state->iss)
+        return state->iss + 1;
+    return state->snd_una;
+}
+
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO
@@ -1207,7 +1240,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // effectiveWindow: number of bytes we're allowed to send now. The advertised
     // window limits the unacknowledged sequence space, and the congestion window
     // limits the bytes in flight that the algorithm reports.
-    uint32_t unackedInWindow = state->snd_nxt - state->snd_una;
+    uint32_t unackedInWindow = state->snd_nxt - getDataSndUna();
     uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
     int64_t effectiveWin = std::min((int64_t)state->snd_wnd - unackedInWindow, (int64_t)congestionWindow - bytesInFlight);
 
@@ -1263,7 +1296,13 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // Nagle's algorithm: when a TCP connection has outstanding data that has not
         // yet been acknowledged, small segments cannot be sent until the outstanding
         // data is acknowledged.
-        bool unacknowledgedData = (state->snd_una != state->snd_max);
+        // The SYN-ACK of a TCP Fast Open server that sends in SYN_RCVD is not
+        // data: Nagle does not wait for its ACK (Linux applies Nagle to the data
+        // in the write queue only). In SYN_SENT, the ACK that completes the
+        // handshake carries the data of a Fast Open SYN that the SYN-ACK did not
+        // acknowledge (RFC 7413 section 4.2.2: "include the data after SND.UNA if
+        // data is available"), without Nagle.
+        bool unacknowledgedData = (getDataSndUna() != state->snd_max) && fsm.getState() != TCP_S_SYN_SENT;
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
         if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
@@ -1357,6 +1396,12 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
+
+    // ... but at the first data byte, while a TCP Fast Open server sends data in
+    // SYN_RCVD: the SYN-ACK is not in the send queue, and the SYN-REXMIT timer
+    // retransmits it
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
 
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
     uint32_t bytes = std::min(std::min(state->snd_effmss, state->snd_max - state->snd_nxt),
@@ -1474,6 +1519,11 @@ void TcpConnection::retransmitData()
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
 
+    // ... from the first data byte, while a TCP Fast Open server sends data in
+    // SYN_RCVD (see retransmitOneSegment())
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+
     uint32_t bytesToSend = state->snd_max - state->snd_nxt;
 
     // FIN (without user data) needs to be resent
@@ -1563,6 +1613,10 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processTSOption(tcpHeader, *check_and_cast<const TcpOptionTimestamp *>(option));
                 break;
 
+            case TCPOPTION_TCP_FASTOPEN: // TFO=34
+                ok = processFastOpenOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpen *>(option));
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -1600,6 +1654,7 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     //
     // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
     // the value specified in the MSS option received during connection startup.
+    state->peerAdvertisedMss = option.getMaxSegmentSize(); // before the local limit, for the Fast Open cache
     state->snd_mss = std::min(state->snd_mss, (uint32_t)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
@@ -1737,12 +1792,91 @@ uint32_t TcpConnection::calculateEffectiveMss()
     return state->snd_mss - (state->ts_enabled ? 10 + 2 : 0);
 }
 
+bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
+{
+    std::vector<uint8_t> cookie(option.getCookieArraySize());
+    for (size_t i = 0; i < cookie.size(); i++)
+        cookie[i] = option.getCookie(i);
+    return processFastOpenCookieBytes(cookie);
+}
+
+bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cookie)
+{
+    // RFC 7413 section 4.2: without Fast Open, a server "MUST ignore all cookie
+    // options", and so does a client
+    bool serverSyn = state->fastopenServerEnabled && fsm.getState() == TCP_S_LISTEN;
+    bool clientSynAck = state->fastopenClientEnabled && fsm.getState() == TCP_S_SYN_SENT;
+    if (!serverSyn && !clientSynAck)
+        return true;
+
+    // RFC 7413 section 4.1.1: the cookie is empty, or it has an even number of
+    // bytes from 4 to 16, and "Options with invalid Length values ... MUST be
+    // ignored"
+    size_t cookieLength = cookie.size();
+    if (cookieLength != 0 && (cookieLength < 4 || cookieLength > 16 || cookieLength % 2 != 0)) {
+        EV_WARN << "Fast Open: ignoring the option with a cookie of " << cookieLength << " bytes\n";
+        return false;
+    }
+
+    if (serverSyn) {
+        if (cookieLength == 0) {
+            // RFC 7413 section 4.2.1: the client requests a cookie
+            state->fastopenCookieRequested = true;
+            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
+            state->fastopenSendCookieOption = true;
+            EV_INFO << "Fast Open: cookie requested\n";
+        }
+        else if (state->fastopenLenientCookieValidation || cookie == tcpMain->generateFastOpenCookie(localAddr, remoteAddr, cookieLength)) {
+            state->fastopenCookieValid = true;
+            EV_INFO << "Fast Open: valid cookie\n";
+        }
+        else {
+            // RFC 7413 section 4.1.2: "if the incoming cookie fails the check, a
+            // valid cookie is readily available to be sent to the client"
+            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
+            state->fastopenSendCookieOption = true;
+            EV_INFO << "Fast Open: the cookie is not valid, giving a new one\n";
+        }
+    }
+    else {
+        // RFC 7413 section 4.2.2, client step 1: cache the cookie with the MSS of
+        // the server, before the local limit. As Linux, cache it only when the SYN
+        // carried a Fast Open option.
+        if (!state->fastopenSynCarriedOption)
+            EV_INFO << "Fast Open: ignoring a cookie that the SYN did not request\n";
+        else if (cookieLength > 0) {
+            uint32_t cacheMss = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss;
+            tcpMain->setFastOpenCookie(remoteAddr, cookie, cacheMss);
+            EV_INFO << "Fast Open: caching the cookie of " << cookieLength << " bytes for " << remoteAddr << "\n";
+        }
+    }
+    return true;
+}
+
+// a TCP Fast Open option; with alignment, 2 NOPs before it make its 2 + an even
+// number of bytes a multiple of 4
+static void appendFastOpenOption(const Ptr<TcpHeader>& tcpHeader, const std::vector<uint8_t>& cookie, bool align)
+{
+    if (align) {
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+    }
+    auto option = new TcpOptionTcpFastOpen();
+    option->setCookieArraySize(cookie.size());
+    for (size_t i = 0; i < cookie.size(); i++)
+        option->setCookie(i, cookie[i]);
+    option->setLength(2 + cookie.size());
+    tcpHeader->appendHeaderOption(option);
+}
+
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 {
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
                                     && (state->syn_rexmit_count > 0
+                                        // TCP Fast Open: the deferred SYN goes out in SYN_SENT
+                                        || state->fastopenSynDeferred
                                         // simultaneous open: the SYN-ACK that answers the
                                         // crossing SYN goes out in SYN_SENT, and it carries the
                                         // handshake options as any other SYN segment
@@ -1761,7 +1895,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
-                                                    || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                    || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             if (tcpMain->alignOptions) // 1 padding byte
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -1790,7 +1924,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // SACK_PERMITTED header option
         if (state->sack_support && (state->rcv_sack_perm || (fsm.getState() == TCP_S_INIT
-                                                             || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                             || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             if (tcpMain->alignOptions && !state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
@@ -1808,7 +1942,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // TS header option
         if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
-                                                            || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                            || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
@@ -1835,6 +1969,31 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
             tcpHeader->appendHeaderOption(option);
+        }
+
+        // TCP Fast Open (RFC 7413), server: the SYN-ACK gives a cookie. A
+        // retransmitted SYN-ACK goes out without it (RFC 7413 section 4.2.2).
+        if (state->fastopenServerEnabled && state->fastopenSendCookieOption && tcpHeader->getAckBit()
+            && state->syn_rexmit_count == 0)
+        {
+            appendFastOpenOption(tcpHeader, state->fastopenCookieToSend, tcpMain->alignOptions);
+            EV_INFO << "Tcp Header Option FAST_OPEN (cookie of " << state->fastopenCookieToSend.size() << " bytes) sent\n";
+        }
+
+        // TCP Fast Open (RFC 7413 section 4.2), client: the first SYN of a connection
+        // that asked for Fast Open carries the cached cookie, or an empty option that
+        // requests a cookie. A retransmitted SYN goes out without it (RFC 7413
+        // section 4.2.1), and so does the SYN-ACK of a simultaneous open.
+        if (state->fastopenClientEnabled && state->fastopenRequested && state->syn_rexmit_count == 0
+            && !tcpHeader->getAckBit())
+        {
+            std::vector<uint8_t> cookie;
+            bool cachedCookie = !state->fastopenCookieRequestPending && tcpMain->getFastOpenCookie(remoteAddr, cookie);
+            if (cachedCookie || state->fastopenCookieRequestPending) {
+                appendFastOpenOption(tcpHeader, cookie, tcpMain->alignOptions);
+                state->fastopenSynCarriedOption = true;
+                EV_INFO << "Tcp Header Option FAST_OPEN (cookie of " << cookie.size() << " bytes) sent\n";
+            }
         }
 
         // TODO add new TCPOptions here once they are implemented

@@ -1,0 +1,71 @@
+%description:
+Tests the cookies of TCP Fast Open (Tcp::generateFastOpenCookie(), RFC 7413
+section 4.1.2): two client addresses get different cookies (checked first, so
+that a constant cookie fails), the same address gets the same cookie again,
+the cookie has the requested length, a cookie of 4 bytes is the start of the
+cookie of 8 bytes, and IPv6 addresses also get different cookies.
+
+%includes:
+#include <iomanip>
+#include <sstream>
+
+#include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static std::string toHex(const std::vector<uint8_t>& v)
+{
+    std::ostringstream out;
+    for (uint8_t b : v)
+        out << std::hex << std::setw(2) << std::setfill('0') << (int)b;
+    return out.str();
+}
+
+%activity:
+
+// the key of the cookies comes from the RNG of the module, so the test needs a module
+cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp.Tcp");
+Tcp *tcpMain = check_and_cast<Tcp *>(moduleType->create("tcpMain", getSimulation()->getSystemModule()));
+tcpMain->finalizeParameters();
+tcpMain->callInitialize();
+
+L3Address server(Ipv4Address("10.0.0.1"));
+L3Address client1(Ipv4Address("192.168.0.1"));
+L3Address client2(Ipv4Address("192.168.0.2"));
+
+std::vector<uint8_t> c1 = tcpMain->generateFastOpenCookie(server, client1, 8);
+std::vector<uint8_t> c2 = tcpMain->generateFastOpenCookie(server, client2, 8);
+EV << "two clients: " << (toHex(c1) != toHex(c2) ? "different" : "SAME") << "\n";
+EV << "same client: " << (toHex(c1) == toHex(tcpMain->generateFastOpenCookie(server, client1, 8)) ? "same" : "DIFFERENT") << "\n";
+EV << "length: " << c1.size() << "\n";
+
+std::vector<uint8_t> c4 = tcpMain->generateFastOpenCookie(server, client1, 4);
+std::vector<uint8_t> c16 = tcpMain->generateFastOpenCookie(server, client1, 16);
+EV << "lengths 4 and 16: " << c4.size() << " " << c16.size() << "\n";
+EV << "4 bytes start the 8 bytes: " << (toHex(c1).substr(0, 8) == toHex(c4) ? "yes" : "NO") << "\n";
+EV << "16 bytes start with the 8 bytes: " << (toHex(c16).substr(0, 16) == toHex(c1) ? "yes" : "NO") << "\n";
+
+L3Address server6(Ipv6Address("2001:db8::1"));
+L3Address client6a(Ipv6Address("2001:db8::a"));
+L3Address client6b(Ipv6Address("2001:db8::b"));
+EV << "two IPv6 clients: " << (toHex(tcpMain->generateFastOpenCookie(server6, client6a, 8)) != toHex(tcpMain->generateFastOpenCookie(server6, client6b, 8)) ? "different" : "SAME") << "\n";
+
+tcpMain->deleteModule();
+
+EV << ".\n";
+
+%contains: stdout
+two clients: different
+same client: same
+length: 8
+lengths 4 and 16: 4 16
+4 bytes start the 8 bytes: yes
+16 bytes start with the 8 bytes: yes
+two IPv6 clients: different
+.

@@ -161,6 +161,16 @@ class INET_API Tcp : public TransportProtocolBase
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
+    // TCP Fast Open (RFC 7413): the key of the cookies that this module gives as a
+    // server, and the cookies that it keeps as a client (RFC 7413 section 4.1.3),
+    // with the MSS that each server announced. The key comes from the RNG at its
+    // first use, so a simulation without Fast Open draws no number.
+    bool fastOpenKeySet = false;
+    uint8_t fastOpenKey[16] = {};
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; };
+    std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache;
+    int fastOpenCookieCacheSize = 0; // from the fastopenCookieCacheSize parameter
+
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
     long numSegmentsSent = 0;
@@ -206,6 +216,28 @@ class INET_API Tcp : public TransportProtocolBase
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+
+    /**
+     * TCP Fast Open (RFC 7413 section 4.1.2): the cookie for a client, a SipHash-2-4
+     * MAC of the source and the destination address of its SYN (as Linux makes
+     * it) under the key of this module. The same addresses give the same cookie.
+     */
+    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes);
+
+    /** TCP Fast Open, client: the cached cookie of the server; false if there is none. */
+    virtual bool getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const;
+
+    /** TCP Fast Open, client: caches the cookie and the MSS that the server sent in a SYN-ACK. */
+    virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie, uint32_t peerMss);
+
+    /** TCP Fast Open, client: caches the MSS of the server, and keeps its cookie. */
+    virtual void updateFastOpenCachedMss(const L3Address& remoteAddr, uint32_t peerMss);
+
+    /** TCP Fast Open, client: the cached MSS of the server; 0 if there is none. */
+    virtual uint32_t getFastOpenCachedMss(const L3Address& remoteAddr) const;
+
+    /** TCP Fast Open, client: removes all cached cookies, as `ip tcp_metrics flush` does on Linux. */
+    virtual void clearFastOpenCookieCache();
 
     virtual void removeConnection(TcpConnection *conn);
     virtual void sendToIp(Packet *segment);

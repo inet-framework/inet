@@ -31,12 +31,15 @@ class INET_API TcpTestClient : public cSimpleModule
     typedef std::list<Command> Commands;
     Commands commands;
     Commands readCommands; // with autoRead=false: when to READ, and how many bytes
+    static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
+    Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
     TcpSocket socket;
+    TcpSocket extraSockets[NUM_EXTRA];
 
     // statistics
     int64_t rcvdBytes;
@@ -49,6 +52,8 @@ class INET_API TcpTestClient : public cSimpleModule
     std::string makeMsgName();
     void handleSelfMessage(cMessage *msg);
     void scheduleNextSend();
+    void scheduleNextExtraSend(int i);
+    cPar& extraPar(const char *name, int i) { return par((name + std::to_string(i + 2)).c_str()); }
 
   protected:
     virtual void initialize();
@@ -154,6 +159,8 @@ void TcpTestClient::initialize()
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
     socket.setOutputGate(gate("socketOut"));
+    for (auto& extraSocket : extraSockets)
+        extraSocket.setOutputGate(gate("socketOut"));
 
     ctr = 0;
 
@@ -164,6 +171,18 @@ void TcpTestClient::initialize()
         scheduleAt(read.tSend, new cMessage("Read", TEST_READ));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
+
+    for (int i = 0; i < NUM_EXTRA; i++) {
+        simtime_t tOpenExtra = extraPar("tOpen", i);
+        if (tOpenExtra >= SIMTIME_ZERO) {
+            Command extraCmd;
+            extraCmd.tSend = extraPar("tSend", i);
+            extraCmd.numBytes = extraPar("sendBytes", i);
+            if (extraCmd.numBytes > 0)
+                extraCommands[i].push_back(extraCmd);
+            scheduleAt(tOpenExtra, new cMessage(("Open" + std::to_string(i + 2)).c_str(), TEST_OPEN_EXTRA + i));
+        }
+    }
 }
 
 void TcpTestClient::handleMessage(cMessage *msg)
@@ -184,7 +203,22 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         printStatus(check_and_cast<TcpStatusInfo *>(msg->getControlInfo()));
     }
-    socket.processMessage(msg);
+    if (par("logIndications")) {
+        EV_INFO_C("testing") << getFullName() << ": " << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind());
+        if (auto packet = dynamic_cast<Packet *>(msg))
+            EV_INFO_C("testing") << ", " << packet->getByteLength() << " bytes";
+        EV_INFO_C("testing") << "\n";
+    }
+    for (auto& extraSocket : extraSockets) {
+        if (extraSocket.belongsToSocket(msg)) {
+            extraSocket.processMessage(msg);
+            return;
+        }
+    }
+    if (socket.belongsToSocket(msg))
+        socket.processMessage(msg);
+    else
+        delete msg; // a connection that the listener forked (fork=true): the received bytes are counted above
 }
 
 void TcpTestClient::handleSelfMessage(cMessage *msg)
@@ -203,7 +237,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.setAutoRead(par("autoRead"));
 
             if (par("active"))
-                socket.connect(L3Address(connectAddress), connectPort);
+                socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
             else if (par("fork"))
                 socket.listen();
             else
@@ -230,7 +264,26 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             delete msg;
             break;
         default:
-            throw cRuntimeError("Unknown self message!");
+            if (msg->getKind() >= TEST_OPEN_EXTRA && msg->getKind() < TEST_OPEN_EXTRA + NUM_EXTRA) {
+                int i = msg->getKind() - TEST_OPEN_EXTRA;
+                const char *localAddress = par("localAddress");
+                const char *connectAddress = par("connectAddress");
+                extraSockets[i].bind(*localAddress ? L3Address(localAddress) : L3Address(), extraPar("localPort", i));
+                extraSockets[i].setAutoRead(par("autoRead"));
+                if (extraPar("active", i))
+                    extraSockets[i].connect(L3Address(connectAddress), par("connectPort"), extraPar("fastOpen", i));
+                else
+                    extraSockets[i].listenOnce();
+                scheduleNextExtraSend(i);
+                delete msg;
+            }
+            else if (msg->getKind() >= TEST_SEND_EXTRA && msg->getKind() < TEST_SEND_EXTRA + NUM_EXTRA) {
+                int i = msg->getKind() - TEST_SEND_EXTRA;
+                extraSockets[i].send(check_and_cast<Packet *>(msg));
+                scheduleNextExtraSend(i);
+            }
+            else
+                throw cRuntimeError("Unknown self message!");
             break;
     }
 }
@@ -244,6 +297,17 @@ void TcpTestClient::scheduleNextSend()
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
     if (cmd.numBytes > 0) // a SEND of 0 bytes is a packet without content
         msg->insertAtBack(makeShared<ByteCountChunk>(B(cmd.numBytes)));
+    scheduleAt(cmd.tSend, msg);
+}
+
+void TcpTestClient::scheduleNextExtraSend(int i)
+{
+    if (extraCommands[i].empty())
+        return;
+    Command cmd = extraCommands[i].front();
+    extraCommands[i].pop_front();
+    Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND_EXTRA + i);
+    msg->insertAtBack(makeShared<ByteCountChunk>(B(cmd.numBytes)));
     scheduleAt(cmd.tSend, msg);
 }
 

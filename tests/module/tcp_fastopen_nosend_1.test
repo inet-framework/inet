@@ -1,0 +1,56 @@
+%description:
+Tests a TCP Fast Open connection that sends nothing. Connection 1 caches the
+cookie of the server. Connection 2 asks for Fast Open with the cookie, so its
+SYN waits for the first SEND, but no SEND comes. When the connection
+establishment timer expires (75 s after the open), the SYN goes out without
+data, with the cookie (RFC 7413 allows it), and the handshake completes.
+Before the timer expires, no SYN goes out.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+sim-time-limit = 76s
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
+[75.501 A003] A.1001 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

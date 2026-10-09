@@ -195,7 +195,11 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
     virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
+    virtual bool processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option);
     //@}
+
+    /** TCP Fast Open (RFC 7413): processes the cookie of a Fast Open option of a SYN or a SYN-ACK. */
+    virtual bool processFastOpenCookieBytes(const std::vector<uint8_t>& cookie);
 
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{
@@ -225,6 +229,15 @@ class INET_API TcpConnection : public SimpleModule
      * TcpStatusInfo::caState.
      */
     virtual int deriveLinuxCaState() const;
+
+    /**
+     * The sequence number from which the advertised window and the bytes in flight
+     * count the data: snd_una, but the first data byte while a TCP Fast Open
+     * server sends data in SYN_RCVD. Its SYN-ACK is then not acknowledged, and
+     * snd_una stays at the ISS, but the SYN-ACK is not data (Linux starts the
+     * child socket at snd_una = ISS+1).
+     */
+    virtual uint32_t getDataSndUna() const;
 
   protected:
 

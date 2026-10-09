@@ -183,8 +183,21 @@ bool TcpConnection::processTimer(cMessage *msg)
         process_TIMEOUT_2MSL();
     }
     else if (msg == connEstabTimer) {
-        event = TCP_E_TIMEOUT_CONN_ESTAB;
-        process_TIMEOUT_CONN_ESTAB();
+        if (state->fastopenSynDeferred) {
+            // TCP Fast Open: no SEND came for the SYN that waits for one. The SYN
+            // goes out now without data (with the cookie, which RFC 7413 allows),
+            // and the handshake gets its full time.
+            EV_DETAIL << "Fast Open: no SEND, sending the SYN without data\n";
+            sendSyn();
+            state->fastopenSynDeferred = false;
+            startSynRexmitTimer();
+            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+            event = TCP_E_IGNORE;
+        }
+        else {
+            event = TCP_E_TIMEOUT_CONN_ESTAB;
+            process_TIMEOUT_CONN_ESTAB();
+        }
     }
     else if (msg == finWait2Timer) {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
@@ -424,8 +437,9 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
                 case TCP_E_RCV_RST:
                     // RFC 9293 returns a passive open to LISTEN. A forked connection
                     // is the child of a listener that still exists (a Linux child
-                    // socket): it closes, else there would be two listeners.
-                    FSM_Goto(fsm, (state->active || state->forked) ? TCP_S_CLOSED : TCP_S_LISTEN);
+                    // socket): it closes, else there would be two listeners. A TCP
+                    // Fast Open connection closes too: the application has it.
+                    FSM_Goto(fsm, (state->active || state->forked || state->fastopenAccelerated) ? TCP_S_CLOSED : TCP_S_LISTEN);
                     break;
 
                 case TCP_E_RCV_ACK:

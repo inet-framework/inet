@@ -821,7 +821,7 @@ uint32_t TcpAlgorithmBase::calculateSsthresh(uint32_t bytesInFlight)
 
 uint32_t TcpAlgorithmBase::getBytesInFlight() const
 {
-    return state->snd_nxt - state->snd_una;
+    return state->snd_nxt - conn->getDataSndUna();
 }
 
 } // namespace tcp

@@ -57,6 +57,22 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
 
             tcpMain->addSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
+            // TCP Fast Open (RFC 7413 section 4.2): with a cached cookie for the
+            // server, the SYN waits for the first SEND, and carries its data
+            // (process_SEND()); without a cookie, the SYN goes out now and requests one
+            if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
+                state->fastopenRequested = true;
+                std::vector<uint8_t> cookie;
+                if (tcpMain->getFastOpenCookie(remoteAddr, cookie)) {
+                    selectInitialSeqNum();
+                    state->fastopenSynDeferred = true;
+                    scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+                    EV_DETAIL << "Fast Open: the SYN waits for the first SEND\n";
+                    break;
+                }
+                state->fastopenCookieRequestPending = true;
+            }
+
             // send initial SYN
             selectInitialSeqNum();
             sendSyn();
@@ -136,9 +152,36 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             break;
 
         case TCP_S_SYN_RCVD:
+            enqueueSendCommandData(packet);
+            if (state->fastopenAccelerated) {
+                // TCP Fast Open (RFC 7413 section 4.2.2): the server of a Fast Open
+                // connection can send before the ACK of its SYN-ACK arrives
+                EV_DETAIL << "Fast Open: sending data in SYN_RCVD\n";
+                tcpAlgorithm->sendCommandInvoked();
+            }
+            else {
+                EV_DETAIL << "Queueing up data for sending later.\n";
+                EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            }
+            break;
+
         case TCP_S_SYN_SENT:
-            EV_DETAIL << "Queueing up data for sending later.\n";
             enqueueSendCommandData(packet); // queue up for later
+            if (state->fastopenSynDeferred) {
+                // TCP Fast Open (RFC 7413 section 4.2.2): the SEND that the SYN waits
+                // for. The SYN carries as much of the data as the cached MSS of the
+                // server allows, less the largest option space (as Linux does); a
+                // SEND of zero bytes sends the SYN without data.
+                uint32_t cachedMss = tcpMain->getFastOpenCachedMss(remoteAddr);
+                uint32_t mss = cachedMss > 0 ? cachedMss : state->snd_mss;
+                uint32_t maxSynData = mss > 40 ? mss - 40 : mss;
+                state->fastopenSynDataLen = std::min(sendQueue->getBytesAvailable(state->iss + 1), maxSynData);
+                sendSyn(); // with fastopenSynDeferred, writeHeaderOptions() writes the options of a first SYN
+                state->fastopenSynDeferred = false;
+                startSynRexmitTimer();
+                break;
+            }
+            EV_DETAIL << "Queueing up data for sending later.\n";
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
@@ -392,6 +435,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setSackEnabled(state->sack_enabled);
     statusInfo->setWsEnabled(state->ws_enabled);
     statusInfo->setEctEnabled(state->ect);
+    statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
     statusInfo->setSndWndScale(state->snd_wnd_scale);
 
     // Congestion-window/RTO/RTT fields live on flavour-specific state variable

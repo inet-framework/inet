@@ -1,0 +1,66 @@
+%description:
+Tests TCP Fast Open with a forked server (listen()). The listener forks a
+connection for the Fast Open SYN of connection 2 (with the cookie and 200
+bytes), and the application gets the connection at once (TCP_I_AVAILABLE,
+RFC 7413 section 4.2.2, step 4), before the SYN-ACK goes out. It accepts the
+connection, and gets TCP_I_ESTABLISHED and the 200 bytes. The ACK of the
+SYN-ACK gives no second indication. The SYN-ACK advertises a window less the
+200 bytes, which the application did not read yet.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+
+*.srv_app.fork=true
+*.srv_app.logIndications=true
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+srv_app: TCP_I_AVAILABLE
+srv_app: TCP_I_ESTABLISHED
+srv_app: TCP_I_DATA, 200 bytes
+[0.503 B002] A.1001 < B.2000: A S 125500:125500(0) ack 125201 win 16184   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.505 A004] A.1001 > B.2000: A ack 125501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[0.506] tcpdump finished, A:4 B:2 segments
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TcpTestNet1.srv_app: received 200 bytes in 1 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

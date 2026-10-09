@@ -1,0 +1,62 @@
+%description:
+Tests the bound of the cookie cache of TCP Fast Open (fastopenCookieCacheSize,
+RFC 7413 section 4.1.3). With a cache of 2 entries, the cookie of a third
+server replaces an arbitrary entry: the first entry of the map, that is, the
+lowest address (10.0.0.1), not the least recently used one. With the default
+size (1024), the cache keeps all three cookies.
+
+%includes:
+#include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static Tcp *makeTcpMain(const char *name, int cacheSize)
+{
+    cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp.Tcp");
+    Tcp *tcpMain = check_and_cast<Tcp *>(moduleType->create(name, getSimulation()->getSystemModule()));
+    tcpMain->par("fastopenCookieCacheSize").setIntValue(cacheSize);
+    tcpMain->finalizeParameters();
+    tcpMain->callInitialize();
+    return tcpMain;
+}
+
+static void printCache(const char *label, Tcp *tcpMain, const std::vector<L3Address>& addrs)
+{
+    std::vector<uint8_t> cookie;
+    for (const auto& addr : addrs)
+        EV << label << ": " << addr << " cached=" << (tcpMain->getFastOpenCookie(addr, cookie) ? "yes" : "no") << "\n";
+}
+
+%activity:
+
+std::vector<L3Address> addrs = { L3Address(Ipv4Address("10.0.0.1")), L3Address(Ipv4Address("10.0.0.2")), L3Address(Ipv4Address("10.0.0.3")) };
+
+Tcp *bounded = makeTcpMain("bounded", 2);
+for (size_t i = 0; i < addrs.size(); i++)
+    bounded->setFastOpenCookie(addrs[i], {1, 2, 3, (uint8_t)i}, 1460);
+printCache("bounded", bounded, addrs);
+bounded->deleteModule();
+
+Tcp *unbounded = makeTcpMain("unbounded", 1024);
+for (size_t i = 0; i < addrs.size(); i++)
+    unbounded->setFastOpenCookie(addrs[i], {1, 2, 3, (uint8_t)i}, 1460);
+printCache("default", unbounded, addrs);
+unbounded->deleteModule();
+
+EV << ".\n";
+
+%contains: stdout
+bounded: 10.0.0.1 cached=no
+bounded: 10.0.0.2 cached=yes
+bounded: 10.0.0.3 cached=yes
+
+%contains: stdout
+default: 10.0.0.1 cached=yes
+default: 10.0.0.2 cached=yes
+default: 10.0.0.3 cached=yes
+.

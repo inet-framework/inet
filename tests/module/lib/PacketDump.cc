@@ -605,6 +605,11 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                         out << " TS(" << tsOpt->getSenderTimestamp() << "," << tsOpt->getEchoedTimestamp() << ")";
                         break;
                     }
+                    case TCPOPTION_TCP_FASTOPEN: {
+                        auto foOpt = check_and_cast<const TcpOptionTcpFastOpen *>(option);
+                        out << " FastOpen(cookieLen=" << foOpt->getCookieArraySize() << ")";
+                        break;
+                    }
                     default:
                         out << " (kind=" << option->getKind() << " length=" << option->getLength() << ")"; break;
                 }

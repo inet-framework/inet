@@ -1,0 +1,64 @@
+%description:
+Tests the loss of the SYN-ACK of a TCP Fast Open server that sends data in
+SYN_RCVD (as in tcp_fastopen_srvdata_1). The tester deletes the SYN-ACK of
+connection 2, and the client drops the data segment, which arrives in
+SYN_SENT. At t=3.5 s, the server retransmits the SYN-ACK and answers the
+retransmitted SYN of the client, and its retransmission timer retransmits the
+data: the retransmitted SYN-ACK keeps snd_max over the data. The client
+receives all 3000 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.srv_app.logIndications=true
+*.srv_app.tSend2=0.5025s
+*.srv_app.sendBytes2=3000B
+*.tcptester.script="b2 delete"
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[3.503 B004] A.1001 < B.2000: A S 125500:125500(0) ack 125201 win 16384   Option(s): MaxSegSize
+[3.503 B005] A.1001 < B.2000: A S 125500:125500(0) ack 125201 win 16384   Option(s): MaxSegSize
+[3.503 B006] A.1001 < B.2000: A 125501:126525(1024) ack 125201 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TcpTestNet1.cli_app: received 3000 bytes in 3 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

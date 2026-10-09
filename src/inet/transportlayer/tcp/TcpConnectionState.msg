@@ -11,9 +11,11 @@ namespace inet::tcp;
 
 cplusplus {{
 typedef std::list<Sack> SackList;
+typedef std::vector<uint8_t> FastOpenCookie;
 }}
 
 class SackList { @existingClass; }
+class FastOpenCookie { @existingClass; }
 
 //
 // TCP FSM states
@@ -306,6 +308,24 @@ struct TcpStateVariables
     simtime_t firstSynSentTime = -1; // when the first SYN was sent (Linux tp->retrans_stamp); a retransmitted SYN does not change it
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
     bool sawAccEcnOpt = false;
+
+    // TCP Fast Open (RFC 7413)
+    bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
+    bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
+    bool fastopenLenientCookieValidation = false; // from the fastopenLenientCookieValidation parameter
+    int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter
+    bool fastopenCookieRequested = false;    // server: the SYN requests a cookie (an empty Fast Open option)
+    bool fastopenCookieValid = false;        // server: the cookie of the SYN is valid
+    bool fastopenSendCookieOption = false;   // server: the SYN-ACK gives a cookie (fastopenCookieToSend)
+    FastOpenCookie fastopenCookieToSend;     // server: the cookie for the SYN-ACK
+    bool fastopenAccelerated = false;        // server: a SYN with a valid cookie made this connection, also without data; the application gets it at once and can send in SYN_RCVD
+    bool fastopenRequested = false;          // client: the OPEN of this connection asked for Fast Open (Linux MSG_FASTOPEN or TCP_FASTOPEN_CONNECT); a cached cookie goes only on the SYN of such a connection
+    bool fastopenSynDeferred = false;        // client: the SYN waits for the first SEND (or for the connection establishment timer), to carry its data
+    bool fastopenCookieRequestPending = false; // client: no cookie is cached, so the SYN requests one
+    bool fastopenSynCarriedOption = false;   // client: the SYN carried a Fast Open option (Linux tp->syn_fastopen); a cookie of the SYN-ACK is cached only then
+    uint32_t fastopenSynDataLen = 0;         // client: the number of bytes on the SYN; a retransmitted SYN leaves them out, and they stay in flight
+    bool fastopenSynDataAccepted = false;    // server: the data of the SYN went to the application before the handshake completed; client: the SYN-ACK acknowledged all the data of the SYN (Linux TCPI_OPT_SYN_DATA)
+    uint32_t peerAdvertisedMss = 0;          // the value of the MSS option of the peer, before the local limit; the client caches it for the data of its next Fast Open SYN
 };
 
 cplusplus(TcpStateVariables) {{
