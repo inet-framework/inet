@@ -236,6 +236,13 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 EV_DETAIL << "SND_D-SACK SET (dupseg rcvd)\n";
             }
 
+            // AccECN, accEcnOptionPolicy="linux": Linux tests the acceptability against
+            // the left edge of the window that it advertised last (tcp_sequence()), so
+            // a duplicate that ends at RCV.NXT passes, and the counters count it
+            if (state->accEcnNegotiated && tcpMain->accEcnOptionLinux && payloadLength > 0
+                && tcpHeader->getSequenceNo() + payloadLength == state->rcv_nxt)
+                countAccEcnReceived(tcpSegment, payloadLength);
+
             EV_DETAIL << "Segment seqNum not acceptable, sending ACK with current receive seq\n";
             // RFC 2018, page 4:
             // "The receiver SHOULD send an ACK for every valid segment that arrives
@@ -253,23 +260,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         return TCP_E_IGNORE;
     }
 
-    // AccECN (RFC 9768 section 3.2): count each CE-marked acceptable packet (section
-    // 4: "only 'Acceptable' packets contribute to the ECN counters"), and the payload
-    // bytes of each acceptable packet by its codepoint (section 3.2.1: r.e0b, r.ceb
-    // and r.e1b, for the AccECN option)
-    if (state->accEcnNegotiated) {
-        int ecn = receivedEcnCodepoint(tcpSegment);
-        if (ecn == IP_ECN_CE)
-            state->rcvCePkts++;
-        if (payloadLength > 0) {
-            if (ecn == IP_ECN_ECT_0)
-                state->rcvEct0Bytes += payloadLength;
-            else if (ecn == IP_ECN_CE)
-                state->rcvCeBytes += payloadLength;
-            else if (ecn == IP_ECN_ECT_1)
-                state->rcvEct1Bytes += payloadLength;
-        }
-    }
+    // AccECN (RFC 9768 section 3.2): section 4: "only 'Acceptable' packets contribute
+    // to the ECN counters"
+    if (state->accEcnNegotiated)
+        countAccEcnReceived(tcpSegment, payloadLength);
 
     // ECN (an AccECN connection uses the CWR bit for the ACE field)
     if (tcpHeader->getCwrBit() == true && !state->accEcnNegotiated) {
@@ -1739,6 +1733,23 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     }
 
     return true;
+}
+
+void TcpConnection::countAccEcnReceived(Packet *tcpSegment, int payloadLength)
+{
+    // section 3.2: r.cep counts the CE-marked packets, and r.e0b, r.ceb and r.e1b the
+    // payload bytes of each codepoint (section 3.2.1), for the ACE field and the option
+    int ecn = receivedEcnCodepoint(tcpSegment);
+    if (ecn == IP_ECN_CE)
+        state->rcvCePkts++;
+    if (payloadLength > 0) {
+        if (ecn == IP_ECN_ECT_0)
+            state->rcvEct0Bytes += payloadLength;
+        else if (ecn == IP_ECN_CE)
+            state->rcvCeBytes += payloadLength;
+        else if (ecn == IP_ECN_ECT_1)
+            state->rcvEct1Bytes += payloadLength;
+    }
 }
 
 void TcpConnection::processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader)

@@ -356,6 +356,8 @@ class INET_API TcpConnection : public SimpleModule
 
     /** AccECN: reads the ACE field of an ACK that makes progress, and counts the CE marks that it reports (RFC 9768 section 3.2.2.5) */
     virtual void processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader);
+    /** AccECN receiver: counts the CE mark and the payload bytes of a received segment (RFC 9768 section 3.2). */
+    virtual void countAccEcnReceived(Packet *tcpSegment, int payloadLength);
     /**
      * AccECN (RFC 9768 section 3.2.3): whether the next segment after the handshake
      * carries the AccECN option, and with which fields. order: 0 (kind 172) or 1
