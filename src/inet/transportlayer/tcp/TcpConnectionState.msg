@@ -291,6 +291,9 @@ struct TcpStateVariables
     bool accEcnCebSeen = false; // AccECN sender: an AccECN option with the ECEB field arrived, so DCTCP counts the CE bytes of the option
     bool accEcnOptionChecked = false; // AccECN: the first AccECN option with EE0B or EE1B was checked for zeroed fields
     bool accEcnOptionIgnored = false; // AccECN: that option had a zeroed field (RFC 9768 section 3.2.3.2.4), so the AccECN options are ignored
+    bool accEcnOptSentWithDsack = false; // AccECN: the last segment carried the AccECN option and a D-SACK block (Linux accecn_opt_sent_w_dsack)
+    uint32_t accEcnSentDsackStart = 0; // AccECN: the start of that D-SACK block
+    bool accEcnOptFailSend = false; // AccECN: the ACKs with the option seem to get lost (RFC 9768 section 3.2.3.2.2), so no more AccECN options
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)

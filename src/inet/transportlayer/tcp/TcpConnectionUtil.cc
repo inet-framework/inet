@@ -286,7 +286,7 @@ uint8_t TcpConnection::accEcnReflectedAce(int ipEcnCodepoint)
 
 bool TcpConnection::getAccEcnOptionFields(int& order, int& wanted, int& required) const
 {
-    if (!state->accEcnNegotiated || !state->accEcnOptionEnabled)
+    if (!state->accEcnNegotiated || !state->accEcnOptionEnabled || state->accEcnOptFailSend)
         return false;
 
     // the counters that changed since the last option, and those that ever changed
@@ -484,16 +484,29 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     // AccECN option (RFC 9768 section 3.2.3.3): remember the counts that it reported,
     // so that the next option knows the counters that changed since. A data segment
-    // with the option ends the extra options of the client (section 3.2.3.2.1).
+    // with the option ends the extra options of the client (section 3.2.3.2.1). As
+    // Linux (tcp_options_write()), remember also whether the option went out with a
+    // D-SACK block, the first SACK block, below the acknowledgment number (RFC 2883).
+    bool accEcnOptionSent = false;
+    const TcpOptionSack *sackOption = nullptr;
     for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
-        int kind = tcpHeader->getHeaderOption(i)->getKind();
-        if (kind == TCPOPTION_ACCECN0 || kind == TCPOPTION_ACCECN1) {
+        const TcpOption *option = tcpHeader->getHeaderOption(i);
+        if (option->getKind() == TCPOPTION_ACCECN0 || option->getKind() == TCPOPTION_ACCECN1) {
+            accEcnOptionSent = true;
             state->accEcnOptEct0Bytes = state->rcvEct0Bytes;
             state->accEcnOptCeBytes = state->rcvCeBytes;
             state->accEcnOptEct1Bytes = state->rcvEct1Bytes;
             if (tcpSegment->getByteLength() > 0)
                 state->accEcnFirstDataOptionSent = true;
         }
+        else if (option->getKind() == TCPOPTION_SACK)
+            sackOption = check_and_cast<const TcpOptionSack *>(option);
+    }
+    if (state->accEcnNegotiated) {
+        state->accEcnOptSentWithDsack = accEcnOptionSent && sackOption != nullptr && sackOption->getSackItemArraySize() > 0
+                && seqLess(sackOption->getSackItem(0).getStart(), tcpHeader->getAckNo());
+        if (state->accEcnOptSentWithDsack)
+            state->accEcnSentDsackStart = sackOption->getSackItem(0).getStart();
     }
 
     // ECN: the ECN capable transport codepoint is ECT(0).

@@ -214,6 +214,18 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             }
             else if (payloadLength + tcpHeader->getSynFinLen() > 0 && state->sack_enabled
                      && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
+                // AccECN (RFC 9768 section 3.2.3.2.2): a host "MAY detect loss of ACKs
+                // carrying the AccECN Option by detecting whether the acknowledged data
+                // always reappears as a retransmission. In such cases, the host SHOULD
+                // disable the sending of the AccECN Option for this half-connection." As
+                // Linux (tcp_rcv_spurious_retrans()): the data of the D-SACK block that went
+                // out with the option arrives again, so that ACK was lost too.
+                if (state->accEcnOptSentWithDsack && tcpHeader->getSequenceNo() == state->accEcnSentDsackStart
+                    && !state->accEcnOptFailSend)
+                {
+                    state->accEcnOptFailSend = true;
+                    EV_INFO << "AccECN: the data of the D-SACK block that went with the AccECN option arrived again: no more AccECN options\n";
+                }
                 // Linux tcp_send_dupack: ANY old data (seq before rcv_nxt) earns a
                 // D-SACK, including a duplicate ending exactly at rcv_nxt -- the
                 // range's right edge is capped at rcv_nxt by addSacks. SEG.LEN
