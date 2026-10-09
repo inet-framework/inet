@@ -1,0 +1,58 @@
+%description:
+Tests the TCP Fast Open cookies with a key from fastopenKey (the format of
+Linux net.ipv4.tcp_fastopen_key). With the key bytes 00..0f and the addresses
+0.1.2.3 (client) and 4.5.6.7 (server), the input of the MAC is the bytes
+00..07, and the cookie is the SipHash-2-4 reference value for that input
+(62 24 93 9a 79 f5 f5 93, Aumasson and Bernstein). With the key of the Linux
+packetdrill tests, a1a1a1a1-b2b2b2b2-c3c3c3c3-d4d4d4d4, and the addresses
+192.0.2.1 (client) and 192.168.0.1 (server), the cookie is the cookie of Linux
+(TFO_COOKIE=3021b9d889017eeb of the packetdrill suite).
+
+%includes:
+#include <iomanip>
+#include <sstream>
+
+#include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static std::string toHex(const std::vector<uint8_t>& v)
+{
+    std::ostringstream out;
+    for (uint8_t b : v)
+        out << std::hex << std::setw(2) << std::setfill('0') << (int)b;
+    return out.str();
+}
+
+static void printCookie(const char *key, const char *server, const char *client)
+{
+    cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp.Tcp");
+    Tcp *tcpMain = check_and_cast<Tcp *>(moduleType->create("tcpMain", getSimulation()->getSystemModule()));
+    tcpMain->par("fastopenKey").setStringValue(key);
+    tcpMain->finalizeParameters();
+    tcpMain->callInitialize();
+    EV << "key " << key << ", client " << client << ", server " << server << ": "
+       << toHex(tcpMain->generateFastOpenCookie(L3Address(Ipv4Address(server)), L3Address(Ipv4Address(client)), 8)) << "\n";
+    tcpMain->deleteModule();
+}
+
+%activity:
+
+printCookie("03020100-07060504-0b0a0908-0f0e0d0c", "4.5.6.7", "0.1.2.3");
+printCookie("a1a1a1a1-b2b2b2b2-c3c3c3c3-d4d4d4d4", "192.168.0.1", "192.0.2.1");
+
+EV << ".\n";
+
+%contains: stdout
+key 03020100-07060504-0b0a0908-0f0e0d0c, client 0.1.2.3, server 4.5.6.7: 6224939a79f5f593
+
+%contains: stdout
+key a1a1a1a1-b2b2b2b2-c3c3c3c3-d4d4d4d4, client 192.0.2.1, server 192.168.0.1: 3021b9d889017eeb
+
+%contains: stdout
+.

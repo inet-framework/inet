@@ -463,13 +463,29 @@ static void appendAddressBytes(std::vector<uint8_t>& bytes, const L3Address& add
 
 std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes)
 {
-    if (!fastOpenKeySet) {
-        for (int i = 0; i < 4; i++) {
-            uint32_t r = getRNG(0)->intRand();
+    // the key: from fastopenKey, in the format of Linux net.ipv4.tcp_fastopen_key
+    // (four 32-bit words in hexadecimal, each in little-endian byte order), or
+    // else from the RNG
+    uint8_t key[16];
+    const char *keyString = par("fastopenKey");
+    if (*keyString != '\0') {
+        unsigned int words[4];
+        if (sscanf(keyString, "%8x-%8x-%8x-%8x", &words[0], &words[1], &words[2], &words[3]) != 4)
+            throw cRuntimeError("fastopenKey must have the format xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx, but it is '%s'", keyString);
+        for (int i = 0; i < 4; i++)
             for (int b = 0; b < 4; b++)
-                fastOpenKey[i * 4 + b] = (uint8_t)(r >> (8 * b));
+                key[i * 4 + b] = (uint8_t)(words[i] >> (8 * b));
+    }
+    else {
+        if (!fastOpenKeySet) {
+            for (int i = 0; i < 4; i++) {
+                uint32_t r = getRNG(0)->intRand();
+                for (int b = 0; b < 4; b++)
+                    fastOpenKey[i * 4 + b] = (uint8_t)(r >> (8 * b));
+            }
+            fastOpenKeySet = true;
         }
-        fastOpenKeySet = true;
+        memcpy(key, fastOpenKey, sizeof(key));
     }
 
     // the input is the source address of the SYN (the client) and then its
@@ -484,7 +500,7 @@ std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& localAddr, con
         std::vector<uint8_t> blockInput = input;
         if (block > 0)
             blockInput.push_back(block);
-        uint64_t h = sipHash24(fastOpenKey, blockInput.data(), blockInput.size());
+        uint64_t h = sipHash24(key, blockInput.data(), blockInput.size());
         for (int b = 0; b < 8 && (int)cookie.size() < cookieBytes; b++)
             cookie.push_back((uint8_t)(h >> (8 * b)));
     }

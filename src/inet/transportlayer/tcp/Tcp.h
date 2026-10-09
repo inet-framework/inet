@@ -230,7 +230,8 @@ class INET_API Tcp : public TransportProtocolBase
     /**
      * TCP Fast Open (RFC 7413 section 4.1.2): the cookie for a client, a SipHash-2-4
      * MAC of the source and the destination address of its SYN (as Linux makes
-     * it) under the key of this module. The same addresses give the same cookie.
+     * it) under the key of this module (fastopenKey, or a key from the RNG). The
+     * same addresses give the same cookie.
      */
     virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes);
 
