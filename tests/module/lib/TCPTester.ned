@@ -44,6 +44,8 @@ package inet.test.moduletest.lib;
 //    - <tt>ace</tt> <i><value></i>: forwards the segment with its AE, CWR and ECE
 //      bits set to the bits of the value (AE = 4, CWR = 2, ECE = 1); it makes a peer
 //      or a path that changes them
+//    - <tt>zeroaccecn</tt>: forwards the segment with the fields of its AccECN option
+//      set to 0; it makes a path that zeroes them
 //
 simple TCPScriptableTester
 {

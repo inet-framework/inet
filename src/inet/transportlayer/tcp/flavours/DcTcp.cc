@@ -42,17 +42,22 @@ bool DcTcp::processEce(uint32_t numBytesAcked)
     // RFC 8257 3.3.2
     state->dctcp_bytesAcked += numBytesAcked;
 
-    // RFC 8257 3.3.3. With AccECN (RFC 9768), the count of CE marks gives the marked
-    // bytes: the new CE marks of this ACK times the MSS; with classic ECN, each byte
-    // that an ACK with ECE acknowledges counts as marked.
+    // RFC 8257 3.3.3. With AccECN (RFC 9768), the AccECN option gives the marked bytes;
+    // before an option with the ECEB field arrives, the new CE marks of this ACK times
+    // the MSS do. With classic ECN, each byte that an ACK with ECE acknowledges counts
+    // as marked.
     if (state->accEcnNegotiated) {
         uint32_t cePkts = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
+        uint32_t ceBytes = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
         state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+        state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
         state->gotEce = false;
-        state->dctcp_bytesMarked += cePkts * state->snd_mss;
-        if (cePkts > 0)
-            EV_INFO << "DCTCP: " << cePkts << " new CE marks (AccECN), " << state->dctcp_bytesMarked << " bytes marked in this window\n";
-        conn->emit(markingProbSignal, cePkts > 0 ? 1 : 0);
+        uint32_t marked = state->accEcnCebSeen ? ceBytes : cePkts * state->snd_mss;
+        state->dctcp_bytesMarked += marked;
+        if (marked > 0)
+            EV_INFO << "DCTCP: " << marked << " bytes newly marked (AccECN " << (state->accEcnCebSeen ? "option" : "ACE field")
+                    << "), " << state->dctcp_bytesMarked << " bytes marked in this window\n";
+        conn->emit(markingProbSignal, marked > 0 ? 1 : 0);
     }
     else if (state->gotEce) {
         state->dctcp_bytesMarked += numBytesAcked;

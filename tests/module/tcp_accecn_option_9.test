@@ -1,0 +1,54 @@
+%description:
+Tests the decode of the ACE field with the AccECN option (RFC 9768 Appendix
+A.2.2). The tester marks A030 CE and removes the ACKs B015 to B018, so B019
+acknowledges 10 packets with one more CE mark in the ACE field. 10 packets could
+hide a full cycle of the 3-bit field, which would be 9 marks (dSafer.cep), but
+the ECEB field shows 1024 new CE bytes, less than half an MSS for each of 9
+packets, so the sender takes 1 mark, as Linux does.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 40000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.tcptester.script="a30 ce; b15 delete; b16 delete; b17 delete; b18 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.431 B015] A.1000 < B.2000: A E N ack 26613 win 16384   Option(s): NOP NOP NOP AccECN0(e0b=26613)# deleting
+[1.431 B016] A.1000 < B.2000: A W N ack 28661 win 16384   Option(s): AccECN0(e0b=27637,ceb=1024)# deleting
+[1.431 B017] A.1000 < B.2000: A W N ack 30709 win 16384   Option(s): AccECN0(e0b=29685,ceb=1024)# deleting
+[1.431 B018] A.1000 < B.2000: A W N ack 32757 win 16384   Option(s): AccECN0(e0b=31733,ceb=1024)# deleting
+[1.431 B019] A.1000 < B.2000: A W N ack 34805 win 16384   Option(s): AccECN0(e0b=33781,ceb=1024)
+[1.431 B020] A.1000 < B.2000: A W N ack 36853 win 16384   Option(s): AccECN0(e0b=35829,ceb=1024)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN option: delivered bytes ECT(0)=33780, CE=1024, ECT(1)=0
+[]: AccECN: ACE=6, packets acknowledged=10, new CE marks=1 (mod 8: 1)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

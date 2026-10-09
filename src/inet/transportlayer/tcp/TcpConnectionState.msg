@@ -285,6 +285,12 @@ struct TcpStateVariables
     uint32_t accEcnOptCeBytes = 0; // AccECN receiver: r.ceb when the last AccECN option went out
     uint32_t accEcnOptEct1Bytes = 1; // AccECN receiver: r.e1b when the last AccECN option went out
     bool accEcnFirstDataOptionSent = false; // AccECN client: a data segment carried the AccECN option (RFC 9768 section 3.2.3.2.1)
+    uint32_t deliveredEct0Bytes = 0; // AccECN sender: the payload bytes that arrived ECT(0), from the AccECN option (s.e0b less its initial value 1)
+    uint32_t deliveredCeBytes = 0; // AccECN sender: the payload bytes that arrived CE, from the AccECN option (s.ceb)
+    uint32_t deliveredEct1Bytes = 0; // AccECN sender: the payload bytes that arrived ECT(1), from the AccECN option (s.e1b less its initial value 1)
+    bool accEcnCebSeen = false; // AccECN sender: an AccECN option with the ECEB field arrived, so DCTCP counts the CE bytes of the option
+    bool accEcnOptionChecked = false; // AccECN: the first AccECN option with EE0B or EE1B was checked for zeroed fields
+    bool accEcnOptionIgnored = false; // AccECN: that option had a zeroed field (RFC 9768 section 3.2.3.2.4), so the AccECN options are ignored
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)

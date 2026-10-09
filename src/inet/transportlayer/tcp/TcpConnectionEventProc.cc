@@ -442,6 +442,9 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setWsEnabled(state->ws_enabled);
     statusInfo->setEctEnabled(state->ect);
     statusInfo->setDeliveredCePkts(state->deliveredCePkts);
+    statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
+    statusInfo->setDeliveredE0Bytes(state->deliveredEct0Bytes);
+    statusInfo->setDeliveredE1Bytes(state->deliveredEct1Bytes);
     statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
     statusInfo->setSndWndScale(state->snd_wnd_scale);
 

@@ -138,6 +138,8 @@ void TCPScriptableTester::parseScript(const char *script)
         } else if (!strncmp(s,"fin",3)) {
             cmd.command = CMD_DATA; s+=3;
             cmd.fin = true;
+        } else if (!strncmp(s,"zeroaccecn",10)) {
+            cmd.command = CMD_ZEROACCECN; s+=10;
         } else if (!strncmp(s,"ace",3)) {
             // "ace <value>": set AE, CWR and ECE to the bits of the value (AE = 4, CWR = 2, ECE = 1)
             cmd.command = CMD_ACE; s+=3;
@@ -314,6 +316,20 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         header->setEceBit((cmd->ace & 1) != 0);
         pk->insertAtFront(header);
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing ACE bits");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_ZEROACCECN)
+    {
+        bubble("zeroing the AccECN option");
+        auto header = pk->removeAtFront<TcpHeader>();
+        for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+            if (auto accEcn = dynamic_cast<TcpOptionAccEcn *>(header->getHeaderOptionForUpdate(i))) {
+                accEcn->setEct0Bytes(0);
+                accEcn->setCeBytes(0);
+                accEcn->setEct1Bytes(0);
+            }
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "zeroing the AccECN option");
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_STRIP)

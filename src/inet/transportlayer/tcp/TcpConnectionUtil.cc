@@ -154,6 +154,12 @@ const char *TcpConnection::optionName(int option)
         case TCPOPTION_TCP_FASTOPEN:
             return "FAST_OPEN";
 
+        case TCPOPTION_ACCECN0:
+            return "ACCECN0";
+
+        case TCPOPTION_ACCECN1:
+            return "ACCECN1";
+
         default:
             return "unknown";
     }
@@ -1867,8 +1873,25 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
             case TCPOPTION_ACCECN1: // 174
                 // RFC 9768 section 3.2.3.2.1: "If there is somehow an AccECN Option on a
                 // SYN, it MUST be ignored when forwarded or received."
-                if (!tcpHeader->getSynBit() || tcpHeader->getAckBit())
+                if (!tcpHeader->getSynBit() || tcpHeader->getAckBit()) {
                     state->sawAccEcnOpt = true;
+                    // section 3.2.3.2.4: a host "MAY check that the initial value of the EE0B
+                    // field or the EE1B field is non-zero" in the first option, and if either
+                    // is zero, it "will switch into a mode that ignores AccECN Options for this
+                    // half-connection" (as Linux tcp_accecn_option_init())
+                    auto accEcnOption = check_and_cast<const TcpOptionAccEcn *>(option);
+                    int numFields = std::min(3, (length - 2) / 3);
+                    bool order0 = kind == TCPOPTION_ACCECN0;
+                    bool e0 = numFields >= (order0 ? 1 : 3);
+                    bool e1 = numFields >= (order0 ? 3 : 1);
+                    if (!state->accEcnOptionChecked && (e0 || e1)) {
+                        state->accEcnOptionChecked = true;
+                        if ((e0 && accEcnOption->getEct0Bytes() == 0) || (e1 && accEcnOption->getEct1Bytes() == 0)) {
+                            state->accEcnOptionIgnored = true;
+                            EV_INFO << "AccECN option with a zeroed EE0B or EE1B field: the AccECN options are ignored\n";
+                        }
+                    }
+                }
                 break;
 
             // TODO add new TCPOptions here once they are implemented

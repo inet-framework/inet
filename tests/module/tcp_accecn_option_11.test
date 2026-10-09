@@ -1,0 +1,47 @@
+%description:
+Tests DCTCP with the AccECN option: the tester marks A005 CE, and DCTCP counts
+the 964 bytes that the ECEB field reports (RFC 8257 section 3.3 counts bytes),
+not one MSS for the CE mark of the ACE field.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 3000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.tcpAlgorithmClass = "DcTcp"
+*.tcptester.script="a5 ce"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.409 A005] A.1000 > B.2000: A E N 2037:3001(964) ack 501 win 16384 CE # marking CE
+[1.411 B004] A.1000 < B.2000: A W N ack 3001 win 16384   Option(s): AccECN0(e0b=2037,ceb=964)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+DCTCP: 964 bytes newly marked (AccECN option), 964 bytes marked in this window
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

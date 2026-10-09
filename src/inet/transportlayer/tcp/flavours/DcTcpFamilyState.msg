@@ -22,6 +22,7 @@ struct DcTcpFamilyStateVariables extends TcpClassicAlgorithmBaseStateVariables
     uint32_t dctcp_bytesAcked = 0;
     uint32_t dctcp_bytesMarked = 0; // amount of bytes marked
     uint32_t dctcp_deliveredCePktsMark = 0; // AccECN: deliveredCePkts at the previous ACK
+    uint32_t dctcp_deliveredCeBytesMark = 0; // AccECN: deliveredCeBytes at the previous ACK
     double dctcp_alpha = 0;
     double dctcp_gamma = 0.0625; // 1/16 (backup 0.16) TODO make it NED parameter;
 };

@@ -1742,12 +1742,40 @@ void TcpConnection::processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader)
     uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 1;
     uint32_t deliveredPkts = (uint32_t)((deliveredBytesThisAck + mss - 1) / mss);
 
-    // RFC 9768 section 3.2.2.5.2 and Appendix A.2.1: the ACE field counts mod 8 (s.cep
+    // The AccECN option (RFC 9768 section 3.2.3.1, Appendix A.1): each field gives the
+    // 24 least significant bits of a byte counter of the receiver, and the increment
+    // is the difference to the local counter, mod 2^24 (the local counters here are
+    // less the initial values of section 3.2.1: 1, 0 and 1).
+    bool cebValid = false;
+    uint32_t dCeb = 0;
+    for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize() && !state->accEcnOptionIgnored; i++) {
+        auto accEcnOption = dynamic_cast<const TcpOptionAccEcn *>(tcpHeader->getHeaderOption(i));
+        if (accEcnOption == nullptr)
+            continue;
+        int numFields = std::min(3, (accEcnOption->getLength() - 2) / 3);
+        bool order0 = accEcnOption->getKind() == TCPOPTION_ACCECN0;
+        if (numFields >= (order0 ? 1 : 3))
+            state->deliveredEct0Bytes += ((accEcnOption->getEct0Bytes() - 1) - state->deliveredEct0Bytes) & 0xFFFFFF;
+        if (numFields >= 2) {
+            dCeb = (accEcnOption->getCeBytes() - state->deliveredCeBytes) & 0xFFFFFF;
+            state->deliveredCeBytes += dCeb;
+            state->accEcnCebSeen = cebValid = true;
+        }
+        if (numFields >= (order0 ? 3 : 1))
+            state->deliveredEct1Bytes += ((accEcnOption->getEct1Bytes() - 1) - state->deliveredEct1Bytes) & 0xFFFFFF;
+        EV_INFO << "AccECN option: delivered bytes ECT(0)=" << state->deliveredEct0Bytes << ", CE=" << state->deliveredCeBytes
+                << ", ECT(1)=" << state->deliveredEct1Bytes << "\n";
+    }
+
+    // RFC 9768 section 3.2.2.5.2 and Appendix A.2: the ACE field counts mod 8 (s.cep
     // starts at 5). An ACK of more than 7 packets could hide a full cycle of the counter,
     // and the sender "SHOULD deem whether it cycled by taking the safest likely case
-    // under the prevailing conditions": the most CE marks that the packets allow,
-    // unless large ACKs are usual for the connection (an average of more than 4 packets,
-    // as Linux tests with pkts_acked_ewma), which shows ACK compression, not a cycle.
+    // under the prevailing conditions": the most CE marks that the packets allow
+    // (dSafer.cep). As Linux (__tcp_accecn_process()), the CE bytes of the option
+    // decide it (Appendix A.2.2: d.cep is safe enough if the marked segments would
+    // otherwise be smaller than half an MSS); without them, large ACKs that are usual
+    // for the connection (an average of more than 4 packets, pkts_acked_ewma) show
+    // ACK compression, not a cycle.
     int delta = ((int)ace - 5 - (int)(state->deliveredCePkts & 7)) & 7;
     if (deliveredPkts > 0) {
         if (state->pktsAckedEwma == 0)
@@ -1756,8 +1784,30 @@ void TcpConnection::processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader)
             state->pktsAckedEwma = std::min<uint32_t>((((state->pktsAckedEwma << 6) - state->pktsAckedEwma) + (deliveredPkts << 6)) >> 6, 0xFFFF);
     }
     int resolvedDelta = delta;
-    if (deliveredPkts > 7 && state->pktsAckedEwma <= (4u << 6))
-        resolvedDelta = (int)deliveredPkts - (((int)deliveredPkts - delta) & 7);
+    if (deliveredPkts > 7) {
+        int safeDelta = (int)deliveredPkts - (((int)deliveredPkts - delta) & 7);
+        if (cebValid) {
+            if (dCeb == 0)
+                resolvedDelta = delta;
+            else if (deliveredPkts >= 16 && (state->sack_enabled || !state->lossRecovery)) {
+                // Linux: the CE packets that the CE bytes give at the average segment size
+                if (deliveredBytesThisAck <= dCeb)
+                    resolvedDelta = safeDelta;
+                else {
+                    uint32_t estimate = (uint32_t)(((uint64_t)dCeb * deliveredPkts + deliveredBytesThisAck - 1) / deliveredBytesThisAck);
+                    resolvedDelta = std::min(safeDelta, delta + (int)(estimate & ~7u));
+                }
+            }
+            else if (dCeb > (uint32_t)delta * mss)
+                resolvedDelta = safeDelta;
+            else if (dCeb < ((uint32_t)safeDelta * mss) >> 1)
+                resolvedDelta = delta;
+            else
+                resolvedDelta = safeDelta;
+        }
+        else if (state->pktsAckedEwma <= (4u << 6))
+            resolvedDelta = safeDelta;
+    }
 
     EV_INFO << "AccECN: ACE=" << (int)ace << ", packets acknowledged=" << deliveredPkts << ", new CE marks="
             << resolvedDelta << " (mod 8: " << delta << ")\n";
