@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
@@ -25,6 +26,7 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
             auto duration = ackPolicy->computeBasicBlockAckDurationField(blockAckPacketReq, basicBlockAckReq);
+            duration = normalizeIeee80211Duration(duration);
             blockAck->setDurationField(duration);
             auto blockAckPacket = new Packet("BasicBlockAck", blockAck);
             EV_DEBUG << "Duration for " << blockAckPacket->getName() << " is set to " << duration << " s.\n";
