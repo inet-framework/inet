@@ -532,6 +532,35 @@ uint32_t Tcp::getFastOpenCachedMss(const L3Address& remoteAddr) const
     return it == fastOpenCookieCache.end() ? 0 : it->second.peerMss;
 }
 
+bool Tcp::getFastOpenUseExpOption(const L3Address& remoteAddr) const
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    if (it == fastOpenCookieCache.end())
+        return false;
+    return it->second.cookie.empty() ? it->second.tryExp == 1 : it->second.exp;
+}
+
+void Tcp::setFastOpenCookieExpForm(const L3Address& remoteAddr, bool exp)
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    if (it != fastOpenCookieCache.end())
+        it->second.exp = exp;
+}
+
+void Tcp::noteFastOpenCookieRequestUnanswered(const L3Address& remoteAddr, bool usedExpOption)
+{
+    if (fastOpenCookieCache.find(remoteAddr) == fastOpenCookieCache.end())
+        setFastOpenCookie(remoteAddr, std::vector<uint8_t>(), 0);
+    auto& entry = fastOpenCookieCache[remoteAddr];
+    // a cached cookie decides the option; the count never goes back
+    // (Linux tcp_fastopen_cache_set())
+    if (!entry.cookie.empty())
+        return;
+    uint8_t tryExp = usedExpOption ? 2 : 1;
+    if (tryExp > entry.tryExp)
+        entry.tryExp = tryExp;
+}
+
 void Tcp::clearFastOpenCookieCache()
 {
     EV_INFO << "Fast Open: removing " << fastOpenCookieCache.size() << " cached cookies\n";

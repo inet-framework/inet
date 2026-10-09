@@ -1,0 +1,73 @@
+%description:
+Tests the experimental TCP Fast Open option (kind 254 with the magic number
+0xF989, RFC 7413 appendix A), with fastopenExpOptionEnabled on both sides.
+The tester removes the Fast Open option of the SYN-ACK of connection 1, so its
+cookie request (kind 34) has no answer. Connection 2 requests a cookie with
+the experimental option, and the server answers in the same option. The
+client caches the cookie with its option, and connection 3 sends the cookie
+in the experimental option, with 200 bytes, which the server accepts.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.fastOpen2=true
+*.cli_app.tOpen3=1s
+*.cli_app.active3=true
+*.cli_app.localPort3=1002
+*.cli_app.tSend3=1s
+*.cli_app.sendBytes3=200B
+*.cli_app.fastOpen3=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+*.srv_app.tOpen3=1s
+*.srv_app.localPort3=2000
+
+*.tcptester.script="b1 strip 34"
+*.*_tcp.fastopenExpOptionEnabled = true
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.501 A003] A.1001 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize FastOpenExp(cookieLen=0)
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.503 B002] A.1001 < B.2000: A S 125500:125500(0) ack 125001 win 16384   Option(s): MaxSegSize FastOpenExp(cookieLen=8)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A005] A.1002 > B.2000: S 250000:250200(200) win 16384   Option(s): MaxSegSize FastOpenExp(cookieLen=8)
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[1.003 B003] A.1002 < B.2000: A S 250500:250500(0) ack 250201 win 16384   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TcpTestNet1.srv_app: received 200 bytes in 1 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

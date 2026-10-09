@@ -197,6 +197,7 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
     virtual bool processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option);
+    virtual bool processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option);
     //@}
 
     /** TCP Fast Open (RFC 7413): processes the cookie of a Fast Open option of a SYN or a SYN-ACK. */

@@ -610,6 +610,13 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                         out << " FastOpen(cookieLen=" << foOpt->getCookieArraySize() << ")";
                         break;
                     }
+                    case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: {
+                        if (auto foExpOpt = dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
+                            out << " FastOpenExp(cookieLen=" << foExpOpt->getCookieArraySize() << ")";
+                        else
+                            out << " (kind=" << option->getKind() << " length=" << option->getLength() << ")";
+                        break;
+                    }
                     default:
                         out << " (kind=" << option->getKind() << " length=" << option->getLength() << ")"; break;
                 }

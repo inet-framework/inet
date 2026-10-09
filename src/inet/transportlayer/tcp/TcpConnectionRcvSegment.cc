@@ -1237,6 +1237,28 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 readHeaderOptions(tcpHeader);
             applyDefaultSendMss(tcpHeader, remoteAddr);
 
+            // TCP Fast Open, client: a cookie request of a first SYN that the SYN-ACK did
+            // not answer suggests a server that knows only the experimental option, so
+            // the next request uses the other option, once (Linux
+            // tcp_rcv_fastopen_synack()). After a retransmitted SYN, which carries no
+            // option, the SYN-ACK tells nothing.
+            if (state->fastopenExpOptionEnabled && state->fastopenCookieRequestPending && state->fastopenSynCarriedOption
+                && state->syn_rexmit_count == 0)
+            {
+                bool answered = false;
+                for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                    auto option = tcpHeader->getHeaderOption(i);
+                    if (option->getKind() == TCPOPTION_TCP_FASTOPEN || dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
+                        answered = true;
+                }
+                if (!answered) {
+                    bool usedExpOption = tcpMain->getFastOpenUseExpOption(remoteAddr);
+                    tcpMain->noteFastOpenCookieRequestUnanswered(remoteAddr, usedExpOption);
+                    EV_INFO << "Fast Open: the cookie request (kind " << (usedExpOption ? 254 : 34) << ") had no answer, the next one uses kind "
+                            << (tcpMain->getFastOpenUseExpOption(remoteAddr) ? 254 : 34) << "\n";
+                }
+            }
+
             // TCP Fast Open (RFC 7413 section 4.2.2), client step 1: the MSS option of
             // the SYN-ACK updates the cache, also without a cookie
             // (readHeaderOptions() cached the cookie)

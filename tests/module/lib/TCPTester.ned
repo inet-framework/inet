@@ -35,6 +35,8 @@ package inet.test.moduletest.lib;
 //      number of bytes added after its payload, and with the FIN bit set if
 //      <tt>fin</tt> follows; <tt>fin</tt> alone sets only the FIN bit. It makes
 //      a peer that sends data or a FIN where INET does not (on a SYN-ACK).
+//    - <tt>strip</tt> <i><kind></i>: forwards the segment without its options of
+//      this kind; it makes a peer that does not answer an option
 //
 simple TCPScriptableTester
 {

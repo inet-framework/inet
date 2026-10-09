@@ -167,7 +167,12 @@ class INET_API Tcp : public TransportProtocolBase
     // first use, so a simulation without Fast Open draws no number.
     bool fastOpenKeySet = false;
     uint8_t fastOpenKey[16] = {};
-    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; };
+    // exp: the cached cookie came in the experimental option (kind 254). tryExp: the
+    // option for a cookie request, while no cookie is cached (Linux tcpm_fastopen
+    // try_exp): 0 = kind 34; 1 = a kind 34 request had no answer, so the next
+    // request uses kind 254; 2 = that request had no answer too, so kind 34 again.
+    // It never goes back, so kind 254 is tried once.
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; bool exp = false; uint8_t tryExp = 0; };
     std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache;
     int fastOpenCookieCacheSize = 0; // from the fastopenCookieCacheSize parameter
     // TCP Fast Open, client: blackhole detection (RFC 7413 section 4.1.3.1). After a
@@ -240,6 +245,19 @@ class INET_API Tcp : public TransportProtocolBase
 
     /** TCP Fast Open, client: the cached MSS of the server; 0 if there is none. */
     virtual uint32_t getFastOpenCachedMss(const L3Address& remoteAddr) const;
+
+    /**
+     * TCP Fast Open, client: true if the option for remoteAddr is the experimental
+     * option (kind 254, RFC 7413 appendix A): the option of the cached cookie, or,
+     * without a cookie, the second request (Linux tcp_fastopen_cache_get()).
+     */
+    virtual bool getFastOpenUseExpOption(const L3Address& remoteAddr) const;
+
+    /** TCP Fast Open, client: records the option in which the cached cookie came. */
+    virtual void setFastOpenCookieExpForm(const L3Address& remoteAddr, bool exp);
+
+    /** TCP Fast Open, client: a cookie request in the given option had no answer; the next request uses the other option once. */
+    virtual void noteFastOpenCookieRequestUnanswered(const L3Address& remoteAddr, bool usedExpOption);
 
     /** TCP Fast Open, client: removes all cached cookies, as `ip tcp_metrics flush` does on Linux. */
     virtual void clearFastOpenCookieCache();

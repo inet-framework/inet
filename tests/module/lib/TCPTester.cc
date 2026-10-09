@@ -120,6 +120,13 @@ void TCPScriptableTester::parseScript(const char *script)
         } else if (!strncmp(s,"fin",3)) {
             cmd.command = CMD_DATA; s+=3;
             cmd.fin = true;
+        } else if (!strncmp(s,"strip",5)) {
+            // "strip <kind>": remove the options of this kind
+            cmd.command = CMD_STRIP; s+=5;
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: option kind expected");
+            cmd.kind = strtol(s, &const_cast<char *&>(s), 10);
         } else
             throw cRuntimeError("syntax error in script: wrong command");
 
@@ -267,6 +274,26 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         if (cmd->bytes > 0)
             pk->insertAtBack(makeShared<ByteCountChunk>(B(cmd->bytes)));
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "adding data");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_STRIP)
+    {
+        bubble("removing options");
+        auto header = pk->removeAtFront<TcpHeader>();
+        std::vector<TcpOption *> options;
+        for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+            if (header->getHeaderOption(i)->getKind() != cmd->kind)
+                options.push_back(header->getHeaderOption(i)->dup());
+        header->dropHeaderOptions();
+        for (auto option : options)
+            header->appendHeaderOption(option);
+        while (header->getHeaderOptionArrayLength().get() % 4 != 0)
+            header->appendHeaderOption(new TcpOptionEnd());
+        B headerLength = TCP_MIN_HEADER_LENGTH + header->getHeaderOptionArrayLength();
+        header->setHeaderLength(headerLength);
+        header->setChunkLength(headerLength);
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "removing options");
         send(pk, fromA ? "out2" : "out1");
     }
     else

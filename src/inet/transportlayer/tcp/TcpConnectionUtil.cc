@@ -678,6 +678,7 @@ void TcpConnection::configureStateVariables()
     state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled");
     state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
     state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
+    state->fastopenExpOptionEnabled = tcpMain->par("fastopenExpOptionEnabled");
     state->fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");
     if (state->fastopenCookieBytes < 4 || state->fastopenCookieBytes > 16 || state->fastopenCookieBytes % 2 != 0)
         throw cRuntimeError("fastopenCookieBytes must be an even number from 4 to 16 (RFC 7413 section 4.1.1), but it is %d", state->fastopenCookieBytes);
@@ -1617,6 +1618,13 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processFastOpenOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpen *>(option));
                 break;
 
+            case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: // 254: the experimental Fast Open option, if enabled
+                if (state->fastopenExpOptionEnabled && dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
+                    ok = processFastOpenExpOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpenExp *>(option));
+                else
+                    EV_ERROR << "ERROR: Unsupported Tcp option kind " << kind << "\n";
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -1800,6 +1808,17 @@ bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader,
     return processFastOpenCookieBytes(cookie);
 }
 
+bool TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option)
+{
+    // the server answers in the option of the client, and the client caches the
+    // option of the cookie (Linux foc->exp)
+    state->fastopenPeerUsedExpOption = true;
+    std::vector<uint8_t> cookie(option.getCookieArraySize());
+    for (size_t i = 0; i < cookie.size(); i++)
+        cookie[i] = option.getCookie(i);
+    return processFastOpenCookieBytes(cookie);
+}
+
 bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cookie)
 {
     // RFC 7413 section 4.2: without Fast Open, a server "MUST ignore all cookie
@@ -1847,26 +1866,41 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
         else if (cookieLength > 0) {
             uint32_t cacheMss = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss;
             tcpMain->setFastOpenCookie(remoteAddr, cookie, cacheMss);
-            EV_INFO << "Fast Open: caching the cookie of " << cookieLength << " bytes for " << remoteAddr << "\n";
+            tcpMain->setFastOpenCookieExpForm(remoteAddr, state->fastopenPeerUsedExpOption);
+            EV_INFO << "Fast Open: caching the cookie of " << cookieLength << " bytes for " << remoteAddr
+                    << (state->fastopenPeerUsedExpOption ? " (experimental option)" : "") << "\n";
         }
     }
     return true;
 }
 
-// a TCP Fast Open option; with alignment, 2 NOPs before it make its 2 + an even
-// number of bytes a multiple of 4
-static void appendFastOpenOption(const Ptr<TcpHeader>& tcpHeader, const std::vector<uint8_t>& cookie, bool align)
+// a TCP Fast Open option (kind 34), or the experimental option (kind 254 with the
+// magic number 0xF989, RFC 7413 appendix A); with alignment, 2 NOPs before it make
+// its length a multiple of 4
+static void appendFastOpenOption(const Ptr<TcpHeader>& tcpHeader, const std::vector<uint8_t>& cookie, bool align, bool exp)
 {
-    if (align) {
+    int length = (exp ? 4 : 2) + cookie.size();
+    if (align && length % 4 == 2) {
         tcpHeader->appendHeaderOption(new TcpOptionNop());
         tcpHeader->appendHeaderOption(new TcpOptionNop());
     }
-    auto option = new TcpOptionTcpFastOpen();
-    option->setCookieArraySize(cookie.size());
-    for (size_t i = 0; i < cookie.size(); i++)
-        option->setCookie(i, cookie[i]);
-    option->setLength(2 + cookie.size());
-    tcpHeader->appendHeaderOption(option);
+    if (exp) {
+        auto option = new TcpOptionTcpFastOpenExp();
+        option->setExpId(0xF989);
+        option->setCookieArraySize(cookie.size());
+        for (size_t i = 0; i < cookie.size(); i++)
+            option->setCookie(i, cookie[i]);
+        option->setLength(length);
+        tcpHeader->appendHeaderOption(option);
+    }
+    else {
+        auto option = new TcpOptionTcpFastOpen();
+        option->setCookieArraySize(cookie.size());
+        for (size_t i = 0; i < cookie.size(); i++)
+            option->setCookie(i, cookie[i]);
+        option->setLength(length);
+        tcpHeader->appendHeaderOption(option);
+    }
 }
 
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
@@ -1976,7 +2010,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->fastopenServerEnabled && state->fastopenSendCookieOption && tcpHeader->getAckBit()
             && state->syn_rexmit_count == 0)
         {
-            appendFastOpenOption(tcpHeader, state->fastopenCookieToSend, tcpMain->alignOptions);
+            appendFastOpenOption(tcpHeader, state->fastopenCookieToSend, tcpMain->alignOptions, state->fastopenPeerUsedExpOption);
             EV_INFO << "Tcp Header Option FAST_OPEN (cookie of " << state->fastopenCookieToSend.size() << " bytes) sent\n";
         }
 
@@ -1990,7 +2024,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             std::vector<uint8_t> cookie;
             bool cachedCookie = !state->fastopenCookieRequestPending && tcpMain->getFastOpenCookie(remoteAddr, cookie);
             if (cachedCookie || state->fastopenCookieRequestPending) {
-                appendFastOpenOption(tcpHeader, cookie, tcpMain->alignOptions);
+                bool exp = state->fastopenExpOptionEnabled && tcpMain->getFastOpenUseExpOption(remoteAddr);
+                appendFastOpenOption(tcpHeader, cookie, tcpMain->alignOptions, exp);
                 state->fastopenSynCarriedOption = true;
                 EV_INFO << "Tcp Header Option FAST_OPEN (cookie of " << cookie.size() << " bytes) sent\n";
             }
