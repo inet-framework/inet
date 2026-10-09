@@ -1,0 +1,35 @@
+%description:
+Tests the default send MSS of RFC 9293 MUST-15 on the active side: the
+server sends no MSS option in its SYN-ACK (sendMssOption=false), so the
+client sends with the IPv4 default of 536 bytes, although its own MSS is
+1024: its 1000 bytes go out as 536 and 464 bytes. Before, the client kept
+its own MSS and sent one segment of 1000 bytes.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.srv_tcp.sendMssOption = false
+*.cli_app.sendScript="1.0 1000"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:537(536) ack 501 win 16384
+
+%contains: stdout
+[1.205 A004] A.1000 > B.2000: A 537:1001(464) ack 501 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

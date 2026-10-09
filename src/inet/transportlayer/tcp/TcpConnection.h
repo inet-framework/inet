@@ -190,6 +190,8 @@ class INET_API TcpConnection : public SimpleModule
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
     virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
+    /** RFC 9293 MUST-15: without an MSS option in the SYN of the peer, use the default send MSS of its address family. */
+    virtual void applyDefaultSendMss(const Ptr<const TcpHeader>& tcpHeader, const L3Address& peerAddr);
     virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
     virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);

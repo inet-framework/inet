@@ -1612,6 +1612,25 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     return true;
 }
 
+void TcpConnection::applyDefaultSendMss(const Ptr<const TcpHeader>& tcpHeader, const L3Address& peerAddr)
+{
+    // RFC 9293, section 3.7.1:
+    //"
+    // If an MSS Option is not received at connection setup, TCP
+    // implementations MUST assume a default send MSS of 536 (576 - 40) for
+    // IPv4 or 1220 (1280 - 60) for IPv6 (MUST-15).
+    //"
+    for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
+        if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE)
+            return;
+    uint32_t defaultMss = peerAddr.getType() == L3Address::IPv6 ? 1220 : 536;
+    if (state->snd_mss > defaultMss) {
+        EV_INFO << "No MSS option received, SMSS is set to the default " << defaultMss << " (RFC 9293 MUST-15)\n";
+        state->snd_mss = defaultMss;
+        state->pmtudOriginalMss = state->snd_mss;
+    }
+}
+
 bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option)
 {
     if (option.getLength() != 3) {

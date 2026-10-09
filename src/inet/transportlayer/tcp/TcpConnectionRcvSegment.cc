@@ -952,6 +952,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
         readHeaderOptions(tcpHeader);
+    applyDefaultSendMss(tcpHeader, srcAddr);
 
     // Linux tcp_syncookies=2 (syncookiesAlways): the connection is built again from
     // the cookie at the handshake ACK, and the 2-bit MSS field of the cookie
@@ -1181,6 +1182,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
+            applyDefaultSendMss(tcpHeader, remoteAddr);
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
@@ -1235,6 +1237,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         // peer stays unknown, and SACK, window scale and timestamps stay off
         if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH)
             readHeaderOptions(tcpHeader);
+        applyDefaultSendMss(tcpHeader, remoteAddr);
         state->snd_max = state->snd_nxt = state->iss;
         sendSynAck();
         startSynRexmitTimer();
