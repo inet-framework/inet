@@ -52,6 +52,7 @@ void Tcp::initialize(int stage)
 
         msl = par("msl");
         alignOptions = par("alignOptions");
+        accEcnBareTimeWaitAck = par("accEcnBareTimeWaitAck");
         sendMssOption = par("sendMssOption");
         fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
 

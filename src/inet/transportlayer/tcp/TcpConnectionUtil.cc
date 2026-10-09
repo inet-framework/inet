@@ -326,8 +326,12 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // received (r.cep, which starts at 5), mod 8. The pure ACK of the SYN-ACK feeds
     // back the IP ECN codepoint of the SYN-ACK instead (section 3.2.2.1, Table 3):
     // "If the TCP Client (A) in AccECN mode uses a pure ACK with no SACK blocks to
-    // acknowledge the SYN/ACK, it MUST use the binary encoding in Table 3".
-    if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
+    // acknowledge the SYN/ACK, it MUST use the binary encoding in Table 3". The
+    // ACKs that TIME_WAIT sends carry no ACE field in Linux (tcp_v4_send_ack()),
+    // selected by accEcnBareTimeWaitAck.
+    if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()
+        && !(tcpMain->accEcnBareTimeWaitAck && the2MSLTimer != nullptr && the2MSLTimer->isScheduled()))
+    {
         bool pureAck = tcpSegment->getByteLength() == 0;
         bool sackBlocks = false;
         for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
