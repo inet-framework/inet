@@ -356,6 +356,23 @@ class INET_API TcpConnection : public SimpleModule
 
     /** AccECN: reads the ACE field of an ACK that makes progress, and counts the CE marks that it reports (RFC 9768 section 3.2.2.5) */
     virtual void processAccEcnAce(const Ptr<const TcpHeader>& tcpHeader);
+    /**
+     * AccECN (RFC 9768 section 3.2.3): whether the next segment after the handshake
+     * carries the AccECN option, and with which fields. order: 0 (kind 172) or 1
+     * (kind 174); wanted: the number of fields to send if they fit; required: the
+     * fewest fields to send, those that changed since the last option.
+     */
+    virtual bool getAccEcnOptionFields(int& order, int& wanted, int& required) const;
+    /** Appends the AccECN option with the fields that fit in the free option space. */
+    virtual void appendAccEcnOption(const Ptr<TcpHeader>& tcpHeader, int order, int wanted, int required);
+    /**
+     * AccECN: the option bytes in use, for the fit of the AccECN option: the real
+     * length, or with accEcnOptionPolicy="linux" the length of the Linux layout
+     * (NOP, NOP, TS and NOP, NOP, SACK).
+     */
+    virtual unsigned int getAccEcnOptionSpaceUsed(const Ptr<TcpHeader>& tcpHeader) const;
+    /** AccECN: whether an option of the given number of fields fits after the used option bytes. */
+    virtual bool accEcnOptionFits(unsigned int used, int numFields, bool sack) const;
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();

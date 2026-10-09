@@ -278,6 +278,13 @@ struct TcpStateVariables
     uint32_t pktsAckedEwma = 0; // AccECN: moving average of the packets that an ACK acknowledges, <<6 (Linux pkts_acked_ewma), for the ACE decode
     uint8_t accEcnOptMinFields = 0;
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
+    uint32_t rcvEct0Bytes = 1; // AccECN receiver: r.e0b, the payload bytes of the acceptable ECT(0) packets, from the initial value 1 (RFC 9768 section 3.2.1)
+    uint32_t rcvCeBytes = 0; // AccECN receiver: r.ceb, the payload bytes of the acceptable CE packets, from 0
+    uint32_t rcvEct1Bytes = 1; // AccECN receiver: r.e1b, the payload bytes of the acceptable ECT(1) packets, from 1
+    uint32_t accEcnOptEct0Bytes = 1; // AccECN receiver: r.e0b when the last AccECN option went out
+    uint32_t accEcnOptCeBytes = 0; // AccECN receiver: r.ceb when the last AccECN option went out
+    uint32_t accEcnOptEct1Bytes = 1; // AccECN receiver: r.e1b when the last AccECN option went out
+    bool accEcnFirstDataOptionSent = false; // AccECN client: a data segment carried the AccECN option (RFC 9768 section 3.2.3.2.1)
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
@@ -333,7 +340,7 @@ struct TcpStateVariables
     simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)
     simtime_t firstSynSentTime = -1; // when the first SYN was sent (Linux tp->retrans_stamp); a retransmitted SYN does not change it
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
-    bool sawAccEcnOpt = false;
+    bool sawAccEcnOpt = false; // AccECN: an AccECN option arrived on a segment other than a SYN (Linux saw_accecn_opt)
 
     // TCP Fast Open (RFC 7413)
     bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter

@@ -21,6 +21,7 @@ cmdenv-log-prefix="[%c]: "
 *.cli_app.sendScript="1.0 3000"
 *.srv_app.sendScript="2.0 1000"
 *.tcptester.script="a4 ce"
+*.*_tcp.accEcnOptionEnabled = false # the ACE field alone (tcp_accecn_option_* test the option)
 *.*_tcp.tcpEcnMode = "accecn"
 
 include ../../lib/defaults.ini

@@ -630,6 +630,21 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                         out << " FastOpen(cookieLen=" << foOpt->getCookieArraySize() << ")";
                         break;
                     }
+                    case TCPOPTION_ACCECN0:
+                    case TCPOPTION_ACCECN1: {
+                        // the fields that the length covers, in the order of the kind
+                        auto accEcnOpt = check_and_cast<const TcpOptionAccEcn *>(option);
+                        bool order0 = option->getKind() == TCPOPTION_ACCECN0;
+                        const char *names[3] = { order0 ? "e0b" : "e1b", "ceb", order0 ? "e1b" : "e0b" };
+                        uint32_t values[3] = { order0 ? accEcnOpt->getEct0Bytes() : accEcnOpt->getEct1Bytes(), accEcnOpt->getCeBytes(),
+                                               order0 ? accEcnOpt->getEct1Bytes() : accEcnOpt->getEct0Bytes() };
+                        int numFields = std::min(3, (option->getLength() - 2) / 3);
+                        out << " AccECN" << (order0 ? 0 : 1) << "(";
+                        for (int k = 0; k < numFields; k++)
+                            out << (k == 0 ? "" : ",") << names[k] << "=" << values[k];
+                        out << ")";
+                        break;
+                    }
                     case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: {
                         if (auto foExpOpt = dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
                             out << " FastOpenExp(cookieLen=" << foExpOpt->getCookieArraySize() << ")";

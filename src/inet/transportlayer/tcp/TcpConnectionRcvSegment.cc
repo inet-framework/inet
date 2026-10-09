@@ -242,9 +242,22 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     // AccECN (RFC 9768 section 3.2): count each CE-marked acceptable packet (section
-    // 4: "only 'Acceptable' packets contribute to the ECN counters")
-    if (state->accEcnNegotiated && receivedEcnCodepoint(tcpSegment) == IP_ECN_CE)
-        state->rcvCePkts++;
+    // 4: "only 'Acceptable' packets contribute to the ECN counters"), and the payload
+    // bytes of each acceptable packet by its codepoint (section 3.2.1: r.e0b, r.ceb
+    // and r.e1b, for the AccECN option)
+    if (state->accEcnNegotiated) {
+        int ecn = receivedEcnCodepoint(tcpSegment);
+        if (ecn == IP_ECN_CE)
+            state->rcvCePkts++;
+        if (payloadLength > 0) {
+            if (ecn == IP_ECN_ECT_0)
+                state->rcvEct0Bytes += payloadLength;
+            else if (ecn == IP_ECN_CE)
+                state->rcvCeBytes += payloadLength;
+            else if (ecn == IP_ECN_ECT_1)
+                state->rcvEct1Bytes += payloadLength;
+        }
+    }
 
     // ECN (an AccECN connection uses the CWR bit for the ACE field)
     if (tcpHeader->getCwrBit() == true && !state->accEcnNegotiated) {

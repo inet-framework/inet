@@ -1,0 +1,54 @@
+%description:
+Tests the omission of the AccECN option with accEcnOptionPolicy="linux". Linux
+decides the fields with its own layout (NOP, NOP, TS and NOP, NOP, SACK), and
+in order 1 a change of EE0B needs the three fields. With two or three SACK
+blocks they do not fit, and RFC 9768 section 3.2.3.3 says: "If there is
+insufficient space to include an AccECN TCP Option containing the counter(s)
+that have changed since the previous AccECN TCP Option, then the entire AccECN
+TCP Option MUST be omitted". So the ACKs from B016 have no option, and the
+SACK blocks stay.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 40000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.accEcnOptionPolicy = "linux"
+*.*_tcp.sackSupport = true
+*.*_tcp.timestampSupport = true
+*.tcptester.script="a28 delete; a30 delete; a32 delete; a34 ce; a36 ect1"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.227 B014] A.1000 < B.2000: A E N ack 25001 win 16384   Option(s): NOP NOP TS(1226,1220) NOP AccECN1(e1b=1,ceb=0,e0b=25001)
+[1.227 B015] A.1000 < B.2000: A E N ack 25001 win 16384   Option(s): TS(1226,1220) SACK[26001,27001) NOP AccECN1(e1b=1,ceb=0,e0b=26001)
+[1.227 B016] A.1000 < B.2000: A E N ack 25001 win 16384   Option(s): TS(1226,1220) SACK[28001,29001)[26001,27001)
+[1.227 B017] A.1000 < B.2000: A E N ack 25001 win 16384   Option(s): TS(1226,1220) SACK[30001,31001)[28001,29001)[26001,27001)
+[1.227 B018] A.1000 < B.2000: A W N ack 25001 win 16384   Option(s): TS(1226,1220) SACK[30001,32001)[28001,29001)[26001,27001)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

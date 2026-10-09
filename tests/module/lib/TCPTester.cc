@@ -111,6 +111,13 @@ void TCPScriptableTester::parseScript(const char *script)
             cmd.command = CMD_COPY; s+=4;
         } else if (!strncmp(s,"ce",2)) {
             cmd.command = CMD_CE; s+=2;
+            cmd.ecn = IP_ECN_CE;
+        } else if (!strncmp(s,"ect1",4)) {
+            cmd.command = CMD_CE; s+=4;
+            cmd.ecn = IP_ECN_ECT_1;
+        } else if (!strncmp(s,"ect0",4)) {
+            cmd.command = CMD_CE; s+=4;
+            cmd.ecn = IP_ECN_ECT_0;
         } else if (!strncmp(s,"tsecr",5)) {
             cmd.command = CMD_TSECR; s+=5;
             while (isspace(*s)) s++;
@@ -267,10 +274,11 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     }
     else if (cmd->command==CMD_CE)
     {
-        bubble("marking CE");
-        pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(IP_ECN_CE);
-        segmentEcn = IP_ECN_CE;
-        dump(seg, pk->getByteLength(), fromA, "marking CE");
+        const char *comment = cmd->ecn == IP_ECN_CE ? "marking CE" : cmd->ecn == IP_ECN_ECT_1 ? "marking ECT(1)" : "marking ECT(0)";
+        bubble(comment);
+        pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(cmd->ecn);
+        segmentEcn = cmd->ecn;
+        dump(seg, pk->getByteLength(), fromA, comment);
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_TSECR)

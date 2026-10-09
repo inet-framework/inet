@@ -278,6 +278,133 @@ uint8_t TcpConnection::accEcnReflectedAce(int ipEcnCodepoint)
     }
 }
 
+bool TcpConnection::getAccEcnOptionFields(int& order, int& wanted, int& required) const
+{
+    if (!state->accEcnNegotiated || !state->accEcnOptionEnabled)
+        return false;
+
+    // the counters that changed since the last option, and those that ever changed
+    // from their initial values (RFC 9768 section 3.2.1)
+    bool e0Changed = state->rcvEct0Bytes != state->accEcnOptEct0Bytes;
+    bool ceChanged = state->rcvCeBytes != state->accEcnOptCeBytes;
+    bool e1Changed = state->rcvEct1Bytes != state->accEcnOptEct1Bytes;
+    bool e0Ever = state->rcvEct0Bytes != 1;
+    bool ceEver = state->rcvCeBytes != 0;
+    bool e1Ever = state->rcvEct1Bytes != 1;
+    // the fields that an option of order 0 (EE0B, ECEB, EE1B) or of order 1 (EE1B,
+    // ECEB, EE0B) needs for the given counters (Table 5)
+    auto fields = [] (int order, bool e0, bool ce, bool e1) {
+        return (order == 0 ? e1 : e0) ? 3 : ce ? 2 : (order == 0 ? e0 : e1) ? 1 : 0;
+    };
+
+    if (tcpMain->accEcnOptionLinux) {
+        // Linux (tcp_established_options(), tcp_ecn_option=2): each segment, once the
+        // peer sent an option; kind 174 with each field that fits, but at least the
+        // fields that changed
+        if (!state->sawAccEcnOpt)
+            return false;
+        order = 1;
+        wanted = 3;
+        required = fields(1, e0Changed, ceChanged, e1Changed);
+        return true;
+    }
+
+    // section 3.2.3.2.1: the client "SHOULD include an AccECN Option in the first ACK
+    // at the end of the three-way handshake", and "SHOULD also include an AccECN
+    // Option on the first data segment it sends"; with each field that fits
+    if (state->active && !state->accEcnFirstDataOptionSent) {
+        order = 0;
+        wanted = 3;
+        required = fields(0, e0Changed, ceChanged, e1Changed);
+        return true;
+    }
+
+    // section 3.2.3.3, the recommended simple scheme: an option "on every scheduled ACK
+    // if any byte counter has incremented since the last ACK", here since the last
+    // option, which also covers an option that did not fit; "Whenever possible, it
+    // SHOULD include a field for every byte counter that has changed at some time
+    // during the connection". Of the two orders, the one with fewer fields.
+    if (!e0Changed && !ceChanged && !e1Changed)
+        return false;
+    order = fields(1, e0Ever, ceEver, e1Ever) < fields(0, e0Ever, ceEver, e1Ever) ? 1 : 0;
+    wanted = fields(order, e0Ever, ceEver, e1Ever);
+    required = fields(order, e0Changed, ceChanged, e1Changed);
+    return true;
+}
+
+unsigned int TcpConnection::getAccEcnOptionSpaceUsed(const Ptr<TcpHeader>& tcpHeader) const
+{
+    if (!tcpMain->accEcnOptionLinux)
+        return tcpHeader->getHeaderOptionArrayLength().get<B>();
+    // Linux decides the fields of the option with its own layout (tcp_established_options()):
+    // NOP, NOP, TS (12 bytes) and NOP, NOP, SACK (4 + 8 bytes for each block); INET can pack
+    // them tighter, which would give an option with more fields than Linux sends
+    unsigned int used = 0;
+    for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+        const TcpOption *option = tcpHeader->getHeaderOption(i);
+        switch (option->getKind()) {
+            case TCPOPTION_END_OF_OPTION_LIST:
+            case TCPOPTION_NO_OPERATION: break;
+            case TCPOPTION_TIMESTAMP: used += 12; break;
+            case TCPOPTION_SACK: used += 2 + option->getLength(); break;
+            default: used += (option->getLength() + 3) & ~3u; break;
+        }
+    }
+    return used;
+}
+
+bool TcpConnection::accEcnOptionFits(unsigned int used, int numFields, bool sack) const
+{
+    unsigned int length = 2 + 3 * numFields;
+    if (tcpMain->accEcnOptionLinux) {
+        // Linux (tcp_options_fit_accecn()): the option can take the 2 NOP bytes before
+        // a SACK option, so it rounds down to 4 bytes if that saves the odd bytes
+        unsigned int saving = sack ? 2 : 0;
+        unsigned int cost = (length & 3) > saving ? (length + 3) & ~3u : length & ~3u;
+        return used + cost <= TCP_OPTIONS_MAX_SIZE.get<B>();
+    }
+    return ((used + length + 3) & ~3u) <= TCP_OPTIONS_MAX_SIZE.get<B>();
+}
+
+void TcpConnection::appendAccEcnOption(const Ptr<TcpHeader>& tcpHeader, int order, int wanted, int required)
+{
+    // RFC 9768 section 3.2.3.3: the option "MAY be truncated to omit one or two fields
+    // from the end of the option ..., provided that the counter(s) that have changed
+    // since the previous AccECN TCP Option are not omitted. If there is insufficient
+    // space ..., then the entire AccECN TCP Option MUST be omitted."
+    bool sack = false;
+    for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++)
+        if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPTION_SACK)
+            sack = true;
+    unsigned int used = getAccEcnOptionSpaceUsed(tcpHeader);
+    int numFields = wanted;
+    while (numFields >= required && !accEcnOptionFits(used, numFields, sack))
+        numFields--;
+    if (numFields < required) {
+        EV_INFO << "Tcp Header Option AccECN not sent: no space for the " << required << " fields that changed\n";
+        return;
+    }
+    unsigned int length = 2 + 3 * numFields;
+    if (tcpMain->alignOptions) {
+        unsigned int realUsed = tcpHeader->getHeaderOptionArrayLength().get<B>();
+        while ((realUsed + length) % 4 != 0) {
+            tcpHeader->appendHeaderOption(new TcpOptionNop());
+            realUsed++;
+        }
+    }
+    auto *option = new TcpOptionAccEcn();
+    option->setKind(order == 0 ? TCPOPTION_ACCECN0 : TCPOPTION_ACCECN1);
+    option->setLength(length);
+    // section 3.2.3.1: "the 24 least significant bits of the current value of the
+    // associated counter"
+    option->setEct0Bytes(state->rcvEct0Bytes & 0xFFFFFF);
+    option->setCeBytes(state->rcvCeBytes & 0xFFFFFF);
+    option->setEct1Bytes(state->rcvEct1Bytes & 0xFFFFFF);
+    tcpHeader->appendHeaderOption(option);
+    EV_INFO << "Tcp Header Option AccECN" << order << " (" << numFields << " fields, E0B=" << option->getEct0Bytes()
+            << ", CEB=" << option->getCeBytes() << ", E1B=" << option->getEct1Bytes() << ") sent\n";
+}
+
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
     sentSegments++;
@@ -347,6 +474,20 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         tcpHeader->setAeBit((ace & 4) != 0);
         tcpHeader->setCwrBit((ace & 2) != 0);
         tcpHeader->setEceBit((ace & 1) != 0);
+    }
+
+    // AccECN option (RFC 9768 section 3.2.3.3): remember the counts that it reported,
+    // so that the next option knows the counters that changed since. A data segment
+    // with the option ends the extra options of the client (section 3.2.3.2.1).
+    for (size_t i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+        int kind = tcpHeader->getHeaderOption(i)->getKind();
+        if (kind == TCPOPTION_ACCECN0 || kind == TCPOPTION_ACCECN1) {
+            state->accEcnOptEct0Bytes = state->rcvEct0Bytes;
+            state->accEcnOptCeBytes = state->rcvCeBytes;
+            state->accEcnOptEct1Bytes = state->rcvEct1Bytes;
+            if (tcpSegment->getByteLength() > 0)
+                state->accEcnFirstDataOptionSent = true;
+        }
     }
 
     // ECN: the ECN capable transport codepoint is ECT(0).
@@ -734,6 +875,7 @@ void TcpConnection::configureStateVariables()
     else
         state->ecnMode = TCP_ECN_MODE_OFF;
     state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
+    state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
@@ -1721,6 +1863,14 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                     EV_ERROR << "ERROR: Unsupported Tcp option kind " << kind << "\n";
                 break;
 
+            case TCPOPTION_ACCECN0: // 172
+            case TCPOPTION_ACCECN1: // 174
+                // RFC 9768 section 3.2.3.2.1: "If there is somehow an AccECN Option on a
+                // SYN, it MUST be ignored when forwarded or received."
+                if (!tcpHeader->getSynBit() || tcpHeader->getAckBit())
+                    state->sawAccEcnOpt = true;
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -2130,6 +2280,13 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             }
         }
 
+        // AccECN (RFC 9768 section 3.2.3.2.1): "A TCP Server that confirms its support
+        // for AccECN ... SHOULD include an AccECN TCP Option on the SYN/ACK", with each
+        // field that fits; a retransmitted SYN-ACK goes out without it (section
+        // 3.2.3.2.2). The SYN never carries it ("MUST NOT").
+        if (tcpHeader->getAckBit() && state->accEcnNegotiated && state->accEcnOptionEnabled && state->syn_rexmit_count == 0)
+            appendAccEcnOption(tcpHeader, tcpMain->accEcnOptionLinux ? 1 : 0, 3, 0);
+
         // TODO add new TCPOptions here once they are implemented
     }
     else if (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD
@@ -2178,6 +2335,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
             addSacks(tcpHeader);
         }
+
+        // AccECN option (RFC 9768 section 3.2.3), after the SACK option, which leaves
+        // room for the fields that changed (see addSacks())
+        int accEcnOrder, accEcnWanted, accEcnRequired;
+        if (tcpHeader->getAckBit() && getAccEcnOptionFields(accEcnOrder, accEcnWanted, accEcnRequired))
+            appendAccEcnOption(tcpHeader, accEcnOrder, accEcnWanted, accEcnRequired);
 
         // TODO add new TCPOptions here once they are implemented
         // TODO delegate to TcpAlgorithm as well -- it may want to append additional options

@@ -15,6 +15,7 @@ cmdenv-express-mode=false
 cmdenv-log-prefix="[%c]: "
 
 *.cli_app.sendScript="1.0 1000"
+*.*_tcp.accEcnOptionEnabled = false # the ACE field alone (tcp_accecn_option_* test the option)
 *.cli_tcp.tcpEcnMode = "accecn"
 
 include ../../lib/defaults.ini

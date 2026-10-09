@@ -465,6 +465,27 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
     if (n > maxnode)
         n = maxnode;
 
+    // AccECN (RFC 9768 section 3.2.3.3): implementations "SHOULD generally prioritize"
+    // the AccECN option "over other TCP Options", but if it "would leave insufficient
+    // space for two SACK blocks ..., the Data Receiver MUST give precedence to the SACK
+    // option". As Linux (tcp_options_fit_accecn()), fewer SACK blocks, but at least
+    // two, make room for the fields that changed since the last option; if even two
+    // blocks leave no room, all blocks stay, and the option is omitted.
+    int accEcnOrder, accEcnWanted, accEcnRequired;
+    if (n > 2 && getAccEcnOptionFields(accEcnOrder, accEcnWanted, accEcnRequired) && accEcnRequired > 0) {
+        // the end of a SACK option of k blocks, in the layout that the fit uses
+        uint sackStart = getAccEcnOptionSpaceUsed(tcpHeader);
+        if (!tcpMain->accEcnOptionLinux)
+            while (sackStart % 4 != 2)
+                sackStart++;
+        auto sackEnd = [&] (uint k) { return sackStart + (tcpMain->accEcnOptionLinux ? 4 : 2) + 8 * k; };
+        uint k = n;
+        while (k > 2 && !accEcnOptionFits(sackEnd(k), accEcnRequired, true))
+            k--;
+        if (accEcnOptionFits(sackEnd(k), accEcnRequired, true))
+            n = k;
+    }
+
     if (n == 0) {
         if (dsack_inserted)
             state->sacks_array.pop_front(); // delete DSACK entry

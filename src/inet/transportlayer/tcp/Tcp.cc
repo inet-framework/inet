@@ -53,6 +53,7 @@ void Tcp::initialize(int stage)
         msl = par("msl");
         alignOptions = par("alignOptions");
         accEcnBareTimeWaitAck = par("accEcnBareTimeWaitAck");
+        accEcnOptionLinux = !strcmp(par("accEcnOptionPolicy").stringValue(), "linux");
         sendMssOption = par("sendMssOption");
         fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
 

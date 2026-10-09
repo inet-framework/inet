@@ -29,6 +29,10 @@ package inet.test.moduletest.lib;
 //      forwards copies of the segment after the given delays
 //      (<tt>copy 0.5</tt> is the same as <tt>delay 0.5</tt>)
 //    - <tt>ce</tt>: forwards the segment marked CE
+//    - <tt>ect1</tt>: forwards the segment marked ECT(1), as from a sender that
+//      uses ECT(1)
+//    - <tt>ect0</tt>: forwards the segment marked ECT(0), as from a sender that
+//      marks also a retransmission
 //    - <tt>tsecr</tt> <i><value></i>: forwards the segment with this TSecr in its
 //      timestamp option
 //    - <tt>data</tt> <i><bytes></i> [<tt>fin</tt>]: forwards the segment with this

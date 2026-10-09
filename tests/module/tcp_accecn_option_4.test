@@ -1,0 +1,53 @@
+%description:
+Tests a server with accEcnOptionPolicy="linux" and a client without the AccECN
+option (accEcnOptionEnabled=false). As Linux, the server sends the option on
+the SYN-ACK, but on no later segment, because the client sent none.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.srv_app.sendScript="2.0 1000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.srv_tcp.accEcnOptionPolicy = "linux"
+*.cli_tcp.accEcnOptionEnabled = false
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 16384   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384   Option(s): MaxSegSize NOP AccECN1(e1b=1,ceb=0,e0b=1)
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A W ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A E N 1:1001(1000) ack 501 win 16384 ECT(0) 
+[1.203 B002] A.1000 < B.2000: A E N ack 1001 win 16384 
+[2.001 B003] A.1000 < B.2000: A E N 501:1501(1000) ack 1001 win 16384 ECT(0) 
+[2.203 A004] A.1000 > B.2000: A E N ack 1501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

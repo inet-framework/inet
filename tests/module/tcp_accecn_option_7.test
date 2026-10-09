@@ -1,0 +1,48 @@
+%description:
+Tests the order of the AccECN option fields with accEcnOptionPolicy="rfc"
+(RFC 9768 section 3.2.3.3, Table 5). The tester marks A003 and A004 ECT(1),
+so the server sends an AccECN1 option with EE1B alone. After the ECT(0)
+segment A005 both counts changed, and the option has the three fields.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 3000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.tcptester.script="a3 ect1; a4 ect1"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A E N 1:1013(1012) ack 501 win 16384 ECT(1)   Option(s): NOP AccECN0(e0b=1,ceb=0,e1b=1)# marking ECT(1)
+[1.203 B002] A.1000 < B.2000: A E N ack 1013 win 16384   Option(s): NOP NOP NOP AccECN1(e1b=1013)
+[1.205 A004] A.1000 > B.2000: A E N 1013:2037(1024) ack 501 win 16384 ECT(1) # marking ECT(1)
+[1.407 B003] A.1000 < B.2000: A E N ack 2037 win 16384   Option(s): NOP NOP NOP AccECN1(e1b=2037)
+[1.409 A005] A.1000 > B.2000: A E N 2037:3001(964) ack 501 win 16384 ECT(0) 
+[1.611 B004] A.1000 < B.2000: A E N ack 3001 win 16384   Option(s): NOP AccECN0(e0b=965,ceb=0,e1b=2037)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

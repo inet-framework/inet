@@ -1,0 +1,54 @@
+%description:
+Tests the AccECN option next to SACK blocks (RFC 9768 section 3.2.3.3): the
+option has precedence over other options, but the receiver "MUST give
+precedence to the SACK option" if fewer than two SACK blocks would fit. The
+tester removes A028, A030 and A032, marks A034 CE and A036 ECT(1). With
+timestamps, three SACK blocks leave no room for the option, so the ACKs from
+B017 have two SACK blocks and the option with the fields that changed: EE0B,
+then also ECEB, then also EE1B.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 40000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.sackSupport = true
+*.*_tcp.timestampSupport = true
+*.tcptester.script="a28 delete; a30 delete; a32 delete; a34 ce; a36 ect1"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.227 B014] A.1000 < B.2000: A E N ack 25289 win 16384   Option(s): NOP NOP TS(1226,1220) NOP NOP NOP AccECN0(e0b=25289)
+[1.227 B015] A.1000 < B.2000: A E N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[26301,27313) NOP NOP NOP AccECN0(e0b=26301)
+[1.227 B016] A.1000 < B.2000: A E N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[28325,29337)[26301,27313) NOP NOP NOP AccECN0(e0b=27313)
+[1.227 B017] A.1000 < B.2000: A E N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[30349,31361)[28325,29337) NOP NOP NOP AccECN0(e0b=28325)
+[1.227 B018] A.1000 < B.2000: A W N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[30349,32373)[28325,29337) AccECN0(e0b=28325,ceb=1012)
+[1.227 B019] A.1000 < B.2000: A W N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[30349,33385)[28325,29337) AccECN0(e0b=29337,ceb=1012)
+[1.227 B020] A.1000 < B.2000: A W N ack 25289 win 16384   Option(s): TS(1226,1220) SACK[30349,34397)[28325,29337) NOP AccECN0(e0b=29337,ceb=1012,e1b=1013)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

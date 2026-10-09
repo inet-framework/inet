@@ -18,6 +18,7 @@ cmdenv-express-mode=false
 cmdenv-log-prefix="[%c]: "
 
 *.cli_app.sendScript="1.0 1000"
+*.*_tcp.accEcnOptionEnabled = false # the ACE field alone (tcp_accecn_option_* test the option)
 *.cli_tcp.tcpEcnMode = "rfc3168"
 *.srv_tcp.tcpEcnMode = "accecn"
 *.tcptester.script="a1 ace 5"
