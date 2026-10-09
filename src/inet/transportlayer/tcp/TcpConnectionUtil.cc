@@ -1733,7 +1733,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // RFC 9293, section 3.7.1: the MSS option announces the maximum segment
         // size that this side can receive. By the time of the SYN-ACK, snd_mss is
         // already the minimum with the MSS of the peer, so it is not announced.
-        if (state->advertisedMss > 0) {
+        if (tcpMain->sendMssOption && state->advertisedMss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
             option->setMaxSegmentSize(state->advertisedMss);
             tcpHeader->appendHeaderOption(option);

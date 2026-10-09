@@ -183,6 +183,7 @@ class INET_API Tcp : public TransportProtocolBase
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int msl;
     bool alignOptions = true; // from the alignOptions parameter: align the options with NOPs
+    bool sendMssOption = true; // from the sendMssOption parameter: send the MSS option in the SYN and the SYN-ACK
 
   public:
     Tcp() {}

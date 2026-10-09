@@ -1,0 +1,32 @@
+%description:
+Tests sendMssOption=false: the server leaves the MSS option out of its
+SYN-ACK. The client's SYN carries it as usual.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.srv_tcp.sendMssOption = false
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+
+%not-contains: stdout
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
