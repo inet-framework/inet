@@ -251,7 +251,6 @@ struct TcpStateVariables
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
     bool ecnWillingness = false; // set if current host is willing to use ECN
-    bool sndAck = false; // set if sending Ack packet, used to set relevant info in controlInfo.
     bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 

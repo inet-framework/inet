@@ -136,6 +136,8 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
     cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs
 
+    bool sendingWindowProbe = false; // sendProbe() sends a window probe, which gets no ECT and no CWR (RFC 3168 section 6.1.6)
+
     // statistics
     long rcvdSegments = 0;
     long sentSegments = 0;

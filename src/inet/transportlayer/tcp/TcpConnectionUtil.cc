@@ -324,7 +324,14 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // rfc-3168, page 20:
     // ECN-capable TCP implementations MUST NOT set either ECT codepoint
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
-    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
+    //
+    // RFC 3168, section 6.1.1: "A host MUST NOT set ECT on SYN or SYN-ACK packets."
+    // RFC 3168, section 6.1.6: "the TCP data sender MUST NOT set either an ECT
+    // codepoint or the CWR bit on window probe packets."
+    // So ECT goes only on new data, also not on a FIN without data.
+    bool markEct = state->ect && !tcpHeader->getSynBit() && tcpSegment->getByteLength() > 0
+            && !state->rexmit && !sendingWindowProbe;
+    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(markEct ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
 
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
@@ -981,13 +988,8 @@ void TcpConnection::sendAck()
     writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("TcpAck");
 
-    // rfc-3168 page 20: pure ack packets must be sent with not-ECT codepoint
-    state->sndAck = true;
-
-    // send it
+    // send it (Not-ECT, as each segment without data, see sendToIP())
     sendToIP(fp, tcpHeader);
-
-    state->sndAck = false;
 
     // notify
     tcpAlgorithm->ackSent();
@@ -1108,7 +1110,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     tcpHeader->setWindow(updateRcvWnd());
 
     // ECN
-    if (state->ect && state->sndCwr) {
+    if (state->ect && state->sndCwr && !sendingWindowProbe) {
         tcpHeader->setCwrBit(true);
         EV_INFO << "set CWR bit\n";
         state->sndCwr = false;
@@ -1350,7 +1352,9 @@ bool TcpConnection::sendProbe()
     uint32_t old_snd_nxt = state->snd_nxt;
 
     EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
+    sendingWindowProbe = true; // no ECT and no CWR (RFC 3168 section 6.1.6)
     sendSegment(1);
+    sendingWindowProbe = false;
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
