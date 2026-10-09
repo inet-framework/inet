@@ -413,6 +413,16 @@ Notable backward compatible changes are the following:
    Direct HT or rate removal still emits its own notification if state changes.
    Empty teardown emits no signal. Existing configuration parameters stay unchanged.
 
+7. A Mobile IPv6 mobile node can send its own traffic through the reverse tunnel
+
+   A mobile node that sent a datagram with an unspecified source address after
+   registering with its home agent aborted the simulation ("Tag
+   'inet::Ipv6InterfaceData' is absent"): the datagram is routed through the
+   reverse tunnel, a tunnel interface created at run time without IPv6 data,
+   and IPv6 took the source address from that interface. IPv6 now takes the
+   home address of the mobile node as the source, as RFC 6275 Section 11.3.1
+   expects of a reverse-tunneled datagram.
+
 8. Radio medium purge without a timer
 
    RadioMedium has a new transmissionPurgeMode parameter. The default,
