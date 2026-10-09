@@ -1,0 +1,48 @@
+%description:
+Tests the text and the FIN of a SYN-ACK (RFC 9293 section 3.10.7.3): the
+tester adds 100 bytes and the FIN bit to the SYN-ACK of the server. The ACK of
+the client acknowledges the SYN, the text and the FIN (ack 602), the client
+goes from ESTABLISHED on to CLOSE_WAIT, and the application receives the bytes.
+Before, the client ignored the FIN and the text.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.tcptester.script="b1 data 100 fin"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S F 500:600(100) ack 1 win 16384   Option(s): MaxSegSize# adding data
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+cli_tcp: ESTABLISHED --> CLOSE_WAIT  (on RCV_FIN)
+[0.005 A002] A.1000 > B.2000: A ack 602 win 16284 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TcpTestNet1.cli_app: received 100 bytes in 1 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

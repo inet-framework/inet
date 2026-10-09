@@ -8,6 +8,7 @@
 #include "TCPTester.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
@@ -105,6 +106,20 @@ void TCPScriptableTester::parseScript(const char *script)
             if (!isdigit(*s))
                 throw cRuntimeError("syntax error in script: TSecr value expected");
             cmd.tsecr = strtoul(s, &const_cast<char *&>(s), 10);
+        } else if (!strncmp(s,"data",4)) {
+            // "data <bytes> [fin]": add the bytes after the payload, and set the FIN bit with "fin"
+            cmd.command = CMD_DATA; s+=4;
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: number of bytes expected");
+            cmd.bytes = strtol(s, &const_cast<char *&>(s), 10);
+            while (isspace(*s)) s++;
+            if (!strncmp(s,"fin",3)) {
+                cmd.fin = true; s+=3;
+            }
+        } else if (!strncmp(s,"fin",3)) {
+            cmd.command = CMD_DATA; s+=3;
+            cmd.fin = true;
         } else
             throw cRuntimeError("syntax error in script: wrong command");
 
@@ -239,6 +254,19 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
                 ts->setEchoedTimestamp(cmd->tsecr);
         pk->insertAtFront(header);
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing TSecr");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_DATA)
+    {
+        bubble("adding data");
+        if (cmd->fin) {
+            auto header = pk->removeAtFront<TcpHeader>();
+            header->setFinBit(true);
+            pk->insertAtFront(header);
+        }
+        if (cmd->bytes > 0)
+            pk->insertAtBack(makeShared<ByteCountChunk>(B(cmd->bytes)));
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "adding data");
         send(pk, fromA ? "out2" : "out1");
     }
     else

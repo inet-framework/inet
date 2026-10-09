@@ -1152,20 +1152,25 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (seqGreater(state->snd_una, state->iss)) {
             EV_INFO << "SYN+ACK bits set, connection established.\n";
 
-            // RFC says "continue processing at the sixth step below where
-            // the URG bit is checked". Those steps deal with: URG, segment text
-            // (and PSH), and FIN.
-            // Now: URG and PSH we don't support yet; in SYN+FIN we ignore FIN;
-            // with segment text we just take it easy and put it in the receiveQueue
-            // -- we'll forward it to the user when more data arrives.
-            if (tcpHeader->getFinBit())
-                EV_DETAIL << "SYN+ACK+FIN received: ignoring FIN\n";
+            // RFC 9293, section 3.10.7.3: "If there are other controls or text in
+            // the segment, then continue processing at the sixth step under Section
+            // 3.10.7.4 where the URG bit is checked". Those steps deal with URG, the
+            // segment text (and PSH), and the FIN. URG and PSH are not supported.
+            // The text goes into the receive queue and rcv_nxt moves over it, and
+            // the FIN takes the connection on to CLOSE-WAIT, so that the ACK of the
+            // SYN also acknowledges them.
+            bool synAckFin = tcpHeader->getFinBit();
 
             if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
                 updateRcvQueueVars();
 
                 if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-                    receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader); // TODO forward to app, etc.
+                    // the SYN takes one sequence number, so the text starts at
+                    // SEG.SEQ+1: the receive queue gets a copy of the header with
+                    // that sequence number
+                    auto textHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+                    textHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+                    state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, textHeader);
                 }
                 else { // not enough freeRcvBuffer in rcvQueue for new segment
                     state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
@@ -1195,9 +1200,19 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             if (state->seedRttFromHandshake && state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
                 tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
 
+            if (synAckFin) {
+                EV_INFO << "FIN on the SYN-ACK: advancing rcv_nxt over the FIN\n";
+                state->fin_rcvd = true;
+                state->rcv_fin_seq = state->rcv_nxt;
+                state->rcv_nxt = state->rcv_fin_seq + 1;
+            }
+
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
+            // the text of the SYN-ACK: the data transfer states deliver the text of
+            // a segment, but this segment reaches ESTABLISHED only on return
+            sendAvailableDataToApp();
 
             // ECN
             if (state->ecnSynSent) {
@@ -1215,6 +1230,13 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 state->ect = false;
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+            }
+
+            if (synAckFin) {
+                // ESTABLISHED now, and the FIN takes the connection on to CLOSE-WAIT
+                // by the transition of the caller
+                performStateTransition(TCP_E_RCV_SYN_ACK);
+                return TCP_E_RCV_FIN;
             }
 
             // This will trigger transition to ESTABLISHED. Timers and notifying

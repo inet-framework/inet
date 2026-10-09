@@ -31,6 +31,10 @@ package inet.test.moduletest.lib;
 //    - <tt>ce</tt>: forwards the segment marked CE
 //    - <tt>tsecr</tt> <i><value></i>: forwards the segment with this TSecr in its
 //      timestamp option
+//    - <tt>data</tt> <i><bytes></i> [<tt>fin</tt>]: forwards the segment with this
+//      number of bytes added after its payload, and with the FIN bit set if
+//      <tt>fin</tt> follows; <tt>fin</tt> alone sets only the FIN bit. It makes
+//      a peer that sends data or a FIN where INET does not (on a SYN-ACK).
 //
 simple TCPScriptableTester
 {
