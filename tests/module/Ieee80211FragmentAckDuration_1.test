@@ -1,0 +1,199 @@
+%description:
+Verify that a fragmented non-QoS data frame reserves the next fragment and both
+ACK exchanges using the response ACK PHY mode. The assertion observes the
+typed Duration/ID field on the production DCF packetSentToPeer signal after
+each frame has completed transmission.
+
+%file: Ieee80211FragmentAckDuration.cc
+
+#include <vector>
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/SimpleModule.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211FragmentAckDurationChecker : public cSimpleModule, public cListener
+{
+  protected:
+    struct FrameObservation {
+        simtime_t duration;
+        b dataLength;
+        int fragmentNumber;
+        int sequenceNumber;
+        bool moreFragments;
+        const physicallayer::IIeee80211Mode *mode;
+    };
+
+    cComponent *senderDcf = nullptr;
+    cComponent *receiverDcf = nullptr;
+    std::vector<FrameObservation> dataFrames;
+    std::vector<const physicallayer::IIeee80211Mode *> ackModes;
+
+    virtual void initialize() override
+    {
+        senderDcf = getModuleByPath("^.source.wlan[0].mac.dcf");
+        receiverDcf = getModuleByPath("^.receiver.wlan[0].mac.dcf");
+        senderDcf->subscribe(packetSentToPeerSignal, this);
+        receiverDcf->subscribe(packetSentToPeerSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (signalID != packetSentToPeerSignal)
+            return;
+        auto packet = check_and_cast<Packet *>(value);
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (source == receiverDcf) {
+            if (header->getType() != ST_ACK)
+                return;
+            const auto& modeReq = packet->findTag<physicallayer::Ieee80211ModeReq>();
+            ASSERT(modeReq != nullptr);
+            ASSERT(modeReq->getMode() != nullptr);
+            ackModes.push_back(modeReq->getMode());
+            return;
+        }
+        if (source != senderDcf)
+            return;
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (dataHeader == nullptr)
+            return;
+        const auto& modeReq = packet->findTag<physicallayer::Ieee80211ModeReq>();
+        ASSERT(modeReq != nullptr);
+        auto mode = modeReq->getMode();
+        ASSERT(mode != nullptr);
+        dataFrames.push_back({header->getDurationField(), packet->getDataLength(),
+                dataHeader->getFragmentNumber(), dataHeader->getSequenceNumber().get(),
+                dataHeader->getMoreFragments(), mode});
+    }
+
+    virtual void finish() override
+    {
+        ASSERT(dataFrames.size() == 2);
+        const FrameObservation *more = nullptr;
+        const FrameObservation *last = nullptr;
+        for (const auto& frame : dataFrames) {
+            if (frame.moreFragments) {
+                ASSERT(more == nullptr);
+                more = &frame;
+            }
+            else {
+                ASSERT(last == nullptr);
+                last = &frame;
+            }
+        }
+        ASSERT(more != nullptr);
+        ASSERT(last != nullptr);
+        ASSERT(more->fragmentNumber == 0);
+        ASSERT(last->fragmentNumber == 1);
+        ASSERT(more->sequenceNumber == last->sequenceNumber);
+        ASSERT(more->mode->getDataMode()->getNetBitrate() == Mbps(54));
+        ASSERT(last->mode->getDataMode()->getNetBitrate() == Mbps(54));
+        ASSERT(ackModes.size() == 2);
+        for (auto mode : ackModes)
+            ASSERT(mode->getDataMode()->getNetBitrate() == Mbps(24));
+
+        const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet("g(erp)");
+        const auto *responseAckMode = modeSet->getMode(Mbps(24));
+        const auto *dataMode = more->mode;
+        const auto currentAckDuration = responseAckMode->getDuration(LENGTH_ACK);
+        const auto expectedCorrect = dataMode->getDuration(last->dataLength)
+                + currentAckDuration + currentAckDuration + 3 * modeSet->getSifsTime();
+        const auto expectedWithDataRateAck = dataMode->getDuration(last->dataLength)
+                + currentAckDuration + dataMode->getDuration(LENGTH_ACK) + 3 * modeSet->getSifsTime();
+        ASSERT(expectedCorrect != expectedWithDataRateAck);
+        // The data-rate ACK is 4 us shorter than the configured 24 Mbps
+        // response ACK in this ERP timing model.
+        ASSERT(expectedCorrect - expectedWithDataRateAck == SimTime(4, SIMTIME_US));
+        ASSERT(more->duration == expectedCorrect);
+
+        // A final fragment reserves only its immediate response ACK and SIFS.
+        ASSERT(last->duration == currentAckDuration + modeSet->getSifsTime());
+        std::cout << "Fragmented DCF Duration/ID uses the 24 Mbps response ACK mode for both fragments.\n";
+    }
+};
+
+Define_Module(Ieee80211FragmentAckDurationChecker);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211FragmentAckDurationChecker extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211FragmentAckDurationChecker);
+}
+
+network Ieee80211FragmentAckDurationTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source: AdhocHost;
+        receiver: AdhocHost;
+        test: Ieee80211FragmentAckDurationChecker;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211FragmentAckDurationTest
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 10ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+*.configurator.addStaticRoutes = true
+**.arp.typename = "GlobalArp"
+
+*.source.mobility.typename = "StationaryMobility"
+*.receiver.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.source.mobility.initialZ = 0m
+*.receiver.mobility.initialX = 10m
+*.receiver.mobility.initialY = 0m
+*.receiver.mobility.initialZ = 0m
+
+**.wlan[*].opMode = "g(erp)"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.transmitter.power = 50mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+*.source.wlan[0].mac.mtu = 2304B
+*.receiver.wlan[0].mac.mtu = 2304B
+
+*.source.wlan[0].mac.dcf.rateSelection.dataFrameBitrate = 54Mbps
+*.source.wlan[0].mac.dcf.rateSelection.responseAckFrameBitrate = 24Mbps
+*.receiver.wlan[0].mac.dcf.rateSelection.responseAckFrameBitrate = 24Mbps
+*.source.wlan[0].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 1000B
+
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "receiver"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 1500B
+*.source.app[0].startTime = 1ms
+*.source.app[0].stopTime = 2ms
+*.source.app[0].sendInterval = 1s
+*.receiver.numApps = 1
+*.receiver.app[0].typename = "UdpSink"
+*.receiver.app[0].localPort = 5000
+
+%contains: stdout
+Fragmented DCF Duration/ID uses the 24 Mbps response ACK mode for both fragments.
