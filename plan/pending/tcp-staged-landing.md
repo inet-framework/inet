@@ -60,7 +60,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S9 ✅ | `topic/tcp-prr` | 13 (part), 20, 39 (part), 59, 64 (part) | +143 −14 | Proportional Rate Reduction (RFC 6937) |
 | S10 ✅ | `topic/tcp-undo-frto-tlp` | 22, 24, 25, 37, 76, 85, 86, new | +1807 −25 | spurious-loss undo, F-RTO (RFC 5682), the tail loss probe (D-29 to D-35) |
 | S11 ✅ | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +198 −36 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
-| S12 | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 43, 44 | +1187 −104 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs |
+| S12 ✅ | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 27 (part), 39 (part), 43, 44, new | +868 −72 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs (D-42 to D-50) |
 | S13 | `topic/tcp-accecn` | 27 | +864 −61 | Accurate ECN; DCTCP counts its bytes also in a fast recovery (D-23) |
 | S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
@@ -455,6 +455,65 @@ plan gives a reason for.
   data: the clients of `ethernet/arptest` and `arptest2` reset the echo of their server, and two
   CI rows moved. S11 adds `abortOnDataAfterClose` (default false), which the packetdrill
   configuration of inet-gpl can select, as the owner's rule for the Linux behaviors says.
+- **D-42 — The default send MSS applies to a SYN without an MSS option.** RFC 9293 MUST-15: "If
+  an MSS Option is not received at connection setup, TCP implementations MUST assume a default
+  send MSS of 536 (576 - 40) for IPv4 or 1220 (1280 - 60) for IPv6". Source commit 15 uses 536
+  only for an MSS option of value 0, which the RFC does not name; without the option, the
+  connection kept its own MSS. S12 applies the default of the address family when the SYN or the
+  SYN-ACK of the peer has no MSS option; `tcp_mss_default_1` and `_2` fail with the source form.
+- **D-43 — The order of the SYN options stays.** Source commit 16 writes the timestamp option
+  before the window scale option of a SYN (and wrote it two times, until commit 27). No RFC sets
+  the order, the packetdrill comparison of inet-gpl ignores it, and with SACK the master order
+  keeps TSval on a 4-byte boundary, which the source order does not. S12 keeps the master order;
+  the Fast Open option goes last, as in Linux.
+- **D-44 — A Fast Open server checks the cookie by default.** RFC 7413 section 4.2.2: with a
+  cookie that is not valid, the SYN-ACK acknowledges only the SYN. The source accepted each cookie
+  of a valid length by default (`fastopenLenientCookieValidation = true`). S12 makes the check
+  the default (the packetdrill configuration of inet-gpl already sets it), and the server also
+  ignores a cookie of a length that RFC 7413 section 4.1.1 does not allow (odd, or not 4 to 16
+  bytes); the source checked the length only on the client.
+- **D-45 — The cookie function is SipHash-2-4 for each cookie.** The source used SipHash only with
+  `fastopenKey` and IPv4, and otherwise a mix of `std::hash`, which gives other cookies with
+  another C++ library, so a fingerprint with Fast Open differs between platforms. S12 uses the
+  SipHash-2-4 MAC of the two addresses (IPv4 or IPv6, as Linux) under a key from the RNG or from
+  `fastopenKey`; `tcp_fastopen_key_1` checks the reference vector and the Linux cookie of the
+  packetdrill suite.
+- **D-46 — The application gets a Fast Open connection at its SYN, and the algorithm starts
+  there.** RFC 7413 section 4.2.2 ("Buffer the data and notify the application"; step 6, the
+  initial window) and appendix A.2 ("accept() returns upon receiving a SYN with a valid Fast Open
+  cookie"); Linux starts the transfer of the child socket (`tcp_init_transfer()`). The source
+  delivered the data with the socket ID of a forked connection before TCP_I_AVAILABLE, which the
+  application did not know; with `listenOnce()`, the socket stayed LISTENING and could not send;
+  and the algorithm started at the ACK of the SYN-ACK, so the congestion window was 0 in
+  SYN_RCVD. S12 sends TCP_I_AVAILABLE (forked) or TCP_I_ESTABLISHED at the SYN, starts the
+  algorithm there, and sends no second indication at the ACK of the SYN-ACK; an RST in SYN_RCVD
+  gives such a connection TCP_I_CONNECTION_RESET (`tcp_fastopen_fork_1`, `_srvdata_1`).
+- **D-47 — Smaller deviations in the Fast Open core.** (1) A retransmitted SYN-ACK carries no
+  cookie (RFC 7413 section 4.2.2, SHOULD); the source sent it again
+  (`tcp_fastopen_synack_rexmit_1`). (2) Only an MSS option of the SYN-ACK updates the cached MSS
+  (RFC 7413 section 4.2.2, client step 1); the source cached `snd_mss` without one. (3) Nagle does
+  not hold the SYN data that the SYN-ACK did not acknowledge, so the first ACK carries it; the
+  source relies on the Minshall form of Nagle (S16), and with the Nagle of master the data waited
+  for ever (`tcp_fastopen_rexmit_1`). (4) The NOPs before a Fast Open option follow
+  `alignOptions`. (5) The ACK of the SYN-ACK runs the ACK processing of the
+  algorithm for each Fast Open connection that sent in SYN_RCVD; the source asked for SYN data.
+  By D-1, the data on the SYN (commit 39; commit 26 recorded the data but sent the SYN without
+  it) and the SYN-ACK that keeps `snd_max` over the data (commit 27) fold into the core.
+- **D-48 — Fast Open blackhole detection is on by default, and follows Linux.** RFC 7413 section
+  4.1.3.1: "The client MUST cache negative responses". The source default was 0 s (off, as Linux
+  since 5.14). S12 uses 3600 s, the former Linux default; a SYN with only a cookie request counts
+  too, as in Linux; an RST with a wrong acknowledgment number is no trigger, because neither the
+  RFC nor Linux has one; a stopped connection sends no Fast Open option, as Linux (the source
+  sent an empty request); and a SYN-ACK that acknowledges the SYN data resets the count.
+- **D-49 — `fastopenExpOptionEnabled` selects both directions of the experimental option.** The
+  client of the source fell back to kind 254 without the parameter, but ignored a kind 254 answer
+  without it. S12 makes the parameter select the fallback too (default off: RFC 7413 section 9
+  says implementations SHOULD use kind 34).
+- **D-50 — A limit of pending Fast Open connections.** RFC 7413 section 4.2: over a preset limit
+  of PendingFastOpenRequests, "the server MUST disable TFO for all new connection requests". The
+  source has no limit. S12 adds `fastopenMaxPendingRequests` for each local port; its default of
+  16 is an assumption, because Linux takes the limit from the TCP_FASTOPEN socket option, which
+  INET's socket API does not have.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1248,28 +1307,93 @@ The six gates pass.
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
 | 1 | fix: send nothing for a SEND of zero bytes | — | 43 (part) |
-| 2 | add: options without NOP alignment, selected by `alignOptions` | — | 15, 16, 23 (parts) |
-| 3 | add: a SYN without the MSS option, selected by `sendMssOption` | — | 15 (part) |
-| 4 | fix: the default send MSS when the SYN has no MSS option (RFC 9293 MUST-15) | — | 15 (part) |
-| 5 | change: the timestamp option before the window scale option in a SYN | — | 16 (part) |
-| 6 | add: TCP Fast Open (RFC 7413), selected by `fastopenClientEnabled` and `fastopenServerEnabled` | — | 26 (part), 43, 44, 15, 16 (parts) |
-| 7 | comment: describe the connection states in the words of RFC 9293 | — | 26 (part) |
+| 2 | fix: pad the option area to a multiple of 4 bytes | — | 23 (part) |
+| 3 | add: options without NOP alignment, selected by `alignOptions` | — | 15, 16, 23 (parts) |
+| 4 | add: a SYN without the MSS option, selected by `sendMssOption` | — | 15 (part) |
+| 5 | fix: the default send MSS when the SYN has no MSS option (RFC 9293 MUST-15) | — | 15 (part) |
+| 6 | fix: the text and the FIN on a SYN-ACK | — | 26 (part) |
+| 7 | add: TCP Fast Open (RFC 7413), selected by two parameters | — | 26 (part), 27 (part), 39 (part), 43, 44, 15, 16 (parts) |
+| 8 | add: Fast Open blackhole detection, selected by `fastopenBlackholeTimeout` | — | 26 (part) |
+| 9 | add: the Fast Open option kind 254, selected by `fastopenExpOptionEnabled` | — | 26 (part), 43, 44 (parts) |
+| 10 | add: the Linux Fast Open cookie key, selected by `fastopenKey` | — | 26 (part) |
+| 11 | add: Fast Open without a cookie, selected by two parameters | — | 26 (part) |
+| 12 | add: the limit of pending Fast Open connections (RFC 7413) | — | new (D-50) |
+| 13 | comment: the connection states in the words of RFC 9293 | — | 26 (part) |
 
 Commit 26 is the Fast Open feature, but it also holds changes that do not belong to Fast Open.
-S12 takes into step 6 the parts that only Fast Open reaches: the data and the FIN on a SYN-ACK
-(only a Fast Open server, or a packetdrill peer, sends them), the data on a crossing SYN, the
-STATUS field `synDataAccepted` (S8), the rule for a Fast Open connection in SYN_RCVD (S11 took
-the rule for a forked connection), and from commits 15 and 16 `peerAdvertisedMss`, the Nagle
-exemption of the SYN-ACK slot and the data retransmission in SYN_RCVD (D-19). Commits 43 and 44
-repair Fast Open before it landed, so by D-1 they fold into step 6, except the zero-length SEND of
-commit 43, which master also has (step 1). Step 6 keeps the check of `seedRttFromHandshake` on the
-active side (D-27).
+S12 divides the feature: the core (step 7) has both roles, because each role needs the other for
+a test in INET, and the server that sends in SYN_RCVD, because its application gets the
+connection at the SYN (D-46); blackhole detection, the experimental option, the Linux key and the
+modes without a cookie follow in their own steps. The core takes from commits 15 and 16
+`peerAdvertisedMss`, the Nagle exemption of the SYN-ACK slot and the data retransmission in
+SYN_RCVD (D-19). Commits 43 and 44 repair Fast Open before it landed, so by D-1 they fold into
+steps 7 and 9, except the zero-length SEND of commit 43 (step 1). By D-1, the core also takes the
+data on the SYN from commit 39 and the SYN-ACK that keeps `snd_max` from commit 27 (D-47). The
+core keeps the check of `seedRttFromHandshake` on the active side (D-27). Step 6 repairs the text
+and the FIN of a SYN-ACK, which only another stack sends; the scripted tester gets the command
+`data` for its test. The planned step for the order of the SYN options (commit 16) is dropped
+(D-43).
 
 The other parts of commit 26 go to the stages of their topics: the FIN of a close that arms the
 retransmission timer only when it does not run and arms the loss probe (S15, timers); the check
 of the sequence number that an ICMP error quotes (RFC 5927) and the hard ICMP errors in SYN_RCVD
 (S17); the immediate SYN retransmission after an ICMP fragmentation-needed error in SYN_SENT (S18,
-path MTU); the `ts_recent` update only from a segment that acknowledges no unsent data, and the
-discard of the retransmission queue in SYN_RCVD also without SACK (S17, with commit 39). Commit 51
-needs nothing here: master already drops an unusable SACK option on receive (S8), and its guard
-of the send path goes with S17, which moves the SACK option to the recovery's `addSacks()`.
+path MTU); the `ts_recent` update only from a segment that acknowledges no unsent data (S17, with
+commit 39). Commit 51 needs nothing here: master already drops an unusable SACK option on receive
+(S8), and its guard of the send path goes with S17, which moves the SACK option to the recovery's
+`addSacks()`.
+
+Items for later stages: (S17) master puts the text of a SYN without Fast Open into the receive
+queue one byte early and does not move `rcv_nxt` over it; a peer that sends the bytes again
+overwrites them, so INET's own peers see no effect. (S17) A passive connection does not send the
+data that a SEND queued in SYN_RCVD when it reaches ESTABLISHED (RFC 9293: "Queue the data for
+transmission after entering ESTABLISHED state"); only an application that sends raw commands can
+reach it, because the socket of INET is not CONNECTED in SYN_RCVD. (inet-gpl) Its packetdrill
+configuration maps no sysctl to `fastopenBlackholeTimeout` (D-48), and its application gets the
+indications of D-46.
+
+### S12 — `topic/tcp-fast-open` — landed 2026-10-09
+
+The owner reviewed and approved S12 on 2026-10-09.
+
+S12 brings TCP Fast Open (RFC 7413) and the option and MSS rules that it needs: four repairs of
+master, eight features that are off by default, and a comment. Where the source is wrong or
+incomplete, S12 deviates from it (D-42 to D-50).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: send nothing for a SEND of zero bytes` | — | 43 (part) | — |
+| `tcp: fix: pad the option area to a multiple of 4 bytes` | — | 23 (part) | — |
+| `tcp: add: options without NOP alignment, selected by alignOptions` | — | 15, 16, 23 (parts) | — |
+| `tcp: add: a SYN without the MSS option, selected by sendMssOption` | — | 15 (part) | — |
+| `tcp: fix: the default send MSS when the SYN has no MSS option` | — | 15 (part) | — |
+| `tcp: fix: the text and the FIN on a SYN-ACK` | — | 26 (part) | — |
+| `tcp: add: TCP Fast Open (RFC 7413), selected by two parameters` | — | 26 (part), 27 (part), 39 (part), 43, 44, 15, 16 (parts) | — |
+| `tcp: add: Fast Open blackhole detection, selected by fastopenBlackholeTimeout` | — | 26 (part) | — |
+| `tcp: add: the Fast Open option kind 254, selected by fastopenExpOptionEnabled` | — | 26 (part), 43, 44 (parts) | — |
+| `tcp: add: the Linux Fast Open cookie key, selected by fastopenKey` | — | 26 (part) | — |
+| `tcp: add: Fast Open without a cookie, selected by two parameters` | — | 26 (part) | — |
+| `tcp: add: the limit of pending Fast Open connections (RFC 7413)` | — | new (D-50) | — |
+| `tcp: comment: the connection states in the words of RFC 9293` | — | 26 (part) | — |
+
+No commit moves a CI row: the features are off by default, and the paths of master that the
+repairs and the core change give the same results in the CI scenarios.
+
+New tests: `tcp_send_empty_1`, `tcp_options_pad_1`, `tcp_options_align_1`, `tcp_mss_option_2`,
+`tcp_mss_default_1` and `_2`, `tcp_synack_data_1` and `_2`, and 16 tests `tcp_fastopen_*` (`_1`,
+`optin_1`, `nosend_1`, `fork_1`, `srvdata_1` and `_2`, `rexmit_1`, `mss_1`, `synack_rexmit_1`,
+`blackhole_1` and `_2`, `exp_1` and `_2`, `nocookie_1` and `_2`, `pending_1`); the unit tests
+`tcp_fastopen_cookie_1`, `_cache_1` and `_key_1`. The test library gets an empty SEND, a second
+and a third connection, `fastOpen` and `logIndications` in `TcpTestClient`, the commands `data`
+and `strip` of the scripted tester, and the Fast Open options in the packet dump.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (422 at the first code commit, 445 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 121 and serializer 4 pass at the head. The new
+tests of steps 2 to 5, 8, 11 and 12 fail one commit earlier (`tcp_fastopen_blackhole_2`, the
+control with the detection off, passes there too); the tests that need test library additions
+of their own commit (steps 1, 6, 7 and 9) fail with the source of the commit before, and so do
+the unit tests of steps 7 and 10. The CI fingerprint job passes at each code commit with no moved
+row. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf` ingredient
+differs, as on master; the lwIP rows need a build with lwIP). The six gates pass.
