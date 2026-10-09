@@ -583,6 +583,18 @@ void Tcp::clearFastOpenCookieCache()
     fastOpenCookieCache.clear();
 }
 
+int Tcp::getNumPendingFastOpenRequests(const L3Address& localAddr, int localPort) const
+{
+    int count = 0;
+    for (const auto& entry : tcpAppConnMap) {
+        const TcpConnection *conn = entry.second;
+        if (conn->getState() != nullptr && conn->getState()->fastopenAccelerated && conn->getFsmState() == TCP_S_SYN_RCVD
+            && conn->getLocalPort() == localPort && (localAddr.isUnspecified() || conn->getLocalAddress() == localAddr))
+            count++;
+    }
+    return count;
+}
+
 bool Tcp::isActiveFastOpenDisabled() const
 {
     return simTime() < fastOpenDisabledUntil;

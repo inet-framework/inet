@@ -992,6 +992,17 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // accepted without a valid cookie, and the SYN-ACK gives no cookie.
     bool fastOpenOption = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
     bool synData = B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength();
+    // RFC 7413 section 4.2: over the limit of pending Fast Open connections, "the
+    // server MUST disable TFO for all new connection requests": no cookie, and the
+    // data of the SYN is not acknowledged (section 5.1)
+    if (state->fastopenServerEnabled && (fastOpenOption || synData)
+        && tcpMain->getNumPendingFastOpenRequests(localAddr, localPort) >= (int)tcpMain->par("fastopenMaxPendingRequests"))
+    {
+        EV_INFO << "Fast Open: the limit of pending Fast Open connections is reached, no Fast Open for this SYN\n";
+        state->fastopenCookieValid = false;
+        state->fastopenSendCookieOption = false;
+        state->fastopenAcceptWithoutCookie = false;
+    }
     bool acceptWithoutCookie = state->fastopenAcceptWithoutCookie && (synData || fastOpenOption);
     if (state->fastopenServerEnabled && (state->fastopenCookieValid || acceptWithoutCookie)) {
         if (!state->fastopenCookieValid)

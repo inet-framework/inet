@@ -263,6 +263,9 @@ class INET_API Tcp : public TransportProtocolBase
     /** TCP Fast Open, client: removes all cached cookies, as `ip tcp_metrics flush` does on Linux. */
     virtual void clearFastOpenCookieCache();
 
+    /** TCP Fast Open, server: the number of Fast Open connections of the local port in SYN_RCVD (PendingFastOpenRequests of RFC 7413). */
+    virtual int getNumPendingFastOpenRequests(const L3Address& localAddr, int localPort) const;
+
     /** TCP Fast Open, client: true while blackhole detection stops Fast Open. */
     virtual bool isActiveFastOpenDisabled() const;
 
