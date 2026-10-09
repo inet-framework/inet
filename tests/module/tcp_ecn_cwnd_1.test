@@ -1,0 +1,59 @@
+%description:
+Tests the retransmission timer that an ECN-Echo restarts at a congestion
+window of one segment (RFC 3168 section 6.1.2: "The sending TCP MUST reset the
+retransmit timer on receiving the ECN-Echo packet when the congestion window
+is one"). The tester marks the first data segment CE, and the ACK with ECE
+acknowledges all data and closes the window, so the timer runs with nothing in
+flight. Its expiry is no loss: the sender retransmits nothing and the run
+goes on. Before, retransmitOneSegment() stopped the simulation with the
+assertion 'bytes != 0'.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+sim-time-limit = 8s
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 2000"
+*.srv_app.autoRead=false
+*.srv_app.readScript="30 4000"
+*.tcptester.script="a3 ce"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.advertisedWindow = 1000
+*.*_tcp.ecnWillingness = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.003 B002] A.1000 < B.2000: A E ack 1001 win 0 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[8.000] tcpdump finished, A:5 B:4 segments
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+REXMIT timer expired with nothing in flight: no retransmission, sending new data
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

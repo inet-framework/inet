@@ -171,8 +171,18 @@ void TcpAlgorithmBase::connectionClosed()
 
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
 {
-    if (timer == rexmitTimer)
-        processRexmitTimer(event);
+    if (timer == rexmitTimer) {
+        // RFC 3168, section 6.1.2: after an ECN-Echo at a congestion window of one
+        // segment, "The sending TCP MUST reset the retransmit timer", also with
+        // nothing in flight, and when it expires, the sender "will then be able to
+        // send a new packet". So there is nothing to retransmit then.
+        if (state->snd_una == state->snd_max) {
+            EV_INFO << "REXMIT timer expired with nothing in flight: no retransmission, sending new data\n";
+            sendData(false);
+        }
+        else
+            processRexmitTimer(event);
+    }
     else if (timer == persistTimer)
         processPersistTimer(event);
     else if (timer == delayedAckTimer)
