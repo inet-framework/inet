@@ -1,0 +1,62 @@
+%description:
+Tests ecnMarkAll=true with DCTCP: as Linux, each segment of the connection is
+ECT(0), also the pure ACKs and the FINs. RFC 8257 section 4.1: "It is
+RECOMMENDED that an implementation provide a configuration knob that will
+cause ECT to be set on such control packets".
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.*_tcp.tcpEcnMode = "rfc3168"
+*.*_tcp.tcpAlgorithmClass = "DcTcp"
+*.*_tcp.ecnMarkAll = true
+*.cli_app.tClose=2s
+*.srv_app.tClose=3s
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W 0:0(0) win 16384 ECT(0)   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S E 500:500(0) ack 1 win 16384 ECT(0)   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A ack 501 win 16384 ECT(0) 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 ECT(0) 
+[1.203 B002] A.1000 < B.2000: A ack 1001 win 16384 ECT(0) 
+cli_tcp: ESTABLISHED --> FIN_WAIT_1  (on CLOSE)
+[2.001 A004] A.1000 > B.2000: A F ack 501 win 16384 ECT(0) 
+srv_tcp: ESTABLISHED --> CLOSE_WAIT  (on RCV_FIN)
+[2.003 B003] A.1000 < B.2000: A ack 1002 win 16384 ECT(0) 
+cli_tcp: FIN_WAIT_1 --> FIN_WAIT_2  (on RCV_ACK)
+srv_tcp: CLOSE_WAIT --> LAST_ACK  (on CLOSE)
+[3.001 B004] A.1000 < B.2000: A F ack 1002 win 16384 ECT(0) 
+cli_tcp: FIN_WAIT_2 --> TIME_WAIT  (on RCV_FIN)
+[3.003 A005] A.1000 > B.2000: A ack 502 win 16384 ECT(0) 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

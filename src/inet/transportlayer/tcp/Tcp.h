@@ -206,6 +206,7 @@ class INET_API Tcp : public TransportProtocolBase
     bool accEcnBareTimeWaitAck = false; // from the accEcnBareTimeWaitAck parameter
     bool accEcnOptionLinux = false; // from the accEcnOptionPolicy parameter: "linux"
     bool sendMssOption = true; // from the sendMssOption parameter: send the MSS option in the SYN and the SYN-ACK
+    bool ecnMarkAll = false; // from the ecnMarkAll parameter
 
   public:
     Tcp() {}

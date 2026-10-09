@@ -42,6 +42,9 @@ class INET_API DcTcp : public TcpReno
     /** Constructor */
     DcTcp();
 
+    /** DCTCP relies on ECN (RFC 8257). */
+    virtual bool needsEcn() const override { return true; }
+
     /** RFC 8257's proportional reduction, in place of RFC 3168's halving. */
     virtual bool processEce(uint32_t numBytesAcked) override;
 

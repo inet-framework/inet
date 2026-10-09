@@ -534,8 +534,22 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // RFC 3168, section 6.1.6: "the TCP data sender MUST NOT set either an ECT
     // codepoint or the CWR bit on window probe packets."
     // So ECT goes only on new data, also not on a FIN without data.
-    bool markEct = state->ect && !tcpHeader->getSynBit() && tcpSegment->getByteLength() > 0
-            && !state->rexmit && !sendingWindowProbe;
+    //
+    // DCTCP, RFC 8257 section 3.6: "for DCTCP connections, the sender SHOULD set ECT
+    // for SYN, SYN-ACK, and RST packets", as Linux does for a flavour that needs ECN:
+    // on an ECN-setup SYN, and on the SYN-ACK of an ECN connection. ecnMarkAll sets
+    // ECT also on the other segments of an AccECN or DCTCP connection, as Linux
+    // (tcp_ecn_send()); RFC 8257 section 4.1: "It is RECOMMENDED that an
+    // implementation provide a configuration knob that will cause ECT to be set on
+    // such control packets".
+    bool needsEcn = tcpAlgorithm != nullptr && tcpAlgorithm->needsEcn();
+    bool markEct;
+    if (tcpHeader->getSynBit())
+        markEct = needsEcn && (tcpHeader->getAckBit() ? state->ect : tcpHeader->getEceBit());
+    else if (tcpMain->ecnMarkAll && (state->accEcnNegotiated || needsEcn))
+        markEct = state->ect;
+    else
+        markEct = state->ect && tcpSegment->getByteLength() > 0 && !state->rexmit && !sendingWindowProbe;
     tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(markEct ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
 
     tcpHeader->setChecksum(0);
@@ -1196,6 +1210,10 @@ void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int src
     tcpHeader->setChecksum(0);
 
     Packet *fp = new Packet("RST");
+
+    // RFC 8257 section 3.6: the RST of a DCTCP connection carries ECT (see sendToIP())
+    if (state != nullptr && state->ect && tcpAlgorithm != nullptr && tcpAlgorithm->needsEcn())
+        fp->addTag<EcnReq>()->setExplicitCongestionNotification(IP_ECN_ECT_0);
 
     // send it
     sendToIP(fp, tcpHeader, src, dest);

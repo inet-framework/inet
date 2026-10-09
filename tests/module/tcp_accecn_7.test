@@ -2,6 +2,9 @@
 Tests DCTCP with the AccECN feedback. The ACE field of B003 counts one CE mark,
 and DCTCP counts the bytes of the marked segment (RFC 8257 section 3.3 with an
 accurate count).
+DCTCP sets ECT on its SYN and SYN-ACK (RFC 8257 section 3.6), so the SYN-ACK
+feeds back the ECT(0) SYN with ACE 0b100, and the ACK of the SYN-ACK feeds
+back the ECT(0) SYN-ACK in the same way (RFC 9768 Tables 2 and 3).
 
 %inifile: omnetpp.ini
 [General]
@@ -36,11 +39,11 @@ while($sor = <FILE>)
 %postrun-command:  perl ./postrun.pl
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
-[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 16384   Option(s): MaxSegSize
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 16384 ECT(0)   Option(s): MaxSegSize
 srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
-[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+[0.003 B001] A.1000 < B.2000: A S N 500:500(0) ack 1 win 16384 ECT(0)   Option(s): MaxSegSize
 cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
-[0.005 A002] A.1000 > B.2000: A W ack 501 win 16384 
+[0.005 A002] A.1000 > B.2000: A N ack 501 win 16384 
 srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [1.001 A003] A.1000 > B.2000: A E N 1:1025(1024) ack 501 win 16384 ECT(0) 
 [1.203 B002] A.1000 < B.2000: A E N ack 1025 win 16384 

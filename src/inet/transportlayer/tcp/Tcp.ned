@@ -208,6 +208,7 @@ simple Tcp extends SimpleModule like ITcp
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         string tcpEcnMode @mutable @enum("off","passive","rfc3168","accecn","accecn-passive") = default("off"); // ECN: "off": no ECN; "passive": answer an ECN-setup SYN (RFC 3168), but request no ECN in an active open (Linux tcp_ecn=2, its default); "rfc3168": request and answer ECN; "accecn": request Accurate ECN (RFC 9768), and answer it and ECN; "accecn-passive": answer Accurate ECN and ECN, but request nothing. Each connection reads it at its open
         bool ecnWillingness = default(false); // deprecated: true is tcpEcnMode="rfc3168"
+        bool ecnMarkAll = default(false); // ECN: ECT also on the pure ACKs, FINs, retransmissions and window probes of an AccECN connection (RFC 9768) and of a DCTCP connection, as Linux does (tcp_ecn_send()); RFC 8257 section 4.1 recommends such a knob for DCTCP. false: ECT only on new data, as RFC 3168 sections 6.1.4 to 6.1.6 ask, which RFC 9768 section 4 keeps
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)

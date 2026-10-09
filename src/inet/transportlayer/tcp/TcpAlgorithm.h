@@ -143,6 +143,13 @@ class INET_API TcpAlgorithm : public cObject
     virtual bool supportsSackRecovery() const { return false; }
 
     /**
+     * Whether this flavour relies on ECN, as DCTCP (Linux TCP_CONG_NEEDS_ECN): its
+     * SYN, SYN-ACK and RST carry ECT (RFC 8257 section 3.6), and the ecnMarkAll
+     * parameter applies to its connections.
+     */
+    virtual bool needsEcn() const { return false; }
+
+    /**
      * Called after we received an ACK for data not yet sent.
      * According to RFC 9293 this function should send an ACK.
      */

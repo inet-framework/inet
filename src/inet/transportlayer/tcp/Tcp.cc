@@ -55,6 +55,7 @@ void Tcp::initialize(int stage)
         accEcnBareTimeWaitAck = par("accEcnBareTimeWaitAck");
         accEcnOptionLinux = !strcmp(par("accEcnOptionPolicy").stringValue(), "linux");
         sendMssOption = par("sendMssOption");
+        ecnMarkAll = par("ecnMarkAll");
         fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
 
         WATCH(checksumMode);
