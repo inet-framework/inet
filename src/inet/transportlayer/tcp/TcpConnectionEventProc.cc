@@ -66,8 +66,10 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
                 EV_DETAIL << "Fast Open: stopped after a suspected blackhole\n";
             else if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
                 state->fastopenRequested = true;
+                // without a cookie, as Linux can (fastopenClientNoCookieRequired), the SYN
+                // waits for the first SEND too, and carries no option
                 std::vector<uint8_t> cookie;
-                if (tcpMain->getFastOpenCookie(remoteAddr, cookie)) {
+                if (tcpMain->getFastOpenCookie(remoteAddr, cookie) || state->fastopenClientNoCookieRequired) {
                     selectInitialSeqNum();
                     state->fastopenSynDeferred = true;
                     scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);

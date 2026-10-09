@@ -679,6 +679,8 @@ void TcpConnection::configureStateVariables()
     state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
     state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
     state->fastopenExpOptionEnabled = tcpMain->par("fastopenExpOptionEnabled");
+    state->fastopenAcceptWithoutCookie = tcpMain->par("fastopenAcceptWithoutCookie");
+    state->fastopenClientNoCookieRequired = tcpMain->par("fastopenClientNoCookieRequired");
     state->fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");
     if (state->fastopenCookieBytes < 4 || state->fastopenCookieBytes > 16 || state->fastopenCookieBytes % 2 != 0)
         throw cRuntimeError("fastopenCookieBytes must be an even number from 4 to 16 (RFC 7413 section 4.1.1), but it is %d", state->fastopenCookieBytes);
@@ -2019,7 +2021,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // requests a cookie. A retransmitted SYN goes out without it (RFC 7413
         // section 4.2.1), and so does the SYN-ACK of a simultaneous open.
         if (state->fastopenClientEnabled && state->fastopenRequested && state->syn_rexmit_count == 0
-            && !tcpHeader->getAckBit())
+            && !tcpHeader->getAckBit() && !state->fastopenClientNoCookieRequired)
         {
             std::vector<uint8_t> cookie;
             bool cachedCookie = !state->fastopenCookieRequestPending && tcpMain->getFastOpenCookie(remoteAddr, cookie);

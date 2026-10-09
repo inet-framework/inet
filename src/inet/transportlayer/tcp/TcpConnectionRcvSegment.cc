@@ -987,9 +987,15 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // goes into the receive queue after the SYN, so that the SYN-ACK acknowledges the
     // SYN and the data, and the application gets the connection and the data now
     // ("Buffer the data and notify the application"). With a Fast Open option but
-    // no valid cookie, the SYN-ACK acknowledges only the SYN.
+    // no valid cookie, the SYN-ACK acknowledges only the SYN. As Linux can
+    // (fastopenAcceptWithoutCookie), a SYN with data or a Fast Open option is
+    // accepted without a valid cookie, and the SYN-ACK gives no cookie.
     bool fastOpenOption = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
-    if (state->fastopenServerEnabled && state->fastopenCookieValid) {
+    bool synData = B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength();
+    bool acceptWithoutCookie = state->fastopenAcceptWithoutCookie && (synData || fastOpenOption);
+    if (state->fastopenServerEnabled && (state->fastopenCookieValid || acceptWithoutCookie)) {
+        if (!state->fastopenCookieValid)
+            state->fastopenSendCookieOption = false;
         state->fastopenAccelerated = true;
         // RFC 7413 section 4.2.2, step 6: "If the FastOpened flag is set, the server
         // MUST follow [RFC5681] (based on [RFC3390]) to set the initial congestion
@@ -1036,7 +1042,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // The text of a SYN with a Fast Open option was accepted above, or it is
     // not acknowledged.
     //
-    if (!fastOpenOption && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
+    if (!fastOpenOption && !state->fastopenAccelerated && synData) {
         updateRcvQueueVars();
 
         if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?

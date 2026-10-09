@@ -314,6 +314,8 @@ struct TcpStateVariables
     bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
     bool fastopenLenientCookieValidation = false; // from the fastopenLenientCookieValidation parameter
     bool fastopenExpOptionEnabled = false;   // from the fastopenExpOptionEnabled parameter
+    bool fastopenAcceptWithoutCookie = false; // from the fastopenAcceptWithoutCookie parameter
+    bool fastopenClientNoCookieRequired = false; // from the fastopenClientNoCookieRequired parameter
     bool fastopenPeerUsedExpOption = false;  // the Fast Open option of the peer was the experimental option (kind 254); the server answers in it, and the client caches its form
     int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter
     bool fastopenCookieRequested = false;    // server: the SYN requests a cookie (an empty Fast Open option)
