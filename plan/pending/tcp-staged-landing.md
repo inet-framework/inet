@@ -1568,3 +1568,33 @@ of a passive client, passes there too). The CI fingerprint job runs at each code
 the rows above move. The TCP fingerprint rows run in debug at the head with no runtime error (the
 `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six
 gates pass.
+
+### S14 — `topic/tcp-receive-buffer`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: `receiveBufferSize`, a receive buffer apart from the advertised window | — | 28 (part) |
+| 2 | add: the Linux acceptance of a segment beyond the buffer at an empty queue | — | 28 (part) |
+| 3 | add: receive window auto-tuning, selected by `windowAutoTuning` | — | 28 (part) |
+| 4 | add: an offer that follows the free buffer, selected by `windowShrinkAllowed` | — | 28 (part) |
+| 5 | add: the growth of the buffer of an owned socket under out-of-order data | — | 28 (part) |
+| 6 | add: the receive buffer and the window of one socket in its open command (D-4) | — | new |
+| 7 | add: MSG_ZEROCOPY completions | — | 29 (part) |
+| 8 | add: the time that the send buffer limits the sender (`sndbufLimited`) | — | 29 (part) |
+| 9 | add: the receive timestamp of delivered data (SO_TIMESTAMPING) | — | 29 (part) |
+| 10 | add: TCP_NOTSENT_LOWAT, a low-water mark on unsent bytes | — | 35 |
+| 11 | change: `timestampSupport` is `@mutable`, as the host-wide sysctl (D-4) | — | new |
+
+Commit 28 separates the receive buffer from the advertised window, but it also changes the
+default offer: the buffer minus the unread in-order data, so that out-of-order data no longer
+makes it smaller. Master counts the out-of-order data as used buffer, as RFC 9293 section
+3.8.6.2.2 does with the data that waits in the buffer, and as Linux does (`sk_rmem_alloc` holds
+the out-of-order queue); the source imitates a buffer that is larger than the window. S14 keeps
+the default of master. With `receiveBufferSize`, the out-of-order data uses the buffer, and the
+offer is the smaller of the window less the unread data and the free buffer. The acceptance of an
+in-order segment beyond the buffer at an empty queue (Linux `tcp_data_queue()`) is a Linux
+behavior; master drops such a segment, and step 2 adds the Linux behavior with a parameter.
+Steps 3 to 5 model the receive memory of Linux (`tcp_grow_window()`, `tcp_shrink_window=1` with
+the skb truesize, `tcp_clamp_window()`), each off by default. Step 6 is the open command of D-4.
+Commits 29 and 35 give the socket options whose contract S3 landed; STATUS gets `skRcvbuf`
+(step 5) and `sndbufLimited` (step 8).
